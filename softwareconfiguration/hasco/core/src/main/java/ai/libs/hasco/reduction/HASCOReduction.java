@@ -8,11 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
-import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
-import org.api4.java.common.attributedobjects.IObjectEvaluator;
-import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.hasco.core.HASCOSolutionCandidate;
@@ -28,7 +24,6 @@ import ai.libs.hasco.model.NumericParameterDomain;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
-import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.logic.fol.structure.CNFFormula;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;
@@ -295,31 +290,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 		CEOCIPSTNPlanningProblem planningProblem = this.getPlanningProblem();
 
 		/* derive a plan evaluator from the configuration evaluator */
-		IObjectEvaluator<IPlan, V> planEvaluator = new IObjectEvaluator<IPlan, V>() {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public V evaluate(final IPlan plan) throws InterruptedException, ObjectEvaluationFailedException {
-				ComponentInstance solution = HASCOReduction.this.decodeSolution(plan);
-				if (solution == null) {
-					throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(a -> a.getEncoding()).collect(Collectors.joining("\n\t")));
-				}
-				IObjectEvaluator<ComponentInstance, V> evaluator = problem.getCompositionEvaluator();
-				if (evaluator instanceof IInformedObjectEvaluatorExtension && HASCOReduction.this.bestSolutionSupplier.get() != null) {
-					((IInformedObjectEvaluatorExtension<V>) evaluator).updateBestScore(HASCOReduction.this.bestSolutionSupplier.get().getScore());
-				}
-				return evaluator.evaluate(solution);
-			}
-
-			@Override
-			public String toString() {
-				Map<String, Object> fields = new HashMap<>();
-				fields.put("problem", problem);
-				return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
-			}
-
-		};
-		return new CostSensitiveHTNPlanningProblem<>(planningProblem, planEvaluator);
+		return new CostSensitiveHTNPlanningProblem<>(planningProblem, new HASCOReductionSolutionEvaluator<>(problem, this));
 	}
 
 	@Override
@@ -329,5 +300,9 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 
 	public ComponentInstance decodeSolution(final IPlan plan) {
 		return Util.getSolutionCompositionForPlan(HASCOReduction.this.components, HASCOReduction.this.getInitState(), plan, true);
+	}
+
+	public Supplier<HASCOSolutionCandidate<V>> getBestSolutionSupplier() {
+		return this.bestSolutionSupplier;
 	}
 }

@@ -3,6 +3,7 @@ package ai.libs.jaicore.ml.weka.dataset;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -44,11 +45,21 @@ public class WekaInstancesUtil {
 			DenseInstance iNew = new DenseInstance(wekaInstances.numAttributes());
 			iNew.setDataset(wekaInstances);
 			for (int i = 0; i < dataset.getNumAttributes(); i++) {
-				iNew.setValue(i, (Double) inst.getAttributeValue(i));
+				IAttribute att = dataset.getInstanceSchema().getAttribute(i);
+				Object val = inst.getAttributeValue(i);
+				if (att instanceof INumericAttribute) {
+					iNew.setValue(i, (Double) val);
+				}
+				else if (att instanceof ICategoricalAttribute) {
+					iNew.setValue(i, ((ICategoricalAttribute) att).getLabelOfCategory((int)val)); // the value is then the internal id of the category, which needs to be transformed
+				}
+				else {
+					throw new UnsupportedOperationException("Only numeric values are supported.");
+				}
 			}
 
 			if (dataset.getLabelAttribute() instanceof ICategoricalAttribute) {
-				iNew.setClassValue(((ICategoricalAttribute) dataset.getLabelAttribute()).serializeAttributeValue(inst.getLabel()));
+				iNew.setClassValue(((ICategoricalAttribute) dataset.getLabelAttribute()).getLabelOfCategory((int)inst.getLabel()));
 			} else {
 				iNew.setClassValue((Double) inst.getLabel());
 			}
@@ -58,6 +69,7 @@ public class WekaInstancesUtil {
 	}
 
 	public static Instances createDatasetFromSchema(final ILabeledInstanceSchema schema) throws UnsupportedAttributeTypeException {
+		Objects.requireNonNull(schema);
 		List<Attribute> attributes = new LinkedList<>();
 
 		for (int i = 0; i < schema.getNumAttributes(); i++) {
@@ -106,6 +118,7 @@ public class WekaInstancesUtil {
 	}
 
 	public static Instance transformInstanceToWekaInstance(final ILabeledInstanceSchema schema, final ILabeledInstance instance) throws UnsupportedAttributeTypeException {
+		Objects.requireNonNull(schema);
 		Instances dataset = createDatasetFromSchema(schema);
 		Instance iNew = new DenseInstance(dataset.numAttributes());
 		iNew.setDataset(dataset);

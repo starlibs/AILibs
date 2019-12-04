@@ -59,6 +59,7 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 
 	@Override
 	public void fit(final ILabeledDataset<? extends ILabeledInstance> dTrain) throws TrainingException, InterruptedException {
+		this.schema = dTrain.getInstanceSchema();
 		WekaInstances data = new WekaInstances(dTrain);
 
 		try {
@@ -71,6 +72,9 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 
 	@Override
 	public ISingleLabelClassification predict(final ILabeledInstance xTest) throws PredictionException, InterruptedException {
+		if (this.schema == null) {
+			throw new IllegalStateException("Cannot conduct predictions with the classifier, because the dataset scheme has not been defined.");
+		}
 		WekaInstance instance;
 		if (xTest instanceof WekaInstance) {
 			instance = (WekaInstance) xTest;
@@ -91,7 +95,12 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 
 	@Override
 	public ISingleLabelClassificationPredictionBatch predict(final ILabeledDataset<? extends ILabeledInstance> dTest) throws PredictionException, InterruptedException {
-		return this.predict((ILabeledInstance[]) dTest.stream().toArray());
+		int n = dTest.size();
+		ILabeledInstance[] instances = new ILabeledInstance[n];
+		for (int i = 0; i < n; i++) {
+			instances[i] = dTest.get(i);
+		}
+		return this.predict(instances);
 	}
 
 	@Override

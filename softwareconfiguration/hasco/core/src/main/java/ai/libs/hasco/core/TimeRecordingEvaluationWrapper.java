@@ -6,12 +6,16 @@ import java.util.Map;
 import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+import org.api4.java.common.control.ILoggingCustomizable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
-public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements IObjectEvaluator<ComponentInstance, V>, IInformedObjectEvaluatorExtension<V> {
+public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements IObjectEvaluator<ComponentInstance, V>, IInformedObjectEvaluatorExtension<V>, ILoggingCustomizable {
 
+	private Logger logger = LoggerFactory.getLogger(TimeRecordingEvaluationWrapper.class);
 	private final IObjectEvaluator<ComponentInstance, V> baseEvaluator;
 	private final Map<ComponentInstance, Integer> consumedTimes = new HashMap<>();
 
@@ -50,6 +54,23 @@ public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements 
 	public void updateBestScore(final V bestScore) {
 		if(this.baseEvaluator instanceof IInformedObjectEvaluatorExtension) {
 			((IInformedObjectEvaluatorExtension<V>) this.baseEvaluator).updateBestScore(bestScore);
+		}
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
+		if (this.baseEvaluator instanceof ILoggingCustomizable) {
+			this.logger.info("Setting logger of evaluator {} to {}", this.baseEvaluator.getClass().getName(), name + ".be");
+			((ILoggingCustomizable) this.baseEvaluator).setLoggerName(name + ".be");
+		}
+		else {
+			this.logger.info("Evaluator {} cannot be customized for logging, so not configuring its logger.", this.baseEvaluator.getClass().getName());
 		}
 	}
 

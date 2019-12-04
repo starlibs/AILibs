@@ -1,8 +1,14 @@
 package ai.libs.jaicore.planning.hierarchical.problems.htn;
 
+
+
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.IPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.core.EvaluatedPlan;
@@ -35,12 +41,48 @@ implements IHierarchicalPlanningToGraphSearchReduction<N, A, CostSensitiveHTNPla
 	 */
 	@Override
 	public I2 encodeProblem(final CostSensitiveHTNPlanningProblem<I1, V> problem) {
-		IObjectEvaluator<IPath<N, A>, V> solutionEvaluator = solutionPath -> problem.getPlanEvaluator().evaluate(CostSensitivePlanningToSearchProblemReduction.this.baseReduction.decodeSolution(solutionPath));
-		return this.forwardReduction.encodeProblem(new GraphSearchWithPathEvaluationsInput<>(this.baseReduction.encodeProblem(problem.getCorePlanningProblem()), solutionEvaluator));
+		return this.forwardReduction.encodeProblem(new GraphSearchWithPathEvaluationsInput<>(this.baseReduction.encodeProblem(problem.getCorePlanningProblem()), new Evaluator<>(problem.getPlanEvaluator(), this.baseReduction)));
 	}
 
 	@Override
 	public IEvaluatedPlan<V> decodeSolution(final O2 solution) {
 		return new EvaluatedPlan<>(this.baseReduction.decodeSolution(solution), solution.getScore());
+	}
+
+	private static class Evaluator<N, A, V extends Comparable<V>> implements IObjectEvaluator<IPath<N, A>, V>, ILoggingCustomizable {
+
+		private Logger logger = LoggerFactory.getLogger(Evaluator.class);
+		private final IObjectEvaluator<IPlan, V> planEvaluator;
+		private final IHierarchicalPlanningToGraphSearchReduction<N, A, ?, IPlan, GraphSearchInput<N, A>, IPath<N, A>> baseReduction;
+
+		public Evaluator(final IObjectEvaluator<IPlan, V> planEvaluator, final IHierarchicalPlanningToGraphSearchReduction<N, A, ?, IPlan, GraphSearchInput<N, A>, IPath<N, A>> baseReduction) {
+			super();
+			this.planEvaluator = planEvaluator;
+			this.baseReduction = baseReduction;
+		}
+
+		@Override
+		public String getLoggerName() {
+			return this.logger.getName();
+		}
+
+		@Override
+		public void setLoggerName(final String name) {
+			this.logger = LoggerFactory.getLogger(name);
+			if (this.planEvaluator instanceof ILoggingCustomizable) {
+				((ILoggingCustomizable) this.planEvaluator).setLoggerName(name + ".pe");
+				this.logger.info("Setting logger of plan evaluator {} to {}", this.planEvaluator.getClass().getName(), name + ".pe");
+			}
+			else {
+				this.logger.info("Plan evaluator {} is not configurable for logging, so not configuring it.");
+			}
+		}
+
+		@Override
+		public V evaluate(final IPath<N, A> solutionPath) throws InterruptedException, ObjectEvaluationFailedException {
+			this.logger.info("Forwarding evaluation to plan evaluator {}", this.planEvaluator.getClass().getName());
+			return this.planEvaluator.evaluate(this.baseReduction.decodeSolution(solutionPath));
+		}
+
 	}
 }

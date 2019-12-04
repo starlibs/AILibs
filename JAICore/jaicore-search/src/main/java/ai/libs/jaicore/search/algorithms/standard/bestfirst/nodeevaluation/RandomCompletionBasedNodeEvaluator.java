@@ -544,6 +544,13 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 		if (this.completer != null) {
 			this.completer.setLoggerName(name + ".randomsearch");
 		}
+		if (this.solutionEvaluator instanceof ILoggingCustomizable) {
+			this.logger.info("Setting logger of evaluator {} to {}", this.solutionEvaluator.getClass().getName(), name + ".evaluator");
+			((ILoggingCustomizable) this.solutionEvaluator).setLoggerName(name + ".evaluator");
+		}
+		else {
+			this.logger.info("Evaluator {} is not customizable for logger, so not configuring it.", this.solutionEvaluator.getClass().getName());
+		}
 		this.logger.info("Switched logger (name) of {} to {}", this, name);
 		this.logger.info("Reprinting RandomCompletionEvaluator configuration after logger switch: timeout {}ms for single evaluations and {}ms in total per node", this.timeoutForSingleCompletionEvaluationInMS,
 				this.getTimeoutForNodeEvaluationInMS());
