@@ -1,13 +1,12 @@
 package ai.libs.jaicore.ml.core.dataset.schema.attribute;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Arrays;
+import java.util.Collection;
 
+import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
-
-public class NumericAttributeTest {
+public class NumericAttributeTest extends AAttributeTest {
 
 	private static final String ATTRIBUTE_NAME = "myNumericAttribute";
 
@@ -18,9 +17,19 @@ public class NumericAttributeTest {
 		attributeToTest = new NumericAttribute(ATTRIBUTE_NAME);
 	}
 
-	@Test
-	public void testNameOfAttribute() {
-		assertEquals("The returned name of the attribute does not match the defined one.", ATTRIBUTE_NAME, attributeToTest.getName());
+	@Override
+	public String getExpectedAttributeName() {
+		return ATTRIBUTE_NAME;
+	}
+
+	@Override
+	public Collection<?> getValuesThatMustBeContained() {
+		return Arrays.asList(-1, 0, 1, 10, 100, 1.5, Math.sqrt(2));
+	}
+
+	@Override
+	public IAttribute getTestedAttribute() {
+		return attributeToTest;
 	}
 
 }

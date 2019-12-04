@@ -20,4 +20,8 @@ public abstract class AInstance implements IClusterableInstance {
 		this.label = label;
 	}
 
+	@Override
+	public boolean isLabelPresent() {
+		return this.label != null;
+	}
 }

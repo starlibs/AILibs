@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.api4.java.ai.ml.classification.execution.IDatasetSplitSet;
 import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
 
 public class DatasetSplitSet<D extends IDataset<?>> implements IDatasetSplitSet<D> {
 

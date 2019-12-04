@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
@@ -23,6 +24,7 @@ import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.PipelineEvaluator;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import weka.core.Instances;
 
 /**
@@ -39,14 +41,15 @@ public class MLPlanConfigConsistencyTester {
 
 	@Before
 	public void init() throws IOException {
-		this.data = new Instances(new FileReader(new File("testrsc/car.arff")));
+		this.data = new Instances(new FileReader(new File("testrsc/car.arff"))); // read the file intentionally into the Instances format!
 		this.data.setClassIndex(this.data.numAttributes() - 1);
+		System.out.println("Loaded dataset with " + this.data.size() + " instances.");
 	}
 
 	@Test
 	public void testEvaluationTimeoutsForRCNEIfSetWithBuilder() throws IOException {
-		AbstractMLPlanBuilder builder = AbstractMLPlanBuilder.forWeka().withNodeEvaluationTimeOut(this.timeoutForNodeEvaluation).withCandidateEvaluationTimeOut(this.timeoutForSingleSolutionEvaluation);
-		MLPlan mlplan = new MLPlan(builder, this.data);
+		AbstractMLPlanBuilder builder = new MLPlanWekaBuilder().withNodeEvaluationTimeOut(this.timeoutForNodeEvaluation).withCandidateEvaluationTimeOut(this.timeoutForSingleSolutionEvaluation);
+		MLPlan mlplan = new MLPlan(builder, new WekaInstances(this.data));
 		AlgorithmEvent event = mlplan.next();
 		assertTrue(event instanceof AlgorithmInitializedEvent);
 		TwoPhaseHASCO twoPhaseHasco = (TwoPhaseHASCO) mlplan.getOptimizingFactory().getOptimizer();
@@ -60,8 +63,8 @@ public class MLPlanConfigConsistencyTester {
 
 	@Test
 	public void testEvaluationTimeoutsForRCNEIfSetInMLPlan() throws IOException {
-		AbstractMLPlanBuilder builder = AbstractMLPlanBuilder.forWeka().withNodeEvaluationTimeOut(this.timeoutForNodeEvaluation).withCandidateEvaluationTimeOut(this.timeoutForSingleSolutionEvaluation);
-		MLPlan mlplan = new MLPlan(builder, this.data);
+		AbstractMLPlanBuilder builder = new MLPlanWekaBuilder().withNodeEvaluationTimeOut(this.timeoutForNodeEvaluation).withCandidateEvaluationTimeOut(this.timeoutForSingleSolutionEvaluation);
+		MLPlan mlplan = new MLPlan(builder, new WekaInstances(this.data));
 		mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, "" + this.timeoutForNodeEvaluation.milliseconds());
 		mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, "" + this.timeoutForSingleSolutionEvaluation.milliseconds());
 		AlgorithmEvent event = mlplan.next();
@@ -77,8 +80,8 @@ public class MLPlanConfigConsistencyTester {
 
 	@Test
 	public void testEvaluationTimeoutsInSearchPhaseEvaluator() throws IOException {
-		AbstractMLPlanBuilder builder = AbstractMLPlanBuilder.forWeka().withNodeEvaluationTimeOut(this.timeoutForNodeEvaluation).withCandidateEvaluationTimeOut(this.timeoutForSingleSolutionEvaluation);
-		MLPlan mlplan = new MLPlan(builder, this.data);
+		AbstractMLPlanBuilder builder = new MLPlanWekaBuilder().withNodeEvaluationTimeOut(this.timeoutForNodeEvaluation).withCandidateEvaluationTimeOut(this.timeoutForSingleSolutionEvaluation);
+		MLPlan mlplan = new MLPlan(builder, new WekaInstances(this.data));
 		AlgorithmEvent event = mlplan.next();
 		assertTrue(event instanceof AlgorithmInitializedEvent);
 		TwoPhaseHASCO twoPhaseHasco = (TwoPhaseHASCO) mlplan.getOptimizingFactory().getOptimizer();
@@ -91,8 +94,8 @@ public class MLPlanConfigConsistencyTester {
 		for (int i = 0; i < 10; i++) {
 			double blowUpSelection = Math.sqrt(i);
 			double blowUpPostProcessing = Math.sqrt(i / 2.0);
-			AbstractMLPlanBuilder builder = AbstractMLPlanBuilder.forWeka();
-			MLPlan mlplan = new MLPlan(builder, this.data);
+			AbstractMLPlanBuilder builder = new MLPlanWekaBuilder();
+			MLPlan mlplan = new MLPlan(builder, new WekaInstances(this.data));
 			mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + blowUpSelection);
 			mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, "" + blowUpPostProcessing);
 

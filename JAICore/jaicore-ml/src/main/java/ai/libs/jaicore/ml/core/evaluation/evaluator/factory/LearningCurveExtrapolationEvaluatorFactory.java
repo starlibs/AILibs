@@ -2,10 +2,10 @@ package ai.libs.jaicore.ml.core.evaluation.evaluator.factory;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.classification.execution.ISupervisedLearnerMetric;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
+import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
 
 import ai.libs.jaicore.ml.core.evaluation.evaluator.LearningCurveExtrapolationEvaluator;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
@@ -19,9 +19,8 @@ public class LearningCurveExtrapolationEvaluatorFactory implements ISupervisedLe
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 
-	public LearningCurveExtrapolationEvaluatorFactory(final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> subsamplingAlgorithmFactory,
-					final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
+	public LearningCurveExtrapolationEvaluatorFactory(final int[] anchorpoints, final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> subsamplingAlgorithmFactory,
+			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.subsamplingAlgorithmFactory = subsamplingAlgorithmFactory;
@@ -30,8 +29,8 @@ public class LearningCurveExtrapolationEvaluatorFactory implements ISupervisedLe
 	}
 
 	@Override
-	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getDataspecificRandomizedLearnerEvaluator(final ILabeledDataset<?> dataset, final ISupervisedLearnerMetric metric,
-			final Random random) throws LearnerEvaluatorConstructionFailedException {
+	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getDataspecificRandomizedLearnerEvaluator(final ILabeledDataset<?> dataset, final ISupervisedLearnerMetric metric, final Random random)
+			throws LearnerEvaluatorConstructionFailedException {
 		return new LearningCurveExtrapolationEvaluator(this.anchorpoints, this.subsamplingAlgorithmFactory, dataset, this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, random.nextLong());
 	}
 }

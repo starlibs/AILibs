@@ -15,7 +15,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.CategoricalAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -64,8 +64,8 @@ public class WekaInstancesUtil {
 			IAttribute attType = schema.getAttributeList().get(i);
 			if (attType instanceof NumericAttribute) {
 				attributes.add(new Attribute("att" + i));
-			} else if (attType instanceof CategoricalAttribute) {
-				attributes.add(new Attribute("att" + i, ((CategoricalAttribute) attType).getValues()));
+			} else if (attType instanceof IntBasedCategoricalAttribute) {
+				attributes.add(new Attribute("att" + i, ((IntBasedCategoricalAttribute) attType).getLabels()));
 			} else {
 				throw new UnsupportedAttributeTypeException("The class attribute has an unsupported attribute type.");
 			}
@@ -77,7 +77,7 @@ public class WekaInstancesUtil {
 		if (classType instanceof INumericAttribute) {
 			classAttribute = new Attribute("class");
 		} else if (classType instanceof ICategoricalAttribute) {
-			classAttribute = new Attribute("class", ((CategoricalAttribute) classType).getValues());
+			classAttribute = new Attribute("class", ((IntBasedCategoricalAttribute) classType).getLabels());
 		} else {
 			throw new UnsupportedAttributeTypeException("The class attribute has an unsupported attribute type.");
 		}
@@ -100,7 +100,7 @@ public class WekaInstancesUtil {
 			for (int i = 0; i < att.numValues(); i++) {
 				domain.add(att.value(i));
 			}
-			return new CategoricalAttribute(attributeName, domain);
+			return new IntBasedCategoricalAttribute(attributeName, domain);
 		}
 		throw new IllegalArgumentException("Can only transform numeric or categorical attributes");
 	}

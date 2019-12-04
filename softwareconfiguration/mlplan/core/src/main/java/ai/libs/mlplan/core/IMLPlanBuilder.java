@@ -2,10 +2,10 @@ package ai.libs.mlplan.core;
 
 import java.io.File;
 
-import org.api4.java.ai.ml.classification.execution.ISupervisedLearnerMetric;
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
 import ai.libs.hasco.core.HASCOFactory;

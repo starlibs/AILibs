@@ -2,7 +2,6 @@ package ai.libs.jaicore.ml.core.dataset;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class DenseInstance extends AInstance {
 
@@ -35,8 +34,19 @@ public class DenseInstance extends AInstance {
 
 	@Override
 	public double[] getPoint() {
-		return IntStream.range(0, this.attributes.size())
-				.mapToDouble(x -> (this.attributes.get(x) instanceof String) ? 0 : (this.attributes.get(x) instanceof Double) ? (Double) this.attributes.get(x) : (double) ((Integer) this.attributes.get(x))).toArray();
+		int n = this.attributes.size();
+		double[] point = new double[n];
+		for (int i = 0; i < n; i++) {
+			Object val = this.attributes.get(i);
+			if (val == null) {
+				throw new UnsupportedOperationException("The given instance cannot be cast to a point, because it has a missing value: " + this.attributes);
+			}
+			if (!(val instanceof Number)) {
+				throw new UnsupportedOperationException("The given instance cannot be cast to a point, because it has a non-numeric value: " + this.attributes);
+			}
+			point[i] = (double) val;
+		}
+		return point;
 	}
 
 	@Override
@@ -48,5 +58,4 @@ public class DenseInstance extends AInstance {
 	public void removeColumn(final int columnPos) {
 		this.attributes.remove(columnPos);
 	}
-
 }

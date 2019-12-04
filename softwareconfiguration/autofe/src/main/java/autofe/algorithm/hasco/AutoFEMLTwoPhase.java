@@ -142,9 +142,9 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 			logger.info("Run 2nd AutoFEML phase performing AutoML");
 			mlplan.buildClassifier(wekaDataset);
 			this.internalMlPlanScore = mlplan.getInternalValidationErrorOfSelectedClassifier();
-			logger.info("Finished 2nd AutoFEML phase. Found solution {}.", mlplan.getSelectedClassifier());
+			logger.info("Finished 2nd AutoFEML phase. Found solution {}.", mlplan.getSelectedWekaClassifier());
 
-			this.setSelectedPipeline(new AutoFEWekaPipeline(solution, mlplan.getSelectedClassifier()));
+			this.setSelectedPipeline(new AutoFEWekaPipeline(solution, mlplan.getSelectedWekaClassifier()));
 
 			logger.info("Finished entire AutoFEML process.");
 		} catch (Exception e) {

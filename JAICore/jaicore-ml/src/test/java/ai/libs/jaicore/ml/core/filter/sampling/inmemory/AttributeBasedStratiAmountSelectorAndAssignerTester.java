@@ -14,7 +14,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.junit.Test;
 
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.CategoricalAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.DiscretizationHelper.DiscretizationStrategy;
@@ -68,7 +68,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		Integer[] attributeIndices = { 2 };
 		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(1);
-		selectorAndAssigner.setDataset(dataset);
+		selectorAndAssigner.init(dataset);
 		Map<ILabeledInstance, Integer> stratiAssignment = new HashMap<>();
 		for (ILabeledInstance i : dataset) {
 			stratiAssignment.put(i, selectorAndAssigner.assignToStrati(i));
@@ -95,7 +95,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		Integer[] attributeIndices = { 2 };
 		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(4);
-		selectorAndAssigner.setDataset(dataset);
+		selectorAndAssigner.init(dataset);
 		Map<ILabeledInstance, Integer> stratiAssignment = new HashMap<>();
 		for (ILabeledInstance i : dataset) {
 			stratiAssignment.put(i, selectorAndAssigner.assignToStrati(i));
@@ -167,7 +167,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setNumCPUs(1);
-		selectorAndAssigner.setDataset(dataset);
+		selectorAndAssigner.init(dataset);
 		Map<ILabeledInstance, Integer> stratiAssignment = new HashMap<>();
 		for (ILabeledInstance i : dataset) {
 			stratiAssignment.put(i, selectorAndAssigner.assignToStrati(i));
@@ -193,7 +193,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setNumCPUs(4);
-		selectorAndAssigner.setDataset(dataset);
+		selectorAndAssigner.init(dataset);
 		Map<ILabeledInstance, Integer> stratiAssignment = new HashMap<>();
 		for (ILabeledInstance i : dataset) {
 			stratiAssignment.put(i, selectorAndAssigner.assignToStrati(i));
@@ -214,10 +214,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 	public ILabeledDataset<ILabeledInstance> createToyDatasetOnlyCategorical() {
 		// Features
-		IAttribute type1 = new CategoricalAttribute("a1", Arrays.asList("A", "B"));
-		IAttribute type2 = new CategoricalAttribute("a2", Arrays.asList("C"));
+		IAttribute type1 = new IntBasedCategoricalAttribute("a1", Arrays.asList("A", "B"));
+		IAttribute type2 = new IntBasedCategoricalAttribute("a2", Arrays.asList("C"));
 		// Label
-		IAttribute type3 = new CategoricalAttribute("a3", Arrays.asList("X", "Y", "Z"));
+		IAttribute type3 = new IntBasedCategoricalAttribute("a3", Arrays.asList("X", "Y", "Z"));
 
 		ILabeledInstanceSchema schema = new LabeledInstanceSchema("testData", Arrays.asList(type1, type2), type3);
 
@@ -228,7 +228,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 	public ILabeledDataset<ILabeledInstance> createToyDatasetMixed() {
 		// Attribute 1 (categorical)
-		IAttribute type1 = new CategoricalAttribute("att0", Arrays.asList("A", "B"));
+		IAttribute type1 = new IntBasedCategoricalAttribute("att0", Arrays.asList("A", "B"));
 		IAttribute type2 = new NumericAttribute("att1");
 		IAttribute type3 = new NumericAttribute("att2");
 		ILabeledInstanceSchema schema = new LabeledInstanceSchema("mixedToyDataset", Arrays.asList(type1, type2), type3);

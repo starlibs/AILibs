@@ -2,10 +2,10 @@ package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.classification.execution.ISupervisedLearnerMetric;
 import org.api4.java.ai.ml.core.dataset.splitter.IRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
 
 import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
 import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;

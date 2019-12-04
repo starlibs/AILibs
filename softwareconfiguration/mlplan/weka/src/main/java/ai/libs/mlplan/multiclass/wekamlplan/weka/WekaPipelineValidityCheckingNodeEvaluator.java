@@ -9,6 +9,7 @@ import ai.libs.hasco.core.Util;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.ControlledNodeEvaluationException;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
@@ -31,13 +32,14 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 	}
 
 	public WekaPipelineValidityCheckingNodeEvaluator(final Collection<Component> components, final Instances data) {
-		super(components, data);
+		super(components, new WekaInstances(data));
 	}
 
 	private boolean multiValuedNominalAttributesExist() {
-		for (int i = 0; i < this.getData().numAttributes(); i++) {
-			Attribute att = this.getData().attribute(i);
-			if (att != this.getData().classAttribute() && att.isNominal() && att.numValues() > 2) {
+		Instances data = this.getData().getInstances();
+		for (int i = 0; i < data.numAttributes(); i++) {
+			Attribute att = data.attribute(i);
+			if (att != data.classAttribute() && att.isNominal() && att.numValues() > 2) {
 				return true;
 			}
 		}
@@ -46,16 +48,18 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 
 	private synchronized void extractDatasetProperties() {
 		if (!this.propertiesDetermined) {
+
 			/* compute binary class predicate */
-			this.binaryClass = this.getData().classAttribute().isNominal() && this.getData().classAttribute().numValues() == 2;
-			this.multiClass = this.getData().classAttribute().isNominal() && this.getData().classAttribute().numValues() > 2;
-			this.regression = this.getData().classAttribute().isNumeric();
+			Instances data = this.getInstancesInWekaFormat();
+			this.binaryClass = data.classAttribute().isNominal() && data.classAttribute().numValues() == 2;
+			this.multiClass = data.classAttribute().isNominal() && data.classAttribute().numValues() > 2;
+			this.regression = data.classAttribute().isNumeric();
 
 			/* determine whether the dataset is multi-valued nominal */
 			this.multiValuedNominalAttributes = this.multiValuedNominalAttributesExist();
 
 			this.containsNegativeValues = false;
-			for (Instance i : this.getData()) {
+			for (Instance i : data) {
 				this.containsNegativeValues = this.containsNegativeValues || Arrays.stream(i.toDoubleArray()).anyMatch(x -> x < 0);
 			}
 
@@ -64,7 +68,7 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 	}
 
 	@Override
-	public Double f(final IPath<TFDNode, String> path) throws ControlledNodeEvaluationException {
+	public Double evaluate(final IPath<TFDNode, String> path) throws ControlledNodeEvaluationException {
 		if (!this.propertiesDetermined) {
 			this.extractDatasetProperties();
 		}
@@ -130,4 +134,12 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 		}
 	}
 
+	@Override
+	public WekaInstances getData() {
+		return (WekaInstances)super.getData();
+	}
+
+	public Instances getInstancesInWekaFormat() {
+		return this.getData().getInstances();
+	}
 }

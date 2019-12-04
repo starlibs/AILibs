@@ -20,7 +20,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
  */
 public class SystematicSampling<D extends ILabeledDataset<?>> extends ASamplingAlgorithm<D> {
 
-	private final DatasetDeriver<D> sampleBuilder;
+	private DatasetDeriver<D> sampleBuilder;
 	private Random random;
 	private D sortedDataset = null;
 	private int k;
@@ -49,7 +49,6 @@ public class SystematicSampling<D extends ILabeledDataset<?>> extends ASamplingA
 	public SystematicSampling(final Random random, final D input) {
 		super(input);
 		this.random = random;
-		this.sampleBuilder = new DatasetDeriver<>(input);
 	}
 
 	/**
@@ -75,6 +74,7 @@ public class SystematicSampling<D extends ILabeledDataset<?>> extends ASamplingA
 				if (this.sortedDataset == null) {
 					this.sortedDataset = (D) this.getInput().createCopy();
 					this.sortedDataset.sort(this.datapointComparator);
+					this.sampleBuilder = new DatasetDeriver<>(this.sortedDataset);
 				}
 			} catch (DatasetCreationException e) {
 				throw new AlgorithmException("Could not create a copy of the dataset.", e);
@@ -88,7 +88,7 @@ public class SystematicSampling<D extends ILabeledDataset<?>> extends ASamplingA
 			// systematic sampling method.
 			if (this.sampleBuilder.currentSizeOfTarget() < this.sampleSize) {
 				int e = (this.startIndex + (this.index++) * this.k) % this.sortedDataset.size();
-				this.sampleBuilder.add(this.sortedDataset.get(e));
+				this.sampleBuilder.add(e);
 				return new SampleElementAddedEvent(this.getId());
 			} else {
 				try {

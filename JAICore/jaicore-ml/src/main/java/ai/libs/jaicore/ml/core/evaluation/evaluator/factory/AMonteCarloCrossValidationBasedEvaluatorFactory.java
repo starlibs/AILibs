@@ -13,7 +13,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
  */
 public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends AMonteCarloCrossValidationBasedEvaluatorFactory<F>> implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> {
 
-	private IDatasetSplitter<ILabeledDataset<?>> datasetSplitter;
+	private IDatasetSplitter<? extends ILabeledDataset<?>> datasetSplitter;
 	private int seed;
 	private int numMCIterations;
 	private ILabeledDataset<?> data;
@@ -31,7 +31,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 	 * Getter for the dataset splitter.
 	 * @return Returns the dataset spliiter.
 	 */
-	public IDatasetSplitter<ILabeledDataset<?>> getDatasetSplitter() {
+	public IDatasetSplitter<? extends ILabeledDataset<?>> getDatasetSplitter() {
 		return this.datasetSplitter;
 	}
 
@@ -80,7 +80,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 	 * @param datasetSplitter The dataset splitter to be used.
 	 * @return The factory object.
 	 */
-	public F withDatasetSplitter(final IDatasetSplitter<ILabeledDataset<?>> datasetSplitter) {
+	public F withDatasetSplitter(final IDatasetSplitter<? extends ILabeledDataset<?>> datasetSplitter) {
 		this.datasetSplitter = datasetSplitter;
 		return this.getSelf();
 	}

@@ -1,31 +1,34 @@
-package wekamlplan;
+package ai.libs.mlplan.multiclass.wekamlplan;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
-import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearningCurveExtrapolationEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
+import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
-import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
-import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-import ai.libs.jaicore.ml.weka.dataset.splitter.MulticlassClassStratifiedSplitter;
+import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.mlplan.core.AbstractMLPlanSingleLabelBuilder;
-import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 
-public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<MLPlanWekaBuilder> {
+public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<IWekaClassifier, MLPlanWekaBuilder> {
 
 	private static final String RES_SSC_TINY_WEKA = "automl/searchmodels/weka/tinytest.json";
 	private static final String RES_SSC_WEKA_COMPLETE = "automl/searchmodels/weka/weka-all-autoweka.json";
@@ -38,13 +41,16 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<MLPlanWe
 	private static final String DEF_REQUESTED_HASCO_INTERFACE = "AbstractClassifier";
 	private static final String DEF_PREFERRED_COMPONENT_NAME_PREFIX = "resolveAbstractClassifierWith";
 
-	private static final ILearnerFactory DEF_CLASSIFIER_FACTORY = new WekaPipelineFactory();
+	private static final WekaPipelineFactory DEF_CLASSIFIER_FACTORY = new WekaPipelineFactory();
 	private static final File DEF_PREFERRED_COMPONENTS = FileUtil.getExistingFileWithHighestPriority(RES_PREFERRED_COMPONENTS, FS_PREFERRED_COMPONENTS);
 	private static final File DEF_SEARCH_SPACE_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_SSC_WEKA_COMPLETE, FS_SSC_WEKA);
-	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE)
-			.withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(DEFAULT_PERFORMANCE_MEASURE)).withDatasetSplitter(new MulticlassClassStratifiedSplitter());
-	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE)
-			.withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(DEFAULT_PERFORMANCE_MEASURE)).withDatasetSplitter(new MulticlassClassStratifiedSplitter());
+	private static final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> DEF_SEARCH_SELECT_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE, new Random(0));
+	//	private static final IDatasetSplitter<WekaInstances> DEF_SEARCH_DATASET_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE, new Random(0));
+	//	private static final IDatasetSplitter<WekaInstances> DEF_SELECTION_DATASET_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SELECTION_TRAIN_FOLD_SIZE, new Random(0));
+	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE);
+	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE);
+
+	private Logger logger = LoggerFactory.getLogger(MLPlanWekaBuilder.class);
 
 	public MLPlanWekaBuilder() throws IOException {
 		super();
@@ -55,6 +61,8 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<MLPlanWe
 		this.withSearchPhaseEvaluatorFactory(DEF_SEARCH_PHASE_EVALUATOR);
 		this.withSelectionPhaseEvaluatorFactory(DEF_SELECTION_PHASE_EVALUATOR);
 		this.withPerformanceMeasure(DEFAULT_PERFORMANCE_MEASURE);
+		this.withDatasetSplitterForSearchSelectionSplit(DEF_SEARCH_SELECT_SPLITTER);
+
 
 		// /* configure blow-ups for MCCV */
 		double blowUpInSelectionPhase = MathExt.round(1f / DEFAULT_SEARCH_TRAIN_FOLD_SIZE * DEFAULT_SELECTION_NUM_MC_ITERATIONS / DEFAULT_SEARCH_NUM_MC_ITERATIONS, 2);
@@ -102,11 +110,16 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<MLPlanWe
 	 * @param trainSplitForAnchorpointsMeasurement The training fold size for measuring the acnhorpoints.
 	 * @param extrapolationMethod The method to be used in order to extrapolate the learning curve from the anchorpoints.
 	 */
-	public void withLearningCurveExtrapolationEvaluation(final int[] anchorpoints, final ISamplingAlgorithmFactory<WekaInstance<Object>, WekaInstances<Object>, ? extends ASamplingAlgorithm<WekaInstance<Object>, WekaInstances<Object>>> subsamplingAlgorithmFactory,
+	public void withLearningCurveExtrapolationEvaluation(final int[] anchorpoints, final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> subsamplingAlgorithmFactory,
 			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
 		this.withSearchPhaseEvaluatorFactory(new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod));
-		this.withSelectionPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(3).withTrainFoldSize(.7).withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss())));
+		this.withSelectionPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(3).withTrainFoldSize(.7));
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + 10);
 	}
 
+
+	@Override
+	public MLPlanWekaBuilder getSelf() {
+		return this;
+	}
 }

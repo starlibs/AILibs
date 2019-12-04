@@ -79,9 +79,9 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 	}
 
 	@Override
-	public Object deserializeAttributeValue(final String string) {
+	public Double deserializeAttributeValue(final String string) {
 		if (string.equals("?")) {
-			return "?";
+			return null;
 		} else {
 			return Double.parseDouble(string);
 		}

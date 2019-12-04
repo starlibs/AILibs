@@ -116,7 +116,7 @@ public class LatexDatasetTableGenerator {
 					numInstances = String.valueOf(inst.size());
 					numAttributes = String.valueOf(inst.getNumAttributes() - 1);
 					if (inst.getInstanceSchema().getLabelAttribute() instanceof ICategoricalAttribute) {
-						numClasses = String.valueOf(((ICategoricalAttribute) inst.getInstanceSchema().getLabelAttribute()).getValues().size());
+						numClasses = String.valueOf(((ICategoricalAttribute) inst.getInstanceSchema().getLabelAttribute()).getLabels().size());
 					} else {
 						numClasses = "inf";
 					}

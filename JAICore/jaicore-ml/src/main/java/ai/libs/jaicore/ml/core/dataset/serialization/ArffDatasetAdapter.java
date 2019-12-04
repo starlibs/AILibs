@@ -30,7 +30,7 @@ import ai.libs.jaicore.ml.core.dataset.Dataset;
 import ai.libs.jaicore.ml.core.dataset.DenseInstance;
 import ai.libs.jaicore.ml.core.dataset.SparseInstance;
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.CategoricalAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffAttributeType;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffItem;
@@ -64,15 +64,43 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		this(false);
 	}
 
+	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IFileDatasetDescriptor datasetFile, final String nameOfClassAttribute) throws DatasetDeserializationFailedException, InterruptedException {
+		Objects.requireNonNull(datasetFile, "No dataset has been configured.");
+
+		/* read the file until the class parameter is found and count the params */
+		int numAttributes = 0;
+		try (BufferedReader br = Files.newBufferedReader(datasetFile.getDatasetDescription().toPath())) {
+			String line;
+
+			while ((line = br.readLine()) != null) {
+				if (line.startsWith(EArffItem.ATTRIBUTE.getValue())) {
+					IAttribute att = parseAttribute(line);
+					if (att.getName().equals(nameOfClassAttribute)) {
+						break;
+					}
+					numAttributes ++;
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new DatasetDeserializationFailedException(e);
+		}
+		LOGGER.info("Successfully identified class attribute index {} for attribute with name {}", numAttributes, nameOfClassAttribute);
+		return this.deserializeDataset(datasetFile, numAttributes);
+	}
+
+	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IFileDatasetDescriptor datasetDescriptor, final int columnWithClassIndex) throws DatasetDeserializationFailedException, InterruptedException {
+		Objects.requireNonNull(datasetDescriptor, "No dataset has been configured.");
+		return readDataset(this.sparseMode, datasetDescriptor.getDatasetDescription(), columnWithClassIndex);
+	}
+
+
 	@Override
 	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IDatasetDescriptor datasetDescriptor) throws DatasetDeserializationFailedException, InterruptedException {
-		Objects.requireNonNull(datasetDescriptor, "No dataset has been configured.");
-
-		if (datasetDescriptor instanceof IFileDatasetDescriptor) {
-			return readDataset(this.sparseMode, ((IFileDatasetDescriptor) datasetDescriptor).getDatasetDescription());
-		} else {
+		if (!(datasetDescriptor instanceof IFileDatasetDescriptor)) {
 			throw new DatasetDeserializationFailedException("Cannot handle dataset descriptor of type " + datasetDescriptor.getClass().getName());
 		}
+		return this.deserializeDataset((IFileDatasetDescriptor)datasetDescriptor, -1);
 	}
 
 	public ILabeledDataset<ILabeledInstance> deserializeDataset() throws InterruptedException, DatasetDeserializationFailedException {
@@ -133,7 +161,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			return new NumericAttribute(name);
 		case NOMINAL:
 			if (values != null) {
-				return new CategoricalAttribute(name, Arrays.stream(values).map(String::trim).collect(Collectors.toList()));
+				return new IntBasedCategoricalAttribute(name, Arrays.stream(values).map(String::trim).collect(Collectors.toList()));
 			} else {
 				throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
 			}
@@ -186,6 +214,10 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile) throws DatasetDeserializationFailedException, InterruptedException {
+		return readDataset(sparseMode, datasetFile, -1);
+	}
+
+	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile, final int columnWithClassIndex) throws DatasetDeserializationFailedException, InterruptedException {
 		try (BufferedReader br = Files.newBufferedReader(datasetFile.toPath())) {
 			ILabeledDataset<ILabeledInstance> dataset = null;
 			KVStore relationMetaData = new KVStore();
@@ -200,6 +232,12 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 					if (line.startsWith(EArffItem.RELATION.getValue())) {
 						// parse relation meta data
 						relationMetaData = parseRelation(line);
+						if (columnWithClassIndex >= 0) {
+							if (relationMetaData.containsKey(K_CLASS_INDEX) && (relationMetaData.getAsInt(K_CLASS_INDEX) != columnWithClassIndex)) {
+								throw new IllegalArgumentException("Cannot overwrite the class index, because it is already defined in the relation of the ARFF file.");
+							}
+							relationMetaData.put(K_CLASS_INDEX, columnWithClassIndex);
+						}
 					} else if (line.startsWith(EArffItem.ATTRIBUTE.getValue())) {
 						// parse attribute meta data
 						attributes.add(parseAttribute(line));

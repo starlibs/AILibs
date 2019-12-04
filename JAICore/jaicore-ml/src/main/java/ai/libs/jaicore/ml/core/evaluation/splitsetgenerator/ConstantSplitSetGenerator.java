@@ -1,10 +1,10 @@
 package ai.libs.jaicore.ml.core.evaluation.splitsetgenerator;
 
-import org.api4.java.ai.ml.classification.execution.IDatasetSplitSet;
-import org.api4.java.ai.ml.classification.execution.IFixedDatasetSplitSetGenerator;
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
+import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
+import org.api4.java.ai.ml.core.evaluation.execution.IFixedDatasetSplitSetGenerator;
 
 import ai.libs.jaicore.ml.core.dataset.splitter.DatasetSplitSet;
 

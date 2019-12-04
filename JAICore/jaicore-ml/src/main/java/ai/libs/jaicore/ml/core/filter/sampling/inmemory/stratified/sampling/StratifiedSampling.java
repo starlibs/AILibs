@@ -1,6 +1,9 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
@@ -8,6 +11,7 @@ import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,15 +28,15 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.WaitForSamplingStepEvent
  * @author Lukas Brandt
  */
 public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorithm<D> {
-
 	private Logger logger = LoggerFactory.getLogger(StratifiedSampling.class);
 	private IStratiAmountSelector stratiAmountSelector;
 	private IStratiAssigner stratiAssigner;
 	private Random random;
 	private DatasetDeriver<D>[] stratiBuilder = null;
-	private D datasetCopy;
 	private boolean allDatapointsAssigned = false;
 	private boolean simpleRandomSamplingStarted;
+	private int numSelectedPoints;
+	private int dsHash;
 
 	/**
 	 * Constructor for Stratified Sampling.
@@ -56,59 +60,72 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException {
 		switch (this.getState()) {
 		case CREATED:
-			try {
-				this.sample = (D) this.getInput().createEmptyCopy();
-				if (!this.allDatapointsAssigned) {
-					this.datasetCopy = (D) this.getInput().createCopy();
-					this.stratiAmountSelector.setNumCPUs(this.getNumCPUs());
-					this.stratiAssigner.setNumCPUs(this.getNumCPUs());
-					this.stratiBuilder= (DatasetDeriver<D>[])Array.newInstance(new DatasetDeriver<>(this.getInput()).getClass(), this.stratiAmountSelector.selectStratiAmount(this.datasetCopy));
+			if (!this.allDatapointsAssigned) {
+				this.dsHash = this.getInput().hashCode();
+				this.stratiAmountSelector.setNumCPUs(this.getNumCPUs());
+				this.stratiAssigner.setNumCPUs(this.getNumCPUs());
 
-					for (int i = 0; i < this.stratiBuilder.length; i++) {
-						this.stratiBuilder[i] = new DatasetDeriver<>(this.getInput());
-					}
-					this.stratiAssigner.init(this.getInput(), this.stratiBuilder.length);
+				/* create strati builder */
+				this.stratiBuilder= (DatasetDeriver<D>[])Array.newInstance(new DatasetDeriver<>(this.getInput()).getClass(), this.stratiAmountSelector.selectStratiAmount(this.getInput()));
+				for (int i = 0; i < this.stratiBuilder.length; i++) {
+					this.stratiBuilder[i] = new DatasetDeriver<>(this.getInput());
 				}
-				this.simpleRandomSamplingStarted = false;
-			} catch (DatasetCreationException e) {
-				throw new AlgorithmException("Could not create a copy of the dataset.", e);
+
+
+				this.stratiAssigner.init(this.getInput(), this.stratiBuilder.length);
+				if (this.getInput().hashCode() != this.dsHash) {
+					throw new IllegalStateException("Original dataset has been modified!");
+				}
 			}
+			this.simpleRandomSamplingStarted = false;
+			this.logger.info("Stratified sampler initialized.");
 			return this.activate();
 		case ACTIVE:
-			if (this.sample.size() < this.sampleSize) {
-				if (!this.allDatapointsAssigned) {
+			if (!this.allDatapointsAssigned) {
 
-					/* Stratify the datapoints one by one. */
-					IInstance datapoint = this.datasetCopy.remove(0);
-					int assignedStrati = this.stratiAssigner.assignToStrati(datapoint);
-					if (assignedStrati < 0 || assignedStrati >= this.stratiBuilder.length) {
-						throw new AlgorithmException("No existing strati for index " + assignedStrati);
+				/* sort all points into their respective stratum */
+				D dataset = this.getInput();
+				int n = dataset.size();
+				for (int i = 0; i < n; i ++) {
+					IInstance datapoint = dataset.get(i);
+					this.logger.debug("Computing statrum for next data point {}", datapoint);
+					int assignedStratum = this.stratiAssigner.assignToStrati(datapoint);
+					if (assignedStratum < 0 || assignedStratum >= this.stratiBuilder.length) {
+						throw new AlgorithmException("No existing strati for index " + assignedStratum);
 					} else {
-						this.stratiBuilder[assignedStrati].add(datapoint);
+						this.stratiBuilder[assignedStratum].add(i); // adding i is MUCH more efficient than adding datapoint
 					}
-					if (this.datasetCopy.isEmpty()) {
-						this.allDatapointsAssigned = true;
-					}
-					return new SampleElementAddedEvent(this.getId());
-				} else {
-					if (!this.simpleRandomSamplingStarted) {
-
-						/* Simple Random Sampling has not started yet -> Initialize one sampling thread per stratum. */
-						try {
-							this.startSimpleRandomSamplingForStrati();
-						} catch (DatasetCreationException e) {
-							throw new AlgorithmException("Could not create sample from strati.", e);
-						}
-						this.simpleRandomSamplingStarted = true;
-						return new WaitForSamplingStepEvent(this.getId());
-					} else {
-
-						/* Check if all threads are finished. If yes finish Stratified Sampling, wait shortly in this step otherwise. */
-						return this.terminate();
-					}
+					this.logger.debug("Added data point {} to stratum {}. {} datapoints remaining.", datapoint, assignedStratum, n - i - 1);
 				}
+
+				/* check number of samples */
+				this.allDatapointsAssigned = true;
+				int totalItemsAssigned = 0;
+				for (DatasetDeriver<D> d : this.stratiBuilder) {
+					this.logger.debug("Elements in stratum: {}", d.currentSizeOfTarget());
+					totalItemsAssigned += d.currentSizeOfTarget();
+				}
+				this.logger.info("Finished stratum assignments. Assigned {} data points in total.", totalItemsAssigned);
+				if (totalItemsAssigned != this.getInput().size()) {
+					throw new IllegalStateException("Not all data have been collected.");
+				}
+				return new SampleElementAddedEvent(this.getId());
 			} else {
-				return this.terminate();
+				if (!this.simpleRandomSamplingStarted) {
+
+					/* Simple Random Sampling has not started yet -> Initialize one sampling thread per stratum. */
+					try {
+						this.startSimpleRandomSamplingForStrati();
+					} catch (DatasetCreationException e) {
+						throw new AlgorithmException("Could not create sample from strati.", e);
+					}
+					this.simpleRandomSamplingStarted = true;
+					return new WaitForSamplingStepEvent(this.getId());
+				} else {
+
+					/* Check if all threads are finished. If yes finish Stratified Sampling, wait shortly in this step otherwise. */
+					return this.terminate();
+				}
 			}
 		case INACTIVE:
 			if (this.sample.size() < this.sampleSize) {
@@ -128,25 +145,70 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 	 * @throws InterruptedException
 	 */
 	private void startSimpleRandomSamplingForStrati() throws InterruptedException, DatasetCreationException {
-		// Calculate the amount of datapoints that will be used from each strati
+
+		/* Calculate the amount of datapoints that will be used from each strati.
+		 * First, floor all fractional numbers. Then, distribute the remaining samples randomly among the strati */
 		int[] sampleSizeForStrati = new int[this.stratiBuilder.length];
-		// Calculate for each stratum the sample size by StratiSize / DatasetSize
+		int numSamplesTotal = 0;
+		List<Integer> fillupStrati = new ArrayList<>();
 		for (int i = 0; i < this.stratiBuilder.length; i++) {
-			sampleSizeForStrati[i] = Math.round((float) (this.sampleSize * (this.stratiBuilder[i].currentSizeOfTarget() / (double) this.getInput().size())));
+			sampleSizeForStrati[i] = (int)Math.floor(this.sampleSize * this.stratiBuilder[i].currentSizeOfTarget() / (double)this.getInput().size());
+			numSamplesTotal += sampleSizeForStrati[i];
+			fillupStrati.add(i);
+		}
+		while (numSamplesTotal < this.sampleSize) {
+			Collections.shuffle(fillupStrati, this.random);
+			int indexForNextFillUp = fillupStrati.remove(0);
+			sampleSizeForStrati[indexForNextFillUp] ++;
+			numSamplesTotal ++;
+		}
+		if (numSamplesTotal != this.sampleSize) {
+			throw new IllegalStateException("Number of samples is " + numSamplesTotal + " where it should be " + this.sampleSize);
 		}
 
-		// Start a Simple Random Sampling thread for each stratum
+		/* conduct a Simple Random Sampling for each stratum */
 		DatasetDeriver<D> sampleDeriver = new DatasetDeriver<>(this.getInput());
 		for (int i = 0; i < this.stratiBuilder.length; i++) {
-
-			SimpleRandomSampling<D> simpleRandomSampling = new SimpleRandomSampling<>(this.random, this.stratiBuilder[i].build());
-			simpleRandomSampling.setSampleSize(sampleSizeForStrati[i]);
-			try {
-				sampleDeriver.addAll(simpleRandomSampling.call());
-			} catch (Exception e) {
-				this.logger.error("Unexpected exception during simple random sampling!", e);
+			final DatasetDeriver<D> stratumBuilder = this.stratiBuilder[i];
+			D stratum = stratumBuilder.build();
+			if (stratum.isEmpty()) {
+				this.logger.warn("{}-th stratum is empty!", i);
+			}
+			else {
+				SimpleRandomSampling<D> simpleRandomSampling = new SimpleRandomSampling<>(this.random, stratum);
+				simpleRandomSampling.setSampleSize(sampleSizeForStrati[i]);
+				this.logger.info("Setting sample size for {}-th stratus to {}", i, sampleSizeForStrati[i]);
+				try {
+					simpleRandomSampling.call();
+					sampleDeriver.addIndices(stratumBuilder.getIndicesOfNewInstancesInOriginalDataset(simpleRandomSampling.getChosenIndices())); // this is MUCH faster than adding the instances
+				} catch (Exception e) {
+					this.logger.error("Unexpected exception during simple random sampling!", e);
+				}
 			}
 		}
 		this.sample = sampleDeriver.build();
+		if (this.sample.size() != numSamplesTotal) {
+			throw new IllegalStateException("The sample has " + this.sample.size() + " elements while it should have " + numSamplesTotal);
+		}
+	}
+
+	@Override
+	public void setLoggerName(final String loggername) {
+		this.logger = LoggerFactory.getLogger(loggername);
+		if (this.stratiAssigner instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.stratiAssigner).setLoggerName(loggername + ".assigner");
+		}
+		if (this.stratiAmountSelector instanceof ILoggingCustomizable) {
+			if (this.stratiAmountSelector != this.stratiAssigner) {
+				((ILoggingCustomizable) this.stratiAmountSelector).setLoggerName(loggername + ".stratiamountselector");
+			} else {
+				this.logger.info("Strati assigner and amount selector are the same object. Using .assigner for logging.");
+			}
+		}
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
 	}
 }

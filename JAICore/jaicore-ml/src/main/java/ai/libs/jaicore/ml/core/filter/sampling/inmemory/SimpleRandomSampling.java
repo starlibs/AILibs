@@ -1,5 +1,10 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
@@ -7,36 +12,61 @@ import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
-import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
+import ai.libs.jaicore.ml.core.dataset.DatasetDeriver;
 
 public class SimpleRandomSampling<D extends IDataset<?>> extends ASamplingAlgorithm<D> {
 
 	private Random random;
+	private Collection<Integer> chosenIndices;
+	private boolean isLargeSample;
+	private int numberOfLastSample = 0;
 
 	public SimpleRandomSampling(final Random random, final D input) {
 		super(input);
 		this.random = random;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
+		int n = this.getInput().size();
 		switch (this.getState()) {
 		case CREATED:
-			try {
-				this.sample = (D)this.getInput().createCopy();
-			} catch (DatasetCreationException e) {
-				throw new AlgorithmException("Could not create a copy of the dataset.", e);
-			}
+			this.isLargeSample = this.sampleSize * 1.0 / n > .3; // if the sample contains more than 30%, we consider it large
 			return this.activate();
 		case ACTIVE:
-			if (this.sample.size() > this.sampleSize) {
-				int i = this.random.nextInt(this.sample.size());
-				this.sample.remove(i);
-				return new SampleElementAddedEvent(this.getId());
-			} else {
-				return this.terminate();
+
+			/* if we have a large sample, we just create a shuffled list of indices, which will be the chosen elements */
+			if (this.isLargeSample) {
+				this.chosenIndices = new ArrayList<>(n);
+				for (int i = 0; i < n; i++) {
+					this.chosenIndices.add(i);
+				}
+				Collections.shuffle((List<Integer>) this.chosenIndices, this.random);
+				this.chosenIndices = ((List<Integer>) this.chosenIndices).subList(0, this.sampleSize);
 			}
+
+			/* if we have a small sample, randomly draw unchosen elements */
+			else {
+				this.chosenIndices = new HashSet<>();
+				while (this.numberOfLastSample < this.sampleSize) {
+					int i;
+					do {
+						i = this.random.nextInt(this.sampleSize);
+					} while (this.chosenIndices.contains(i));
+					this.chosenIndices.add(i);
+					this.numberOfLastSample ++;
+				}
+			}
+
+			/* create sample */
+			DatasetDeriver<D> deriver = new DatasetDeriver<>(this.getInput());
+			deriver.addIndices(this.chosenIndices);
+			try {
+				this.sample = deriver.build();
+			} catch (DatasetCreationException e) {
+				throw new AlgorithmException("Could not create sample.", e);
+			}
+			return this.terminate();
 		case INACTIVE:
 			this.doInactiveStep();
 			break;
@@ -44,6 +74,10 @@ public class SimpleRandomSampling<D extends IDataset<?>> extends ASamplingAlgori
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
 		return null;
+	}
+
+	public Collection<Integer> getChosenIndices() {
+		return Collections.unmodifiableCollection(this.chosenIndices);
 	}
 
 }

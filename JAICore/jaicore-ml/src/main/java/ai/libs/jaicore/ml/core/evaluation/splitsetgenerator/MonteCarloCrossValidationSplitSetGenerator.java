@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.api4.java.ai.ml.classification.execution.IDatasetSplitSet;
-import org.api4.java.ai.ml.classification.execution.IDatasetSplitSetGenerator;
 import org.api4.java.ai.ml.core.dataset.splitter.IRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
+import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSetGenerator;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

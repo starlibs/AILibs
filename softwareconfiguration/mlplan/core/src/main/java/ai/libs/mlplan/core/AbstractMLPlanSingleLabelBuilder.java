@@ -1,12 +1,12 @@
 package ai.libs.mlplan.core;
 
 import org.api4.java.ai.ml.classification.IClassifier;
-import org.api4.java.ai.ml.classification.execution.ISupervisedLearnerMetric;
+import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
 
 import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 
-public abstract class AbstractMLPlanSingleLabelBuilder<B extends AbstractMLPlanSingleLabelBuilder<B>> extends AbstractMLPlanBuilder<IClassifier, B> {
+public abstract class AbstractMLPlanSingleLabelBuilder<C extends IClassifier, B extends AbstractMLPlanSingleLabelBuilder<C, B>> extends AbstractMLPlanBuilder<C, B> {
 
 	/* Default configuration values. */
 	protected static final int DEFAULT_SEARCH_NUM_MC_ITERATIONS = 5;

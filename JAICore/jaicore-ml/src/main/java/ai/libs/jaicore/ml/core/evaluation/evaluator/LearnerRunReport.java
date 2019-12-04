@@ -1,7 +1,7 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
-import org.api4.java.ai.ml.classification.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.IPredictionAndGroundTruthTable;
+import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 
 public class LearnerRunReport implements ILearnerRunReport {
 

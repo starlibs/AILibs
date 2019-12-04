@@ -7,22 +7,24 @@ import java.lang.reflect.Constructor;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.common.attributedobjects.IListDecorator;
 
-import ai.libs.jaicore.ml.core.dataset.ADataset;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class WekaInstances extends ADataset<IWekaInstance> implements IWekaInstances, IListDecorator<Instances, Instance, IWekaInstance> {
+public class WekaInstances implements IWekaInstances, IListDecorator<Instances, Instance, IWekaInstance> {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -1980814429448333405L;
+
+	private ILabeledInstanceSchema schema;
 
 	private Instances dataset;
 
@@ -31,14 +33,15 @@ public class WekaInstances extends ADataset<IWekaInstance> implements IWekaInsta
 	}
 
 	public WekaInstances(final Instances dataset, final ILabeledInstanceSchema schema) {
-		super(schema);
+		this.schema = schema;
 		this.dataset = dataset;
+		System.out.println(dataset.size() + " -> " + this.size());
 	}
 
 	public WekaInstances(final ILabeledDataset<? extends ILabeledInstance> dataset) {
-		super(dataset.getInstanceSchema());
+		this.schema = dataset.getInstanceSchema();
 		if (dataset instanceof WekaInstances) {
-			this.dataset = ((WekaInstances) dataset).dataset;
+			this.dataset = new Instances(((WekaInstances) dataset).dataset);
 		} else {
 			try {
 				this.dataset = WekaInstancesUtil.datasetToWekaInstances(dataset);
@@ -130,4 +133,29 @@ public class WekaInstances extends ADataset<IWekaInstance> implements IWekaInsta
 		return new WekaInstances(this);
 	}
 
+	@Override
+	public Object[] getLabelVector() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ILabeledInstanceSchema getInstanceSchema() {
+		return this.schema;
+	}
+
+	@Override
+	public Object[][] getFeatureMatrix() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeColumn(final String columnName) {
+		throw new UnsupportedOperationException();
+
+	}
+
+	@Override
+	public void removeColumn(final IAttribute attribute) {
+		throw new UnsupportedOperationException();
+	}
 }

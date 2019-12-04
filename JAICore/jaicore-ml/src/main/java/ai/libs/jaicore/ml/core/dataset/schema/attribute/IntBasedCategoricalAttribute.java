@@ -5,7 +5,7 @@ import java.util.List;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttributeValue;
 
-public class CategoricalAttribute extends AAttribute implements ICategoricalAttribute {
+public class IntBasedCategoricalAttribute extends AAttribute implements ICategoricalAttribute {
 
 	/**
 	 *
@@ -13,40 +13,42 @@ public class CategoricalAttribute extends AAttribute implements ICategoricalAttr
 	private static final long serialVersionUID = 3727153881173459843L;
 
 	private final List<String> domain;
+	private final int numCategories;
 
-	public CategoricalAttribute(final String name, final List<String> domain) {
+	public IntBasedCategoricalAttribute(final String name, final List<String> domain) {
 		super(name);
 		this.domain = domain;
+		this.numCategories = domain.size();
 	}
 
 	@Override
 	public String getStringDescriptionOfDomain() {
-		return "[Nom] " + this.getName() + " " + this.domain;
+		return this.domain.toString();
 	}
 
 	@Override
-	public List<String> getValues() {
+	public List<String> getLabels() {
 		return this.domain;
 	}
 
 	@Override
 	public boolean isBinary() {
-		return this.getValues().size() == 2;
+		return this.getLabels().size() == 2;
 	}
 
 	@Override
 	public boolean isValidValue(final Object attributeValue) {
-		String value = null;
+		Integer value = null;
 		if (attributeValue instanceof ICategoricalAttributeValue) {
 			value = ((ICategoricalAttributeValue) attributeValue).getValue();
-		} else if (attributeValue instanceof String) {
-			value = (String) attributeValue;
+		} else if (attributeValue instanceof Integer) {
+			value = (Integer) attributeValue;
 		}
 
 		if (value == null) {
 			return false;
 		} else {
-			return this.domain.contains(value);
+			return value < this.domain.size();
 		}
 	}
 
@@ -55,7 +57,7 @@ public class CategoricalAttribute extends AAttribute implements ICategoricalAttr
 		if (!this.isValidValue(attributeValue)) {
 			throw new IllegalArgumentException("No valid attribute value.");
 		}
-		return this.domain.indexOf(this.getAttributeValueAsString(attributeValue)) + 1;
+		return this.domain.indexOf(this.getLabelOfAttributeValue(attributeValue)) + 1;
 	}
 
 	@Override
@@ -63,9 +65,9 @@ public class CategoricalAttribute extends AAttribute implements ICategoricalAttr
 		return this.domain.get((int) encodedAttributeValue - 1);
 	}
 
-	private String getAttributeValueAsString(final Object object) {
+	private String getLabelOfAttributeValue(final Object object) {
 		if (object instanceof ICategoricalAttributeValue) {
-			return ((ICategoricalAttributeValue) object).getValue();
+			return this.domain.get(((ICategoricalAttributeValue) object).getValue());
 		} else if (object instanceof String) {
 			return (String) object;
 		} else {
@@ -76,7 +78,7 @@ public class CategoricalAttribute extends AAttribute implements ICategoricalAttr
 	@Override
 	public ICategoricalAttributeValue getAsAttributeValue(final Object object) {
 		if (this.isValidValue(object)) {
-			return new CategoricalAttributeValue(this, this.getAttributeValueAsString(object));
+			return new IntBasedCategoricalAttributeValue(this, (int)object);
 		} else {
 			return null;
 		}
@@ -87,32 +89,43 @@ public class CategoricalAttribute extends AAttribute implements ICategoricalAttr
 		return this.getAsAttributeValue(this.decodeValue(encodedAttributeValue));
 	}
 
+	public String getNameOfCategory(final int categoryId) {
+		return this.domain.get(categoryId);
+	}
+
 	@Override
-	public double toDouble(final Object object) {
-		throw new UnsupportedOperationException("Not yet implemented");
+	public double toDouble(final Object value) {
+		if (!(value instanceof Integer)) {
+			throw new IllegalArgumentException();
+		}
+		return this.domain.indexOf(value);
 	}
 
 	@Override
 	public String serializeAttributeValue(final Object value) {
-		if (value instanceof String && value.equals("?")) {
-			return "?";
+		if (!(value instanceof Integer)) {
+			throw new IllegalArgumentException("Can only serialize the integer representation of a category.");
 		}
-		return "\"" + this.domain.get((int) value) + "\"";
+		return value.toString();
 	}
 
 	@Override
-	public Object deserializeAttributeValue(final String string) {
+	public Integer deserializeAttributeValue(final String string) {
 		String trimmedString = string.trim();
-		if (string.startsWith("\"")) {
-			trimmedString = trimmedString.substring(1);
-		}
-		if (string.endsWith("\"")) {
-			trimmedString = trimmedString.substring(0, trimmedString.length() - 1);
-		}
 		if (string.equals("?")) {
-			return "?";
+			return null;
 		}
 		return this.domain.indexOf(trimmedString);
+	}
+
+	@Override
+	public int getNumberOfCategories() {
+		return this.numCategories;
+	}
+
+	@Override
+	public String getLabelOfCategory(final Number categoryId) {
+		return this.domain.get((int)categoryId);
 	}
 
 }

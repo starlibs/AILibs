@@ -2,11 +2,13 @@ package ai.libs.jaicore.ml.weka;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import java.util.List;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -67,7 +70,7 @@ public class WekaInstancesTester {
 				boolean isBinary = data.attribute(i).numValues() == 2;
 				if (isBinary) {
 					assertEquals("Nominal attribute \"" + data.attribute(i).name() + "\" is binary but is of type " + type.getClass().getName() + " in the wrapped model (should be " + ICategoricalAttribute.class.getName() + ")", isBinary,
-							(type instanceof ICategoricalAttribute) && ((ICategoricalAttribute) type).getValues().size() == 2);
+							(type instanceof ICategoricalAttribute) && ((ICategoricalAttribute) type).getLabels().size() == 2);
 				} else {
 					assertEquals("Nominal attribute \"" + data.attribute(i).name() + "\" is not binary but is of type " + type.getClass().getName() + " in the wrapped model (should be " + ICategoricalAttribute.class.getName() + ")",
 							!isBinary, type instanceof ICategoricalAttribute);
@@ -90,9 +93,9 @@ public class WekaInstancesTester {
 						assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + value + " but should have " + data.get(i).value(j), data.get(i).value(j), value, 0.0);
 					} else if (data.attribute(j).isNominal()) {
 						String expectedValue = data.attribute(j).value((int) data.get(i).value(j));
-
 						ICategoricalAttribute type = (ICategoricalAttribute) wrapped.getListOfAttributes().get(j);
-						String wrappedValue = type.serializeAttributeValue(value);
+						int intValue = (int)Math.round(value);
+						String wrappedValue = type.serializeAttributeValue(intValue);
 						assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + wrappedValue + " but should have " + expectedValue, expectedValue, wrappedValue);
 					} else {
 						fail("Unsupported attribute value type " + value.getClass());
@@ -101,10 +104,9 @@ public class WekaInstancesTester {
 					if (wrapped.getLabelAttribute() instanceof INumericAttribute) {
 						assertEquals("Class has value " + inst.getLabel() + " but should have" + data.get(i).classValue(), data.get(i).classValue(), (Double) inst.getLabel(), 0.0);
 					} else {
-						String expectedValue = data.attribute(j).value((int) data.get(i).value(j));
-						ICategoricalAttribute type = (ICategoricalAttribute) wrapped.getListOfAttributes().get(j);
-						String wrappedValue = type.serializeAttributeValue(inst.getLabel());
-						assertEquals("Class has value " + wrappedValue + " but should have " + WekaUtil.getClassName(data.get(i)), expectedValue);
+						String expectedValue = data.attribute(j).value((int) data.get(i).value(j)); // get true label
+						String wrappedValue = inst.getLabel().toString(); // get wrapped label attribute
+						assertEquals("Class has value " + wrappedValue + " but should have " + WekaUtil.getClassName(data.get(i)), expectedValue, wrappedValue);
 					}
 				}
 			}
@@ -135,6 +137,22 @@ public class WekaInstancesTester {
 
 		/* check that target type is the same */
 		assertEquals(wrapped.getLabelAttribute().getClass(), emptyCopy.getLabelAttribute().getClass());
+	}
+
+
+	@Test
+	public void testCopy() throws Exception {
+		Instances data = new Instances(new FileReader(this.dataset));
+		data.setClassIndex(data.numAttributes() - 1);
+		IWekaInstances wrapped = new WekaInstances(data);
+		IWekaInstances copy = (IWekaInstances)wrapped.createCopy();
+
+		/* check that the copy is equal to the original */
+		assertEquals(wrapped, copy);
+
+		/* check that the copy is not the same anymore if one element is removed */
+		copy.remove(0);
+		assertNotEquals(wrapped, copy);
 	}
 
 	@Test
@@ -198,6 +216,7 @@ public class WekaInstancesTester {
 	}
 
 	@Test
+	@Ignore // maybe this is not a useful test, because instances are allowed to occur several times!
 	public void testThatEveryInstanceOccursOnlyOnce() throws Exception {
 		Instances data = new Instances(new FileReader(this.dataset));
 		data.setClassIndex(data.numAttributes() - 1);
@@ -235,6 +254,16 @@ public class WekaInstancesTester {
 		assertEquals(wrapped.size(), n);
 		for (int i = 0; i < n; i++) {
 			assertTrue(wrapped.get(i).equals(dataAsSpecificArray[i]));
+		}
+	}
+
+	@Test
+	public void testThatEachElementIsFoundWithContains() throws FileNotFoundException, IOException {
+		Instances data = new Instances(new FileReader(this.dataset));
+		data.setClassIndex(data.numAttributes() - 1);
+		WekaInstances wrapped = new WekaInstances(data);
+		for (IWekaInstance wi : wrapped) {
+			assertTrue(wrapped.contains(wi));
 		}
 	}
 }

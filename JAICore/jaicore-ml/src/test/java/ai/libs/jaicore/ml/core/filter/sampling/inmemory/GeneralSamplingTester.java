@@ -38,6 +38,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 	private Logger logger = LoggerFactory.getLogger(GeneralSamplingTester.class);
+	private static final String SAMPLER_LOGGER_NAME = "testedalgorithm";
 
 	@Parameters(name = "problemset = {0}")
 	public static Collection<Object[]> data() {
@@ -73,6 +74,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	public void testSampleSizeTinyProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		SamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
 		ILabeledDataset<?> dataset = problemSet.getTinyProblemInputForGeneralTestPurposes();
+		this.logger.info("Testing sample on dataset with {} data points.", dataset.size());
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
 
@@ -182,8 +184,11 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	}
 
 	private <I extends ILabeledInstance> void testNoDuplicates(final ILabeledDataset<I> dataset) throws AlgorithmCreationException {
+		Set<I> dsAsSet = new HashSet<>(dataset);
+		assertEquals("Cannot check sampling, because the original dataset already has duplicates.", dataset.size(), dsAsSet.size());
 		@SuppressWarnings("unchecked")
 		ASamplingAlgorithm<ILabeledDataset<I>> samplingAlgorithm = (ASamplingAlgorithm<ILabeledDataset<I>>) this.getAlgorithm(dataset);
+		samplingAlgorithm.setLoggerName(SAMPLER_LOGGER_NAME);
 		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
 		ILabeledDataset<I> sample = this.getSample(samplingAlgorithm);

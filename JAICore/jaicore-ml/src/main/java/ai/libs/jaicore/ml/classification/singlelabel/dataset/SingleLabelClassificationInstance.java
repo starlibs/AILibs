@@ -54,4 +54,9 @@ public class SingleLabelClassificationInstance implements ISingleLabelClassifica
 		return (Integer) this.inst.getLabel();
 	}
 
+	@Override
+	public boolean isLabelPresent() {
+		return this.inst.isLabelPresent();
+	}
+
 }

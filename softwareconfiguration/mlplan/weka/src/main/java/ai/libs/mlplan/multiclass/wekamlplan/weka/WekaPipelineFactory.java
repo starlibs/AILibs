@@ -11,6 +11,7 @@ import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
+import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -21,7 +22,6 @@ import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.core.OptionHandler;
-import wekamlplan.ILearnerFactory;
 
 public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 
@@ -43,7 +43,7 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 				ASSearch search = ASSearch.forName(searcherCI.getComponent().getName(), this.getParameterList(searcherCI).toArray(new String[0]));
 
 				IWekaClassifier c = this.getComponentInstantiation(groundComponent.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER));
-				return new WekaClassifier(new MLPipeline(search, eval, c));
+				return new WekaClassifier(new MLPipeline(search, eval, c.getClassifier()));
 
 			} else {
 				Classifier c = AbstractClassifier.forName(groundComponent.getComponent().getName(), this.getParameterList(groundComponent).toArray(new String[0]));
@@ -57,7 +57,7 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 					switch (reqI.getKey()) {
 					case "W":
 						if (c instanceof SingleClassifierEnhancer) {
-							((SingleClassifierEnhancer) c).setClassifier(this.getComponentInstantiation(reqI.getValue()));
+							((SingleClassifierEnhancer) c).setClassifier(this.getComponentInstantiation(reqI.getValue()).getClassifier());
 						} else {
 							this.logger.error("Got required interface W but classifier {} is not single classifier enhancer", c.getClass().getName());
 						}
@@ -72,7 +72,7 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 						}
 						break;
 					case "B":
-						List<Classifier> baseLearnerList = this.getListOfBaseLearners(reqI.getValue());
+						List<IWekaClassifier> baseLearnerList = this.getListOfBaseLearners(reqI.getValue());
 						if (c instanceof MultipleClassifiersCombiner) {
 							((MultipleClassifiersCombiner) c).setClassifiers(baseLearnerList.toArray(new Classifier[0]));
 						} else {
@@ -84,15 +84,15 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 						break;
 					}
 				}
-				return c;
+				return new WekaClassifier(c);
 			}
 		} catch (Exception e) {
 			throw new ComponentInstantiationFailedException(e, "Could not instantiate component.");
 		}
 	}
 
-	private List<Classifier> getListOfBaseLearners(final ComponentInstance ci) throws ComponentInstantiationFailedException {
-		List<Classifier> baseLearnerList = new LinkedList<>();
+	private List<IWekaClassifier> getListOfBaseLearners(final ComponentInstance ci) throws ComponentInstantiationFailedException {
+		List<IWekaClassifier> baseLearnerList = new LinkedList<>();
 
 		if (ci.getComponent().getName().equals("MultipleBaseLearnerListElement")) {
 			baseLearnerList.add(this.getComponentInstantiation(ci.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER)));

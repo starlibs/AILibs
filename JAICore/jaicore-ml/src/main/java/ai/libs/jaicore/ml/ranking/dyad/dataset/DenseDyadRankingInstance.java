@@ -13,7 +13,7 @@ import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes.Ranking;
 
 /**
- * 
+ *
  *
  * @author Helena Graf
  * @author Alexander Tornede
@@ -43,14 +43,14 @@ public class DenseDyadRankingInstance extends ADyadRankingInstance {
 	@Override
 	public Set<IDyad> getAttributeValue(final int pos) {
 		if (pos == 0) {
-			return Collections.unmodifiableSet(dyads);
+			return Collections.unmodifiableSet(this.dyads);
 		}
 		throw new IllegalArgumentException("No attribute at position " + pos + ".");
 	}
 
 	@Override
 	public IRanking<IDyad> getLabel() {
-		return rankingOverDyads;
+		return this.rankingOverDyads;
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class DenseDyadRankingInstance extends ADyadRankingInstance {
 			}
 		}
 
-		if (!drInstance.getLabel().equals(getLabel())) {
+		if (!drInstance.getLabel().equals(this.getLabel())) {
 			return false;
 		}
 
@@ -95,12 +95,12 @@ public class DenseDyadRankingInstance extends ADyadRankingInstance {
 	}
 
 	@Override
-	public void setDyads(Set<IDyad> dyads) {
+	public void setDyads(final Set<IDyad> dyads) {
 		this.dyads = dyads;
 	}
 
 	@Override
-	public void setRanking(Ranking<IDyad> ranking) {
+	public void setRanking(final Ranking<IDyad> ranking) {
 		this.rankingOverDyads = new Ranking<>(ranking);
 	}
 }

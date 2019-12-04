@@ -2,12 +2,12 @@ package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
 import java.util.List;
 
-import org.api4.java.ai.ml.classification.execution.ILearnerRunReport;
-import org.api4.java.ai.ml.classification.execution.ISupervisedLearnerExecutor;
-import org.api4.java.ai.ml.classification.execution.LearnerExecutionFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
+import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
+import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerExecutor;
+import org.api4.java.ai.ml.core.evaluation.execution.LearnerExecutionFailedException;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;

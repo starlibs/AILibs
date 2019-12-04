@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.api4.java.ai.ml.classification.IClassifier;
+
 import ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier;
 
-public class MLPlanSimpleBuilder extends AbstractMLPlanSingleLabelBuilder<MLPlanSimpleBuilder> {
+public class MLPlanSimpleBuilder extends AbstractMLPlanSingleLabelBuilder<IClassifier, MLPlanSimpleBuilder> {
 
 	public MLPlanSimpleBuilder() {
 		try {

@@ -5,11 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import org.api4.java.ai.ml.classification.execution.IDatasetSplitSet;
-import org.api4.java.ai.ml.classification.execution.IDatasetSplitSetGenerator;
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.splitter.IRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
+import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
+import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSetGenerator;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;

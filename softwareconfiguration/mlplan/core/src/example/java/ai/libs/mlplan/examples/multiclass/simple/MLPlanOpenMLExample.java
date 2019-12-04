@@ -7,8 +7,8 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.classification.IClassifier;
-import org.api4.java.ai.ml.classification.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.TimeOut;
 
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;

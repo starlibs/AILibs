@@ -3,11 +3,11 @@ package ai.libs.jaicore.ml.core.evaluation.evaluator.factory;
 import java.util.List;
 import java.util.Random;
 
-import org.api4.java.ai.ml.classification.execution.ISupervisedLearnerMetric;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
+import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
 
 import ai.libs.jaicore.ml.core.evaluation.evaluator.ExtrapolatedSaturationPointEvaluator;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;

@@ -7,10 +7,10 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import org.api4.java.ai.ml.classification.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.learningcurve.ILearningCurve;
 import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;

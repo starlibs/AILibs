@@ -1,6 +1,7 @@
 package ai.libs.mlplan.core;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Random;
 
 import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
@@ -54,7 +55,6 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	private ComponentInstance componentInstanceOfSelectedClassifier;
 
 	private final IMLPlanBuilder<L, ?> builder;
-	private final ILabeledDataset<?> data;
 	private TwoPhaseHASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String> twoPhaseHASCOFactory;
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, L, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
 
@@ -76,7 +76,10 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 		}
 		/* store builder and data for main algorithm */
 		this.builder = builder;
-		this.data = data;
+		Objects.requireNonNull(this.getInput());
+		if (this.getInput().isEmpty()) {
+			throw new IllegalArgumentException("Cannot run ML-Plan on empty dataset.");
+		}
 	}
 
 	@Override
@@ -93,14 +96,14 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 
 			/* set up exact splits */
 			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
-			this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%).", this.data.size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2), MathExt.round(dataPortionUsedForSelection, 2));
+			this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%).", this.getInput().size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2), MathExt.round(dataPortionUsedForSelection, 2));
 			ILabeledDataset<?> dataShownToSearch;
 			if (dataPortionUsedForSelection > 0) {
 				try {
 					int seed = this.getConfig().randomSeed();
 					IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> splitter = this.builder.getSearchSelectionDatasetSplitter();
 					if (splitter == null) {
-						throw new IllegalArgumentException("The builder does not specify a dataset splitter");
+						throw new IllegalArgumentException("The builder does not specify a dataset splitter for the separation between search and selection phase data.");
 					}
 					dataShownToSearch = splitter.split(this.getInput(), new Random(seed), dataPortionUsedForSelection).get(1); // attention; this is a bit tricky (data portion for selection is in 0)
 				} catch (SplitFailedException e) {

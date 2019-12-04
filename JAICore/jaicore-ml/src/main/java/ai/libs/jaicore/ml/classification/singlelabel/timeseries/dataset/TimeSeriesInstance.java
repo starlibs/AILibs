@@ -94,4 +94,9 @@ public class TimeSeriesInstance implements ITimeSeriesInstance {
 		this.attributeValues.add((INDArrayTimeseries) value);
 	}
 
+	@Override
+	public boolean isLabelPresent() {
+		return this.label != null;
+	}
+
 }
