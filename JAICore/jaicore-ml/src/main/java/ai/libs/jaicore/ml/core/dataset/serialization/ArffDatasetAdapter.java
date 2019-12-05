@@ -23,7 +23,6 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.ArrayUtil;
 import ai.libs.jaicore.basic.OptionsParser;
 import ai.libs.jaicore.basic.kvstore.KVStore;
 import ai.libs.jaicore.ml.core.dataset.Dataset;
@@ -78,11 +77,10 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 					if (att.getName().equals(nameOfClassAttribute)) {
 						break;
 					}
-					numAttributes ++;
+					numAttributes++;
 				}
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new DatasetDeserializationFailedException(e);
 		}
 		LOGGER.info("Successfully identified class attribute index {} for attribute with name {}", numAttributes, nameOfClassAttribute);
@@ -94,13 +92,12 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		return readDataset(this.sparseMode, datasetDescriptor.getDatasetDescription(), columnWithClassIndex);
 	}
 
-
 	@Override
 	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IDatasetDescriptor datasetDescriptor) throws DatasetDeserializationFailedException, InterruptedException {
 		if (!(datasetDescriptor instanceof IFileDatasetDescriptor)) {
 			throw new DatasetDeserializationFailedException("Cannot handle dataset descriptor of type " + datasetDescriptor.getClass().getName());
 		}
-		return this.deserializeDataset((IFileDatasetDescriptor)datasetDescriptor, -1);
+		return this.deserializeDataset((IFileDatasetDescriptor) datasetDescriptor, -1);
 	}
 
 	public ILabeledDataset<ILabeledInstance> deserializeDataset() throws InterruptedException, DatasetDeserializationFailedException {
@@ -170,7 +167,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 	}
 
-	protected static Object parseInstance(final boolean sparseData, final List<IAttribute> attributes, final String line) {
+	protected static Object parseInstance(final boolean sparseData, final List<IAttribute> attributes, final int targetIndex, final String line) {
 		if (line.trim().startsWith("%")) {
 			throw new IllegalArgumentException("Cannot create object for commented line!");
 		}
@@ -183,10 +180,16 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			}
 
 			Object[] parsedDenseInstance = new Object[lineSplit.length];
+			Object target = null;
+			int cI = 0;
 			for (int i = 0; i < lineSplit.length; i++) {
-				parsedDenseInstance[i] = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
+				if (i == targetIndex) {
+					target = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
+				} else {
+					parsedDenseInstance[cI++] = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
+				}
 			}
-			return parsedDenseInstance;
+			return Arrays.asList(parsedDenseInstance, target);
 		} else {
 			Map<Integer, Object> parsedSparseInstance = new HashMap<>();
 			for (String sparseValue : lineSplit) {
@@ -259,11 +262,10 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				} else {
 					line = line.trim();
 					if (!line.isEmpty() && !line.startsWith("%")) { // ignore empty and comment lines
-						Object parsedInstance = parseInstance(sparseMode, attributes, line);
+						Object parsedInstance = parseInstance(sparseMode, attributes, relationMetaData.getAsInt(K_CLASS_INDEX), line);
 						ILabeledInstance newI;
 						if (parsedInstance instanceof Object[]) {
-							Object[] parsedDenseInstance = (Object[]) parsedInstance;
-							newI = new DenseInstance(ArrayUtil.copyArrayExlcuding(parsedDenseInstance, relationMetaData.getAsIntList(K_CLASS_INDEX)), parsedDenseInstance[relationMetaData.getAsInt(K_CLASS_INDEX)]);
+							newI = new DenseInstance((Object[]) ((List<?>) parsedInstance).get(0), ((List<?>) parsedInstance).get(1));
 						} else if (parsedInstance instanceof Map) {
 							@SuppressWarnings("unchecked")
 							Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
