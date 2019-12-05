@@ -5,20 +5,23 @@ import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
 import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSetGenerator;
 import org.api4.java.ai.ml.core.evaluation.execution.IFixedDatasetSplitSetGenerator;
+import org.api4.java.common.control.ILoggingCustomizable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * This is an IDatasetSplitSetGenerator that produced splits for only one initially given dataset.
+ * This is an IDatasetSplitSetGenerator that produces splits for one initially fixed dataset.
  *
  * It can be used as a split generator in a context where the data are not passed along the usage of the splitter.
  *
- * @author felix
+ * @author Felix Mohr
  *
  * @param <D>
  */
-public class FixedDataSplitSetGenerator<D extends IDataset<?>> implements IFixedDatasetSplitSetGenerator<D> {
-
+public class FixedDataSplitSetGenerator<D extends IDataset<?>> implements IFixedDatasetSplitSetGenerator<D>, ILoggingCustomizable {
 	private final D data;
 	private final IDatasetSplitSetGenerator<D> generator;
+	private Logger logger = LoggerFactory.getLogger(FixedDataSplitSetGenerator.class);
 
 	public FixedDataSplitSetGenerator(final D data, final IDatasetSplitSetGenerator<D> generator) {
 		super();
@@ -49,5 +52,22 @@ public class FixedDataSplitSetGenerator<D extends IDataset<?>> implements IFixed
 	@Override
 	public String toString() {
 		return "FixedDataSplitSetGenerator [data=" + this.data + ", generator=" + this.generator + "]";
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
+		if (this.generator instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.generator).setLoggerName(name + ".splitgen");
+			this.logger.info("Setting logger of base split generator {} to {}", this.generator.getClass().getName(), name + ".splitgen");
+		}
+		else {
+			this.logger.info("Base split generator {} is not configurable for logging, so not configuring it.", this.generator.getClass().getName());
+		}
 	}
 }

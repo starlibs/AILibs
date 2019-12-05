@@ -14,9 +14,8 @@ import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.DyadRankedBestFirstFactory;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer;
-import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.metamining.dyadranking.WEKADyadRankedNodeQueueConfig;
-import ai.libs.mlplan.multiclass.MLPlanWekaBuilder;
+import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 import weka.classifiers.Evaluation;
@@ -39,7 +38,7 @@ public class WekaDyadRankingExample {
 		List<Instances> split = WekaUtil.getStratifiedSplit((Instances) data, (new Random(0)).nextLong(), 0.7d);
 
 		WEKADyadRankedNodeQueueConfig openConfig = new WEKADyadRankedNodeQueueConfig();
-		MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forWeka();
+		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 		builder.withSearchSpaceConfigFile(new File("resources/automl/searchmodels/weka/weka-approach-5-autoweka.json"))
 		.withAlgorithmConfigFile(new File("conf/mlplan.properties"))
 		.withSearchFactory(new DyadRankedBestFirstFactory<>(openConfig), new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<>(n -> 1.0)).withPreferredNodeEvaluator(n -> 1.0);

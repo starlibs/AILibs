@@ -89,7 +89,7 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 	@Parameter(0)
 	public OpenMLProblemSet problemSet;
 
-	public abstract IAlgorithm<ILabeledDataset<?>, IClassifier> getAutoMLAlgorithm(ILabeledDataset<?> data);
+	public abstract IAlgorithm<ILabeledDataset<?>, ? extends IClassifier> getAutoMLAlgorithm(ILabeledDataset<?> data);
 
 	@Test
 	public void testThatModelIsTrained() throws Exception {
@@ -109,7 +109,7 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 
 			/* get algorithm */
 			logger.info("Loading the algorithm");
-			IAlgorithm<ILabeledDataset<?>, IClassifier> algorithm = this.getAutoMLAlgorithm(train); // AutoML-tools should deliver a classifier
+			IAlgorithm<ILabeledDataset<?>, ? extends IClassifier> algorithm = this.getAutoMLAlgorithm(train); // AutoML-tools should deliver a classifier
 
 			assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 			if (algorithm instanceof ILoggingCustomizable) {

@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.IAlgorithm;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
@@ -50,5 +51,5 @@ public abstract class AutoMLAlgorithmCoreFunctionalityTester extends GeneralAlgo
 		}
 	}
 
-	public abstract IAlgorithm getAutoMLAlgorithm(ILabeledDataset data);
+	public abstract IAlgorithm<? extends ILabeledDataset<?>, ? extends ISupervisedLearner<?, ?>> getAutoMLAlgorithm(ILabeledDataset<?> data);
 }

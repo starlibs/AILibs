@@ -41,7 +41,7 @@ import com.google.common.collect.Range;
 import ai.libs.jaicore.basic.sets.CartesianProductComputationProblem;
 import ai.libs.jaicore.basic.sets.LDSRelationComputer;
 import ai.libs.jaicore.ml.core.dataset.cache.StratifiedSplitSubsetInstruction;
-import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.LabelBasedStratifiedSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.StratifiedSampling;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
@@ -466,8 +466,7 @@ public class WekaUtil {
 	public static List<IWekaInstances> getStratifiedSplit(final IWekaInstances data, final Random random, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
 		try {
 			List<Instances> split = new ArrayList<>();
-			AttributeBasedStratiAmountSelectorAndAssigner stratiBuilder = new AttributeBasedStratiAmountSelectorAndAssigner();
-			StratifiedSampling<IWekaInstances> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, random, data);
+			StratifiedSampling<IWekaInstances> sampler = new LabelBasedStratifiedSampling<>(random, data);
 			sampler.setSampleSize((int) Math.ceil(portionOfFirstFold * data.size()));
 			split.add(sampler.call().getList());
 			split.add(sampler.getComplementOfLastSample().getList());

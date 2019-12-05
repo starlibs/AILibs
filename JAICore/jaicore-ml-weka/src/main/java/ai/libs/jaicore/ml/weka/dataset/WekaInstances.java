@@ -35,7 +35,6 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 	public WekaInstances(final Instances dataset, final ILabeledInstanceSchema schema) {
 		this.schema = schema;
 		this.dataset = dataset;
-		System.out.println(dataset.size() + " -> " + this.size());
 	}
 
 	public WekaInstances(final ILabeledDataset<? extends ILabeledInstance> dataset) {
@@ -51,6 +50,7 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 		}
 	}
 
+	@Override
 	public Instances getInstances() {
 		return this.dataset;
 	}

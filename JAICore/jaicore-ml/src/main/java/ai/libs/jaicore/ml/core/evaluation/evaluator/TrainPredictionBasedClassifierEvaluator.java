@@ -60,12 +60,19 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
+		if (this.splitGenerator instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.splitGenerator).setLoggerName(name + ".splitgen");
+			this.logger.info("Setting logger of split generator {} to {}", this.splitGenerator.getClass().getName(), name + ".splitgen");
+		}
+		else {
+			this.logger.info("Split generator {} is not configurable for logging, so not configuring it.", this.splitGenerator.getClass().getName());
+		}
 		if (this.executor instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) this.executor).setLoggerName(name + ".executor");
 			this.logger.info("Setting logger of learner executor {} to {}", this.executor.getClass().getName(), name + ".executor");
 		}
 		else {
-			this.logger.info("Learner executor {} is not configurable for logging, so not configuring it.");
+			this.logger.info("Learner executor {} is not configurable for logging, so not configuring it.", this.executor.getClass().getName());
 		}
 	}
 }

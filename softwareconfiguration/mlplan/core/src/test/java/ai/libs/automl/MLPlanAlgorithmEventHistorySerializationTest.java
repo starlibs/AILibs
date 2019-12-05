@@ -39,7 +39,7 @@ public class MLPlanAlgorithmEventHistorySerializationTest {
 		builder.withTimeOut(new TimeOut(90, TimeUnit.SECONDS));
 		builder.withNumCpus(2);
 
-		MLPlan<IClassifier> mlplan = new MLPlan<>(builder, split.get(0));
+		MLPlan<IClassifier> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("mlplan");
 

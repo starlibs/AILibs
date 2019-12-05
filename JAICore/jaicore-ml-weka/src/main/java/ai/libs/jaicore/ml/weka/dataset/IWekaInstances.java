@@ -9,6 +9,10 @@ public interface IWekaInstances extends ILabeledDataset<IWekaInstance> {
 
 	public Instances getList();
 
+	default public Instances getInstances() {
+		return this.getList();
+	}
+
 	@Override
 	public IWekaInstances createEmptyCopy() throws DatasetCreationException, InterruptedException;
 

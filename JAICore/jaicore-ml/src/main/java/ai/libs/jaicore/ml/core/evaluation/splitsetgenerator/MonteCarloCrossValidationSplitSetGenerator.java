@@ -29,6 +29,7 @@ public class MonteCarloCrossValidationSplitSetGenerator<D extends ILabeledDatase
 	private final IRandomDatasetSplitter<D> datasetSplitter;
 	private final int repeats;
 	private final long seed;
+	private int runningSeed;
 
 	public MonteCarloCrossValidationSplitSetGenerator(final IRandomDatasetSplitter<D> datasetSplitter, final int repeats, final Random random) {
 		super();
@@ -47,6 +48,14 @@ public class MonteCarloCrossValidationSplitSetGenerator<D extends ILabeledDatase
 		this.logger.info("Switching logger of {} from {} to {}", this, this.logger.getName(), name);
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Switched logger of {} to {}", this, name);
+
+		if (this.datasetSplitter instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.datasetSplitter).setLoggerName(name + ".splitter");
+			this.logger.info("Setting logger of splitter {} to {}", this.datasetSplitter.getClass().getName(), name + ".splitter");
+		}
+		else {
+			this.logger.info("Base splitter {} is not configurable for logging, so not configuring it.", this.datasetSplitter.getClass().getName());
+		}
 	}
 
 	@Override
@@ -61,6 +70,7 @@ public class MonteCarloCrossValidationSplitSetGenerator<D extends ILabeledDatase
 
 	@Override
 	public IDatasetSplitSet<D> nextSplitSet(final D data) throws InterruptedException, SplitFailedException {
+		this.logger.info("Generating next split set of size {} for dataset with {} instances.", this.repeats, data.size());
 		if (Thread.interrupted()) { // clear the interrupted field. This is Java a general convention when an
 			// InterruptedException is thrown (see Java documentation for details)
 			this.logger.info("MCCV has been interrupted, leaving MCCV.");
@@ -69,7 +79,10 @@ public class MonteCarloCrossValidationSplitSetGenerator<D extends ILabeledDatase
 
 		List<List<D>> splits = new ArrayList<>(this.repeats);
 		for (int i = 0; i < this.repeats; i++) {
-			splits.add(this.datasetSplitter.split(data, new Random(this.seed + i)));
+			long seed = this.seed + this.runningSeed;
+			this.logger.debug("Invoking dataset splitter {} with Random({})", this.datasetSplitter, seed);
+			splits.add(this.datasetSplitter.split(data, new Random(seed)));
+			this.runningSeed ++;
 		}
 		return new DatasetSplitSet<>(splits);
 	}

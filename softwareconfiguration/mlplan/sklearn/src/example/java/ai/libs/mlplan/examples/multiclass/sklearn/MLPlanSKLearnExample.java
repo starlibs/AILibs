@@ -1,4 +1,4 @@
-package ai.libs.mlplan.examples.multiclass.weka;
+package ai.libs.mlplan.examples.multiclass.sklearn;
 
 import java.io.File;
 import java.io.FileReader;

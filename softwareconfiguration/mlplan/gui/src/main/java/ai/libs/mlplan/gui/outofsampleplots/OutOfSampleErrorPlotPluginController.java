@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+import org.api4.java.ai.ml.classification.IClassifier;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,33 +18,30 @@ import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredS
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.core.Instances;
 import weka.core.SerializationHelper;
 
 public class OutOfSampleErrorPlotPluginController extends ASimpleMVCPluginController<OutOfSampleErrorPlotPluginModel, OutOfSampleErrorPlotPluginView> {
 
-	private Instances train, test;
+	private ILabeledDataset<?> train, test;
 	private Logger logger = LoggerFactory.getLogger(OutOfSampleErrorPlotPlugin.class);
 
 	public OutOfSampleErrorPlotPluginController(final OutOfSampleErrorPlotPluginModel model, final OutOfSampleErrorPlotPluginView view) {
 		super(model, view);
 	}
 
-	public Instances getTrain() {
+	public ILabeledDataset<?> getTrain() {
 		return this.train;
 	}
 
-	public void setTrain(final Instances train) {
+	public void setTrain(final ILabeledDataset<?> train) {
 		this.train = train;
 	}
 
-	public Instances getTest() {
+	public ILabeledDataset<?> getTest() {
 		return this.test;
 	}
 
-	public void setTest(final Instances test) {
+	public void setTest(final ILabeledDataset<?> test) {
 		this.test = test;
 	}
 
@@ -63,9 +62,9 @@ public class OutOfSampleErrorPlotPluginController extends ASimpleMVCPluginContro
 				ScoredSolutionCandidateInfo scoredSolutionCandidateInfo = (ScoredSolutionCandidateInfo) rawScoredSolutionCandidateInfo;
 
 				try {
-					Classifier classifier = this.deserializeClassifier(scoredSolutionCandidateInfo.getSolutionCandidateRepresentation());
+					IClassifier classifier = this.deserializeClassifier(scoredSolutionCandidateInfo.getSolutionCandidateRepresentation());
 					this.logger.debug("Building classifier");
-					classifier.buildClassifier(this.train);
+					classifier.fit(this.train);
 					Evaluation eval = new Evaluation(this.train);
 					List<Double> performances = new ArrayList<>();
 					performances.add(this.parseScoreToDouble(scoredSolutionCandidateInfo.getScore()));
@@ -84,7 +83,7 @@ public class OutOfSampleErrorPlotPluginController extends ASimpleMVCPluginContro
 		}
 	}
 
-	private Classifier deserializeClassifier(final String serializedClassifier) throws Exception {
+	private ILabeledDataset<?> deserializeClassifier(final String serializedClassifier) throws Exception {
 		final byte[] bytes = Base64.getDecoder().decode(serializedClassifier);
 		Classifier classifier = (Classifier) SerializationHelper.read(new ByteArrayInputStream(bytes));
 		return classifier;

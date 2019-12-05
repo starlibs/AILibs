@@ -1,4 +1,5 @@
-package ai.libs.mlplan.examples.multiclass.simple;
+package ai.libs.mlplan.examples.gui;
+
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,12 +27,11 @@ import ai.libs.mlplan.core.MLPlanSimpleBuilder;
  * @author fmohr
  *
  */
-public class MLPlanOpenMLExample {
+public class MLPlanVisualizationExample {
 
 	public static void main(final String[] args) throws Exception {
 
-		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(30);
-		System.out.println(ds.getNumAttributes());
+		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(3);
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 30 seconds */
@@ -43,8 +43,8 @@ public class MLPlanOpenMLExample {
 
 		MLPlan<IClassifier> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setRandomSeed(1);
-		mlplan.setPortionOfDataForPhase2(0f);
-		mlplan.setLoggerName("mlplan");
+		mlplan.setPortionOfDataForPhase2(.3f);
+		mlplan.setLoggerName("testedalgorithm");
 
 		try {
 			long start = System.currentTimeMillis();

@@ -60,7 +60,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 
 	private boolean buildSelectedClasifierOnGivenData = true;
 
-	public MLPlan(final IMLPlanBuilder<L, ?> builder, final ILabeledDataset<?> data) {
+	MLPlan(final IMLPlanBuilder<L, ?> builder, final ILabeledDataset<?> data) { // ML-Plan has a package visible constructor, because it should only be constructed using a builder
 		super(builder.getAlgorithmConfig(), data);
 		builder.prepareNodeEvaluatorInFactoryWithData(data);
 

@@ -207,7 +207,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	public void fit(final ILabeledDataset<? extends ILabeledInstance> dTrain) throws TrainingException, InterruptedException {
 		Objects.requireNonNull(this.timeout, "Timeout must be set before running ML-Plan.");
 
-		MLPlan<IWekaClassifier> mlplan = new MLPlan<>(this.builder, dTrain);
+		MLPlan<IWekaClassifier> mlplan = this.builder.withDataset(dTrain).build();
 		this.listeners.forEach(mlplan::registerListener);
 		mlplan.setTimeout(this.timeout);
 		if (this.loggerName != null) {

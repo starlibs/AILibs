@@ -1,4 +1,4 @@
-package ai.libs.mlplan.examples.multiclass.weka;
+package ai.libs.mlplan.examples.metamining;
 
 import java.io.BufferedReader;
 import java.io.File;
