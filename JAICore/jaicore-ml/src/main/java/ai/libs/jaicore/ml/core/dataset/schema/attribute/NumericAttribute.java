@@ -87,4 +87,5 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 		}
 	}
 
+
 }

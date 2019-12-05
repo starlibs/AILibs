@@ -10,14 +10,20 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
+import org.api4.java.common.reconstruction.IReconstructible;
+import org.api4.java.common.reconstruction.IReconstructionInstruction;
+import org.api4.java.common.reconstruction.IReconstructionPlan;
 
-public class Dataset extends ArrayList<ILabeledInstance> implements ILabeledDataset<ILabeledInstance> {
+import ai.libs.jaicore.basic.reproduction.ReconstructionPlan;
+
+public class Dataset extends ArrayList<ILabeledInstance> implements ILabeledDataset<ILabeledInstance>, IReconstructible {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -3643080541896274181L;
 
+	private final List<IReconstructionInstruction> instructions = new ArrayList<>();
 	private final ILabeledInstanceSchema schema;
 
 	public Dataset(final ILabeledInstanceSchema schema) {
@@ -83,5 +89,46 @@ public class Dataset extends ArrayList<ILabeledInstance> implements ILabeledData
 		}
 		return ds;
 	}
+
+	@Override
+	public IReconstructionPlan getConstructionPlan() {
+		return new ReconstructionPlan(this.instructions);
+	}
+
+	@Override
+	public void addInstruction(final IReconstructionInstruction instruction) {
+		this.instructions.add(instruction);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((this.schema == null) ? 0 : this.schema.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		Dataset other = (Dataset) obj;
+		if (this.schema == null) {
+			if (other.schema != null) {
+				return false;
+			}
+		} else if (!this.schema.equals(other.schema)) {
+			return false;
+		}
+		return true;
+	}
+
 
 }

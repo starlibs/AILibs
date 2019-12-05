@@ -72,4 +72,41 @@ public class SparseInstance extends AInstance {
 		this.attributeMap.remove(columnPos);
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((this.attributeMap == null) ? 0 : this.attributeMap.hashCode());
+		result = prime * result + ((this.nullElement == null) ? 0 : this.nullElement.hashCode());
+		result = prime * result + this.numAttributes;
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		SparseInstance other = (SparseInstance) obj;
+		if (this.attributeMap == null) {
+			if (other.attributeMap != null) {
+				return false;
+			}
+		} else if (!this.attributeMap.equals(other.attributeMap)) {
+			return false;
+		}
+		if (this.nullElement != other.nullElement) {
+			return false;
+		}
+		if (this.numAttributes != other.numAttributes) {
+			return false;
+		}
+		return true;
+	}
 }

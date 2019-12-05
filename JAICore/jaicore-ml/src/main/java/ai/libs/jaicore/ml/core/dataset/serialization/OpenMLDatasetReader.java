@@ -10,6 +10,9 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
+import ai.libs.jaicore.basic.reproduction.ReconstructionInstruction;
+import ai.libs.jaicore.ml.core.dataset.Dataset;
+
 public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset<ILabeledInstance>> {
 
 	private static final OpenmlConnector connector = new OpenmlConnector();
@@ -18,7 +21,9 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 		try {
 			DataSetDescription dsd = connector.dataGet(openMLId);
 			File arffFile = connector.datasetGet(dsd);
-			return new ArffDatasetAdapter().deserializeDataset(new FileDatasetDescriptor(arffFile), dsd.getDefault_target_attribute());
+			Dataset ds = (Dataset)(new ArffDatasetAdapter().deserializeDataset(new FileDatasetDescriptor(arffFile), dsd.getDefault_target_attribute()));
+			ds.addInstruction(new ReconstructionInstruction(OpenMLDatasetReader.class.getMethod("deserializeDataset", int.class), openMLId));
+			return ds;
 		} catch (Exception e) {
 			throw new DatasetDeserializationFailedException("Could not deserialize OpenML dataset with id " + openMLId, e);
 		}

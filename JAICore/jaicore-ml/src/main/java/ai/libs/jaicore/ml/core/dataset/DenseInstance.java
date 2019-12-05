@@ -58,4 +58,34 @@ public class DenseInstance extends AInstance {
 	public void removeColumn(final int columnPos) {
 		this.attributes.remove(columnPos);
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((this.attributes == null) ? 0 : this.attributes.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		DenseInstance other = (DenseInstance) obj;
+		if (this.attributes == null) {
+			if (other.attributes != null) {
+				return false;
+			}
+		} else if (!this.attributes.equals(other.attributes)) {
+			return false;
+		}
+		return true;
+	}
 }
