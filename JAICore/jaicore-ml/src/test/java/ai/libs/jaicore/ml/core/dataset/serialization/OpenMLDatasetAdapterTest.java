@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.core.dataset.serialization;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -9,35 +10,53 @@ import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFail
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
+import org.api4.java.common.reconstruction.IReconstructible;
+import org.api4.java.common.reconstruction.ReconstructionException;
 import org.junit.Test;
 
 public class OpenMLDatasetAdapterTest {
 
 	@Test
-	public void testReadingKRVKP() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException {
-		this.read(3, 3196,36, 2);
+	public void testReadingKRVKP() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException, ReconstructionException {
+		this.testReadAndReconstructibility(3, 3196,36, 2);
 	}
 
 	@Test
-	public void testReadingHiggs() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException {
-		this.read(23512, 98050, 28, 2);
+	public void testReadingHiggs() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException, ReconstructionException {
+		this.testReadAndReconstructibility(23512, 98050, 28, 2);
 	}
 
 	@Test
-	public void testReadingAmazon() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException {
-		this.read(1457, 1500, 10000, 50);
+	public void testReadingAmazon() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException, ReconstructionException {
+		this.testReadAndReconstructibility(1457, 1500, 10000, 50);
 	}
 
 	@Test
-	public void testReadingArticleInfluence() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException {
-		this.read(42123, 3615, 6, 3169);
+	public void testReadingArticleInfluence() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException, ReconstructionException {
+		this.testReadAndReconstructibility(42123, 3615, 6, 3169);
 	}
 
-	public void read(final int id, final int expectedInstances, final int expectedAttributes, final int expectedClasses) throws DatasetDeserializationFailedException, InterruptedException {
+	public void testReadAndReconstructibility(final int id, final int expectedInstances, final int expectedAttributes, final int expectedClasses) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
+		this.testReconstructibility(this.read(id, expectedInstances, expectedAttributes, expectedClasses));
+	}
+
+	public ILabeledDataset<ILabeledInstance> read(final int id, final int expectedInstances, final int expectedAttributes, final int expectedClasses) throws DatasetDeserializationFailedException, InterruptedException {
 		ILabeledDataset<ILabeledInstance> data = OpenMLDatasetReader.deserializeDataset(id);
 		assertEquals("Incorrect number of instances.", expectedInstances, data.size());
 		assertEquals("Incorrect number of attributes.", expectedAttributes, data.getNumAttributes());
 		Set<Object> labels = data.stream().map(i -> i.getLabel()).collect(Collectors.toSet());
 		assertEquals("Incorrect number of class labels.", expectedClasses, labels.size());
+		return data;
+	}
+
+	public void testReconstructibility(final ILabeledDataset<?> dataset) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
+		if (!(dataset instanceof IReconstructible)) {
+			fail("Dataset not reconstructible");
+		}
+		IReconstructible rDataset = (IReconstructible)dataset;
+		ILabeledDataset<?> reproducedDataset = (ILabeledDataset<?>)rDataset.getConstructionPlan().reconstructObject();
+		assertEquals(dataset.get(0), reproducedDataset.get(0)); // first check that the first instance is equal in both cases. This is of course covered by later assertions but simplifies debugging in case of failure
+		assertEquals(dataset.getInstanceSchema(), reproducedDataset.getInstanceSchema()); // check that schema are identically. Again, this is checked for convenience
+		assertEquals(rDataset, reproducedDataset); // full equality check
 	}
 }

@@ -16,6 +16,8 @@ import ai.libs.jaicore.graphvisualizer.plugin.IGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ControlBarGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.speedslider.SpeedSliderGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.TimeSliderGUIPlugin;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
@@ -117,6 +119,11 @@ public class AlgorithmVisualizationWindow implements Runnable {
 			graphVisualizationPlugin.setAlgorithmEventSource(this.algorithmEventSource);
 			graphVisualizationPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
 		}
+	}
+
+	public void show() {
+		new JFXPanel();
+		Platform.runLater(this);
 	}
 
 	@Override

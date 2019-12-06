@@ -172,7 +172,6 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			throw new IllegalArgumentException("Cannot create object for commented line!");
 		}
 		String[] lineSplit = line.split(",");
-		System.out.println(Arrays.toString(lineSplit));
 
 		if (!sparseData) {
 			if (lineSplit.length != attributes.size()) {
@@ -184,7 +183,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			Object target = null;
 			int cI = 0;
 			for (int i = 0; i < lineSplit.length; i++) {
-				if (i == targetIndex) {
+				if (cI == targetIndex) {
 					target = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
 				} else {
 					parsedDenseInstance[cI++] = attributes.get(i).deserializeAttributeValue(lineSplit[i]);

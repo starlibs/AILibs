@@ -64,7 +64,44 @@ public class InstanceSchema implements IInstanceSchema {
 
 	@Override
 	public IInstanceSchema getCopy() {
-		return new InstanceSchema(relationName, new ArrayList<>(attributeList));
+		return new InstanceSchema(this.relationName, new ArrayList<>(this.attributeList));
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((this.attributeList == null) ? 0 : this.attributeList.hashCode());
+		result = prime * result + ((this.relationName == null) ? 0 : this.relationName.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		InstanceSchema other = (InstanceSchema) obj;
+		if (this.attributeList == null) {
+			if (other.attributeList != null) {
+				return false;
+			}
+		} else if (!this.attributeList.equals(other.attributeList)) {
+			return false;
+		}
+		if (this.relationName == null) {
+			if (other.relationName != null) {
+				return false;
+			}
+		} else if (!this.relationName.equals(other.relationName)) {
+			return false;
+		}
+		return true;
+	}
 }

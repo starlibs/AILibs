@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
-import org.api4.java.ai.ml.core.exception.DatasetTraceInstructionFailedException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -40,11 +39,9 @@ import com.google.common.collect.Range;
 
 import ai.libs.jaicore.basic.sets.CartesianProductComputationProblem;
 import ai.libs.jaicore.basic.sets.LDSRelationComputer;
-import ai.libs.jaicore.ml.core.dataset.cache.StratifiedSplitSubsetInstruction;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.LabelBasedStratifiedSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.StratifiedSampling;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
-import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -477,54 +474,6 @@ public class WekaUtil {
 		} catch (ClassCastException | AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException | DatasetCreationException e) {
 			throw new SplitFailedException(e);
 		}
-	}
-
-	/**
-	 * Creates a stratified split for a given {@link ReproducibleInstances} Object. The history will be updated to track the split.
-	 *
-	 * @param data
-	 *            - Input data
-	 * @param rand
-	 *            - random used to get a seed, which can be used and saved
-	 * @param portions
-	 *            - ratios to split
-	 * @return a list of {@link ReproducibleInstances}. For each of them the history will be updated to track the split
-	 * @throws InterruptedException
-	 * @throws SplitFailedException
-	 */
-	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final Random rand, final double portions) throws SplitFailedException, InterruptedException {
-		return getStratifiedSplit(data, rand.nextLong(), portions);
-	}
-
-	/**
-	 * Creates a StratifiedSplit for a given {@link ReproducibleInstances} Object. THe History will be updated to track the split.
-	 *
-	 * @param data
-	 *            - Input data
-	 * @param seed
-	 *            - random seed
-	 * @param portions
-	 *            - ratios to split
-	 * @return a List of {@link ReproducibleInstances}. For each of them the history will be updated to track the split
-	 * @throws InterruptedException
-	 * @throws SplitFailedException
-	 */
-	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final long seed, final double portions) throws SplitFailedException, InterruptedException {
-		int n = 2;
-		List<ReproducibleInstances> out = new ArrayList<>(n);
-		for (int i = 0; i < n; i++) {
-			ReproducibleInstances fold;
-			try {
-				fold = new ReproducibleInstances(data).reduceWithInstruction("stratified split", new StratifiedSplitSubsetInstruction(seed, portions), i);
-			} catch (ClassNotFoundException | DatasetTraceInstructionFailedException e) {
-				throw new SplitFailedException(e);
-			}
-			out.add(fold);
-		}
-		if (out.get(0).size() != Math.ceil(portions * data.size())) {
-			throw new IllegalStateException("First fold has " + out.get(0).size() + " instead of " + Math.ceil(portions * data.size()) + " items.");
-		}
-		return out;
 	}
 
 	public static List<File> getDatasetsInFolder(final File folder) throws IOException {

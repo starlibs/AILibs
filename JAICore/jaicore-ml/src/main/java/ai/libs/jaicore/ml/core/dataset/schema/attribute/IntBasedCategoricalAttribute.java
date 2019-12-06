@@ -133,4 +133,37 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		return this.domain.get((int) categoryId);
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((this.domain == null) ? 0 : this.domain.hashCode());
+		result = prime * result + this.numCategories;
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		IntBasedCategoricalAttribute other = (IntBasedCategoricalAttribute) obj;
+		if (this.domain == null) {
+			if (other.domain != null) {
+				return false;
+			}
+		} else if (!this.domain.equals(other.domain)) {
+			return false;
+		}
+		if (this.numCategories != other.numCategories) {
+			return false;
+		}
+		return true;
+	}
 }
