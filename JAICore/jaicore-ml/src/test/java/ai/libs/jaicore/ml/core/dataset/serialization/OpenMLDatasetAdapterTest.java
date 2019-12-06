@@ -18,7 +18,7 @@ public class OpenMLDatasetAdapterTest {
 
 	@Test
 	public void testReadingKRVKP() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException, ReconstructionException {
-		this.testReadAndReconstructibility(3, 3196,36, 2);
+		this.testReadAndReconstructibility(3, 3196, 36, 2);
 	}
 
 	@Test
@@ -42,9 +42,12 @@ public class OpenMLDatasetAdapterTest {
 
 	public ILabeledDataset<ILabeledInstance> read(final int id, final int expectedInstances, final int expectedAttributes, final int expectedClasses) throws DatasetDeserializationFailedException, InterruptedException {
 		ILabeledDataset<ILabeledInstance> data = OpenMLDatasetReader.deserializeDataset(id);
+		System.out.println(data.getInstanceSchema());
+
 		assertEquals("Incorrect number of instances.", expectedInstances, data.size());
 		assertEquals("Incorrect number of attributes.", expectedAttributes, data.getNumAttributes());
 		Set<Object> labels = data.stream().map(i -> i.getLabel()).collect(Collectors.toSet());
+		System.out.println(labels);
 		assertEquals("Incorrect number of class labels.", expectedClasses, labels.size());
 		return data;
 	}
@@ -53,8 +56,8 @@ public class OpenMLDatasetAdapterTest {
 		if (!(dataset instanceof IReconstructible)) {
 			fail("Dataset not reconstructible");
 		}
-		IReconstructible rDataset = (IReconstructible)dataset;
-		ILabeledDataset<?> reproducedDataset = (ILabeledDataset<?>)rDataset.getConstructionPlan().reconstructObject();
+		IReconstructible rDataset = (IReconstructible) dataset;
+		ILabeledDataset<?> reproducedDataset = (ILabeledDataset<?>) rDataset.getConstructionPlan().reconstructObject();
 		assertEquals(dataset.get(0), reproducedDataset.get(0)); // first check that the first instance is equal in both cases. This is of course covered by later assertions but simplifies debugging in case of failure
 		assertEquals(dataset.getInstanceSchema(), reproducedDataset.getInstanceSchema()); // check that schema are identically. Again, this is checked for convenience
 		assertEquals(rDataset, reproducedDataset); // full equality check

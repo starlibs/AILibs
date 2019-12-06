@@ -27,7 +27,19 @@ public class LabeledInstanceSchema extends InstanceSchema implements ILabeledIns
 
 	@Override
 	public LabeledInstanceSchema getCopy() {
-		return new LabeledInstanceSchema(getRelationName(), new ArrayList<>(getAttributeList()), labelAttribute);
+		return new LabeledInstanceSchema(this.getRelationName(), new ArrayList<>(this.getAttributeList()), this.labelAttribute);
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(super.toString());
+		sb.append("\n");
+		sb.append("Target: ");
+		sb.append(this.labelAttribute);
+
+		return sb.toString();
 	}
 
 }

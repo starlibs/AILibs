@@ -40,10 +40,10 @@ public class InstanceSchema implements IInstanceSchema {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("%attributes\n");
-		for (IAttribute t : this.attributeList) {
-			sb.append(t.toString() + "\n");
-		}
+
+		sb.append("Relation: " + this.relationName);
+		sb.append("\n");
+		sb.append("Features: " + this.attributeList);
 		return sb.toString();
 	}
 
@@ -104,4 +104,5 @@ public class InstanceSchema implements IInstanceSchema {
 		}
 		return true;
 	}
+
 }

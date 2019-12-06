@@ -21,7 +21,7 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 		try {
 			DataSetDescription dsd = connector.dataGet(openMLId);
 			File arffFile = connector.datasetGet(dsd);
-			Dataset ds = (Dataset)(new ArffDatasetAdapter().deserializeDataset(new FileDatasetDescriptor(arffFile), dsd.getDefault_target_attribute()));
+			Dataset ds = (Dataset) (new ArffDatasetAdapter().deserializeDataset(new FileDatasetDescriptor(arffFile), dsd.getDefault_target_attribute()));
 			ds.addInstruction(new ReconstructionInstruction(OpenMLDatasetReader.class.getMethod("deserializeDataset", int.class), openMLId));
 			return ds;
 		} catch (Exception e) {

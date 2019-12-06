@@ -81,7 +81,6 @@ public class ArffDatasetAdapterTest {
 	@Test
 	public void testParseDenseInstance() {
 		String testInstanceLine = generateDenseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE);
-		System.out.println(testInstanceLine);
 		Object parsedInstance = ArffDatasetAdapter.parseInstance(false, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
 		assertTrue("The returned instance is not in the expected dense instance format", parsedInstance instanceof List<?>);
 		Object[] parsedDenseInstance = (Object[]) ((List<?>) parsedInstance).get(0);

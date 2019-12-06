@@ -31,6 +31,7 @@ import ai.libs.jaicore.ml.core.dataset.SparseInstance;
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.StringAttribute;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffAttributeType;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffItem;
 
@@ -83,6 +84,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		} catch (Exception e) {
 			throw new DatasetDeserializationFailedException(e);
 		}
+
 		LOGGER.info("Successfully identified class attribute index {} for attribute with name {}", numAttributes, nameOfClassAttribute);
 		return this.deserializeDataset(datasetFile, numAttributes);
 	}
@@ -127,16 +129,17 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			metaData.put(K_RELATION_NAME, relationDescription);
 		}
 
+		System.out.println("Meta Data: " + metaData);
 		return metaData;
 	}
 
 	protected static IAttribute parseAttribute(final String line) throws UnsupportedAttributeTypeException {
-		String[] attributeDefinitionSplit = line.substring(EArffItem.ATTRIBUTE.getValue().length() + 1).split(SEPARATOR_ATTRIBUTE_DESCRIPTION);
-		String name = attributeDefinitionSplit[0].trim();
-		if (name.startsWith("'") && name.endsWith("'")) {
+		String attributeDefinitionSplit = line.substring(EArffItem.ATTRIBUTE.getValue().length() + 1);
+		String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION));
+		if ((name.startsWith("'") && name.endsWith("'")) || (name.startsWith("\"") && name.endsWith("\""))) {
 			name = name.substring(1, name.length() - 1);
 		}
-		String type = attributeDefinitionSplit[1].trim();
+		String type = attributeDefinitionSplit.substring(name.length() + 1);
 
 		EArffAttributeType attType;
 		String[] values = null;
@@ -156,9 +159,12 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		case REAL:
 		case INTEGER:
 			return new NumericAttribute(name);
+		case STRING:
+			return new StringAttribute(name);
 		case NOMINAL:
 			if (values != null) {
-				return new IntBasedCategoricalAttribute(name, Arrays.stream(values).map(String::trim).collect(Collectors.toList()));
+				return new IntBasedCategoricalAttribute(name,
+						Arrays.stream(values).map(String::trim).map(x -> (((x.startsWith("'") && x.endsWith("'")) || x.startsWith("\"") && x.endsWith("\"")) ? x.substring(1, x.length() - 1) : x)).collect(Collectors.toList()));
 			} else {
 				throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
 			}
@@ -183,7 +189,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			Object target = null;
 			int cI = 0;
 			for (int i = 0; i < lineSplit.length; i++) {
-				if (cI == targetIndex) {
+				if (i == targetIndex) {
 					target = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
 				} else {
 					parsedDenseInstance[cI++] = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
@@ -233,7 +239,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 			while ((line = br.readLine()) != null) {
 				if (!instanceReadMode) {
-					if (line.startsWith(EArffItem.RELATION.getValue())) {
+					if (line.toLowerCase().startsWith(EArffItem.RELATION.getValue())) {
 						// parse relation meta data
 						relationMetaData = parseRelation(line);
 						if (columnWithClassIndex >= 0) {
@@ -242,16 +248,17 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 							}
 							relationMetaData.put(K_CLASS_INDEX, columnWithClassIndex);
 						}
-					} else if (line.startsWith(EArffItem.ATTRIBUTE.getValue())) {
+					} else if (line.toLowerCase().startsWith(EArffItem.ATTRIBUTE.getValue())) {
 						// parse attribute meta data
 						attributes.add(parseAttribute(line));
-					} else if (line.startsWith(EArffItem.DATA.getValue())) {
+					} else if (line.toLowerCase().startsWith(EArffItem.DATA.getValue())) {
 						// switch to instance read mode
-						if (!line.trim().equals(EArffItem.DATA.getValue())) {
+						if (!line.toLowerCase().trim().equals(EArffItem.DATA.getValue())) {
 							throw new IllegalArgumentException(
 									"Error while parsing arff-file on line " + lineCounter + ": There is more in this line than just the data declaration " + EArffItem.DATA.getValue() + ", which is not supported");
 						}
 						instanceReadMode = true;
+						System.out.println("Switch to instance read mode.");
 						try {
 							dataset = createDataset(relationMetaData, attributes);
 						} catch (IllegalArgumentException e) {
@@ -282,6 +289,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			lineCounter++;
 			return dataset;
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new DatasetDeserializationFailedException("Could not deserialize dataset from ARFF file.", e);
 		}
 	}

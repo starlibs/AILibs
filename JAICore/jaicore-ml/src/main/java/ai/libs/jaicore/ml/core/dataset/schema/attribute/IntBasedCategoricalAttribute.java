@@ -120,6 +120,9 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		if (string.equals(MISSING_VALUE)) {
 			return null;
 		}
+		if ((string.startsWith("'") && string.endsWith("'")) || (string.startsWith("\"") && string.endsWith("\""))) {
+			trimmedString = trimmedString.substring(1, trimmedString.length() - 1);
+		}
 		return this.domain.indexOf(trimmedString);
 	}
 
