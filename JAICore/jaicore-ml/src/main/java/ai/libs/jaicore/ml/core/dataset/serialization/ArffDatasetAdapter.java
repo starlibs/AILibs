@@ -129,17 +129,16 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			metaData.put(K_RELATION_NAME, relationDescription);
 		}
 
-		System.out.println("Meta Data: " + metaData);
 		return metaData;
 	}
 
 	protected static IAttribute parseAttribute(final String line) throws UnsupportedAttributeTypeException {
 		String attributeDefinitionSplit = line.substring(EArffItem.ATTRIBUTE.getValue().length() + 1);
 		String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION));
+		String type = attributeDefinitionSplit.substring(name.length() + 1);
 		if ((name.startsWith("'") && name.endsWith("'")) || (name.startsWith("\"") && name.endsWith("\""))) {
 			name = name.substring(1, name.length() - 1);
 		}
-		String type = attributeDefinitionSplit.substring(name.length() + 1);
 
 		EArffAttributeType attType;
 		String[] values = null;
@@ -258,7 +257,6 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 									"Error while parsing arff-file on line " + lineCounter + ": There is more in this line than just the data declaration " + EArffItem.DATA.getValue() + ", which is not supported");
 						}
 						instanceReadMode = true;
-						System.out.println("Switch to instance read mode.");
 						try {
 							dataset = createDataset(relationMetaData, attributes);
 						} catch (IllegalArgumentException e) {
