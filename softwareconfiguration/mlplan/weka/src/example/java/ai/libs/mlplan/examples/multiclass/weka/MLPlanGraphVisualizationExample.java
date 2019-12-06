@@ -26,6 +26,7 @@ import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogr
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
+import javafx.embed.swing.JFXPanel;
 
 public class MLPlanGraphVisualizationExample {
 	public static void main(final String[] args) throws Exception {
@@ -34,9 +35,10 @@ public class MLPlanGraphVisualizationExample {
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */
-		MLPlan<IWekaClassifier> mlplan = new MLPlanWekaBuilder().withDataset(split.get(0)).build();
+		MLPlan<IWekaClassifier> mlplan = new MLPlanWekaBuilder().withNumCpus(6).withDataset(split.get(0)).build();
 
 		/* start visualization */
+		new JFXPanel();
 		AlgorithmVisualizationWindow window;
 		NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer = new NodeInfoAlgorithmEventPropertyComputer();
 		AlgorithmEventPropertyComputer comp = new NodeDisplayInfoAlgorithmEventPropertyComputer<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator()));

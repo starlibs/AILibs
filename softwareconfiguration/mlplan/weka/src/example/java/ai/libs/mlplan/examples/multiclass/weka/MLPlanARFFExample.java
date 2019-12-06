@@ -22,15 +22,15 @@ import weka.core.Instances;
 
 public class MLPlanARFFExample {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MLPlanARFFExample.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger("example");
 
 	public static void main(final String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
 		long start = System.currentTimeMillis();
-		File file = new File("testrsc/amazon.arff");
+		File file = new File("testrsc/waveform.arff");
 		Instances data = new Instances(new FileReader(file));
-		System.out.println("Data read. Time to create dataset object was " + (System.currentTimeMillis() - start) + "ms.");
+		LOGGER.info("Data read. Time to create dataset object was {}ms", System.currentTimeMillis() - start);
 		data.setClassIndex(data.numAttributes() - 1);
 		List<IWekaInstances> split = WekaUtil.getStratifiedSplit(new WekaInstances(data), 0, .7f);
 
@@ -38,8 +38,8 @@ public class MLPlanARFFExample {
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 		builder.withNodeEvaluationTimeOut(new TimeOut(30, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new TimeOut(10, TimeUnit.SECONDS));
-		builder.withTimeOut(new TimeOut(300, TimeUnit.SECONDS));
-		builder.withNumCpus(2);
+		builder.withTimeOut(new TimeOut(2, TimeUnit.MINUTES));
+		builder.withNumCpus(4);
 
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setPortionOfDataForPhase2(0f);

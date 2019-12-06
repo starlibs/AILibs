@@ -190,6 +190,7 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 		if (this.sample.size() != numSamplesTotal) {
 			throw new IllegalStateException("The sample has " + this.sample.size() + " elements while it should have " + numSamplesTotal);
 		}
+		Collections.shuffle(this.sample, this.random); // up to here, instances have been ordered by their class. We now mix instances of the classes again.
 	}
 
 	@Override

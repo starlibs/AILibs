@@ -133,6 +133,17 @@
   	<level value="warn" />
   </logger>
   
+  <!-- configuration for example classes -->
+  <logger name="example">
+    <level value="debug" />
+    
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
   <!-- configuration for ML-Plan Test logging -->
   <logger name="testedalgorithm">
     <level value="trace" />
