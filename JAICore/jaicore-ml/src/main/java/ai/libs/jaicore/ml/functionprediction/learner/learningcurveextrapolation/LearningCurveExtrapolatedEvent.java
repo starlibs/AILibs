@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation;
 
-import ai.libs.jaicore.basic.events.IEvent;
+import org.api4.java.common.event.IEvent;
 
 public class LearningCurveExtrapolatedEvent implements IEvent {
 	private final LearningCurveExtrapolator extrapolator;

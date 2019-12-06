@@ -9,12 +9,12 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.common.event.IEventEmitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
-import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.InvalidAnchorPointsException;
@@ -32,7 +32,7 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
  *
  * @author Lukas Brandt
  */
-public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator, ILoggingCustomizable, IEventEmitter {
+public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator, ILoggingCustomizable, IEventEmitter<Object> {
 
 	private Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
 

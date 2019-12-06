@@ -281,7 +281,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 				return;
 			}
 			this.shutdownInitialized = System.currentTimeMillis();
-			this.logger.info("Entering shutdown procedure for {}. Interrupting {} active threads.", this.getId(), this.activeThreads.size());
+			this.logger.info("Entering shutdown procedure for {}. Interrupting {} active threads: {}", this.getId(), this.activeThreads.size(), this.activeThreads);
 		}
 		for (Thread t : this.activeThreads) {
 			this.logger.debug("Triggering interrupt on {} as part of shutdown of {}", t, this.getId());

@@ -17,6 +17,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.common.event.IEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,14 +35,11 @@ import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.events.MCCVSplitEvaluationEvent;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
-import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolatedEvent;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
-import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 
 public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<?>>> extends AAlgorithm<ILabeledDataset<?>, L> implements ILoggingCustomizable {
@@ -174,7 +172,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			this.optimizingFactory.setLoggerName(this.loggerName + ".optimizingfactory");
 			this.optimizingFactory.registerListener(new Object() {
 				@Subscribe
-				public void receiveEventFromFactory(final AlgorithmEvent event) {
+				public void receiveEventFromFactory(final IEvent event) {
 					if (event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent) {
 						return;
 					}
@@ -323,17 +321,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	}
 
 	@Subscribe
-	public void receiveClassifierCreatedEvent(final SupervisedLearnerCreatedEvent e) {
-		this.post(e);
-	}
-
-	@Subscribe
-	public void receiveClassifierCreatedEvent(final LearningCurveExtrapolatedEvent e) {
-		this.post(e);
-	}
-
-	@Subscribe
-	public void receiveClassifierCreatedEvent(final MCCVSplitEvaluationEvent e) {
+	public void receiveEvent(final IEvent e) {
 		this.post(e);
 	}
 

@@ -7,6 +7,8 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.common.event.IEvent;
+import org.api4.java.common.event.IEventEmitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +17,6 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.jaicore.basic.events.IEvent;
-import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedObjectEvaluator;
 import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;

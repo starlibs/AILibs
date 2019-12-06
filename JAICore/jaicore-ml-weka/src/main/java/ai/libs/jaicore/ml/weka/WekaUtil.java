@@ -43,6 +43,8 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.Labe
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.StratifiedSampling;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
+import weka.attributeSelection.ASEvaluation;
+import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.MultipleClassifiersCombiner;
@@ -242,12 +244,24 @@ public class WekaUtil {
 	}
 
 	public static String getClassifierDescriptor(final Classifier c) {
+		return getDescriptor(c);
+	}
+
+	public static String getPreprocessorDescriptor(final ASSearch c) {
+		return getDescriptor(c);
+	}
+
+	public static String getPreprocessorDescriptor(final ASEvaluation c) {
+		return getDescriptor(c);
+	}
+
+	public static String getDescriptor(final Object o) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(c.getClass().getName());
-		if (c instanceof OptionHandler) {
+		sb.append(o.getClass().getName());
+		if (o instanceof OptionHandler) {
 			sb.append("- [");
 			int i = 0;
-			for (String s : ((OptionHandler) c).getOptions()) {
+			for (String s : ((OptionHandler) o).getOptions()) {
 				if (i++ > 0) {
 					sb.append(", ");
 				}

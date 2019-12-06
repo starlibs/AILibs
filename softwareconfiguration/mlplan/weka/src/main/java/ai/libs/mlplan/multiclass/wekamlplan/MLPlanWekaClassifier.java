@@ -20,11 +20,11 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.common.event.IEventEmitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.model.Component;
-import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.core.MLPlan;

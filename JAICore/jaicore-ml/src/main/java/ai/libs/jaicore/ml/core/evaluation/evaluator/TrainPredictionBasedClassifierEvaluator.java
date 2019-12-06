@@ -15,15 +15,23 @@ import org.api4.java.ai.ml.core.evaluation.execution.LearnerExecutionFailedExcep
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.common.event.IEventEmitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvaluator, ILoggingCustomizable {
+import com.google.common.eventbus.EventBus;
+
+import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluationCompletedEvent;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluationFailedEvent;
+
+public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvaluator, ILoggingCustomizable, IEventEmitter<Object> {
 
 	private Logger logger = LoggerFactory.getLogger(TrainPredictionBasedClassifierEvaluator.class);
 	private final IFixedDatasetSplitSetGenerator<ILabeledDataset<? extends ILabeledInstance>> splitGenerator;
 	private final SupervisedLearnerExecutor<ILabeledDataset<? extends ILabeledInstance>> executor = new SupervisedLearnerExecutor<>();
 	private final ISupervisedLearnerMetric metric;
+	private final EventBus eventBus = new EventBus();
+	private boolean hasListeners;
 
 	public TrainPredictionBasedClassifierEvaluator(final IFixedDatasetSplitSetGenerator<ILabeledDataset<?>> splitGenerator, final ISupervisedLearnerMetric metric) {
 		super();
@@ -44,7 +52,19 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 			for (int i = 0; i < n; i++) {
 				List<ILabeledDataset<? extends ILabeledInstance>> folds = splitSet.getFolds(i);
 				this.logger.debug("Executing learner on folds of sizes {} (train) and {} (test).", folds.get(0).size(), folds.get(1).size());
-				ILearnerRunReport report = this.executor.execute(learner, folds.get(0), folds.get(1));
+				ILearnerRunReport report;
+				long startExecution = System.currentTimeMillis();
+				try {
+					report = this.executor.execute(learner, folds.get(0), folds.get(1));
+				}
+				catch (LearnerExecutionFailedException e) {
+					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent(learner, folds.get(0), folds.get(1), e, (int)(System.currentTimeMillis() - startExecution)));
+					throw e;
+				}
+
+				if (this.hasListeners) {
+					this.eventBus.post(new TrainTestSplitEvaluationCompletedEvent(learner, report));
+				}
 				reports.add(report);
 				if (this.logger.isDebugEnabled()) {
 					List<?> gt = report.getPredictionDiffList().getGroundTruthAsList();
@@ -92,5 +112,11 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 		else {
 			this.logger.info("Learner executor {} is not configurable for logging, so not configuring it.", this.executor.getClass().getName());
 		}
+	}
+
+	@Override
+	public void registerListener(final Object listener) {
+		this.eventBus.register(listener);
+		this.hasListeners = true;
 	}
 }

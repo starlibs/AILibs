@@ -38,12 +38,12 @@ public class MLPlanARFFExample {
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 		builder.withNodeEvaluationTimeOut(new TimeOut(30, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new TimeOut(10, TimeUnit.SECONDS));
-		builder.withTimeOut(new TimeOut(2, TimeUnit.MINUTES));
+		builder.withTimeOut(new TimeOut(3, TimeUnit.MINUTES));
 		builder.withNumCpus(4);
 
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setPortionOfDataForPhase2(0f);
-		mlplan.setLoggerName("mlplan");
+		mlplan.setLoggerName("testedalgorithm");
 
 		try {
 			start = System.currentTimeMillis();

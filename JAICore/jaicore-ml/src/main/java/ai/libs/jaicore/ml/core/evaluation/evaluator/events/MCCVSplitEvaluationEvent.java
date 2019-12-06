@@ -1,8 +1,7 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator.events;
 
 import org.api4.java.ai.ml.classification.IClassifier;
-
-import ai.libs.jaicore.basic.events.IEvent;
+import org.api4.java.common.event.IEvent;
 
 public class MCCVSplitEvaluationEvent implements IEvent {
 	private final IClassifier classifier;

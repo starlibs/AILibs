@@ -38,7 +38,7 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<IWekaCla
 	private static final String FS_PREFERRED_COMPONENTS = "conf/mlpan-weka-preferenceList.txt";
 
 	/* Default configuration values. */
-	private static final String DEF_REQUESTED_HASCO_INTERFACE = "AbstractClassifier";
+	private static final String DEF_REQUESTED_HASCO_INTERFACE = "MLPipeline";
 	private static final String DEF_PREFERRED_COMPONENT_NAME_PREFIX = "resolveAbstractClassifierWith";
 
 	private static final WekaPipelineFactory DEF_CLASSIFIER_FACTORY = new WekaPipelineFactory();
