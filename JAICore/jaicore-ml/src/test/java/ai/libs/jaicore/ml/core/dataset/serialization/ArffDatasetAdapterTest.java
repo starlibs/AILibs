@@ -26,7 +26,7 @@ import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 public class ArffDatasetAdapterTest {
 
 	private static final String RELATION_NAME = "probing_nonan_noid";
-	private static final int CLASS_INDEX = 22;
+	private static final int CLASS_INDEX = 1;
 	private static final String RELATION_STRING = "@relation '" + RELATION_NAME + ": -C " + CLASS_INDEX + "'";
 
 	private static final String ATTRIBUTE_NAME = "myAtt";
@@ -42,8 +42,8 @@ public class ArffDatasetAdapterTest {
 	private static final double TEST_NUMERIC_VAL = 231.0;
 	private static final int TEST_CATEGORICAL_VAL = (int) TEST_CAT_ATT.deserializeAttributeValue(CATEGORICAL_VALUES.get(1));
 	private static final Object[] TEST_INSTANCE = { TEST_NUMERIC_VAL, TEST_CATEGORICAL_VAL };
-	private static final Object[] TEST_INSTANCE_WITH_MISSING_NUMERIC_VAL = { "?", TEST_CATEGORICAL_VAL };
-	private static final Object[] TEST_INSTANCE_WITH_MISSING_CATEGORICAL_VAL = { TEST_NUMERIC_VAL, "?"};
+	private static final Object[] TEST_INSTANCE_WITH_MISSING_NUMERIC_VAL = { null, TEST_CATEGORICAL_VAL };
+	private static final Object[] TEST_INSTANCE_WITH_MISSING_CATEGORICAL_VAL = { TEST_NUMERIC_VAL, null };
 	private static final List<IAttribute> TEST_ATTRIBUTES = Arrays.asList(TEST_NUM_ATT, TEST_CAT_ATT);
 
 	private static String generateDenseInstanceString(final List<IAttribute> attributes, final Object[] instanceArray) {
@@ -82,12 +82,17 @@ public class ArffDatasetAdapterTest {
 	public void testParseDenseInstance() {
 		String testInstanceLine = generateDenseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE);
 		System.out.println(testInstanceLine);
-		Object parsedInstance = ArffDatasetAdapter.parseInstance(false, TEST_ATTRIBUTES, testInstanceLine);
-		assertTrue("The returned instance is not in the expected dense instance format", parsedInstance instanceof Object[]);
-		Object[] parsedDenseInstance = (Object[]) parsedInstance;
-		assertEquals("The size of the array is varying.", TEST_INSTANCE.length, parsedDenseInstance.length);
+		Object parsedInstance = ArffDatasetAdapter.parseInstance(false, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
+		assertTrue("The returned instance is not in the expected dense instance format", parsedInstance instanceof List<?>);
+		Object[] parsedDenseInstance = (Object[]) ((List<?>) parsedInstance).get(0);
+		Object label = ((List<?>) parsedInstance).get(1);
+		assertEquals("The size of the array is varying.", TEST_INSTANCE.length, parsedDenseInstance.length + 1);
 		for (int i = 0; i < TEST_INSTANCE.length; i++) {
-			assertEquals("Attribute value at position " + i + " " + parsedDenseInstance[i] + " is not equal to the expected value " + TEST_INSTANCE[i], TEST_INSTANCE[i], parsedDenseInstance[i]);
+			if (i == CLASS_INDEX) {
+				assertEquals("Attribute value at position " + i + " " + label + " is not equal to the expected value " + TEST_INSTANCE[i], TEST_INSTANCE[i], label);
+			} else {
+				assertEquals("Attribute value at position " + i + " " + parsedDenseInstance[i] + " is not equal to the expected value " + TEST_INSTANCE[i], TEST_INSTANCE[i], parsedDenseInstance[i]);
+			}
 		}
 		assertTrue("Numeric attribute is not a Number object but of type " + parsedDenseInstance[0].getClass().getName(), parsedDenseInstance[0] instanceof Number);
 	}
@@ -95,7 +100,7 @@ public class ArffDatasetAdapterTest {
 	@Test
 	public void testParseSparseInstance() {
 		String testInstanceLine = generateSparseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE);
-		Object parsedInstance = ArffDatasetAdapter.parseInstance(true, TEST_ATTRIBUTES, testInstanceLine);
+		Object parsedInstance = ArffDatasetAdapter.parseInstance(true, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
 		assertTrue("The returned instance is not in the expected sparse instance format", parsedInstance instanceof Map);
 		@SuppressWarnings("unchecked")
 		Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
@@ -108,30 +113,29 @@ public class ArffDatasetAdapterTest {
 	@Test
 	public void testThatMissingNumericValuesAreNullInDenseInstances() {
 		String testInstanceLine = generateDenseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE_WITH_MISSING_NUMERIC_VAL);
-		System.out.println(testInstanceLine);
-		Object parsedInstance = ArffDatasetAdapter.parseInstance(false, TEST_ATTRIBUTES, testInstanceLine);
-		assertTrue("The returned instance is not in the expected dense instance format", parsedInstance instanceof Object[]);
-		Object[] parsedDenseInstance = (Object[]) parsedInstance;
+		Object parsedInstance = ArffDatasetAdapter.parseInstance(false, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
+		assertTrue("The returned instance is not in the expected dense instance format", parsedInstance instanceof List<?>);
+		Object[] parsedDenseInstance = (Object[]) ((List<?>) parsedInstance).get(0);
+		Object label = ((List<?>) parsedInstance).get(1);
 		assertNull(parsedDenseInstance[0]);
-		assertNotNull(parsedDenseInstance[1]);
+		assertNotNull(label);
 	}
 
 	@Test
 	public void testThatMissingCategoricalValuesAreNullInDenseInstances() {
 		String testInstanceLine = generateDenseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE_WITH_MISSING_CATEGORICAL_VAL);
-		System.out.println(testInstanceLine);
-		Object parsedInstance = ArffDatasetAdapter.parseInstance(false, TEST_ATTRIBUTES, testInstanceLine);
-		assertTrue("The returned instance is not in the expected dense instance format", parsedInstance instanceof Object[]);
-		Object[] parsedDenseInstance = (Object[]) parsedInstance;
-		assertNull(parsedDenseInstance[1]);
+		Object parsedInstance = ArffDatasetAdapter.parseInstance(false, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
+		assertTrue("The returned instance is not in the expected dense instance format", parsedInstance instanceof List<?>);
+		Object[] parsedDenseInstance = (Object[]) ((List<?>) parsedInstance).get(0);
+		Object label = ((List<?>) parsedInstance).get(1);
+		assertNull(label);
 		assertNotNull(parsedDenseInstance[0]);
 	}
 
 	@Test
 	public void testThatMissingNumericValuesAreNullInSparseInstances() {
 		String testInstanceLine = generateSparseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE_WITH_MISSING_NUMERIC_VAL);
-		System.out.println(testInstanceLine);
-		Object parsedInstance = ArffDatasetAdapter.parseInstance(true, TEST_ATTRIBUTES, testInstanceLine);
+		Object parsedInstance = ArffDatasetAdapter.parseInstance(true, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
 		@SuppressWarnings("unchecked")
 		Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
 		assertNull(parsedSparseInstance.get(0));
@@ -141,8 +145,7 @@ public class ArffDatasetAdapterTest {
 	@Test
 	public void testThatMissingCategoricalValuesAreNullInSparseInstances() {
 		String testInstanceLine = generateSparseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE_WITH_MISSING_CATEGORICAL_VAL);
-		System.out.println(testInstanceLine);
-		Object parsedInstance = ArffDatasetAdapter.parseInstance(true, TEST_ATTRIBUTES, testInstanceLine);
+		Object parsedInstance = ArffDatasetAdapter.parseInstance(true, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
 		@SuppressWarnings("unchecked")
 		Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
 		assertNull(parsedSparseInstance.get(1));

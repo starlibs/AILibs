@@ -172,6 +172,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			throw new IllegalArgumentException("Cannot create object for commented line!");
 		}
 		String[] lineSplit = line.split(",");
+		System.out.println(Arrays.toString(lineSplit));
 
 		if (!sparseData) {
 			if (lineSplit.length != attributes.size()) {
@@ -179,7 +180,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						+ lineSplit.length + ". Values: " + Arrays.toString(lineSplit));
 			}
 
-			Object[] parsedDenseInstance = new Object[lineSplit.length];
+			Object[] parsedDenseInstance = new Object[lineSplit.length - 1];
 			Object target = null;
 			int cI = 0;
 			for (int i = 0; i < lineSplit.length; i++) {
@@ -189,6 +190,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 					parsedDenseInstance[cI++] = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
 				}
 			}
+
 			return Arrays.asList(parsedDenseInstance, target);
 		} else {
 			Map<Integer, Object> parsedSparseInstance = new HashMap<>();
@@ -264,7 +266,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 					if (!line.isEmpty() && !line.startsWith("%")) { // ignore empty and comment lines
 						Object parsedInstance = parseInstance(sparseMode, attributes, relationMetaData.getAsInt(K_CLASS_INDEX), line);
 						ILabeledInstance newI;
-						if (parsedInstance instanceof Object[]) {
+						if (parsedInstance instanceof List<?>) {
 							newI = new DenseInstance((Object[]) ((List<?>) parsedInstance).get(0), ((List<?>) parsedInstance).get(1));
 						} else if (parsedInstance instanceof Map) {
 							@SuppressWarnings("unchecked")

@@ -72,7 +72,7 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 
 	@Override
 	public String serializeAttributeValue(final Object value) {
-		if (value instanceof String && value.equals("?")) {
+		if (value == null) {
 			return "?";
 		}
 		return this.getAttributeValueAsDouble(value) + "";

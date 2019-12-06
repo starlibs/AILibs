@@ -12,6 +12,8 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 	 */
 	private static final long serialVersionUID = 3727153881173459843L;
 
+	private static final String MISSING_VALUE = "?";
+
 	private final List<String> domain;
 	private final int numCategories;
 
@@ -78,7 +80,7 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 	@Override
 	public ICategoricalAttributeValue getAsAttributeValue(final Object object) {
 		if (this.isValidValue(object)) {
-			return new IntBasedCategoricalAttributeValue(this, (int)object);
+			return new IntBasedCategoricalAttributeValue(this, (int) object);
 		} else {
 			return null;
 		}
@@ -103,16 +105,19 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 
 	@Override
 	public String serializeAttributeValue(final Object value) {
+		if (value == null) {
+			return MISSING_VALUE;
+		}
 		if (!(value instanceof Integer)) {
 			throw new IllegalArgumentException("Can only serialize the integer representation of a category.");
 		}
-		return value.toString();
+		return this.domain.get((Integer) value);
 	}
 
 	@Override
 	public Integer deserializeAttributeValue(final String string) {
 		String trimmedString = string.trim();
-		if (string.equals("?")) {
+		if (string.equals(MISSING_VALUE)) {
 			return null;
 		}
 		return this.domain.indexOf(trimmedString);
@@ -125,7 +130,7 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 
 	@Override
 	public String getLabelOfCategory(final Number categoryId) {
-		return this.domain.get((int)categoryId);
+		return this.domain.get((int) categoryId);
 	}
 
 }
