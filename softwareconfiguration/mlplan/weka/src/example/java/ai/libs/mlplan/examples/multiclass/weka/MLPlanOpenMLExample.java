@@ -9,7 +9,10 @@ import java.util.concurrent.TimeUnit;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.TimeOut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
@@ -28,34 +31,37 @@ import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
  */
 public class MLPlanOpenMLExample {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger("example");
+
 	public static void main(final String[] args) throws Exception {
 
-		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(3);
+		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(60);
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 30 seconds */
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 		builder.withNodeEvaluationTimeOut(new TimeOut(10, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.SECONDS));
-		builder.withTimeOut(new TimeOut(30, TimeUnit.SECONDS));
-		builder.withNumCpus(1);
+		builder.withTimeOut(new TimeOut(2, TimeUnit.MINUTES));
+		builder.withNumCpus(4);
 
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setRandomSeed(1);
 		mlplan.setPortionOfDataForPhase2(.3f);
+		mlplan.setLoggerName("mlplan");
 
 		try {
 			long start = System.currentTimeMillis();
 			IWekaClassifier optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
-			System.out.println("Finished build of the classifier. Training time was " + trainTime + "s.");
+			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
 
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor<ILabeledDataset<?>> executor = new SupervisedLearnerExecutor<>();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			System.out.println("Error Rate of the solution produced by ML-Plan: " + ClassifierMetric.MEAN_ERRORRATE.evaluateToDouble(Arrays.asList(report)));
+			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}", ClassifierMetric.MEAN_ERRORRATE.evaluateToDouble(Arrays.asList(report)));
 		} catch (NoSuchElementException e) {
-			System.out.println("Building the classifier failed: " + e.getMessage());
+			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}
 	}
 }

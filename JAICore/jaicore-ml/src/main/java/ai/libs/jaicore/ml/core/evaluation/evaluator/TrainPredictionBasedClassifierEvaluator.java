@@ -44,9 +44,27 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 			for (int i = 0; i < n; i++) {
 				List<ILabeledDataset<? extends ILabeledInstance>> folds = splitSet.getFolds(i);
 				this.logger.debug("Executing learner on folds of sizes {} (train) and {} (test).", folds.get(0).size(), folds.get(1).size());
-				reports.add(this.executor.execute(learner, folds.get(0), folds.get(1)));
+				ILearnerRunReport report = this.executor.execute(learner, folds.get(0), folds.get(1));
+				reports.add(report);
+				if (this.logger.isDebugEnabled()) {
+					List<?> gt = report.getPredictionDiffList().getGroundTruthAsList();
+					List<?> pr = report.getPredictionDiffList().getPredictionsAsList();
+					int m = gt.size();
+					int mistakes = 0;
+					for (int j = 0; j < m; j++) {
+						if (!pr.get(j).equals(gt.get(j))) {
+							mistakes ++;
+						}
+					}
+					if (m - mistakes == 0) {
+						this.logger.warn("0 correct predictions seems suspicious. Here are the vectors: \n\tGround truth: {}\n\tPredictions: {}", report.getPredictionDiffList().getGroundTruthAsList(), report.getPredictionDiffList().getPredictionsAsList());
+					}
+					this.logger.debug("Execution completed. Classifier predicted {}/{} test instances correctly.", (m-mistakes), m);
+				}
 			}
-			return this.metric.evaluate(reports);
+			double score = this.metric.evaluate(reports);
+			this.logger.info("Computed value for metric {} of {} executions. Metric value is: {}", this.metric, n, score);
+			return score;
 		} catch (LearnerExecutionFailedException | SplitFailedException e) {
 			throw new ObjectEvaluationFailedException(e);
 		}

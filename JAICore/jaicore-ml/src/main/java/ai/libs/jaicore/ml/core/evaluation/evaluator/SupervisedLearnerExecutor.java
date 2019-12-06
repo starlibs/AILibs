@@ -44,7 +44,12 @@ public class SupervisedLearnerExecutor<D extends ILabeledDataset<? extends ILabe
 		int numTestInstances = test.size();
 		PredictionDiff<Object> diff = new PredictionDiff<>();
 		for (int j = 0; j < numTestInstances; j++) {
-			diff.addPair(predictions.get(j).getPrediction(), test.get(j).getLabel());
+			Object prediction = predictions.get(j).getPrediction();
+			Object groundTruth = test.get(j).getLabel();
+			if (prediction.getClass() != groundTruth.getClass()) {
+				throw new IllegalStateException("Type of ground truth " + groundTruth + " (" + groundTruth.getClass().getName() + ") and prediction " + prediction +" (" + prediction.getClass().getName() + ") do not match!");
+			}
+			diff.addPair(prediction, groundTruth);
 		}
 		return new LearnerRunReport(trainingTime, (int) (endTestTime - start), diff);
 	}

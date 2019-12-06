@@ -25,8 +25,16 @@ public class WekaInstance extends ElementDecorator<Instance> implements IWekaIns
 	}
 
 	@Override
-	public String getLabel() {
-		return WekaUtil.getClassName(this.getElement());
+	public Number getLabel() {
+		boolean isInteger = this.getElement().classAttribute().isNominal();
+		double classValue = this.getElement().classValue();
+		if (isInteger) {
+			int intClassValue = (int)classValue;
+			return intClassValue;
+		}
+		else {
+			return classValue;
+		}
 	}
 
 	@Override

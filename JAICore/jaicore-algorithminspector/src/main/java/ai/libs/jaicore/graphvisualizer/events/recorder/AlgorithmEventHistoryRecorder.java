@@ -41,6 +41,10 @@ public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
 		this.eventPropertyComputers = eventPropertyComputers;
 	}
 
+	public void addPropertyComputer(final AlgorithmEventPropertyComputer computer) {
+		this.eventPropertyComputers.add(computer);
+	}
+
 	@Subscribe
 	@Override
 	public void handleAlgorithmEvent(final AlgorithmEvent algorithmEvent) {
