@@ -158,4 +158,12 @@ public class ArffDatasetAdapterTest {
 		ArffDatasetAdapter.readDataset(datasetFile);
 	}
 
+	@Test
+	public void testReadingAmazonDatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
+		File datasetFile = new File("../../../datasets/classification/multi-class/amazon.arff");
+		long startTime = System.currentTimeMillis();
+		ArffDatasetAdapter.readDataset(datasetFile);
+		System.out.println((System.currentTimeMillis() - startTime) + "ms");
+	}
+
 }

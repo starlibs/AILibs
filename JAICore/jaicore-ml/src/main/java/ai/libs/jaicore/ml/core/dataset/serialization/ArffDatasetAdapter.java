@@ -3,9 +3,9 @@ package ai.libs.jaicore.ml.core.dataset.serialization;
 import java.io.BufferedReader;
 import java.io.File;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -207,7 +207,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		if (!relationMetaData.containsKey(K_CLASS_INDEX) || relationMetaData.getAsInt(K_CLASS_INDEX) < 0) {
 			throw new IllegalArgumentException("No (valid) class index given!");
 		}
-		List<IAttribute> attributeList = new LinkedList<>(attributes);
+		List<IAttribute> attributeList = new ArrayList<>(attributes);
 		IAttribute labelAttribute = attributeList.remove((int) relationMetaData.getAsInt(K_CLASS_INDEX));
 		ILabeledInstanceSchema schema = new LabeledInstanceSchema(relationMetaData.getAsString(K_RELATION_NAME), attributeList, labelAttribute);
 		return new Dataset(schema);
@@ -225,7 +225,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		try (BufferedReader br = Files.newBufferedReader(datasetFile.toPath())) {
 			ILabeledDataset<ILabeledInstance> dataset = null;
 			KVStore relationMetaData = new KVStore();
-			List<IAttribute> attributes = new LinkedList<>();
+			List<IAttribute> attributes = new ArrayList<>();
 
 			boolean instanceReadMode = false;
 			String line;
