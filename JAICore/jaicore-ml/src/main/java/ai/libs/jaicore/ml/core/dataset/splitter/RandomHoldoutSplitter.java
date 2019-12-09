@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.core.dataset.splitter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -95,6 +96,7 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 					subSampler.setSampleSize(sampleSize);
 					logger.debug("Computing fold of size {}/{}, i.e. a portion of {}", sampleSize, totalItems, portion);
 					D fold = subSampler.call();
+					Collections.shuffle(fold, new Random(seed));
 					addReconstructionInfo(data, fold, seed, numFold, portions);
 					folds.add(fold);
 					copy = subSampler.getComplementOfLastSample();
@@ -102,6 +104,7 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 				}
 				else {
 					logger.debug("This is the last fold, which exhausts the complete original data, so no more sampling will be conducted.");
+					Collections.shuffle(copy, new Random(seed));
 					folds.add(copy);
 					addReconstructionInfo(data, copy, seed, numFold, portions);
 				}
