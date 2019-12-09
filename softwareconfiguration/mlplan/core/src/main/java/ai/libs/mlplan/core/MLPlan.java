@@ -18,6 +18,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.common.event.IEvent;
+import org.api4.java.common.reconstruction.IReconstructible;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,7 @@ import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
+import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
@@ -72,12 +74,14 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 		if (builder.getRequestedInterface() == null || builder.getRequestedInterface().isEmpty()) {
 			throw new IllegalArgumentException("No requested HASCO interface defined!");
 		}
+
 		/* store builder and data for main algorithm */
 		this.builder = builder;
 		Objects.requireNonNull(this.getInput());
 		if (this.getInput().isEmpty()) {
 			throw new IllegalArgumentException("Cannot run ML-Plan on empty dataset.");
 		}
+		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(this.getInput());
 	}
 
 	@Override
@@ -93,6 +97,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			}
 
 			/* set up exact splits */
+			ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(this.getInput());
 			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
 			this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%).", this.getInput().size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2), MathExt.round(dataPortionUsedForSelection, 2));
 			ILabeledDataset<?> dataShownToSearch;
@@ -112,6 +117,13 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			}
 			if (dataShownToSearch.isEmpty()) {
 				throw new IllegalStateException("Cannot search on no data.");
+			}
+
+			/* check that reconstructibility is preserved */
+			if (this.getInput() instanceof IReconstructible) {
+				if (((IReconstructible)dataShownToSearch).getConstructionPlan().getInstructions().isEmpty()) {
+					throw new IllegalStateException("Reconstructibility instructions have been lost in search/selection-split!");
+				}
 			}
 
 			/* dynamically compute blow-ups */

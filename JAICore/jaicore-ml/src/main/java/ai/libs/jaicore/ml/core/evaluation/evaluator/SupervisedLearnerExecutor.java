@@ -16,26 +16,31 @@ public class SupervisedLearnerExecutor<D extends ILabeledDataset<? extends ILabe
 
 	@Override
 	public ILearnerRunReport execute(final ISupervisedLearner<? extends ILabeledInstance, D> learner, final D train, final D test) throws LearnerExecutionFailedException {
+		long startTrainTime = System.currentTimeMillis();
 		try {
-			long startTrainTime = System.currentTimeMillis();
 			learner.fit(train);
-			long endTrainTime = System.currentTimeMillis();
-			return this.getReportForTrainedLearner(learner, test, (int) (endTrainTime - startTrainTime));
-		} catch (PredictionException | InterruptedException | TrainingException e) {
-			throw new LearnerExecutionFailedException(e);
+		} catch (TrainingException | InterruptedException e) {
+			throw new LearnerExecutionFailedException(startTrainTime, System.currentTimeMillis(), e);
+		}
+		long endTrainTime = System.currentTimeMillis();
+		try {
+			return this.getReportForTrainedLearner(learner, train, test, startTrainTime, endTrainTime);
+		} catch (PredictionException | InterruptedException e) {
+			throw new LearnerExecutionFailedException(startTrainTime, endTrainTime, endTrainTime, System.currentTimeMillis(), e);
 		}
 	}
 
 	@Override
 	public ILearnerRunReport execute(final ISupervisedLearner<? extends ILabeledInstance, D> learner, final D test) throws LearnerExecutionFailedException {
+		long startTestTime = System.currentTimeMillis();
 		try {
-			return this.getReportForTrainedLearner(learner, test, -1);
+			return this.getReportForTrainedLearner(learner, null, test, -1, -1);
 		} catch (PredictionException | InterruptedException e) {
-			throw new LearnerExecutionFailedException(e);
+			throw new LearnerExecutionFailedException(-1, -1, startTestTime, System.currentTimeMillis(), e);
 		}
 	}
 
-	private ILearnerRunReport getReportForTrainedLearner(final ISupervisedLearner<? extends ILabeledInstance, D> learner, final D test, final int trainingTime) throws PredictionException, InterruptedException {
+	private ILearnerRunReport getReportForTrainedLearner(final ISupervisedLearner<? extends ILabeledInstance, D> learner, final D train, final D test, final long trainingStartTime, final long trainingEndTime) throws PredictionException, InterruptedException {
 		long start = System.currentTimeMillis();
 		List<? extends IPrediction> predictions = learner.predict(test).getPredictions();
 		long endTestTime = System.currentTimeMillis();
@@ -51,6 +56,6 @@ public class SupervisedLearnerExecutor<D extends ILabeledDataset<? extends ILabe
 			}
 			diff.addPair(prediction, groundTruth);
 		}
-		return new LearnerRunReport(trainingTime, (int) (endTestTime - start), diff);
+		return new LearnerRunReport(train, test, trainingStartTime, trainingEndTime, start, endTestTime, diff);
 	}
 }

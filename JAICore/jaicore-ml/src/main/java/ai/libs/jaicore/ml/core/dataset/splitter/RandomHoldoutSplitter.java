@@ -15,9 +15,12 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.common.reconstruction.IReconstructible;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
+import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.SimpleRandomSampling;
 
 /**
@@ -58,42 +61,75 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 		}
 	}
 
-	@Override
-	public List<D> split(final D data, final Random random) throws SplitFailedException, InterruptedException {
-		this.logger.info("Creating new split with {} folds.", this.portions.length);
-		List<D> folds = new ArrayList<>(this.portions.length);
+	public static <D extends IDataset<?>> List<D> createSplit(final D data, final long seed, final double... portions) throws SplitFailedException, InterruptedException {
+		return createSplit(data, seed, LoggerFactory.getLogger(RandomHoldoutSplitter.class), portions);
+	}
+
+	/**
+	 * This static method exists to enable reproducibility.
+	 *
+	 * @param <D>
+	 * @param data
+	 * @param seed
+	 * @param logger
+	 * @param portions
+	 * @return
+	 * @throws SplitFailedException
+	 * @throws InterruptedException
+	 */
+	public static <D extends IDataset<?>> List<D> createSplit(final D data, final long seed, final Logger logger, final double... portions) throws SplitFailedException, InterruptedException {
+		logger.info("Creating new split with {} folds.", portions.length);
+		List<D> folds = new ArrayList<>(portions.length);
 
 		/* create sub-indices for the respective folds */
 		int totalItems = data.size();
 		try {
 			D copy = (D)data.createCopy();
 			double remainingMass = 1;
-			for (int i = 0; i < this.portions.length; i++) {
-				double portion = i < this.portions.length ? this.portions[i] : remainingMass;
+			for (int numFold = 0; numFold < portions.length; numFold++) {
+				double portion = numFold < portions.length ? portions[numFold] : remainingMass;
 				remainingMass -= portion;
 				if (remainingMass > 0) {
-					SimpleRandomSampling<D> subSampler = new SimpleRandomSampling<>(random, copy);
+					SimpleRandomSampling<D> subSampler = new SimpleRandomSampling<>(new Random(seed), copy);
 					int sampleSize = (int)Math.round(portion * totalItems);
 					subSampler.setSampleSize(sampleSize);
-					this.logger.debug("Computing fold of size {}/{}, i.e. a portion of {}", sampleSize, totalItems, portion);
+					logger.debug("Computing fold of size {}/{}, i.e. a portion of {}", sampleSize, totalItems, portion);
 					D fold = subSampler.call();
+					addReconstructionInfo(data, fold, seed, numFold, portions);
 					folds.add(fold);
 					copy = subSampler.getComplementOfLastSample();
-					this.logger.debug("Reduced the data by the fold. Remaining items: {}", copy.size());
+					logger.debug("Reduced the data by the fold. Remaining items: {}", copy.size());
 				}
 				else {
-					this.logger.debug("This is the last fold, which exhausts the complete original data, so no more sampling will be conducted.");
+					logger.debug("This is the last fold, which exhausts the complete original data, so no more sampling will be conducted.");
 					folds.add(copy);
+					addReconstructionInfo(data, copy, seed, numFold, portions);
 				}
 			}
 		} catch (AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException | DatasetCreationException e) {
 			throw new SplitFailedException(e);
 		}
-		if (folds.size() != this.portions.length) {
-			throw new IllegalStateException("Needed to generate " + this.portions.length + " folds, but only produced " + folds.size());
+		if (folds.size() != portions.length) {
+			throw new IllegalStateException("Needed to generate " + portions.length + " folds, but only produced " + folds.size());
 		}
 		return folds;
+	}
 
+	private static void addReconstructionInfo(final IDataset<?> data, final IDataset<?> fold, final long seed, final int numFold, final double[] portions) {
+		if (data instanceof IReconstructible) { // make the data in the folds reconstructible
+			ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(data);
+			((IReconstructible) data).getConstructionPlan().getInstructions().forEach(inst -> ((IReconstructible)fold).addInstruction(inst));
+			((IReconstructible) fold).addInstruction(new ReconstructionInstruction(RandomHoldoutSplitter.class.getName(), "getFoldOfSplit", new Class<?>[] {IDataset.class, long.class, int.class, double[].class}, new Object[] {"this", seed, numFold, portions}));
+		}
+	}
+
+	public static <D extends IDataset<?>> D getFoldOfSplit(final D data, final long seed, final int fold, final double...portions) throws SplitFailedException, InterruptedException {
+		return createSplit(data, seed, portions).get(fold);
+	}
+
+	@Override
+	public List<D> split(final D data, final Random random) throws SplitFailedException, InterruptedException {
+		return createSplit(data, this.rand.nextLong(), this.portions);
 	}
 
 	@Override

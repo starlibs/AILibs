@@ -122,7 +122,7 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 				// Train classifier on subsample.
 				this.logger.debug("Running classifier with {} data points.", this.anchorPoints[i]);
 				ILearnerRunReport report = learnerExecutor.execute(this.learner, subsampledDataset, testInstances);
-				this.trainingTimes[i] = report.getTrainingTimeInMS();
+				this.trainingTimes[i] = (int)(report.getTrainEndTime() - report.getTrainStartTime());
 
 				// Measure accuracy of the trained learner on test split.
 				this.yValues[i] = metric.loss(report.getPredictionDiffList());

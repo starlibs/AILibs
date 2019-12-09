@@ -10,7 +10,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import ai.libs.jaicore.basic.reproduction.ReconstructionInstruction;
+import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
 import ai.libs.jaicore.ml.core.dataset.Dataset;
 
 public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset<ILabeledInstance>> {

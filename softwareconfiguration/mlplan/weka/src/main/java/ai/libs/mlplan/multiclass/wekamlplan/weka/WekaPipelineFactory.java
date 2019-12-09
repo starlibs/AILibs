@@ -11,16 +11,16 @@ import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
+import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.mlplan.core.ILearnerFactory;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
-import weka.classifiers.MultipleClassifiersCombiner;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.supportVector.Kernel;
+import weka.classifiers.meta.Stacking;
 import weka.core.OptionHandler;
 
 public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
@@ -56,7 +56,7 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 				for (Entry<String, ComponentInstance> reqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
 					switch (reqI.getKey()) {
 					case "W":
-						if (c instanceof SingleClassifierEnhancer) {
+						if (c instanceof SingleClassifierEnhancer) { // suppose that this defines a base classifier
 							((SingleClassifierEnhancer) c).setClassifier(this.getComponentInstantiation(reqI.getValue()).getClassifier());
 						} else {
 							this.logger.error("Got required interface W but classifier {} is not single classifier enhancer", c.getClass().getName());
@@ -71,12 +71,13 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 							this.logger.error("Got required interface K but classifier {} is not SMO", c.getClass().getName());
 						}
 						break;
-					case "B":
-						List<IWekaClassifier> baseLearnerList = this.getListOfBaseLearners(reqI.getValue());
-						if (c instanceof MultipleClassifiersCombiner) {
-							((MultipleClassifiersCombiner) c).setClassifiers(baseLearnerList.toArray(new Classifier[0]));
-						} else {
-							this.logger.error("Got required interface B but classifier {} is not MultipleClassifiersCombiner", c.getClass().getName());
+					case "B": // suppose that this defines a base classifier
+						Classifier baseClassifier = this.getComponentInstantiation(reqI.getValue()).getClassifier();
+						if (c instanceof Stacking) {
+							((Stacking) c).setClassifiers(new Classifier[] {baseClassifier});
+						}
+						else {
+							this.logger.error("Unsupported option B for classifier {}", c.getClass().getName());
 						}
 						break;
 					default:

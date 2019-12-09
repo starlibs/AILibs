@@ -1,9 +1,8 @@
-package ai.libs.mlplan.multiclass.wekamlplan.weka.model;
+package ai.libs.jaicore.ml.weka.classification.pipeline;
 
 import java.io.Serializable;
 
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.mlplan.multiclass.wekamlplan.sophisticated.FeaturePreprocessor;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
@@ -18,7 +17,7 @@ public class SuvervisedFilterPreprocessor implements Serializable, FeaturePrepro
 	private final AttributeSelection selector;
 	private boolean prepared;
 
-	public SuvervisedFilterPreprocessor(ASSearch searcher, ASEvaluation evaluator) {
+	public SuvervisedFilterPreprocessor(final ASSearch searcher, final ASEvaluation evaluator) {
 		super();
 		this.searcher = searcher;
 		this.evaluator = evaluator;
@@ -26,8 +25,8 @@ public class SuvervisedFilterPreprocessor implements Serializable, FeaturePrepro
 		this.selector.setSearch(searcher);
 		this.selector.setEvaluator(evaluator);
 	}
-	
-	public SuvervisedFilterPreprocessor(ASSearch searcher, ASEvaluation evaluator, AttributeSelection selector) {
+
+	public SuvervisedFilterPreprocessor(final ASSearch searcher, final ASEvaluation evaluator, final AttributeSelection selector) {
 		super();
 		this.searcher = searcher;
 		this.evaluator = evaluator;
@@ -35,41 +34,48 @@ public class SuvervisedFilterPreprocessor implements Serializable, FeaturePrepro
 	}
 
 	public ASSearch getSearcher() {
-		return searcher;
+		return this.searcher;
 	}
 
 	public ASEvaluation getEvaluator() {
-		return evaluator;
+		return this.evaluator;
 	}
 
 	public AttributeSelection getSelector() {
-		return selector;
+		return this.selector;
 	}
-	
-	public void prepare(Instances data) throws Exception {
-		selector.SelectAttributes(data);
-		prepared = true;
+
+	@Override
+	public void prepare(final Instances data) throws Exception {
+		this.selector.SelectAttributes(data);
+		this.prepared = true;
 	}
-	
-	public Instance apply(Instance data) throws Exception {
-		if (!prepared)
+
+	@Override
+	public Instance apply(final Instance data) throws Exception {
+		if (!this.prepared) {
 			throw new IllegalStateException("Cannot apply preprocessor before it has been prepared!");
-		Instance inst = selector.reduceDimensionality(data);
-		if (inst.dataset().classIndex() >= 0)
+		}
+		Instance inst = this.selector.reduceDimensionality(data);
+		if (inst.dataset().classIndex() >= 0) {
 			inst = WekaUtil.removeClassAttribute(inst);
+		}
 		for (int i = 0; i < inst.dataset().numAttributes(); i++) {
 			Attribute a = inst.dataset().attribute(i);
 			inst.dataset().renameAttribute(a, this.getClass().getSimpleName() + "_" + a.name());
 		}
 		return inst;
 	}
-	
-	public Instances apply(Instances data) throws Exception {
-		if (!prepared)
+
+	@Override
+	public Instances apply(final Instances data) throws Exception {
+		if (!this.prepared) {
 			throw new IllegalStateException("Cannot apply preprocessor before it has been prepared!");
-		Instances inst = selector.reduceDimensionality(data);
-		if (inst.classIndex() >= 0)
+		}
+		Instances inst = this.selector.reduceDimensionality(data);
+		if (inst.classIndex() >= 0) {
 			inst = WekaUtil.removeClassAttribute(inst);
+		}
 		for (int i = 0; i < inst.numAttributes(); i++) {
 			Attribute a = inst.attribute(i);
 			inst.renameAttribute(a, this.getClass().getSimpleName() + "_" + a.name());
@@ -81,44 +87,54 @@ public class SuvervisedFilterPreprocessor implements Serializable, FeaturePrepro
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((evaluator == null) ? 0 : evaluator.hashCode());
-		result = prime * result + ((searcher == null) ? 0 : searcher.hashCode());
-		result = prime * result + ((selector == null) ? 0 : selector.hashCode());
+		result = prime * result + ((this.evaluator == null) ? 0 : this.evaluator.hashCode());
+		result = prime * result + ((this.searcher == null) ? 0 : this.searcher.hashCode());
+		result = prime * result + ((this.selector == null) ? 0 : this.selector.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		SuvervisedFilterPreprocessor other = (SuvervisedFilterPreprocessor) obj;
-		if (evaluator == null) {
-			if (other.evaluator != null)
+		if (this.evaluator == null) {
+			if (other.evaluator != null) {
 				return false;
-		} else if (!evaluator.equals(other.evaluator))
+			}
+		} else if (!this.evaluator.equals(other.evaluator)) {
 			return false;
-		if (searcher == null) {
-			if (other.searcher != null)
+		}
+		if (this.searcher == null) {
+			if (other.searcher != null) {
 				return false;
-		} else if (!searcher.equals(other.searcher))
+			}
+		} else if (!this.searcher.equals(other.searcher)) {
 			return false;
-		if (selector == null) {
-			if (other.selector != null)
+		}
+		if (this.selector == null) {
+			if (other.selector != null) {
 				return false;
-		} else if (!selector.equals(other.selector))
+			}
+		} else if (!this.selector.equals(other.selector)) {
 			return false;
+		}
 		return true;
 	}
 
+	@Override
 	public boolean isPrepared() {
-		return prepared;
+		return this.prepared;
 	}
 
-	public void setPrepared(boolean prepared) {
+	public void setPrepared(final boolean prepared) {
 		this.prepared = prepared;
 	}
 }

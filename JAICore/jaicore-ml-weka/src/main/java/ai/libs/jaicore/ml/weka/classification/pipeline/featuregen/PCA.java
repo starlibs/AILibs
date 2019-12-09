@@ -1,6 +1,6 @@
-package ai.libs.mlplan.multiclass.wekamlplan.sophisticated.featuregen;
+package ai.libs.jaicore.ml.weka.classification.pipeline.featuregen;
 
-import ai.libs.mlplan.multiclass.wekamlplan.weka.model.SuvervisedFilterPreprocessor;
+import ai.libs.jaicore.ml.weka.classification.pipeline.SuvervisedFilterPreprocessor;
 import weka.attributeSelection.PrincipalComponents;
 import weka.attributeSelection.Ranker;
 

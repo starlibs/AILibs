@@ -35,7 +35,7 @@ public class MonteCarloCrossValidationSplitSetGenerator<D extends ILabeledDatase
 		super();
 		this.datasetSplitter = datasetSplitter;
 		this.repeats = repeats;
-		this.seed = random.nextLong(); // we do not want to use the random object any further, because the randomness inside should not be affected by outer operations
+		this.seed = random.nextLong(); // we do not want to use the random object any further, because (i) the randomness inside should not be affected by outer operations and (ii) having a concrete seed augments the reproducibility
 	}
 
 	@Override

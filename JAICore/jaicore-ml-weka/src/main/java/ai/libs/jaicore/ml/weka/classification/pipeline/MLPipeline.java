@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multiclass.wekamlplan.weka.model;
+package ai.libs.jaicore.ml.weka.classification.pipeline;
 
 import java.io.Serializable;
 import java.util.ArrayList;

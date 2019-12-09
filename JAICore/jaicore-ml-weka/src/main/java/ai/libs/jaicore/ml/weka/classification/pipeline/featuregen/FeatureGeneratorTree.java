@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multiclass.wekamlplan.sophisticated.featuregen;
+package ai.libs.jaicore.ml.weka.classification.pipeline.featuregen;
 
 import java.util.ArrayList;
 import java.util.List;

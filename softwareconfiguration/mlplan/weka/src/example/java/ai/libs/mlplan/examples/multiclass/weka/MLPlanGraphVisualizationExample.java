@@ -4,9 +4,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
+import org.api4.java.algorithm.TimeOut;
 
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
@@ -31,11 +33,11 @@ import javafx.embed.swing.JFXPanel;
 public class MLPlanGraphVisualizationExample {
 	public static void main(final String[] args) throws Exception {
 
-		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(3);
+		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(346);
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */
-		MLPlan<IWekaClassifier> mlplan = new MLPlanWekaBuilder().withNumCpus(6).withDataset(split.get(0)).build();
+		MLPlan<IWekaClassifier> mlplan = new MLPlanWekaBuilder().withNumCpus(4).withTimeOut(new TimeOut(1, TimeUnit.HOURS)).withDataset(split.get(0)).build();
 
 		/* start visualization */
 		new JFXPanel();

@@ -33,6 +33,7 @@ import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.LearningCurveExtrapolationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
@@ -184,6 +185,7 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 	 * @return The builder object.
 	 */
 	public B withDataset(final ILabeledDataset<?> dataset) {
+		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(dataset);
 		this.dataset = dataset;
 		return this.getSelf();
 	}
@@ -284,6 +286,8 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 	@Override
 	public PipelineEvaluator getClassifierEvaluationInSearchPhase(final ILabeledDataset<?> data, final int seed, final int fullDatasetSize) throws LearnerEvaluatorConstructionFailedException {
 		Objects.requireNonNull(this.factoryForPipelineEvaluationInSearchPhase, "No factory for pipeline evaluation in search phase has been set!");
+		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(data);
+
 		ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> evaluator = this.factoryForPipelineEvaluationInSearchPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed));
 		if (evaluator instanceof LearningCurveExtrapolationEvaluator) {
 			((LearningCurveExtrapolationEvaluator) evaluator).setFullDatasetSize(fullDatasetSize);
@@ -457,8 +461,7 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 	 * @return The ML-Plan object configured with this builder.
 	 */
 	public MLPlan<L> build(final ILabeledDataset<?> dataset) {
-		this.dataset = dataset;
-		return this.build();
+		return this.withDataset(dataset).build();
 	}
 
 	/**

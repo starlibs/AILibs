@@ -1,5 +1,7 @@
 package ai.libs.jaicore.basic.sets;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1064,5 +1066,10 @@ public class SetUtil {
 			return false;
 		}
 		return true;
+	}
+
+	public static Type getGenericClass(final Collection<?> c) {
+		ParameterizedType stringListType = (ParameterizedType) c.getClass().getGenericSuperclass();
+		return stringListType.getActualTypeArguments()[0];
 	}
 }

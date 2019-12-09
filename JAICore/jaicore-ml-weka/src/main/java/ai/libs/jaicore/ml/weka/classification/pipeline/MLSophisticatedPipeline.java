@@ -1,11 +1,11 @@
-package ai.libs.mlplan.multiclass.wekamlplan.sophisticated;
+package ai.libs.jaicore.ml.weka.classification.pipeline;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.mlplan.multiclass.wekamlplan.sophisticated.featuregen.FeatureGenerator;
+import ai.libs.jaicore.ml.weka.classification.pipeline.featuregen.FeatureGenerator;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;

@@ -1,11 +1,15 @@
 package ai.libs.jaicore.ml.core.evaluation.splitsetgenerator;
 
+import java.util.List;
+
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
 import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSetGenerator;
 import org.api4.java.ai.ml.core.evaluation.execution.IFixedDatasetSplitSetGenerator;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.common.reconstruction.IReconstructible;
+import org.api4.java.common.reconstruction.IReconstructionInstruction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +31,14 @@ public class FixedDataSplitSetGenerator<D extends IDataset<?>> implements IFixed
 		super();
 		this.data = data;
 		this.generator = generator;
+
+		/* consistency check: check whether data, if reconstructible, already have a construction */
+		if (data instanceof IReconstructible) {
+			List<IReconstructionInstruction> instructions = ((IReconstructible) data).getConstructionPlan().getInstructions();
+			if (instructions == null || instructions.isEmpty()) {
+				throw new IllegalArgumentException("Data that is declared to be reconstructible does not carry any instructions.");
+			}
+		}
 	}
 
 	@Override

@@ -53,12 +53,14 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 				List<ILabeledDataset<? extends ILabeledInstance>> folds = splitSet.getFolds(i);
 				this.logger.debug("Executing learner on folds of sizes {} (train) and {} (test).", folds.get(0).size(), folds.get(1).size());
 				ILearnerRunReport report;
-				long startExecution = System.currentTimeMillis();
 				try {
 					report = this.executor.execute(learner, folds.get(0), folds.get(1));
 				}
 				catch (LearnerExecutionFailedException e) {
-					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent(learner, folds.get(0), folds.get(1), e, (int)(System.currentTimeMillis() - startExecution)));
+					ILabeledDataset<?> train = folds.get(0);
+					ILabeledDataset<?> test = folds.get(1);
+					ILearnerRunReport failReport = new LearnerRunReport(train, test, e.getTrainTimeStart(),  e.getTrainTimeEnd(),  e.getTestTimeStart(), e.getTestTimeEnd(), e.getCause());
+					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent(learner, failReport));
 					throw e;
 				}
 

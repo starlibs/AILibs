@@ -15,5 +15,4 @@ public class SimpleRandomSamplingFactory<D extends ILabeledDataset<?>> extends A
 		simpleRandomSampling.setSampleSize(sampleSize);
 		return simpleRandomSampling;
 	}
-
 }

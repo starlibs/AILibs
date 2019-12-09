@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multiclass.wekamlplan.sophisticated;
+package ai.libs.jaicore.ml.weka.classification.pipeline;
 
 import weka.core.Instance;
 import weka.core.Instances;

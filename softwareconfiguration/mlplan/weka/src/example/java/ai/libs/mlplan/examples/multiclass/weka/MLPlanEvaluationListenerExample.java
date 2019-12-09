@@ -23,9 +23,9 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluat
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
+import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 
 /**
  * This is an example class that illustrates the usage of ML-Plan on the segment dataset of OpenML. It is configured to run for 30 seconds and to use 70% of the data for search and 30% for selection in its second phase.
@@ -57,7 +57,7 @@ public class MLPlanEvaluationListenerExample {
 			@Subscribe
 			public void receiveEvent(final TrainTestSplitEvaluationFailedEvent e) { // this event is fired whenever any pipeline is evaluated successfully
 				MLPipeline pipeline = ((MLPipeline)((WekaClassifier)e.getLearner()).getClassifier());
-				LOGGER.info("Received exception for learner {}: {}", pipeline, e.getException().getClass().getName());
+				LOGGER.info("Received exception for learner {}: {}", pipeline, e.getReport().getException().getClass().getName());
 			}
 
 			@Subscribe

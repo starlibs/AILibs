@@ -15,14 +15,14 @@ import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.serialization.ComponentNotFoundException;
 import ai.libs.hasco.serialization.ComponentUtils;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.model.SupervisedFilterSelector;
+import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
+import ai.libs.jaicore.ml.weka.classification.pipeline.SupervisedFilterSelector;
 import weka.core.OptionHandler;
 
 /**
  * A factory that provides the ability to wrap given MLPipelines to a
  * ComponentInstance
- * 
+ *
  * @author Helena Graf
  *
  */
@@ -32,11 +32,11 @@ public class MLPipelineComponentInstanceFactory {
 
 	/**
 	 * Creates a new factory object using the given configuration file
-	 * 
+	 *
 	 * @param components
 	 * @throws IOException
 	 */
-	public MLPipelineComponentInstanceFactory(Collection<Component> components) throws IOException {
+	public MLPipelineComponentInstanceFactory(final Collection<Component> components) throws IOException {
 		// TODO possibly change this to get loaded components so that components don't
 		// have to be loaded twice
 		this.components = components;
@@ -44,7 +44,7 @@ public class MLPipelineComponentInstanceFactory {
 
 	/**
 	 * Converts the given MLPipelines object to a ComponentInstance.
-	 * 
+	 *
 	 * @param pipeline
 	 *            The pipelines to convert
 	 * @return The converted pipelines as a ComponentInstance
@@ -53,36 +53,36 @@ public class MLPipelineComponentInstanceFactory {
 	 *             configuration
 	 */
 	@SuppressWarnings("unchecked")
-	public ComponentInstance convertToComponentInstance(MLPipeline pipeline) throws ComponentNotFoundException {
+	public ComponentInstance convertToComponentInstance(final MLPipeline pipeline) throws ComponentNotFoundException {
 		if (pipeline.getPreprocessors() != null && pipeline.getPreprocessors().size() > 0) {
 			// Pipeline has preprocessor
 			SupervisedFilterSelector preprocessor = pipeline.getPreprocessors().get(0);
 
 			// CI for searcher
-			ComponentInstance searcherCI = getComponentInstanceForPipelineElement(preprocessor.getSearcher());
+			ComponentInstance searcherCI = this.getComponentInstanceForPipelineElement(preprocessor.getSearcher());
 
 			// CI for evaluator
-			ComponentInstance evaluatorCI = getComponentInstanceForPipelineElement(preprocessor.getEvaluator());
+			ComponentInstance evaluatorCI = this.getComponentInstanceForPipelineElement(preprocessor.getEvaluator());
 
 			// CI for preprocessor
-			ComponentInstance preprocessorCI = getComponentInstanceForPipelineElement(preprocessor.getSelector(),
+			ComponentInstance preprocessorCI = this.getComponentInstanceForPipelineElement(preprocessor.getSelector(),
 					new ImmutablePair<>("eval", evaluatorCI), new ImmutablePair<>("search", searcherCI));
 
 			// CI for classifier
-			ComponentInstance classifierCI = getComponentInstanceForPipelineElement(pipeline.getBaseClassifier());
+			ComponentInstance classifierCI = this.getComponentInstanceForPipelineElement(pipeline.getBaseClassifier());
 
 			// Pipeline
 			HashMap<String, ComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<String, ComponentInstance>();
 			satisfactionOfRequiredInterfaces.put("preprocessor", preprocessorCI);
 			satisfactionOfRequiredInterfaces.put("classifier", classifierCI);
-			return new ComponentInstance(ComponentUtils.getComponentByName("pipeline", components), new HashMap<String, String>(),
+			return new ComponentInstance(ComponentUtils.getComponentByName("pipeline", this.components), new HashMap<String, String>(),
 					satisfactionOfRequiredInterfaces);
 
 		} else {
 			// Pipeline is only classifier
 			ComponentInstance classifierCI = new ComponentInstance(
-					ComponentUtils.getComponentByName(pipeline.getBaseClassifier().getClass().getName(), components),
-					getParametersForPipelineElement(pipeline.getBaseClassifier()),
+					ComponentUtils.getComponentByName(pipeline.getBaseClassifier().getClass().getName(), this.components),
+					this.getParametersForPipelineElement(pipeline.getBaseClassifier()),
 					new HashMap<String, ComponentInstance>());
 			return classifierCI;
 		}
@@ -91,7 +91,7 @@ public class MLPipelineComponentInstanceFactory {
 	/**
 	 * Converts a single element of the pipeline to a ComponentInstance, e.g. a
 	 * classifier.
-	 * 
+	 *
 	 * @param pipelineElement
 	 *            The pipeline element to convert
 	 * @param satisfactionOfRegquiredInterfaces
@@ -102,26 +102,26 @@ public class MLPipelineComponentInstanceFactory {
 	 *             If the pipeline element contains elements that are not in the
 	 *             loaded configuration
 	 */
-	private ComponentInstance getComponentInstanceForPipelineElement(Object pipelineElement,
-			@SuppressWarnings("unchecked") Pair<String, ComponentInstance>... satisfactionOfRegquiredInterfaces)
-			throws ComponentNotFoundException {
+	private ComponentInstance getComponentInstanceForPipelineElement(final Object pipelineElement,
+			@SuppressWarnings("unchecked") final Pair<String, ComponentInstance>... satisfactionOfRegquiredInterfaces)
+					throws ComponentNotFoundException {
 		HashMap<String, ComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<String, ComponentInstance>();
 		Arrays.stream(satisfactionOfRegquiredInterfaces).forEach(entry -> {
 			satisfactionOfRequiredInterfaces.put(entry.getKey(), entry.getValue());
 		});
-		return new ComponentInstance(ComponentUtils.getComponentByName(pipelineElement.getClass().getName(), components),
-				getParametersForPipelineElement(pipelineElement), satisfactionOfRequiredInterfaces);
+		return new ComponentInstance(ComponentUtils.getComponentByName(pipelineElement.getClass().getName(), this.components),
+				this.getParametersForPipelineElement(pipelineElement), satisfactionOfRequiredInterfaces);
 	}
 
 	/**
 	 * Gets the parameters for the given pipeline element as a map from parameter
 	 * name to value
-	 * 
+	 *
 	 * @param classifier
 	 *            The classifier for which to get the parameters
 	 * @return The parameter map
 	 */
-	private Map<String, String> getParametersForPipelineElement(Object classifier) {
+	private Map<String, String> getParametersForPipelineElement(final Object classifier) {
 		if (classifier instanceof OptionHandler) {
 			OptionHandler handler = (OptionHandler) classifier;
 			HashMap<String, String> parametersWithValues = new HashMap<String, String>(handler.getOptions().length);

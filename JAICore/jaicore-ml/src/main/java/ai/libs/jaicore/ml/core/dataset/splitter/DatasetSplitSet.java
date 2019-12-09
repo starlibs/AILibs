@@ -48,5 +48,4 @@ public class DatasetSplitSet<D extends IDataset<?>> implements IDatasetSplitSet<
 	public List<D> getFolds(final int splitId) {
 		return Collections.unmodifiableList(this.splits.get(splitId));
 	}
-
 }

@@ -728,6 +728,27 @@ public class WekaUtil {
 		return filteredInstances.firstInstance();
 	}
 
+	public static Instances removeAttribute(final Instances data, final int attribute) throws Exception {
+		Remove remove = new Remove();
+		remove.setAttributeIndices("" + (attribute + 1));
+		remove.setInputFormat(data);
+		return Filter.useFilter(data, remove);
+	}
+
+	public static Instances removeAttributes(final Instances data, final Collection<Integer> attributes) throws Exception {
+		Remove remove = new Remove();
+		StringBuilder sb = new StringBuilder();
+		for (int att : attributes) {
+			if (sb.length() != 0) {
+				sb.append(",");
+			}
+			sb.append(att + 1);
+		}
+		remove.setAttributeIndices(sb.toString());
+		remove.setInputFormat(data);
+		return Filter.useFilter(data, remove);
+	}
+
 	public static Instances removeClassAttribute(final Instances data) throws Exception {
 		if (data.classIndex() < 0) {
 			throw new IllegalArgumentException("Class index of data is not set!");

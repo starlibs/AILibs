@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.weka.classification.learner;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -13,30 +14,48 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.LearnerConfigurationFailedException;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
+import org.api4.java.common.reconstruction.IReconstructible;
+import org.api4.java.common.reconstruction.IReconstructionInstruction;
+import org.api4.java.common.reconstruction.IReconstructionPlan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
+import ai.libs.jaicore.basic.reconstruction.ReconstructionPlan;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
+import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
+import weka.attributeSelection.ASEvaluation;
+import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.OptionHandler;
 
-public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> implements IWekaClassifier {
+public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> implements IWekaClassifier, IReconstructible {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WekaClassifier.class);
 
 	private final String name;
-	private String[] options;
 	private Classifier wrappedClassifier;
 
 	private ILabeledInstanceSchema schema;
 
+	public static WekaClassifier createPipeline(final String searcher, final List<String> searcherOptions, final String evaluator, final List<String> evaluatorOptions, final String classifier, final List<String> classifierOptions) throws Exception {
+		ASSearch search = ASSearch.forName(searcher, searcherOptions.toArray(new String[0]));
+		ASEvaluation eval = ASEvaluation.forName(evaluator, evaluatorOptions.toArray(new String[0]));
+		Classifier c = AbstractClassifier.forName(classifier, classifierOptions.toArray(new String[0]));
+		return new WekaClassifier(new MLPipeline(search, eval, c));
+	}
+
+	public static WekaClassifier createBaseClassifier(final String name, final List<String> options) {
+		return new WekaClassifier(name, options.toArray(new String[0]));
+	}
+
 	public WekaClassifier(final String name, final String[] options) {
 		this.name = name;
-		this.options = options;
 		try {
 			this.wrappedClassifier = AbstractClassifier.forName(name, options);
 		} catch (Exception e) {
@@ -54,7 +73,7 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 	}
 
 	public String[] getOptions() {
-		return this.options;
+		return ((OptionHandler)this.wrappedClassifier).getOptions();
 	}
 
 	@Override
@@ -121,11 +140,7 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 
 	@Override
 	public void setConfig(final Map<String, Object> config) throws LearnerConfigurationFailedException, InterruptedException {
-		try {
-			((OptionHandler) this.wrappedClassifier).setOptions(this.options);
-		} catch (Exception e) {
-			throw new LearnerConfigurationFailedException("Could not set config for " + WekaClassifier.class.getSimpleName());
-		}
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -133,4 +148,37 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 		return this.wrappedClassifier;
 	}
 
+	@Override
+	public IReconstructionPlan getConstructionPlan() {
+		try {
+			if (this.wrappedClassifier instanceof MLPipeline) {
+				MLPipeline pipeline = (MLPipeline)this.wrappedClassifier;
+				Classifier classifier = pipeline.getBaseClassifier();
+				ASSearch searcher = pipeline.getPreprocessors().get(0).getSearcher();
+				ASEvaluation evaluator = pipeline.getPreprocessors().get(0).getEvaluator();
+				return new ReconstructionPlan(Arrays.asList(new ReconstructionInstruction(WekaClassifier.class.getMethod("createPipeline", String.class, List.class, String.class, List.class, String.class, List.class), searcher.getClass().getName(), ((OptionHandler)searcher).getOptions(), evaluator.getClass().getName(), ((OptionHandler)evaluator).getOptions(), classifier.getClass().getName(), ((OptionHandler)classifier).getOptions())));
+			}
+			else {
+				return new ReconstructionPlan(Arrays.asList(new ReconstructionInstruction(WekaClassifier.class.getMethod("createBaseClassifier", String.class, List.class), this.name, this.getOptionsAsList())));
+			}
+		} catch (NoSuchMethodException | SecurityException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public List<String> getOptionsAsList() {
+		return Arrays.asList(((OptionHandler)this.wrappedClassifier).getOptions());
+	}
+
+	@Override
+	public void addInstruction(final IReconstructionInstruction instruction) {
+		throw new UnsupportedOperationException("The WEKAClassifier cannot be modified afterwards, so no new instruction makes sense.");
+	}
+
+	@Override
+	public String toString() {
+		String c = this.wrappedClassifier instanceof MLPipeline ? this.wrappedClassifier.toString() : WekaUtil.getClassifierDescriptor(this.wrappedClassifier);
+		return "WekaClassifier [name=" + this.name + ", options=" + this.getOptionsAsList() + ", wrappedClassifier=" + c + ", schema=" + this.schema + "]";
+	}
 }

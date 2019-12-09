@@ -1,9 +1,8 @@
-package ai.libs.mlplan.multiclass.wekamlplan.weka.model;
+package ai.libs.jaicore.ml.weka.classification.pipeline;
 
 import java.io.Serializable;
 
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.mlplan.multiclass.wekamlplan.sophisticated.FeaturePreprocessor;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;

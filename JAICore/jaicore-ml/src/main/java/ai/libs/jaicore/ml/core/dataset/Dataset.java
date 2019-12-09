@@ -14,7 +14,8 @@ import org.api4.java.common.reconstruction.IReconstructible;
 import org.api4.java.common.reconstruction.IReconstructionInstruction;
 import org.api4.java.common.reconstruction.IReconstructionPlan;
 
-import ai.libs.jaicore.basic.reproduction.ReconstructionPlan;
+import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
+import ai.libs.jaicore.basic.reconstruction.ReconstructionPlan;
 
 public class Dataset extends ArrayList<ILabeledInstance> implements ILabeledDataset<ILabeledInstance>, IReconstructible {
 
@@ -23,7 +24,7 @@ public class Dataset extends ArrayList<ILabeledInstance> implements ILabeledData
 	 */
 	private static final long serialVersionUID = -3643080541896274181L;
 
-	private final List<IReconstructionInstruction> instructions = new ArrayList<>();
+	private final List<ReconstructionInstruction> instructions = new ArrayList<>();
 	private final ILabeledInstanceSchema schema;
 
 	public Dataset(final ILabeledInstanceSchema schema) {
@@ -97,7 +98,7 @@ public class Dataset extends ArrayList<ILabeledInstance> implements ILabeledData
 
 	@Override
 	public void addInstruction(final IReconstructionInstruction instruction) {
-		this.instructions.add(instruction);
+		this.instructions.add((ReconstructionInstruction)instruction);
 	}
 
 	@Override
