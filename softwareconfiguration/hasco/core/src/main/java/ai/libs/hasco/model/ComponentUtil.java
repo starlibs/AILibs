@@ -126,6 +126,20 @@ public class ComponentUtil {
 		return instanceList;
 	}
 
+	/**
+	 * Enumerates all possible component instances for a specific root component and a collection of components for resolving required interfaces.
+	 * Hyperparameters are set to the default value.
+	 *
+	 * @param requiredInterface The interface required to be provided by the root components.
+	 * @param components The collection fo components that is used for resolving required interfaces recursively.
+	 * @return A collection of component instances of the given root component with all possible algorithm choices.
+	 */
+	public static Collection<ComponentInstance> getAllAlgorithmSelectionInstances(final String requiredInterface, final Collection<Component> components) {
+		Collection<ComponentInstance> instanceList = new LinkedList<>();
+		components.stream().filter(x -> x.getProvidedInterfaces().contains(requiredInterface)).map(x -> getAllAlgorithmSelectionInstances(x, components)).forEach(instanceList::addAll);
+		return instanceList;
+	}
+
 	public static int getNumberOfUnparametrizedCompositions(final Collection<Component> components, final String requiredInterface) {
 		if (hasCycles(components, requiredInterface)) {
 			return -1;
@@ -150,6 +164,12 @@ public class ComponentUtil {
 			numCandidates += waysToResolveComponent;
 		}
 		return numCandidates;
+	}
+
+	public ComponentInstance getRandomParametrization(final ComponentInstance componentInstance, final Random rand) {
+		ComponentInstance randomParametrization = randomParameterizationOfComponent(componentInstance.getComponent(), rand);
+		componentInstance.getSatisfactionOfRequiredInterfaces().entrySet().forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), this.getRandomParametrization(x.getValue(), rand)));
+		return randomParametrization;
 	}
 
 	public static boolean hasCycles(final Collection<Component> components, final String requiredInterface) {

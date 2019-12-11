@@ -4,24 +4,21 @@ import java.io.File;
 import java.io.IOException;
 
 import org.api4.java.ai.ml.classification.multilabel.evaluation.loss.IMultiLabelClassificationMeasure;
-import org.api4.java.ai.ml.core.dataset.splitter.IDatasetSplitter;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.ml.classification.multilabel.loss.AutoMEKAGGPFitnessMeasureLoss;
 import ai.libs.jaicore.ml.classification.multilabel.loss.InstanceWiseF1;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ProbabilisticMonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleMLCSplitBasedClassifierEvaluator;
+import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.splitter.ArbitrarySplitter;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
-import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
+import ai.libs.mlplan.core.ILearnerFactory;
 
-public class MLPlanMekaBuilder extends AbstractMLPlanBuilder {
+public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IWekaClassifier, MLPlanMekaBuilder> {
 
-	private static final String RES_SSC_MEKA_COMPLETE = "automl/searchmodels/meka/mlplan-meka.json";
-	private static final String FS_SSC_MEKA_COMPLETE = "conf/mlplan-meka.json";
-
-	private static final String RES_PREFC_MEKA = "mlplan/meka-preferenceList.txt";
-	private static final String FS_PREFC_MEKA = "conf/mlpan-meka-preferenceList.txt";
+	private static final File SSC = FileUtil.getExistingFileWithHighestPriority(ML2PlanMekaPathConfig.RES_SSC, ML2PlanMekaPathConfig.FS_SSC);
+	private static final File PREFERRED_COMPONENTS = FileUtil.getExistingFileWithHighestPriority(ML2PlanMekaPathConfig.RES_PREFC, ML2PlanMekaPathConfig.FS_PREFC);
 
 	/* Default configuration values. */
 	private static final int SEARCH_NUM_MC_ITERATIONS = 5;
@@ -34,10 +31,7 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder {
 	private static final String DEF_REQUESTED_HASCO_INTERFACE = "MLClassifier";
 	private static final String DEF_PREFERRED_COMPONENT_NAME_PREFIX = "resolveMLClassifierWith";
 
-	private static final IDatasetSplitter DEF_SELECTION_HOLDOUT_SPLITTER = new ArbitrarySplitter();
-	private static final File DEF_SEARCH_SPACE_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_SSC_MEKA_COMPLETE, FS_SSC_MEKA_COMPLETE);
-	private static final File DEF_PREFERRED_COMPONENTS_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_PREFC_MEKA, FS_PREFC_MEKA);
-	private static final ILearnerFactory CLASSIFIER_FACTORY = new MekaPipelineFactory();
+	private static final ILearnerFactory<IWekaClassifier> CLASSIFIER_FACTORY = new MekaPipelineFactory();
 	private static final ProbabilisticMonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new ProbabilisticMonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(SEARCH_NUM_MC_ITERATIONS)
 			.withTrainFoldSize(SEARCH_TRAIN_FOLD_SIZE).withSplitBasedEvaluator(new SimpleMLCSplitBasedClassifierEvaluator(LOSS_FUNCTION)).withDatasetSplitter(new ArbitrarySplitter());
 	private static final ProbabilisticMonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new ProbabilisticMonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(SELECTION_NUM_MC_ITERATIONS)
@@ -45,9 +39,9 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder {
 
 	public MLPlanMekaBuilder() throws IOException {
 		super();
-		this.withSearchSpaceConfigFile(DEF_SEARCH_SPACE_CONFIG);
+		this.withSearchSpaceConfigFile(SSC);
 		this.withRequestedInterface(DEF_REQUESTED_HASCO_INTERFACE);
-		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS_CONFIG, DEF_PREFERRED_COMPONENT_NAME_PREFIX);
+		this.withPreferredComponentsFile(PREFERRED_COMPONENTS, DEF_PREFERRED_COMPONENT_NAME_PREFIX);
 		this.withDatasetSplitterForSearchSelectionSplit(DEF_SELECTION_HOLDOUT_SPLITTER);
 		this.withClassifierFactory(CLASSIFIER_FACTORY);
 		this.withSearchPhaseEvaluatorFactory(DEF_SEARCH_PHASE_EVALUATOR);

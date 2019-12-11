@@ -1,3 +1,4 @@
 dependencies {
+	compile project(':JAICore:jaicore-ml-weka')
 	compile project(':mlplan-core')
 }

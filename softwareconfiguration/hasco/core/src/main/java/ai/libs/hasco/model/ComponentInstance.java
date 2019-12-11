@@ -46,14 +46,21 @@ public class ComponentInstance {
 	@SuppressWarnings("unused")
 	private ComponentInstance() {
 		// for serialization purposes
-		component = null;
-		parameterValues = null;
-		satisfactionOfRequiredInterfaces = null;
+		this.component = null;
+		this.parameterValues = null;
+		this.satisfactionOfRequiredInterfaces = null;
+	}
+
+	public ComponentInstance(final ComponentInstance other) {
+		this.component = other.component;
+		this.parameterValues = new HashMap<>(other.parameterValues);
+		this.satisfactionOfRequiredInterfaces = new HashMap<>();
+		other.satisfactionOfRequiredInterfaces.entrySet().forEach(x -> this.satisfactionOfRequiredInterfaces.put(x.getKey(), new ComponentInstance(x.getValue())));
 	}
 
 	/**
 	 * Constructor for creating a <code>ComponentInstance</code> for a particular <code>Component</code>.
-	 * 
+	 *
 	 * @param component
 	 *            The component that is grounded.
 	 * @param parameterValues
@@ -139,7 +146,7 @@ public class ComponentInstance {
 
 	/**
 	 * This method checks, whether a given list of paths of refinements conforms the constraints for parameter refinements.
-	 * 
+	 *
 	 * @param paths
 	 *            A list of paths of refinements to be checked.
 	 * @return Returns true if everything is alright and false if there is an issue with the given paths.
@@ -155,7 +162,7 @@ public class ComponentInstance {
 
 	/**
 	 * This method checks, whether a path of refinements conforms the constraints for parameter refinements.
-	 * 
+	 *
 	 * @param path
 	 *            A path of refinements to be checked.
 	 * @return Returns true if everything is alright and false if there is an issue with the given path.

@@ -11,7 +11,9 @@ import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.NumericParameterDomain;
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
+import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
+import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
+import ai.libs.mlplan.core.ILearnerFactory;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.MultipleClassifiersCombiner;
@@ -24,7 +26,7 @@ import weka.core.OptionHandler;
 * components that correspond to MEKA algorithms to a MultiLabelClassifier.
 *
 */
-public class MekaPipelineFactory implements ILearnerFactory {
+public class MekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 
 	private static final String PARAMETER_NAME_WITH_DASH_WARNING = "Required interface of component {} has dash or underscore in interface id {}";
 
@@ -32,11 +34,11 @@ public class MekaPipelineFactory implements ILearnerFactory {
 	private static final Logger logger = LoggerFactory.getLogger(MekaPipelineFactory.class);
 
 	@Override
-	public Classifier getComponentInstantiation(final ComponentInstance ci) throws ComponentInstantiationFailedException {
+	public IWekaClassifier getComponentInstantiation(final ComponentInstance ci) throws ComponentInstantiationFailedException {
 		MultiLabelClassifier instance = null;
 		try {
 			instance = (MultiLabelClassifier) this.getClassifier(ci);
-			return instance;
+			return new WekaClassifier(instance);
 		} catch (Exception e) {
 			throw new ComponentInstantiationFailedException(e, "Could not instantiate " + ci.getComponent().getName());
 		}

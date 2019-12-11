@@ -1,9 +1,11 @@
 package ai.libs.jaicore.ml.weka.classification.learner;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassificationPredictionBatch;
@@ -43,7 +45,8 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 
 	private ILabeledInstanceSchema schema;
 
-	public static WekaClassifier createPipeline(final String searcher, final List<String> searcherOptions, final String evaluator, final List<String> evaluatorOptions, final String classifier, final List<String> classifierOptions) throws Exception {
+	public static WekaClassifier createPipeline(final String searcher, final List<String> searcherOptions, final String evaluator, final List<String> evaluatorOptions, final String classifier, final List<String> classifierOptions)
+			throws Exception {
 		ASSearch search = ASSearch.forName(searcher, searcherOptions.toArray(new String[0]));
 		ASEvaluation eval = ASEvaluation.forName(evaluator, evaluatorOptions.toArray(new String[0]));
 		Classifier c = AbstractClassifier.forName(classifier, classifierOptions.toArray(new String[0]));
@@ -73,7 +76,7 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 	}
 
 	public String[] getOptions() {
-		return ((OptionHandler)this.wrappedClassifier).getOptions();
+		return ((OptionHandler) this.wrappedClassifier).getOptions();
 	}
 
 	@Override
@@ -106,7 +109,10 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 		}
 
 		try {
-			return new SingleLabelClassification((int) this.wrappedClassifier.classifyInstance(instance.getElement()));
+			Map<Integer, Double> distribution = new HashMap<>();
+			double[] dist = this.wrappedClassifier.distributionForInstance(instance.getElement());
+			IntStream.range(0, dist.length).forEach(x -> distribution.put(x, dist[x]));
+			return new SingleLabelClassification(distribution);
 		} catch (Exception e) {
 			throw new PredictionException("Could not make a prediction since an exception occurred in the wrapped weka classifier.", e);
 		}
@@ -152,13 +158,14 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 	public IReconstructionPlan getConstructionPlan() {
 		try {
 			if (this.wrappedClassifier instanceof MLPipeline) {
-				MLPipeline pipeline = (MLPipeline)this.wrappedClassifier;
+				MLPipeline pipeline = (MLPipeline) this.wrappedClassifier;
 				Classifier classifier = pipeline.getBaseClassifier();
 				ASSearch searcher = pipeline.getPreprocessors().get(0).getSearcher();
 				ASEvaluation evaluator = pipeline.getPreprocessors().get(0).getEvaluator();
-				return new ReconstructionPlan(Arrays.asList(new ReconstructionInstruction(WekaClassifier.class.getMethod("createPipeline", String.class, List.class, String.class, List.class, String.class, List.class), searcher.getClass().getName(), ((OptionHandler)searcher).getOptions(), evaluator.getClass().getName(), ((OptionHandler)evaluator).getOptions(), classifier.getClass().getName(), ((OptionHandler)classifier).getOptions())));
-			}
-			else {
+				return new ReconstructionPlan(
+						Arrays.asList(new ReconstructionInstruction(WekaClassifier.class.getMethod("createPipeline", String.class, List.class, String.class, List.class, String.class, List.class), searcher.getClass().getName(),
+								((OptionHandler) searcher).getOptions(), evaluator.getClass().getName(), ((OptionHandler) evaluator).getOptions(), classifier.getClass().getName(), ((OptionHandler) classifier).getOptions())));
+			} else {
 				return new ReconstructionPlan(Arrays.asList(new ReconstructionInstruction(WekaClassifier.class.getMethod("createBaseClassifier", String.class, List.class), this.name, this.getOptionsAsList())));
 			}
 		} catch (NoSuchMethodException | SecurityException e) {
@@ -168,7 +175,7 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 	}
 
 	public List<String> getOptionsAsList() {
-		return Arrays.asList(((OptionHandler)this.wrappedClassifier).getOptions());
+		return Arrays.asList(((OptionHandler) this.wrappedClassifier).getOptions());
 	}
 
 	@Override
