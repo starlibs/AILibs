@@ -56,7 +56,7 @@ public class MLPlanGraphVisualizationExample {
 			System.out.println("Finished build of the classifier. Training time was " + trainTime + "s.");
 
 			/* evaluate solution produced by mlplan */
-			SupervisedLearnerExecutor<ILabeledDataset<?>> executor = new SupervisedLearnerExecutor<>();
+			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
 			System.out.println("Error Rate of the solution produced by ML-Plan: " + ClassifierMetric.MEAN_ERRORRATE.evaluateToDouble(Arrays.asList(report)));
 		} catch (NoSuchElementException e) {

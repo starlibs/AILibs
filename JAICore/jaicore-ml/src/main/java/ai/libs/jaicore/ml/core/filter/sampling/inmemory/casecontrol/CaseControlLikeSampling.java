@@ -17,7 +17,7 @@ import ai.libs.jaicore.ml.core.dataset.DatasetDeriver;
 import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 
-public abstract class CaseControlLikeSampling<D extends ILabeledDataset<?>> extends ASamplingAlgorithm<D> {
+public abstract class CaseControlLikeSampling<D extends ILabeledDataset<? extends ILabeledInstance>> extends ASamplingAlgorithm<D> {
 
 	private Logger logger = LoggerFactory.getLogger(CaseControlLikeSampling.class);
 	protected Random rand;

@@ -21,7 +21,7 @@ import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 public class PreTrainedPredictionBasedClassifierEvaluator implements IClassifierEvaluator {
 
 	private final ILabeledDataset<?> testData;
-	private final SupervisedLearnerExecutor<ILabeledDataset<? extends ILabeledInstance>> executor = new SupervisedLearnerExecutor<>();
+	private final SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 	private final ISupervisedLearnerMetric metric;
 
 	public PreTrainedPredictionBasedClassifierEvaluator(final ILabeledDataset<?> testData, final ISupervisedLearnerMetric metric) {

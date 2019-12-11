@@ -11,7 +11,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 
-public class OSMAC<D extends ILabeledDataset<?>> extends PilotEstimateSampling<D> {
+public class OSMAC<D extends ILabeledDataset<? extends ILabeledInstance>> extends PilotEstimateSampling<D> {
 
 	public OSMAC(final Random rand, final D input, final IClassifier pilot) {
 		super(input, pilot);

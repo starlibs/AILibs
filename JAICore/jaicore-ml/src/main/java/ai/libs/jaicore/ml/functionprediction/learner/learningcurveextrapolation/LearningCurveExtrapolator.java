@@ -108,7 +108,7 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 			ILabeledDataset<? extends ILabeledInstance> testInstances = this.test;
 
 			// Create subsamples at the anchorpoints and measure the accuracy there.
-			SupervisedLearnerExecutor<ILabeledDataset<? extends ILabeledInstance>> learnerExecutor = new SupervisedLearnerExecutor<>();
+			SupervisedLearnerExecutor learnerExecutor = new SupervisedLearnerExecutor();
 			ILossFunction metric = new ErrorRate();
 			for (int i = 0; i < this.anchorPoints.length; i++) {
 

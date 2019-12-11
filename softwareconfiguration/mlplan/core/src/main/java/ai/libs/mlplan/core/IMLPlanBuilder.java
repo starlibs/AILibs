@@ -23,13 +23,13 @@ import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
  * @author fmohr
  *
  */
-public interface IMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<?>>, B extends IMLPlanBuilder<L, B>> {
+public interface IMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, B extends IMLPlanBuilder<L, B>> {
 
-	public IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> getSearchSelectionDatasetSplitter();
+	public IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<? extends ILabeledInstance>> getSearchSelectionDatasetSplitter();
 
-	public PipelineEvaluator getClassifierEvaluationInSearchPhase(ILabeledDataset<?> dataShownToSearch, int randomSeed, int size) throws LearnerEvaluatorConstructionFailedException;
+	public PipelineEvaluator getClassifierEvaluationInSearchPhase(ILabeledDataset<? extends ILabeledInstance> dataShownToSearch, int randomSeed, int size) throws LearnerEvaluatorConstructionFailedException;
 
-	public PipelineEvaluator getClassifierEvaluationInSelectionPhase(ILabeledDataset<?> dataShownToSearch, int randomSeed) throws LearnerEvaluatorConstructionFailedException;
+	public PipelineEvaluator getClassifierEvaluationInSelectionPhase(ILabeledDataset<? extends ILabeledInstance> dataShownToSearch, int randomSeed) throws LearnerEvaluatorConstructionFailedException;
 
 	public ISupervisedLearnerMetric getPerformanceMeasure();
 

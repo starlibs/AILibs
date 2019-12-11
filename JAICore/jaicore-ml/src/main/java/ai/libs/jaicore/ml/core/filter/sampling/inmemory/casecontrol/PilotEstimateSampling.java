@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 
-public abstract class PilotEstimateSampling<D extends ILabeledDataset<?>> extends CaseControlLikeSampling<D> {
+public abstract class PilotEstimateSampling<D extends ILabeledDataset<? extends ILabeledInstance>> extends CaseControlLikeSampling<D> {
 
 	private Logger logger = LoggerFactory.getLogger(PilotEstimateSampling.class);
 

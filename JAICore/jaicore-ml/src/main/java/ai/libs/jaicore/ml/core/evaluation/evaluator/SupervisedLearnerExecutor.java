@@ -16,12 +16,12 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SupervisedLearnerExecutor<D extends ILabeledDataset<? extends ILabeledInstance>> implements ISupervisedLearnerExecutor<D>, ILoggingCustomizable {
+public class SupervisedLearnerExecutor implements ISupervisedLearnerExecutor, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(SupervisedLearnerExecutor.class);
 
 	@Override
-	public ILearnerRunReport execute(final ISupervisedLearner<? extends ILabeledInstance, D> learner, final D train, final D test) throws LearnerExecutionFailedException, LearnerExecutionInterruptedException {
+	public <I extends ILabeledInstance, D extends ILabeledDataset<? extends I>> ILearnerRunReport execute(final ISupervisedLearner<I, D> learner, final D train, final D test) throws LearnerExecutionFailedException, LearnerExecutionInterruptedException {
 		long startTrainTime = System.currentTimeMillis();
 		try {
 			this.logger.info("Fitting the learner {} with {} instances, each of which with {} attributes", learner, train.size(), train.getNumAttributes());
@@ -53,7 +53,7 @@ public class SupervisedLearnerExecutor<D extends ILabeledDataset<? extends ILabe
 	}
 
 	@Override
-	public ILearnerRunReport execute(final ISupervisedLearner<? extends ILabeledInstance, D> learner, final D test) throws LearnerExecutionFailedException {
+	public <I extends ILabeledInstance, D extends ILabeledDataset<? extends I>> ILearnerRunReport execute(final ISupervisedLearner<I, D> learner, final D test) throws LearnerExecutionFailedException {
 		long startTestTime = System.currentTimeMillis();
 		try {
 			return this.getReportForTrainedLearner(learner, null, test, -1, -1);
@@ -62,7 +62,7 @@ public class SupervisedLearnerExecutor<D extends ILabeledDataset<? extends ILabe
 		}
 	}
 
-	private ILearnerRunReport getReportForTrainedLearner(final ISupervisedLearner<? extends ILabeledInstance, D> learner, final D train, final D test, final long trainingStartTime, final long trainingEndTime) throws PredictionException, InterruptedException {
+	private <I extends ILabeledInstance, D extends ILabeledDataset<? extends I>> ILearnerRunReport getReportForTrainedLearner(final ISupervisedLearner<I, D> learner, final D train, final D test, final long trainingStartTime, final long trainingEndTime) throws PredictionException, InterruptedException {
 		long start = System.currentTimeMillis();
 		List<? extends IPrediction> predictions = learner.predict(test).getPredictions();
 		long endTestTime = System.currentTimeMillis();

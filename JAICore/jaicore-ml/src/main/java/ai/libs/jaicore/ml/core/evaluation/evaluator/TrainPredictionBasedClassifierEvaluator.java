@@ -29,7 +29,7 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 
 	private Logger logger = LoggerFactory.getLogger(TrainPredictionBasedClassifierEvaluator.class);
 	private final IFixedDatasetSplitSetGenerator<ILabeledDataset<? extends ILabeledInstance>> splitGenerator;
-	private final SupervisedLearnerExecutor<ILabeledDataset<? extends ILabeledInstance>> executor = new SupervisedLearnerExecutor<>();
+	private final SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 	private final ISupervisedLearnerMetric metric;
 	private final EventBus eventBus = new EventBus();
 	private boolean hasListeners;
