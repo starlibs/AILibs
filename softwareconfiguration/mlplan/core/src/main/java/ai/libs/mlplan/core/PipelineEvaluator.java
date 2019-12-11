@@ -31,12 +31,12 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 	private Logger logger = LoggerFactory.getLogger(PipelineEvaluator.class);
 
 	private final EventBus eventBus = new EventBus();
-	private final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<?>>> learnerFactory;
+	private final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> learnerFactory;
 	private final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> benchmark;
 	private final int timeoutForEvaluation;
 	private Double bestScore = 1.0;
 
-	public PipelineEvaluator(final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<?>>> learnerFactory, final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> benchmark, final int timeoutForEvaluation) {
+	public PipelineEvaluator(final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> learnerFactory, final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> benchmark, final int timeoutForEvaluation) {
 		super();
 		this.learnerFactory = learnerFactory;
 		this.benchmark = benchmark;

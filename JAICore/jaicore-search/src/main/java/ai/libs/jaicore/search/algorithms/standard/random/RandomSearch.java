@@ -100,7 +100,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 			N node = path.getHead();
 			assert this.exploredGraph.hasItem(node) : "Node that shall be expanded is not part of the graph: " + node;
 			assert !this.closed.contains(node);
-			this.logger.debug("Expanding next node {}", node);
+			if (this.logger.isDebugEnabled()) {
+				this.logger.debug("Expanding next node with hash code {}", node.hashCode());
+			}
 			boolean closeNodeAfterwards = false;
 			boolean nodeAdded = false;
 			if (this.isSingleNodeSuccessorGenerator) {
@@ -179,7 +181,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		assert !this.exploredGraph.hasItem(to);
 		assert this.exploredGraph.hasItem(from) : "The head " + from + " of the path with " + path.getNumberOfNodes() + " nodes is not part of the explored graph! Here is the path: \n\t" + path.getNodes().stream().map(Object::toString).collect(Collectors.joining("\n\t"));
 		this.exploredGraph.addItem(to);
-		this.logger.debug("Added node {} to graph.", to);
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug("Added node with hash code {} to graph.", to.hashCode());
+		}
 		assert this.exploredGraph.hasItem(to);
 		assert this.exploredGraph.isGraphSane();
 		boolean isPrioritized = this.priorityPredicate != null && this.priorityPredicate.test(to);
@@ -189,7 +193,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		this.exploredGraph.addEdge(from, to, label);
 		SearchGraphPath<N, A> extendedPath = new SearchGraphPath<>(path, to, label);
 		boolean isGoalNode = this.goalTester.isGoal(extendedPath);
-		this.logger.debug("Added node {} as a successor of {} with edge label {} to the model.", to, from, label);
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug("Added node {} as a successor of {} with edge label {} to the model.", to.hashCode(), from.hashCode(), label);
+		}
 		this.post(new NodeAddedEvent<>(this.getId(), from, to, isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
 		return extendedPath;
 	}
@@ -257,7 +263,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 	}
 
 	public SearchGraphPath<N, A> nextSolutionUnderSubPath(final IPath<N, A> path) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
-		this.logger.info("Looking for next solution under node {}. Remaining time is {}.", path, this.getRemainingTimeToDeadline());
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("Looking for next solution under node with hash code {}. Remaining time is {}.", path.getHead().hashCode(), this.getRemainingTimeToDeadline());
+		}
 		this.checkAndConductTermination();
 		assert this.exploredGraph.isGraphSane();
 
@@ -277,7 +285,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 
 				/* expand node if this has not happened yet. */
 				if (!this.closed.contains(head)) {
-					this.logger.debug("Current head {} has not been expanded yet, expanding it now.", head);
+					if (this.logger.isDebugEnabled()) {
+						this.logger.debug("Current head {} has not been expanded yet, expanding it now.", head.hashCode());
+					}
 					this.expandPath(cPath);
 				}
 
@@ -327,7 +337,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		this.exhausted.add(head);
 		this.prioritizedNodes.remove(head);
 		this.updateExhaustedAndPrioritizedState(head);
-		this.logger.debug("Returning next solution path {}", cPath);
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug("Returning next solution path. Hash code is {}", cPath.hashCode());
+		}
 		return head == this.root ? null : cPath;
 	}
 

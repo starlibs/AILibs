@@ -1,10 +1,10 @@
 package ai.libs.jaicore.ml.weka.classification.learner;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
@@ -86,6 +86,8 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 
 		try {
 			this.wrappedClassifier.buildClassifier(data.getInstances());
+		} catch (InterruptedException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new TrainingException("Could not build " + this.getClass().getSimpleName() + " due to exception", e);
 		}
@@ -113,6 +115,8 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 			double[] dist = this.wrappedClassifier.distributionForInstance(instance.getElement());
 			IntStream.range(0, dist.length).forEach(x -> distribution.put(x, dist[x]));
 			return new SingleLabelClassification(distribution);
+		} catch (InterruptedException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new PredictionException("Could not make a prediction since an exception occurred in the wrapped weka classifier.", e);
 		}
@@ -130,18 +134,11 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 
 	@Override
 	public ISingleLabelClassificationPredictionBatch predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
-		return new SingleLabelClassificationPredictionBatch(Arrays.stream(dTest).map(x -> {
-			try {
-				return this.predict(x);
-			} catch (PredictionException e) {
-				LOGGER.error("There was an issue while making a prediction", e);
-				return null;
-			} catch (InterruptedException e) {
-				LOGGER.error("Got interrupted while predicting. ", e);
-				Thread.currentThread().interrupt();
-				return null;
-			}
-		}).collect(Collectors.toList()));
+		List<ISingleLabelClassification> predictions = new ArrayList<>();
+		for (ILabeledInstance inst : dTest) {
+			predictions.add(this.predict(inst));
+		}
+		return new SingleLabelClassificationPredictionBatch(predictions);
 	}
 
 	@Override
@@ -186,6 +183,6 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 	@Override
 	public String toString() {
 		String c = this.wrappedClassifier instanceof MLPipeline ? this.wrappedClassifier.toString() : WekaUtil.getClassifierDescriptor(this.wrappedClassifier);
-		return "WekaClassifier [name=" + this.name + ", options=" + this.getOptionsAsList() + ", wrappedClassifier=" + c + ", schema=" + this.schema + "]";
+		return "WekaClassifier [name=" + this.name + ", options=" + this.getOptionsAsList() + ", wrappedClassifier=" + c + "]";
 	}
 }

@@ -284,11 +284,11 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 	}
 
 	@Override
-	public PipelineEvaluator getClassifierEvaluationInSearchPhase(final ILabeledDataset<?> data, final int seed, final int fullDatasetSize) throws LearnerEvaluatorConstructionFailedException {
+	public PipelineEvaluator getClassifierEvaluationInSearchPhase(final ILabeledDataset<? extends ILabeledInstance> data, final int seed, final int fullDatasetSize) throws LearnerEvaluatorConstructionFailedException {
 		Objects.requireNonNull(this.factoryForPipelineEvaluationInSearchPhase, "No factory for pipeline evaluation in search phase has been set!");
 		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(data);
 
-		ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> evaluator = this.factoryForPipelineEvaluationInSearchPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed));
+		ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluator = this.factoryForPipelineEvaluationInSearchPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed));
 		if (evaluator instanceof LearningCurveExtrapolationEvaluator) {
 			((LearningCurveExtrapolationEvaluator) evaluator).setFullDatasetSize(fullDatasetSize);
 		}
@@ -297,7 +297,7 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 	}
 
 	@Override
-	public PipelineEvaluator getClassifierEvaluationInSelectionPhase(final ILabeledDataset<?> data, final int seed) throws LearnerEvaluatorConstructionFailedException {
+	public PipelineEvaluator getClassifierEvaluationInSelectionPhase(final ILabeledDataset<? extends ILabeledInstance> data, final int seed) throws LearnerEvaluatorConstructionFailedException {
 		if (this.factoryForPipelineEvaluationInSelectionPhase == null) {
 			throw new IllegalStateException("No factory for pipeline evaluation in selection phase has been set!");
 		}
@@ -310,14 +310,14 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 	 * @param evaluatorFactory The evaluator factory for the search phase.
 	 * @return The builder object.
 	 */
-	public void withSearchPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> evaluatorFactory) {
+	public void withSearchPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluatorFactory) {
 		this.factoryForPipelineEvaluationInSearchPhase = evaluatorFactory;
 	}
 
 	/**
 	 * @return The factory for the classifier evaluator of the search phase.
 	 */
-	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> getSearchEvaluatorFactory() {
+	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getSearchEvaluatorFactory() {
 		return this.factoryForPipelineEvaluationInSearchPhase;
 	}
 
@@ -327,7 +327,7 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 	 * @param evaluatorFactory The evaluator factory for the selection phase.
 	 * @return The builder object.
 	 */
-	public B withSelectionPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> evaluatorFactory) {
+	public B withSelectionPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluatorFactory) {
 		this.factoryForPipelineEvaluationInSelectionPhase = evaluatorFactory;
 		return this.getSelf();
 	}
@@ -357,7 +357,7 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 	/**
 	 * @return The factory for the classifier evaluator of the selection phase.
 	 */
-	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> getSelectionEvaluatorFactory() {
+	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getSelectionEvaluatorFactory() {
 		return this.factoryForPipelineEvaluationInSelectionPhase;
 	}
 
@@ -394,7 +394,7 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 	}
 
 	@Override
-	public IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> getSearchSelectionDatasetSplitter() {
+	public IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<? extends ILabeledInstance>> getSearchSelectionDatasetSplitter() {
 		return this.searchSelectionDatasetSplitter;
 	}
 

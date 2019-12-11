@@ -37,6 +37,7 @@ import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConf
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
+import ai.libs.jaicore.ml.core.dataset.DatasetUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
@@ -44,7 +45,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 
-public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<?>>> extends AAlgorithm<ILabeledDataset<?>, L> implements ILoggingCustomizable {
+public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> extends AAlgorithm<ILabeledDataset<?>, L> implements ILoggingCustomizable {
 
 	/** Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(MLPlan.class);
@@ -99,7 +100,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			/* set up exact splits */
 			ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(this.getInput());
 			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
-			this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%).", this.getInput().size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2), MathExt.round(dataPortionUsedForSelection, 2));
+			this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%).", this.getInput().size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2), MathExt.round(dataPortionUsedForSelection * 100, 2));
 			ILabeledDataset<?> dataShownToSearch;
 			if (dataPortionUsedForSelection > 0) {
 				try {
@@ -117,6 +118,11 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			}
 			if (dataShownToSearch.isEmpty()) {
 				throw new IllegalStateException("Cannot search on no data.");
+			}
+
+			/* check that class proportions are maintained */
+			if (this.logger.isDebugEnabled()) {
+				this.logger.debug("Class distribution is {}. Original class distribution was {}", DatasetUtil.getLabelCounts(dataShownToSearch), DatasetUtil.getLabelCounts(this.getInput()));
 			}
 
 			/* check that reconstructibility is preserved */

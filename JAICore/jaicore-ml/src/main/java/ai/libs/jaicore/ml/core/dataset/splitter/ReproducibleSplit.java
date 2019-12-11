@@ -21,7 +21,7 @@ public class ReproducibleSplit<D extends IDataset<?>> extends ArrayList<D> imple
 
 	public ReproducibleSplit(final ReconstructionInstruction creationInstruction, final D dataset, final D...folds) {
 		if (!(dataset instanceof IReconstructible)) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("The given dataset itself is not reconstructible.");
 		}
 		for (D d : folds) {
 			this.add(d);

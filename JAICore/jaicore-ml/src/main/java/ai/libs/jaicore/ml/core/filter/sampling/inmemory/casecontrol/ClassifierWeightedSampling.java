@@ -32,7 +32,7 @@ import ai.libs.jaicore.basic.sets.Pair;
  * @param <I>
  */
 
-public class ClassifierWeightedSampling<D extends ILabeledDataset<?>> extends PilotEstimateSampling<D> {
+public class ClassifierWeightedSampling<D extends ILabeledDataset<? extends ILabeledInstance>> extends PilotEstimateSampling<D> {
 
 	private Logger logger = LoggerFactory.getLogger(ClassifierWeightedSampling.class);
 

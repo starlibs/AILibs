@@ -9,6 +9,7 @@ import java.util.Random;
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.splitter.IRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
 import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSetGenerator;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
+import ai.libs.jaicore.ml.core.dataset.DatasetUtil;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.SimpleRandomSampling;
 
 /**
@@ -86,6 +88,10 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 		int totalItems = data.size();
 		try {
 			D copy = (D)data.createCopy();
+			Collections.shuffle(copy, new Random(seed));
+			if (copy instanceof ILabeledDataset<?> && logger.isDebugEnabled()) {
+				logger.debug("Class distribution is {}", DatasetUtil.getLabelCounts((ILabeledDataset<?>)copy));
+			}
 			double remainingMass = 1;
 			for (int numFold = 0; numFold < portions.length; numFold++) {
 				double portion = numFold < portions.length ? portions[numFold] : remainingMass;
@@ -96,7 +102,6 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 					subSampler.setSampleSize(sampleSize);
 					logger.debug("Computing fold of size {}/{}, i.e. a portion of {}", sampleSize, totalItems, portion);
 					D fold = subSampler.call();
-					Collections.shuffle(fold, new Random(seed));
 					addReconstructionInfo(data, fold, seed, numFold, portions);
 					folds.add(fold);
 					copy = subSampler.getComplementOfLastSample();
@@ -104,7 +109,6 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 				}
 				else {
 					logger.debug("This is the last fold, which exhausts the complete original data, so no more sampling will be conducted.");
-					Collections.shuffle(copy, new Random(seed));
 					folds.add(copy);
 					addReconstructionInfo(data, copy, seed, numFold, portions);
 				}
@@ -132,7 +136,7 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 
 	@Override
 	public List<D> split(final D data, final Random random) throws SplitFailedException, InterruptedException {
-		return createSplit(data, this.rand.nextLong(), this.portions);
+		return createSplit(data, this.rand.nextLong(), this.logger, this.portions);
 	}
 
 	@Override

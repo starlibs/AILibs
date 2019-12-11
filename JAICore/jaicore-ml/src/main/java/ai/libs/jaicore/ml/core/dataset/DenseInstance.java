@@ -44,6 +44,9 @@ public class DenseInstance extends AInstance {
 			if (!(val instanceof Number)) {
 				throw new UnsupportedOperationException("The given instance cannot be cast to a point, because it has a non-numeric value: " + this.attributes);
 			}
+			if (val instanceof Integer) {
+				val = Double.valueOf((int)val);
+			}
 			point[i] = (double) val;
 		}
 		return point;

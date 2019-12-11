@@ -15,6 +15,7 @@ import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
+import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearningCurveExtrapolationEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
@@ -23,6 +24,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStra
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.core.AbstractMLPlanSingleLabelBuilder;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
@@ -117,6 +119,14 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<IWekaCla
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + 10);
 	}
 
+	@Override
+	public MLPlanWekaBuilder withDataset(final ILabeledDataset<?> dataset) {
+		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(dataset);
+		WekaInstances instances = dataset instanceof WekaInstances ? (WekaInstances)dataset : new WekaInstances(dataset);
+		super.withDataset(instances);
+		this.logger.info("Setting dataset as WekaInstances object.");
+		return this.getSelf();
+	}
 
 	@Override
 	public MLPlanWekaBuilder getSelf() {
