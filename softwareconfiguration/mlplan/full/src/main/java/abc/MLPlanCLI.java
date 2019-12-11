@@ -1,4 +1,4 @@
-package ai.libs.mlplan.cli;
+package abc;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,8 +17,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.algorithm.TimeOut;
-import org.nd4j.linalg.api.ops.impl.loss.MeanSquaredErrorLoss;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +40,9 @@ import ai.libs.jaicore.ml.classification.multilabel.loss.InstanceWiseF1;
 import ai.libs.jaicore.ml.classification.multilabel.loss.JaccardScore;
 import ai.libs.jaicore.ml.classification.multilabel.loss.RankLoss;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.Precision;
-import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
+import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
 import ai.libs.jaicore.ml.regression.loss.RootMeanSquaredError;
+import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
@@ -51,7 +52,8 @@ import ai.libs.mlplan.core.AbstractMLPlanSingleLabelBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import ai.libs.mlplan.gui.outofsampleplots.WekaClassifierSolutionCandidateRepresenter;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
+import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
+import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import ai.libs.mlplan.multilabel.MLPlanMekaBuilder;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -211,19 +213,19 @@ public class MLPlanCLI {
 				builder = new MLPlanWekaBuilder().withTinyWekaSearchSpace();
 				break;
 			case "sklearn":
-				builder = AbstractMLPlanBuilder.forSKLearn();
+				builder = new MLPlanSKLearnBuilder();
 				break;
 			case "sklearn-ul":
-				builder = AbstractMLPlanBuilder.forSKLearn().withUnlimitedLengthPipelineSearchSpace();
+				builder = new MLPlanSKLearnBuilder().withUnlimitedLengthPipelineSearchSpace();
 				break;
 			case "meka":
-				builder = AbstractMLPlanBuilder.forMeka();
+				builder = new MLPlanMekaBuilder();
 				break;
 			default:
 				throw new IllegalArgumentException("Could not identify search space configuration");
 			}
 		} else {
-			builder = AbstractMLPlanBuilder.forWeka();
+			builder = new MLPlanWekaBuilder();
 		}
 
 		if (commandLine.hasOption(multiLabelOption)) {
@@ -258,10 +260,10 @@ public class MLPlanCLI {
 
 			switch (commandLine.getOptionValue(evaluationMeasureOption)) {
 			case "ERRORRATE":
-				slcBuilder.withPerformanceMeasure(new ZeroOneLoss());
+				slcBuilder.withPerformanceMeasure(ClassifierMetric.MEAN_ERRORRATE);
 				break;
 			case "MEAN_SQUARED_ERROR":
-				slcBuilder.withPerformanceMeasure(new MeanSquaredErrorLoss());
+				throw new UnsupportedOperationException();
 				break;
 			case "PRECISION":
 				int classIndex = Integer.parseInt(commandLine.getOptionValue(positiveClassIndex, "0"));
@@ -284,7 +286,7 @@ public class MLPlanCLI {
 		builder.withTimeOut(new TimeOut(Integer.parseInt(commandLine.getOptionValue(totalTimeoutOption, totalTimeout)), TimeUnit.SECONDS));
 		builder.withNumCpus(Integer.parseInt(commandLine.getOptionValue(numCPUsOption, numCPUS)));
 
-		MLPlan mlplan = builder.build(trainData);
+		MLPlan<IClassifier> mlplan = builder.withDataset(trainData).build();
 		mlplan.setLoggerName("mlplan");
 		mlplan.setRandomSeed(Integer.parseInt(commandLine.getOptionValue(randomSeedOption, randomSeed)));
 
@@ -320,7 +322,7 @@ public class MLPlanCLI {
 		}
 
 		logger.info("Build mlplan classifier");
-		Classifier optimizedClassifier = mlplan.call();
+		IClassifier optimizedClassifier = mlplan.call();
 
 		logger.info("Open timeout tasks: {}", GlobalTimer.getInstance().getActiveTasks());
 

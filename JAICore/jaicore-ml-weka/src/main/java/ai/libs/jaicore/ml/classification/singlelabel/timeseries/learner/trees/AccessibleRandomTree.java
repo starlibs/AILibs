@@ -155,7 +155,7 @@ public class AccessibleRandomTree extends RandomTree {
 		return this.tree;
 	}
 
-	class AccessibleTree extends Tree {
+	public class AccessibleTree extends Tree {
 		/**
 		 * Default generated serial version UID.
 		 */
@@ -207,7 +207,7 @@ public class AccessibleRandomTree extends RandomTree {
 			}
 			if (totalWeight < 2 * AccessibleRandomTree.this.m_MinNum ||
 
-			// Nominal case
+					// Nominal case
 					(data.classAttribute().isNominal() && Utils.eq(classProbs[Utils.maxIndex(classProbs)], Utils.sum(classProbs)))
 
 					||
@@ -383,6 +383,19 @@ public class AccessibleRandomTree extends RandomTree {
 			} else {
 				return returnedDist;
 			}
+		}
+
+
+		public AccessibleTree[] getSuccessors() {
+			return this.successors;
+		}
+
+		public int getAttribute() {
+			return super.getM_Attribute();
+		}
+
+		public double getSplitPoint() {
+			return super.getM_SplitPoint();
 		}
 	}
 

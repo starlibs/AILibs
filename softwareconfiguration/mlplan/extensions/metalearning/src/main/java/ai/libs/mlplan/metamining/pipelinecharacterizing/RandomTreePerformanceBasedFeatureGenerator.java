@@ -4,11 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.common.math.IVector;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.IVector;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.AccessibleRandomTree;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.AccessibleRandomTree.AccessibleTree;
 import weka.classifiers.trees.RandomTree;
-import weka.classifiers.trees.RandomTree.Tree;
 import weka.core.Instances;
 
 /**
@@ -20,9 +21,9 @@ import weka.core.Instances;
  */
 public class RandomTreePerformanceBasedFeatureGenerator extends AWEKAPerformanceDecisionTreeBasedFeatureGenerator {
 
-	private RandomTree randomTree = new RandomTree();
-	private Tree tree;
-	private Map<Tree, Integer> nodesIndices = new HashMap<>();
+	private AccessibleRandomTree randomTree = new AccessibleRandomTree();
+	private Map<AccessibleTree, Integer> nodesIndices = new HashMap<>();
+	private AccessibleTree tree;
 	private boolean allowUnsetValues = false;
 	private double incomingUnsetValueValue = Double.NaN;
 	private double outgoingUnsetValueValue = 0;
@@ -39,19 +40,19 @@ public class RandomTreePerformanceBasedFeatureGenerator extends AWEKAPerformance
 		}
 
 		// Step 2: Count the nodes in the tree (DF Traversal Index Mapping)
-		this.addIndexToMap(0, this.randomTree.getM_Tree());
-		this.tree = this.randomTree.getM_Tree();
+		this.addIndexToMap(0, this.randomTree.getMTree());
+		this.tree = this.randomTree.getMTree();
 	}
 
-	private int addIndexToMap(int subTreeIndex, final Tree subTree) {
+	private int addIndexToMap(int subTreeIndex, final AccessibleTree subTree) {
 		this.nodesIndices.put(subTree, subTreeIndex);
 		subTreeIndex++;
 
 		int numberOfSuccessors = 0;
-		if (subTree.getM_Successors() != null) {
-			for (int i = 0; i < subTree.getM_Successors().length; i++) {
+		if (subTree.getSuccessors() != null) {
+			for (int i = 0; i < subTree.getSuccessors().length; i++) {
 				subTreeIndex += numberOfSuccessors;
-				numberOfSuccessors += this.addIndexToMap(subTreeIndex, subTree.getM_Successors()[i]) + 1;
+				numberOfSuccessors += this.addIndexToMap(subTreeIndex, subTree.getSuccessors()[i]) + 1;
 			}
 		}
 		return numberOfSuccessors;
@@ -62,26 +63,26 @@ public class RandomTreePerformanceBasedFeatureGenerator extends AWEKAPerformance
 		IVector pipelineRepresentation = new DenseDoubleVector(this.nodesIndices.size(), this.nonOccurenceValue);
 
 		// Query the RandomTree
-		Tree subTree = this.tree;
+		AccessibleTree subTree = this.tree;
 		while (subTree != null) {
-			if (subTree.getM_Attribute() == -1) {
+			if (subTree.getAttribute() == -1) {
 				// We are at a leaf node - The current node occurs
 				pipelineRepresentation.setValue(this.nodesIndices.get(subTree), this.occurenceValue);
 
 				// We are at a leaf - stop
 				subTree = null;
 			} else if (this.allowUnsetValues
-					&& !this.isValueUnset(intermediatePipelineRepresentation.getValue(subTree.getM_Attribute()))
+					&& !this.isValueUnset(intermediatePipelineRepresentation.getValue(subTree.getAttribute()))
 					|| !this.allowUnsetValues) {
 				// The current node occurs
 				pipelineRepresentation.setValue(this.nodesIndices.get(subTree), this.occurenceValue);
 
-				if (intermediatePipelineRepresentation.getValue(subTree.getM_Attribute()) < subTree.getM_SplitPoint()) {
+				if (intermediatePipelineRepresentation.getValue(subTree.getAttribute()) < subTree.getSplitPoint()) {
 					// we go to the left
-					subTree = subTree.getM_Successors()[0];
+					subTree = subTree.getSuccessors()[0];
 				} else {
 					// we go to the right
-					subTree = subTree.getM_Successors()[1];
+					subTree = subTree.getSuccessors()[1];
 				}
 
 			} else {
@@ -103,12 +104,12 @@ public class RandomTreePerformanceBasedFeatureGenerator extends AWEKAPerformance
 		}
 	}
 
-	private void setSubTreeToValue(final Tree subTree, final double value, final IVector featureRepresentation) {
+	private void setSubTreeToValue(final AccessibleTree subTree, final double value, final IVector featureRepresentation) {
 		featureRepresentation.setValue(this.nodesIndices.get(subTree), value);
 
-		if (subTree.getM_Successors() != null) {
-			for (int i = 0; i < subTree.getM_Successors().length; i++) {
-				this.setSubTreeToValue(subTree.getM_Successors()[i], value, featureRepresentation);
+		if (subTree.getSuccessors() != null) {
+			for (int i = 0; i < subTree.getSuccessors().length; i++) {
+				this.setSubTreeToValue(subTree.getSuccessors()[i], value, featureRepresentation);
 			}
 		}
 	}

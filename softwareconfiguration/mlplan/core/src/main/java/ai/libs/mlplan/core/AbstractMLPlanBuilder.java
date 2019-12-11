@@ -54,8 +54,7 @@ import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
  *
  * @author mwever, fmohr
  */
-public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, B extends AbstractMLPlanBuilder<L, B>>
-implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
+public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, B extends AbstractMLPlanBuilder<L, B>> implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 
 	/* Logging */
 	private Logger logger = LoggerFactory.getLogger(AbstractMLPlanBuilder.class);
@@ -190,6 +189,10 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 		return this.getSelf();
 	}
 
+	public ILabeledDataset<?> getDataset() {
+		return this.dataset;
+	}
+
 	/**
 	 * Specify the search space in which ML-Plan is required to work.
 	 *
@@ -288,7 +291,8 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 		Objects.requireNonNull(this.factoryForPipelineEvaluationInSearchPhase, "No factory for pipeline evaluation in search phase has been set!");
 		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(data);
 
-		ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluator = this.factoryForPipelineEvaluationInSearchPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed));
+		ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluator = this.factoryForPipelineEvaluationInSearchPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE,
+				new Random(seed));
 		if (evaluator instanceof LearningCurveExtrapolationEvaluator) {
 			((LearningCurveExtrapolationEvaluator) evaluator).setFullDatasetSize(fullDatasetSize);
 		}
@@ -333,7 +337,8 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 	}
 
 	/**
-	 * Sets the performance measure to evaluate a candidate solution's generalization performance. Caution: This resets the evaluators to MCCV for both search and selection phase if these are not already MCCVs.
+	 * Sets the performance measure to evaluate a candidate solution's generalization performance.
+	 *
 	 * @param performanceMeasure The loss function to be used.
 	 * @return The builder object.
 	 */
@@ -464,18 +469,20 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 		return this.withDataset(dataset).build();
 	}
 
+	public void checkPreconditionsForInitialization() {
+		Objects.requireNonNull(this.dataset, "A dataset needs to be provided as input to ML-Plan");
+		Objects.requireNonNull(this.searchSelectionDatasetSplitter, "Dataset splitter for search phase must be set!");
+		Objects.requireNonNull(this.requestedHASCOInterface, "No requested HASCO interface defined!");
+	}
+
 	/**
 	 * Builds an ML-Plan object with the dataset provided earlier to this builder.
 	 *
 	 * @return The ML-Plan object configured with this builder.
 	 */
 	public MLPlan<L> build() {
-		Objects.requireNonNull(this.dataset, "A dataset needs to be provided as input to ML-Plan");
-		Objects.requireNonNull(this.searchSelectionDatasetSplitter, "Dataset splitter for search phase must be set!");
-		Objects.requireNonNull(this.requestedHASCOInterface, "No requested HASCO interface defined!");
-		MLPlan<L> mlplan = new MLPlan<>(this, this.dataset);
-		mlplan.setTimeout(this.getTimeOut());
-		return mlplan;
+		this.checkPreconditionsForInitialization();
+		return new MLPlan<>(this, this.dataset);
 	}
 
 }

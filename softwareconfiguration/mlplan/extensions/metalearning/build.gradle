@@ -1,5 +1,5 @@
 dependencies {
-	compile project(':mlplan-core')
+	compile project(':mlplan-weka')
 	
 	// OWL API
 	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.9'

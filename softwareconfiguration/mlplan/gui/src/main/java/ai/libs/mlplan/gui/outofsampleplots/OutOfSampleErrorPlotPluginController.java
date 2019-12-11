@@ -1,8 +1,6 @@
 package ai.libs.mlplan.gui.outofsampleplots;
 
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 import org.api4.java.ai.ml.classification.IClassifier;
@@ -11,14 +9,18 @@ import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEve
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import ai.libs.jaicore.basic.reconstruction.ReconstructionPlan;
 import ai.libs.jaicore.graphvisualizer.events.gui.GUIEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
 import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfo;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.ErrorRate;
+import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
-import weka.core.SerializationHelper;
 
 public class OutOfSampleErrorPlotPluginController extends ASimpleMVCPluginController<OutOfSampleErrorPlotPluginModel, OutOfSampleErrorPlotPluginView> {
 
@@ -65,11 +67,9 @@ public class OutOfSampleErrorPlotPluginController extends ASimpleMVCPluginContro
 					IClassifier classifier = this.deserializeClassifier(scoredSolutionCandidateInfo.getSolutionCandidateRepresentation());
 					this.logger.debug("Building classifier");
 					classifier.fit(this.train);
-					Evaluation eval = new Evaluation(this.train);
 					List<Double> performances = new ArrayList<>();
 					performances.add(this.parseScoreToDouble(scoredSolutionCandidateInfo.getScore()));
-					eval.evaluateModel(classifier, this.test);
-					performances.add(eval.errorRate());
+					performances.add(MLEvaluationUtil.getLossForTrainedClassifier(classifier, this.test, new ErrorRate()));
 					this.logger.debug("Adding solution to model and updating view.");
 					this.getModel().addEntry(algorithmEvent.getTimestampOfEvent(), classifier, performances);
 					this.logger.debug("Added solution to model.");
@@ -84,9 +84,8 @@ public class OutOfSampleErrorPlotPluginController extends ASimpleMVCPluginContro
 	}
 
 	private IClassifier deserializeClassifier(final String serializedClassifier) throws Exception {
-		final byte[] bytes = Base64.getDecoder().decode(serializedClassifier);
-		Classifier classifier = (Classifier) SerializationHelper.read(new ByteArrayInputStream(bytes));
-		return classifier;
+		ReconstructionPlan plan = new ObjectMapper().readValue(serializedClassifier, ReconstructionPlan.class);
+		return (IClassifier)plan.reconstructObject();
 	}
 
 	private double parseScoreToDouble(final String score) throws NumberFormatException {

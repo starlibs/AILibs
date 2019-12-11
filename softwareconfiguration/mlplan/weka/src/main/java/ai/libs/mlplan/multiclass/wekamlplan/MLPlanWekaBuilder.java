@@ -132,4 +132,10 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<IWekaCla
 	public MLPlanWekaBuilder getSelf() {
 		return this;
 	}
+
+	@Override
+	public MLPlan4Weka build() {
+		this.checkPreconditionsForInitialization();
+		return new MLPlan4Weka(this, this.getDataset());
+	}
 }

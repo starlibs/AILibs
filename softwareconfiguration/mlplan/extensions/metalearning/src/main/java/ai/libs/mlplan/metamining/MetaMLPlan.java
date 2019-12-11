@@ -11,7 +11,9 @@ import java.util.TimerTask;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.openml.webapplication.fantail.dc.GlobalCharacterizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,18 +23,11 @@ import ai.libs.hasco.core.Util;
 import ai.libs.hasco.metamining.MetaMinerBasedSorter;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
-<<<<<<< HEAD
-import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
-=======
-import ai.libs.jaicore.ml.core.dataset.metafeature.GlobalCharacterizer;
->>>>>>> branch 'general/improvement/outsourcedinterfaces' of https://github.com/fmohr/AILibs.git
-import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
-<<<<<<< HEAD
-import ai.libs.jaicore.ml.core.metalearning.metafeature.GlobalCharacterizer;
-=======
-import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValidationSplitSetGenerator;
->>>>>>> branch 'general/improvement/outsourcedinterfaces' of https://github.com/fmohr/AILibs.git
+import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
+import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
+import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
+//github.com/fmohr/AILibs.git
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.lds.BestFirstLimitedDiscrepancySearch;
 import ai.libs.jaicore.search.algorithms.standard.lds.BestFirstLimitedDiscrepancySearchFactory;
@@ -40,14 +35,12 @@ import ai.libs.jaicore.search.algorithms.standard.lds.NodeOrderList;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.model.travesaltree.ReducedGraphGenerator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
-import ai.libs.mlplan.core.AbstractMLPlanBuilder;
-import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.metamining.databaseconnection.ExperimentRepository;
-import ai.libs.mlplan.multiclass.MLPlanWekaBuilder;
+import ai.libs.mlplan.multiclass.wekamlplan.MLPlan4Weka;
+import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -74,22 +67,22 @@ public class MetaMLPlan extends AbstractClassifier {
 	private int seed = 0;
 
 	// Search results
-	private Classifier bestModel;
+	private IWekaClassifier bestModel;
 	private transient Collection<Component> components;
 
 	// For intermediate results
 	private transient EventBus eventBus = new EventBus();
 
-	public MetaMLPlan(final Instances data) throws IOException {
+	public MetaMLPlan(final ILabeledDataset<?> data) throws IOException {
 		this(resourceFile, data);
 	}
 
-	public MetaMLPlan(final File configFile, final Instances data) throws IOException {
+	public MetaMLPlan(final File configFile, final ILabeledDataset<?> data) throws IOException {
 		// Prepare mlPlan to get a graphGenerator
-		MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forWeka();
+		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 		builder.withSearchSpaceConfigFile(configFile);
 		builder.withDataset(data);
-		MLPlan mlPlan = builder.build();
+		MLPlan4Weka mlPlan = builder.build();
 		mlPlan.next();
 
 		// Set search components except lds
@@ -128,8 +121,6 @@ public class MetaMLPlan extends AbstractClassifier {
 
 		// Preparing the split for validating pipelines
 		this.logger.info("Preparing validation split");
-		SimpleSLCSplitBasedClassifierEvaluator classifierEval = new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss());
-		MonteCarloCrossValidationSplitSetGenerator mccv = new MonteCarloCrossValidationSplitSetGenerator(classifierEval, 5, data, .7f, this.seed);
 
 		// Search for solutions
 		this.logger.info("Searching for solutions");
@@ -152,13 +143,13 @@ public class MetaMLPlan extends AbstractClassifier {
 
 				// Prepare pipeline
 				ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, solution.get(solution.size() - 1).getState(), true);
-				Classifier pl = this.factory.getComponentInstantiation(ci);
+				IWekaClassifier pl = this.factory.getComponentInstantiation(ci);
 
 				// Evaluate pipeline
 				trainingTimer.reset();
 				trainingTimer.start();
 				this.logger.info("Evaluate Pipeline: {}", pl);
-				double score = mccv.evaluate(pl);
+				double score = MLEvaluationUtil.mccv(pl, new WekaInstances(data), 5, .7, this.seed, ClassifierMetric.MEAN_ERRORRATE);
 				this.logger.info("Pipeline Score: {}", score);
 				trainingTimer.stop();
 
@@ -188,7 +179,7 @@ public class MetaMLPlan extends AbstractClassifier {
 			public void run() {
 				MetaMLPlan.this.logger.info("Evaluating best model on whole training data ({})", MetaMLPlan.this.bestModel);
 				try {
-					MetaMLPlan.this.bestModel.buildClassifier(data);
+					MetaMLPlan.this.bestModel.getClassifier().buildClassifier(data);
 				} catch (Exception e) {
 					MetaMLPlan.this.bestModel = null;
 					MetaMLPlan.this.logger.error("Evaluation of best model failed with an exception: {}", e);
@@ -229,7 +220,7 @@ public class MetaMLPlan extends AbstractClassifier {
 
 	@Override
 	public double classifyInstance(final Instance instance) throws Exception {
-		return this.bestModel.classifyInstance(instance);
+		return this.bestModel.getClassifier().classifyInstance(instance);
 	}
 
 	public void registerListenerForIntermediateSolutions(final Object listener) {

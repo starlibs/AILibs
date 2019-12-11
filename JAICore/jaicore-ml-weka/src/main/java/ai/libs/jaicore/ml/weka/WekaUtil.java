@@ -470,6 +470,10 @@ public class WekaUtil {
 		return an;
 	}
 
+	public static List<Instances> getStratifiedSplit(final Instances data, final long seed, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
+		return getStratifiedSplit(new WekaInstances(data), new Random(seed), portionOfFirstFold).stream().map(i -> i.getInstances()).collect(Collectors.toList());
+	}
+
 	public static List<IWekaInstances> getStratifiedSplit(final IWekaInstances data, final long seed, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
 		return getStratifiedSplit(data, new Random(seed), portionOfFirstFold);
 	}

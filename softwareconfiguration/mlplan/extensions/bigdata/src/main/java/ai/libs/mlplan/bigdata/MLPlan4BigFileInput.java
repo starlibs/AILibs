@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.TimeOut;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -30,10 +31,11 @@ import ai.libs.jaicore.ml.core.filter.sampling.infiles.ReservoirSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SimpleRandomSamplingFactory;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolatedEvent;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.ipl.InversePowerLawExtrapolationMethod;
-import ai.libs.mlplan.core.AbstractMLPlanBuilder;
+import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
-import ai.libs.mlplan.multiclass.MLPlanWekaBuilder;
+import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.Attribute;
@@ -59,11 +61,11 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 	private File intermediateSizeDownsampledFile = new File("testrsc/sampled/intermediate/" + this.getInput().getName());
 
 	private final int[] anchorpointsTraining = new int[] { 8, 16, 64, 128 };
-	private Map<Classifier, ComponentInstance> classifier2modelMap = new HashMap<>();
+	private Map<ISupervisedLearner<?, ?>, ComponentInstance> classifier2modelMap = new HashMap<>();
 	private Map<ComponentInstance, int[]> trainingTimesDuringSearch = new HashMap<>();
 	private Map<ComponentInstance, List<Integer>> trainingTimesDuringSelection = new HashMap<>();
 	private int numTrainingInstancesUsedInSelection;
-	private MLPlan mlplan;
+	private MLPlan<IWekaClassifier> mlplan;
 
 	public MLPlan4BigFileInput(final File input) {
 		super(input);
@@ -113,11 +115,11 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 			/* apply ML-Plan to reduced data */
 			MLPlanWekaBuilder builder;
 			try {
-				builder = AbstractMLPlanBuilder.forWeka();
+				builder = new MLPlanWekaBuilder();
 				builder.withLearningCurveExtrapolationEvaluation(this.anchorpointsTraining, new SimpleRandomSamplingFactory<>(), .7, new InversePowerLawExtrapolationMethod());
 				builder.withNodeEvaluationTimeOut(new TimeOut(15, TimeUnit.MINUTES));
 				builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.MINUTES));
-				this.mlplan = new MLPlan(builder, data);
+				this.mlplan = builder.withDataset(new WekaInstances(data)).build();
 				this.mlplan.setLoggerName(this.getLoggerName() + ".mlplan");
 				this.mlplan.registerListener(this);
 				this.mlplan.setTimeout(new TimeOut(this.getTimeout().seconds() - 30, TimeUnit.SECONDS));
@@ -182,7 +184,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 				completeData.setClassIndex(completeData.numAttributes() - 1);
 				this.logger.info("Created final dataset with {} instances. Now building the final classifier.", completeData.size());
 				long startFinalTraining = System.currentTimeMillis();
-				this.mlplan.getSelectedClassifier().buildClassifier(completeData);
+				this.mlplan.getSelectedClassifier().fit(new WekaInstances(completeData));
 				this.logger.info("Classifier has been fully trained within {}ms.", System.currentTimeMillis() - startFinalTraining);
 			} catch (Exception e) {
 				throw new AlgorithmException("Could not train the final classifier with the full data.", e);
@@ -262,7 +264,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 		while (this.hasNext()) {
 			this.next();
 		}
-		return this.mlplan.getSelectedClassifier();
+		return this.mlplan.getSelectedClassifier().getClassifier();
 	}
 
 	@Override

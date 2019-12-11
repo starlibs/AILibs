@@ -3,6 +3,7 @@ package ai.libs.mlplan.metamining.dyadranking;
 import java.util.Collection;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
+import org.api4.java.common.math.IVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +11,6 @@ import ai.libs.hasco.core.Util;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IDyadRanker;
 import ai.libs.jaicore.ml.ranking.dyad.learner.search.ADyadRankedNodeQueue;
 import ai.libs.jaicore.ml.ranking.dyad.learner.util.AbstractDyadScaler;

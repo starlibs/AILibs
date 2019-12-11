@@ -5,10 +5,10 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.api4.java.common.math.IVector;
 import org.junit.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.RandomTreePerformanceBasedFeatureGenerator;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
