@@ -12,6 +12,7 @@ import org.api4.java.ai.ml.core.evaluation.execution.IFixedDatasetSplitSetGenera
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
 import org.api4.java.ai.ml.core.evaluation.execution.LearnerExecutionFailedException;
+import org.api4.java.ai.ml.core.evaluation.execution.LearnerExecutionInterruptedException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -42,6 +43,7 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 	@Override
 	public Double evaluate(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner) throws InterruptedException, ObjectEvaluationFailedException {
 		try {
+			long evaluationStart = System.currentTimeMillis();
 			this.logger.info("Splitting the given data into two folds.");
 			IDatasetSplitSet<ILabeledDataset<? extends ILabeledInstance>> splitSet = this.splitGenerator.nextSplitSet();
 			if (splitSet.getNumberOfFoldsPerSplit() != 2) {
@@ -51,15 +53,25 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 			List<ILearnerRunReport> reports = new ArrayList<>(n);
 			for (int i = 0; i < n; i++) {
 				List<ILabeledDataset<? extends ILabeledInstance>> folds = splitSet.getFolds(i);
-				this.logger.debug("Executing learner on folds of sizes {} (train) and {} (test).", folds.get(0).size(), folds.get(1).size());
+				this.logger.debug("Executing learner{} on folds of sizes {} (train) and {} (test) using {}.", learner, folds.get(0).size(), folds.get(1).size(), this.executor.getClass().getName());
 				ILearnerRunReport report;
 				try {
 					report = this.executor.execute(learner, folds.get(0), folds.get(1));
+					this.logger.trace("Obtained report. Training times was {}ms, testing time {}ms. Ground truth vector: {}, prediction vector: {}", report.getTrainEndTime() - report.getTrainStartTime(), report.getTestEndTime() - report.getTestStartTime(), report.getPredictionDiffList().getGroundTruthAsList(), report.getPredictionDiffList().getPredictionsAsList());
 				}
-				catch (LearnerExecutionFailedException e) {
+				catch (LearnerExecutionInterruptedException e) {
+					this.logger.info("Received interrupt of training in iteration #{} after a total evaluation time of {}ms. Sending an event over the bus and forwarding the exception.", i + 1, System.currentTimeMillis() - evaluationStart);
 					ILabeledDataset<?> train = folds.get(0);
 					ILabeledDataset<?> test = folds.get(1);
-					ILearnerRunReport failReport = new LearnerRunReport(train, test, e.getTrainTimeStart(),  e.getTrainTimeEnd(),  e.getTestTimeStart(), e.getTestTimeEnd(), e.getCause());
+					ILearnerRunReport failReport = new LearnerRunReport(train, test, e.getTrainTimeStart(),  e.getTrainTimeEnd(),  e.getTestTimeStart(), e.getTestTimeEnd(), e);
+					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent(learner, failReport));
+					throw e;
+				}
+				catch (LearnerExecutionFailedException e) { // cannot be merged with the above clause, because then the only common supertype is "Exception", which does not have these methods
+					this.logger.info("Catching {} in iteration #{} after a total evaluation time of {}ms. Sending an event over the bus and forwarding the exception.", e.getClass().getName(), i + 1, System.currentTimeMillis() - evaluationStart);
+					ILabeledDataset<?> train = folds.get(0);
+					ILabeledDataset<?> test = folds.get(1);
+					ILearnerRunReport failReport = new LearnerRunReport(train, test, e.getTrainTimeStart(),  e.getTrainTimeEnd(),  e.getTestTimeStart(), e.getTestTimeEnd(), e);
 					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent(learner, failReport));
 					throw e;
 				}

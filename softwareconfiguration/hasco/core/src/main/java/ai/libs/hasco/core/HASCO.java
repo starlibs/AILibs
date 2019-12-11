@@ -273,12 +273,12 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 		this.logger.info("Received cancel, first processing the cancel locally, then forwarding to search.");
 		super.cancel();
 		if (this.search != null) {
-			this.logger.info("Trigger cancel on search. Thread intteruption flag is {}", Thread.currentThread().isInterrupted());
+			this.logger.info("Trigger cancel on search. Thread interruption flag is {}", Thread.currentThread().isInterrupted());
 			this.search.cancel();
 		}
-		this.logger.info("Finished, now terminating. Thread intteruption flag is {}", Thread.currentThread().isInterrupted());
+		this.logger.info("Finished, now terminating. Thread interruption flag is {}", Thread.currentThread().isInterrupted());
 		this.terminate();
-		this.logger.info("Cancel completed. Thread intteruption flag is {}", Thread.currentThread().isInterrupted());
+		this.logger.info("Cancel completed. Thread interruption flag is {}", Thread.currentThread().isInterrupted());
 	}
 
 	public IHASCOPlanningReduction<N, A> getPlanningGraphGeneratorDeriver() {

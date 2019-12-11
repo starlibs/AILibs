@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -46,14 +45,14 @@ public class ComponentInstance {
 	@SuppressWarnings("unused")
 	private ComponentInstance() {
 		// for serialization purposes
-		component = null;
-		parameterValues = null;
-		satisfactionOfRequiredInterfaces = null;
+		this.component = null;
+		this.parameterValues = null;
+		this.satisfactionOfRequiredInterfaces = null;
 	}
 
 	/**
 	 * Constructor for creating a <code>ComponentInstance</code> for a particular <code>Component</code>.
-	 * 
+	 *
 	 * @param component
 	 *            The component that is grounded.
 	 * @param parameterValues
@@ -139,7 +138,7 @@ public class ComponentInstance {
 
 	/**
 	 * This method checks, whether a given list of paths of refinements conforms the constraints for parameter refinements.
-	 * 
+	 *
 	 * @param paths
 	 *            A list of paths of refinements to be checked.
 	 * @return Returns true if everything is alright and false if there is an issue with the given paths.
@@ -155,7 +154,7 @@ public class ComponentInstance {
 
 	/**
 	 * This method checks, whether a path of refinements conforms the constraints for parameter refinements.
-	 * 
+	 *
 	 * @param path
 	 *            A path of refinements to be checked.
 	 * @return Returns true if everything is alright and false if there is an issue with the given path.
@@ -250,12 +249,6 @@ public class ComponentInstance {
 	@JsonIgnore
 	@Override
 	public String toString() {
-		try {
-			return new ObjectMapper().writeValueAsString(this);
-		} catch (JsonProcessingException e) {
-			L.warn("Could not directly serialize ComponentInstance to JSON:", e);
-		}
-
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("component", this.component);
 		fields.put("parameterValues", this.parameterValues);

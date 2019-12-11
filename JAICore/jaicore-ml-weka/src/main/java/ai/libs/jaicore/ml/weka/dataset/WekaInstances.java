@@ -3,6 +3,9 @@ package ai.libs.jaicore.ml.weka.dataset;
 import static ai.libs.jaicore.ml.weka.dataset.WekaInstancesUtil.extractSchema;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.api4.java.ai.ml.core.dataset.IDataset;
@@ -13,11 +16,17 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.common.attributedobjects.IListDecorator;
+import org.api4.java.common.reconstruction.IReconstructible;
+import org.api4.java.common.reconstruction.IReconstructionInstruction;
+import org.api4.java.common.reconstruction.IReconstructionPlan;
 
+import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
+import ai.libs.jaicore.basic.reconstruction.ReconstructionPlan;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class WekaInstances implements IWekaInstances, IListDecorator<Instances, Instance, IWekaInstance> {
+public class WekaInstances implements IWekaInstances, IListDecorator<Instances, Instance, IWekaInstance>, IReconstructible {
 
 	/**
 	 *
@@ -25,6 +34,8 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 	private static final long serialVersionUID = -1980814429448333405L;
 
 	private ILabeledInstanceSchema schema;
+
+	private final List<IReconstructionInstruction> reconstructionInstructions;
 
 	private Instances dataset;
 
@@ -35,6 +46,7 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 	public WekaInstances(final Instances dataset, final ILabeledInstanceSchema schema) {
 		this.schema = schema;
 		this.dataset = dataset;
+		this.reconstructionInstructions = new ArrayList<>();
 	}
 
 	public WekaInstances(final ILabeledDataset<? extends ILabeledInstance> dataset) {
@@ -48,6 +60,7 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 				throw new IllegalArgumentException("Could not convert dataset to weka's Instances.", e);
 			}
 		}
+		this.reconstructionInstructions = (dataset instanceof IReconstructible) ? ((ReconstructionPlan)((IReconstructible)dataset).getConstructionPlan()).getInstructions() : null;
 	}
 
 	@Override
@@ -135,7 +148,7 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 
 	@Override
 	public Object[] getLabelVector() {
-		throw new UnsupportedOperationException();
+		return WekaUtil.getClassesAsList(this.dataset).toArray();
 	}
 
 	@Override
@@ -157,5 +170,15 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 	@Override
 	public void removeColumn(final IAttribute attribute) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IReconstructionPlan getConstructionPlan() {
+		return new ReconstructionPlan(this.reconstructionInstructions.stream().map(i -> (ReconstructionInstruction)i).collect(Collectors.toList()));
+	}
+
+	@Override
+	public void addInstruction(final IReconstructionInstruction instruction) {
+		this.reconstructionInstructions.add(instruction);
 	}
 }

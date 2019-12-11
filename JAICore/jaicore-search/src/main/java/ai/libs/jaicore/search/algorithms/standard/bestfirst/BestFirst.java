@@ -1309,11 +1309,15 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		return (IBestFirstConfig) super.getConfig();
 	}
 
-	@Override
-	public String toString() {
+	public String toDetailedString() {
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("graphGenerator", this.graphGenerator);
 		fields.put("nodeEvaluator", this.nodeEvaluator);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
+	}
+
+	@Override
+	public String toString() {
+		return this.getId();
 	}
 }

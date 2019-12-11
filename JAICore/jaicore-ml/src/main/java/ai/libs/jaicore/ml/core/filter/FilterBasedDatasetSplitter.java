@@ -85,11 +85,12 @@ public class FilterBasedDatasetSplitter<D extends IDataset<?>> implements IDatas
 				instructions.forEach(i -> ((IReconstructible)secondFold).addInstruction(i));
 				ReconstructionInstruction rInstForSecondFold = new ReconstructionInstruction(FilterBasedDatasetSplitter.class.getName(), "getFoldOfSplit", new Class<?>[] {IDataset.class, ISamplingAlgorithmFactory.class, long.class, int.class, List.class}, new Object[] {"this", samplerFactory, seed, 1, portionsAsList});
 				((IReconstructible)secondFold).addInstruction(rInstForSecondFold);
+				ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(firstFold);
+				ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(secondFold);
+				ReconstructionInstruction inst = new ReconstructionInstruction(FilterBasedDatasetSplitter.class.getName(), "getSplit", new Class<?>[] {IDataset.class, ISamplingAlgorithmFactory.class, long.class, List.class}, new Object[] {"this", samplerFactory, seed, Arrays.asList(relativeFoldSizes)});
+				return new ReproducibleSplit<>(inst, data, firstFold, secondFold);
 			}
-			ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(firstFold);
-			ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(secondFold);
-			ReconstructionInstruction inst = new ReconstructionInstruction(FilterBasedDatasetSplitter.class.getName(), "getSplit", new Class<?>[] {IDataset.class, ISamplingAlgorithmFactory.class, long.class, List.class}, new Object[] {"this", samplerFactory, seed, Arrays.asList(relativeFoldSizes)});
-			return new ReproducibleSplit<>(inst, data, firstFold, secondFold);
+			return Arrays.asList(firstFold, secondFold);
 		} catch (DatasetCreationException e) {
 			throw new SplitFailedException(e);
 		}
