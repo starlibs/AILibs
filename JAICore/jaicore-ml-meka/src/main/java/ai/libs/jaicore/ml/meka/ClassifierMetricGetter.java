@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.weka;
+package ai.libs.jaicore.ml.meka;
 
 import java.util.Arrays;
 import java.util.List;

@@ -289,7 +289,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 		this.logger.info("Switched ML-Plan logger to {}", name);
 	}
 
-	public void setPortionOfDataForPhase2(final float portion) {
+	public void setPortionOfDataForPhase2(final double portion) {
 		this.getConfig().setProperty(MLPlanClassifierConfig.SELECTION_PORTION, String.valueOf(portion));
 	}
 

@@ -13,6 +13,7 @@ include ":JAICore:jaicore-logic"
 include ":JAICore:jaicore-math"
 include ":JAICore:jaicore-ml"
 include ":JAICore:jaicore-ml-weka"
+include ":JAICore:jaicore-ml-meka"
 
 include ":JAICore:jaicore-planning"
 include ":JAICore:jaicore-processes"

@@ -1,17 +1,16 @@
 dependencies {
 	compile project(":JAICore:jaicore-ml")
-	
+	compile project(":JAICore:jaicore-ml-weka")
+
 	compile ("$api4AIml")
 	
-	// weka dependencies
-	compile ("$weka") {
+	// meka dependencies
+	
+	compile("$meka") {
 			exclude group: 'log4j'
 			exclude group: 'org.slf4j'
 	}
-	compile ("$wekaRotationForest") {
-		exclude group: 'weka-dev'
-	}
-	compile ("$openmlAPIConnector")
+	
 	testCompile project(path:':JAICore:jaicore-basic', configuration:'testArtifacts')
 }
 
@@ -31,7 +30,7 @@ uploadArchives {
       		}
 
       		pom.project {
-        		name 'JAICore-ML-WEKA'
+        		name 'JAICore-ML-MEKA'
         		packaging 'jar'
         		// optionally artifactId can be defined here 
         		description 'This project provides utils to deal with machine learning tasks. Especially it gives support to work with standard ML libraries in Java.'

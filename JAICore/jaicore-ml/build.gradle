@@ -1,7 +1,6 @@
 dependencies {
 	compile project(":JAICore:jaicore-basic")
 	compile project(":JAICore:jaicore-experiments")
-	compile project(":JAICore:jaicore-algorithminspector")
 	compile project(":JAICore:jaicore-search")
 	compile project(":JAICore:jaicore-processes")
 	compile project(":JAICore:jaicore-math")
@@ -9,24 +8,21 @@ dependencies {
 	
 	compile ("$api4AIml")
 	
-	
 	compile ("$apacheCommonsCollections")
 	compile ("$openmlAPIConnector")
 	
-	// linear algebra
+	// linear algebra; used for time series modeling and dyad ranking
   	compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"
     compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta3"
     
-    //optimization algorithms
+    //optimization algorithms; used for optimization in dyad ranking
     compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '3.9.2'
 	
-	//JTwig template engine
+	//JTwig template engine; used for the scikit-learn wrapper
 	compile "org.jtwig:jtwig-core:5.87.0.RELEASE"
 	
-	
+	// used for the web-client to address a learning curve prediction server
 	compile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.28'
-	compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.28'
-	compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: '2.28'
 }
 
 configurations.all {

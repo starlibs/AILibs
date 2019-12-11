@@ -230,6 +230,7 @@ dependencies{
 	compile project(":JAICore:jaicore-math")
 	compile project(":JAICore:jaicore-ml")
 	compile project(":JAICore:jaicore-ml-weka")
+	compile project(":JAICore:jaicore-ml-meka")
 	compile project(":JAICore:jaicore-planning")
 	compile project(":JAICore:jaicore-processes")
 	compile project(":JAICore:jaicore-search")
