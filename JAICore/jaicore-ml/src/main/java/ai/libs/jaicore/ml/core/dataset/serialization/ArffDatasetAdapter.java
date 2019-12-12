@@ -66,14 +66,12 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IFileDatasetDescriptor datasetFile, final String nameOfClassAttribute) throws DatasetDeserializationFailedException, InterruptedException {
 		Objects.requireNonNull(datasetFile, "No dataset has been configured.");
-
 		/* read the file until the class parameter is found and count the params */
 		int numAttributes = 0;
 		try (BufferedReader br = Files.newBufferedReader(datasetFile.getDatasetDescription().toPath())) {
 			String line;
-
 			while ((line = br.readLine()) != null) {
-				if (line.startsWith(EArffItem.ATTRIBUTE.getValue())) {
+				if (line.toLowerCase().startsWith(EArffItem.ATTRIBUTE.getValue().toLowerCase())) {
 					IAttribute att = parseAttribute(line);
 					if (att.getName().equals(nameOfClassAttribute)) {
 						break;
@@ -133,7 +131,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	protected static IAttribute parseAttribute(final String line) throws UnsupportedAttributeTypeException {
-		String attributeDefinitionSplit = line.substring(EArffItem.ATTRIBUTE.getValue().length() + 1);
+		String attributeDefinitionSplit = line.replaceAll("\\t", " ").substring(EArffItem.ATTRIBUTE.getValue().length() + 1);
 		String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION));
 		String type = attributeDefinitionSplit.substring(name.length() + 1);
 		if ((name.startsWith("'") && name.endsWith("'")) || (name.startsWith("\"") && name.endsWith("\""))) {

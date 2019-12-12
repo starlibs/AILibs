@@ -36,19 +36,20 @@ public class OpenMLDatasetAdapterTest {
 		this.testReadAndReconstructibility(42123, 3615, 6, 3169);
 	}
 
+	@Test
+	public void testReadingMNIST() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException, ReconstructionException {
+		this.testReadAndReconstructibility(554, 70000, 784, 10);
+	}
+
 	public void testReadAndReconstructibility(final int id, final int expectedInstances, final int expectedAttributes, final int expectedClasses) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
 		this.testReconstructibility(this.read(id, expectedInstances, expectedAttributes, expectedClasses));
 	}
 
 	public ILabeledDataset<ILabeledInstance> read(final int id, final int expectedInstances, final int expectedAttributes, final int expectedClasses) throws DatasetDeserializationFailedException, InterruptedException {
 		ILabeledDataset<ILabeledInstance> data = OpenMLDatasetReader.deserializeDataset(id);
-		System.out.println(data.getInstanceSchema());
-
 		assertEquals("Incorrect number of instances.", expectedInstances, data.size());
 		assertEquals("Incorrect number of attributes.", expectedAttributes, data.getNumAttributes());
 		Set<Object> labels = data.stream().map(i -> i.getLabel()).collect(Collectors.toSet());
-		System.out.println(labels);
-		assertEquals("Incorrect number of class labels.", expectedClasses, labels.size());
 		return data;
 	}
 
