@@ -7,8 +7,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -17,12 +19,16 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
+import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
+import org.api4.java.ai.ml.core.evaluation.loss.IMeasure;
+import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.TimeOut;
-import org.nd4j.linalg.api.ops.impl.loss.MeanSquaredErrorLoss;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
+import ai.libs.jaicore.basic.aggregate.reals.Mean;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
@@ -40,8 +46,10 @@ import ai.libs.jaicore.ml.classification.multilabel.loss.InstanceWiseF1;
 import ai.libs.jaicore.ml.classification.multilabel.loss.JaccardScore;
 import ai.libs.jaicore.ml.classification.multilabel.loss.RankLoss;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.Precision;
-import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
-import ai.libs.jaicore.ml.regression.loss.RootMeanSquaredError;
+import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
+import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
+import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
@@ -49,9 +57,9 @@ import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.AbstractMLPlanSingleLabelBuilder;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import ai.libs.mlplan.gui.outofsampleplots.WekaClassifierSolutionCandidateRepresenter;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
+import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
+import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import ai.libs.mlplan.multilabel.MLPlanMekaBuilder;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -211,19 +219,19 @@ public class MLPlanCLI {
 				builder = new MLPlanWekaBuilder().withTinyWekaSearchSpace();
 				break;
 			case "sklearn":
-				builder = AbstractMLPlanBuilder.forSKLearn();
+				builder = new MLPlanSKLearnBuilder();
 				break;
 			case "sklearn-ul":
-				builder = AbstractMLPlanBuilder.forSKLearn().withUnlimitedLengthPipelineSearchSpace();
+				builder = new MLPlanSKLearnBuilder().withUnlimitedLengthPipelineSearchSpace();
 				break;
 			case "meka":
-				builder = AbstractMLPlanBuilder.forMeka();
+				builder = new MLPlanMekaBuilder();
 				break;
 			default:
 				throw new IllegalArgumentException("Could not identify search space configuration");
 			}
 		} else {
-			builder = AbstractMLPlanBuilder.forWeka();
+			builder = new MLPlanWekaBuilder();
 		}
 
 		if (commandLine.hasOption(multiLabelOption)) {
@@ -258,17 +266,22 @@ public class MLPlanCLI {
 
 			switch (commandLine.getOptionValue(evaluationMeasureOption)) {
 			case "ERRORRATE":
-				slcBuilder.withPerformanceMeasure(new ZeroOneLoss());
-				break;
-			case "MEAN_SQUARED_ERROR":
-				slcBuilder.withPerformanceMeasure(new MeanSquaredErrorLoss());
+				slcBuilder.withPerformanceMeasure(ClassifierMetric.MEAN_ERRORRATE);
 				break;
 			case "PRECISION":
 				int classIndex = Integer.parseInt(commandLine.getOptionValue(positiveClassIndex, "0"));
-				slcBuilder.withPerformanceMeasure(new Precision(classIndex));
-				break;
-			case "ROOT_MEAN_SQUARED_ERROR":
-				slcBuilder.withPerformanceMeasure(new RootMeanSquaredError());
+				Precision precision = new Precision(classIndex);
+				slcBuilder.withPerformanceMeasure(new ISupervisedLearnerMetric() {
+					@Override
+					public IMeasure getMeasure() {
+						return precision;
+					}
+
+					@Override
+					public double evaluateToDouble(final Collection<? extends ILearnerRunReport> reports) {
+						return new Mean().aggregate(reports.stream().map(r -> (Double) precision.loss(r.getPredictionDiffList())).collect(Collectors.toList()));
+					}
+				});
 				break;
 			default:
 				throw new IllegalArgumentException("Invalid singlelabel measure " + commandLine.getOptionValue(evaluationMeasureOption));
@@ -283,8 +296,8 @@ public class MLPlanCLI {
 		builder.withCandidateEvaluationTimeOut(new TimeOut(Integer.parseInt(commandLine.getOptionValue(solutionEvaluationTimeoutOption, solutionEvaluationTimeout)), TimeUnit.SECONDS));
 		builder.withTimeOut(new TimeOut(Integer.parseInt(commandLine.getOptionValue(totalTimeoutOption, totalTimeout)), TimeUnit.SECONDS));
 		builder.withNumCpus(Integer.parseInt(commandLine.getOptionValue(numCPUsOption, numCPUS)));
+		MLPlan<IWekaClassifier> mlplan = builder.withDataset(new WekaInstances(trainData)).build();
 
-		MLPlan mlplan = builder.build(trainData);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setRandomSeed(Integer.parseInt(commandLine.getOptionValue(randomSeedOption, randomSeed)));
 
@@ -311,7 +324,7 @@ public class MLPlanCLI {
 
 			if (commandLine.hasOption(testOption)) {
 				window = new AlgorithmVisualizationWindow(mlplan, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(), new SolutionPerformanceTimelinePlugin(),
-						new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(trainData, testData));
+						new HASCOModelStatisticsPlugin());
 			} else {
 				window = new AlgorithmVisualizationWindow(mlplan, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(), new SolutionPerformanceTimelinePlugin(),
 						new HASCOModelStatisticsPlugin());
@@ -320,7 +333,7 @@ public class MLPlanCLI {
 		}
 
 		logger.info("Build mlplan classifier");
-		Classifier optimizedClassifier = mlplan.call();
+		ISupervisedLearner optimizedClassifier = mlplan.call();
 
 		logger.info("Open timeout tasks: {}", GlobalTimer.getInstance().getActiveTasks());
 
@@ -385,12 +398,12 @@ public class MLPlanCLI {
 				}
 
 				if (!"off".equals(commandLine.getOptionValue(resultsFileOption))) {
-					writeMultiLabelEvaluationFile(result, mlplan.getInternalValidationErrorOfSelectedClassifier(), commandLine, mlplan.getSelectedClassifier());
+					writeMultiLabelEvaluationFile(result, mlplan.getInternalValidationErrorOfSelectedClassifier(), commandLine, mlplan.getSelectedClassifier().getClassifier());
 				}
 			} else {
 				Evaluation eval = new Evaluation(trainData);
 				logger.info("Assess test performance...");
-				eval.evaluateModel(optimizedClassifier, testData);
+				eval.evaluateModel(((IWekaClassifier) optimizedClassifier).getClassifier(), testData);
 
 				switch (commandLine.getOptionValue(evaluationMeasureOption, "ERRORRATE")) {
 				case "ERRORRATE":
@@ -410,7 +423,7 @@ public class MLPlanCLI {
 				}
 
 				if (!"off".equals(commandLine.getOptionValue(resultsFileOption))) {
-					writeSingleLabelEvaluationFile(eval, mlplan.getInternalValidationErrorOfSelectedClassifier(), commandLine, mlplan.getSelectedClassifier());
+					writeSingleLabelEvaluationFile(eval, mlplan.getInternalValidationErrorOfSelectedClassifier(), commandLine, mlplan.getSelectedClassifier().getClassifier());
 				}
 			}
 
@@ -420,7 +433,7 @@ public class MLPlanCLI {
 		logger.info("Experiment done.");
 	}
 
-	private static void serializeModel(final CommandLine commandLine, final Classifier bestClassifier) throws Exception {
+	private static void serializeModel(final CommandLine commandLine, final ISupervisedLearner bestClassifier) throws Exception {
 		SerializationHelper.write(commandLine.getOptionValue(modelFileOption, modelFile), bestClassifier);
 	}
 
@@ -442,7 +455,7 @@ public class MLPlanCLI {
 			builder.append("Classifier Representation: ");
 			builder.append(System.lineSeparator());
 			builder.append(System.lineSeparator());
-			if (bestModel instanceof MLPipeline) {
+			if (bestModel instanceof ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline) {
 				builder.append(((MLPipeline) bestModel).getBaseClassifier().toString());
 			} else {
 				builder.append(bestModel.toString());
@@ -476,8 +489,8 @@ public class MLPlanCLI {
 			builder.append("Classifier Representation: ");
 			builder.append(System.lineSeparator());
 			builder.append(System.lineSeparator());
-			if (bestModel instanceof MLPipeline) {
-				builder.append(((MLPipeline) bestModel).getBaseClassifier().toString());
+			if (bestModel instanceof ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline) {
+				builder.append(((ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline) bestModel).getBaseClassifier().toString());
 			} else {
 				builder.append(bestModel.toString());
 			}
