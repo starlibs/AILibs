@@ -38,13 +38,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.AutoMEKAGGPFitnessMeasureLoss;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.ExactMatch;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.F1MacroAverageL;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.Hamming;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.InstanceWiseF1;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.JaccardScore;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.RankLoss;
+import ai.libs.jaicore.ml.classification.multilabel.evaluation.EMultiLabelClassifierMetric;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.Precision;
 import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
@@ -238,25 +232,25 @@ public class MLPlanCLI {
 			MLPlanMekaBuilder mekaBuilder = (MLPlanMekaBuilder) builder;
 			switch (commandLine.getOptionValue(evaluationMeasureOption)) {
 			case "AUTO_MEKA_GGP_FITNESS":
-				mekaBuilder.withPerformanceMeasure(new AutoMEKAGGPFitnessMeasureLoss());
+				mekaBuilder.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_AUTOMEKA_FITNESS);
 				break;
 			case "EXACT_MATCH":
-				mekaBuilder.withPerformanceMeasure(new ExactMatch());
+				mekaBuilder.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_EXACTMATCH);
 				break;
 			case "F1_MACRO_AVG_D":
-				mekaBuilder.withPerformanceMeasure(new InstanceWiseF1());
+				mekaBuilder.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_INSTANCEF1);
 				break;
 			case "F1_MACRO_AVG_L":
-				mekaBuilder.withPerformanceMeasure(new F1MacroAverageL());
+				mekaBuilder.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_F1MACROL);
 				break;
 			case "HAMMING":
-				mekaBuilder.withPerformanceMeasure(new Hamming());
+				mekaBuilder.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_HAMMING);
 				break;
 			case "JACCARD":
-				mekaBuilder.withPerformanceMeasure(new JaccardScore());
+				mekaBuilder.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_JACCARD);
 				break;
 			case "RANK_LOSS":
-				mekaBuilder.withPerformanceMeasure(new RankLoss());
+				mekaBuilder.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_RANK);
 				break;
 			default:
 				throw new IllegalArgumentException("Invalid multilabel measure " + commandLine.getOptionValue(evaluationMeasureOption));
