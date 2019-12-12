@@ -131,9 +131,9 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	protected static IAttribute parseAttribute(final String line) throws UnsupportedAttributeTypeException {
-		String attributeDefinitionSplit = line.replaceAll("\\t", " ").substring(EArffItem.ATTRIBUTE.getValue().length() + 1);
-		String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION));
-		String type = attributeDefinitionSplit.substring(name.length() + 1);
+		String attributeDefinitionSplit = line.replaceAll("\\t", " ").substring(EArffItem.ATTRIBUTE.getValue().length() + 1).trim();
+		String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION)).trim();
+		String type = attributeDefinitionSplit.substring(name.length() + 1).trim();
 		if ((name.startsWith("'") && name.endsWith("'")) || (name.startsWith("\"") && name.endsWith("\""))) {
 			name = name.substring(1, name.length() - 1);
 		}
@@ -174,9 +174,15 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		if (line.trim().startsWith("%")) {
 			throw new IllegalArgumentException("Cannot create object for commented line!");
 		}
-		String[] lineSplit = line.split(",");
 
 		boolean sparseMode = sparseData;
+		String curLine = line;
+		if (curLine.trim().startsWith("{") && curLine.trim().endsWith("}")) {
+			curLine = curLine.substring(1, curLine.length() - 1);
+			sparseMode = true;
+		}
+		String[] lineSplit = curLine.split(",");
+
 		if (lineSplit.length < attributes.size()) {
 			sparseMode = true;
 		}

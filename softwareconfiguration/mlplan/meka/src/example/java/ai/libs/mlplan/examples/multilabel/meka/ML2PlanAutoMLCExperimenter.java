@@ -37,10 +37,8 @@ import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredS
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.AutoMEKAGGPFitnessMeasureLoss;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.AutoMekaGGPFitness;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.F1MacroAverageL;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.Hamming;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.InstanceWiseF1AsLoss;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.RankLoss;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
@@ -49,7 +47,6 @@ import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogr
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.gui.outofsampleplots.WekaClassifierSolutionCandidateRepresenter;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.multilabel.MLPlanMekaBuilder;
 import javafx.application.Platform;

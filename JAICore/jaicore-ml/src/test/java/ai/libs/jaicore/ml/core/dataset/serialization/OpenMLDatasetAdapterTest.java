@@ -41,6 +41,31 @@ public class OpenMLDatasetAdapterTest {
 		this.testReadAndReconstructibility(554, 70000, 784, 10);
 	}
 
+	@Test
+	public void testReadingDexter() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException, ReconstructionException {
+		this.testReadAndReconstructibility(4136, 600, 20000, 2);
+	}
+
+	@Test
+	public void testReadingDorothea() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException, ReconstructionException {
+		this.testReadAndReconstructibility(4137, 1150, 100000, 2);
+	}
+
+	@Test
+	public void testReadingGisette() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException, ReconstructionException {
+		this.testReadAndReconstructibility(41026, 7000, 5000, 2);
+	}
+
+	@Test
+	public void testReadingCifar10() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException, ReconstructionException {
+		this.testReadAndReconstructibility(40927, 60000, 3072, 10);
+	}
+
+	@Test
+	public void testReadingAbalone() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException, ReconstructionException {
+		this.testReadAndReconstructibility(183, 4177, 8, 28);
+	}
+
 	public void testReadAndReconstructibility(final int id, final int expectedInstances, final int expectedAttributes, final int expectedClasses) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
 		this.testReconstructibility(this.read(id, expectedInstances, expectedAttributes, expectedClasses));
 	}
