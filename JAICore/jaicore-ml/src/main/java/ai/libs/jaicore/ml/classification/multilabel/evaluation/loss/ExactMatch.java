@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.classification.multilabel.loss;
+package ai.libs.jaicore.ml.classification.multilabel.evaluation.loss;
 
 import java.util.List;
 import java.util.stream.IntStream;

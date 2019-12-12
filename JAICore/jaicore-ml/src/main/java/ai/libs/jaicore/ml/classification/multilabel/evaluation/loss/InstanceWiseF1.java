@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.classification.multilabel.loss;
+package ai.libs.jaicore.ml.classification.multilabel.evaluation.loss;
 
 import java.util.List;
 import java.util.OptionalDouble;
@@ -8,13 +8,22 @@ import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClass
 
 import ai.libs.jaicore.ml.core.evaluation.loss.F1Measure;
 
-public class F1MacroAverageL extends AMultiLabelClassificationMeasure {
+/**
+ * Instance-wise F1 measure for multi-label classifiers.
+ *
+ * For reference see
+ * Wu, Xi-Zhu; Zhou, Zhi-Hua: A Unified View of Multi-Label Performance Measures (ICML / JMLR 2017)
+ *
+ * @author mwever
+ *
+ */
+public class InstanceWiseF1 extends AMultiLabelClassificationMeasure {
 
-	public F1MacroAverageL(final double threshold) {
+	public InstanceWiseF1(final double threshold) {
 		super(threshold);
 	}
 
-	public F1MacroAverageL() {
+	public InstanceWiseF1() {
 		super();
 	}
 
@@ -26,16 +35,15 @@ public class F1MacroAverageL extends AMultiLabelClassificationMeasure {
 	@Override
 	public double score(final List<IMultiLabelClassification> expected, final List<IMultiLabelClassification> actual) {
 		this.checkConsistency(expected, actual);
-		int[][] expectedMatrix = this.transposeMatrix(this.listToThresholdedRelevanceMatrix(expected));
-		int[][] actualMatrix = this.transposeMatrix(this.listToThresholdedRelevanceMatrix(actual));
+		int[][] expectedMatrix = this.listToThresholdedRelevanceMatrix(expected);
+		int[][] actualMatrix = this.listToThresholdedRelevanceMatrix(actual);
 
-		F1Measure loss = new F1Measure(1);
-		OptionalDouble res = IntStream.range(0, expectedMatrix.length).mapToDouble(x -> loss.score(expectedMatrix[x], actualMatrix[x])).average();
+		F1Measure baseMeasure = new F1Measure(1);
+		OptionalDouble res = IntStream.range(0, expectedMatrix.length).mapToDouble(x -> baseMeasure.score(expectedMatrix[x], actualMatrix[x])).average();
 		if (!res.isPresent()) {
 			throw new IllegalStateException("Could not determine average label-wise f measure.");
 		} else {
 			return res.getAsDouble();
 		}
 	}
-
 }

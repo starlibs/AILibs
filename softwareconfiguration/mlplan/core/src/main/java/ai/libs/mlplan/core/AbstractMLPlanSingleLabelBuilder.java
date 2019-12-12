@@ -9,10 +9,6 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValid
 public abstract class AbstractMLPlanSingleLabelBuilder<C extends IClassifier, B extends AbstractMLPlanSingleLabelBuilder<C, B>> extends AbstractMLPlanBuilder<C, B> {
 
 	/* Default configuration values. */
-	protected static final int DEFAULT_SEARCH_NUM_MC_ITERATIONS = 5;
-	protected static final double DEFAULT_SEARCH_TRAIN_FOLD_SIZE = 0.7;
-	protected static final int DEFAULT_SELECTION_NUM_MC_ITERATIONS = 5;
-	protected static final double DEFAULT_SELECTION_TRAIN_FOLD_SIZE = 0.7;
 	protected static final ISupervisedLearnerMetric DEFAULT_PERFORMANCE_MEASURE = ClassifierMetric.MEAN_ERRORRATE;
 
 	protected AbstractMLPlanSingleLabelBuilder() {

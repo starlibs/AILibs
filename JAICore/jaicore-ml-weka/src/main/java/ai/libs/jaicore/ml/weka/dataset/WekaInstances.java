@@ -41,6 +41,7 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 
 	public WekaInstances(final Instances dataset) {
 		this(dataset, extractSchema(dataset));
+		this.reconstructionInstructions.add(new ReconstructionInstruction("Instances", "__construct", new Class<?>[] {}, new Object[] {}));
 	}
 
 	public WekaInstances(final Instances dataset, final ILabeledInstanceSchema schema) {
@@ -60,7 +61,7 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 				throw new IllegalArgumentException("Could not convert dataset to weka's Instances.", e);
 			}
 		}
-		this.reconstructionInstructions = (dataset instanceof IReconstructible) ? ((ReconstructionPlan)((IReconstructible)dataset).getConstructionPlan()).getInstructions() : null;
+		this.reconstructionInstructions = (dataset instanceof IReconstructible) ? ((ReconstructionPlan) ((IReconstructible) dataset).getConstructionPlan()).getInstructions() : null;
 	}
 
 	@Override
@@ -174,7 +175,7 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 
 	@Override
 	public IReconstructionPlan getConstructionPlan() {
-		return new ReconstructionPlan(this.reconstructionInstructions.stream().map(i -> (ReconstructionInstruction)i).collect(Collectors.toList()));
+		return new ReconstructionPlan(this.reconstructionInstructions.stream().map(i -> (ReconstructionInstruction) i).collect(Collectors.toList()));
 	}
 
 	@Override

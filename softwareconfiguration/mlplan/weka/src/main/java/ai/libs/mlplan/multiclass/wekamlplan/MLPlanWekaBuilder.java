@@ -46,11 +46,14 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<IWekaCla
 	private static final WekaPipelineFactory DEF_CLASSIFIER_FACTORY = new WekaPipelineFactory();
 	private static final File DEF_PREFERRED_COMPONENTS = FileUtil.getExistingFileWithHighestPriority(RES_PREFERRED_COMPONENTS, FS_PREFERRED_COMPONENTS);
 	private static final File DEF_SEARCH_SPACE_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_SSC_WEKA_COMPLETE, FS_SSC_WEKA);
-	private static final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> DEF_SEARCH_SELECT_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE, new Random(0));
-	//	private static final IDatasetSplitter<WekaInstances> DEF_SEARCH_DATASET_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE, new Random(0));
-	//	private static final IDatasetSplitter<WekaInstances> DEF_SELECTION_DATASET_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SELECTION_TRAIN_FOLD_SIZE, new Random(0));
-	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE);
-	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE);
+	private static final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> DEF_SEARCH_SELECT_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE,
+			new Random(0));
+	// private static final IDatasetSplitter<WekaInstances> DEF_SEARCH_DATASET_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE, new Random(0));
+	// private static final IDatasetSplitter<WekaInstances> DEF_SELECTION_DATASET_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SELECTION_TRAIN_FOLD_SIZE, new Random(0));
+	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS)
+			.withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE);
+	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS)
+			.withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE);
 
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaBuilder.class);
 
@@ -65,35 +68,11 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<IWekaCla
 		this.withPerformanceMeasure(DEFAULT_PERFORMANCE_MEASURE);
 		this.withDatasetSplitterForSearchSelectionSplit(DEF_SEARCH_SELECT_SPLITTER);
 
-
 		// /* configure blow-ups for MCCV */
 		double blowUpInSelectionPhase = MathExt.round(1f / DEFAULT_SEARCH_TRAIN_FOLD_SIZE * DEFAULT_SELECTION_NUM_MC_ITERATIONS / DEFAULT_SEARCH_NUM_MC_ITERATIONS, 2);
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
 		double blowUpInPostprocessing = MathExt.round((1 / (1 - this.getAlgorithmConfig().dataPortionForSelection())) / DEFAULT_SELECTION_NUM_MC_ITERATIONS, 2);
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
-	}
-
-
-	/**
-	 * Creates a preferred node evaluator that can be used to prefer components over other components.
-	 *
-	 * @param preferredComponentsFile The file containing a priority list of component names.
-	 * @param preferableCompnentMethodPrefix The prefix of a method's name for refining a complex task to preferable components.
-	 * @return The builder object.
-	 * @throws IOException Thrown if a problem occurs while trying to read the file containing the priority list.
-	 */
-	public MLPlanWekaBuilder withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
-		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
-		List<String> ordering;
-		if (preferredComponentsFile instanceof ResourceFile) {
-			ordering = ResourceUtil.readResourceFileToStringList((ResourceFile) preferredComponentsFile);
-		} else if (!preferredComponentsFile.exists()) {
-			this.logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", preferredComponentsFile.getAbsolutePath());
-			ordering = new ArrayList<>();
-		} else {
-			ordering = FileUtil.readFileAsList(preferredComponentsFile);
-		}
-		return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.getComponents(), ordering, preferableCompnentMethodPrefix));
 	}
 
 	/**
@@ -119,10 +98,32 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<IWekaCla
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + 10);
 	}
 
+	/**
+	 * Creates a preferred node evaluator that can be used to prefer components over other components.
+	 *
+	 * @param preferredComponentsFile The file containing a priority list of component names.
+	 * @param preferableCompnentMethodPrefix The prefix of a method's name for refining a complex task to preferable components.
+	 * @return The builder object.
+	 * @throws IOException Thrown if a problem occurs while trying to read the file containing the priority list.
+	 */
+	public MLPlanWekaBuilder withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
+		List<String> ordering;
+		if (preferredComponentsFile instanceof ResourceFile) {
+			ordering = ResourceUtil.readResourceFileToStringList((ResourceFile) preferredComponentsFile);
+		} else if (!preferredComponentsFile.exists()) {
+			this.logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", preferredComponentsFile.getAbsolutePath());
+			ordering = new ArrayList<>();
+		} else {
+			ordering = FileUtil.readFileAsList(preferredComponentsFile);
+		}
+		return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.getComponents(), ordering, preferableCompnentMethodPrefix));
+	}
+
 	@Override
 	public MLPlanWekaBuilder withDataset(final ILabeledDataset<?> dataset) {
 		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(dataset);
-		WekaInstances instances = dataset instanceof WekaInstances ? (WekaInstances)dataset : new WekaInstances(dataset);
+		WekaInstances instances = dataset instanceof WekaInstances ? (WekaInstances) dataset : new WekaInstances(dataset);
 		super.withDataset(instances);
 		this.logger.info("Setting dataset as WekaInstances object.");
 		return this.getSelf();

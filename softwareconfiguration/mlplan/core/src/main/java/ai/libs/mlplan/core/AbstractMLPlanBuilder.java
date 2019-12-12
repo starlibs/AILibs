@@ -34,7 +34,6 @@ import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
-import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.LearningCurveExtrapolationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
@@ -54,8 +53,7 @@ import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
  *
  * @author mwever, fmohr
  */
-public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, B extends AbstractMLPlanBuilder<L, B>>
-implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
+public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, B extends AbstractMLPlanBuilder<L, B>> implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 
 	/* Logging */
 	private Logger logger = LoggerFactory.getLogger(AbstractMLPlanBuilder.class);
@@ -63,6 +61,11 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 
 	private static final String RES_ALGORITHM_CONFIG = "mlplan/mlplan.properties";
 	private static final String FS_ALGORITHM_CONFIG = "conf/mlplan.properties";
+
+	protected static final int DEFAULT_SEARCH_NUM_MC_ITERATIONS = 5;
+	protected static final double DEFAULT_SEARCH_TRAIN_FOLD_SIZE = 0.7;
+	protected static final int DEFAULT_SELECTION_NUM_MC_ITERATIONS = 5;
+	protected static final double DEFAULT_SELECTION_TRAIN_FOLD_SIZE = 0.7;
 
 	/* Default configuration values */
 	private static final File DEF_ALGORITHM_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_ALGORITHM_CONFIG, FS_ALGORITHM_CONFIG);
@@ -79,15 +82,15 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 	private File searchSpaceFile;
 	private String requestedHASCOInterface;
 	private ILearnerFactory<L> classifierFactory;
-	private ISupervisedLearnerMetric performanceMeasure = ClassifierMetric.MEAN_ERRORRATE;
+	private ISupervisedLearnerMetric performanceMetric;
 
 	private IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator = null;
 	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
 
 	/* The splitter is used to create the split for separating search and selection data */
 	private IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter;
-	private ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> factoryForPipelineEvaluationInSearchPhase = null;
-	private ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> factoryForPipelineEvaluationInSelectionPhase = null;
+	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> factoryForPipelineEvaluationInSearchPhase = null;
+	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> factoryForPipelineEvaluationInSelectionPhase = null;
 
 	private Collection<Component> components = new LinkedList<>();
 
@@ -288,7 +291,8 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 		Objects.requireNonNull(this.factoryForPipelineEvaluationInSearchPhase, "No factory for pipeline evaluation in search phase has been set!");
 		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(data);
 
-		ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluator = this.factoryForPipelineEvaluationInSearchPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed));
+		ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluator = this.factoryForPipelineEvaluationInSearchPhase.getDataspecificRandomizedLearnerEvaluator(data, this.performanceMetric,
+				new Random(seed));
 		if (evaluator instanceof LearningCurveExtrapolationEvaluator) {
 			((LearningCurveExtrapolationEvaluator) evaluator).setFullDatasetSize(fullDatasetSize);
 		}
@@ -301,7 +305,7 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 		if (this.factoryForPipelineEvaluationInSelectionPhase == null) {
 			throw new IllegalStateException("No factory for pipeline evaluation in selection phase has been set!");
 		}
-		return new PipelineEvaluator(this.getLearnerFactory(), this.factoryForPipelineEvaluationInSelectionPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed)), Integer.MAX_VALUE);
+		return new PipelineEvaluator(this.getLearnerFactory(), this.factoryForPipelineEvaluationInSelectionPhase.getDataspecificRandomizedLearnerEvaluator(data, this.performanceMetric, new Random(seed)), Integer.MAX_VALUE);
 	}
 
 	/**
@@ -338,7 +342,7 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 	 * @return The builder object.
 	 */
 	public B withPerformanceMeasure(final ISupervisedLearnerMetric performanceMeasure) {
-		this.performanceMeasure = performanceMeasure;
+		this.performanceMetric = performanceMeasure;
 		return this.getSelf();
 	}
 
@@ -363,7 +367,7 @@ implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 
 	@Override
 	public ISupervisedLearnerMetric getPerformanceMeasure() {
-		return this.performanceMeasure;
+		return this.performanceMetric;
 	}
 
 	@SuppressWarnings("unchecked")
