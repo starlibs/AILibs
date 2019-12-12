@@ -178,12 +178,16 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 		String[] lineSplit = line.split(",");
 
-		if (!sparseData) {
+		boolean sparseMode = sparseData;
+		if (lineSplit.length < attributes.size()) {
+			sparseMode = true;
+		}
+
+		if (!sparseMode) {
 			if (lineSplit.length != attributes.size()) {
 				throw new IllegalArgumentException("Cannot parse instance as this is not a sparse instance but has less columns than there are attributes defined. Expected values: " + attributes.size() + ". Actual number of values: "
 						+ lineSplit.length + ". Values: " + Arrays.toString(lineSplit));
 			}
-
 			Object[] parsedDenseInstance = new Object[lineSplit.length - 1];
 			Object target = null;
 			int cI = 0;
@@ -194,7 +198,6 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 					parsedDenseInstance[cI++] = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
 				}
 			}
-
 			return Arrays.asList(parsedDenseInstance, target);
 		} else {
 			Map<Integer, Object> parsedSparseInstance = new HashMap<>();

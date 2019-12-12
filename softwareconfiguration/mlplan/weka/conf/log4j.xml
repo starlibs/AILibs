@@ -134,15 +134,15 @@
   </logger>
   
   <logger name="ai.libs.jaicore.timing">
-  	<level value="info" />
+  	<level value="warn" />
   </logger>
   
   <logger name="ai.libs.jaicore.concurrent">
-  	<level value="info" />
+  	<level value="warn" />
   </logger>
   
   <logger name="ai.libs.jaicore.interrupt">
-  	<level value="info" />
+  	<level value="warn" />
   </logger>
   
   <!-- configuration for example classes -->

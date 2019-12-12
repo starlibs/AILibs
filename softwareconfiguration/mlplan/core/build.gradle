@@ -17,7 +17,11 @@ dependencies {
 	compile project(':JAICore:jaicore-logic') 
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
-	compile project(':JAICore:jaicore-ml')
+	compile (project(':JAICore:jaicore-ml')) {
+		exclude group: 'org.nd4j'
+		exclude group: 'org.deeplearning4j'
+		exclude group: 'edu.stanford.nlp'
+	}
 	
 	compile ('org.api4:ai-ml')
 		

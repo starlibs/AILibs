@@ -10,7 +10,7 @@ import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
 public interface MLPlanClassifierConfig extends TwoPhaseHASCOConfig {
 
 	public static final String PREFERRED_COMPONENTS = "mlplan.preferredComponents";
-	public static final String SELECTION_PORTION = "mlplan.selection.mccvPortion";
+	public static final String SELECTION_PORTION = "mlplan.selectionportion";
 
 	@Key(SELECTION_PORTION)
 	@DefaultValue("0.3")

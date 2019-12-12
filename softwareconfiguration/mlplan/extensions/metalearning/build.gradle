@@ -1,8 +1,9 @@
 dependencies {
-	compile project(':mlplan-core')
+	compile project(':mlplan-weka')
 	
 	// OWL API
 	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.9'
+	compile ('org.openml:EvaluationEngine:0.1.0')
 	
 	// TreeMiner
 	compile 'com.github.helegraf:TreeMiner:ed1071c4ef'

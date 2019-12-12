@@ -31,10 +31,16 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
-import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.classification.IClassifier;
+import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
+import org.api4.java.ai.ml.core.exception.PredictionException;
+import org.api4.java.ai.ml.ranking.IRanking;
+import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
+import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.common.math.IVector;
 import org.api4.java.datastructure.graph.IPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.openml.webapplication.fantail.dc.LandmarkerCharacterizer;
@@ -47,16 +53,14 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.IVector;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.ErrorRate;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.FixedSplitClassifierEvaluator;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
-import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.PLNetDyadRanker;
 import ai.libs.jaicore.ml.ranking.dyad.learner.util.DyadMinMaxScaler;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.FValueEvent;
@@ -67,9 +71,9 @@ import ai.libs.jaicore.search.algorithms.standard.random.RandomSearch;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.ComponentInstanceVectorFeatureGenerator;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
-import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import weka.core.Instances;
 
 /**
@@ -154,7 +158,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 	 * Used to create landmarker values for pipelines where no such landmarker has
 	 * yet been evaluated.
 	 */
-	private ILearnerFactory classifierFactory;
+	private ILearnerFactory<IClassifier> classifierFactory;
 
 	/*
 	 * Defines if a landmarking based approach is used for defining the meta
@@ -175,7 +179,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 
 	private DyadMinMaxScaler scaler = null;
 
-	public void setClassifierFactory(final ILearnerFactory classifierFactory) {
+	public void setClassifierFactory(final ILearnerFactory<IClassifier> classifierFactory) {
 		this.classifierFactory = classifierFactory;
 	}
 
@@ -219,7 +223,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public V f(final IPath<T, A> path) throws InterruptedException, PathEvaluationException {
+	public V evaluate(final IPath<T, A> path) throws InterruptedException, PathEvaluationException {
 		if (this.firstEvaluation == null) {
 			this.firstEvaluation = Instant.now();
 		}
@@ -336,7 +340,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 		return completedPaths;
 	}
 
-	private List<ComponentInstance> getDyadRankedPaths(final List<List<T>> randomPaths) throws PredictionException {
+	private List<ComponentInstance> getDyadRankedPaths(final List<List<T>> randomPaths) throws PredictionException, InterruptedException {
 		Map<IVector, ComponentInstance> pipelineToCharacterization = new HashMap<>();
 		// extract componentInstances that we can rank
 		for (List<T> randomPath : randomPaths) {
@@ -382,7 +386,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 			Instances[] subsets = this.landmarkerSets[i];
 			double score = 0d;
 			for (Instances train : subsets) {
-				FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(train, this.evaluationDataset);
+				FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(new WekaInstances(train), new WekaInstances(this.evaluationDataset), new ErrorRate());
 				try {
 					score += evaluator.evaluate(this.classifierFactory.getComponentInstantiation(cI));
 				} catch (Exception e) {
@@ -398,15 +402,15 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 		return new DenseDoubleVector(yPrime);
 	}
 
-	private List<ComponentInstance> rankRandomPipelines(final Map<IVector, ComponentInstance> randomPipelines) throws PredictionException {
+	private List<ComponentInstance> rankRandomPipelines(final Map<IVector, ComponentInstance> randomPipelines) throws PredictionException, InterruptedException {
 		List<IVector> alternatives = new ArrayList<>(randomPipelines.keySet());
 
 		/* Use a sparse instance for ranking */
 		SparseDyadRankingInstance toRank = new SparseDyadRankingInstance(new DenseDoubleVector(this.datasetMetaFeatures), alternatives);
-		IDyadRankingInstance rankedInstance;
+		IRanking<IDyad> rankedInstance;
 		rankedInstance = this.dyadRanker.predict(toRank);
 		List<ComponentInstance> rankedPipelines = new ArrayList<>();
-		for (Dyad dyad : rankedInstance) {
+		for (IDyad dyad : rankedInstance) {
 			rankedPipelines.add(randomPipelines.get(dyad.getAlternative()));
 		}
 		return rankedPipelines;

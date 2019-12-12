@@ -193,6 +193,10 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		return this.getSelf();
 	}
 
+	public ILabeledDataset<?> getDataset() {
+		return this.dataset;
+	}
+
 	/**
 	 * Specify the search space in which ML-Plan is required to work.
 	 *
@@ -337,7 +341,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	}
 
 	/**
-	 * Sets the performance measure to evaluate a candidate solution's generalization performance. Caution: This resets the evaluators to MCCV for both search and selection phase if these are not already MCCVs.
+	 * Sets the performance measure to evaluate a candidate solution's generalization performance.
+	 *
 	 * @param performanceMeasure The loss function to be used.
 	 * @return The builder object.
 	 */
@@ -468,18 +473,20 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		return this.withDataset(dataset).build();
 	}
 
+	public void checkPreconditionsForInitialization() {
+		Objects.requireNonNull(this.dataset, "A dataset needs to be provided as input to ML-Plan");
+		Objects.requireNonNull(this.searchSelectionDatasetSplitter, "Dataset splitter for search phase must be set!");
+		Objects.requireNonNull(this.requestedHASCOInterface, "No requested HASCO interface defined!");
+	}
+
 	/**
 	 * Builds an ML-Plan object with the dataset provided earlier to this builder.
 	 *
 	 * @return The ML-Plan object configured with this builder.
 	 */
 	public MLPlan<L> build() {
-		Objects.requireNonNull(this.dataset, "A dataset needs to be provided as input to ML-Plan");
-		Objects.requireNonNull(this.searchSelectionDatasetSplitter, "Dataset splitter for search phase must be set!");
-		Objects.requireNonNull(this.requestedHASCOInterface, "No requested HASCO interface defined!");
-		MLPlan<L> mlplan = new MLPlan<>(this, this.dataset);
-		mlplan.setTimeout(this.getTimeOut());
-		return mlplan;
+		this.checkPreconditionsForInitialization();
+		return new MLPlan<>(this, this.dataset);
 	}
 
 }
