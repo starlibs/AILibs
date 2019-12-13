@@ -4,21 +4,21 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
-import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.common.aggregate.IAggregateFunction;
 
 import ai.libs.jaicore.basic.aggregate.reals.Mean;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.ErrorRate;
 
-public enum ClassifierMetric implements ISupervisedLearnerMetric {
+public enum EAggregatedClassifierMetric implements IAggregatedPredictionPerformanceMetric {
 
 	MEAN_ERRORRATE(new ErrorRate(), new Mean());
 
 	private final IDeterministicPredictionPerformanceMeasure lossFunction;
 	private final IAggregateFunction<Double> aggregation;
 
-	private ClassifierMetric(final IDeterministicPredictionPerformanceMeasure lossFunction, final IAggregateFunction<Double> aggregation) {
+	private EAggregatedClassifierMetric(final IDeterministicPredictionPerformanceMeasure lossFunction, final IAggregateFunction<Double> aggregation) {
 		this.lossFunction = lossFunction;
 		this.aggregation = aggregation;
 	}

@@ -10,30 +10,30 @@ import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredict
 
 public abstract class APredictionPerformanceMeasure<O, P> implements IDeterministicPredictionPerformanceMeasure<O, P> {
 
-	protected void checkConsistency(final List<P> expected, final List<O> actual) {
+	protected void checkConsistency(final List<? extends P> expected, final List<? extends O> actual) {
 		if (expected.size() != actual.size()) {
 			throw new IllegalArgumentException("The expected and predicted classification lists must be of the same length.");
 		}
 	}
 
 	@Override
-	public double loss(final IPredictionAndGroundTruthTable<O, P> pairTable) {
-		return this.loss(pairTable.getPredictionsAsList(), pairTable.getGroundTruthAsList());
+	public double loss(final IPredictionAndGroundTruthTable<? extends O, ? extends P> pairTable) {
+		return this.loss(pairTable.getGroundTruthAsList(), pairTable.getPredictionsAsList());
 	}
 
 	@Override
-	public double loss(final List<O> actual, final List<P> expected) {
-		return 1 - this.score(actual, expected);
+	public double loss(final List<? extends P> expected, final List<? extends O> actual) {
+		return 1 - this.score(expected, actual);
 	}
 
 	@Override
-	public double score(final List<O> actual, final List<P> expected) {
-		return 1 - this.loss(actual, expected);
+	public double score(final List<? extends P> expected, final List<? extends O> actual) {
+		return 1 - this.loss(expected, actual);
 	}
 
 	@Override
-	public double score(final IPredictionAndGroundTruthTable<O, P> pairTable) {
-		return this.score(pairTable.getPredictionsAsList(), pairTable.getGroundTruthAsList());
+	public double score(final IPredictionAndGroundTruthTable<? extends O, ? extends P> pairTable) {
+		return this.score(pairTable.getGroundTruthAsList(), pairTable.getPredictionsAsList());
 	}
 
 	protected double averageInstanceWiseLoss(final List<P> expected, final List<O> actual, final IDeterministicInstancePredictionPerformanceMeasure<O, P> subMeasure) {

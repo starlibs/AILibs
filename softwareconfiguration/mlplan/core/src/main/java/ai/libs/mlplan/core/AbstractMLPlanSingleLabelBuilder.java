@@ -1,15 +1,15 @@
 package ai.libs.mlplan.core;
 
 import org.api4.java.ai.ml.classification.IClassifier;
-import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
 
-import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
+import ai.libs.jaicore.ml.core.evaluation.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 
 public abstract class AbstractMLPlanSingleLabelBuilder<C extends IClassifier, B extends AbstractMLPlanSingleLabelBuilder<C, B>> extends AbstractMLPlanBuilder<C, B> {
 
 	/* Default configuration values. */
-	protected static final ISupervisedLearnerMetric DEFAULT_PERFORMANCE_MEASURE = ClassifierMetric.MEAN_ERRORRATE;
+	protected static final IAggregatedPredictionPerformanceMetric DEFAULT_PERFORMANCE_MEASURE = EAggregatedClassifierMetric.MEAN_ERRORRATE;
 
 	protected AbstractMLPlanSingleLabelBuilder() {
 		super();

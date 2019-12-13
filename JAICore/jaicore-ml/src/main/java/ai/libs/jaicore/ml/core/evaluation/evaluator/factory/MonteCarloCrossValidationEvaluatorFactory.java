@@ -4,7 +4,7 @@ import java.util.Random;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
 
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
@@ -19,7 +19,7 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEva
 public class MonteCarloCrossValidationEvaluatorFactory extends AMonteCarloCrossValidationBasedEvaluatorFactory<MonteCarloCrossValidationEvaluatorFactory> {
 
 	@Override
-	public MonteCarloCrossValidationEvaluator getDataspecificRandomizedLearnerEvaluator(final ILabeledDataset<? extends ILabeledInstance> dataset, final ISupervisedLearnerMetric metric, final Random random) {
+	public MonteCarloCrossValidationEvaluator getDataspecificRandomizedLearnerEvaluator(final ILabeledDataset<? extends ILabeledInstance> dataset, final IAggregatedPredictionPerformanceMetric metric, final Random random) {
 		if (this.getTrainFoldSize() <= 0 || this.getTrainFoldSize() >= 1) {
 			throw new IllegalStateException("Train fold size is configured to " + this.getTrainFoldSize() + " but must be strictly greater than 0 and strictly smaller than 1.");
 		}

@@ -18,7 +18,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
-import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
+import ai.libs.jaicore.ml.core.evaluation.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
@@ -58,7 +58,7 @@ public class MLPlanGraphVisualizationExample {
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			System.out.println("Error Rate of the solution produced by ML-Plan: " + ClassifierMetric.MEAN_ERRORRATE.evaluateToDouble(Arrays.asList(report)));
+			System.out.println("Error Rate of the solution produced by ML-Plan: " + EAggregatedClassifierMetric.MEAN_ERRORRATE.evaluateToDouble(Arrays.asList(report)));
 		} catch (NoSuchElementException e) {
 			System.out.println("Building the classifier failed: " + e.getMessage());
 		}

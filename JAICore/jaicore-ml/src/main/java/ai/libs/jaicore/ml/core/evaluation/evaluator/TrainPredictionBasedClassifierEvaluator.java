@@ -10,7 +10,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
 import org.api4.java.ai.ml.core.evaluation.execution.IFixedDatasetSplitSetGenerator;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
-import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
 import org.api4.java.ai.ml.core.evaluation.execution.LearnerExecutionFailedException;
 import org.api4.java.ai.ml.core.evaluation.execution.LearnerExecutionInterruptedException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
@@ -30,11 +30,11 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 	private Logger logger = LoggerFactory.getLogger(TrainPredictionBasedClassifierEvaluator.class);
 	private final IFixedDatasetSplitSetGenerator<ILabeledDataset<? extends ILabeledInstance>> splitGenerator;
 	private final SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
-	private final ISupervisedLearnerMetric metric;
+	private final IAggregatedPredictionPerformanceMetric metric;
 	private final EventBus eventBus = new EventBus();
 	private boolean hasListeners;
 
-	public TrainPredictionBasedClassifierEvaluator(final IFixedDatasetSplitSetGenerator<ILabeledDataset<?>> splitGenerator, final ISupervisedLearnerMetric metric) {
+	public TrainPredictionBasedClassifierEvaluator(final IFixedDatasetSplitSetGenerator<ILabeledDataset<?>> splitGenerator, final IAggregatedPredictionPerformanceMetric metric) {
 		super();
 		this.splitGenerator = splitGenerator;
 		this.metric = metric;

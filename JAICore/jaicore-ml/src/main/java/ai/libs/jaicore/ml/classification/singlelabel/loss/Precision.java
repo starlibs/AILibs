@@ -11,7 +11,7 @@ public class Precision extends ASingleLabelClassificationPerformanceMeasure {
 	}
 
 	@Override
-	public double score(final List<Object> expected, final List<Object> actual) {
+	public double score(final List<? extends Object> expected, final List<? extends Object> actual) {
 		int tp = 0;
 		int fp = 0;
 

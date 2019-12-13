@@ -16,7 +16,7 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
-import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
+import ai.libs.jaicore.ml.core.evaluation.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluationCompletedEvent;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluationFailedEvent;
@@ -62,7 +62,7 @@ public class MLPlanEvaluationListenerExample {
 
 			@Subscribe
 			public void receiveEvent(final TrainTestSplitEvaluationCompletedEvent e) { // this event is fired whenever any pipeline is evaluated successfully
-				double errorRate = ClassifierMetric.MEAN_ERRORRATE.evaluate(Arrays.asList(e.getReport()));
+				double errorRate = EAggregatedClassifierMetric.MEAN_ERRORRATE.evaluate(Arrays.asList(e.getReport()));
 				MLPipeline pipeline = ((MLPipeline)((WekaClassifier)e.getLearner()).getClassifier());
 				LOGGER.info("Received single evaluation error rate for learner {} is {}", pipeline, errorRate);
 			}
@@ -77,7 +77,7 @@ public class MLPlanEvaluationListenerExample {
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}", ClassifierMetric.MEAN_ERRORRATE.evaluateToDouble(Arrays.asList(report)));
+			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}", EAggregatedClassifierMetric.MEAN_ERRORRATE.evaluateToDouble(Arrays.asList(report)));
 		} catch (NoSuchElementException e) {
 			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}

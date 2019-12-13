@@ -3,10 +3,10 @@ package ai.libs.jaicore.ml.core.evaluation;
 import java.util.Collection;
 
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
-import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 
-public class SingleSplitEvaluationMetric implements ISupervisedLearnerMetric {
+public class SingleSplitEvaluationMetric implements IAggregatedPredictionPerformanceMetric {
 
 	private final IDeterministicPredictionPerformanceMeasure lossFunction;
 

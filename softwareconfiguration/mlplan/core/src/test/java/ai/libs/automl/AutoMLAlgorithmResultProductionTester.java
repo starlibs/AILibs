@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
-import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
+import ai.libs.jaicore.ml.core.evaluation.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.PreTrainedPredictionBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.LabelBasedStratifiedSampling;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
@@ -125,7 +125,7 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 			assertNotNull("The algorithm as not returned any classifier.", c);
 
 			/* compute error rate */
-			IClassifierEvaluator evaluator = new PreTrainedPredictionBasedClassifierEvaluator(test, ClassifierMetric.MEAN_ERRORRATE);
+			IClassifierEvaluator evaluator = new PreTrainedPredictionBasedClassifierEvaluator(test, EAggregatedClassifierMetric.MEAN_ERRORRATE);
 			double score = evaluator.evaluate(c);
 			assertTrue("At least 10 instances must be classified!", test.size() >= 10);
 			assertTrue("There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks(), GlobalTimer.getInstance().getActiveTasks().isEmpty());

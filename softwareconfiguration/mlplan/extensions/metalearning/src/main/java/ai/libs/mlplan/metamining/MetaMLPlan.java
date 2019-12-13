@@ -23,7 +23,7 @@ import ai.libs.hasco.core.Util;
 import ai.libs.hasco.metamining.MetaMinerBasedSorter;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
+import ai.libs.jaicore.ml.core.evaluation.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
@@ -149,7 +149,7 @@ public class MetaMLPlan extends AbstractClassifier {
 				trainingTimer.reset();
 				trainingTimer.start();
 				this.logger.info("Evaluate Pipeline: {}", pl);
-				double score = MLEvaluationUtil.mccv(pl, new WekaInstances(data), 5, .7, this.seed, ClassifierMetric.MEAN_ERRORRATE);
+				double score = MLEvaluationUtil.mccv(pl, new WekaInstances(data), 5, .7, this.seed, EAggregatedClassifierMetric.MEAN_ERRORRATE);
 				this.logger.info("Pipeline Score: {}", score);
 				trainingTimer.stop();
 

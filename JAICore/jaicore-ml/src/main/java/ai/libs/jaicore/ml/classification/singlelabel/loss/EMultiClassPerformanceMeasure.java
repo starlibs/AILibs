@@ -17,22 +17,22 @@ public enum EMultiClassPerformanceMeasure implements IDeterministicHomogeneousPr
 	}
 
 	@Override
-	public double loss(final List<Object> actual, final List<Object> expected) {
+	public double loss(final List<? extends Object> actual, final List<? extends Object> expected) {
 		return this.measure.loss(actual, expected);
 	}
 
 	@Override
-	public double loss(final IPredictionAndGroundTruthTable<Object, Object> pairTable) {
+	public double loss(final IPredictionAndGroundTruthTable<? extends Object, ? extends Object> pairTable) {
 		return this.measure.loss(pairTable);
 	}
 
 	@Override
-	public double score(final List<Object> expected, final List<Object> actual) {
+	public double score(final List<? extends Object> expected, final List<? extends Object> actual) {
 		return this.measure.score(expected, actual);
 	}
 
 	@Override
-	public double score(final IPredictionAndGroundTruthTable<Object, Object> pairTable) {
+	public double score(final IPredictionAndGroundTruthTable<? extends Object, ? extends Object> pairTable) {
 		return this.measure.score(pairTable);
 	}
 }

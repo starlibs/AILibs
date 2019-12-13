@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.classification.multilabel.evaluation.loss;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.stream.IntStream;
@@ -19,12 +20,12 @@ public class F1MacroAverageL extends AThresholdBasedMultiLabelClassificationMeas
 	}
 
 	@Override
-	public double loss(final List<IRelevanceOrderedLabelSet> actual, final List<IRelevanceOrderedLabelSet> expected) {
+	public double loss(final List<? extends Collection<Object>> expected, final List<? extends IRelevanceOrderedLabelSet> actual) {
 		return 1 - this.score(expected, actual);
 	}
 
 	@Override
-	public double score(final List<IRelevanceOrderedLabelSet> expected, final List<IRelevanceOrderedLabelSet> actual) {
+	public double score(final List<? extends Collection<Object>> expected, final List<? extends IRelevanceOrderedLabelSet> actual) {
 		this.checkConsistency(expected, actual);
 		int[][] expectedMatrix = this.transposeMatrix(this.listToThresholdedRelevanceMatrix(expected));
 		int[][] actualMatrix = this.transposeMatrix(this.listToThresholdedRelevanceMatrix(actual));

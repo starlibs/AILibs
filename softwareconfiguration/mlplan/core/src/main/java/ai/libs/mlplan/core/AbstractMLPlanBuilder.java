@@ -17,7 +17,7 @@ import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomData
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
-import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.TimeOut;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -82,7 +82,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	private File searchSpaceFile;
 	private String requestedHASCOInterface;
 	private ILearnerFactory<L> classifierFactory;
-	private ISupervisedLearnerMetric performanceMetric;
+	private IAggregatedPredictionPerformanceMetric performanceMetric;
 
 	private IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator = null;
 	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
@@ -346,7 +346,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 * @param performanceMeasure The loss function to be used.
 	 * @return The builder object.
 	 */
-	public B withPerformanceMeasure(final ISupervisedLearnerMetric performanceMeasure) {
+	public B withPerformanceMeasure(final IAggregatedPredictionPerformanceMetric performanceMeasure) {
 		this.performanceMetric = performanceMeasure;
 		return this.getSelf();
 	}
@@ -371,7 +371,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	}
 
 	@Override
-	public ISupervisedLearnerMetric getPerformanceMeasure() {
+	public IAggregatedPredictionPerformanceMetric getPerformanceMeasure() {
 		return this.performanceMetric;
 	}
 

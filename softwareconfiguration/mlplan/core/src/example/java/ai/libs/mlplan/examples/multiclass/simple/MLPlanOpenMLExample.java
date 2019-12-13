@@ -12,7 +12,7 @@ import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.TimeOut;
 
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
-import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
+import ai.libs.jaicore.ml.core.evaluation.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.mlplan.core.MLPlan;
@@ -55,7 +55,7 @@ public class MLPlanOpenMLExample {
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			System.out.println("Error Rate of the solution produced by ML-Plan: " + ClassifierMetric.MEAN_ERRORRATE.evaluateToDouble(Arrays.asList(report)));
+			System.out.println("Error Rate of the solution produced by ML-Plan: " + EAggregatedClassifierMetric.MEAN_ERRORRATE.evaluateToDouble(Arrays.asList(report)));
 		} catch (NoSuchElementException e) {
 			System.out.println("Building the classifier failed: " + e.getMessage());
 		}

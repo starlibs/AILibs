@@ -7,7 +7,7 @@ import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
-import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
 
 import ai.libs.jaicore.ml.core.evaluation.evaluator.ExtrapolatedSaturationPointEvaluator;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
@@ -34,7 +34,7 @@ public class ExtrapolatedSaturationPointEvaluatorFactory implements ISupervisedL
 	}
 
 	@Override
-	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> getDataspecificRandomizedLearnerEvaluator(final ILabeledDataset<?> dataset, final ISupervisedLearnerMetric metric,
+	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> getDataspecificRandomizedLearnerEvaluator(final ILabeledDataset<?> dataset, final IAggregatedPredictionPerformanceMetric metric,
 			final Random random) throws LearnerEvaluatorConstructionFailedException {
 		try {
 			List<ILabeledDataset<?>> split = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<ILabeledDataset<?>>(), .7f, random).split(dataset);

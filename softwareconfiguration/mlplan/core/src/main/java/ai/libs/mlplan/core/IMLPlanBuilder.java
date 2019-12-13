@@ -5,7 +5,7 @@ import java.io.File;
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
 import ai.libs.hasco.core.HASCOFactory;
@@ -31,7 +31,7 @@ public interface IMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, I
 
 	public PipelineEvaluator getClassifierEvaluationInSelectionPhase(ILabeledDataset<? extends ILabeledInstance> dataShownToSearch, int randomSeed) throws LearnerEvaluatorConstructionFailedException;
 
-	public ISupervisedLearnerMetric getPerformanceMeasure();
+	public IAggregatedPredictionPerformanceMetric getPerformanceMeasure();
 
 	public String getRequestedInterface();
 

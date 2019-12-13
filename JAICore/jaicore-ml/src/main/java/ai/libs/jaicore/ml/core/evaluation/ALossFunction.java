@@ -6,7 +6,7 @@ import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicHomogen
 public abstract class ALossFunction<O> implements IDeterministicHomogeneousPredictionPerformanceMeasure<O> {
 
 	@Override
-	public final double loss(final IPredictionAndGroundTruthTable<O, O> pairTable) {
+	public final double loss(final IPredictionAndGroundTruthTable<? extends O, ? extends O> pairTable) {
 		return this.loss(pairTable.getGroundTruthAsList(), pairTable.getPredictionsAsList());
 	}
 }

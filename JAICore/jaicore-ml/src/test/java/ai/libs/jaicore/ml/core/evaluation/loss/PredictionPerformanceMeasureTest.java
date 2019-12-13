@@ -2,9 +2,14 @@ package ai.libs.jaicore.ml.core.evaluation.loss;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 
-public class MeasureTest {
+import ai.libs.jaicore.ml.classification.singlelabel.loss.ErrorRate;
+
+public class PredictionPerformanceMeasureTest {
 
 	private static final double DELTA = 1E-8;
 
@@ -29,6 +34,21 @@ public class MeasureTest {
 	@Test
 	public void testFalsePositives() {
 		assertEquals("Wrong number of false positives", 2.0, new FalseNegatives(1).score(VEC_EXP, VEC_ACT), DELTA);
+	}
+
+	@Test
+	public void testErrorRate() {
+		ErrorRate er = new ErrorRate();
+		List<Integer> exp = new ArrayList<>();
+		List<Integer> act = new ArrayList<>();
+		for (int i : VEC_EXP) {
+			exp.add(i);
+		}
+		for (int i : VEC_ACT) {
+			act.add(i);
+		}
+		double loss = er.loss(exp, act);
+		assertEquals("ErrorRate is not correct", 0.5, loss, DELTA);
 	}
 
 	@Test

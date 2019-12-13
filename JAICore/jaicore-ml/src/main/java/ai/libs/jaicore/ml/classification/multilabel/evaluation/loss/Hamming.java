@@ -19,15 +19,15 @@ public class Hamming extends AMultiLabelClassificationMeasure {
 	}
 
 	@Override
-	public double loss(final List<IMultiLabelClassification> actual, final List<Collection<Object>> expected) {
+	public double loss(final List<? extends Collection<Object>> expected, final List<? extends IMultiLabelClassification> actual) {
 		this.checkConsistency(expected, actual);
 		return (double) IntStream.range(0, expected.size()).map(x -> SetUtil.getDisjointSet(this.getThresholdedPredictionAsSet(actual.get(x)), expected.get(x)).size()).sum()
 				/ (expected.size() * expected.get(0).size());
 	}
 
 	@Override
-	public double score(final List<IMultiLabelClassification> actual, final List<Collection<Object>> expected) {
-		return 1 - this.loss(actual, expected);
+	public double score(final List<? extends Collection<Object>> expected, final List<? extends IMultiLabelClassification> actual) {
+		return 1 - this.loss(expected, actual);
 	}
 
 }

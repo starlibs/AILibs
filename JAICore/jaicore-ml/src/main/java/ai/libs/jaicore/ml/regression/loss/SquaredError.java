@@ -7,7 +7,7 @@ import ai.libs.jaicore.ml.core.evaluation.loss.AInstanceMeasure;
  *
  * @author mwever
  */
-public class SquaredError extends AInstanceMeasure<Double> {
+public class SquaredError extends AInstanceMeasure<Double, Double> {
 
 	@Override
 	public double loss(final Double actual, final Double expected) {

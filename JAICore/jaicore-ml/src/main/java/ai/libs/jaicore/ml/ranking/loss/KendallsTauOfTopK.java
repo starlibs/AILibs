@@ -27,7 +27,7 @@ public class KendallsTauOfTopK extends ARankingPredictionPerformanceMeasure impl
 	}
 
 	@Override
-	public double loss(final List<IRanking<?>> expected, final List<IRanking<?>> actual) {
+	public double loss(final List<? extends IRanking<?>> expected, final List<? extends IRanking<?>> actual) {
 		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.loss(expected.get(0), actual.get(0))).average();
 		if (res.isPresent()) {
 			return res.getAsDouble();

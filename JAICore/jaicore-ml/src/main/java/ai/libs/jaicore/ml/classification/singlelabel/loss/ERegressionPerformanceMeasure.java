@@ -18,22 +18,22 @@ public enum ERegressionPerformanceMeasure implements IDeterministicHomogeneousPr
 	}
 
 	@Override
-	public double loss(final List<Double> actual, final List<Double> expected) {
+	public double loss(final List<? extends Double> actual, final List<? extends Double> expected) {
 		return this.measure.loss(actual, expected);
 	}
 
 	@Override
-	public double loss(final IPredictionAndGroundTruthTable<Double, Double> pairTable) {
+	public double loss(final IPredictionAndGroundTruthTable<? extends Double, ? extends Double> pairTable) {
 		return this.measure.loss(pairTable);
 	}
 
 	@Override
-	public double score(final List<Double> expected, final List<Double> actual) {
+	public double score(final List<? extends Double> expected, final List<? extends Double> actual) {
 		return this.measure.score(actual, expected);
 	}
 
 	@Override
-	public double score(final IPredictionAndGroundTruthTable<Double, Double> pairTable) {
+	public double score(final IPredictionAndGroundTruthTable<? extends Double, ? extends Double> pairTable) {
 		return this.measure.score(pairTable);
 	}
 }

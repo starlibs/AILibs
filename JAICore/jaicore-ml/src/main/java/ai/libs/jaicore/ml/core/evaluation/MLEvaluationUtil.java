@@ -27,11 +27,11 @@ public class MLEvaluationUtil {
 		return measure.loss((PredictionDiff)report.getPredictionDiffList());
 	}
 
-	public static double mccv(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainFoldSize, final long seed, final ClassifierMetric metric) throws ObjectEvaluationFailedException, InterruptedException {
+	public static double mccv(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainFoldSize, final long seed, final EAggregatedClassifierMetric metric) throws ObjectEvaluationFailedException, InterruptedException {
 		return evaluate(learner, data, new MonteCarloCrossValidationEvaluator(data, repeats, trainFoldSize, new Random(seed), metric));
 	}
 
 	public static double mccv(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainFoldSize, final long seed) throws ObjectEvaluationFailedException, InterruptedException {
-		return mccv(learner, data, repeats, trainFoldSize, seed, ClassifierMetric.MEAN_ERRORRATE);
+		return mccv(learner, data, repeats, trainFoldSize, seed, EAggregatedClassifierMetric.MEAN_ERRORRATE);
 	}
 }

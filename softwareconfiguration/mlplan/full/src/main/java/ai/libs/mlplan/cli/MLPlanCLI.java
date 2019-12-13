@@ -20,7 +20,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
-import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
 import org.api4.java.ai.ml.core.evaluation.loss.IMeasure;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.TimeOut;
@@ -40,7 +40,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.Solutio
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.EMultiLabelClassifierMetric;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.Precision;
-import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
+import ai.libs.jaicore.ml.core.evaluation.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
@@ -260,12 +260,12 @@ public class MLPlanCLI {
 
 			switch (commandLine.getOptionValue(evaluationMeasureOption)) {
 			case "ERRORRATE":
-				slcBuilder.withPerformanceMeasure(ClassifierMetric.MEAN_ERRORRATE);
+				slcBuilder.withPerformanceMeasure(EAggregatedClassifierMetric.MEAN_ERRORRATE);
 				break;
 			case "PRECISION":
 				int classIndex = Integer.parseInt(commandLine.getOptionValue(positiveClassIndex, "0"));
 				Precision precision = new Precision(classIndex);
-				slcBuilder.withPerformanceMeasure(new ISupervisedLearnerMetric() {
+				slcBuilder.withPerformanceMeasure(new IAggregatedPredictionPerformanceMetric() {
 					@Override
 					public IMeasure getMeasure() {
 						return precision;

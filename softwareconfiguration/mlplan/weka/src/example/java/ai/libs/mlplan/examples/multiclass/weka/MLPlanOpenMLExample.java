@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
-import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
+import ai.libs.jaicore.ml.core.evaluation.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
@@ -59,7 +59,7 @@ public class MLPlanOpenMLExample {
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}", ClassifierMetric.MEAN_ERRORRATE.evaluateToDouble(Arrays.asList(report)));
+			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}", EAggregatedClassifierMetric.MEAN_ERRORRATE.evaluateToDouble(Arrays.asList(report)));
 		} catch (NoSuchElementException e) {
 			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}

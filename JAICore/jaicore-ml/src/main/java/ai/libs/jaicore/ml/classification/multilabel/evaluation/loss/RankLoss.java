@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.classification.multilabel.evaluation.loss;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.stream.IntStream;
@@ -45,7 +46,7 @@ public class RankLoss extends AMultiLabelClassificationMeasure {
 	}
 
 	@Override
-	public double loss(final List<IMultiLabelClassification> expected, final List<IMultiLabelClassification> actual) {
+	public double loss(final List<? extends Collection<Object>> expected, final List<? extends IMultiLabelClassification> actual) {
 		this.checkConsistency(expected, actual);
 
 		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.rankingLoss(expected.get(x), actual.get(x))).average();
