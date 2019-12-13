@@ -69,14 +69,14 @@ public class SupervisedLearnerExecutor implements ISupervisedLearnerExecutor, IL
 
 		/* create difference table */
 		int numTestInstances = test.size();
-		PredictionDiff diff = new PredictionDiff();
+		TypelessPredictionDiff diff = new TypelessPredictionDiff();
 		for (int j = 0; j < numTestInstances; j++) {
 			Object prediction = predictions.get(j).getPrediction();
 			Object groundTruth = test.get(j).getLabel();
 			if (prediction.getClass() != groundTruth.getClass()) {
 				throw new IllegalStateException("Type of ground truth " + groundTruth + " (" + groundTruth.getClass().getName() + ") and prediction " + prediction +" (" + prediction.getClass().getName() + ") do not match!");
 			}
-			diff.addPair(prediction, groundTruth);
+			diff.addPair(groundTruth, prediction);
 		}
 		return new LearnerRunReport(train, test, trainingStartTime, trainingEndTime, start, endTestTime, diff);
 	}

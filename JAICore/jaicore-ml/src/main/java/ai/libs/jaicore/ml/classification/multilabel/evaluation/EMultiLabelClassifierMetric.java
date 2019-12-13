@@ -36,8 +36,8 @@ public enum EMultiLabelClassifierMetric implements IAggregatedPredictionPerforma
 
 		public double evaluateToDouble(final Collection<? extends ILearnerRunReport> reports) {
 			return this.aggregation.aggregate(reports.stream().map(r -> {
-				List<S> predictions = new ListView<S>(r.getPredictionDiffList().getPredictionsAsList());
-				List<T> groundTruth = new ListView<T>(r.getPredictionDiffList().getGroundTruthAsList());
+				List<S> groundTruth = new ListView<S>(r.getPredictionDiffList().getGroundTruthAsList());
+				List<T> predictions = new ListView<T>(r.getPredictionDiffList().getPredictionsAsList());
 				return (Double)this.lossFunction.loss(groundTruth, predictions);
 			}).collect(Collectors.toList()));
 		}

@@ -142,11 +142,11 @@ public class ListView<T> implements List<T> {
 
 	@Override
 	public Object[] toArray() {
-		throw new UnsupportedOperationException("This is a read-only view.");
+		return this.list.toArray();
 	}
 
 	@Override
-	public <T> T[] toArray(final T[] arg0) {
-		throw new UnsupportedOperationException("This is a read-only view.");
+	public <S> S[] toArray(final S[] arg0) {
+		return this.list.toArray(arg0);
 	}
 }

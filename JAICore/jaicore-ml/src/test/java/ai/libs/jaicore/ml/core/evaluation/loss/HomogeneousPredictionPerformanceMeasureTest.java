@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.EClassificationPerformanceMeasure;
 
-public class PredictionPerformanceMeasureTest {
+public class HomogeneousPredictionPerformanceMeasureTest {
 
 	private static final double DELTA = 1E-8;
 

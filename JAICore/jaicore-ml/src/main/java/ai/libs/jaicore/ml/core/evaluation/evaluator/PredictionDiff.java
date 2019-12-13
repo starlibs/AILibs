@@ -1,22 +1,31 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.api4.java.ai.ml.core.evaluation.IPredictionAndGroundTruthTable;
 
+import ai.libs.jaicore.basic.sets.ListView;
 
-public class PredictionDiff implements IPredictionAndGroundTruthTable<Object, Object> {
+public class PredictionDiff<E, A> implements IPredictionAndGroundTruthTable<E, A> {
 
-	private final List<Object> predictions = new ArrayList<>();
-	private final List<Object> groundTruths= new ArrayList<>();
+	private final Class<?> expectedClass;
+	private final Class<?> predictionClass;
+	private final List<E> groundTruths = new ArrayList<>();
+	private final List<A> predictions = new ArrayList<>();
 
 	public PredictionDiff() {
 		super();
+		Type genericSuperClass = this.getClass().getGenericSuperclass();
+		this.expectedClass = (genericSuperClass instanceof ParameterizedType) ? (Class<E>)((ParameterizedType)genericSuperClass).getActualTypeArguments()[0].getClass() : Object.class;
+		this.predictionClass = (genericSuperClass instanceof ParameterizedType) ? (Class<A>)((ParameterizedType)genericSuperClass).getActualTypeArguments()[1].getClass() : Object.class;
 	}
 
-	public PredictionDiff(final List<?> predictions, final List<?> groundTruths) {
+	public PredictionDiff(final List<? extends E> groundTruths, final List<? extends A> predictions) {
 		this();
 		if (predictions.size() != groundTruths.size()) {
 			throw new IllegalArgumentException("Predictions and ground truths must have the same length!");
@@ -25,9 +34,14 @@ public class PredictionDiff implements IPredictionAndGroundTruthTable<Object, Ob
 		this.groundTruths.addAll(groundTruths);
 	}
 
-	public void addPair(final Object prediction, final Object groundTruth) {
-		this.predictions.add(prediction);
+	public void addPair(final E groundTruth, final A prediction) {
 		this.groundTruths.add(groundTruth);
+		this.predictions.add(prediction);
+	}
+
+	@Override
+	public <E1, A1> PredictionDiff<E1, A1> getCastedView(final Class<E1> expectedClass, final Class<A1> actualClass) {
+		return new PredictionDiff<>(new ListView<E1>(this.groundTruths), new ListView<A1>(this.predictions));
 	}
 
 	@Override
@@ -36,45 +50,45 @@ public class PredictionDiff implements IPredictionAndGroundTruthTable<Object, Ob
 	}
 
 	@Override
-	public Object getPrediction(final int instance) {
+	public A getPrediction(final int instance) {
 		return this.predictions.get(instance);
 	}
 
 	@Override
-	public Object getGroundTruth(final int instance) {
+	public E getGroundTruth(final int instance) {
 		return this.groundTruths.get(instance);
 	}
 
 	@Override
-	public List<Object> getPredictionsAsList() {
+	public List<A> getPredictionsAsList() {
 		return Collections.unmodifiableList(this.predictions);
 	}
 
 	public <T> List<T> getPredictionsAsList(final Class<T> clazz) {
 		List<T> cList = new ArrayList<>(this.predictions.size());
-		this.predictions.forEach(e -> cList.add((T)e));
+		this.predictions.forEach(e -> cList.add((T) e));
 		return Collections.unmodifiableList(cList);
 	}
 
 	@Override
-	public Object[] getPredictionsAsArray() {
-		return this.predictions.toArray();
+	public A[] getPredictionsAsArray() {
+		return this.predictions.toArray((A[])Array.newInstance(this.predictionClass, this.predictions.size()));
 	}
 
 	@Override
-	public List<Object> getGroundTruthAsList() {
+	public List<E> getGroundTruthAsList() {
 		return Collections.unmodifiableList(this.groundTruths);
 	}
 
 	public <T> List<T> getGroundTruthAsList(final Class<T> clazz) {
 		List<T> cList = new ArrayList<>(this.groundTruths.size());
-		this.groundTruths.forEach(e -> cList.add((T)e));
+		this.groundTruths.forEach(e -> cList.add((T) e));
 		return Collections.unmodifiableList(cList);
 	}
 
 	@Override
-	public Object[] getGroundTruthAsArray() {
-		return null;
+	public E[] getGroundTruthAsArray() {
+		return this.groundTruths.toArray((E[])Array.newInstance(this.expectedClass, this.groundTruths.size()));
 	}
 
 }
