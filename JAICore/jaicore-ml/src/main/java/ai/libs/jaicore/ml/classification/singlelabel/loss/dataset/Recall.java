@@ -1,17 +1,19 @@
-package ai.libs.jaicore.ml.core.evaluation.loss;
+package ai.libs.jaicore.ml.classification.singlelabel.loss.dataset;
 
-public class Recall extends AInstanceMeasure<int[], int[]> {
+import java.util.List;
+
+public class Recall extends AHomogeneousPredictionPerformanceMeasure<Object>  {
 
 	private final TruePositives tp;
 	private final FalseNegatives fn;
 
-	public Recall(final int positiveClass) {
+	public Recall(final Object positiveClass) {
 		this.tp = new TruePositives(positiveClass);
 		this.fn = new FalseNegatives(positiveClass);
 	}
 
 	@Override
-	public double score(final int[] expected, final int[] actual) {
+	public double score(final List<? extends Object> expected, final List<? extends Object> actual) {
 		double truePositives = this.tp.score(expected, actual);
 		double denominator = (truePositives + this.fn.score(expected, actual));
 		return denominator == 0.0 ? 0 : truePositives / denominator;

@@ -1,20 +1,22 @@
-package ai.libs.jaicore.ml.core.evaluation.loss;
+package ai.libs.jaicore.ml.classification.singlelabel.loss.dataset;
 
-public class FMeasure extends AInstanceMeasure<int[], int[]> {
+import java.util.List;
+
+public class FMeasure extends AHomogeneousPredictionPerformanceMeasure<Object> {
 
 	private final double beta;
 	private final Precision precision;
 	private final Recall recall;
 
-	public FMeasure(final double beta, final int positiveClass) {
+	public FMeasure(final double beta, final Object positiveClass) {
 		this.beta = beta;
 		this.precision = new Precision(positiveClass);
 		this.recall = new Recall(positiveClass);
 	}
 
 	@Override
-	public double score(final int[] expected, final int[] actual) {
-		if (expected.length != actual.length) {
+	public double score(final List<?> expected, final List<?> actual) {
+		if (expected.size() != actual.size()) {
 			throw new IllegalArgumentException("Expected and actual must be of the same length.");
 		}
 

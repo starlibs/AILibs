@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 import org.api4.java.ai.ml.ranking.IRanking;
 import org.api4.java.ai.ml.ranking.loss.IRankingPredictionPerformanceMeasure;
 
-import ai.libs.jaicore.ml.core.evaluation.loss.APredictionPerformanceMeasure;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.APredictionPerformanceMeasure;
 
 public abstract class ARankingPredictionPerformanceMeasure extends APredictionPerformanceMeasure<IRanking<?>, IRanking<?>> implements IRankingPredictionPerformanceMeasure {
 

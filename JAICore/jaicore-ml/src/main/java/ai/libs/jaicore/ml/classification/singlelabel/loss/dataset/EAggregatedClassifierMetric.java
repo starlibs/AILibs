@@ -1,19 +1,18 @@
-package ai.libs.jaicore.ml.core.evaluation;
+package ai.libs.jaicore.ml.classification.singlelabel.loss.dataset;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
+import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.common.aggregate.IAggregateFunction;
 
 import ai.libs.jaicore.basic.aggregate.reals.Mean;
-import ai.libs.jaicore.ml.classification.singlelabel.loss.ErrorRate;
 
 public enum EAggregatedClassifierMetric implements IAggregatedPredictionPerformanceMetric {
 
-	MEAN_ERRORRATE(new ErrorRate(), new Mean());
+	MEAN_ERRORRATE(EClassificationPerformanceMeasure.ERRORRATE, new Mean());
 
 	private final IDeterministicPredictionPerformanceMeasure lossFunction;
 	private final IAggregateFunction<Double> aggregation;

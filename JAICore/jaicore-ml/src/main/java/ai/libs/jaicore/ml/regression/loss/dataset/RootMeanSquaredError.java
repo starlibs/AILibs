@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.regression.loss;
+package ai.libs.jaicore.ml.regression.loss.dataset;
 
 import java.util.List;
 

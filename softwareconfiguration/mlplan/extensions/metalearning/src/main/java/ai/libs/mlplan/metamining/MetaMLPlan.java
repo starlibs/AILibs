@@ -23,7 +23,7 @@ import ai.libs.hasco.core.Util;
 import ai.libs.hasco.metamining.MetaMinerBasedSorter;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.jaicore.ml.core.evaluation.EAggregatedClassifierMetric;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;

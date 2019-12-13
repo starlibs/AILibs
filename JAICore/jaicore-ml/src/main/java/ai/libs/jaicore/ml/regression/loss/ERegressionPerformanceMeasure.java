@@ -1,12 +1,12 @@
-package ai.libs.jaicore.ml.classification.singlelabel.loss;
+package ai.libs.jaicore.ml.regression.loss;
 
 import java.util.List;
 
 import org.api4.java.ai.ml.core.evaluation.IPredictionAndGroundTruthTable;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicHomogeneousPredictionPerformanceMeasure;
 
-import ai.libs.jaicore.ml.regression.loss.MeanSquaredError;
-import ai.libs.jaicore.ml.regression.loss.RootMeanSquaredError;
+import ai.libs.jaicore.ml.regression.loss.dataset.MeanSquaredError;
+import ai.libs.jaicore.ml.regression.loss.dataset.RootMeanSquaredError;
 
 public enum ERegressionPerformanceMeasure implements IDeterministicHomogeneousPredictionPerformanceMeasure<Double> {
 	MEAN_SQUARED_ERROR(new MeanSquaredError()), ROOT_MEAN_SQUARED_ERROR(new RootMeanSquaredError());

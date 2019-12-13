@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.ArrayUtil;
-import ai.libs.jaicore.ml.core.evaluation.loss.F1Measure;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.F1Measure;
 import meka.core.Metrics;
 
 public class MultilabelMeasureTest {

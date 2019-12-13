@@ -11,7 +11,7 @@ import org.api4.java.algorithm.TimeOut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.instance.ZeroOneLoss;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.multiclass.sklearn.SKLearnMLPlanWekaClassifier;

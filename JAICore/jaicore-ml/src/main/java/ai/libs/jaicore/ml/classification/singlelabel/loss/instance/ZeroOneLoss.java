@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.classification.singlelabel.loss;
+package ai.libs.jaicore.ml.classification.singlelabel.loss.instance;
 
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicInstancePredictionPerformanceMeasure;
 

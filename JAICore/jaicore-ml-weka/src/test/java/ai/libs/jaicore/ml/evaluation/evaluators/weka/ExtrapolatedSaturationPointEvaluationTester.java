@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import ai.libs.jaicore.ml.classification.singlelabel.loss.ErrorRate;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.ExtrapolatedSaturationPointEvaluator;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SystematicSamplingFactory;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.ipl.InversePowerLawExtrapolationMethod;
@@ -46,7 +46,7 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 
 		// Test classifier evaluation at saturation point
 		ExtrapolatedSaturationPointEvaluator evaluator = new ExtrapolatedSaturationPointEvaluator(new int[] { 8, 16, 64, 128 }, new SystematicSamplingFactory<>(), this.train, 0.7,
-				new InversePowerLawExtrapolationMethod(), 123l, this.test, new ErrorRate());
+				new InversePowerLawExtrapolationMethod(), 123l, this.test, EClassificationPerformanceMeasure.ERRORRATE);
 		evaluator.setEpsilon(0.0005d);
 		double evaluationResult = evaluator.evaluate(new WekaClassifier(new SMO()));
 		Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);

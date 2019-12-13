@@ -1,10 +1,11 @@
-package ai.libs.jaicore.ml.regression.loss;
+package ai.libs.jaicore.ml.regression.loss.dataset;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import ai.libs.jaicore.basic.StatisticsUtil;
+import ai.libs.jaicore.ml.regression.loss.instance.SquaredError;
 
 public class MeanSquaredError extends ARegressionMeasure {
 

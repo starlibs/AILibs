@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.core.evaluation.loss;
+package ai.libs.jaicore.ml.classification.singlelabel.loss.dataset;
 
 import java.util.List;
 import java.util.OptionalDouble;

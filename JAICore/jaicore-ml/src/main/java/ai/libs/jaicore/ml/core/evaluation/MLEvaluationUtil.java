@@ -7,12 +7,12 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.execution.LearnerExecutionFailedException;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 
-import ai.libs.jaicore.ml.classification.singlelabel.loss.ASingleLabelClassificationPerformanceMeasure;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.PredictionDiff;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 
 public class MLEvaluationUtil {
@@ -21,10 +21,10 @@ public class MLEvaluationUtil {
 		return evaluator.evaluate(learner);
 	}
 
-	public static double getLossForTrainedClassifier(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> testData, final ASingleLabelClassificationPerformanceMeasure measure) throws ObjectEvaluationFailedException, InterruptedException, LearnerExecutionFailedException {
+	public static double getLossForTrainedClassifier(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> testData, final IDeterministicPredictionPerformanceMeasure<Object, Object> measure) throws ObjectEvaluationFailedException, InterruptedException, LearnerExecutionFailedException {
 		SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 		ILearnerRunReport report = executor.execute(learner, testData);
-		return measure.loss((PredictionDiff)report.getPredictionDiffList());
+		return measure.loss(report.getPredictionDiffList());
 	}
 
 	public static double mccv(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainFoldSize, final long seed, final EAggregatedClassifierMetric metric) throws ObjectEvaluationFailedException, InterruptedException {

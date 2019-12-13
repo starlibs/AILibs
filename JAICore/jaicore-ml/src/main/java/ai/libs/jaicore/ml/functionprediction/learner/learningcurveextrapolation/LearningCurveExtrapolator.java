@@ -12,6 +12,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.learningcurve.ILearningCurve;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicHomogeneousPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -20,8 +21,8 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.classification.singlelabel.loss.ErrorRate;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.PredictionDiff;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.EClassificationPerformanceMeasure;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.ErrorRate;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
@@ -109,7 +110,7 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 
 			// Create subsamples at the anchorpoints and measure the accuracy there.
 			SupervisedLearnerExecutor learnerExecutor = new SupervisedLearnerExecutor();
-			ErrorRate metric = new ErrorRate();
+			IDeterministicHomogeneousPredictionPerformanceMeasure<Object> metric = EClassificationPerformanceMeasure.ERRORRATE;
 			for (int i = 0; i < this.anchorPoints.length; i++) {
 
 				// If it is a rerunnable factory, set the previous run.
@@ -125,7 +126,7 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 				this.trainingTimes[i] = (int)(report.getTrainEndTime() - report.getTrainStartTime());
 
 				// Measure accuracy of the trained learner on test split.
-				this.yValues[i] = metric.loss((PredictionDiff)report.getPredictionDiffList());
+				this.yValues[i] = metric.loss(report.getPredictionDiffList());
 				this.logger.debug("Training finished. Observed learning curve value (accuracy) of {}.", this.yValues[i]);
 			}
 			if (this.logger.isInfoEnabled()) {

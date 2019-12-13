@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.multilabel.IRelevanceOrderedLabelSet;
 
-import ai.libs.jaicore.ml.core.evaluation.loss.F1Measure;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.F1Measure;
 
 public class F1MacroAverageL extends AThresholdBasedMultiLabelClassificationMeasure {
 

@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
 import org.api4.java.ai.ml.classification.multilabel.evaluation.loss.IMultiLabelClassificationPredictionPerformanceMeasure;
 
-import ai.libs.jaicore.ml.core.evaluation.loss.APredictionPerformanceMeasure;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.APredictionPerformanceMeasure;
 
 public abstract class AMultiLabelClassificationMeasure extends APredictionPerformanceMeasure<IMultiLabelClassification, Collection<Object>> implements IMultiLabelClassificationPredictionPerformanceMeasure<IMultiLabelClassification, Collection<Object>> {
 

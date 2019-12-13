@@ -40,7 +40,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.Solutio
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.EMultiLabelClassifierMetric;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.Precision;
-import ai.libs.jaicore.ml.core.evaluation.EAggregatedClassifierMetric;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
