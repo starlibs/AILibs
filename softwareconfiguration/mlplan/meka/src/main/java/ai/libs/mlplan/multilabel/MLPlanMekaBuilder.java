@@ -15,13 +15,13 @@ import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.EMultiLabelClassifierMetric;
+import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import ai.libs.mlplan.multilabel.model.IMekaClassifier;
 
 public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IMekaClassifier, MLPlanMekaBuilder> {
 

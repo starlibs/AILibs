@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multilabel.model;
+package ai.libs.jaicore.ml.classification.multilabel.learner;
 
 import java.util.ArrayList;
 import java.util.HashMap;

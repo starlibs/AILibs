@@ -16,7 +16,7 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.ComponentUtil;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.mlplan.multilabel.model.IMekaClassifier;
+import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 
 public class MekaPipelineFactoryTest {
 	private static final File SSC = FileUtil.getExistingFileWithHighestPriority(ML2PlanMekaPathConfig.RES_SSC, ML2PlanMekaPathConfig.FS_SSC);

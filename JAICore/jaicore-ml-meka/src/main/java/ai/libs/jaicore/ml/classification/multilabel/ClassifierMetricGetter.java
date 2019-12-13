@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.meka;
+package ai.libs.jaicore.ml.classification.multilabel;
 
 import java.util.Arrays;
 import java.util.List;
