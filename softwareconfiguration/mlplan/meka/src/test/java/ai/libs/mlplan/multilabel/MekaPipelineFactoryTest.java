@@ -16,7 +16,7 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.ComponentUtil;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
+import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 
 public class MekaPipelineFactoryTest {
 	private static final File SSC = FileUtil.getExistingFileWithHighestPriority(ML2PlanMekaPathConfig.RES_SSC, ML2PlanMekaPathConfig.FS_SSC);
@@ -43,7 +43,8 @@ public class MekaPipelineFactoryTest {
 		for (int i = 0; i < 10; i++) {
 			ComponentInstance ci = list.get(new Random().nextInt(list.size()));
 			System.out.println(ci);
-			IWekaClassifier c = mpf.getComponentInstantiation(ci);
+			IMekaClassifier c = mpf.getComponentInstantiation(ci);
+			c.fit(dTrain);
 		}
 	}
 

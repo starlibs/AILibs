@@ -1,15 +1,12 @@
 package ai.libs.jaicore.ml.classification.multilabel.evaluation.loss;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.stream.IntStream;
 
-import org.api4.java.ai.ml.classification.multilabel.evaluation.loss.IMultiLabelClassificationPredictionPerformanceMeasure;
+import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
 
-import ai.libs.jaicore.ml.core.evaluation.loss.APredictionPerformanceMeasure;
-
-public class JaccardScore extends APredictionPerformanceMeasure<Collection<Object>> implements IMultiLabelClassificationPredictionPerformanceMeasure<Collection<Object>> {
+public class JaccardScore extends AMultiLabelClassificationMeasure {
 
 	private ai.libs.jaicore.ml.core.evaluation.loss.JaccardScore instanceScorer;
 
@@ -17,9 +14,14 @@ public class JaccardScore extends APredictionPerformanceMeasure<Collection<Objec
 		super();
 	}
 
+	public JaccardScore(final double threshold) {
+		super(threshold);
+	}
+
 	@Override
-	public double score(final List<Collection<Object>> expected, final List<Collection<Object>> actual) {
-		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.instanceScorer.score(expected.get(x), actual.get(x))).average();
+	public double score(final List<IMultiLabelClassification> expected, final List<IMultiLabelClassification> actual) {
+
+		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.instanceScorer.score(this.getThresholdedPredictionAsSet(expected.get(x)), this.getThresholdedPredictionAsSet(actual.get(x)))).average();
 		if (!res.isPresent()) {
 			throw new IllegalStateException("Could not average the jaccord score.");
 		} else {
@@ -28,7 +30,7 @@ public class JaccardScore extends APredictionPerformanceMeasure<Collection<Objec
 	}
 
 	@Override
-	public double loss(final List<Collection<Object>> actual, final List<Collection<Object>> expected) {
+	public double loss(final List<IMultiLabelClassification> actual, final List<IMultiLabelClassification> expected) {
 		return 1 - this.score(expected, actual);
 	}
 
