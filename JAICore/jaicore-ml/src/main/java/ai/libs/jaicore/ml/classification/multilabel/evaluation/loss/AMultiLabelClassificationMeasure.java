@@ -1,6 +1,9 @@
 package ai.libs.jaicore.ml.classification.multilabel.evaluation.loss;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
@@ -32,7 +35,7 @@ public abstract class AMultiLabelClassificationMeasure extends AMeasure<IMultiLa
 	protected double[][] listToRelevanceMatrix(final List<IMultiLabelClassification> classificationList) {
 		double[][] matrix = new double[classificationList.size()][];
 		IntStream.range(0, classificationList.size()).forEach(x -> {
-			matrix[x] = classificationList.get(x).getLabelRelevanceVector();
+			matrix[x] = classificationList.get(x).getPrediction();
 		});
 
 		return matrix;
@@ -41,7 +44,7 @@ public abstract class AMultiLabelClassificationMeasure extends AMeasure<IMultiLa
 	protected int[][] listToThresholdedRelevanceMatrix(final List<IMultiLabelClassification> classificationList) {
 		int[][] matrix = new int[classificationList.size()][];
 		IntStream.range(0, classificationList.size()).forEach(x -> {
-			matrix[x] = classificationList.get(x).getLabelRelevanceVector(this.threshold);
+			matrix[x] = classificationList.get(x).getPrediction(this.threshold);
 		});
 		return matrix;
 	}
@@ -66,6 +69,10 @@ public abstract class AMultiLabelClassificationMeasure extends AMeasure<IMultiLa
 			}
 		}
 		return out;
+	}
+
+	protected Set<Integer> getThresholdedPredictionAsSet(final IMultiLabelClassification prediction) {
+		return Arrays.stream(prediction.getThresholdedPrediction()).mapToObj(Integer::valueOf).collect(Collectors.toSet());
 	}
 
 }

@@ -1,7 +1,11 @@
 package ai.libs.mlplan.multilabel.model;
 
-import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
+import org.api4.java.ai.ml.classification.IClassifier;
 
-public interface IMekaClassifier extends IWekaClassifier {
+import meka.classifiers.multilabel.MultiLabelClassifier;
+
+public interface IMekaClassifier extends IClassifier {
+
+	public MultiLabelClassifier getClassifier();
 
 }

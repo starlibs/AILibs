@@ -18,12 +18,12 @@ import ai.libs.jaicore.ml.classification.multilabel.evaluation.EMultiLabelClassi
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
-import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multilabel.model.IMekaClassifier;
 
-public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IWekaClassifier, MLPlanMekaBuilder> {
+public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IMekaClassifier, MLPlanMekaBuilder> {
 
 	private static final File DEF_SEARCH_SPACE_CONFIG = FileUtil.getExistingFileWithHighestPriority(ML2PlanMekaPathConfig.RES_SSC, ML2PlanMekaPathConfig.FS_SSC);
 	private static final File DEF_PREFERRED_COMPONENTS = FileUtil.getExistingFileWithHighestPriority(ML2PlanMekaPathConfig.RES_PREFC, ML2PlanMekaPathConfig.FS_PREFC);
@@ -34,7 +34,7 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IWekaClassifier, ML
 
 	private static final EMultiLabelClassifierMetric DEFAULT_PERFORMANCE_MEASURE = EMultiLabelClassifierMetric.MEAN_INSTANCEF1;
 
-	private static final ILearnerFactory<IWekaClassifier> DEF_CLASSIFIER_FACTORY = new MekaPipelineFactory();
+	private static final ILearnerFactory<IMekaClassifier> DEF_CLASSIFIER_FACTORY = new MekaPipelineFactory();
 	private static final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> DEF_SEARCH_SELECT_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE,
 			new Random(0));
 	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS)

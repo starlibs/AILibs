@@ -19,7 +19,7 @@ public class ExactMatch extends AMultiLabelClassificationMeasure {
 	@Override
 	public double loss(final List<IMultiLabelClassification> actual, final List<IMultiLabelClassification> expected) {
 		this.checkConsistency(expected, actual);
-		return (double) IntStream.range(0, expected.size()).map(x -> SetUtils.isEqualSet(expected.get(x).getPrediction(), actual.get(x).getPrediction()) ? 0 : 1).sum() / expected.size();
+		return (double) IntStream.range(0, expected.size()).map(x -> SetUtils.isEqualSet(this.getThresholdedPredictionAsSet(expected.get(x)), this.getThresholdedPredictionAsSet(actual.get(x))) ? 0 : 1).sum() / expected.size();
 	}
 
 	@Override

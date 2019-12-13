@@ -76,7 +76,7 @@ public class ClassifierWeightedSampling<D extends ILabeledDataset<? extends ILab
 			}
 		}
 		int[] indices = IntStream.range(0, this.getInput().size()).toArray();
-		EnumeratedIntegerDistribution  finalDistribution = new EnumeratedIntegerDistribution(indices, weights);
+		EnumeratedIntegerDistribution finalDistribution = new EnumeratedIntegerDistribution(indices, weights);
 		finalDistribution.reseedRandomGenerator(this.rand.nextLong());
 
 		/* now draw <number of samples> many indices whose threshold will be set to 1 */
@@ -86,8 +86,7 @@ public class ClassifierWeightedSampling<D extends ILabeledDataset<? extends ILab
 			int index;
 			do {
 				index = finalDistribution.sample();
-			}
-			while (consideredIndices.contains(index));
+			} while (consideredIndices.contains(index));
 			consideredIndices.add(index);
 		}
 

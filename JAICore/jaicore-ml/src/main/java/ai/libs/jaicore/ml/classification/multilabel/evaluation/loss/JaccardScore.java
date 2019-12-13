@@ -20,7 +20,8 @@ public class JaccardScore extends AMultiLabelClassificationMeasure {
 
 	@Override
 	public double score(final List<IMultiLabelClassification> expected, final List<IMultiLabelClassification> actual) {
-		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.instanceScorer.score(expected.get(x).getPrediction(), actual.get(x).getPrediction())).average();
+
+		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.instanceScorer.score(this.getThresholdedPredictionAsSet(expected.get(x)), this.getThresholdedPredictionAsSet(actual.get(x)))).average();
 		if (!res.isPresent()) {
 			throw new IllegalStateException("Could not average the jaccord score.");
 		} else {

@@ -26,17 +26,14 @@ public class RankLoss extends AMultiLabelClassificationMeasure {
 	}
 
 	private double rankingLoss(final IMultiLabelClassification expected, final IMultiLabelClassification actual) {
-		List<String> expectedRelevantLabels = expected.getPrediction();
-		List<String> expectedIrrelevantLabels = expected.getIrrelevantLabels();
-
-		List<String> actualLabelset = actual.getLabelSet();
-		double[] labelRelevance = actual.getLabelRelevanceVector();
-
+		int[] expectedRelevantLabels = expected.getRelevantLabels(0.5);
+		int[] expectedIrrelevantLabels = expected.getIrrelevantLabels(0.5);
+		double[] labelRelevance = actual.getPrediction();
 		double wrongRankingCounter = 0;
-		for (String expectedRel : expectedRelevantLabels) {
-			for (String expectedIrr : expectedIrrelevantLabels) {
-				double scoreRelLabel = labelRelevance[actualLabelset.indexOf(expectedRel)];
-				double scoreIrrLabel = labelRelevance[actualLabelset.indexOf(expectedIrr)];
+		for (int expectedRel : expectedRelevantLabels) {
+			for (int expectedIrr : expectedIrrelevantLabels) {
+				double scoreRelLabel = labelRelevance[expectedRel];
+				double scoreIrrLabel = labelRelevance[expectedIrr];
 				if (scoreRelLabel == scoreIrrLabel) {
 					wrongRankingCounter += this.tieLoss;
 				} else if (scoreRelLabel < scoreIrrLabel) {
@@ -44,7 +41,7 @@ public class RankLoss extends AMultiLabelClassificationMeasure {
 				}
 			}
 		}
-		return wrongRankingCounter / (expectedRelevantLabels.size() + expectedIrrelevantLabels.size());
+		return wrongRankingCounter / (expectedRelevantLabels.length + expectedIrrelevantLabels.length);
 	}
 
 	@Override
