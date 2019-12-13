@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.core.evaluation.loss;
 
-public class Precision extends AInstanceMeasure<int[]> {
+public class Precision extends AInstanceMeasure<int[], int[]> {
 
 	private final TruePositives tp;
 	private final FalsePositives fp;

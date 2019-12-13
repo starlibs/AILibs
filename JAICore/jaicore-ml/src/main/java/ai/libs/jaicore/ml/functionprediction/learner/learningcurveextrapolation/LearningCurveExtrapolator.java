@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.ml.classification.singlelabel.loss.ErrorRate;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.PredictionDiff;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
@@ -124,7 +125,7 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 				this.trainingTimes[i] = (int)(report.getTrainEndTime() - report.getTrainStartTime());
 
 				// Measure accuracy of the trained learner on test split.
-				this.yValues[i] = metric.loss(report.getPredictionDiffList());
+				this.yValues[i] = metric.loss((PredictionDiff)report.getPredictionDiffList());
 				this.logger.debug("Training finished. Observed learning curve value (accuracy) of {}.", this.yValues[i]);
 			}
 			if (this.logger.isInfoEnabled()) {

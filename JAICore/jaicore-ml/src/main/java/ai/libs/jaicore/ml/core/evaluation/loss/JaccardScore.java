@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
 
-public class JaccardScore extends AInstanceMeasure<Collection<Integer>> {
+public class JaccardScore extends AInstanceMeasure<Collection<Integer>, Collection<Integer>> {
 
 	@Override
 	public double score(final Collection<Integer> expected, final Collection<Integer> actual) {

@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.core.evaluation.loss;
 
-public class FMeasure extends AInstanceMeasure<int[]> {
+public class FMeasure extends AInstanceMeasure<int[], int[]> {
 
 	private final double beta;
 	private final Precision precision;

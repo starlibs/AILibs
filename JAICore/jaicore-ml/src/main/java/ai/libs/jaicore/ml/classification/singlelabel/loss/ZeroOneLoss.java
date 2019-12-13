@@ -6,7 +6,7 @@ import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicInstanc
  *
  * @author mwever
  */
-public class ZeroOneLoss implements IDeterministicInstancePredictionPerformanceMeasure<Object> {
+public class ZeroOneLoss implements IDeterministicInstancePredictionPerformanceMeasure<Object, Object> {
 
 	@Override
 	public double loss(final Object expected, final Object actual) {

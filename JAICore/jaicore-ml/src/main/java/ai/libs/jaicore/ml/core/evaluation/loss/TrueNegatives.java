@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.core.evaluation.loss;
 
 import java.util.stream.IntStream;
 
-public class TrueNegatives extends AInstanceMeasure<int[]> {
+public class TrueNegatives extends AInstanceMeasure<int[], int[]> {
 
 	private final int positiveClass;
 

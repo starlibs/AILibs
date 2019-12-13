@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.OptionalDouble;
 
 import org.api4.java.ai.ml.classification.multilabel.IRelevanceOrderedLabelSet;
-import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicHomogeneousPredictionPerformanceMeasure;
 
 /**
  * Measure combining exact match, hamming loss, f1macroavgL and rankloss. Here
@@ -19,18 +19,18 @@ import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredict
  */
 public class AutoMEKAGGPFitnessMeasureLoss extends AThresholdBasedMultiLabelClassificationMeasure {
 
-	private IDeterministicPredictionPerformanceMeasure<IRelevanceOrderedLabelSet>[] measures;
+	private IDeterministicHomogeneousPredictionPerformanceMeasure<IRelevanceOrderedLabelSet>[] measures;
 
 	@SuppressWarnings("unchecked")
 	public AutoMEKAGGPFitnessMeasureLoss() {
 		super();
-		this.measures = new IDeterministicPredictionPerformanceMeasure[] { new ExactMatch(), new F1MacroAverageL(), new Hamming(), new RankLoss() };
+		this.measures = new IDeterministicHomogeneousPredictionPerformanceMeasure[] { new ExactMatch(), new F1MacroAverageL(), new Hamming(), new RankLoss() };
 	}
 
 	@SuppressWarnings("unchecked")
 	public AutoMEKAGGPFitnessMeasureLoss(final double threshold) {
 		super(threshold);
-		this.measures = new IDeterministicPredictionPerformanceMeasure[] { new ExactMatch(), new F1MacroAverageL(threshold), new Hamming(), new RankLoss(threshold) };
+		this.measures = new IDeterministicHomogeneousPredictionPerformanceMeasure[] { new ExactMatch(), new F1MacroAverageL(threshold), new Hamming(), new RankLoss(threshold) };
 	}
 
 	@Override

@@ -69,7 +69,7 @@ public class SupervisedLearnerExecutor implements ISupervisedLearnerExecutor, IL
 
 		/* create difference table */
 		int numTestInstances = test.size();
-		PredictionDiff<Object> diff = new PredictionDiff<>();
+		PredictionDiff diff = new PredictionDiff();
 		for (int j = 0; j < numTestInstances; j++) {
 			Object prediction = predictions.get(j).getPrediction();
 			Object groundTruth = test.get(j).getLabel();

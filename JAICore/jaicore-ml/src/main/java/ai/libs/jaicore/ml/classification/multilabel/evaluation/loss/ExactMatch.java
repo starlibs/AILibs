@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.classification.multilabel.evaluation.loss;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -17,13 +18,13 @@ public class ExactMatch extends AMultiLabelClassificationMeasure {
 	}
 
 	@Override
-	public double loss(final List<IMultiLabelClassification> actual, final List<IMultiLabelClassification> expected) {
+	public double loss(final List<IMultiLabelClassification> actual, final List<Collection<Object>> expected) {
 		this.checkConsistency(expected, actual);
-		return (double) IntStream.range(0, expected.size()).map(x -> SetUtils.isEqualSet(this.getThresholdedPredictionAsSet(expected.get(x)), this.getThresholdedPredictionAsSet(actual.get(x))) ? 0 : 1).sum() / expected.size();
+		return (double) IntStream.range(0, expected.size()).map(x -> SetUtils.isEqualSet(expected.get(x), this.getThresholdedPredictionAsSet(actual.get(x))) ? 0 : 1).sum() / expected.size();
 	}
 
 	@Override
-	public double score(final List<IMultiLabelClassification> expected, final List<IMultiLabelClassification> actual) {
+	public double score(final List<IMultiLabelClassification> actual, final List<Collection<Object>> expected) {
 		return 1 - this.loss(actual, expected);
 	}
 
