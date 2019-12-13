@@ -11,7 +11,7 @@ import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredict
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 
-import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.EAggregatedClassifierMetric;
+import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 

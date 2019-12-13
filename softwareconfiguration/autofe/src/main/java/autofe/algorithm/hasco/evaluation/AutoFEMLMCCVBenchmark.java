@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.SQLAdapter;
-import ai.libs.jaicore.ml.classification.singlelabel.loss.instance.ZeroOneLoss;
+import ai.libs.jaicore.ml.classification.loss.instance.ZeroOneLoss;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValidationSplitSetGenerator;
 import autofe.algorithm.hasco.AutoFEWekaPipeline;

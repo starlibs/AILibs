@@ -10,7 +10,7 @@ import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClass
 
 public class JaccardScore extends AMultiLabelClassificationMeasure {
 
-	private ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.JaccardScore instanceScorer;
+	private ai.libs.jaicore.ml.classification.loss.dataset.JaccardScore instanceScorer;
 
 	public JaccardScore() {
 		super();

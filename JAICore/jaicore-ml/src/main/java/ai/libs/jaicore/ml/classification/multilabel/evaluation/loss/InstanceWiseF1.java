@@ -6,7 +6,7 @@ import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.multilabel.IRelevanceOrderedLabelSet;
 
-import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.F1Measure;
+import ai.libs.jaicore.ml.classification.loss.dataset.F1Measure;
 
 /**
  * Instance-wise F1 measure for multi-label classifiers.

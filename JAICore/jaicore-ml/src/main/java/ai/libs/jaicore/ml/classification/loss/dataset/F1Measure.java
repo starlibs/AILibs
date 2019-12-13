@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.classification.singlelabel.loss.dataset;
+package ai.libs.jaicore.ml.classification.loss.dataset;
 
 public class F1Measure extends FMeasure {
 

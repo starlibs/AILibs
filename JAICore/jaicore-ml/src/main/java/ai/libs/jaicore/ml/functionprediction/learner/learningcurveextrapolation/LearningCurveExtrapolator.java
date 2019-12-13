@@ -21,8 +21,8 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.EClassificationPerformanceMeasure;
-import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.ErrorRate;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
+import ai.libs.jaicore.ml.classification.loss.dataset.ErrorRate;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;

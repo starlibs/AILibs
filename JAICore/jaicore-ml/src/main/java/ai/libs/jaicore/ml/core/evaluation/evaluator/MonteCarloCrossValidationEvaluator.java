@@ -7,7 +7,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
 
-import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.EAggregatedClassifierMetric;
+import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
 import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.FixedDataSplitSetGenerator;
 import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValidationSplitSetGenerator;

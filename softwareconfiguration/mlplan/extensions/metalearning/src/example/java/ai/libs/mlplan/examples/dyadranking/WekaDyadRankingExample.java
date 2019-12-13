@@ -9,7 +9,7 @@ import org.api4.java.algorithm.TimeOut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.ErrorRate;
+import ai.libs.jaicore.ml.classification.loss.dataset.ErrorRate;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;

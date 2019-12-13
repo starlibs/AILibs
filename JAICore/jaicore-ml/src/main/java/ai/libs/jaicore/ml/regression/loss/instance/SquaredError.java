@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.regression.loss.instance;
 
-import ai.libs.jaicore.ml.classification.singlelabel.loss.instance.AInstanceMeasure;
+import ai.libs.jaicore.ml.classification.loss.instance.AInstanceMeasure;
 
 /**
  * Measure computing the squared error of two doubles. It can be used to compute the mean squared error.

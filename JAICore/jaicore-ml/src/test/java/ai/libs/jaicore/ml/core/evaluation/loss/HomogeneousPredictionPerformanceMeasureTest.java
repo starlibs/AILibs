@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.EClassificationPerformanceMeasure;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 
 public class HomogeneousPredictionPerformanceMeasureTest {
 

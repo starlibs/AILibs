@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.interrupt.Interrupter;
-import ai.libs.jaicore.ml.classification.singlelabel.loss.dataset.EAggregatedClassifierMetric;
+import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.PreTrainedPredictionBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.LabelBasedStratifiedSampling;
