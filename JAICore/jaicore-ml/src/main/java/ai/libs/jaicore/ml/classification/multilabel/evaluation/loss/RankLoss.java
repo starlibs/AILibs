@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.OptionalDouble;
 import java.util.stream.IntStream;
 
-import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
+import org.api4.java.ai.ml.classification.multilabel.IRelevanceOrderedLabelSet;
+import org.api4.java.ai.ml.classification.multilabel.evaluation.loss.IMultiLabelClassificationPredictionPerformanceMeasure;
 
-public class RankLoss extends AMultiLabelClassificationMeasure {
+import ai.libs.jaicore.ml.core.evaluation.loss.APredictionPerformanceMeasure;
+
+public class RankLoss extends APredictionPerformanceMeasure<IRelevanceOrderedLabelSet> implements IMultiLabelClassificationPredictionPerformanceMeasure<IRelevanceOrderedLabelSet> {
 
 	private static final double DEFAULT_TIE_LOSS = 0.0;
 
@@ -25,18 +28,16 @@ public class RankLoss extends AMultiLabelClassificationMeasure {
 		this.tieLoss = tieLoss;
 	}
 
-	private double rankingLoss(final IMultiLabelClassification expected, final IMultiLabelClassification actual) {
-		List<String> expectedRelevantLabels = expected.getPrediction();
-		List<String> expectedIrrelevantLabels = expected.getIrrelevantLabels();
-
-		List<String> actualLabelset = actual.getLabelSet();
+	private double rankingLoss(final IRelevanceOrderedLabelSet expected, final IRelevanceOrderedLabelSet actual) {
+		List<Object> expectedRelevantLabels = expected.getRelevantLabels();
+		List<Object> expectedIrrelevantLabels = expected.getIrrelevantLabels();
 		double[] labelRelevance = actual.getLabelRelevanceVector();
 
 		double wrongRankingCounter = 0;
-		for (String expectedRel : expectedRelevantLabels) {
-			for (String expectedIrr : expectedIrrelevantLabels) {
-				double scoreRelLabel = labelRelevance[actualLabelset.indexOf(expectedRel)];
-				double scoreIrrLabel = labelRelevance[actualLabelset.indexOf(expectedIrr)];
+		for (Object expectedRel : expectedRelevantLabels) {
+			for (Object expectedIrr : expectedIrrelevantLabels) {
+				double scoreRelLabel = labelRelevance[actual.indexOf(expectedRel)];
+				double scoreIrrLabel = labelRelevance[actual.indexOf(expectedIrr)];
 				if (scoreRelLabel == scoreIrrLabel) {
 					wrongRankingCounter += this.tieLoss;
 				} else if (scoreRelLabel < scoreIrrLabel) {
@@ -48,7 +49,7 @@ public class RankLoss extends AMultiLabelClassificationMeasure {
 	}
 
 	@Override
-	public double loss(final List<IMultiLabelClassification> expected, final List<IMultiLabelClassification> actual) {
+	public double loss(final List<IRelevanceOrderedLabelSet> expected, final List<IRelevanceOrderedLabelSet> actual) {
 		this.checkConsistency(expected, actual);
 
 		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.rankingLoss(expected.get(x), actual.get(x))).average();

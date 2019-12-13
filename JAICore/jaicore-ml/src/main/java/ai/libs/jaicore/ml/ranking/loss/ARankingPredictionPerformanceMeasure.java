@@ -5,11 +5,11 @@ import java.util.OptionalDouble;
 import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.ranking.IRanking;
-import org.api4.java.ai.ml.ranking.IRankingPredictionAndGroundTruthTable;
+import org.api4.java.ai.ml.ranking.loss.IRankingPredictionPerformanceMeasure;
 
-import ai.libs.jaicore.ml.core.evaluation.loss.AMeasure;
+import ai.libs.jaicore.ml.core.evaluation.loss.APredictionPerformanceMeasure;
 
-public abstract class ARankingMeasure extends AMeasure<IRanking<?>, IRankingPredictionAndGroundTruthTable> {
+public abstract class ARankingPredictionPerformanceMeasure extends APredictionPerformanceMeasure<IRanking<?>> implements IRankingPredictionPerformanceMeasure {
 
 	@Override
 	public double loss(final List<IRanking<?>> expected, final List<IRanking<?>> actual) {

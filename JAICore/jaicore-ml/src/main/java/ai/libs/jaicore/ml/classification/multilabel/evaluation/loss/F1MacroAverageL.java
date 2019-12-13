@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.OptionalDouble;
 import java.util.stream.IntStream;
 
-import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
+import org.api4.java.ai.ml.classification.multilabel.IRelevanceOrderedLabelSet;
 
 import ai.libs.jaicore.ml.core.evaluation.loss.F1Measure;
 
-public class F1MacroAverageL extends AMultiLabelClassificationMeasure {
+public class F1MacroAverageL extends AThresholdBasedMultiLabelClassificationMeasure {
 
 	public F1MacroAverageL(final double threshold) {
 		super(threshold);
@@ -19,12 +19,12 @@ public class F1MacroAverageL extends AMultiLabelClassificationMeasure {
 	}
 
 	@Override
-	public double loss(final List<IMultiLabelClassification> actual, final List<IMultiLabelClassification> expected) {
+	public double loss(final List<IRelevanceOrderedLabelSet> actual, final List<IRelevanceOrderedLabelSet> expected) {
 		return 1 - this.score(expected, actual);
 	}
 
 	@Override
-	public double score(final List<IMultiLabelClassification> expected, final List<IMultiLabelClassification> actual) {
+	public double score(final List<IRelevanceOrderedLabelSet> expected, final List<IRelevanceOrderedLabelSet> actual) {
 		this.checkConsistency(expected, actual);
 		int[][] expectedMatrix = this.transposeMatrix(this.listToThresholdedRelevanceMatrix(expected));
 		int[][] actualMatrix = this.transposeMatrix(this.listToThresholdedRelevanceMatrix(actual));

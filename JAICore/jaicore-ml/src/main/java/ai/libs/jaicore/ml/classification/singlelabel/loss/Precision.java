@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.classification.singlelabel.loss;
 
 import java.util.List;
 
-public class Precision extends ASingleLabelClassificationMeasure {
+public class Precision extends ASingleLabelClassificationPerformanceMeasure {
 
 	private final int positiveClass;
 

@@ -2,8 +2,6 @@ package ai.libs.jaicore.ml.regression.loss;
 
 import java.util.List;
 
-import org.api4.java.ai.ml.regression.evaluation.IRegressionPrediction;
-
 /**
  * The root mean squared loss function.
  * This loss function computes the sum of differences of expected/actual pairs,
@@ -17,7 +15,7 @@ public class RootMeanSquaredError extends ARegressionMeasure {
 	private static final MeanSquaredError MEAN_SQUARED_ERROR_LOSS = new MeanSquaredError();
 
 	@Override
-	public double loss(final List<IRegressionPrediction> actual, final List<IRegressionPrediction> expected) {
+	public double loss(final List<Double> actual, final List<Double> expected) {
 		return Math.sqrt(MEAN_SQUARED_ERROR_LOSS.loss(expected, actual));
 	}
 

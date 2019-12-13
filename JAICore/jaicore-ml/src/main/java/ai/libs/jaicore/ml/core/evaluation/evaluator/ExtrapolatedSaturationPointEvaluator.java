@@ -6,7 +6,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
 import org.api4.java.ai.ml.core.evaluation.learningcurve.IAnalyticalLearningCurve;
-import org.api4.java.ai.ml.core.evaluation.loss.IMeasure;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -49,7 +49,7 @@ public class ExtrapolatedSaturationPointEvaluator implements ISupervisedLearnerE
 	// Configuration for the measurement at the saturation point.
 	private double epsilon;
 	private ILabeledDataset<?> test;
-	private IMeasure measure;
+	private IDeterministicPredictionPerformanceMeasure<?> measure;
 
 	/**
 	 * Create a classifier evaluator with an accuracy measurement at the
@@ -76,7 +76,7 @@ public class ExtrapolatedSaturationPointEvaluator implements ISupervisedLearnerE
 	 */
 	public ExtrapolatedSaturationPointEvaluator(final int[] anchorpoints,
 			final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> samplingAlgorithmFactory, final ILabeledDataset<?> train,
-					final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod, final long seed, final ILabeledDataset<?> test, final IMeasure measure) {
+					final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod, final long seed, final ILabeledDataset<?> test, final IDeterministicPredictionPerformanceMeasure<?> measure) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;

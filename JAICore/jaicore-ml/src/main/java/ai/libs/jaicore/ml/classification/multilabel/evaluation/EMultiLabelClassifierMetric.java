@@ -3,8 +3,7 @@ package ai.libs.jaicore.ml.classification.multilabel.evaluation;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassificationPredictionAndGroundTruthTable;
-import org.api4.java.ai.ml.classification.multilabel.evaluation.loss.IMultiLabelClassificationMeasure;
+import org.api4.java.ai.ml.classification.multilabel.evaluation.loss.IMultiLabelClassificationPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
 import org.api4.java.common.aggregate.IAggregateFunction;
@@ -23,21 +22,21 @@ public enum EMultiLabelClassifierMetric implements ISupervisedLearnerMetric {
 	MEAN_EXACTMATCH(new ExactMatch(), new Mean()), MEAN_F1MACROL(new F1MacroAverageL(), new Mean()), MEAN_HAMMING(new Hamming(), new Mean()), MEAN_INSTANCEF1(new InstanceWiseF1(), new Mean()), MEAN_JACCARD(new JaccardScore(), new Mean()),
 	MEAN_RANK(new RankLoss(), new Mean()), MEAN_AUTOMEKA_FITNESS(new AutoMEKAGGPFitnessMeasureLoss(), new Mean());
 
-	private final IMultiLabelClassificationMeasure lossFunction;
+	private final IMultiLabelClassificationPredictionPerformanceMeasure<?> lossFunction;
 	private final IAggregateFunction<Double> aggregation;
 
-	private EMultiLabelClassifierMetric(final IMultiLabelClassificationMeasure lossFunction, final IAggregateFunction<Double> aggregation) {
+	private EMultiLabelClassifierMetric(final IMultiLabelClassificationPredictionPerformanceMeasure<?> lossFunction, final IAggregateFunction<Double> aggregation) {
 		this.lossFunction = lossFunction;
 		this.aggregation = aggregation;
 	}
 
 	@Override
 	public double evaluateToDouble(final Collection<? extends ILearnerRunReport> reports) {
-		return this.aggregation.aggregate(reports.stream().map(r -> (Double) this.lossFunction.loss((IMultiLabelClassificationPredictionAndGroundTruthTable) r.getPredictionDiffList())).collect(Collectors.toList()));
+		return this.aggregation.aggregate(reports.stream().map(r -> (Double) this.lossFunction.loss(r.getPredictionDiffList())).collect(Collectors.toList()));
 	}
 
 	@Override
-	public IMultiLabelClassificationMeasure getMeasure() {
+	public IMultiLabelClassificationPredictionPerformanceMeasure<?> getMeasure() {
 		return this.lossFunction;
 	}
 }

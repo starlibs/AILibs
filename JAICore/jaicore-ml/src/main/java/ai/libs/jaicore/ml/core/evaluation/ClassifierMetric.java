@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
-import org.api4.java.ai.ml.core.evaluation.loss.IMeasure;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.common.aggregate.IAggregateFunction;
 
 import ai.libs.jaicore.basic.aggregate.reals.Mean;
@@ -15,10 +15,10 @@ public enum ClassifierMetric implements ISupervisedLearnerMetric {
 
 	MEAN_ERRORRATE(new ErrorRate(), new Mean());
 
-	private final IMeasure lossFunction;
+	private final IDeterministicPredictionPerformanceMeasure lossFunction;
 	private final IAggregateFunction<Double> aggregation;
 
-	private ClassifierMetric(final IMeasure lossFunction, final IAggregateFunction<Double> aggregation) {
+	private ClassifierMetric(final IDeterministicPredictionPerformanceMeasure lossFunction, final IAggregateFunction<Double> aggregation) {
 		this.lossFunction = lossFunction;
 		this.aggregation = aggregation;
 	}
@@ -29,7 +29,7 @@ public enum ClassifierMetric implements ISupervisedLearnerMetric {
 	}
 
 	@Override
-	public IMeasure getMeasure() {
+	public IDeterministicPredictionPerformanceMeasure getMeasure() {
 		return this.lossFunction;
 	}
 }

@@ -7,7 +7,7 @@ import java.util.OptionalDouble;
 import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.ranking.IRanking;
-import org.api4.java.ai.ml.ranking.loss.IRankingMeasure;
+import org.api4.java.ai.ml.ranking.loss.IRankingPredictionPerformanceMeasure;
 
 /**
  * The Normalized Discounted Cumulative Gain for ranking.
@@ -16,7 +16,7 @@ import org.api4.java.ai.ml.ranking.loss.IRankingMeasure;
  * @author mwever
  *
  */
-public class NDCGLoss extends ARankingMeasure implements IRankingMeasure {
+public class NDCGLoss extends ARankingPredictionPerformanceMeasure implements IRankingPredictionPerformanceMeasure {
 
 	/**
 	 * The position up to which to compute the cumulative gain (zero-indexed, exclusive).

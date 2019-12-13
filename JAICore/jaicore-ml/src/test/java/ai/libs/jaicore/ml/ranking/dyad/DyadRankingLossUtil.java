@@ -9,7 +9,7 @@ import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.ranking.IRanking;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
-import org.api4.java.ai.ml.ranking.loss.IRankingLossFunction;
+import org.api4.java.ai.ml.ranking.loss.IRankingPredictionPerformanceMeasure;
 
 import com.google.common.collect.Lists;
 
@@ -42,7 +42,7 @@ public class DyadRankingLossUtil {
 	 *            {@link IDyadRankingInstance}s
 	 * @return Average loss over all {@link IDyadRankingInstance}s
 	 */
-	public static double computeAverageLoss(final IRankingLossFunction lossFunction, final List<IRanking<?>> trueOrderings, final List<IRanking<?>> predictedOrderings) {
+	public static double computeAverageLoss(final IRankingPredictionPerformanceMeasure lossFunction, final List<IRanking<?>> trueOrderings, final List<IRanking<?>> predictedOrderings) {
 		if (trueOrderings.size() != predictedOrderings.size()) {
 			throw new IllegalArgumentException("The list of predictions and the list of ground truth dyad rankings need to have the same length!");
 		}
@@ -63,7 +63,7 @@ public class DyadRankingLossUtil {
 	 * @return Average loss over all {@link IDyadRankingInstance}s
 	 * @throws InterruptedException
 	 */
-	public static double computeAverageLoss(final IRankingLossFunction lossFunction, final DyadRankingDataset trueOrderings, final IDyadRanker ranker, final Random random) throws PredictionException, InterruptedException {
+	public static double computeAverageLoss(final IRankingPredictionPerformanceMeasure lossFunction, final DyadRankingDataset trueOrderings, final IDyadRanker ranker, final Random random) throws PredictionException, InterruptedException {
 		List<IRanking<?>> predictedOrderings = new ArrayList<>();
 		List<IRanking<?>> expectedOrderings = new ArrayList<>();
 		for (int i = 0; i < trueOrderings.size(); i++) {
@@ -81,7 +81,7 @@ public class DyadRankingLossUtil {
 		return lossFunction.loss(expectedOrderings, predictedOrderings);
 	}
 
-	public static double computeAverageLoss(final IRankingLossFunction lossFunction, final DyadRankingDataset trueOrderings, final IDyadRanker ranker) throws PredictionException, InterruptedException {
+	public static double computeAverageLoss(final IRankingPredictionPerformanceMeasure lossFunction, final DyadRankingDataset trueOrderings, final IDyadRanker ranker) throws PredictionException, InterruptedException {
 		return computeAverageLoss(lossFunction, trueOrderings, ranker, new Random(0));
 	}
 }

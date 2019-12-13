@@ -10,7 +10,7 @@ import org.api4.java.ai.ml.core.evaluation.execution.LearnerExecutionFailedExcep
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 
-import ai.libs.jaicore.ml.classification.singlelabel.loss.ASingleLabelClassificationMeasure;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.ASingleLabelClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 
@@ -20,7 +20,7 @@ public class MLEvaluationUtil {
 		return evaluator.evaluate(learner);
 	}
 
-	public static double getLossForTrainedClassifier(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> testData, final ASingleLabelClassificationMeasure measure) throws ObjectEvaluationFailedException, InterruptedException, LearnerExecutionFailedException {
+	public static double getLossForTrainedClassifier(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> testData, final ASingleLabelClassificationPerformanceMeasure measure) throws ObjectEvaluationFailedException, InterruptedException, LearnerExecutionFailedException {
 		SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 		ILearnerRunReport report = executor.execute(learner, testData);
 		return measure.loss(report.getPredictionDiffList());

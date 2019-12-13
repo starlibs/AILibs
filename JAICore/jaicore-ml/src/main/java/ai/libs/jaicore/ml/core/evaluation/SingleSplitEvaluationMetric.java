@@ -4,13 +4,13 @@ import java.util.Collection;
 
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.execution.ISupervisedLearnerMetric;
-import org.api4.java.ai.ml.core.evaluation.loss.IMeasure;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 
 public class SingleSplitEvaluationMetric implements ISupervisedLearnerMetric {
 
-	private final IMeasure lossFunction;
+	private final IDeterministicPredictionPerformanceMeasure lossFunction;
 
-	public SingleSplitEvaluationMetric(final IMeasure lossFunction) {
+	public SingleSplitEvaluationMetric(final IDeterministicPredictionPerformanceMeasure lossFunction) {
 		super();
 		this.lossFunction = lossFunction;
 	}
@@ -24,7 +24,7 @@ public class SingleSplitEvaluationMetric implements ISupervisedLearnerMetric {
 	}
 
 	@Override
-	public IMeasure getMeasure() {
+	public IDeterministicPredictionPerformanceMeasure getMeasure() {
 		return this.lossFunction;
 	}
 }

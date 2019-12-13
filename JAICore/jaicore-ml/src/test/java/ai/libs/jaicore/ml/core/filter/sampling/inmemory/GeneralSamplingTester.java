@@ -214,7 +214,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	@Test
 	public <I extends ILabeledInstance> void checkOriginalDataSetNotModified() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		SamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
-		ILabeledDataset<ILabeledInstance> dataset = problemSet.getTinyProblemInputForGeneralTestPurposes();
+		ILabeledDataset<? extends ILabeledInstance> dataset = problemSet.getTinyProblemInputForGeneralTestPurposes();
 		int hashCode = dataset.hashCode();
 		@SuppressWarnings("unchecked")
 		ASamplingAlgorithm<ILabeledDataset<I>> samplingAlgorithm = (ASamplingAlgorithm<ILabeledDataset<I>>) this.getAlgorithm(dataset);

@@ -1,12 +1,12 @@
 package ai.libs.jaicore.ml.classification.singlelabel.loss;
 
-import org.api4.java.ai.ml.core.evaluation.loss.IInstanceMeasure;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicInstancePredictionPerformanceMeasure;
 
 /**
  *
  * @author mwever
  */
-public class ZeroOneLoss implements IInstanceMeasure<Object> {
+public class ZeroOneLoss implements IDeterministicInstancePredictionPerformanceMeasure<Object> {
 
 	@Override
 	public double loss(final Object expected, final Object actual) {

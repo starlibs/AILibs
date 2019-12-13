@@ -12,7 +12,6 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.learningcurve.ILearningCurve;
-import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -109,7 +108,7 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 
 			// Create subsamples at the anchorpoints and measure the accuracy there.
 			SupervisedLearnerExecutor learnerExecutor = new SupervisedLearnerExecutor();
-			ILossFunction metric = new ErrorRate();
+			ErrorRate metric = new ErrorRate();
 			for (int i = 0; i < this.anchorPoints.length; i++) {
 
 				// If it is a rerunnable factory, set the previous run.

@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.classification.singlelabel.loss;
 
 import java.util.List;
 
-public class ErrorRate extends ASingleLabelClassificationMeasure {
+public class ErrorRate extends ASingleLabelClassificationPerformanceMeasure {
 
 	private final ZeroOneLoss zeroOneLoss = new ZeroOneLoss();
 

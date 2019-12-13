@@ -207,6 +207,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 	 */
 	@Override
 	public List<IKVStore> getRowsOfTable(final String table) throws SQLException {
+		this.logger.info("Fetching complete table {}", table);
 		return this.getRowsOfTable(table, new HashMap<>());
 	}
 
@@ -266,6 +267,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 	@Override
 	public List<IKVStore> getResultsOfQuery(final String query, final List<String> values) throws SQLException {
 		this.checkConnection();
+		this.logger.info("Conducting query {} with values {}", query, values);
 		try (PreparedStatement statement = this.connect.prepareStatement(query)) {
 			for (int i = 1; i <= values.size(); i++) {
 				statement.setString(i, values.get(i - 1));

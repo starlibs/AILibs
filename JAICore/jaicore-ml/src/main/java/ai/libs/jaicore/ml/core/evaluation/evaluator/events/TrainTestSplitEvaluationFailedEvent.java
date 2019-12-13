@@ -6,17 +6,17 @@ import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.event.IEvent;
 
-public class TrainTestSplitEvaluationFailedEvent implements IEvent {
-	private final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner;
+public class TrainTestSplitEvaluationFailedEvent<I extends ILabeledInstance, D extends ILabeledDataset<? extends I>> implements IEvent {
+	private final ISupervisedLearner<I, D> learner;
 	private final ILearnerRunReport report;
 
-	public TrainTestSplitEvaluationFailedEvent(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILearnerRunReport report) {
+	public TrainTestSplitEvaluationFailedEvent(final ISupervisedLearner<I, D> learner, final ILearnerRunReport report) {
 		super();
 		this.learner = learner;
 		this.report = report;
 	}
 
-	public ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getLearner() {
+	public ISupervisedLearner<I, D> getLearner() {
 		return this.learner;
 	}
 

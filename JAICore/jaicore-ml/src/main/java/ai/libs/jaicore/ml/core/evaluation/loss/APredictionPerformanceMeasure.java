@@ -5,10 +5,10 @@ import java.util.OptionalDouble;
 import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.core.evaluation.IPredictionAndGroundTruthTable;
-import org.api4.java.ai.ml.core.evaluation.loss.IInstanceMeasure;
-import org.api4.java.ai.ml.core.evaluation.loss.IMeasure;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicInstancePredictionPerformanceMeasure;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 
-public abstract class AMeasure<O, T extends IPredictionAndGroundTruthTable<O>> implements IMeasure<O, T> {
+public abstract class APredictionPerformanceMeasure<O> implements IDeterministicPredictionPerformanceMeasure<O> {
 
 	protected void checkConsistency(final List<O> expected, final List<O> actual) {
 		if (expected.size() != actual.size()) {
@@ -17,7 +17,7 @@ public abstract class AMeasure<O, T extends IPredictionAndGroundTruthTable<O>> i
 	}
 
 	@Override
-	public double loss(final T pairTable) {
+	public double loss(final IPredictionAndGroundTruthTable<O> pairTable) {
 		return this.loss(pairTable.getPredictionsAsList(), pairTable.getGroundTruthAsList());
 	}
 
@@ -32,11 +32,11 @@ public abstract class AMeasure<O, T extends IPredictionAndGroundTruthTable<O>> i
 	}
 
 	@Override
-	public double score(final T pairTable) {
+	public double score(final IPredictionAndGroundTruthTable<O> pairTable) {
 		return this.score(pairTable.getGroundTruthAsList(), pairTable.getPredictionsAsList());
 	}
 
-	protected double averageInstanceWiseLoss(final List<O> expected, final List<O> actual, final IInstanceMeasure<O> subMeasure) {
+	protected double averageInstanceWiseLoss(final List<O> expected, final List<O> actual, final IDeterministicInstancePredictionPerformanceMeasure<O> subMeasure) {
 		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> subMeasure.loss(expected.get(x), actual.get(x))).average();
 		if (res.isPresent()) {
 			return res.getAsDouble();
@@ -45,7 +45,7 @@ public abstract class AMeasure<O, T extends IPredictionAndGroundTruthTable<O>> i
 		}
 	}
 
-	protected double averageInstanceWiseScore(final List<O> expected, final List<O> actual, final IInstanceMeasure<O> subMeasure) {
+	protected double averageInstanceWiseScore(final List<O> expected, final List<O> actual, final IDeterministicInstancePredictionPerformanceMeasure<O> subMeasure) {
 		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> subMeasure.score(expected.get(x), actual.get(x))).average();
 		if (res.isPresent()) {
 			return res.getAsDouble();

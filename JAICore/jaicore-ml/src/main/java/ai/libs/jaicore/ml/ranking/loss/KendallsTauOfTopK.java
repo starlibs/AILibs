@@ -5,7 +5,7 @@ import java.util.OptionalDouble;
 import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.ranking.IRanking;
-import org.api4.java.ai.ml.ranking.loss.IRankingLossFunction;
+import org.api4.java.ai.ml.ranking.loss.IRankingPredictionPerformanceMeasure;
 
 /**
  * Calculates the kendalls-tau loss only for the top k dyads.
@@ -16,7 +16,7 @@ import org.api4.java.ai.ml.ranking.loss.IRankingLossFunction;
  * @author mwever
  *
  */
-public class KendallsTauOfTopK extends ARankingMeasure implements IRankingLossFunction {
+public class KendallsTauOfTopK extends ARankingPredictionPerformanceMeasure implements IRankingPredictionPerformanceMeasure {
 	private int k;
 
 	private double p;
