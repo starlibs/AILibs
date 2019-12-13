@@ -6,8 +6,8 @@ import java.util.List;
 import org.api4.java.ai.ml.classification.IClassifierEvaluator;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
-import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
 import org.api4.java.ai.ml.core.evaluation.execution.LearnerExecutionFailedException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
@@ -22,9 +22,9 @@ public class PreTrainedPredictionBasedClassifierEvaluator implements IClassifier
 
 	private final ILabeledDataset<?> testData;
 	private final SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
-	private final IAggregatedPredictionPerformanceMetric metric;
+	private final IAggregatedPredictionPerformanceMeasure metric;
 
-	public PreTrainedPredictionBasedClassifierEvaluator(final ILabeledDataset<?> testData, final IAggregatedPredictionPerformanceMetric metric) {
+	public PreTrainedPredictionBasedClassifierEvaluator(final ILabeledDataset<?> testData, final IAggregatedPredictionPerformanceMeasure metric) {
 		super();
 		this.testData = testData;
 		this.metric = metric;

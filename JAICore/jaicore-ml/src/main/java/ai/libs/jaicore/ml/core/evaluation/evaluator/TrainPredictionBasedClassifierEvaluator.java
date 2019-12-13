@@ -2,15 +2,16 @@ package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.classification.IClassifierEvaluator;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
 import org.api4.java.ai.ml.core.evaluation.execution.IFixedDatasetSplitSetGenerator;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
-import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
 import org.api4.java.ai.ml.core.evaluation.execution.LearnerExecutionFailedException;
 import org.api4.java.ai.ml.core.evaluation.execution.LearnerExecutionInterruptedException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
@@ -30,11 +31,11 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 	private Logger logger = LoggerFactory.getLogger(TrainPredictionBasedClassifierEvaluator.class);
 	private final IFixedDatasetSplitSetGenerator<ILabeledDataset<? extends ILabeledInstance>> splitGenerator;
 	private final SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
-	private final IAggregatedPredictionPerformanceMetric metric;
+	private final IAggregatedPredictionPerformanceMeasure metric;
 	private final EventBus eventBus = new EventBus();
 	private boolean hasListeners;
 
-	public TrainPredictionBasedClassifierEvaluator(final IFixedDatasetSplitSetGenerator<ILabeledDataset<?>> splitGenerator, final IAggregatedPredictionPerformanceMetric metric) {
+	public TrainPredictionBasedClassifierEvaluator(final IFixedDatasetSplitSetGenerator<ILabeledDataset<?>> splitGenerator, final IAggregatedPredictionPerformanceMeasure<?, ?> metric) {
 		super();
 		this.splitGenerator = splitGenerator;
 		this.metric = metric;
@@ -44,7 +45,7 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 	public Double evaluate(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner) throws InterruptedException, ObjectEvaluationFailedException {
 		try {
 			long evaluationStart = System.currentTimeMillis();
-			this.logger.info("Splitting the given data into two folds.");
+			this.logger.info("Using {} to split the given data into two folds.", this.splitGenerator.getClass().getName());
 			IDatasetSplitSet<ILabeledDataset<? extends ILabeledInstance>> splitSet = this.splitGenerator.nextSplitSet();
 			if (splitSet.getNumberOfFoldsPerSplit() != 2) {
 				throw new IllegalStateException("Number of folds for each split should be 2 but is " + splitSet.getNumberOfFoldsPerSplit() + "! Split generator: " + this.splitGenerator);
@@ -64,7 +65,7 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 					ILabeledDataset<?> train = folds.get(0);
 					ILabeledDataset<?> test = folds.get(1);
 					ILearnerRunReport failReport = new LearnerRunReport(train, test, e.getTrainTimeStart(),  e.getTrainTimeEnd(),  e.getTestTimeStart(), e.getTestTimeEnd(), e);
-					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent(learner, failReport));
+					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent<>(learner, failReport));
 					throw e;
 				}
 				catch (LearnerExecutionFailedException e) { // cannot be merged with the above clause, because then the only common supertype is "Exception", which does not have these methods
@@ -72,12 +73,12 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 					ILabeledDataset<?> train = folds.get(0);
 					ILabeledDataset<?> test = folds.get(1);
 					ILearnerRunReport failReport = new LearnerRunReport(train, test, e.getTrainTimeStart(),  e.getTrainTimeEnd(),  e.getTestTimeStart(), e.getTestTimeEnd(), e);
-					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent(learner, failReport));
+					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent<>(learner, failReport));
 					throw e;
 				}
 
 				if (this.hasListeners) {
-					this.eventBus.post(new TrainTestSplitEvaluationCompletedEvent(learner, report));
+					this.eventBus.post(new TrainTestSplitEvaluationCompletedEvent<>(learner, report));
 				}
 				reports.add(report);
 				if (this.logger.isDebugEnabled()) {
@@ -96,12 +97,16 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 					this.logger.debug("Execution completed. Classifier predicted {}/{} test instances correctly.", (m-mistakes), m);
 				}
 			}
-			double score = this.metric.evaluate(reports);
+			double score = this.metric.loss(reports.stream().map(r -> r.getPredictionDiffList()).collect(Collectors.toList()));
 			this.logger.info("Computed value for metric {} of {} executions. Metric value is: {}", this.metric, n, score);
 			return score;
 		} catch (LearnerExecutionFailedException | SplitFailedException e) {
 			throw new ObjectEvaluationFailedException(e);
 		}
+	}
+
+	protected IFixedDatasetSplitSetGenerator<ILabeledDataset<? extends ILabeledInstance>> getSplitGenerator() {
+		return this.splitGenerator;
 	}
 
 	@Override

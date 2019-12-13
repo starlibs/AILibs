@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
-import ai.libs.jaicore.ml.classification.loss.dataset.ErrorRate;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.FixedSplitClassifierEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.weka.WekaUtil;
@@ -78,7 +78,7 @@ public class ExperimentRunner<T extends ISplitter> {
 		}
 
 		/* train classifier on all data */
-		double loss = new FixedSplitClassifierEvaluator(outerSplit.get(0), outerSplit.get(1), new ErrorRate()).evaluate(new WekaClassifier(bestFoundClassifier));
+		double loss = new FixedSplitClassifierEvaluator(outerSplit.get(0), outerSplit.get(1), EClassificationPerformanceMeasure.ERRORRATE).evaluate(new WekaClassifier(bestFoundClassifier));
 		Map<String, Object> result = new HashMap<>();
 		this.logger.info("\t\t\tBest previously observed loss was {}. The retrained classifier achieves {} on the full data.", bestFoundScore, loss);
 		result.put("errorRate", loss);

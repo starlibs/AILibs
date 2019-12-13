@@ -20,7 +20,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
-import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.evaluation.loss.IMeasure;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.TimeOut;
@@ -265,7 +265,7 @@ public class MLPlanCLI {
 			case "PRECISION":
 				int classIndex = Integer.parseInt(commandLine.getOptionValue(positiveClassIndex, "0"));
 				Precision precision = new Precision(classIndex);
-				slcBuilder.withPerformanceMeasure(new IAggregatedPredictionPerformanceMetric() {
+				slcBuilder.withPerformanceMeasure(new IAggregatedPredictionPerformanceMeasure() {
 					@Override
 					public IMeasure getMeasure() {
 						return precision;

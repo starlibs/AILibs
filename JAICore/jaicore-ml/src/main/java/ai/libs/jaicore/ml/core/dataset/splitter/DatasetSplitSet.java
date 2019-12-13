@@ -17,6 +17,9 @@ public class DatasetSplitSet<D extends IDataset<?>> implements IDatasetSplitSet<
 
 	public DatasetSplitSet(final IDatasetSplitSet<D> set) {
 		int n = set.getNumberOfSplits();
+		if (n == 0) {
+			throw new IllegalArgumentException("Cannot create a split set with no folds.");
+		}
 		for (int i = 0; i < n; i++) {
 			this.splits.add(new ArrayList<>(set.getFolds(i)));
 		}

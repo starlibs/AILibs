@@ -9,7 +9,7 @@ import org.api4.java.algorithm.TimeOut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.classification.loss.dataset.ErrorRate;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
@@ -54,7 +54,7 @@ public class WekaDyadRankingExample {
 			logger.info("Finished build of the classifier. Training time was {}s", trainTime);
 
 			/* evaluate solution produced by mlplan */
-			double errorRate = MLEvaluationUtil.getLossForTrainedClassifier(mlplan, split.get(1), new ErrorRate());
+			double errorRate = MLEvaluationUtil.getLossForTrainedClassifier(mlplan, split.get(1), EClassificationPerformanceMeasure.ERRORRATE);
 			logger.info("Error Rate of the solution produced by ML-Plan: {}", errorRate);
 		} catch (NoSuchElementException e) {
 			logger.error("Building the classifier failed: {}", e.getMessage());

@@ -5,7 +5,7 @@ import java.util.Random;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
-import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMeasure;
 
 import ai.libs.jaicore.ml.core.evaluation.evaluator.LearningCurveExtrapolationEvaluator;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
@@ -29,7 +29,7 @@ public class LearningCurveExtrapolationEvaluatorFactory implements ISupervisedLe
 	}
 
 	@Override
-	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getDataspecificRandomizedLearnerEvaluator(final ILabeledDataset<?> dataset, final IAggregatedPredictionPerformanceMetric metric, final Random random)
+	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getDataspecificRandomizedLearnerEvaluator(final ILabeledDataset<?> dataset, final IAggregatedPredictionPerformanceMeasure metric, final Random random)
 			throws LearnerEvaluatorConstructionFailedException {
 		return new LearningCurveExtrapolationEvaluator(this.anchorpoints, this.subsamplingAlgorithmFactory, dataset, this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, random.nextLong());
 	}

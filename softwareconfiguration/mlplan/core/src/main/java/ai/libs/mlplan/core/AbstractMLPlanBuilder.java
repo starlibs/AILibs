@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -16,8 +15,7 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
-import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.TimeOut;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -34,9 +32,9 @@ import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.LearningCurveExtrapolationEvaluator;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
@@ -66,6 +64,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	protected static final double DEFAULT_SEARCH_TRAIN_FOLD_SIZE = 0.7;
 	protected static final int DEFAULT_SELECTION_NUM_MC_ITERATIONS = 5;
 	protected static final double DEFAULT_SELECTION_TRAIN_FOLD_SIZE = 0.7;
+	protected static final IDeterministicPredictionPerformanceMeasure<Object, Object> DEFAULT_PERFORMANCE_MEASURE = EClassificationPerformanceMeasure.ERRORRATE;
 
 	/* Default configuration values */
 	private static final File DEF_ALGORITHM_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_ALGORITHM_CONFIG, FS_ALGORITHM_CONFIG);
@@ -81,21 +80,18 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	private Predicate<TFDNode> priorizingPredicate = null;
 	private File searchSpaceFile;
 	private String requestedHASCOInterface;
-	private ILearnerFactory<L> classifierFactory;
-	private IAggregatedPredictionPerformanceMetric performanceMetric;
+	private ILearnerFactory<L> learnerFactory;
 
+	/* Node Evaluation */
 	private IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator = null;
 	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
 
-	/* The splitter is used to create the split for separating search and selection data */
+	/* Candidate Evaluation (if no other node evaluation is used) */
 	private IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter;
-	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> factoryForPipelineEvaluationInSearchPhase = null;
-	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> factoryForPipelineEvaluationInSelectionPhase = null;
+	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factoryForPipelineEvaluationInSearchPhase = null;
+	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factoryForPipelineEvaluationInSelectionPhase = null;
 
 	private Collection<Component> components = new LinkedList<>();
-
-	/* Use caching */
-	private boolean useCache;
 
 	/* The problem input for ML-Plan. */
 	private ILabeledDataset<?> dataset;
@@ -104,6 +100,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		super();
 		this.withAlgorithmConfigFile(DEF_ALGORITHM_CONFIG);
 		this.withRandomCompletionBasedBestFirstSearch();
+		this.withSeed(0);
 	}
 
 	/**
@@ -219,7 +216,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 * @return The builder object.
 	 */
 	public B withClassifierFactory(final ILearnerFactory<L> classifierFactory) {
-		this.classifierFactory = classifierFactory;
+		this.learnerFactory = classifierFactory;
 		return this.getSelf();
 	}
 
@@ -290,26 +287,24 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		return new TimeOut(this.algorithmConfig.timeoutForCandidateEvaluation(), TimeUnit.MILLISECONDS);
 	}
 
-	@Override
-	public PipelineEvaluator getClassifierEvaluationInSearchPhase(final ILabeledDataset<? extends ILabeledInstance> data, final int seed, final int fullDatasetSize) throws LearnerEvaluatorConstructionFailedException {
-		Objects.requireNonNull(this.factoryForPipelineEvaluationInSearchPhase, "No factory for pipeline evaluation in search phase has been set!");
-		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(data);
+	public MonteCarloCrossValidationEvaluatorFactory withMCCVBasedCandidateEvaluationInSearchPhase() {
+		this.factoryForPipelineEvaluationInSearchPhase = new MonteCarloCrossValidationEvaluatorFactory();
+		return ((MonteCarloCrossValidationEvaluatorFactory)this.factoryForPipelineEvaluationInSearchPhase).withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE).withMeasure(DEFAULT_PERFORMANCE_MEASURE);
+	}
 
-		ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluator = this.factoryForPipelineEvaluationInSearchPhase.getDataspecificRandomizedLearnerEvaluator(data, this.performanceMetric,
-				new Random(seed));
-		if (evaluator instanceof LearningCurveExtrapolationEvaluator) {
-			((LearningCurveExtrapolationEvaluator) evaluator).setFullDatasetSize(fullDatasetSize);
-		}
-
-		return new PipelineEvaluator(this.getLearnerFactory(), evaluator, this.getAlgorithmConfig().timeoutForCandidateEvaluation());
+	public MonteCarloCrossValidationEvaluatorFactory withMCCVBasedCandidateEvaluationInSelectionPhase() {
+		this.factoryForPipelineEvaluationInSelectionPhase = new MonteCarloCrossValidationEvaluatorFactory();
+		return ((MonteCarloCrossValidationEvaluatorFactory)this.factoryForPipelineEvaluationInSelectionPhase).withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE).withMeasure(DEFAULT_PERFORMANCE_MEASURE);
 	}
 
 	@Override
-	public PipelineEvaluator getClassifierEvaluationInSelectionPhase(final ILabeledDataset<? extends ILabeledInstance> data, final int seed) throws LearnerEvaluatorConstructionFailedException {
-		if (this.factoryForPipelineEvaluationInSelectionPhase == null) {
-			throw new IllegalStateException("No factory for pipeline evaluation in selection phase has been set!");
-		}
-		return new PipelineEvaluator(this.getLearnerFactory(), this.factoryForPipelineEvaluationInSelectionPhase.getDataspecificRandomizedLearnerEvaluator(data, this.performanceMetric, new Random(seed)), Integer.MAX_VALUE);
+	public ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getLearnerEvaluationFactoryForSearchPhase() {
+		return this.factoryForPipelineEvaluationInSearchPhase;
+	}
+
+	@Override
+	public ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getLearnerEvaluationFactoryForSelectionPhase() {
+		return this.factoryForPipelineEvaluationInSelectionPhase;
 	}
 
 	/**
@@ -341,17 +336,6 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	}
 
 	/**
-	 * Sets the performance measure to evaluate a candidate solution's generalization performance.
-	 *
-	 * @param performanceMeasure The loss function to be used.
-	 * @return The builder object.
-	 */
-	public B withPerformanceMeasure(final IAggregatedPredictionPerformanceMetric performanceMeasure) {
-		this.performanceMetric = performanceMeasure;
-		return this.getSelf();
-	}
-
-	/**
 	 * Sets the number of cpus that may be used by ML-Plan.
 	 *
 	 * @param numCpus The number of cpus to use.
@@ -363,16 +347,17 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		return this.getSelf();
 	}
 
+	public B withSeed(final long seed) {
+		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_SEED, seed + "");
+		this.update();
+		return this.getSelf();
+	}
+
 	/**
 	 * @return The factory for the classifier evaluator of the selection phase.
 	 */
 	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getSelectionEvaluatorFactory() {
 		return this.factoryForPipelineEvaluationInSelectionPhase;
-	}
-
-	@Override
-	public IAggregatedPredictionPerformanceMetric getPerformanceMeasure() {
-		return this.performanceMetric;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -383,7 +368,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 
 	@Override
 	public ILearnerFactory<L> getLearnerFactory() {
-		return this.classifierFactory;
+		return this.learnerFactory;
 	}
 
 	@Override
@@ -417,12 +402,6 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		return this.algorithmConfig;
 	}
 
-	@Override
-	public boolean getUseCache() {
-		return this.useCache;
-	}
-
-	@Override
 	public void prepareNodeEvaluatorInFactoryWithData(final ILabeledDataset<?> data) {
 		if (!(this.hascoFactory instanceof HASCOViaFDAndBestFirstFactory)) {
 			return;
@@ -486,7 +465,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 */
 	public MLPlan<L> build() {
 		this.checkPreconditionsForInitialization();
+		this.prepareNodeEvaluatorInFactoryWithData(this.dataset); // inform node evaluator about data and create the MLPlan object
 		return new MLPlan<>(this, this.dataset);
 	}
-
 }

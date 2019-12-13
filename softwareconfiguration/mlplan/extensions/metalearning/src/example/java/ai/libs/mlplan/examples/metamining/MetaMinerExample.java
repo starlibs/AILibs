@@ -6,7 +6,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.classification.loss.dataset.ErrorRate;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
 import ai.libs.jaicore.ml.weka.WekaUtil;
@@ -50,7 +50,7 @@ public class MetaMinerExample {
 
 		// Evaluate solution produced by meta mlplan
 		logger.info("Evaluate.");
-		double score = MLEvaluationUtil.getLossForTrainedClassifier(new WekaClassifier(metaMLPlan), split.get(1), new ErrorRate());
+		double score = MLEvaluationUtil.getLossForTrainedClassifier(new WekaClassifier(metaMLPlan), split.get(1), EClassificationPerformanceMeasure.ERRORRATE);
 		logger.info("Error Rate of the solution produced by Meta ML-Plan: {}", score);
 		logger.info("Time in Seconds: {}",watch.getTime()/1000);
 	}

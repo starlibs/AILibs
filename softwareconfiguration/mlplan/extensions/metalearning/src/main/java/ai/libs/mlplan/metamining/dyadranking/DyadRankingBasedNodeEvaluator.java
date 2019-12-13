@@ -53,7 +53,7 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.ml.classification.loss.dataset.ErrorRate;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.FixedSplitClassifierEvaluator;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
@@ -386,7 +386,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 			Instances[] subsets = this.landmarkerSets[i];
 			double score = 0d;
 			for (Instances train : subsets) {
-				FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(new WekaInstances(train), new WekaInstances(this.evaluationDataset), new ErrorRate());
+				FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(new WekaInstances(train), new WekaInstances(this.evaluationDataset), EClassificationPerformanceMeasure.ERRORRATE);
 				try {
 					score += evaluator.evaluate(this.classifierFactory.getComponentInstantiation(cI));
 				} catch (Exception e) {

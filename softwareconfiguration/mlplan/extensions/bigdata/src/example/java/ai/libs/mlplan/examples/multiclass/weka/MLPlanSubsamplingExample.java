@@ -10,7 +10,7 @@ import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.TimeOut;
 
-import ai.libs.jaicore.ml.classification.loss.dataset.ErrorRate;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
@@ -57,7 +57,7 @@ public class MLPlanSubsamplingExample {
 			System.out.println("Training time was " + trainTime + "s.");
 
 			/* evaluate solution produced by mlplan */
-			double errorRate = MLEvaluationUtil.getLossForTrainedClassifier(optimizedClassifier, split.get(1), new ErrorRate());
+			double errorRate = MLEvaluationUtil.getLossForTrainedClassifier(optimizedClassifier, split.get(1), EClassificationPerformanceMeasure.ERRORRATE);
 			System.out.println("Error Rate of the solution produced by ML-Plan: " + errorRate + ". Internally believed error was " + mlplan.getInternalValidationErrorOfSelectedClassifier());
 		} catch (NoSuchElementException e) {
 			System.out.println("Building the classifier failed: " + e.getMessage());

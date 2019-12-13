@@ -25,12 +25,12 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISa
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-import ai.libs.mlplan.core.AbstractMLPlanSingleLabelBuilder;
+import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 
-public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<IWekaClassifier, MLPlanWekaBuilder> {
+public class MLPlanWekaBuilder extends AbstractMLPlanBuilder<IWekaClassifier, MLPlanWekaBuilder> {
 
 	private static final String RES_SSC_TINY_WEKA = "automl/searchmodels/weka/tinytest.json";
 	private static final String RES_SSC_WEKA_COMPLETE = "automl/searchmodels/weka/weka-all-autoweka.json";
@@ -51,9 +51,9 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<IWekaCla
 	// private static final IDatasetSplitter<WekaInstances> DEF_SEARCH_DATASET_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE, new Random(0));
 	// private static final IDatasetSplitter<WekaInstances> DEF_SELECTION_DATASET_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SELECTION_TRAIN_FOLD_SIZE, new Random(0));
 	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS)
-			.withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE);
+			.withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE).withMeasure(DEFAULT_PERFORMANCE_MEASURE);
 	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS)
-			.withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE);
+			.withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE).withMeasure(DEFAULT_PERFORMANCE_MEASURE);
 
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaBuilder.class);
 
@@ -65,7 +65,6 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<IWekaCla
 		this.withClassifierFactory(DEF_CLASSIFIER_FACTORY);
 		this.withSearchPhaseEvaluatorFactory(DEF_SEARCH_PHASE_EVALUATOR);
 		this.withSelectionPhaseEvaluatorFactory(DEF_SELECTION_PHASE_EVALUATOR);
-		this.withPerformanceMeasure(DEFAULT_PERFORMANCE_MEASURE);
 		this.withDatasetSplitterForSearchSelectionSplit(DEF_SEARCH_SELECT_SPLITTER);
 
 		// /* configure blow-ups for MCCV */

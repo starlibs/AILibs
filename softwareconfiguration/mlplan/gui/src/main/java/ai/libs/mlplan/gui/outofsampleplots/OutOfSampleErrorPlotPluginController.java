@@ -18,7 +18,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfo;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
-import ai.libs.jaicore.ml.classification.loss.dataset.ErrorRate;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
 
@@ -69,7 +69,7 @@ public class OutOfSampleErrorPlotPluginController extends ASimpleMVCPluginContro
 					classifier.fit(this.train);
 					List<Double> performances = new ArrayList<>();
 					performances.add(this.parseScoreToDouble(scoredSolutionCandidateInfo.getScore()));
-					performances.add(MLEvaluationUtil.getLossForTrainedClassifier(classifier, this.test, new ErrorRate()));
+					performances.add(MLEvaluationUtil.getLossForTrainedClassifier(classifier, this.test, EClassificationPerformanceMeasure.ERRORRATE));
 					this.logger.debug("Adding solution to model and updating view.");
 					this.getModel().addEntry(algorithmEvent.getTimestampOfEvent(), classifier, performances);
 					this.logger.debug("Added solution to model.");

@@ -168,4 +168,9 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
 	}
+
+	@Override
+	public String toString() {
+		return "RandomHoldoutSplitter [rand=" + this.rand + ", portions=" + Arrays.toString(this.portions) + "]";
+	}
 }

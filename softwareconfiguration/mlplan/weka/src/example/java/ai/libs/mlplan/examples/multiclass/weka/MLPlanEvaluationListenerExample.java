@@ -16,6 +16,7 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluationCompletedEvent;
@@ -23,7 +24,6 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluat
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
-import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 
@@ -55,16 +55,16 @@ public class MLPlanEvaluationListenerExample {
 		mlplan.registerListener(new Object() {
 
 			@Subscribe
-			public void receiveEvent(final TrainTestSplitEvaluationFailedEvent e) { // this event is fired whenever any pipeline is evaluated successfully
-				MLPipeline pipeline = ((MLPipeline)((WekaClassifier)e.getLearner()).getClassifier());
-				LOGGER.info("Received exception for learner {}: {}", pipeline, e.getReport().getException().getClass().getName());
+			public void receiveEvent(final TrainTestSplitEvaluationFailedEvent<?, ?> e) { // this event is fired whenever any pipeline is evaluated successfully
+				IWekaClassifier classifier = ((WekaClassifier)e.getLearner());
+				LOGGER.info("Received exception for learner {}: {}", classifier, e.getReport().getException().getClass().getName());
 			}
 
 			@Subscribe
-			public void receiveEvent(final TrainTestSplitEvaluationCompletedEvent e) { // this event is fired whenever any pipeline is evaluated successfully
-				double errorRate = EAggregatedClassifierMetric.MEAN_ERRORRATE.evaluate(Arrays.asList(e.getReport()));
-				MLPipeline pipeline = ((MLPipeline)((WekaClassifier)e.getLearner()).getClassifier());
-				LOGGER.info("Received single evaluation error rate for learner {} is {}", pipeline, errorRate);
+			public void receiveEvent(final TrainTestSplitEvaluationCompletedEvent<?, ?> e) { // this event is fired whenever any pipeline is evaluated successfully
+				double errorRate = EClassificationPerformanceMeasure.ERRORRATE.loss(e.getReport().getPredictionDiffList());
+				IWekaClassifier classifier = ((WekaClassifier)e.getLearner());
+				LOGGER.info("Received single evaluation error rate for learner {} is {}", classifier, errorRate);
 			}
 		});
 

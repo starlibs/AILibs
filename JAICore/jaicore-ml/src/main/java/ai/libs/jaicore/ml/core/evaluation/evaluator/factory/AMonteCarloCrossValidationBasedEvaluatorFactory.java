@@ -1,8 +1,14 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator.factory;
 
+import java.util.Random;
+
+import org.api4.java.ai.ml.core.IDataConfigurable;
 import org.api4.java.ai.ml.core.dataset.splitter.IDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.IPredictionPerformanceMetricConfigurable;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
+import org.api4.java.common.control.IRandomConfigurable;
 
 /**
  * An abstract factory for configuring Monte Carlo cross-validation based evaluators.
@@ -11,14 +17,15 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
  * @author fmohr
  *
  */
-public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends AMonteCarloCrossValidationBasedEvaluatorFactory<F>> implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
+public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends AMonteCarloCrossValidationBasedEvaluatorFactory<F>> implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, IRandomConfigurable, IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>, IPredictionPerformanceMetricConfigurable<Object, Object>  {
 
 	private IDatasetSplitter<? extends ILabeledDataset<?>> datasetSplitter;
-	private int seed;
-	private int numMCIterations;
-	private ILabeledDataset<?> data;
+	protected Random random;
+	protected int numMCIterations;
+	protected ILabeledDataset<?> data;
 	private double trainFoldSize;
 	private int timeoutForSolutionEvaluation;
+	protected IDeterministicPredictionPerformanceMeasure<Object, Object> metric;
 
 	/**
 	 * Standard c'tor.
@@ -36,14 +43,6 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 	}
 
 	/**
-	 * Getter for the random seed.
-	 * @return Seed used for generating randomized dataset splits.
-	 */
-	public int getSeed() {
-		return this.seed;
-	}
-
-	/**
 	 * Getter for the number of iterations, i.e. the number of splits considered.
 	 * @return The number of iterations.
 	 */
@@ -55,6 +54,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 	 * Getter for the dataset which is used for splitting.
 	 * @return The original dataset that is being split.
 	 */
+	@Override
 	public ILabeledDataset<?> getData() {
 		return this.data;
 	}
@@ -85,13 +85,8 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 		return this.getSelf();
 	}
 
-	/**
-	 * Configures the evaluator to use the given random seed.
-	 * @param seed The seed to be used for pseudo-randomization.
-	 * @return The factory object.
-	 */
-	public F withSeed(final int seed) {
-		this.seed = seed;
+	public F withRandom(final Random random) {
+		this.random = random;
 		return this.getSelf();
 	}
 
@@ -136,4 +131,25 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 	}
 
 	public abstract F getSelf();
+
+	@Override
+	public void setMeasure(final IDeterministicPredictionPerformanceMeasure<Object, Object> measure) {
+		this.metric = measure;
+	}
+
+	@Override
+	public void setData(final ILabeledDataset<? extends ILabeledInstance> data) {
+		this.withData(data);
+	}
+
+	@Override
+	public void setRandom(final Random random) {
+		this.withRandom(random);
+
+	}
+
+	public F withMeasure(final IDeterministicPredictionPerformanceMeasure<Object, Object> measure) {
+		this.setMeasure(measure);
+		return this.getSelf();
+	}
 }

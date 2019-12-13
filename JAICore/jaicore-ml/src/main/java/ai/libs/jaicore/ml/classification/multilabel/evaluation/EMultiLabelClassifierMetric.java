@@ -1,12 +1,12 @@
 package ai.libs.jaicore.ml.classification.multilabel.evaluation;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.classification.multilabel.evaluation.loss.IMultiLabelClassificationPredictionPerformanceMeasure;
-import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMetric;
-import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
+import org.api4.java.ai.ml.core.evaluation.IPredictionAndGroundTruthTable;
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMeasure;
 import org.api4.java.common.aggregate.IAggregateFunction;
 
 import ai.libs.jaicore.basic.aggregate.reals.Mean;
@@ -19,7 +19,7 @@ import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.InstanceWise
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.JaccardScore;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.RankLoss;
 
-public enum EMultiLabelClassifierMetric implements IAggregatedPredictionPerformanceMetric {
+public enum EMultiLabelClassifierMetric implements IAggregatedPredictionPerformanceMeasure<Object, Object> {
 
 	MEAN_EXACTMATCH(new ExactMatch(), new Mean()), MEAN_F1MACROL(new F1MacroAverageL(), new Mean()), MEAN_HAMMING(new Hamming(), new Mean()), MEAN_INSTANCEF1(new InstanceWiseF1(), new Mean()), MEAN_JACCARD(new JaccardScore(), new Mean()),
 	MEAN_RANK(new RankLoss(), new Mean()), MEAN_AUTOMEKA_FITNESS(new AutoMEKAGGPFitnessMeasureLoss(), new Mean());
@@ -34,16 +34,29 @@ public enum EMultiLabelClassifierMetric implements IAggregatedPredictionPerforma
 			this.aggregation = aggregation;
 		}
 
-		public double evaluateToDouble(final Collection<? extends ILearnerRunReport> reports) {
-			return this.aggregation.aggregate(reports.stream().map(r -> {
-				List<S> groundTruth = new ListView<S>(r.getPredictionDiffList().getGroundTruthAsList());
-				List<T> predictions = new ListView<T>(r.getPredictionDiffList().getPredictionsAsList());
-				return (Double)this.lossFunction.loss(groundTruth, predictions);
-			}).collect(Collectors.toList()));
+		public double loss(final List<List<? extends Object>> expected, final List<List<? extends Object>> actual) {
+			int n = expected.size();
+			List<Double> losses = new ArrayList<>();
+			for (int i = 0; i < n; i++) {
+				List<S> groundTruth = new ListView<S>(expected.get(i));
+				List<T> predictions = new ListView<T>(actual.get(i));
+				losses.add(this.lossFunction.loss(groundTruth, predictions));
+			}
+			return this.aggregation.aggregate(losses);
 		}
 
-		public IMultiLabelClassificationPredictionPerformanceMeasure getMeasure() {
-			return this.lossFunction;
+		public double loss(final List<IPredictionAndGroundTruthTable<? extends Object, ? extends Object>> pairTables) {
+			List<List<?>> expected = pairTables.stream().map(i -> i.getGroundTruthAsList()).collect(Collectors.toList());
+			List<List<?>> actual = pairTables.stream().map(i -> i.getPredictionsAsList()).collect(Collectors.toList());
+			return this.loss(expected, actual);
+		}
+
+		public double score(final List<List<? extends Object>> expected, final List<List<? extends Object>> actual) {
+			return 1 - this.loss(expected, actual);
+		}
+
+		public double score(final List<IPredictionAndGroundTruthTable<? extends Object, ? extends Object>> pairTables) {
+			return 1 - this.loss(pairTables);
 		}
 	}
 
@@ -54,12 +67,23 @@ public enum EMultiLabelClassifierMetric implements IAggregatedPredictionPerforma
 	}
 
 	@Override
-	public double evaluateToDouble(final Collection<? extends ILearnerRunReport> reports) {
-		return this.wrapper.evaluateToDouble(reports);
+	public double loss(final List<List<? extends Object>> expected, final List<List<? extends Object>> actual) {
+		return this.wrapper.loss(expected, actual);
 	}
 
 	@Override
-	public IMultiLabelClassificationPredictionPerformanceMeasure<?, ?> getMeasure() {
-		return this.wrapper.getMeasure();
+	public double loss(final List<IPredictionAndGroundTruthTable<? extends Object, ? extends Object>> pairTables) {
+		return this.wrapper.loss(pairTables);
 	}
+
+	@Override
+	public double score(final List<List<? extends Object>> expected, final List<List<? extends Object>> actual) {
+		return this.wrapper.score(expected, actual);
+	}
+
+	@Override
+	public double score(final List<IPredictionAndGroundTruthTable<? extends Object, ? extends Object>> pairTables) {
+		return this.wrapper.score(pairTables);
+	}
+
 }

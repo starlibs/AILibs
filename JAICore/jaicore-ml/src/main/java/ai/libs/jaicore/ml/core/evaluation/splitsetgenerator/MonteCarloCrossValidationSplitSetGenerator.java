@@ -35,6 +35,9 @@ public class MonteCarloCrossValidationSplitSetGenerator<D extends ILabeledDatase
 		super();
 		this.datasetSplitter = datasetSplitter;
 		this.repeats = repeats;
+		if (repeats <= 0) {
+			throw new IllegalArgumentException("Cannot create MCCV split generator for non-positive number of repeats " + repeats + ". Set A positive number of repeats.");
+		}
 		this.seed = random.nextLong(); // we do not want to use the random object any further, because (i) the randomness inside should not be affected by outer operations and (ii) having a concrete seed augments the reproducibility
 	}
 

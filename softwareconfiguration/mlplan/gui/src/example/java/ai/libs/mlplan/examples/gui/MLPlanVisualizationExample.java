@@ -18,7 +18,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPro
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
-import ai.libs.jaicore.ml.classification.loss.dataset.ErrorRate;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
@@ -75,10 +75,7 @@ public class MLPlanVisualizationExample {
 			System.out.println("Finished build of the classifier. Training time was " + trainTime + "s.");
 
 			/* evaluate solution produced by mlplan */
-			System.out.println("Error Rate of the solution produced by ML-Plan: " + MLEvaluationUtil.getLossForTrainedClassifier(optimizedClassifier, split.get(1), new ErrorRate()));
-			//			while (true) {
-			//				;
-			//			}
+			System.out.println("Error Rate of the solution produced by ML-Plan: " + MLEvaluationUtil.getLossForTrainedClassifier(optimizedClassifier, split.get(1), EClassificationPerformanceMeasure.ERRORRATE));
 		} catch (NoSuchElementException e) {
 			System.out.println("Building the classifier failed: " + e.getMessage());
 		}

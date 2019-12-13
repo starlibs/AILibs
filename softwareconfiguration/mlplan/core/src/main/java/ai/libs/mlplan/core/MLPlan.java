@@ -1,11 +1,13 @@
 package ai.libs.mlplan.core;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
+import org.api4.java.ai.ml.core.IDataConfigurable;
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -19,6 +21,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.common.control.IRandomConfigurable;
 import org.api4.java.common.event.IEvent;
 import org.api4.java.common.reconstruction.IReconstructible;
 import org.slf4j.Logger;
@@ -40,6 +43,7 @@ import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.ml.core.dataset.DatasetUtil;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
@@ -62,10 +66,10 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, L, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
 
 	private boolean buildSelectedClasifierOnGivenData = true;
+	private final long seed;
 
 	protected MLPlan(final IMLPlanBuilder<L, ?> builder, final ILabeledDataset<?> data) { // ML-Plan has a package visible constructor, because it should only be constructed using a builder
 		super(builder.getAlgorithmConfig(), data);
-		builder.prepareNodeEvaluatorInFactoryWithData(data);
 
 		/* sanity checks */
 		if (builder.getSearchSpaceConfigFile() == null || !builder.getSearchSpaceConfigFile().exists()) {
@@ -85,6 +89,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 		if (this.getInput().isEmpty()) {
 			throw new IllegalArgumentException("Cannot run ML-Plan on empty dataset.");
 		}
+		this.seed = this.builder.getAlgorithmConfig().seed();
 		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(this.getInput());
 	}
 
@@ -105,6 +110,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
 			this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%).", this.getInput().size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2), MathExt.round(dataPortionUsedForSelection * 100, 2));
 			ILabeledDataset<?> dataShownToSearch;
+			ILabeledDataset<?> dataShownToSelection;
 			if (dataPortionUsedForSelection > 0) {
 				try {
 					int seed = this.getConfig().randomSeed();
@@ -112,12 +118,15 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 					if (splitter == null) {
 						throw new IllegalArgumentException("The builder does not specify a dataset splitter for the separation between search and selection phase data.");
 					}
-					dataShownToSearch = splitter.split(this.getInput(), new Random(seed), dataPortionUsedForSelection).get(1); // attention; this is a bit tricky (data portion for selection is in 0)
+					List<ILabeledDataset<?>> split = splitter.split(this.getInput(), new Random(seed), dataPortionUsedForSelection);
+					dataShownToSearch = split.get(1); // attention; this is a bit tricky (data portion for selection is in 0)
+					dataShownToSelection = split.get(0);
 				} catch (SplitFailedException e) {
 					throw new AlgorithmException("Error in ML-Plan execution.", e);
 				}
 			} else {
 				dataShownToSearch = this.getInput();
+				dataShownToSelection = null;
 			}
 			if (dataShownToSearch.isEmpty()) {
 				throw new IllegalStateException("Cannot search on no data.");
@@ -152,11 +161,25 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 
 			/* setup the pipeline evaluators */
 			this.logger.debug("Setting up the pipeline evaluators.");
+			ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluatorFactoryForSearch = this.builder.getLearnerEvaluationFactoryForSearchPhase();
+			if (evaluatorFactoryForSearch instanceof IRandomConfigurable) {
+				((IRandomConfigurable) evaluatorFactoryForSearch).setRandom(new Random(this.seed));
+			}
+			if (evaluatorFactoryForSearch instanceof IDataConfigurable) {
+				((IDataConfigurable) evaluatorFactoryForSearch).setData(dataShownToSearch);
+			}
+			ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluatorFactoryForSelection = this.builder.getLearnerEvaluationFactoryForSelectionPhase();
+			if (evaluatorFactoryForSelection instanceof IRandomConfigurable) {
+				((IRandomConfigurable) evaluatorFactoryForSelection).setRandom(new Random(this.seed));
+			}
+			if (evaluatorFactoryForSelection instanceof IDataConfigurable && dataShownToSelection != null) {
+				((IDataConfigurable) evaluatorFactoryForSelection).setData(dataShownToSelection);
+			}
 			PipelineEvaluator classifierEvaluatorForSearch;
 			PipelineEvaluator classifierEvaluatorForSelection;
 			try {
-				classifierEvaluatorForSearch = this.builder.getClassifierEvaluationInSearchPhase(dataShownToSearch, this.getConfig().randomSeed(), MLPlan.this.getInput().size());
-				classifierEvaluatorForSelection = this.builder.getClassifierEvaluationInSelectionPhase(dataShownToSearch, this.getConfig().randomSeed());
+				classifierEvaluatorForSearch = new PipelineEvaluator(this.builder.getLearnerFactory(), evaluatorFactoryForSearch.getLearnerEvaluator(), this.getConfig().timeoutForCandidateEvaluation());
+				classifierEvaluatorForSelection = new PipelineEvaluator(this.builder.getLearnerFactory(), evaluatorFactoryForSelection.getLearnerEvaluator(), this.getConfig().timeoutForCandidateEvaluation());
 			} catch (LearnerEvaluatorConstructionFailedException e2) {
 				throw new AlgorithmException("Could not create the pipeline evaluator", e2);
 			}
@@ -166,8 +189,8 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			/* communicate the parameters with which ML-Plan will run */
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info(
-						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tTarget: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
-						this.getInput().hashCode(), this.builder.getPerformanceMeasure(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
+						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
+						this.getInput().hashCode(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
 						this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), classifierEvaluatorForSearch.getBenchmark(),
 						classifierEvaluatorForSelection.getBenchmark(), this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
 			}

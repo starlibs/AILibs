@@ -8,7 +8,7 @@ import org.api4.java.ai.ml.classification.IClassifier;
 
 import ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier;
 
-public class MLPlanSimpleBuilder extends AbstractMLPlanSingleLabelBuilder<IClassifier, MLPlanSimpleBuilder> {
+public class MLPlanSimpleBuilder extends AbstractMLPlanBuilder<IClassifier, MLPlanSimpleBuilder> {
 
 	public MLPlanSimpleBuilder() {
 		try {
@@ -22,8 +22,8 @@ public class MLPlanSimpleBuilder extends AbstractMLPlanSingleLabelBuilder<IClass
 				return Arrays.asList(data, data);
 			});
 
-			this.withMonteCarloCrossValidationInSearchPhase(3, .7);
-			this.withMonteCarloCrossValidationInSelectionPhase(3, .7);
+			this.withMCCVBasedCandidateEvaluationInSearchPhase().withNumMCIterations(3).withTrainFoldSize(.7);
+			this.withMCCVBasedCandidateEvaluationInSelectionPhase().withNumMCIterations(3).withTrainFoldSize(.7);
 			this.withRequestedInterface("AbstractClassifier");
 			//			this.withSearchPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory<>());
 
