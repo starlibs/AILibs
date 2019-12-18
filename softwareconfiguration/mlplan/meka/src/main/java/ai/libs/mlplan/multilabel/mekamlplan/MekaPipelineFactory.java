@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multilabel;
+package ai.libs.mlplan.multilabel.mekamlplan;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -13,7 +13,6 @@ import ai.libs.hasco.model.NumericParameterDomain;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.classification.multilabel.learner.MekaClassifier;
-import ai.libs.mlplan.core.ILearnerFactory;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.MultipleClassifiersCombiner;
@@ -26,7 +25,7 @@ import weka.core.OptionHandler;
 * components that correspond to MEKA algorithms to a MultiLabelClassifier.
 *
 */
-public class MekaPipelineFactory implements ILearnerFactory<IMekaClassifier> {
+public class MekaPipelineFactory implements IMekaPipelineFactory {
 
 	private static final String PARAMETER_NAME_WITH_DASH_WARNING = "Required interface of component {} has dash or underscore in interface id {}";
 

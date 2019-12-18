@@ -2,6 +2,9 @@ package ai.libs.jaicore.basic;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ArrayUtil {
 
@@ -110,4 +113,48 @@ public class ArrayUtil {
 		return (String[]) Arrays.stream(cleanArrayString(arrayString).split(",")).toArray();
 	}
 
+	public static List<Integer> argMax(final double[] array) {
+		int argMax = argMaxFirst(array);
+		return IntStream.range(0, array.length).filter(x -> array[x] == array[argMax]).mapToObj(Integer::valueOf).collect(Collectors.toList());
+	}
+
+	public static List<Integer> argMax(final int[] array) {
+		int argMax = argMaxFirst(array);
+		return IntStream.range(0, array.length).filter(x -> array[x] == array[argMax]).mapToObj(Integer::valueOf).collect(Collectors.toList());
+	}
+
+	public static int argMaxFirst(final int[] array) {
+		Integer argMax = null;
+		for (int i = 0; i < array.length; i++) {
+			if (argMax == null || array[i] > array[argMax]) {
+				argMax = i;
+			}
+		}
+		return argMax;
+	}
+
+	public static int argMaxFirst(final double[] array) {
+		Integer argMax = null;
+		for (int i = 0; i < array.length; i++) {
+			if (argMax == null || array[i] > array[argMax]) {
+				argMax = i;
+			}
+		}
+		return argMax;
+	}
+
+	public static List<Integer> argMin(final int[] array) {
+		int argMin = argMinFirst(array);
+		return IntStream.range(0, array.length).filter(x -> array[x] == array[argMin]).mapToObj(Integer::valueOf).collect(Collectors.toList());
+	}
+
+	public static int argMinFirst(final int[] array) {
+		Integer argMin = null;
+		for (int i = 0; i < array.length; i++) {
+			if (argMin == null || array[i] < array[argMin]) {
+				argMin = i;
+			}
+		}
+		return argMin;
+	}
 }

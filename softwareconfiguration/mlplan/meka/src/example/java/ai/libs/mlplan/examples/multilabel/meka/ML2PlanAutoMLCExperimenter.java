@@ -3,7 +3,6 @@ package ai.libs.mlplan.examples.multilabel.meka;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,6 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
@@ -28,34 +26,20 @@ import ai.libs.jaicore.experiments.IExperimentSetEvaluator;
 import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
-import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
-import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
-import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeDisplayInfoAlgorithmEventPropertyComputer;
-import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
-import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
-import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
-import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
-import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.AutoMEKAGGPFitnessMeasureLoss;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.F1MacroAverageL;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.Hamming;
+import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.InstanceWiseF1;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.RankLoss;
+import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
-import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
-import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
-import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
-import ai.libs.mlplan.core.AbstractMLPlanBuilder;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import ai.libs.mlplan.multilabel.MLPlanMekaBuilder;
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import meka.classifiers.multilabel.Evaluation;
+import ai.libs.mlplan.multilabel.mekamlplan.MLPlanMekaBuilder;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.core.MLUtils;
-import meka.core.Metrics;
-import meka.core.Result;
 import weka.core.Instances;
 
 /**
@@ -98,7 +82,8 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 			String testFold = experimentDescription.get("test_fold");
 			String testSeed = experimentDescription.get("seed");
 
-			List<Instances> trainTestSplit = WekaUtil.realizeSplit(data, WekaUtil.getArbitrarySplit(data, new Random(Integer.parseInt(testSeed)), 0.7));
+			IWekaInstances dataset = new WekaInstances(data);
+			List<IWekaInstances> trainTestSplit = WekaUtil.realizeSplit(dataset, WekaUtil.getArbitrarySplit(dataset, new Random(Integer.parseInt(testSeed)), 0.7));
 
 			TimeOut mlplanTimeOut = new TimeOut(Integer.parseInt(experimentDescription.get("timeout")), TimeUnit.MINUTES);
 			TimeOut nodeEvalTimeOut = new TimeOut(Integer.parseInt(experimentDescription.get("node_timeout")), TimeUnit.MINUTES);
@@ -109,7 +94,7 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 			// Evaluation: test
 			this.logger.info("Now test...");
 
-			MLPlanMekaBuilder builder = AbstractMLPlanBuilder.forMeka();
+			MLPlanMekaBuilder builder = new MLPlanMekaBuilder();
 			builder.withNodeEvaluationTimeOut(nodeEvalTimeOut);
 			builder.withCandidateEvaluationTimeOut(nodeEvalTimeOut);
 
@@ -122,7 +107,7 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 				builder.withPerformanceMeasure(new Hamming());
 				break;
 			case 62: // F1Measure avgd by instances
-				builder.withPerformanceMeasure(new InstanceWiseF1AsLoss());
+				builder.withPerformanceMeasure(new InstanceWiseF1());
 				break;
 			case 74: // F1Measure avgd by labels (standard F1 measure for MLC)
 				builder.withPerformanceMeasure(new F1MacroAverageL());
@@ -140,25 +125,13 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 			builder.withAlgorithmConfig(algoConfig);
 			builder.withTimeOut(mlplanTimeOut);
 			builder.withNumCpus(CONFIG.getNumberOfCPUs());
+			builder.withDataset(trainTestSplit.get(0));
 
-			MLPlan mlplan = null;
+			MLPlan<IMekaClassifier> mlplan = null;
 
 			try {
-				mlplan = new MLPlan(builder, trainTestSplit.get(0));
+				mlplan = builder.build();
 				mlplan.setLoggerName("ml2plan");
-
-				if (CONFIG.showGUI()) {
-					new JFXPanel();
-
-					NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer = new NodeInfoAlgorithmEventPropertyComputer();
-					List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers = Arrays.asList(nodeInfoAlgorithmEventPropertyComputer,
-							new NodeDisplayInfoAlgorithmEventPropertyComputer<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new RolloutInfoAlgorithmEventPropertyComputer(nodeInfoAlgorithmEventPropertyComputer),
-							new ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer(new WekaClassifierSolutionCandidateRepresenter()));
-
-					AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(),
-							new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
-					Platform.runLater(window);
-				}
 
 				MultiLabelClassifier classifier;
 				try {
@@ -176,7 +149,7 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 				// mlplan.getComponentInstanceOfSelectedClassifier().getParameterValue("threshold");
 
 				this.logger.info("Evaluate classifier...");
-				Result result = Evaluation.evaluateModel(classifier, trainTestSplit.get(0), trainTestSplit.get(1), "PCutL");
+//				Result result = Evaluation.evaluateModel(classifier, trainTestSplit.get(0), trainTestSplit.get(1), "PCutL");
 				this.logger.info("Done evaluating Classifier.");
 				this.logger.info("Store results in DB...");
 				// HashMap<String, Double> metrics = new HashMap<>();
@@ -192,12 +165,12 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 				this.logger.info("Done with evaluation. Send job result.");
 				Map<String, Object> results = new HashMap<>();
 
-				double extFitness = new AutoMekaGGPFitness().calculateMeasure(result.allPredictions(), result.allTrueValues());
-				double extHamming = Metrics.L_Hamming(result.allTrueValues(), result.allPredictions(0.5));
-				double extAccuracy = Metrics.P_Accuracy(result.allTrueValues(), result.allPredictions(0.5));
-				double extRank = Metrics.L_RankLoss(result.allTrueValues(), result.allPredictions());
-				double extJaccard = Metrics.P_JaccardIndex(result.allTrueValues(), result.allPredictions(0.5));
-				double extInstanceF1 = Metrics.P_FmacroAvgD(result.allTrueValues(), result.allPredictions(0.5));
+//				double extFitness = new AutoMekaGGPFitness().calculateMeasure(result.allPredictions(), result.allTrueValues());
+//				double extHamming = Metrics.L_Hamming(result.allTrueValues(), result.allPredictions(0.5));
+//				double extAccuracy = Metrics.P_Accuracy(result.allTrueValues(), result.allPredictions(0.5));
+//				double extRank = Metrics.L_RankLoss(result.allTrueValues(), result.allPredictions());
+//				double extJaccard = Metrics.P_JaccardIndex(result.allTrueValues(), result.allPredictions(0.5));
+//				double extInstanceF1 = Metrics.P_FmacroAvgD(result.allTrueValues(), result.allPredictions(0.5));
 
 				Stack<ComponentInstance> classifierNameStack = new Stack<>();
 				classifierNameStack.push(mlplan.getComponentInstanceOfSelectedClassifier());
@@ -219,12 +192,12 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 
 				results.put("intValue", mlplan.getInternalValidationErrorOfSelectedClassifier());
 
-				results.put("extFitness", extFitness);
-				results.put("extHamming", extHamming);
-				results.put("extAccuracy", extAccuracy);
-				results.put("extInstanceF1", extInstanceF1);
-				results.put("extJaccard", extJaccard);
-				results.put("extRank", extRank);
+//				results.put("extFitness", extFitness);
+//				results.put("extHamming", extHamming);
+//				results.put("extAccuracy", extAccuracy);
+//				results.put("extInstanceF1", extInstanceF1);
+//				results.put("extJaccard", extJaccard);
+//				results.put("extRank", extRank);
 
 				processor.processResults(results);
 

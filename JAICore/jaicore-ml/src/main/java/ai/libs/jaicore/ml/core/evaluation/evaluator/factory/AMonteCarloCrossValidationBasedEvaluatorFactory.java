@@ -17,7 +17,8 @@ import org.api4.java.common.control.IRandomConfigurable;
  * @author fmohr
  *
  */
-public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends AMonteCarloCrossValidationBasedEvaluatorFactory<F>> implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, IRandomConfigurable, IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>, IPredictionPerformanceMetricConfigurable<Object, Object>  {
+public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends AMonteCarloCrossValidationBasedEvaluatorFactory<F>> implements
+		ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, IRandomConfigurable, IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>, IPredictionPerformanceMetricConfigurable {
 
 	private IDatasetSplitter<? extends ILabeledDataset<?>> datasetSplitter;
 	protected Random random;
@@ -25,7 +26,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 	protected ILabeledDataset<?> data;
 	private double trainFoldSize;
 	private int timeoutForSolutionEvaluation;
-	protected IDeterministicPredictionPerformanceMeasure<Object, Object> metric;
+	protected IDeterministicPredictionPerformanceMeasure<?, ?> metric;
 
 	/**
 	 * Standard c'tor.
@@ -133,7 +134,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 	public abstract F getSelf();
 
 	@Override
-	public void setMeasure(final IDeterministicPredictionPerformanceMeasure<Object, Object> measure) {
+	public void setMeasure(final IDeterministicPredictionPerformanceMeasure<?, ?> measure) {
 		this.metric = measure;
 	}
 
@@ -148,7 +149,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 
 	}
 
-	public F withMeasure(final IDeterministicPredictionPerformanceMeasure<Object, Object> measure) {
+	public F withMeasure(final IDeterministicPredictionPerformanceMeasure<?, ?> measure) {
 		this.setMeasure(measure);
 		return this.getSelf();
 	}

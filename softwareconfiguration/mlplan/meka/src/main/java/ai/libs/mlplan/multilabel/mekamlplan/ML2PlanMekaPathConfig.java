@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multilabel;
+package ai.libs.mlplan.multilabel.mekamlplan;
 
 /**
  * Static path configuration for ML2-Plan. Resource files are prefixed with RES_. However, resource files only function as back-up solutions. If there is a configuration file on the standard file path marked with FS_ this configuration will be preferred over the configuration in the resource files.

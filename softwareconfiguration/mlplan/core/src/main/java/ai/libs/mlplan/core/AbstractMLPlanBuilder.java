@@ -289,12 +289,14 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 
 	public MonteCarloCrossValidationEvaluatorFactory withMCCVBasedCandidateEvaluationInSearchPhase() {
 		this.factoryForPipelineEvaluationInSearchPhase = new MonteCarloCrossValidationEvaluatorFactory();
-		return ((MonteCarloCrossValidationEvaluatorFactory)this.factoryForPipelineEvaluationInSearchPhase).withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE).withMeasure(DEFAULT_PERFORMANCE_MEASURE);
+		return ((MonteCarloCrossValidationEvaluatorFactory) this.factoryForPipelineEvaluationInSearchPhase).withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE)
+				.withMeasure(DEFAULT_PERFORMANCE_MEASURE);
 	}
 
 	public MonteCarloCrossValidationEvaluatorFactory withMCCVBasedCandidateEvaluationInSelectionPhase() {
 		this.factoryForPipelineEvaluationInSelectionPhase = new MonteCarloCrossValidationEvaluatorFactory();
-		return ((MonteCarloCrossValidationEvaluatorFactory)this.factoryForPipelineEvaluationInSelectionPhase).withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE).withMeasure(DEFAULT_PERFORMANCE_MEASURE);
+		return ((MonteCarloCrossValidationEvaluatorFactory) this.factoryForPipelineEvaluationInSelectionPhase).withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE)
+				.withMeasure(DEFAULT_PERFORMANCE_MEASURE);
 	}
 
 	@Override

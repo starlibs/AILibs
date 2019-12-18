@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multilabel;
+package ai.libs.mlplan.multilabel.mekamlplan;
 
 import java.util.ArrayList;
 import java.util.Collection;

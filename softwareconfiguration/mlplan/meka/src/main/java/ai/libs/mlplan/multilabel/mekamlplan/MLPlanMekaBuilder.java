@@ -1,11 +1,13 @@
-package ai.libs.mlplan.multilabel;
+package ai.libs.mlplan.multilabel.mekamlplan;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import org.api4.java.ai.ml.classification.multilabel.evaluation.loss.IMultiLabelClassificationPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.slf4j.Logger;
@@ -14,8 +16,10 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.EMultiLabelClassifierMetric;
+import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.AutoMEKAGGPFitnessMeasureLoss;
+import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.InstanceWiseF1;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
@@ -32,15 +36,15 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IMekaClassifier, ML
 	private static final String DEF_REQUESTED_HASCO_INTERFACE = "MLClassifier";
 	private static final String DEF_PREFERRED_COMPONENT_NAME_PREFIX = "resolveMLClassifierWith";
 
-	private static final EMultiLabelClassifierMetric DEFAULT_PERFORMANCE_MEASURE = EMultiLabelClassifierMetric.MEAN_INSTANCEF1;
+	private static final IMultiLabelClassificationPredictionPerformanceMeasure DEFAULT_PERFORMANCE_MEASURE = new InstanceWiseF1();
 
 	private static final ILearnerFactory<IMekaClassifier> DEF_CLASSIFIER_FACTORY = new MekaPipelineFactory();
 	private static final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> DEF_SEARCH_SELECT_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE,
 			new Random(0));
 	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS)
-			.withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE);
+			.withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE).withMeasure(DEFAULT_PERFORMANCE_MEASURE);
 	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS)
-			.withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE);
+			.withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE).withMeasure(DEFAULT_PERFORMANCE_MEASURE);
 
 	private Logger logger = LoggerFactory.getLogger(MLPlanMekaBuilder.class);
 
@@ -61,7 +65,7 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IMekaClassifier, ML
 	 * @return The builder object.
 	 */
 	public MLPlanMekaBuilder withAutoMEKADefaultConfiguration() {
-		this.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_AUTOMEKA_FITNESS);
+		this.withPerformanceMeasure(new AutoMEKAGGPFitnessMeasureLoss());
 		return this;
 	}
 
@@ -92,14 +96,14 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IMekaClassifier, ML
 	 * @param lossFunction The loss function to be used.
 	 * @return The builder object.
 	 */
-	public MLPlanMekaBuilder withPerformanceMeasure(final EMultiLabelClassifierMetric measure) {
-		super.withPerformanceMeasure(measure);
+	public MLPlanMekaBuilder withPerformanceMeasure(final IMultiLabelClassificationPredictionPerformanceMeasure measure) {
+		List<ISupervisedLearnerEvaluatorFactory> phaseList = Arrays.asList(this.getSearchEvaluatorFactory(), this.getSelectionEvaluatorFactory());
+		for (ISupervisedLearnerEvaluatorFactory factory : phaseList) {
+			if (factory instanceof MonteCarloCrossValidationEvaluatorFactory) {
+				((MonteCarloCrossValidationEvaluatorFactory) factory).withMeasure(measure);
+			}
+		}
 		return this;
-	}
-
-	@Override
-	public EMultiLabelClassifierMetric getPerformanceMeasure() {
-		return (EMultiLabelClassifierMetric) super.getPerformanceMeasure();
 	}
 
 	@Override

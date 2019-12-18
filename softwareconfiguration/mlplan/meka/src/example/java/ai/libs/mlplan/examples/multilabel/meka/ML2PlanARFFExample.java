@@ -8,13 +8,13 @@ import java.util.concurrent.TimeUnit;
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.algorithm.TimeOut;
 
+import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import ai.libs.mlplan.multilabel.MLPlanMekaBuilder;
+import ai.libs.mlplan.multilabel.mekamlplan.MLPlanMekaBuilder;
 import meka.core.MLUtils;
 import weka.core.Instances;
 
@@ -45,7 +45,7 @@ public class ML2PlanARFFExample {
 		builder.withCandidateEvaluationTimeOut(new TimeOut(60, TimeUnit.SECONDS));
 		builder.withNumCpus(4);
 		builder.withTimeOut(new TimeOut(150, TimeUnit.SECONDS));
-		MLPlan<IWekaClassifier> ml2plan = builder.withDataset(new WekaInstances(data)).build();
+		MLPlan<IMekaClassifier> ml2plan = builder.withDataset(new WekaInstances(data)).build();
 		ml2plan.setLoggerName("testedalgorithm");
 		ml2plan.call();
 	}
