@@ -1,11 +1,12 @@
 package ai.libs.jaicore.ml.classification.multilabel.evaluation.loss;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
+
+import ai.libs.jaicore.basic.ArrayUtil;
 
 public class RankLoss extends AMultiLabelClassificationMeasure {
 
@@ -26,9 +27,9 @@ public class RankLoss extends AMultiLabelClassificationMeasure {
 		this.tieLoss = tieLoss;
 	}
 
-	private double rankingLoss(final IMultiLabelClassification expected, final IMultiLabelClassification actual) {
-		int[] expectedRelevantLabels = expected.getRelevantLabels(0.5);
-		int[] expectedIrrelevantLabels = expected.getIrrelevantLabels(0.5);
+	private double rankingLoss(final int[] expected, final IMultiLabelClassification actual) {
+		List<Integer> expectedRelevantLabels = ArrayUtil.argMax(expected);
+		List<Integer> expectedIrrelevantLabels = ArrayUtil.argMin(expected);
 		double[] labelRelevance = actual.getPrediction();
 		double wrongRankingCounter = 0;
 		for (int expectedRel : expectedRelevantLabels) {
@@ -42,11 +43,11 @@ public class RankLoss extends AMultiLabelClassificationMeasure {
 				}
 			}
 		}
-		return wrongRankingCounter / (expectedRelevantLabels.length + expectedIrrelevantLabels.length);
+		return wrongRankingCounter / (expectedRelevantLabels.size() + expectedIrrelevantLabels.size());
 	}
 
 	@Override
-	public double loss(final List<? extends Collection<Object>> expected, final List<? extends IMultiLabelClassification> actual) {
+	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> actual) {
 		this.checkConsistency(expected, actual);
 
 		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.rankingLoss(expected.get(x), actual.get(x))).average();

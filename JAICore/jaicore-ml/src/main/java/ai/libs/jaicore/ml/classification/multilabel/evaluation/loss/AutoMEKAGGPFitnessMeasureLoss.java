@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalDouble;
 
-import org.api4.java.ai.ml.classification.multilabel.IRelevanceOrderedLabelSet;
-import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicHomogeneousPredictionPerformanceMeasure;
+import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
+import org.api4.java.ai.ml.classification.multilabel.evaluation.loss.IMultiLabelClassificationPredictionPerformanceMeasure;
 
 /**
  * Measure combining exact match, hamming loss, f1macroavgL and rankloss. Here
@@ -14,27 +14,27 @@ import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicHomogen
  * de S�, Alex GC, Gisele L. Pappa, and Alex A. Freitas. "Towards a method for automatically selecting and configuring multi-label
  * classification algorithms." Proceedings of the Genetic and Evolutionary Computation Conference Companion. ACM, 2017.
  *
- * @author helegraf, mwever
+ * @author mwever
  *
  */
 public class AutoMEKAGGPFitnessMeasureLoss extends AThresholdBasedMultiLabelClassificationMeasure {
 
-	private IDeterministicHomogeneousPredictionPerformanceMeasure<IRelevanceOrderedLabelSet>[] measures;
+	private IMultiLabelClassificationPredictionPerformanceMeasure<int[], IMultiLabelClassification>[] measures;
 
 	@SuppressWarnings("unchecked")
 	public AutoMEKAGGPFitnessMeasureLoss() {
 		super();
-		this.measures = new IDeterministicHomogeneousPredictionPerformanceMeasure[] { new ExactMatch(), new F1MacroAverageL(), new Hamming(), new RankLoss() };
+		this.measures = new IMultiLabelClassificationPredictionPerformanceMeasure[] { new ExactMatch(), new F1MacroAverageL(), new Hamming(), new RankLoss() };
 	}
 
 	@SuppressWarnings("unchecked")
 	public AutoMEKAGGPFitnessMeasureLoss(final double threshold) {
 		super(threshold);
-		this.measures = new IDeterministicHomogeneousPredictionPerformanceMeasure[] { new ExactMatch(), new F1MacroAverageL(threshold), new Hamming(), new RankLoss(threshold) };
+		this.measures = new IMultiLabelClassificationPredictionPerformanceMeasure[] { new ExactMatch(threshold), new F1MacroAverageL(threshold), new Hamming(threshold), new RankLoss(threshold) };
 	}
 
 	@Override
-	public double loss(final List<IRelevanceOrderedLabelSet> expected, final List<IRelevanceOrderedLabelSet> actual) {
+	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> actual) {
 		OptionalDouble res = Arrays.stream(this.measures).mapToDouble(x -> x.loss(expected, actual)).average();
 		if (res.isPresent()) {
 			return res.getAsDouble();

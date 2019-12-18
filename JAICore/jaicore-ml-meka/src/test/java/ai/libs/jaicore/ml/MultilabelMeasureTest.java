@@ -1,12 +1,15 @@
 package ai.libs.jaicore.ml;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.ArrayUtil;
-import ai.libs.jaicore.ml.classification.loss.dataset.F1Measure;
 import meka.core.Metrics;
 
 public class MultilabelMeasureTest {
+
+	private static final double DELTA = 1E-8;
 
 	@Test
 	public void test() {
@@ -15,24 +18,23 @@ public class MultilabelMeasureTest {
 
 		double sum = 0.0;
 		for (int i = 0; i < gt.length; i++) {
-			System.out.println(Metrics.F1(gt[i], test[i]) + " / " + new F1Measure(1).score(gt[i], test[i]));
 			sum += Metrics.F1(gt[i], test[i]);
 		}
-		System.out.println((sum / 2));
-		System.out.println(Metrics.P_FmacroAvgD(gt, test));
-		System.out.println(Metrics.P_FmacroAvgL(gt, test));
-		System.out.println(Metrics.P_FmicroAvg(gt, test));
+
+		double fmeasureAggregated = sum / 2;
+		assertEquals("Instance-wise f-measure is not correct", Metrics.P_FmacroAvgD(gt, test), fmeasureAggregated, DELTA);
+
+		double mekaFMeasureMacroL = Metrics.P_FmacroAvgL(gt, test);
 
 		gt = ArrayUtil.transposeIntegerMatrix(gt);
 		test = ArrayUtil.transposeIntegerMatrix(test);
 
-		System.out.println("====");
 		sum = 0.0;
 		for (int i = 0; i < gt.length; i++) {
-			System.out.println(Metrics.F1(gt[i], test[i]) + " / " + new F1Measure(1).score(gt[i], test[i]));
 			sum += Metrics.F1(gt[i], test[i]);
 		}
-		System.out.println((sum / 7));
+		fmeasureAggregated = sum / 7;
+		assertEquals("Instance-wise f-measure is not correct", mekaFMeasureMacroL, fmeasureAggregated, DELTA);
 	}
 
 }
