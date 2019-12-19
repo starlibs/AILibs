@@ -19,7 +19,7 @@ import org.api4.java.ai.ml.classification.multilabel.evaluation.loss.IMultiLabel
  */
 public class AutoMEKAGGPFitnessMeasureLoss extends AThresholdBasedMultiLabelClassificationMeasure {
 
-	private IMultiLabelClassificationPredictionPerformanceMeasure<int[], IMultiLabelClassification>[] measures;
+	private IMultiLabelClassificationPredictionPerformanceMeasure[] measures;
 
 	@SuppressWarnings("unchecked")
 	public AutoMEKAGGPFitnessMeasureLoss() {

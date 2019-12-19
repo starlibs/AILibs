@@ -7,10 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -19,16 +17,12 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
-import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMeasure;
-import org.api4.java.ai.ml.core.evaluation.loss.IMeasure;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.TimeOut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
-import ai.libs.jaicore.basic.aggregate.reals.Mean;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
@@ -39,8 +33,14 @@ import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredS
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.EMultiLabelClassifierMetric;
-import ai.libs.jaicore.ml.classification.singlelabel.loss.Precision;
+import ai.libs.jaicore.ml.classification.loss.dataset.Precision;
+import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.AutoMEKAGGPFitnessMeasureLoss;
+import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.ExactMatch;
+import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.F1MacroAverageL;
+import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.Hamming;
+import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.InstanceWiseF1;
+import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.JaccardScore;
+import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.RankLoss;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
@@ -49,12 +49,11 @@ import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithm
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
-import ai.libs.mlplan.core.AbstractMLPlanSingleLabelBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.gui.outofsampleplots.WekaClassifierSolutionCandidateRepresenter;
 import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
-import ai.libs.mlplan.multilabel.MLPlanMekaBuilder;
+import ai.libs.mlplan.multilabel.mekamlplan.MLPlanMekaBuilder;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import meka.classifiers.multilabel.MultiLabelClassifier;
@@ -232,53 +231,28 @@ public class MLPlanCLI {
 			MLPlanMekaBuilder mekaBuilder = (MLPlanMekaBuilder) builder;
 			switch (commandLine.getOptionValue(evaluationMeasureOption)) {
 			case "AUTO_MEKA_GGP_FITNESS":
-				mekaBuilder.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_AUTOMEKA_FITNESS);
+				mekaBuilder.withPerformanceMeasure(new AutoMEKAGGPFitnessMeasureLoss());
 				break;
 			case "EXACT_MATCH":
-				mekaBuilder.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_EXACTMATCH);
+				mekaBuilder.withPerformanceMeasure(new ExactMatch());
 				break;
 			case "F1_MACRO_AVG_D":
-				mekaBuilder.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_INSTANCEF1);
+				mekaBuilder.withPerformanceMeasure(new InstanceWiseF1());
 				break;
 			case "F1_MACRO_AVG_L":
-				mekaBuilder.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_F1MACROL);
+				mekaBuilder.withPerformanceMeasure(new F1MacroAverageL());
 				break;
 			case "HAMMING":
-				mekaBuilder.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_HAMMING);
+				mekaBuilder.withPerformanceMeasure(new Hamming());
 				break;
 			case "JACCARD":
-				mekaBuilder.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_JACCARD);
+				mekaBuilder.withPerformanceMeasure(new JaccardScore());
 				break;
 			case "RANK_LOSS":
-				mekaBuilder.withPerformanceMeasure(EMultiLabelClassifierMetric.MEAN_RANK);
+				mekaBuilder.withPerformanceMeasure(new RankLoss());
 				break;
 			default:
 				throw new IllegalArgumentException("Invalid multilabel measure " + commandLine.getOptionValue(evaluationMeasureOption));
-			}
-		} else {
-			AbstractMLPlanSingleLabelBuilder slcBuilder = (AbstractMLPlanSingleLabelBuilder) builder;
-
-			switch (commandLine.getOptionValue(evaluationMeasureOption)) {
-			case "ERRORRATE":
-				slcBuilder.withPerformanceMeasure(EAggregatedClassifierMetric.MEAN_ERRORRATE);
-				break;
-			case "PRECISION":
-				int classIndex = Integer.parseInt(commandLine.getOptionValue(positiveClassIndex, "0"));
-				Precision precision = new Precision(classIndex);
-				slcBuilder.withPerformanceMeasure(new IAggregatedPredictionPerformanceMeasure() {
-					@Override
-					public IMeasure getMeasure() {
-						return precision;
-					}
-
-					@Override
-					public double evaluateToDouble(final Collection<? extends ILearnerRunReport> reports) {
-						return new Mean().aggregate(reports.stream().map(r -> (Double) precision.loss(r.getPredictionDiffList())).collect(Collectors.toList()));
-					}
-				});
-				break;
-			default:
-				throw new IllegalArgumentException("Invalid singlelabel measure " + commandLine.getOptionValue(evaluationMeasureOption));
 			}
 		}
 
