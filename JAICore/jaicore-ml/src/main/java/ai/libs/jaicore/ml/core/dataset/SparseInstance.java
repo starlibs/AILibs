@@ -49,12 +49,16 @@ public class SparseInstance extends AInstance {
 
 	@Override
 	public double[] getPoint() {
-		throw new UnsupportedOperationException("Not yet implemented in SparseInstance.");// TODO
+		double[] point = new double[this.numAttributes];
+		for (int i = 0; i < this.numAttributes; i++) {
+			point[i] = this.getPointValue(i);
+		}
+		return point;
 	}
 
 	@Override
 	public double getPointValue(final int pos) {
-		throw new UnsupportedOperationException("Not yet implemented in SparseInstance");// TODO
+		return this.attributeMap.containsKey(pos) ? (double)this.attributeMap.get(pos) : 0;
 	}
 
 	@Override

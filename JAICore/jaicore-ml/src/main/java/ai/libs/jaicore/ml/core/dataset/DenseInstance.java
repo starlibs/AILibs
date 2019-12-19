@@ -39,7 +39,8 @@ public class DenseInstance extends AInstance {
 		for (int i = 0; i < n; i++) {
 			Object val = this.attributes.get(i);
 			if (val == null) {
-				throw new UnsupportedOperationException("The given instance cannot be cast to a point, because it has a missing value: " + this.attributes);
+				val = 0;
+				//				throw new UnsupportedOperationException("The given instance cannot be cast to a point, because it has a missing value: " + this.attributes);
 			}
 			if (!(val instanceof Number)) {
 				throw new UnsupportedOperationException("The given instance cannot be cast to a point, because it has a non-numeric value: " + this.attributes);

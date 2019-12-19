@@ -68,7 +68,7 @@ public class WekaInstancesUtil {
 			} else if (attType instanceof IntBasedCategoricalAttribute) {
 				attributes.add(new Attribute("att" + i, ((IntBasedCategoricalAttribute) attType).getLabels()));
 			} else {
-				throw new UnsupportedAttributeTypeException("The class attribute has an unsupported attribute type.");
+				throw new UnsupportedAttributeTypeException("The class attribute has an unsupported attribute type " + attType.getName() + ".");
 			}
 		}
 
