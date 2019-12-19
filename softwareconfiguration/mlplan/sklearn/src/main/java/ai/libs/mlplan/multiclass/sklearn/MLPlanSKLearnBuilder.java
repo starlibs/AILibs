@@ -4,24 +4,31 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
+import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.FileUtil;
+import ai.libs.jaicore.basic.MathExt;
+import ai.libs.jaicore.basic.ResourceFile;
+import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.SystemRequirementsNotMetException;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
-import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
-import ai.libs.jaicore.ml.weka.dataset.splitter.MulticlassClassStratifiedSplitter;
-import ai.libs.mlplan.core.AbstractMLPlanSingleLabelBuilder;
-import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
+import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
+import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
+import ai.libs.mlplan.core.AbstractMLPlanBuilder;
+import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 
-public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
+public class MLPlanSKLearnBuilder extends AbstractMLPlanBuilder<ScikitLearnWrapper, MLPlanSKLearnBuilder> {
 
 	private Logger logger = LoggerFactory.getLogger(MLPlanSKLearnBuilder.class);
 
@@ -38,25 +45,27 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
 	private static final String[] COMMAND_PYTHON_EXEC = { COMMAND_PYTHON, "-c" };
 	private static final String PYTHON_MODULE_NOT_FOUND_ERROR_MSG = "ModuleNotFoundError";
 
-	/* DEFAULT VALUES FOR THE SCIKIT-LEARN SETTING */
 	private static final String RES_SKLEARN_SEARCHSPACE_CONFIG = "automl/searchmodels/sklearn/sklearn-mlplan.json";
 	private static final String RES_SKLEARN_UL_SEARCHSPACE_CONFIG = "automl/searchmodels/sklearn/ml-plan-ul.json";
 	private static final String FS_SEARCH_SPACE_CONFIG = "conf/mlplan-sklearn.json";
 
-	private static final String RES_SKLEARN_PREFERRED_COMPONENTS = "mlplan/sklearn-preferenceList.txt";
+	private static final String RES_SKLEARN_PREFERRED_COMPONENTS = "automl/searchmodels/sklearn/sklearn-preferenceList.txt";
 	private static final String FS_SKLEARN_PREFERRED_COMPONENTS = "conf/sklearn-preferenceList.txt";
 
+	/* DEFAULT VALUES FOR THE SCIKIT-LEARN SETTING */
 	private static final String DEF_REQUESTED_HASCO_INTERFACE = "AbstractClassifier";
 	private static final String DEF_PREFERRED_COMPONENT_NAME_PREFIX = "resolveAbstractClassifierWith";
 
-	private static final IDatasetSplitter DEF_SELECTION_HOLDOUT_SPLITTER = new MulticlassClassStratifiedSplitter();
-	private static final ILearnerFactory DEF_CLASSIFIER_FACTORY = new SKLearnClassifierFactory();
 	private static final File DEF_SEARCH_SPACE_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_SKLEARN_SEARCHSPACE_CONFIG, FS_SEARCH_SPACE_CONFIG);
 	private static final File DEF_PREFERRED_COMPONENTS = FileUtil.getExistingFileWithHighestPriority(RES_SKLEARN_PREFERRED_COMPONENTS, FS_SKLEARN_PREFERRED_COMPONENTS);
-	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE)
-			.withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(DEFAULT_PERFORMANCE_MEASURE)).withDatasetSplitter(new MulticlassClassStratifiedSplitter());
-	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE)
-			.withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(DEFAULT_PERFORMANCE_MEASURE)).withDatasetSplitter(new MulticlassClassStratifiedSplitter());
+
+	private static final SKLearnClassifierFactory DEF_CLASSIFIER_FACTORY = new SKLearnClassifierFactory();
+	private static final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> DEF_SEARCH_SELECT_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE,
+			new Random(0));
+	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS)
+			.withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE).withMeasure(DEFAULT_PERFORMANCE_MEASURE);
+	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS)
+			.withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE).withMeasure(DEFAULT_PERFORMANCE_MEASURE);
 
 	/**
 	 * Creates a new ML-Plan Builder for scikit-learn.
@@ -81,10 +90,15 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
 		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, DEF_PREFERRED_COMPONENT_NAME_PREFIX);
 		this.withRequestedInterface(DEF_REQUESTED_HASCO_INTERFACE);
 		this.withClassifierFactory(DEF_CLASSIFIER_FACTORY);
-		this.withDatasetSplitterForSearchSelectionSplit(DEF_SELECTION_HOLDOUT_SPLITTER);
 		this.withSearchPhaseEvaluatorFactory(DEF_SEARCH_PHASE_EVALUATOR);
 		this.withSelectionPhaseEvaluatorFactory(DEF_SELECTION_PHASE_EVALUATOR);
-		this.setPerformanceMeasureName(DEFAULT_PERFORMANCE_MEASURE.getClass().getSimpleName());
+		this.withDatasetSplitterForSearchSelectionSplit(DEF_SEARCH_SELECT_SPLITTER);
+
+		// /* configure blow-ups for MCCV */
+		double blowUpInSelectionPhase = MathExt.round(1f / DEFAULT_SEARCH_TRAIN_FOLD_SIZE * DEFAULT_SELECTION_NUM_MC_ITERATIONS / DEFAULT_SEARCH_NUM_MC_ITERATIONS, 2);
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
+		double blowUpInPostprocessing = MathExt.round((1 / (1 - this.getAlgorithmConfig().dataPortionForSelection())) / DEFAULT_SELECTION_NUM_MC_ITERATIONS, 2);
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
 	}
 
 	/**
@@ -93,7 +107,29 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
 	 * @throws IOException Thrown if the search space configuration file cannot be read.
 	 */
 	public MLPlanSKLearnBuilder withUnlimitedLengthPipelineSearchSpace() throws IOException {
-		return (MLPlanSKLearnBuilder) this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(RES_SKLEARN_UL_SEARCHSPACE_CONFIG, FS_SEARCH_SPACE_CONFIG));
+		return this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(RES_SKLEARN_UL_SEARCHSPACE_CONFIG, FS_SEARCH_SPACE_CONFIG));
+	}
+
+	/**
+	 * Creates a preferred node evaluator that can be used to prefer components over other components.
+	 *
+	 * @param preferredComponentsFile The file containing a priority list of component names.
+	 * @param preferableCompnentMethodPrefix The prefix of a method's name for refining a complex task to preferable components.
+	 * @return The builder object.
+	 * @throws IOException Thrown if a problem occurs while trying to read the file containing the priority list.
+	 */
+	public MLPlanSKLearnBuilder withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
+		List<String> ordering;
+		if (preferredComponentsFile instanceof ResourceFile) {
+			ordering = ResourceUtil.readResourceFileToStringList((ResourceFile) preferredComponentsFile);
+		} else if (!preferredComponentsFile.exists()) {
+			this.logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", preferredComponentsFile.getAbsolutePath());
+			ordering = new ArrayList<>();
+		} else {
+			ordering = FileUtil.readFileAsList(preferredComponentsFile);
+		}
+		return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.getComponents(), ordering, preferableCompnentMethodPrefix));
 	}
 
 	private void checkPythonSetup() {
@@ -109,7 +145,7 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
 			}
 			String versionString = sb.toString();
 			if (!versionString.startsWith("Python ")) {
-				throw new SystemRequirementsNotMetException("Could not detect valid python version.");
+				throw new SystemRequirementsNotMetException("Could not detect valid python version. (>>" + versionString + "<<)");
 			}
 
 			String[] versionSplit = versionString.substring(7).split("\\.");
@@ -184,7 +220,8 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
 	}
 
 	@Override
-	protected IDatasetSplitter getDefaultDatasetSplitter() {
-		return new MulticlassClassStratifiedSplitter();
+	public MLPlanSKLearnBuilder getSelf() {
+		return this;
 	}
+
 }

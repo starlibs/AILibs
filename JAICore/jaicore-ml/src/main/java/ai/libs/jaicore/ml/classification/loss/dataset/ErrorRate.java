@@ -6,9 +6,7 @@ import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicHomogen
 
 public class ErrorRate extends APredictionPerformanceMeasure<Object, Object> implements IDeterministicHomogeneousPredictionPerformanceMeasure<Object> {
 
-
 	ErrorRate() {
-
 		/* empty constructor to avoid direct instantiation. Use the enum instead. */
 	}
 
@@ -21,6 +19,5 @@ public class ErrorRate extends APredictionPerformanceMeasure<Object, Object> imp
 		}
 		return sumOfZOLoss / expected.size();
 	}
-
 
 }

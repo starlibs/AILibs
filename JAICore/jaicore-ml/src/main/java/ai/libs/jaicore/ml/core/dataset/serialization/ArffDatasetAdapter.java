@@ -1,7 +1,10 @@
 package ai.libs.jaicore.ml.core.dataset.serialization;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,11 +13,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.core.dataset.descriptor.IDatasetDescriptor;
 import org.api4.java.ai.ml.core.dataset.descriptor.IFileDatasetDescriptor;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.serialization.IDatasetDeserializer;
 import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
@@ -132,8 +138,14 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 	protected static IAttribute parseAttribute(final String line) throws UnsupportedAttributeTypeException {
 		String attributeDefinitionSplit = line.replaceAll("\\t", " ").substring(EArffItem.ATTRIBUTE.getValue().length() + 1).trim();
-		String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION)).trim();
+		String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION));
+		if (name.trim().startsWith("'") && !name.trim().endsWith("'")) {
+			int cutIndex = attributeDefinitionSplit.substring(name.length()).indexOf("'");
+			name += attributeDefinitionSplit.substring(name.length(), name.length() + cutIndex + 1);
+		}
+
 		String type = attributeDefinitionSplit.substring(name.length() + 1).trim();
+		name = name.trim();
 		if ((name.startsWith("'") && name.endsWith("'")) || (name.startsWith("\"") && name.endsWith("\""))) {
 			name = name.substring(1, name.length() - 1);
 		}
@@ -147,7 +159,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			try {
 				attType = EArffAttributeType.valueOf(type.toUpperCase());
 			} catch (IllegalArgumentException e) {
-				throw new UnsupportedAttributeTypeException("The attribute type " + type.toUpperCase() + " is not supported in the EArffAttributeType ENUM.");
+				throw new UnsupportedAttributeTypeException("The attribute type " + type.toUpperCase() + " is not supported in the EArffAttributeType ENUM. (line: " + line + ")");
 			}
 		}
 
@@ -297,6 +309,59 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			e.printStackTrace();
 			throw new DatasetDeserializationFailedException("Could not deserialize dataset from ARFF file.", e);
 		}
+	}
+
+	public static void serializeDataset(final File arffOutputFile, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter(arffOutputFile))) {
+			// write metadata
+			serializeMetaData(bw, data);
+			bw.write("\n\n");
+			// write actual data (payload)
+			serializeData(bw, data);
+		}
+	}
+
+	private static void serializeData(final BufferedWriter bw, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
+		bw.write(EArffItem.DATA.getValue() + "\n");
+		for (ILabeledInstance instance : data) {
+			Object[] atts = instance.getAttributes();
+			bw.write(IntStream.range(0, atts.length).mapToObj(x -> serializeAttributeValue(data.getInstanceSchema().getAttribute(x), atts[x])).collect(Collectors.joining(",")));
+			bw.write(",");
+			bw.write(serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
+			bw.write("\n");
+		}
+	}
+
+	private static String serializeAttributeValue(final IAttribute att, final Object value) {
+		String returnValue = att.serializeAttributeValue(value);
+		if (att instanceof ICategoricalAttribute) {
+			returnValue = "'" + returnValue + "'";
+		}
+		return returnValue;
+	}
+
+	private static void serializeMetaData(final BufferedWriter bw, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
+		StringBuilder sb = new StringBuilder();
+		sb.append(EArffItem.RELATION.getValue() + " " + data.getRelationName());
+		sb.append("\n");
+		sb.append("\n");
+		for (IAttribute att : data.getInstanceSchema().getAttributeList()) {
+			sb.append(serializeAttribute(att));
+			sb.append("\n");
+		}
+		sb.append(serializeAttribute(data.getInstanceSchema().getLabelAttribute()));
+		bw.write(sb.toString());
+	}
+
+	private static String serializeAttribute(final IAttribute att) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(EArffItem.ATTRIBUTE.getValue() + " '" + att.getName() + "' ");
+		if (att instanceof ICategoricalAttribute) {
+			sb.append("{'" + ((ICategoricalAttribute) att).getLabels().stream().collect(Collectors.joining("','")) + "'}");
+		} else if (att instanceof INumericAttribute) {
+			sb.append(EArffAttributeType.NUMERIC.getName());
+		}
+		return sb.toString();
 	}
 
 }

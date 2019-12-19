@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -157,4 +158,9 @@ public class ArffDatasetAdapterTest {
 		ArffDatasetAdapter.readDataset(datasetFile);
 	}
 
+	@Test
+	public void testWritingADatasetToFile() throws DatasetDeserializationFailedException, InterruptedException, IOException {
+		File datasetFile = new File("classifier-rank.arff");
+		ArffDatasetAdapter.serializeDataset(new File("classifier-rank.arff.copy"), ArffDatasetAdapter.readDataset(datasetFile));
+	}
 }

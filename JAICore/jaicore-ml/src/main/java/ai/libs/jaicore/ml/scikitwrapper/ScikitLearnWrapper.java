@@ -1,9 +1,7 @@
 package ai.libs.jaicore.ml.scikitwrapper;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,10 +13,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassificationPredictionBatch;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.evaluation.IPrediction;
-import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
@@ -32,6 +30,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceUtil;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
+import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 
 /**
@@ -64,8 +65,8 @@ import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
  * @author wever
  * @author scheiblm
  */
-public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<ILabeledInstance>, P, B>
-implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<ILabeledInstance>> {
+public class ScikitLearnWrapper extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch>
+		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 	private static final String PYTHON_FILE_EXT = ".py";
 	private static final String MODEL_DUMP_FILE_EXT = ".pcl";
 	private static final String RESULT_FILE_EXT = ".json";
@@ -172,13 +173,15 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<ILabeledInstance
 		return new File(MODEL_DUMPS_DIRECTORY, arffName + "_" + this.configurationUID + RESULT_FILE_EXT);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void fit(final ILabeledDataset<ILabeledInstance> data) throws TrainingException {
+	public void fit(final ILabeledDataset<? extends ILabeledInstance> data) throws TrainingException {
 		try {
 			/* Ensure model dump directory exists and get the name of the dump */
 			MODEL_DUMPS_DIRECTORY.mkdirs();
 			String arffName = this.getArffName(data);
 			this.trainArff = this.getArffFile(data, arffName);
+			this.dataset = (ILabeledDataset<ILabeledInstance>) data.createEmptyCopy();
 
 			if (!this.withoutModelDump) {
 				this.modelFile = new File(MODEL_DUMPS_DIRECTORY, this.configurationUID + "_" + arffName + MODEL_DUMP_FILE_EXT);
@@ -212,21 +215,17 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<ILabeledInstance
 			L.debug("Reusing {}.arff", arffName);
 			return arffOutputFile;
 		}
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(arffOutputFile))) {
-			bw.write(data.toString());
-		}
+		ArffDatasetAdapter.serializeDataset(arffOutputFile, data);
 		return arffOutputFile;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public P predict(final ILabeledInstance instance) throws PredictionException, InterruptedException {
-		return (P) this.predict(new ILabeledInstance[] { instance }).get(0);
+	public ISingleLabelClassification predict(final ILabeledInstance instance) throws PredictionException, InterruptedException {
+		return this.predict(new ILabeledInstance[] { instance }).get(0);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public B predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
+	public ISingleLabelClassificationPredictionBatch predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
 		ILabeledDataset<ILabeledInstance> data;
 		try {
 			data = this.dataset.createEmptyCopy();
@@ -288,12 +287,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<ILabeledInstance
 		 * The structured results of the last classifyInstances call is accessable over
 		 * getRawLastClassificationResults().
 		 * */
-		List<Double> flatresults = this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList());
-		double[] resultsArray = new double[flatresults.size()];
-		for (int i = 0; i < resultsArray.length; i++) {
-			resultsArray[i] = flatresults.get(i);
-		}
-		return null;
+		return new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification((int) (double) x)).collect(Collectors.toList()));
 	}
 
 	/**

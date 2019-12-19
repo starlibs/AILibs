@@ -15,8 +15,7 @@ import ai.libs.hasco.model.CategoricalParameterDomain;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
-import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
-import weka.classifiers.Classifier;
+import ai.libs.mlplan.core.ILearnerFactory;
 
 /**
  * The SKLearnClassifierFactory takes a ground component instance and parses it into a <code>ScikitLearnWrapper</code> as defined in the project jaicore-ml.
@@ -24,7 +23,7 @@ import weka.classifiers.Classifier;
  *
  * @author wever
  */
-public class SKLearnClassifierFactory implements ILearnerFactory, ILoggingCustomizable {
+public class SKLearnClassifierFactory implements ILearnerFactory<ScikitLearnWrapper>, ILoggingCustomizable {
 
 	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList("True", "False"));
 
@@ -32,7 +31,7 @@ public class SKLearnClassifierFactory implements ILearnerFactory, ILoggingCustom
 	private String loggerName;
 
 	@Override
-	public Classifier getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
+	public ScikitLearnWrapper getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
 		this.logger.info("Parse ground component instance {} to ScikitLearnWrapper object.", groundComponent);
 
 		StringBuilder constructInstruction = new StringBuilder();

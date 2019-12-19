@@ -46,8 +46,11 @@ public abstract class ASupervisedLearner<I extends ILabeledInstance, D extends I
 	@SuppressWarnings("unchecked")
 	@Override
 	public B predict(final D dTest) throws PredictionException, InterruptedException {
-		Class<I> clazz = (Class<I>)dTest.iterator().next().getClass();
-		I[] instancesAsArray = (I[])Array.newInstance(clazz, dTest.size());
+		Class<I> clazz = (Class<I>) dTest.iterator().next().getClass();
+		I[] instancesAsArray = (I[]) Array.newInstance(clazz, dTest.size());
+		for (int i = 0; i < dTest.size(); i++) {
+			instancesAsArray[i] = dTest.get(i);
+		}
 		return this.predict(instancesAsArray);
 	}
 

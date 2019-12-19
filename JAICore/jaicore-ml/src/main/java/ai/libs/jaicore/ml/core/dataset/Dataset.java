@@ -97,8 +97,15 @@ public class Dataset extends ArrayList<ILabeledInstance> implements ILabeledData
 	}
 
 	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		this.stream().map(x -> x.toString()).forEach(x -> sb.append(x + "\n"));
+		return sb.toString();
+	}
+
+	@Override
 	public void addInstruction(final IReconstructionInstruction instruction) {
-		this.instructions.add((ReconstructionInstruction)instruction);
+		this.instructions.add((ReconstructionInstruction) instruction);
 	}
 
 	@Override
@@ -130,6 +137,5 @@ public class Dataset extends ArrayList<ILabeledInstance> implements ILabeledData
 		}
 		return true;
 	}
-
 
 }

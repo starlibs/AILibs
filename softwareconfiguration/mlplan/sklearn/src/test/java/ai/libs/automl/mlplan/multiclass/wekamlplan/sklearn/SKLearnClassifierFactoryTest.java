@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -20,7 +21,6 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.ComponentUtil;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.mlplan.multiclass.sklearn.SKLearnClassifierFactory;
 import weka.core.Instances;
 
@@ -67,7 +67,7 @@ public class SKLearnClassifierFactoryTest {
 	private static SKLearnClassifierFactory factory;
 
 	@BeforeClass
-	public static void setup() throws FileNotFoundException, IOException, SplitFailedException, InterruptedException {
+	public static void setup() throws FileNotFoundException, IOException, InterruptedException, SplitFailedException {
 		/* load dataset */
 		Instances data = new Instances(new FileReader(TEST_DATASET));
 		data.setClassIndex(data.numAttributes() - 1);
