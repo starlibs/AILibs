@@ -3,12 +3,12 @@ package ai.libs.jaicore.ml.learningcurve.extrapolation.inversepowerlaw;
 import java.io.File;
 import java.io.FileReader;
 
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper.ProblemType;
-import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
-import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.core.Instances;
 import weka.filters.Filter;
@@ -36,7 +36,7 @@ public class InversePowerLearningCurveModelTrainer {
 	 *            Destination where the built model shall be saved.
 	 * @return Trained classifier.
 	 */
-	public static ISupervisedLearner<IWekaInstance, IWekaInstances> trainModelClassifier(final File datasetFolder, final String modelPath) throws Exception {
+	public static ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> trainModelClassifier(final File datasetFolder, final String modelPath) throws Exception {
 		Instances data = null;
 		for (File file : datasetFolder.listFiles()) {
 			if (data == null) {
