@@ -1,6 +1,5 @@
 package ai.libs.mlplan.examples.multiclass.simple;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -11,7 +10,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.TimeOut;
 
-import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
@@ -55,7 +54,7 @@ public class MLPlanOpenMLExample {
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			System.out.println("Error Rate of the solution produced by ML-Plan: " + EAggregatedClassifierMetric.MEAN_ERRORRATE.evaluateToDouble(Arrays.asList(report)));
+			System.out.println("Error Rate of the solution produced by ML-Plan: " + EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()));
 		} catch (NoSuchElementException e) {
 			System.out.println("Building the classifier failed: " + e.getMessage());
 		}

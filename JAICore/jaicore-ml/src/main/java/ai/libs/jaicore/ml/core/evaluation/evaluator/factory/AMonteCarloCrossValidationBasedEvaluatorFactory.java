@@ -18,7 +18,7 @@ import org.api4.java.common.control.IRandomConfigurable;
  *
  */
 public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends AMonteCarloCrossValidationBasedEvaluatorFactory<F>> implements
-		ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, IRandomConfigurable, IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>, IPredictionPerformanceMetricConfigurable {
+ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, IRandomConfigurable, IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>, IPredictionPerformanceMetricConfigurable<Object, Object> {
 
 	private IDatasetSplitter<? extends ILabeledDataset<?>> datasetSplitter;
 	protected Random random;
@@ -134,7 +134,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 	public abstract F getSelf();
 
 	@Override
-	public void setMeasure(final IDeterministicPredictionPerformanceMeasure<?, ?> measure) {
+	public void setMeasure(final IDeterministicPredictionPerformanceMeasure<Object, Object> measure) {
 		this.metric = measure;
 	}
 
@@ -149,7 +149,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 
 	}
 
-	public F withMeasure(final IDeterministicPredictionPerformanceMeasure<?, ?> measure) {
+	public F withMeasure(final IDeterministicPredictionPerformanceMeasure<Object, Object> measure) {
 		this.setMeasure(measure);
 		return this.getSelf();
 	}

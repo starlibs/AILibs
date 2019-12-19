@@ -66,7 +66,7 @@ import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
  * @author scheiblm
  */
 public class ScikitLearnWrapper extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch>
-		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
+implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 	private static final String PYTHON_FILE_EXT = ".py";
 	private static final String MODEL_DUMP_FILE_EXT = ".pcl";
 	private static final String RESULT_FILE_EXT = ".json";
@@ -221,7 +221,7 @@ public class ScikitLearnWrapper extends ASupervisedLearner<ILabeledInstance, ILa
 
 	@Override
 	public ISingleLabelClassification predict(final ILabeledInstance instance) throws PredictionException, InterruptedException {
-		return this.predict(new ILabeledInstance[] { instance }).get(0);
+		return (ISingleLabelClassification)this.predict(new ILabeledInstance[] { instance }).get(0);
 	}
 
 	@Override

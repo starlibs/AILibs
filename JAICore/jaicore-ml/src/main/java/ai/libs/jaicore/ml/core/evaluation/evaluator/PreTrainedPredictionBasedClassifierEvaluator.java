@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.classification.IClassifierEvaluator;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -22,9 +23,9 @@ public class PreTrainedPredictionBasedClassifierEvaluator implements IClassifier
 
 	private final ILabeledDataset<?> testData;
 	private final SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
-	private final IAggregatedPredictionPerformanceMeasure metric;
+	private final IAggregatedPredictionPerformanceMeasure<Object, Object> metric;
 
-	public PreTrainedPredictionBasedClassifierEvaluator(final ILabeledDataset<?> testData, final IAggregatedPredictionPerformanceMeasure metric) {
+	public PreTrainedPredictionBasedClassifierEvaluator(final ILabeledDataset<?> testData, final IAggregatedPredictionPerformanceMeasure<Object, Object> metric) {
 		super();
 		this.testData = testData;
 		this.metric = metric;
@@ -35,7 +36,7 @@ public class PreTrainedPredictionBasedClassifierEvaluator implements IClassifier
 		try {
 			List<ILearnerRunReport> reports = new ArrayList<>(1);
 			reports.add(this.executor.execute(learner, this.testData));
-			return this.metric.evaluate(reports);
+			return this.metric.loss(reports.stream().map(r -> r.getPredictionDiffList()).collect(Collectors.toList()));
 		} catch (LearnerExecutionFailedException e) {
 			throw new ObjectEvaluationFailedException(e);
 		}

@@ -1,6 +1,5 @@
 package ai.libs.mlplan.examples.multiclass.weka;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -13,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.logging.LoggerUtil;
-import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
@@ -61,7 +60,7 @@ public class MLPlanOpenMLExample {
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}", EAggregatedClassifierMetric.MEAN_ERRORRATE.evaluateToDouble(Arrays.asList(report)));
+			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}", EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()));
 		} catch (NoSuchElementException e) {
 			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}
