@@ -70,7 +70,9 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 				for (int i = 0; i < this.stratiBuilder.length; i++) {
 					this.stratiBuilder[i] = new DatasetDeriver<>(this.getInput());
 				}
-
+				if (this.stratiBuilder.length == 0) {
+					throw new IllegalStateException("No strati have been defined.");
+				}
 
 				this.stratiAssigner.init(this.getInput(), this.stratiBuilder.length);
 				if (this.getInput().hashCode() != this.dsHash) {
@@ -124,6 +126,7 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 				} else {
 
 					/* Check if all threads are finished. If yes finish Stratified Sampling, wait shortly in this step otherwise. */
+					this.logger.info("Stratified sampling completed.");
 					return this.terminate();
 				}
 			}
@@ -146,13 +149,26 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 	 */
 	private void startSimpleRandomSamplingForStrati() throws InterruptedException, DatasetCreationException {
 
+		if (this.sampleSize == -1) {
+			throw new IllegalStateException("No valid sample size specified");
+		}
+
 		/* Calculate the amount of datapoints that will be used from each strati.
 		 * First, floor all fractional numbers. Then, distribute the remaining samples randomly among the strati */
+		this.logger.info("Now drawing simple random elements in each stratum.");
 		int[] sampleSizeForStrati = new int[this.stratiBuilder.length];
 		int numSamplesTotal = 0;
 		List<Integer> fillupStrati = new ArrayList<>();
+		double totalInputSize = this.getInput().size();
 		for (int i = 0; i < this.stratiBuilder.length; i++) {
-			sampleSizeForStrati[i] = (int)Math.floor(this.sampleSize * this.stratiBuilder[i].currentSizeOfTarget() / (double)this.getInput().size());
+			if (this.stratiBuilder[i].currentSizeOfTarget() < 0) {
+				throw new IllegalStateException("Builder for stratum " + i + " has a negative current target size: " +  this.stratiBuilder[i].currentSizeOfTarget());
+			}
+			int totalNumberOfElementsInStratum = this.stratiBuilder[i].currentSizeOfTarget();
+			sampleSizeForStrati[i] = (int)Math.floor(totalNumberOfElementsInStratum * (this.sampleSize / totalInputSize));
+			if (sampleSizeForStrati[i] < 0) {
+				throw new IllegalStateException("Determined negative stratum size " + sampleSizeForStrati[i] + " for " + i + "-th stratum.");
+			}
 			numSamplesTotal += sampleSizeForStrati[i];
 			fillupStrati.add(i);
 		}
@@ -165,6 +181,13 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 		if (numSamplesTotal != this.sampleSize) {
 			throw new IllegalStateException("Number of samples is " + numSamplesTotal + " where it should be " + this.sampleSize);
 		}
+		int stratiSumCheck = 0;
+		for (int i = 0; i < this.stratiBuilder.length; i++) {
+			stratiSumCheck += sampleSizeForStrati[i];
+		}
+		if (stratiSumCheck != this.sampleSize) {
+			throw new IllegalStateException("The total number of samples assigned within the strati is " + stratiSumCheck + ", but it should be " + this.sampleSize + ".");
+		}
 
 		/* conduct a Simple Random Sampling for each stratum */
 		DatasetDeriver<D> sampleDeriver = new DatasetDeriver<>(this.getInput());
@@ -174,23 +197,39 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 			if (stratum.isEmpty()) {
 				this.logger.warn("{}-th stratum is empty!", i);
 			}
+			else if (sampleSizeForStrati[i] == 0) {
+				this.logger.warn("No samples for stratum {}", i);
+			}
+			else if (sampleSizeForStrati[i] == stratum.size()) {
+				sampleDeriver.addIndices(stratumBuilder.getIndicesOfNewInstancesInOriginalDataset()); // add the complete stratum
+			}
 			else {
 				SimpleRandomSampling<D> simpleRandomSampling = new SimpleRandomSampling<>(this.random, stratum);
 				simpleRandomSampling.setSampleSize(sampleSizeForStrati[i]);
 				this.logger.info("Setting sample size for {}-th stratus to {}", i, sampleSizeForStrati[i]);
 				try {
+					this.logger.debug("Calling SimpleRandomSampling");
 					simpleRandomSampling.call();
-					sampleDeriver.addIndices(stratumBuilder.getIndicesOfNewInstancesInOriginalDataset(simpleRandomSampling.getChosenIndices())); // this is MUCH faster than adding the instances
+					this.logger.debug("SimpleRandomSampling finished");
 				} catch (Exception e) {
 					this.logger.error("Unexpected exception during simple random sampling!", e);
 				}
+				if (simpleRandomSampling.getChosenIndices().size() != sampleSizeForStrati[i]) {
+					throw new IllegalStateException("Number of samples drawn for stratum " + i + " is " + simpleRandomSampling.getChosenIndices().size() + ", but it should be " + sampleSizeForStrati[i]);
+				}
+				sampleDeriver.addIndices(stratumBuilder.getIndicesOfNewInstancesInOriginalDataset(simpleRandomSampling.getChosenIndices())); // this is MUCH faster than adding the instances
 			}
 		}
+		if (sampleDeriver.currentSizeOfTarget() != this.sampleSize) {
+			throw new IllegalStateException("The deriver says that the target has " + sampleDeriver.currentSizeOfTarget() + " elements, but it should have been configured for " + this.sampleSize);
+		}
+		this.logger.info("Strati sub-samples completed, building the final sample and shuffling it.");
 		this.sample = sampleDeriver.build();
 		if (this.sample.size() != numSamplesTotal) {
-			throw new IllegalStateException("The sample has " + this.sample.size() + " elements while it should have " + numSamplesTotal);
+			throw new IllegalStateException("The sample deriver has produced a sample with " + this.sample.size() + " elements while it should have " + numSamplesTotal);
 		}
 		Collections.shuffle(this.sample, this.random); // up to here, instances have been ordered by their class. We now mix instances of the classes again.
+		this.logger.info("Overall stratified shuffled sample completed.");
 	}
 
 	@Override

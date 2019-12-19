@@ -95,6 +95,7 @@ public class ArffDatasetAdapterTest {
 			}
 		}
 		assertTrue("Numeric attribute is not a Number object but of type " + parsedDenseInstance[0].getClass().getName(), parsedDenseInstance[0] instanceof Number);
+		assertNotNull("No instance label for dense instance " + parsedInstance, ((List<?>)parsedInstance).get(1));
 	}
 
 	@Test
@@ -108,6 +109,7 @@ public class ArffDatasetAdapterTest {
 			assertEquals("Attribute value at position " + i + " " + parsedSparseInstance.get(i) + " is not equal to the expected value " + TEST_INSTANCE[i], TEST_INSTANCE[i], parsedSparseInstance.get(i));
 		}
 		assertTrue("Numeric attribute is not a Number object but of type " + parsedSparseInstance.get(0).getClass().getName(), parsedSparseInstance.get(0) instanceof Number);
+		assertNotNull("No instance label for sparse instance " + parsedSparseInstance, parsedSparseInstance.get(CLASS_INDEX));
 	}
 
 	@Test

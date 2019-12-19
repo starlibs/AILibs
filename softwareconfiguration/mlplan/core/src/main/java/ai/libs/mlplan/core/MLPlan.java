@@ -108,7 +108,6 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			/* set up exact splits */
 			ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(this.getInput());
 			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
-			this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%).", this.getInput().size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2), MathExt.round(dataPortionUsedForSelection * 100, 2));
 			ILabeledDataset<?> dataShownToSearch;
 			ILabeledDataset<?> dataShownToSelection;
 			if (dataPortionUsedForSelection > 0) {
@@ -118,6 +117,10 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 					if (splitter == null) {
 						throw new IllegalArgumentException("The builder does not specify a dataset splitter for the separation between search and selection phase data.");
 					}
+					this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%) with splitter {}.", this.getInput().size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2), MathExt.round(dataPortionUsedForSelection * 100, 2), splitter.getClass().getName());
+					if (splitter instanceof ILoggingCustomizable) {
+						((ILoggingCustomizable) splitter).setLoggerName(this.getLoggerName() + ".searchselectsplitter");
+					}
 					List<ILabeledDataset<?>> split = splitter.split(this.getInput(), new Random(seed), dataPortionUsedForSelection);
 					final int expectedSearchSize = (int)Math.round(this.getInput().size() * (1 - dataPortionUsedForSelection)); // attention; this is a bit tricky (data portion for selection is in 0)
 					final int expectedSelectionSize = this.getInput().size() - expectedSearchSize;
@@ -126,18 +129,20 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 					}
 					dataShownToSearch = split.get(1); // attention; this is a bit tricky (data portion for selection is in 0)
 					dataShownToSelection = this.getInput();
+					this.logger.debug("Search/Selection split completed. Using {} data points in search and {} in selection.", dataShownToSearch.size(), dataShownToSelection.size());
 				} catch (SplitFailedException e) {
 					throw new AlgorithmException("Error in ML-Plan execution.", e);
 				}
 			} else {
 				dataShownToSearch = this.getInput();
 				dataShownToSelection = null;
+				this.logger.debug("Selection phase de-activated. Not splitting the data and giving everything to the search.");
 			}
 			if (dataShownToSearch.isEmpty()) {
 				throw new IllegalStateException("Cannot search on no data.");
 			}
-			if (!dataShownToSelection.containsAll(dataShownToSearch)) {
-				throw new IllegalStateException("The search data (" + dataShownToSearch.size() + " data points) contains data not contained in the selection data (" + dataShownToSelection.size() +" data points)!");
+			if (dataShownToSelection.size() < dataShownToSearch.size()) {
+				throw new IllegalStateException("The search data (" + dataShownToSearch.size() + " data points) are bigger than the selection data (" + dataShownToSelection.size() +" data points)!");
 			}
 
 			/* check that class proportions are maintained */

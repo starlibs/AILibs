@@ -66,6 +66,9 @@ public class SimpleRandomSampling<D extends IDataset<?>> extends ASamplingAlgori
 			} catch (DatasetCreationException e) {
 				throw new AlgorithmException("Could not create sample.", e);
 			}
+			if (this.chosenIndices == null) {
+				throw new IllegalStateException("Chosen indices must not be null!");
+			}
 			return this.terminate();
 		case INACTIVE:
 			this.doInactiveStep();
@@ -77,6 +80,9 @@ public class SimpleRandomSampling<D extends IDataset<?>> extends ASamplingAlgori
 	}
 
 	public Collection<Integer> getChosenIndices() {
+		if (this.chosenIndices == null) {
+			throw new IllegalStateException("The algorithm has not run, so no indices have been chosen!");
+		}
 		return Collections.unmodifiableCollection(this.chosenIndices);
 	}
 

@@ -294,7 +294,10 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						} else if (parsedInstance instanceof Map) {
 							@SuppressWarnings("unchecked")
 							Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
-							Object label = parsedSparseInstance.remove(relationMetaData.getAsInt(K_CLASS_INDEX));
+							Object label = (parsedSparseInstance).containsKey(relationMetaData.getAsInt(K_CLASS_INDEX)) ? parsedSparseInstance.remove(relationMetaData.getAsInt(K_CLASS_INDEX)) : 0; // in sparse instance, the class attribute may be missing; it is then assumed to be 0
+							if (label == null) {
+								throw new IllegalArgumentException("Cannot identify label for instance " + line);
+							}
 							newI = new SparseInstance(attributes.size(), parsedSparseInstance, label);
 						} else {
 							throw new IllegalStateException("Severe Error: The format of the parsed instance is not as expected.");

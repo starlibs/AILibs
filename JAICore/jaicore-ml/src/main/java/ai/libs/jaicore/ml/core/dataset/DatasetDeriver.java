@@ -33,15 +33,11 @@ public class DatasetDeriver<D extends IDataset<?>> {
 			for (int index : this.indicesToCopy) {
 				copy.add(this.dsOriginal.get(index));
 			}
+			if (copy.size() != this.indicesToCopy.size()) {
+				throw new IllegalStateException("The copy has " + copy.size() + " elements while it should have " + this.indicesToCopy.size() + ".");
+			}
 			return copy;
 		}
-
-		//		public void addInstance(final IInstance inst) {
-		//			if (!this.dsOriginal.contains(inst)) {
-		//				throw new IllegalArgumentException("The instance " + inst + " is not contained in the given dataset of type " + this.dsOriginal.getClass().getName() + " with " + this.dsOriginal.size() + " elements.");
-		//			}
-		//			this.itemsToCopy.add((I)inst);
-		//		}
 
 		public void addInstance(final int inst) {
 			this.indicesToCopy.add(inst);

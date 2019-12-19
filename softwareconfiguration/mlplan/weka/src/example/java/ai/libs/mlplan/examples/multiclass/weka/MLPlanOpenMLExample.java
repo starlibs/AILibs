@@ -34,7 +34,7 @@ public class MLPlanOpenMLExample {
 
 	public static void main(final String[] args) throws Exception {
 
-		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(60);
+		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(41064);
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 30 seconds */
@@ -49,7 +49,7 @@ public class MLPlanOpenMLExample {
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setRandomSeed(1);
 		mlplan.setPortionOfDataForPhase2(.3f);
-		mlplan.setLoggerName("mlplan");
+		mlplan.setLoggerName("testedalgorithm");
 
 		try {
 			long start = System.currentTimeMillis();

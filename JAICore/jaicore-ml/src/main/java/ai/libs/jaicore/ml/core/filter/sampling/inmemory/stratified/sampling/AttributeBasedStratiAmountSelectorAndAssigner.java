@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
@@ -214,11 +215,16 @@ public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmo
 					raw = datapoint.getAttributeValue(attributeIndex);
 				}
 				value = this.discretizationHelper.discretize((double) raw, this.discretizationPolicies.get(attributeIndex));
+				Objects.requireNonNull(value);
 			} else {
 				if (attributeIndex == this.numAttributes) { // this can only happen for labeled instances
 					value = ((ILabeledInstance) datapoint).getLabel();
+					if (value == null) {
+						throw new IllegalArgumentException("Cannot assign data point " + datapoint + " to any stratum, because it has no label.");
+					}
 				} else {
 					value = datapoint.getAttributeValue(attributeIndex);
+					Objects.requireNonNull(value);
 				}
 			}
 			instanceAttributeValues.add(value);

@@ -109,4 +109,9 @@ public class SparseInstance extends AInstance {
 		}
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "SparseInstance [nullElement=" + this.nullElement + ", attributeMap=" + this.attributeMap + ", numAttributes=" + this.numAttributes + "]";
+	}
 }
