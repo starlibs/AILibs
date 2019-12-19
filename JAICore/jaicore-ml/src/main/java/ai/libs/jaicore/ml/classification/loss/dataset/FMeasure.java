@@ -23,6 +23,7 @@ public class FMeasure extends AHomogeneousPredictionPerformanceMeasure<Object> {
 		double precision = this.precision.score(expected, actual);
 		double recall = this.recall.score(expected, actual);
 		double denominator = ((Math.pow(this.beta, 2) * precision) + recall);
+
 		return denominator == 0.0 ? 0 : (1 + Math.pow(this.beta, 2)) * (precision * recall) / denominator;
 	}
 
