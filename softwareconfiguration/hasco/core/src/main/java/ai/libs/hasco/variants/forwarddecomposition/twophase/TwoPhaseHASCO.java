@@ -37,6 +37,7 @@ import com.google.common.eventbus.Subscribe;
 import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.events.HASCOSolutionEvent;
+import ai.libs.hasco.events.TwoPhaseHASCOPhaseSwitchEvent;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import ai.libs.hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
@@ -199,16 +200,19 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 				throw new AlgorithmTimeoutedException(this.getRemainingTimeToDeadline().milliseconds() * -1);
 			}
 
-			/* phase 2: select model */
+			/* phase 2: enter phase and set respective logs/events */
 			IObjectEvaluator<?, Double> selectionBenchmark = this.getInput().getSelectionBenchmark();
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info("Entering phase 2. Solutions seen so far had an (internal) error of {}", this.phase1ResultQueue.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
 			}
+			this.post(new TwoPhaseHASCOPhaseSwitchEvent(this.getId()));
 			if (selectionBenchmark instanceof IInformedObjectEvaluatorExtension) {
 				this.logger.debug("Setting best score for selection phase node evaluator to {}", this.phase1ResultQueue.peek().getScore());
 				((IInformedObjectEvaluatorExtension<Double>) selectionBenchmark).updateBestScore(this.phase1ResultQueue.peek().getScore());
 			}
 			this.checkAndConductTermination();
+
+			/* phase 2: conduct it (select model) */
 			this.selectedHASCOSolution = this.selectModel();
 			this.setBestSeenSolution(this.selectedHASCOSolution);
 			assert this.getBestSeenSolution().equals(this.selectedHASCOSolution);

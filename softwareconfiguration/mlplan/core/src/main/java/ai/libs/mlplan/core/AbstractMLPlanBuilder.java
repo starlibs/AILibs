@@ -95,6 +95,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 
 	/* The problem input for ML-Plan. */
 	private ILabeledDataset<?> dataset;
+	private double portionOfDataReservedForSelection = 0.3;
 
 	protected AbstractMLPlanBuilder() {
 		super();
@@ -442,6 +443,16 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		this.hascoFactory.setSearchProblemTransformer(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<TFDNode, String, Double>(this.preferredNodeEvaluator, this.priorizingPredicate,
 				this.algorithmConfig.randomSeed(), this.algorithmConfig.numberOfRandomCompletions(), this.algorithmConfig.timeoutForCandidateEvaluation(), this.algorithmConfig.timeoutForNodeEvaluation()));
 		this.hascoFactory.withAlgorithmConfig(this.getAlgorithmConfig());
+	}
+
+	public B withPortionOfDataReservedForSelection(final double value) {
+		this.algorithmConfig.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, value + "");
+		return this.getSelf();
+	}
+
+	@Override
+	public double getPortionOfDataReservedForSelectionPhase() {
+		return this.algorithmConfig.dataPortionForSelection();
 	}
 
 	/**

@@ -2,11 +2,13 @@ package ai.libs.mlplan.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Random;
 
 import org.api4.java.ai.ml.classification.IClassifier;
 
 import ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier;
+import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
 
 public class MLPlanSimpleBuilder extends AbstractMLPlanBuilder<IClassifier, MLPlanSimpleBuilder> {
 
@@ -18,9 +20,7 @@ public class MLPlanSimpleBuilder extends AbstractMLPlanBuilder<IClassifier, MLPl
 			this.withClassifierFactory(ci -> new MajorityClassifier());
 
 			/* configure dataset splitter */
-			this.withDatasetSplitterForSearchSelectionSplit((data, random, relativeFoldSizes) -> {
-				return Arrays.asList(data, data);
-			});
+			this.withDatasetSplitterForSearchSelectionSplit(new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), .9, new Random(0)));
 
 			this.withMCCVBasedCandidateEvaluationInSearchPhase().withNumMCIterations(3).withTrainFoldSize(.7);
 			this.withMCCVBasedCandidateEvaluationInSelectionPhase().withNumMCIterations(3).withTrainFoldSize(.7);
