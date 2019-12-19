@@ -149,7 +149,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 
 	}
 
-	public F withMeasure(final IDeterministicPredictionPerformanceMeasure<Object, Object> measure) {
+	public F withMeasure(final IDeterministicPredictionPerformanceMeasure<?, ?> measure) {
 		this.setMeasure(measure);
 		return this.getSelf();
 	}
