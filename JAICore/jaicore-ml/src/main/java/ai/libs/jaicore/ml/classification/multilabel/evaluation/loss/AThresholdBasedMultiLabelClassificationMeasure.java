@@ -8,7 +8,7 @@ import org.api4.java.ai.ml.classification.multilabel.evaluation.loss.IMultiLabel
 
 import ai.libs.jaicore.ml.classification.loss.dataset.APredictionPerformanceMeasure;
 
-public abstract class AThresholdBasedMultiLabelClassificationMeasure extends APredictionPerformanceMeasure<int[], IMultiLabelClassification> implements IMultiLabelClassificationPredictionPerformanceMeasure<int[], IMultiLabelClassification> {
+public abstract class AThresholdBasedMultiLabelClassificationMeasure extends APredictionPerformanceMeasure<int[], IMultiLabelClassification> implements IMultiLabelClassificationPredictionPerformanceMeasure {
 
 	private static final double DEFAULT_THRESHOLD = 0.5;
 
