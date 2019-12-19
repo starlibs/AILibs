@@ -19,7 +19,8 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStra
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 
-public class ExtrapolatedSaturationPointEvaluatorFactory implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>>, IRandomConfigurable, IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>, IPredictionPerformanceMetricConfigurable<Object, Object> {
+public class ExtrapolatedSaturationPointEvaluatorFactory
+		implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>>, IRandomConfigurable, IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>, IPredictionPerformanceMetricConfigurable {
 
 	private int[] anchorpoints;
 	private ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> subsamplingAlgorithmFactory;
@@ -27,11 +28,10 @@ public class ExtrapolatedSaturationPointEvaluatorFactory implements ISupervisedL
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 	private ILabeledDataset<? extends ILabeledInstance> dataset;
 	private Random random;
-	private IDeterministicPredictionPerformanceMeasure<Object, Object> metric;
+	private IDeterministicPredictionPerformanceMeasure<?, ?> metric;
 
-	public ExtrapolatedSaturationPointEvaluatorFactory(final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> subsamplingAlgorithmFactory,
-					final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
+	public ExtrapolatedSaturationPointEvaluatorFactory(final int[] anchorpoints, final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> subsamplingAlgorithmFactory,
+			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.subsamplingAlgorithmFactory = subsamplingAlgorithmFactory;
@@ -70,7 +70,7 @@ public class ExtrapolatedSaturationPointEvaluatorFactory implements ISupervisedL
 	}
 
 	@Override
-	public void setMeasure(final IDeterministicPredictionPerformanceMeasure<Object, Object> measure) {
+	public void setMeasure(final IDeterministicPredictionPerformanceMeasure<?, ?> measure) {
 		this.metric = measure;
 	}
 

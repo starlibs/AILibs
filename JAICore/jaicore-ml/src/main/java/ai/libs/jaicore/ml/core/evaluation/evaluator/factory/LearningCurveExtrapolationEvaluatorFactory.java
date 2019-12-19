@@ -15,7 +15,8 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 
-public class LearningCurveExtrapolationEvaluatorFactory implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, IRandomConfigurable, IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>, IPredictionPerformanceMetricConfigurable<Object, Object> {
+public class LearningCurveExtrapolationEvaluatorFactory implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, IRandomConfigurable,
+		IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>, IPredictionPerformanceMetricConfigurable {
 
 	private int[] anchorpoints;
 	private ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> subsamplingAlgorithmFactory;
@@ -23,7 +24,7 @@ public class LearningCurveExtrapolationEvaluatorFactory implements ISupervisedLe
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 	private ILabeledDataset<? extends ILabeledInstance> dataset;
 	private Random random;
-	private IDeterministicPredictionPerformanceMeasure<Object, Object> metric;
+	private IDeterministicPredictionPerformanceMeasure<?, ?> metric;
 
 	public LearningCurveExtrapolationEvaluatorFactory(final int[] anchorpoints, final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> subsamplingAlgorithmFactory,
 			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
@@ -35,8 +36,7 @@ public class LearningCurveExtrapolationEvaluatorFactory implements ISupervisedLe
 	}
 
 	@Override
-	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getLearnerEvaluator()
-			throws LearnerEvaluatorConstructionFailedException {
+	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getLearnerEvaluator() throws LearnerEvaluatorConstructionFailedException {
 		return new LearningCurveExtrapolationEvaluator(this.anchorpoints, this.subsamplingAlgorithmFactory, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, this.random.nextLong());
 	}
 
@@ -56,7 +56,7 @@ public class LearningCurveExtrapolationEvaluatorFactory implements ISupervisedLe
 	}
 
 	@Override
-	public void setMeasure(final IDeterministicPredictionPerformanceMeasure<Object, Object> measure) {
+	public void setMeasure(final IDeterministicPredictionPerformanceMeasure<?, ?> measure) {
 		this.metric = measure;
 	}
 
