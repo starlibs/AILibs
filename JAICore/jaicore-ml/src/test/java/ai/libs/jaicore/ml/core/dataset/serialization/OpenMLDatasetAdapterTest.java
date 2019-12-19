@@ -61,6 +61,7 @@ public class OpenMLDatasetAdapterTest {
 		problemSets.add(register(41026, 7000, 5000, 2, false)); // gisette
 		problemSets.add(register(40927, 60000, 3072, 10, false)); // CIFAR-10
 		problemSets.add(register(183, 4177, 8, 28, true)); // abalone
+		problemSets.add(register(181, 1484, 8, 10, true)); // yeast
 
 
 
