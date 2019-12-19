@@ -55,5 +55,7 @@ public interface IMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, I
 
 	public MLPlanClassifierConfig getAlgorithmConfig();
 
+	public double getPortionOfDataReservedForSelectionPhase();
+
 	public B getSelf();
 }

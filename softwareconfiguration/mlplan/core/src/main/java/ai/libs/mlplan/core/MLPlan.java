@@ -119,8 +119,13 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 						throw new IllegalArgumentException("The builder does not specify a dataset splitter for the separation between search and selection phase data.");
 					}
 					List<ILabeledDataset<?>> split = splitter.split(this.getInput(), new Random(seed), dataPortionUsedForSelection);
+					final int expectedSearchSize = (int)Math.round(this.getInput().size() * (1 - dataPortionUsedForSelection)); // attention; this is a bit tricky (data portion for selection is in 0)
+					final int expectedSelectionSize = this.getInput().size() - expectedSearchSize;
+					if (expectedSearchSize != split.get(1).size() || expectedSelectionSize != split.get(0).size()) {
+						throw new IllegalStateException("Invalid split produced by " + splitter.getClass().getName() + "! Split sizes are " + split.get(1).size() + "/" + split.get(0).size() + " but expected sizes were " + expectedSearchSize + "/" + expectedSelectionSize);
+					}
 					dataShownToSearch = split.get(1); // attention; this is a bit tricky (data portion for selection is in 0)
-					dataShownToSelection = split.get(0);
+					dataShownToSelection = this.getInput();
 				} catch (SplitFailedException e) {
 					throw new AlgorithmException("Error in ML-Plan execution.", e);
 				}
@@ -130,6 +135,9 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			}
 			if (dataShownToSearch.isEmpty()) {
 				throw new IllegalStateException("Cannot search on no data.");
+			}
+			if (!dataShownToSelection.containsAll(dataShownToSearch)) {
+				throw new IllegalStateException("The search data (" + dataShownToSearch.size() + " data points) contains data not contained in the selection data (" + dataShownToSelection.size() +" data points)!");
 			}
 
 			/* check that class proportions are maintained */
@@ -189,9 +197,9 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			/* communicate the parameters with which ML-Plan will run */
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info(
-						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
+						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tData points used during search: {}\n\tData points used during selection: {}\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
 						this.getInput().hashCode(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
-						this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), classifierEvaluatorForSearch.getBenchmark(),
+						this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), dataShownToSearch.size(), dataShownToSelection.size(), classifierEvaluatorForSearch.getBenchmark(),
 						classifierEvaluatorForSelection.getBenchmark(), this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
 			}
 
