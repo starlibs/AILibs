@@ -23,8 +23,7 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
-import ai.libs.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
-import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
+import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -56,8 +55,7 @@ public class PCSBasedOptimizationRunner {
 				new NodeDisplayInfoAlgorithmEventPropertyComputer<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new RolloutInfoAlgorithmEventPropertyComputer(nodeInfoAlgorithmEventPropertyComputer),
 				new ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer(new PCSBasedOptimizationSolutionCandidateRepresenter()));
 
-		window = new OptimizerVisualizationWindow(evaluator, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(), new SolutionPerformanceTimelinePlugin(),
-				new OutOfSampleErrorPlotPlugin(evaluator.getInstances().get(0), evaluator.getInstances().get(1)));
+		window = new OptimizerVisualizationWindow(evaluator, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(), new SolutionPerformanceTimelinePlugin());
 
 		Platform.runLater(window);
 

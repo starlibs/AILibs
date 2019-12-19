@@ -25,7 +25,7 @@ import ai.libs.hyperopt.optimizer.HyperBandOptimizer;
 import ai.libs.hyperopt.optimizer.SMACOptimizer;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.AlgorithmEventListener;
-import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
+import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 
 /**
