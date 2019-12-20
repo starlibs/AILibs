@@ -50,6 +50,10 @@ public class AlternativeNodeEvaluator<N, A, V extends Comparable<V>> extends Dec
 		return (this.ne1 instanceof IPotentiallySolutionReportingPathEvaluator) && ((IPotentiallySolutionReportingPathEvaluator<?, ?,  ?>) this.ne1).reportsSolutions();
 	}
 
+	public IPathEvaluator<N, A, V> getPrimaryNodeEvaluator() {
+		return this.ne1;
+	}
+
 	@Override
 	public boolean reportsSolutions() {
 		if (super.reportsSolutions()) {

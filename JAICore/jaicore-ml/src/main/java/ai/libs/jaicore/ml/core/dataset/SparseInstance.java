@@ -30,7 +30,7 @@ public class SparseInstance extends AInstance {
 	public Object getAttributeValue(final int pos) {
 		if (this.attributeMap.containsKey(pos)) {
 			return this.attributeMap.get(pos);
-		} else {
+		} else if (this.nullElement != null) {
 			switch (this.nullElement) {
 			case UNKNOWN:
 				return "?";
@@ -39,6 +39,9 @@ public class SparseInstance extends AInstance {
 			default:
 				throw new UnsupportedOperationException("The use of the specified null element is not defined.");
 			}
+		}
+		else {
+			return null;
 		}
 	}
 
@@ -69,6 +72,10 @@ public class SparseInstance extends AInstance {
 			return;
 		}
 		this.attributeMap.put(pos, value);
+	}
+
+	public Map<Integer, Object> getAttributeMap() {
+		return this.attributeMap;
 	}
 
 	@Override

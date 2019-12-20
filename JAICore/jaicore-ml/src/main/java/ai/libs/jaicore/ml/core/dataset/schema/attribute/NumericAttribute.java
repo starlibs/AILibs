@@ -17,7 +17,7 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 
 	@Override
 	public boolean isValidValue(final Object value) {
-		if (value instanceof Number || value instanceof INumericAttributeValue) {
+		if (value == null || value instanceof Number || value instanceof INumericAttributeValue) {
 			return true;
 		}
 		return false;
@@ -29,6 +29,9 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 	}
 
 	private double getAttributeValueAsDouble(final Object attributeValue) {
+		if (attributeValue == null) {
+			return Double.NaN;
+		}
 		if (attributeValue instanceof INumericAttributeValue) {
 			return ((INumericAttributeValue) attributeValue).getValue();
 		} else if (attributeValue instanceof Integer) {
@@ -38,7 +41,7 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 		} else if (attributeValue instanceof Double) {
 			return (Double) attributeValue;
 		} else {
-			throw new IllegalArgumentException("No valid attribute value");
+			throw new IllegalArgumentException("No valid attribute value " + attributeValue + " for attribute " + this.getClass().getName());
 		}
 	}
 

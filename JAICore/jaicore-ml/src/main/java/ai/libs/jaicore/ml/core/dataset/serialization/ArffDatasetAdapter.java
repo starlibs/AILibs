@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -68,6 +69,23 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 	public ArffDatasetAdapter() {
 		this(false);
+	}
+
+	public IAttribute getAttributeWithName(final IFileDatasetDescriptor datasetFile, final String nameOfAttribute) throws DatasetDeserializationFailedException {
+		try (BufferedReader br = Files.newBufferedReader(datasetFile.getDatasetDescription().toPath())) {
+			String line;
+			while ((line = br.readLine()) != null) {
+				if (line.toLowerCase().startsWith(EArffItem.ATTRIBUTE.getValue().toLowerCase())) {
+					IAttribute att = parseAttribute(line);
+					if (att.getName().equals(nameOfAttribute)) {
+						return att;
+					}
+				}
+			}
+			throw new NoSuchElementException("No attribute with name " + nameOfAttribute + " found.");
+		} catch (Exception e) {
+			throw new DatasetDeserializationFailedException(e);
+		}
 	}
 
 	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IFileDatasetDescriptor datasetFile, final String nameOfClassAttribute) throws DatasetDeserializationFailedException, InterruptedException {
@@ -298,9 +316,12 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 							if (label == null) {
 								throw new IllegalArgumentException("Cannot identify label for instance " + line);
 							}
-							newI = new SparseInstance(attributes.size(), parsedSparseInstance, label);
+							newI = new SparseInstance(dataset.getNumAttributes(), parsedSparseInstance, label);
 						} else {
 							throw new IllegalStateException("Severe Error: The format of the parsed instance is not as expected.");
+						}
+						if (newI.getNumAttributes() != dataset.getNumAttributes()) {
+							throw new IllegalStateException("Instance has " + newI.getNumAttributes() + " attributes, but the dataset defines " + dataset.getNumAttributes() + " attributes.");
 						}
 						dataset.add(newI);
 					}

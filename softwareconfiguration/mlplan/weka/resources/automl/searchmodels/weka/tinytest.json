@@ -2,6 +2,13 @@
   "repository" : "Tiny repository",
   "components" : [
   {
+    "name" : "weka.classifiers.rules.ZeroR",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier" ],
+    "parameter" : [ ],
+    "dependencies" : [ ]
+  },
+  {
     "name" : "weka.classifiers.bayes.BayesNet",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "Test" ],
@@ -34,6 +41,29 @@
       "type" : "boolean",
       "default" : "true"
     }],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.classifiers.lazy.KStar",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier" ,"BoostableBaseClassifier"],
+    "parameter" : [ {
+      "name" : "B",
+      "type" : "int",
+      "default" : 20.0,
+      "min" : 1.0,
+      "max" : 100.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "E",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "M",
+      "type" : "cat",
+      "default" : "a",
+      "values" : [ "a", "d", "m", "n" ]
+    } ],
     "dependencies" : [ ]
   }
   ]

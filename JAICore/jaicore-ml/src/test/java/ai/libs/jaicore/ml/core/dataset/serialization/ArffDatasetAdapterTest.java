@@ -17,10 +17,12 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.kvstore.KVStore;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.ml.core.dataset.DatasetTestUtil;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 
@@ -155,14 +157,23 @@ public class ArffDatasetAdapterTest {
 	}
 
 	@Test
-	public void testReadingADatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
-		File datasetFile = new File("classifier-rank.arff");
-		ArffDatasetAdapter.readDataset(datasetFile);
+	public void testReadingDenseDatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
+		this.testReadingDatasetFromFile(new File("testrsc/dataset/arff/classifier-rank.arff"));
+	}
+
+	@Test
+	public void testReadingSparseDatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
+		this.testReadingDatasetFromFile(new File("testrsc/dataset/arff/dexter.arff"));
+	}
+
+	private void testReadingDatasetFromFile(final File datasetFile) throws DatasetDeserializationFailedException, InterruptedException {
+		ILabeledDataset<?> ds = ArffDatasetAdapter.readDataset(datasetFile);
+		DatasetTestUtil.checkDatasetCoherence(ds);
 	}
 
 	@Test
 	public void testWritingADatasetToFile() throws DatasetDeserializationFailedException, InterruptedException, IOException {
-		File datasetFile = new File("classifier-rank.arff");
-		ArffDatasetAdapter.serializeDataset(new File("classifier-rank.arff.copy"), ArffDatasetAdapter.readDataset(datasetFile));
+		File datasetFile = new File("testrsc/dataset/arff/classifier-rank.arff");
+		ArffDatasetAdapter.serializeDataset(new File("testrsc/dataset/arff/classifier-rank.arff.copy"), ArffDatasetAdapter.readDataset(datasetFile));
 	}
 }

@@ -13,6 +13,7 @@ import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
+import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.TimeOut;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.events.HASCOSolutionEvent;
@@ -98,7 +100,6 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 		switch (this.getState()) {
 		case CREATED:
 			this.logger.info("Starting an ML-Plan instance.");
-			AlgorithmInitializedEvent event = this.activate();
 
 			/* check number of CPUs assigned */
 			if (this.getConfig().cpus() < 1) {
@@ -124,7 +125,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 					List<ILabeledDataset<?>> split = splitter.split(this.getInput(), new Random(seed), dataPortionUsedForSelection);
 					final int expectedSearchSize = (int)Math.round(this.getInput().size() * (1 - dataPortionUsedForSelection)); // attention; this is a bit tricky (data portion for selection is in 0)
 					final int expectedSelectionSize = this.getInput().size() - expectedSearchSize;
-					if (expectedSearchSize != split.get(1).size() || expectedSelectionSize != split.get(0).size()) {
+					if (Math.abs(expectedSearchSize - split.get(1).size()) > 1 || Math.abs(expectedSelectionSize - split.get(0).size()) > 1) {
 						throw new IllegalStateException("Invalid split produced by " + splitter.getClass().getName() + "! Split sizes are " + split.get(1).size() + "/" + split.get(0).size() + " but expected sizes were " + expectedSearchSize + "/" + expectedSelectionSize);
 					}
 					dataShownToSearch = split.get(1); // attention; this is a bit tricky (data portion for selection is in 0)
@@ -141,7 +142,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			if (dataShownToSearch.isEmpty()) {
 				throw new IllegalStateException("Cannot search on no data.");
 			}
-			if (dataShownToSelection.size() < dataShownToSearch.size()) {
+			if (dataShownToSelection != null && dataShownToSelection.size() < dataShownToSearch.size()) {
 				throw new IllegalStateException("The search data (" + dataShownToSearch.size() + " data points) are bigger than the selection data (" + dataShownToSelection.size() +" data points)!");
 			}
 
@@ -192,20 +193,22 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			PipelineEvaluator classifierEvaluatorForSelection;
 			try {
 				classifierEvaluatorForSearch = new PipelineEvaluator(this.builder.getLearnerFactory(), evaluatorFactoryForSearch.getLearnerEvaluator(), this.getConfig().timeoutForCandidateEvaluation());
-				classifierEvaluatorForSelection = new PipelineEvaluator(this.builder.getLearnerFactory(), evaluatorFactoryForSelection.getLearnerEvaluator(), this.getConfig().timeoutForCandidateEvaluation());
+				classifierEvaluatorForSelection = dataShownToSelection != null ? new PipelineEvaluator(this.builder.getLearnerFactory(), evaluatorFactoryForSelection.getLearnerEvaluator(), this.getConfig().timeoutForCandidateEvaluation()) : null;
 			} catch (LearnerEvaluatorConstructionFailedException e2) {
 				throw new AlgorithmException("Could not create the pipeline evaluator", e2);
 			}
 			classifierEvaluatorForSearch.registerListener(this); // events will be forwarded
-			classifierEvaluatorForSelection.registerListener(this); // events will be forwarded
+			if (classifierEvaluatorForSelection != null) {
+				classifierEvaluatorForSelection.registerListener(this); // events will be forwarded
+			}
 
 			/* communicate the parameters with which ML-Plan will run */
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info(
 						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tData points used during search: {}\n\tData points used during selection: {}\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
 						this.getInput().hashCode(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
-						this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), dataShownToSearch.size(), dataShownToSelection.size(), classifierEvaluatorForSearch.getBenchmark(),
-						classifierEvaluatorForSelection.getBenchmark(), this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
+						this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), dataShownToSearch.size(), dataShownToSelection != null ? dataShownToSelection.size() : 0, classifierEvaluatorForSearch.getBenchmark(),
+								classifierEvaluatorForSelection != null ? classifierEvaluatorForSelection.getBenchmark() : null, this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
 			}
 
 			/* create 2-phase software configuration problem */
@@ -267,6 +270,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 
 			this.logger.info("Initializing the optimization factory.");
 			this.optimizingFactory.init();
+			AlgorithmInitializedEvent event = this.activate();
 			this.logger.info("Started and activated ML-Plan.");
 			return event;
 
@@ -375,6 +379,11 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 
 	public OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, L, HASCOSolutionCandidate<Double>, Double> getOptimizingFactory() {
 		return this.optimizingFactory;
+	}
+
+	public IAlgorithm<?, ?> getSearch() {
+		HASCO<?, ?, ?, ?> hasco = ((TwoPhaseHASCO<?, ?, ?>)this.optimizingFactory.getOptimizer()).getHasco();
+		return hasco.getSearch();
 	}
 
 	@Subscribe

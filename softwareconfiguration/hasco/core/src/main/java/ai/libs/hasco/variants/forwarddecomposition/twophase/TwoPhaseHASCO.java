@@ -202,18 +202,28 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 
 			/* phase 2: enter phase and set respective logs/events */
 			IObjectEvaluator<?, Double> selectionBenchmark = this.getInput().getSelectionBenchmark();
-			if (this.logger.isInfoEnabled()) {
-				this.logger.info("Entering phase 2. Solutions seen so far had an (internal) error of {}", this.phase1ResultQueue.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
-			}
-			this.post(new TwoPhaseHASCOPhaseSwitchEvent(this.getId()));
-			if (selectionBenchmark instanceof IInformedObjectEvaluatorExtension) {
-				this.logger.debug("Setting best score for selection phase node evaluator to {}", this.phase1ResultQueue.peek().getScore());
-				((IInformedObjectEvaluatorExtension<Double>) selectionBenchmark).updateBestScore(this.phase1ResultQueue.peek().getScore());
-			}
-			this.checkAndConductTermination();
+			if (selectionBenchmark != null) {
+				if (this.logger.isInfoEnabled()) {
+					this.logger.info("Entering phase 2. Solutions seen so far had an (internal) error of {}", this.phase1ResultQueue.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
+				}
+				this.post(new TwoPhaseHASCOPhaseSwitchEvent(this.getId()));
+				if (selectionBenchmark instanceof IInformedObjectEvaluatorExtension) {
+					this.logger.debug("Setting best score for selection phase node evaluator to {}", this.phase1ResultQueue.peek().getScore());
+					((IInformedObjectEvaluatorExtension<Double>) selectionBenchmark).updateBestScore(this.phase1ResultQueue.peek().getScore());
+				}
+				this.checkAndConductTermination();
 
-			/* phase 2: conduct it (select model) */
-			this.selectedHASCOSolution = this.selectModel();
+				/* phase 2: conduct it (select model) */
+				this.selectedHASCOSolution = this.selectModel();
+			}
+			else {
+				this.logger.info("Selection phase is disabled. Returning best result of phase 1.");
+				final Optional<HASCOSolutionCandidate<Double>> bestSolutionOptional = this.phase1ResultQueue.stream().min((s1, s2) -> s1.getScore().compareTo(s2.getScore()));
+				if (!bestSolutionOptional.isPresent()) {
+					throw new IllegalStateException("Cannot select a model since phase 1 has not returned any result.");
+				}
+				this.selectedHASCOSolution = bestSolutionOptional.get();
+			}
 			this.setBestSeenSolution(this.selectedHASCOSolution);
 			assert this.getBestSeenSolution().equals(this.selectedHASCOSolution);
 			return this.terminate();

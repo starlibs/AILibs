@@ -95,6 +95,10 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		return this.domain.get(categoryId);
 	}
 
+	public int getIdOfLabel(final String label) {
+		return this.domain.indexOf(label);
+	}
+
 	@Override
 	public double toDouble(final Object value) {
 		if (!(value instanceof Integer)) {

@@ -29,6 +29,8 @@ import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPr
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.attributeSelection.ASEvaluation;
@@ -124,10 +126,11 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 
 	@Override
 	public ISingleLabelClassificationPredictionBatch predict(final ILabeledDataset<? extends ILabeledInstance> dTest) throws PredictionException, InterruptedException {
+		IWekaInstances wInstances = new WekaInstances(dTest);
 		int n = dTest.size();
-		ILabeledInstance[] instances = new ILabeledInstance[n];
+		IWekaInstance[] instances = new IWekaInstance[n];
 		for (int i = 0; i < n; i++) {
-			instances[i] = dTest.get(i);
+			instances[i] = wInstances.get(i);
 		}
 		return this.predict(instances);
 	}

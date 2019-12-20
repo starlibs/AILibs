@@ -11,14 +11,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.classification.IClassifierEvaluator;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.junit.Test;
@@ -29,12 +29,15 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.Subscribe;
+
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.interrupt.Interrupter;
-import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
+import ai.libs.jaicore.ml.core.dataset.DatasetUtil;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.PreTrainedPredictionBasedClassifierEvaluator;
-import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.LabelBasedStratifiedSampling;
+import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 
 /**
@@ -47,7 +50,6 @@ import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 public abstract class AutoMLAlgorithmResultProductionTester {
 
 	private static final Logger logger = LoggerFactory.getLogger(AutoMLAlgorithmResultProductionTester.class);
-	private static final TimeOut timeout = new TimeOut(10, TimeUnit.MINUTES);
 
 	// creates the test data
 	@Parameters(name = "{0}")
@@ -62,6 +64,8 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 		problemSets.add(new OpenMLProblemSet(1501)); // semeion
 		problemSets.add(new OpenMLProblemSet(149)); // CovPokElec
 		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
+		problemSets.add(new OpenMLProblemSet(4136)); // dexter
+		problemSets.add(new OpenMLProblemSet(4137)); // dorothea
 		problemSets.add(new OpenMLProblemSet(40668)); // connect-4
 		problemSets.add(new OpenMLProblemSet(1590)); // adult
 		problemSets.add(new OpenMLProblemSet(182)); // satimage
@@ -75,9 +79,11 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 		problemSets.add(new OpenMLProblemSet(1104)); // leukemia
 		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
 		problemSets.add(new OpenMLProblemSet(554)); // mnist
-		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
 		problemSets.add(new OpenMLProblemSet(155)); // pokerhand
 		problemSets.add(new OpenMLProblemSet(40691)); // winequality
+		problemSets.add(new OpenMLProblemSet(41026)); // gisette
+		problemSets.add(new OpenMLProblemSet(41065)); // mnist-rotate
+		problemSets.add(new OpenMLProblemSet(41066)); // secom
 
 		OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
 		for (int i = 0; i < data.length; i++) {
@@ -91,6 +97,10 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 
 	public abstract IAlgorithm<ILabeledDataset<?>, ? extends IClassifier> getAutoMLAlgorithm(ILabeledDataset<?> data);
 
+	public void afterInitHook(final IAlgorithm<ILabeledDataset<?>, ? extends IClassifier> algorithm) {
+
+	}
+
 	@Test
 	public void testThatModelIsTrained() throws Exception {
 		try {
@@ -101,11 +111,17 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 			/* load dataset and get splits */
 			logger.info("Loading dataset {} from {} for test.", this.problemSet.getName(), this.problemSet.getDataset());
 			ILabeledDataset<?> dataset = OpenMLDatasetReader.deserializeDataset(this.problemSet.getId());
+			if (dataset.getLabelAttribute() instanceof INumericAttribute) {
+				logger.info("Changing regression dataset to classification dataset!");
+				dataset = DatasetUtil.convertToClassificationDataset(dataset);
+			}
 			String datasetname = this.problemSet.getName();
-			LabelBasedStratifiedSampling<ILabeledDataset<?>> sampling = new LabelBasedStratifiedSampling<>(new Random(0), dataset);
-			sampling.setSampleSize(.7);
-			ILabeledDataset<?> train = sampling.nextSample();
-			ILabeledDataset<?> test = sampling.getComplementOfLastSample();
+			List<ILabeledDataset<?>> trainTestSplit = SplitterUtil.getLabelStratifiedTrainTestSplit(dataset, new Random(0), .7);
+			ILabeledDataset<?> train = trainTestSplit.get(0);
+			ILabeledDataset<?> test = trainTestSplit.get(1);
+			if (train.getNumAttributes() != test.getNumAttributes()) {
+				throw new IllegalStateException();
+			}
 
 			/* get algorithm */
 			logger.info("Loading the algorithm");
@@ -115,19 +131,29 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 			if (algorithm instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
 			}
-			algorithm.setTimeout(timeout);
 
 			/* find classifier */
 			logger.info("Checking that {} delivers a model on dataset {}", algorithm.getId(), datasetname);
+			long start = System.currentTimeMillis();
+			algorithm.registerListener(new Object() {
+
+				@Subscribe
+				public void receiveInitEvent(final AlgorithmInitializedEvent e) {
+					AutoMLAlgorithmResultProductionTester.this.afterInitHook(algorithm);
+				}
+			});
 			IClassifier c = algorithm.call();
+			long runtime = System.currentTimeMillis() - start;
+			assertTrue("Algorithm timeout violated. Runtime was " + runtime + ", but configured timeout was " + algorithm.getTimeout(), runtime < algorithm.getTimeout().milliseconds());
 			assertFalse("The thread should not be interrupted after calling the AutoML-tool!", Thread.currentThread().isInterrupted());
 			logger.info("Identified classifier {} as solution to the problem.", c);
 			assertNotNull("The algorithm as not returned any classifier.", c);
 
 			/* compute error rate */
-			IClassifierEvaluator evaluator = new PreTrainedPredictionBasedClassifierEvaluator(test, EAggregatedClassifierMetric.MEAN_ERRORRATE);
-			double score = evaluator.evaluate(c);
 			assertTrue("At least 10 instances must be classified!", test.size() >= 10);
+			IClassifierEvaluator evaluator = new PreTrainedPredictionBasedClassifierEvaluator(test, EClassificationPerformanceMeasure.ERRORRATE);
+			double score = evaluator.evaluate(c);
+			Thread.sleep(5000);
 			assertTrue("There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks(), GlobalTimer.getInstance().getActiveTasks().isEmpty());
 			logger.info("Error rate of solution {} on {} is: {}", c.getClass().getName(), datasetname, score);
 		}

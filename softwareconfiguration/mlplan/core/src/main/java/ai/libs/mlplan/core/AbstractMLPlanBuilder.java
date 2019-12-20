@@ -27,7 +27,6 @@ import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.hasco.serialization.ComponentLoader;
-import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
@@ -36,6 +35,7 @@ import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformance
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
@@ -405,8 +405,13 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		return this.algorithmConfig;
 	}
 
-	public void prepareNodeEvaluatorInFactoryWithData(final ILabeledDataset<?> data) {
-		if (!(this.hascoFactory instanceof HASCOViaFDAndBestFirstFactory)) {
+	public B withPipelineValidityCheckingNodeEvaluator(final PipelineValidityCheckingNodeEvaluator ne) {
+		this.pipelineValidityCheckingNodeEvaluator = ne;
+		return this.getSelf();
+	}
+
+	public void prepareNodeEvaluatorInFactoryWithData() {
+		if (!(this.hascoFactory.getSearchFactory() instanceof BestFirstFactory)) {
 			return;
 		}
 		if (this.factoryPreparedWithData) {
@@ -423,7 +428,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		IPathEvaluator<TFDNode, String, Double> actualNodeEvaluator;
 		if (this.pipelineValidityCheckingNodeEvaluator != null) {
 			this.pipelineValidityCheckingNodeEvaluator.setComponents(this.components);
-			this.pipelineValidityCheckingNodeEvaluator.setData(data);
+			this.pipelineValidityCheckingNodeEvaluator.setData(this.dataset);
 			if (this.preferredNodeEvaluator != null) {
 				actualNodeEvaluator = new AlternativeNodeEvaluator<>(this.pipelineValidityCheckingNodeEvaluator, this.preferredNodeEvaluator);
 			} else {
@@ -478,7 +483,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 */
 	public MLPlan<L> build() {
 		this.checkPreconditionsForInitialization();
-		this.prepareNodeEvaluatorInFactoryWithData(this.dataset); // inform node evaluator about data and create the MLPlan object
+		this.prepareNodeEvaluatorInFactoryWithData(); // inform node evaluator about data and create the MLPlan object
 		return new MLPlan<>(this, this.dataset);
 	}
 }

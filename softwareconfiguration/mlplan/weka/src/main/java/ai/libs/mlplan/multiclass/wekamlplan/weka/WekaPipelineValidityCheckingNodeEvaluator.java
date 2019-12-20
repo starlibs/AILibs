@@ -2,8 +2,12 @@ package ai.libs.mlplan.multiclass.wekamlplan.weka;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.IPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.Util;
 import ai.libs.hasco.model.Component;
@@ -17,7 +21,9 @@ import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityCheckingNodeEvaluator {
+public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityCheckingNodeEvaluator implements ILoggingCustomizable {
+
+	private Logger logger = LoggerFactory.getLogger(WekaPipelineValidityCheckingNodeEvaluator.class);
 
 	/* the predicates of the dataset */
 	private boolean propertiesDetermined;
@@ -33,6 +39,9 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 
 	public WekaPipelineValidityCheckingNodeEvaluator(final Collection<Component> components, final Instances data) {
 		super(components, new WekaInstances(data));
+		Objects.requireNonNull(components);
+		Objects.requireNonNull(data);
+		components.forEach(c -> this.logger.info("Considering component {}", c));
 	}
 
 	private boolean multiValuedNominalAttributesExist() {
@@ -48,6 +57,10 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 
 	private synchronized void extractDatasetProperties() {
 		if (!this.propertiesDetermined) {
+
+			if (this.getComponents() == null) {
+				throw new IllegalStateException("Components not defined!");
+			}
 
 			/* compute binary class predicate */
 			Instances data = this.getInstancesInWekaFormat();
@@ -96,13 +109,16 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 			}
 
 			if (classifier != null) {
-				this.checkValidity(classifier.getComponent().getName().toLowerCase());
+				this.checkValidity(classifier);
 			}
 		}
 		return null;
 	}
 
-	private void checkValidity(final String classifierName) throws ControlledNodeEvaluationException {
+	private void checkValidity(final ComponentInstance classifier) throws ControlledNodeEvaluationException {
+
+		String classifierName = classifier.getComponent().getName().toLowerCase();
+
 		/* forbid M5regression algorithms on non-binary classes */
 		boolean binaryClassifierMatch = classifierName.matches("(.*)(additiveregression|simplelinearregression|m5rules|votedperceptron|m5p)(.*)");
 
@@ -141,5 +157,15 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 
 	public Instances getInstancesInWekaFormat() {
 		return this.getData().getInstances();
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }

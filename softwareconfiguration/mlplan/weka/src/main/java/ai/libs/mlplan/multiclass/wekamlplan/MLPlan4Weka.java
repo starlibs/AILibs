@@ -7,7 +7,7 @@ import ai.libs.mlplan.core.MLPlan;
 
 public class MLPlan4Weka extends MLPlan<IWekaClassifier> {
 
-	public MLPlan4Weka(final MLPlanWekaBuilder builder, final ILabeledDataset<?> data) {
+	MLPlan4Weka(final MLPlanWekaBuilder builder, final ILabeledDataset<?> data) {
 		super(builder, data);
 	}
 

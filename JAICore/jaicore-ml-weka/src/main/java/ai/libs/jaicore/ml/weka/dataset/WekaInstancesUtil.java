@@ -107,6 +107,12 @@ public class WekaInstancesUtil {
 	}
 
 	public static Instance transformInstanceToWekaInstance(final ILabeledInstanceSchema schema, final ILabeledInstance instance) throws UnsupportedAttributeTypeException {
+		if (instance.getNumAttributes() != schema.getNumAttributes()) {
+			throw new IllegalArgumentException("Schema and instance do not coincide. The schema defines " + schema.getNumAttributes() + " attributes but the instance has " + instance.getNumAttributes() + " attributes.");
+		}
+		if (instance instanceof WekaInstance) {
+			return ((WekaInstance) instance).getElement();
+		}
 		Objects.requireNonNull(schema);
 		Instances dataset = createDatasetFromSchema(schema);
 		Instance iNew = new DenseInstance(dataset.numAttributes());

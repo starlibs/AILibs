@@ -1,7 +1,6 @@
 package ai.libs.jaicore.ml.core.dataset.serialization;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -26,6 +25,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
+import ai.libs.jaicore.ml.core.dataset.DatasetTestUtil;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 
@@ -62,6 +62,10 @@ public class OpenMLDatasetAdapterTest {
 		problemSets.add(register(40927, 60000, 3072, 10, false)); // CIFAR-10
 		problemSets.add(register(183, 4177, 8, 28, true)); // abalone
 		problemSets.add(register(181, 1484, 8, 10, true)); // yeast
+		problemSets.add(register(1501, 1593, 256, 10, true)); // semeion
+		problemSets.add(register(41064, 58000, 784, 2, true)); // convex
+		problemSets.add(register(41066, 1567, 590, 2, true)); // secom
+		problemSets.add(register(41065, 62000, 784, 10, true)); // mnist rotate
 
 
 
@@ -89,9 +93,7 @@ public class OpenMLDatasetAdapterTest {
 		ILabeledDataset<ILabeledInstance> data = OpenMLDatasetReader.deserializeDataset(id);
 		assertEquals("Incorrect number of instances.", expectedInstances, data.size());
 		assertEquals("Incorrect number of attributes.", expectedAttributes, data.getNumAttributes());
-		for (ILabeledInstance i : data) {
-			assertNotNull("Instance " + i + " has no label.", i.getLabel());
-		}
+		DatasetTestUtil.checkDatasetCoherence(data);
 		return data;
 	}
 
@@ -105,7 +107,7 @@ public class OpenMLDatasetAdapterTest {
 
 		/* create stratified split and test that folds are reproducible */
 		System.out.println("Creating a stratified split.");
-		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(dataset, 0, .8);
+		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(dataset, 0, .7);
 		ILabeledDataset<?> reproducedFirstFold = (ILabeledDataset<?>)((IReconstructible)split.get(0)).getConstructionPlan().reconstructObject();
 		ILabeledDataset<?> reproducedSecondFold = (ILabeledDataset<?>)((IReconstructible)split.get(1)).getConstructionPlan().reconstructObject();
 		System.out.println("Testing that folds are reconstructible.");

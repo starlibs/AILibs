@@ -22,6 +22,9 @@ public class WekaInstance extends ElementDecorator<Instance> implements IWekaIns
 
 	public WekaInstance(final ILabeledInstanceSchema schema, final ILabeledInstance instance) throws UnsupportedAttributeTypeException {
 		super(transformInstanceToWekaInstance(schema, instance));
+		if (schema.getNumAttributes() != instance.getNumAttributes()) {
+			throw new IllegalStateException("Number of attributes in the instance deviate from those in the scheme.");
+		}
 	}
 
 	@Override
@@ -44,8 +47,7 @@ public class WekaInstance extends ElementDecorator<Instance> implements IWekaIns
 
 	@Override
 	public Object[] getAttributes() {
-		IntStream.range(0, this.getElement().numAttributes()).filter(x -> x != this.getElement().classIndex()).mapToObj(x -> this.getElement().attribute(x)).map(this::transformAttributeValueToData).toArray();
-		return null;
+		return IntStream.range(0, this.getElement().numAttributes()).filter(x -> x != this.getElement().classIndex()).mapToObj(x -> this.getElement().attribute(x)).map(this::transformAttributeValueToData).toArray();
 	}
 
 	private Object transformAttributeValueToData(final Attribute att) {
