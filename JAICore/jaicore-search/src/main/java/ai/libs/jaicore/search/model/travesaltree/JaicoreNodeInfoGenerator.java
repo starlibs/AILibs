@@ -26,6 +26,7 @@ public class JaicoreNodeInfoGenerator<N, V extends Comparable<V>> implements Nod
 		StringBuilder sb = new StringBuilder();
 
 		Map<String, Object> annotations = node.getAnnotations();
+
 		sb.append("<h2>Annotation</h2><table><tr><th>Key</th><th>Value</th></tr>");
 		for (String key : annotations.keySet()) {
 			sb.append("<tr><td>" + key + "</td><td>" + annotations.get(key) + "</td></tr>");

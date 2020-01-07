@@ -51,6 +51,7 @@ import com.google.common.eventbus.Subscribe;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
+import ai.libs.jaicore.graphvisualizer.events.graph.NodeInfoAlteredEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeParentSwitchEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeRemovedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
@@ -195,21 +196,6 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		private String name;
 
 		private ENodeType(final String name) {
-			this.name = name;
-		}
-
-		@Override
-		public String toString() {
-			return this.name;
-		}
-	}
-
-	private enum ENodeAnnotation {
-		F_ERROR("fError"), F_MESSAGE("fMessage"), F_TIME("fTime");
-
-		private String name;
-
-		private ENodeAnnotation(final String name) {
 			this.name = name;
 		}
 
@@ -437,7 +423,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* currently, we only support tree search */
 		assert !this.ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + this.ext2int.get(t2).getNodes().stream().map(n -> n + "").reduce("", (s, t) -> s + SPACER + t) + "\n\tSecond Path:"
-		+ newNode.getNodes().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
+				+ newNode.getNodes().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
 
 		/* register node in map and create annotation object */
 		this.ext2int.put(t2, newNode);
@@ -479,7 +465,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		long startComputation = System.currentTimeMillis();
 		try {
 			this.logger.trace("Calling f-function of node evaluator for {}", node.hashCode());
-			label = this.computeTimeoutAware(() -> BestFirst.this.nodeEvaluator.evaluate(node), "Node Labeling with " + BestFirst.this.nodeEvaluator, !this.threadsOfPool.contains(Thread.currentThread())); // shutdown algorithm on exception iff
+			label = this.computeTimeoutAware(() -> BestFirst.this.nodeEvaluator.evaluate(node), "Node Labeling with " + BestFirst.this.nodeEvaluator, !this.threadsOfPool.contains(Thread.currentThread())); // shutdown algorithm on exception
+																																																				// iff
 			// this is not a worker thread
 			this.logger.trace("Determined f-value of {}", label);
 			if (this.isStopCriterionSatisfied()) {
@@ -533,11 +520,14 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* check whether an uncertainty-value is present if the node evaluator is an uncertainty-measuring evaluator */
 		assert !(this.nodeEvaluator instanceof IPotentiallyUncertaintyAnnotatingPathEvaluator) || !((IPotentiallyUncertaintyAnnotatingPathEvaluator<?, ?, ?>) this.nodeEvaluator).annotatesUncertainty()
-		|| node.getAnnotation("uncertainty") != null : "Uncertainty-based node evaluator claims to annotate uncertainty but has not assigned any uncertainty to " + node.getHead();
+				|| node.getAnnotation("uncertainty") != null : "Uncertainty-based node evaluator claims to annotate uncertainty but has not assigned any uncertainty to " + node.getHead();
 
 		/* eventually set the label */
 		node.setScore(label);
 		assert node.getScore() != null : "Node label must not be NULL";
+
+		// XXX
+		this.post(new NodeInfoAlteredEvent<BackPointerPath<N, A, V>>(this.getId(), node));
 	}
 
 	/**
@@ -588,7 +578,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				assert this.nodeSelectedForExpansion == null : "Node selected for expansion must be NULL when setting it!";
 				this.nodeSelectedForExpansion = node;
 				assert this.open.contains(node) : "OPEN must contain the node to be expanded.\n\tOPEN size: " + this.open.size() + "\n\tNode to be expanded: " + node + ".\n\tOPEN: "
-				+ this.open.stream().map(n -> SPACER + n).collect(Collectors.joining());
+						+ this.open.stream().map(n -> SPACER + n).collect(Collectors.joining());
 				this.open.remove(this.nodeSelectedForExpansion);
 				int openSizeAfter = this.open.size();
 				assert this.ext2int.containsKey(this.nodeSelectedForExpansion.getHead()) : "A node chosen for expansion has no entry in the ext2int map!";
@@ -614,7 +604,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* Preliminarily check that the active jobs are less than the additional threads */
 		assert this.additionalThreadsForNodeAttachment == 0 || this.activeJobs.get() < this.additionalThreadsForNodeAttachment : "Cannot expand nodes if number of active jobs (" + this.activeJobs.get()
-		+ " is at least as high as the threads available for node attachment (" + this.additionalThreadsForNodeAttachment + ")";
+				+ " is at least as high as the threads available for node attachment (" + this.additionalThreadsForNodeAttachment + ")";
 
 		/*
 		 * Step 1: determine node that will be expanded next. Either it already has been set
@@ -669,7 +659,6 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		assert !this.open.contains(actualNodeSelectedForExpansion) : "Node selected for expansion is still on OPEN";
 		assert actualNodeSelectedForExpansion != null : "We have not selected any node for expansion, but this must be the case at this point.";
 		this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
-
 
 		/* steps 2 and 3 only for non-goal nodes */
 		AlgorithmEvent expansionEvent;
@@ -1019,7 +1008,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			switch (this.getState()) {
 			case CREATED:
 				AlgorithmInitializedEvent initEvent = this.activate();
-				this.logger.info("Initializing BestFirst search {} with the following configuration:\n\tCPUs: {}\n\tTimeout: {}ms\n\tNode Evaluator: {}", this.getId(), this.getConfig().cpus(), this.getConfig().timeout(), this.nodeEvaluator);
+				this.logger.info("Initializing BestFirst search {} with the following configuration:\n\tCPUs: {}\n\tTimeout: {}ms\n\tNode Evaluator: {}", this.getId(), this.getConfig().cpus(), this.getConfig().timeout(),
+						this.nodeEvaluator);
 				int additionalCPUs = this.getConfig().cpus() - 1;
 				if (additionalCPUs > 0) {
 					this.parallelizeNodeExpansion(additionalCPUs);

@@ -12,6 +12,7 @@ import org.api4.java.datastructure.graph.IPath;
 
 import ai.libs.jaicore.graph.ReadOnlyPathAccessor;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.ENodeAnnotation;
 
 public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluatedPath<N, A, V> {
 	private final N nodeLabel;
@@ -21,7 +22,7 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 	private final Map<String, Object> annotations = new HashMap<>(); // for nodes effectively examined
 
 	public BackPointerPath(final N point) {
-		this (null, point, null);
+		this(null, point, null);
 	}
 
 	public BackPointerPath(final BackPointerPath<N, A, V> parent, final N point, final A edgeLabelToParent) {
@@ -43,7 +44,7 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 	@SuppressWarnings("unchecked")
 	@Override
 	public V getScore() {
-		return (V) this.annotations.get("f");
+		return (V) this.annotations.get(ENodeAnnotation.F_ERROR.toString());
 	}
 
 	public void setParent(final BackPointerPath<N, A, V> newParent) {
@@ -51,7 +52,7 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 	}
 
 	public void setScore(final V internalLabel) {
-		this.setAnnotation("f", internalLabel);
+		this.setAnnotation(ENodeAnnotation.F_ERROR.toString(), internalLabel);
 	}
 
 	public void setAnnotation(final String annotationName, final Object annotationValue) {

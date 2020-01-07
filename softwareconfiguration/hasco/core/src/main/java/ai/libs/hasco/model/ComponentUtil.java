@@ -64,9 +64,9 @@ public class ComponentUtil {
 					NumericParameterDomain numDomain = (NumericParameterDomain) p.getDefaultDomain();
 					if (numDomain.isInteger()) {
 						if ((int) (numDomain.getMax() - numDomain.getMin()) > 0) {
-							parameterValues.put(p.getName(), (rand.nextInt((int) (numDomain.getMax() - numDomain.getMin())) + numDomain.getMin()) + "");
+							parameterValues.put(p.getName(), ((int) (rand.nextInt((int) (numDomain.getMax() - numDomain.getMin())) + numDomain.getMin())) + "");
 						} else {
-							parameterValues.put(p.getName(), p.getDefaultValue() + "");
+							parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
 						}
 					} else {
 						parameterValues.put(p.getName(), (rand.nextDouble() * (numDomain.getMax() - numDomain.getMin()) + numDomain.getMin()) + "");
