@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
+import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.events.result.IScoredSolutionCandidateFoundEvent;
 
 import ai.libs.hasco.model.ComponentInstance;
@@ -15,8 +16,8 @@ public class ClassifierFoundEvent extends ASolutionCandidateFoundEvent<ISupervis
 	private final double inSampleError;
 	private final ComponentInstance componentDescription;
 
-	public ClassifierFoundEvent(final String algorithmId, final ComponentInstance componentDescription, final ISupervisedLearner<?, ?> solutionCandidate, final double inSampleError) {
-		super(algorithmId, solutionCandidate);
+	public ClassifierFoundEvent(final IAlgorithm<?, ?> algorithm, final ComponentInstance componentDescription, final ISupervisedLearner<?, ?> solutionCandidate, final double inSampleError) {
+		super(algorithm, solutionCandidate);
 		this.inSampleError = inSampleError;
 		this.componentDescription = componentDescription;
 	}

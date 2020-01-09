@@ -19,7 +19,7 @@ public class AAlgorithmEvent implements IAlgorithmEvent {
 	 */
 	public AAlgorithmEvent(final IAlgorithm<?, ?> algorithm) {
 		super();
-		this.algorithmId = algorithm.getId();
+		this.algorithmId = algorithm != null ? algorithm.getId() : "<unknown algorithm>";
 	}
 
 	@Override

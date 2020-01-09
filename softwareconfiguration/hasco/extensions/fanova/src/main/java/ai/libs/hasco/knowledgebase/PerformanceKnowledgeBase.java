@@ -14,6 +14,7 @@ import java.util.Properties;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
+import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,6 @@ import ai.libs.hasco.model.Parameter;
 import ai.libs.hasco.serialization.ParameterDeserializer;
 import ai.libs.hasco.serialization.ParameterDomainDeserializer;
 import ai.libs.jaicore.basic.StringUtil;
-import ai.libs.jaicore.basic.kvstore.IKVStore;
 import ai.libs.jaicore.db.sql.SQLAdapter;
 import weka.core.Attribute;
 import weka.core.DenseInstance;

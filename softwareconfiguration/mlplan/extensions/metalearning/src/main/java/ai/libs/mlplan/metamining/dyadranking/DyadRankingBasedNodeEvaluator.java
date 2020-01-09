@@ -579,7 +579,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 			solutionObject.setAnnotation("timeToSolution", Duration.between(this.firstEvaluation, Instant.now()).toMillis());
 			solutionObject.setAnnotation("nodesEvaluatedToSolution", this.randomlyCompletedPaths);
 			logger.debug("Posting solution {}", solutionObject);
-			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>("DyadRankingBasedCompletion", solutionObject));
+			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(null, solutionObject));
 		} catch (Exception e) {
 			logger.error("Couldn't post solution to event bus.", e);
 		}

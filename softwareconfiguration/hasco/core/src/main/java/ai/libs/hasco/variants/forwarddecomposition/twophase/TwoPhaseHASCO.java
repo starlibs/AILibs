@@ -206,7 +206,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 				if (this.logger.isInfoEnabled()) {
 					this.logger.info("Entering phase 2. Solutions seen so far had an (internal) error of {}", this.phase1ResultQueue.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
 				}
-				this.post(new TwoPhaseHASCOPhaseSwitchEvent(this.getId()));
+				this.post(new TwoPhaseHASCOPhaseSwitchEvent(this));
 				if (selectionBenchmark instanceof IInformedObjectEvaluatorExtension) {
 					this.logger.debug("Setting best score for selection phase node evaluator to {}", this.phase1ResultQueue.peek().getScore());
 					((IInformedObjectEvaluatorExtension<Double>) selectionBenchmark).informAboutBestScore(this.phase1ResultQueue.peek().getScore());

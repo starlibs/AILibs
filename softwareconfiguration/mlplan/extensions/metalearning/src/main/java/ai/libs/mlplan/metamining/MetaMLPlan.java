@@ -153,7 +153,7 @@ public class MetaMLPlan extends AbstractClassifier {
 				this.logger.info("Pipeline Score: {}", score);
 				trainingTimer.stop();
 
-				this.eventBus.post(new IntermediateSolutionEvent(this.algorithmId, pl, score));
+				this.eventBus.post(new IntermediateSolutionEvent(null, pl, score));
 
 				// Check if better than previous best
 				if (score < bestScore) {

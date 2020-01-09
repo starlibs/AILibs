@@ -208,7 +208,7 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 					HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan, HASCO.this.timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
 					HASCO.this.updateBestSeenSolution(solution);
 					HASCO.this.listOfAllRecognizedSolutions.add(solution);
-					HASCOSolutionEvent<V> hascoSolutionEvent = new HASCOSolutionEvent<>(HASCO.this.getId(), solution);
+					HASCOSolutionEvent<V> hascoSolutionEvent = new HASCOSolutionEvent<>(HASCO.this, solution);
 					HASCO.this.hascoSolutionEventCache.put(solutionEvent, hascoSolutionEvent);
 					HASCO.this.post(hascoSolutionEvent);
 				}

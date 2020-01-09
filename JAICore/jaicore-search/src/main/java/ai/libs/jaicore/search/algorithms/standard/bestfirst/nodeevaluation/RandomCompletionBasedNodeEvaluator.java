@@ -59,7 +59,7 @@ import ai.libs.jaicore.timing.TimedComputation;
 public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, A, V>
 implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V>, ICancelablePathEvaluator, IPotentiallyUncertaintyAnnotatingPathEvaluator<T, A, V>, ILoggingCustomizable {
 
-	private static final IAlgorithm<?, ?> ALGORITHM = null;
+	private final IAlgorithm<?, ?> ALGORITHM = null;
 	private static final boolean LOG_FAILURES_AS_ERRORS = false;
 
 	private String loggerName;
@@ -155,7 +155,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 			throw new IllegalArgumentException("Random Completer currently can only work with backpointer-based paths.");
 		}
 		BackPointerPath<T, A, V> n = (BackPointerPath<T, A, V>) path;
-		this.eventBus.post(new NodeAnnotationEvent<>(ALGORITHM, n.getHead(), "f-computing thread", Thread.currentThread().getName()));
+		this.eventBus.post(new NodeAnnotationEvent<>(this.ALGORITHM, n.getHead(), "f-computing thread", Thread.currentThread().getName()));
 		this.logger.info("Received request for f-value of node with hashCode {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms. Enable DEBUG for node details.", n.hashCode(),
 				this.desiredNumberOfSuccesfulSamples, this.getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS);
 		this.logger.debug("Node details: {}", n);
@@ -254,7 +254,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 							V val = this.getFValueOfSolutionPath(completedPath);
 							this.logger.debug("Completed path evaluation with id {}. Score is {}", evaluationId, val);
 							successfulSamples.incrementAndGet();
-							this.eventBus.post(new RolloutEvent<>(ALGORITHM, n.path(), val));
+							this.eventBus.post(new RolloutEvent<>(this.ALGORITHM, n.path(), val));
 							if (val != null) {
 								evaluations.add(val);
 								this.updateMapOfBestScoreFoundSoFar(completedPath, val);
@@ -484,7 +484,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 			solutionObject.setAnnotation("timeToSolution", (int) (System.currentTimeMillis() - this.timestampOfFirstEvaluation));
 			solutionObject.setAnnotation("nodesEvaluatedToSolution", numberOfComputedFValues);
 			this.logger.debug("Posting solution {}", solutionObject);
-			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(ALGORITHM, solutionObject));
+			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(this.ALGORITHM, solutionObject));
 		} catch (Exception e) {
 			List<Pair<String, Object>> explanations = new ArrayList<>();
 			if (this.logger.isDebugEnabled()) {

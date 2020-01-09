@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+import org.api4.java.datastructure.kvstore.IKVStore;
 
-import ai.libs.jaicore.basic.kvstore.IKVStore;
 import ai.libs.jaicore.db.sql.SQLAdapter;
 import ai.libs.reduction.Util;
 import ai.libs.reduction.single.MySQLReductionExperiment;

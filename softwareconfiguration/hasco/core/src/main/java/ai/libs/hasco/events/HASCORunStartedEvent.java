@@ -1,5 +1,6 @@
 package ai.libs.hasco.events;
 
+import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
@@ -8,8 +9,8 @@ public class HASCORunStartedEvent<T, V extends Comparable<V>> extends AlgorithmI
 	private final int seed, timeout, numberOfCPUS;
 	private IObjectEvaluator<T, V> benchmark;
 
-	public HASCORunStartedEvent(final String algorithmId, final int seed, final int timeout, final int numberOfCPUS, final IObjectEvaluator<T, V> benchmark) {
-		super(algorithmId);
+	public HASCORunStartedEvent(final IAlgorithm<?, ?> algorithm, final int seed, final int timeout, final int numberOfCPUS, final IObjectEvaluator<T, V> benchmark) {
+		super(algorithm);
 		this.seed = seed;
 		this.timeout = timeout;
 		this.numberOfCPUS = numberOfCPUS;
