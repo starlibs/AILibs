@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
-import ai.libs.jaicore.basic.IDatabaseConfig;
+import ai.libs.jaicore.db.IDatabaseConfig;
 import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;

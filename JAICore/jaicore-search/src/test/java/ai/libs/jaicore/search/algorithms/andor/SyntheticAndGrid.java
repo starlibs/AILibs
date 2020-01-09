@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
 import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
 import ai.libs.jaicore.search.algorithms.andor.SyntheticAndGrid.NodeLabel;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public class SyntheticAndGrid implements IGraphGenerator<NodeLabel, String> {
 
@@ -40,12 +40,12 @@ public class SyntheticAndGrid implements IGraphGenerator<NodeLabel, String> {
 	}
 
 	@Override
-	public SingleRootGenerator<NodeLabel> getRootGenerator() {
+	public ISingleRootGenerator<NodeLabel> getRootGenerator() {
 		return () -> new NodeLabel(0,0);
 	}
 
 	@Override
-	public SuccessorGenerator<NodeLabel, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<NodeLabel, String> getSuccessorGenerator() {
 		return n -> {
 			List<NodeExpansionDescription<NodeLabel,String>> l = new ArrayList<>();
 			if (n.depth == this.depth) {

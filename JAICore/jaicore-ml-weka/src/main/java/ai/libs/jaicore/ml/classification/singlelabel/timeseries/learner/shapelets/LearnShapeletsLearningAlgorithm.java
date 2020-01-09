@@ -13,8 +13,8 @@ import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,7 +149,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	/**
 	 * See {@link IAlgorithm#getTimeout()}.
 	 */
-	private TimeOut timeout = new TimeOut(Integer.MAX_VALUE, TimeUnit.SECONDS);
+	private Timeout timeout = new Timeout(Integer.MAX_VALUE, TimeUnit.SECONDS);
 
 	/**
 	 * Indicator whether instances used for training should be reordered s.t. the
@@ -662,7 +662,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 * {@inheritDoc}
 	 */
 	@Override
-	public AlgorithmEvent nextWithException() {
+	public IAlgorithmEvent nextWithException() {
 		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 

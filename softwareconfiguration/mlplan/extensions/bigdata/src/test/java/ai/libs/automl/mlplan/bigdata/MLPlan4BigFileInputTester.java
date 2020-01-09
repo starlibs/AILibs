@@ -7,7 +7,7 @@ import java.io.FileReader;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 import org.junit.Test;
 
 import ai.libs.jaicore.ml.weka.WekaUtil;
@@ -40,7 +40,7 @@ public class MLPlan4BigFileInputTester {
 		}
 
 		MLPlan4BigFileInput mlplan = new MLPlan4BigFileInput(new File(origDataSrcName + ".train"));
-		mlplan.setTimeout(new TimeOut(5, TimeUnit.MINUTES));
+		mlplan.setTimeout(new Timeout(5, TimeUnit.MINUTES));
 		mlplan.setLoggerName("testedalgorithm");
 		long start = System.currentTimeMillis();
 		Classifier c = mlplan.call();

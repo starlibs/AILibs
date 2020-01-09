@@ -1,7 +1,7 @@
 package ai.libs.jaicore.search.probleminputs;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 /**
@@ -13,15 +13,15 @@ import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
  * @param <N>
  * @param <A>
  */
-public class GraphSearchInput<N, A> implements IGraphSearchInput<N, A> {
+public class GraphSearchInput<N, A> implements IPathSearchInput<N, A> {
 	private final IGraphGenerator<N, A> graphGenerator;
-	private final PathGoalTester<N, A> goalTester;
+	private final IPathGoalTester<N, A> goalTester;
 
-	public GraphSearchInput(final IGraphSearchInput<N, A> inputToClone) {
+	public GraphSearchInput(final IPathSearchInput<N, A> inputToClone) {
 		this(inputToClone.getGraphGenerator(), inputToClone.getGoalTester());
 	}
 
-	public GraphSearchInput(final IGraphGenerator<N, A> graphGenerator, final PathGoalTester<N, A> goalTester) {
+	public GraphSearchInput(final IGraphGenerator<N, A> graphGenerator, final IPathGoalTester<N, A> goalTester) {
 		super();
 		this.graphGenerator = graphGenerator;
 		this.goalTester = goalTester;
@@ -33,7 +33,7 @@ public class GraphSearchInput<N, A> implements IGraphSearchInput<N, A> {
 	}
 
 	@Override
-	public PathGoalTester<N, A> getGoalTester() {
+	public IPathGoalTester<N, A> getGoalTester() {
 		return this.goalTester;
 	}
 }

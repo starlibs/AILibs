@@ -1,6 +1,6 @@
 package ai.libs.hasco.events;
 
-import org.api4.java.algorithm.events.AAlgorithmEvent;
+import ai.libs.jaicore.basic.algorithm.AAlgorithmEvent;
 
 public class TwoPhaseHASCOPhaseSwitchEvent extends AAlgorithmEvent {
 

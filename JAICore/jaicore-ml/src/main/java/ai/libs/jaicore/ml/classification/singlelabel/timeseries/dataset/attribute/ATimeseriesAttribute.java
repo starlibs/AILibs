@@ -1,7 +1,7 @@
 package ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.attribute;
 
+import org.api4.java.ai.ml.core.dataset.schema.attribute.ITimeseries;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ITimeseriesAttribute;
-import org.api4.java.common.timeseries.ITimeseries;
 
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.AGenericObjectAttribute;
 

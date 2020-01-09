@@ -7,11 +7,11 @@ import java.util.stream.Collectors;
 
 import org.api4.java.ai.graphsearch.problem.IPathInORGraphSearch;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
-import org.api4.java.algorithm.events.SolutionCandidateFoundEvent;
+import org.api4.java.algorithm.events.result.ISolutionCandidateFoundEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +81,7 @@ public class EnhancedTTSPExample {
 	private class AStarNodeEvaluator implements IPathEvaluator<EnhancedTTSPNode, String, Double> {
 
 		@Override
-		public Double evaluate(final IPath<EnhancedTTSPNode, String> node) {
+		public Double evaluate(final ILabeledPath<EnhancedTTSPNode, String> node) {
 
 			double g = node.getHead().getTime();
 			double h = 0;
@@ -135,7 +135,7 @@ public class EnhancedTTSPExample {
 		/* run search */
 		SearchGraphPath<EnhancedTTSPNode, String> bestSolution = null;
 		double bestValue = Double.MAX_VALUE;
-		SolutionCandidateFoundEvent<? extends SearchGraphPath<EnhancedTTSPNode, String>> solution;
+		ISolutionCandidateFoundEvent<? extends SearchGraphPath<EnhancedTTSPNode, String>> solution;
 		while (!Thread.currentThread().isInterrupted() && (solution = search.nextSolutionCandidateEvent()) != null) {
 			double value = solution.getTimestamp();
 			if (value < bestValue) {

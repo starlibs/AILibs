@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ public class OutOfSampleErrorPlotPluginController extends ASimpleMVCPluginContro
 	}
 
 	@Override
-	public void handleAlgorithmEventInternally(final PropertyProcessedAlgorithmEvent algorithmEvent) {
+	public void handleAlgorithmEventInternally(final IPropertyProcessedAlgorithmEvent algorithmEvent) {
 		if (algorithmEvent.correspondsToEventOfClass(ClassifierFoundEvent.class)) {
 			this.logger.debug("Received classifier found event {}", algorithmEvent);
 

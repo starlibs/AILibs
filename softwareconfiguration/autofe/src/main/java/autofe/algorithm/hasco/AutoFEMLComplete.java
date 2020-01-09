@@ -16,10 +16,8 @@ import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.IAlgorithmConfig;
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -41,6 +39,8 @@ import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
+import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
 import ai.libs.jaicore.ml.classification.loss.instance.ZeroOneLoss;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.ISplitBasedClassifierEvaluator;
@@ -122,15 +122,15 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 	}
 
 	@Override
-	public Iterator<AlgorithmEvent> iterator() {
-		return new Iterator<AlgorithmEvent>() {
+	public Iterator<IAlgorithmEvent> iterator() {
+		return new Iterator<IAlgorithmEvent>() {
 			@Override
 			public boolean hasNext() {
 				return AutoFEMLComplete.this.hasNext();
 			}
 
 			@Override
-			public AlgorithmEvent next() {
+			public IAlgorithmEvent next() {
 				try {
 					return AutoFEMLComplete.this.nextWithException();
 				} catch (Exception e) {
@@ -146,7 +146,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 	}
 
 	@Override
-	public AlgorithmEvent next() {
+	public IAlgorithmEvent next() {
 		try {
 			return this.nextWithException();
 		} catch (Exception e) {
@@ -189,7 +189,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmTimeoutedException, AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException {
+	public IAlgorithmEvent nextWithException() throws AlgorithmTimeoutedException, AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException {
 		switch (this.state) {
 		case CREATED:
 			return this.setupSearch();
@@ -200,7 +200,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 		}
 	}
 
-	private AlgorithmEvent setupSearch() throws AlgorithmException, InterruptedException {
+	private IAlgorithmEvent setupSearch() throws AlgorithmException, InterruptedException {
 
 		/* check whether data has been set */
 		if (this.data == null) {
@@ -300,7 +300,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 		return new AlgorithmInitializedEvent(this.getId());
 	}
 
-	private AlgorithmEvent search() throws AlgorithmException, InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
+	private IAlgorithmEvent search() throws AlgorithmException, InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
 		/* train the classifier returned by the optimizing factory */
 		long startOptimizationTime = System.currentTimeMillis();
 		this.setSelectedPipeline(this.optimizingFactory.call());
@@ -377,17 +377,17 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 
 	@Override
 	public void setTimeout(final long timeout, final TimeUnit timeUnit) {
-		this.setTimeout(new TimeOut(timeout, timeUnit));
+		this.setTimeout(new Timeout(timeout, timeUnit));
 	}
 
 	@Override
-	public void setTimeout(final TimeOut timeout) {
+	public void setTimeout(final Timeout timeout) {
 		this.config.setProperty(IOwnerBasedAlgorithmConfig.K_TIMEOUT, "" + timeout.milliseconds());
 	}
 
 	@Override
-	public TimeOut getTimeout() {
-		return new TimeOut(this.config.timeout(), TimeUnit.MILLISECONDS);
+	public Timeout getTimeout() {
+		return new Timeout(this.config.timeout(), TimeUnit.MILLISECONDS);
 	}
 
 	@Override

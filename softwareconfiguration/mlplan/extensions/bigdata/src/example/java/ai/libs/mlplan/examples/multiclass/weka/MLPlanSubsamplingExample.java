@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
@@ -40,9 +40,9 @@ public class MLPlanSubsamplingExample {
 
 		/* build and run ml-plan */
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
-		builder.withNodeEvaluationTimeOut(new TimeOut(30, TimeUnit.SECONDS));
-		builder.withCandidateEvaluationTimeOut(new TimeOut(10, TimeUnit.SECONDS));
-		builder.withTimeOut(new TimeOut(30, TimeUnit.SECONDS));
+		builder.withNodeEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
+		builder.withTimeOut(new Timeout(30, TimeUnit.SECONDS));
 		builder.withNumCpus(1);
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setPortionOfDataForPhase2(0f);

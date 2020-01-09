@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 
 import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 import ai.libs.jaicore.basic.sets.Pair;
@@ -137,7 +137,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setTimeout(final TimeOut timeout) {
+	public void setTimeout(final Timeout timeout) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -145,7 +145,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 * {@inheritDoc}
 	 */
 	@Override
-	public TimeOut getTimeout() {
+	public Timeout getTimeout() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -153,7 +153,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 * {@inheritDoc}
 	 */
 	@Override
-	public AlgorithmEvent nextWithException() {
+	public IAlgorithmEvent nextWithException() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -199,7 +199,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Iterator<AlgorithmEvent> iterator() {
+	public Iterator<IAlgorithmEvent> iterator() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -215,7 +215,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 * {@inheritDoc}
 	 */
 	@Override
-	public AlgorithmEvent next() {
+	public IAlgorithmEvent next() {
 		throw new NoSuchElementException("Cannot enumerate this algorithm!");
 	}
 

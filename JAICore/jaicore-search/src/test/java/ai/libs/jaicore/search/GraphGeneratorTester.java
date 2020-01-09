@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Queue;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.graph.LabeledGraph;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public abstract class GraphGeneratorTester<N, A> {
 
@@ -35,7 +35,7 @@ public abstract class GraphGeneratorTester<N, A> {
 		for (Pair<IGraphGenerator<N, A>, Integer> pair : this.getGraphGenerators()) {
 			IGraphGenerator<N, A> g = pair.getX();
 			int maxN = pair.getY();
-			SuccessorGenerator<N, A> s = g.getSuccessorGenerator();
+			ISuccessorGenerator<N, A> s = g.getSuccessorGenerator();
 
 			int n1 = 0;
 			int n2 = 0;
@@ -45,7 +45,7 @@ public abstract class GraphGeneratorTester<N, A> {
 			int maxDepth;
 
 			/* run bfs from left */
-			N root1 = ((SingleRootGenerator<N>) g.getRootGenerator()).getRoot();
+			N root1 = ((ISingleRootGenerator<N>) g.getRootGenerator()).getRoot();
 			open.clear();
 			open.add(new Node(root1, 0));
 			g1.addItem(root1);
@@ -68,7 +68,7 @@ public abstract class GraphGeneratorTester<N, A> {
 			}
 
 			/* run bfs from right */
-			N root2 = ((SingleRootGenerator<N>) g.getRootGenerator()).getRoot();
+			N root2 = ((ISingleRootGenerator<N>) g.getRootGenerator()).getRoot();
 			open.clear();
 			open.add(new Node(root2, 0));
 			g2.addItem(root2);

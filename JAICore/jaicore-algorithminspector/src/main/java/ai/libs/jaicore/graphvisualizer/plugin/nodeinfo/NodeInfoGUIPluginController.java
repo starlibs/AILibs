@@ -1,6 +1,6 @@
 package ai.libs.jaicore.graphvisualizer.plugin.nodeinfo;
 
-import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import ai.libs.jaicore.graphvisualizer.events.gui.GUIEvent;
@@ -16,7 +16,7 @@ public class NodeInfoGUIPluginController implements IGUIPluginController {
 	}
 
 	@Override
-	public void handleSerializableAlgorithmEvent(final PropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
+	public void handleSerializableAlgorithmEvent(final IPropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
 		Object rawNodeDisplayInfoProperty = algorithmEvent.getProperty(NodeDisplayInfoAlgorithmEventPropertyComputer.NODE_DISPLAY_INFO_PROPERTY_NAME);
 		Object rawNodeInfoProperty = algorithmEvent.getProperty(NodeInfoAlgorithmEventPropertyComputer.NODE_INFO_PROPERTY_NAME);
 		if (rawNodeDisplayInfoProperty != null && rawNodeInfoProperty != null) {

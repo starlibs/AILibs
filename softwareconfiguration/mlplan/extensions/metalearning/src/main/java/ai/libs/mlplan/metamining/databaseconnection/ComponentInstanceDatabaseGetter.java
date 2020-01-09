@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.serialization.ComponentNotFoundException;
-import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.basic.kvstore.IKVStore;
+import ai.libs.jaicore.db.sql.SQLAdapter;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.jaicore.ml.weka.classification.pipeline.SupervisedFilterSelector;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;

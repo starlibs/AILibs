@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
@@ -48,9 +48,9 @@ public class MLPlanVisualizationExample {
 
 		/* initialize mlplan, and let it run for 30 seconds */
 		MLPlanSimpleBuilder builder = new MLPlanSimpleBuilder();
-		builder.withNodeEvaluationTimeOut(new TimeOut(10, TimeUnit.SECONDS));
-		builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.SECONDS));
-		builder.withTimeOut(new TimeOut(30, TimeUnit.SECONDS));
+		builder.withNodeEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.SECONDS));
+		builder.withTimeOut(new Timeout(30, TimeUnit.SECONDS));
 		builder.withNumCpus(1);
 
 		MLPlan<IClassifier> mlplan = builder.withDataset(split.get(0)).build();

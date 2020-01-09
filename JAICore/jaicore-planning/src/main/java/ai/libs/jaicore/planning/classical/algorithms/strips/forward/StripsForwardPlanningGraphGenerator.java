@@ -8,16 +8,17 @@ import java.util.Map;
 import java.util.Set;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.ILazySuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleSuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.classical.problems.strips.StripsAction;
 import ai.libs.jaicore.planning.classical.problems.strips.StripsPlanningProblem;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public class StripsForwardPlanningGraphGenerator implements IGraphGenerator<StripsForwardPlanningNode, String> {
 
@@ -34,7 +35,7 @@ public class StripsForwardPlanningGraphGenerator implements IGraphGenerator<Stri
 	}
 
 	@Override
-	public SingleRootGenerator<StripsForwardPlanningNode> getRootGenerator() {
+	public ISingleRootGenerator<StripsForwardPlanningNode> getRootGenerator() {
 		return () -> {
 			StripsForwardPlanningNode root = new StripsForwardPlanningNode(new Monom(), new Monom(), null);
 			return root;
@@ -61,16 +62,16 @@ public class StripsForwardPlanningGraphGenerator implements IGraphGenerator<Stri
 	}
 
 	@Override
-	public SingleSuccessorGenerator<StripsForwardPlanningNode, String> getSuccessorGenerator() {
-		return new SingleSuccessorGenerator<StripsForwardPlanningNode, String>() {
+	public ILazySuccessorGenerator<StripsForwardPlanningNode, String> getSuccessorGenerator() {
+		return new ILazySuccessorGenerator<StripsForwardPlanningNode, String>() {
 
 			@Override
-			public List<NodeExpansionDescription<StripsForwardPlanningNode, String>> generateSuccessors(final StripsForwardPlanningNode node) throws InterruptedException {
+			public List<INewNodeDescription<StripsForwardPlanningNode, String>> generateSuccessors(final StripsForwardPlanningNode node) throws InterruptedException {
 				if (StripsForwardPlanningGraphGenerator.this.completelyExpandedNodes.contains(node)) {
 					throw new IllegalArgumentException("Successors of node " + node + " have already been computed.");
 				}
 				long start = System.currentTimeMillis();
-				List<NodeExpansionDescription<StripsForwardPlanningNode, String>> successors = new ArrayList<>();
+				List<INewNodeDescription<StripsForwardPlanningNode, String>> successors = new ArrayList<>();
 				List<StripsAction> applicableActions = StripsForwardPlanningGraphGenerator.this.getApplicableActionsInNode(node);
 				StripsForwardPlanningGraphGenerator.this.returnedActions.put(node, applicableActions);
 				for (StripsAction action : applicableActions) {
@@ -82,7 +83,7 @@ public class StripsForwardPlanningGraphGenerator implements IGraphGenerator<Stri
 					add.addAll(action.getAddList());
 
 					StripsForwardPlanningNode newNode = new StripsForwardPlanningNode(add, del, action);
-					successors.add(new NodeExpansionDescription<>(newNode, "edge label", NodeType.OR));
+					successors.add(new NodeExpansionDescription<>(newNode, "edge label"));
 					if (logger.isTraceEnabled()) {
 						logger.trace("Created the node expansion description within {}ms. New state size is {}.", System.currentTimeMillis() - t, newNode.getStateRelativeToInitState(StripsForwardPlanningGraphGenerator.this.initState).size());
 					}

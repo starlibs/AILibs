@@ -1,8 +1,8 @@
 package ai.libs.mlplan.metamining;
 
 import org.api4.java.ai.ml.classification.IClassifier;
-import org.api4.java.algorithm.events.AAlgorithmEvent;
 
+import ai.libs.jaicore.basic.algorithm.AAlgorithmEvent;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 
 public class IntermediateSolutionEvent extends AAlgorithmEvent {

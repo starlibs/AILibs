@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
@@ -39,7 +39,7 @@ public class BOSSLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integ
 		/**
 		 * The alphabet size determines the number of Bins for the SFA Histograms. Four was determined empirical
 		 * as an optimal value for the alphabet size.
-		 * cf.p. 1519 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
+		 * cf.p. 1519 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schï¿½fer"
 		 *
 		 */
 		@Key(K_ALPHABET_SIZE)
@@ -61,7 +61,7 @@ public class BOSSLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integ
 
 		/**
 		 * If mean corrected is set to true than the first DFT coefficient is dropped to normalize the mean.
-		 * c.f.p. 1519 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
+		 * c.f.p. 1519 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schï¿½fer"
 		 */
 		@Key(K_MEANCORRECTED)
 		public boolean meanCorrected();
@@ -84,7 +84,7 @@ public class BOSSLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integ
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() {
+	public IAlgorithmEvent nextWithException() {
 		return null;
 	}
 

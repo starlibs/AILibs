@@ -1,16 +1,16 @@
 package ai.libs.jaicore.graphvisualizer.events.recorder;
 
-import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 
 /**
- * {@link AlgorithmEventHistoryEntry}s are used to store {@link PropertyProcessedAlgorithmEvent}s in an {@link AlgorithmEventHistory} combined with additional meta information.
+ * {@link AlgorithmEventHistoryEntry}s are used to store {@link IPropertyProcessedAlgorithmEvent}s in an {@link AlgorithmEventHistory} combined with additional meta information.
  *
  * @author atornede
  *
  */
 public class AlgorithmEventHistoryEntry {
 
-	private PropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent;
+	private IPropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent;
 	private long timeEventWasReceived;
 
 	@SuppressWarnings("unused")
@@ -19,22 +19,22 @@ public class AlgorithmEventHistoryEntry {
 	}
 
 	/**
-	 * Creates a new {@link AlgorithmEventHistoryEntry} storing the given {@link PropertyProcessedAlgorithmEvent} and the time at which the event was received.
+	 * Creates a new {@link AlgorithmEventHistoryEntry} storing the given {@link IPropertyProcessedAlgorithmEvent} and the time at which the event was received.
 	 *
-	 * @param algorithmEvent The {@link PropertyProcessedAlgorithmEvent} to be stored.
+	 * @param algorithmEvent The {@link IPropertyProcessedAlgorithmEvent} to be stored.
 	 * @param timeEventWasReceived The time at which the event was received.
 	 */
-	public AlgorithmEventHistoryEntry(final PropertyProcessedAlgorithmEvent algorithmEvent, final long timeEventWasReceived) {
+	public AlgorithmEventHistoryEntry(final IPropertyProcessedAlgorithmEvent algorithmEvent, final long timeEventWasReceived) {
 		this.propertyProcessedAlgorithmEvent = algorithmEvent;
 		this.timeEventWasReceived = timeEventWasReceived;
 	}
 
 	/**
-	 * Returns the {@link PropertyProcessedAlgorithmEvent} stored as part of this entry.
+	 * Returns the {@link IPropertyProcessedAlgorithmEvent} stored as part of this entry.
 	 *
-	 * @return The {@link PropertyProcessedAlgorithmEvent} stored as part of this entry.
+	 * @return The {@link IPropertyProcessedAlgorithmEvent} stored as part of this entry.
 	 */
-	public PropertyProcessedAlgorithmEvent getAlgorithmEvent() {
+	public IPropertyProcessedAlgorithmEvent getAlgorithmEvent() {
 		return this.propertyProcessedAlgorithmEvent;
 	}
 

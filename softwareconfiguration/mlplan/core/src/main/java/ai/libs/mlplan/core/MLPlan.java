@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.ml.core.IDataConfigurable;
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
@@ -14,10 +14,8 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -43,6 +41,8 @@ import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
+import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.ml.core.dataset.DatasetUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
@@ -86,7 +86,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 
 		/* store builder and data for main algorithm */
 		this.builder = builder;
-		this.setTimeout(new TimeOut(builder.getAlgorithmConfig().timeout(), TimeUnit.MILLISECONDS));
+		this.setTimeout(new Timeout(builder.getAlgorithmConfig().timeout(), TimeUnit.MILLISECONDS));
 		Objects.requireNonNull(this.getInput());
 		if (this.getInput().isEmpty()) {
 			throw new IllegalArgumentException("Cannot run ML-Plan on empty dataset.");
@@ -96,7 +96,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
 		case CREATED:
 			this.logger.info("Starting an ML-Plan instance.");
@@ -359,7 +359,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	}
 
 	@SuppressWarnings("unchecked")
-	public IGraphSearchInput<TFDNode, String> getSearchProblemInputGenerator() {
+	public IPathSearchInput<TFDNode, String> getSearchProblemInputGenerator() {
 		return ((TwoPhaseHASCO<? extends GraphSearchInput<TFDNode, String>, TFDNode, String>) this.optimizingFactory.getOptimizer()).getGraphSearchInput();
 	}
 

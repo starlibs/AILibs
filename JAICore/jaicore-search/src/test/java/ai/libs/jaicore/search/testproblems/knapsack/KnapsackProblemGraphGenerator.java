@@ -9,17 +9,17 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
 import org.api4.java.datastructure.graph.implicit.NodeType;
 import org.api4.java.datastructure.graph.implicit.SerializableGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleSuccessorGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ILazySuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.problems.knapsack.KnapsackConfiguration;
 import ai.libs.jaicore.problems.knapsack.KnapsackProblem;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator<KnapsackConfiguration, String>, ILoggingCustomizable {
 
@@ -34,11 +34,11 @@ public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator
 	}
 
 	@Override
-	public SingleRootGenerator<KnapsackConfiguration> getRootGenerator() {
+	public ISingleRootGenerator<KnapsackConfiguration> getRootGenerator() {
 		return () -> new KnapsackConfiguration(new HashSet<>(), this.problem.getObjects(), 0.0);
 	}
 
-	class KnapsackSuccessorGenerator implements SingleSuccessorGenerator<KnapsackConfiguration, String> {
+	class KnapsackSuccessorGenerator implements ILazySuccessorGenerator<KnapsackConfiguration, String> {
 		private Map<KnapsackConfiguration, Set<Integer>> expandedChildren = new HashMap<>();
 
 		private List<String> getPossiblePackingObjects(final KnapsackConfiguration n) {
@@ -122,7 +122,7 @@ public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator
 	}
 
 	@Override
-	public SuccessorGenerator<KnapsackConfiguration, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<KnapsackConfiguration, String> getSuccessorGenerator() {
 		return new KnapsackSuccessorGenerator();
 	}
 

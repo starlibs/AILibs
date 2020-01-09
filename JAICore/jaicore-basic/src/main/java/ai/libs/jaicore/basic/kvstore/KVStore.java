@@ -17,6 +17,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.api4.java.datastructure.kvstore.IKVFilter;
+import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -184,7 +186,7 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 	}
 
 	@Override
-	public Object getAsObject(final String key, final Class<?> objectClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	public <T> T getAsObject(final String key, final Class<T> objectClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		return objectClass.getConstructor().newInstance(this.get(key));
 	}
 

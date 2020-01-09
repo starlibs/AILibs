@@ -5,7 +5,7 @@ import java.io.File;
 import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
@@ -60,7 +60,7 @@ public class HASCOFactory<S extends GraphSearchWithPathEvaluationsInput<N, A, V>
 		return this.planningGraphGeneratorDeriver;
 	}
 
-	public void setPlanningGraphGeneratorDeriver(final IHierarchicalPlanningToGraphSearchReduction<N, A, ? super CEOCIPSTNPlanningProblem, ? extends IPlan, ? extends GraphSearchInput<N,A>, ? super IPath<N,A>> planningGraphGeneratorDeriver) {
+	public void setPlanningGraphGeneratorDeriver(final IHierarchicalPlanningToGraphSearchReduction<N, A, ? super CEOCIPSTNPlanningProblem, ? extends IPlan, ? extends GraphSearchInput<N,A>, ? super ILabeledPath<N,A>> planningGraphGeneratorDeriver) {
 		this.planningGraphGeneratorDeriver = (planningGraphGeneratorDeriver instanceof IHASCOPlanningReduction) ? (IHASCOPlanningReduction<N, A>)planningGraphGeneratorDeriver : new DefaultHASCOPlanningReduction<>(planningGraphGeneratorDeriver);
 	}
 

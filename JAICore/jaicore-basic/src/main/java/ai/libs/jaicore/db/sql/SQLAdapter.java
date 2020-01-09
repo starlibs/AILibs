@@ -1,4 +1,4 @@
-package ai.libs.jaicore.basic;
+package ai.libs.jaicore.db.sql;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -9,21 +9,24 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.kvstore.IKVStore;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.db.IDatabaseAdapter;
-import ai.libs.jaicore.db.sql.ResultSetToKVStoreSerializer;
+import ai.libs.jaicore.db.IDatabaseConfig;
 
 /**
  * This is a simple util class for easy database access and query execution in sql. You need to make sure that the respective JDBC connector is in the class path. By default, the adapter uses the mysql driver, but any jdbc driver can be
@@ -234,6 +237,26 @@ public class SQLAdapter implements IDatabaseAdapter {
 		return this.getResultsOfQuery("SELECT * FROM `" + table + "`" + conditionSB.toString(), values);
 	}
 
+
+	public Iterator<IKVStore> getRowIteratorOfTable(final String table) throws SQLException {
+		return this.getRowIteratorOfTable(table, new HashMap<>());
+	}
+
+	public Iterator<IKVStore> getRowIteratorOfTable(final String table, final Map<String, String> conditions) throws SQLException {
+		StringBuilder conditionSB = new StringBuilder();
+		List<String> values = new ArrayList<>();
+		for (Entry<String, String> entry : conditions.entrySet()) {
+			if (conditionSB.length() > 0) {
+				conditionSB.append(" AND ");
+			} else {
+				conditionSB.append(" WHERE ");
+			}
+			conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
+			values.add(entry.getValue());
+		}
+		return this.getResultIteratorOfQuery("SELECT * FROM `" + table + "`" + conditionSB.toString(), values);
+	}
+
 	/**
 	 * Retrieves the select result for the given query.
 	 * @param query The SQL query which is to be executed.
@@ -276,6 +299,21 @@ public class SQLAdapter implements IDatabaseAdapter {
 		} catch (IOException e) {
 			throw new SQLException("Could not serialize result set to KVStoreCollection.", e);
 		}
+	}
+
+	public Iterator<IKVStore> getResultIteratorOfQuery(final String query, final List<String> values) throws SQLException {
+		this.checkConnection();
+		boolean autoCommit = this.connect.getAutoCommit();
+		this.connect.setAutoCommit(false); // deactivate autocommit for this request
+		this.logger.info("Conducting query {} with values {}", query, values);
+		PreparedStatement statement = this.connect.prepareStatement(query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		statement.setFetchSize(100); // this avoids that the whole result table is read
+		for (int i = 1; i <= values.size(); i++) {
+			statement.setString(i, values.get(i - 1));
+		}
+		Iterator<IKVStore> iterator = new ResultSetToKVStoreSerializer().getSerializationIterator(statement.executeQuery());
+		this.connect.setAutoCommit(autoCommit);
+		return iterator;
 	}
 
 	/**
@@ -638,5 +676,26 @@ public class SQLAdapter implements IDatabaseAdapter {
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
+	}
+
+	@Override
+	public void createTable(final String tablename, final String nameOfPrimaryField, final Collection<String> fieldnames, final Map<String, String> types, final Collection<String> keys) throws SQLException {
+		this.checkConnection();
+		Objects.requireNonNull(this.connect);
+		StringBuilder sqlMainTable = new StringBuilder();
+		StringBuilder keyFieldsSB = new StringBuilder();
+		sqlMainTable.append("CREATE TABLE IF NOT EXISTS `" + tablename + "` (");
+		sqlMainTable.append("`" + nameOfPrimaryField + "` " + types.get(nameOfPrimaryField) + " NOT NULL AUTO_INCREMENT,");
+		for (String key : fieldnames) {
+			sqlMainTable.append("`" + key + "` " + types.get(key) + " NOT NULL,");
+			keyFieldsSB.append("`" + key + "`,");
+		}
+		sqlMainTable.append("PRIMARY KEY (`" + nameOfPrimaryField + "`)");
+		sqlMainTable.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
+
+		/* prepare statement */
+		try (Statement stmt = this.connect.createStatement()) {
+			stmt.execute(sqlMainTable.toString());
+		}
 	}
 }

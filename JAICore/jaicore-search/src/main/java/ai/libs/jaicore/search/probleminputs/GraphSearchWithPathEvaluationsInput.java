@@ -3,15 +3,15 @@ package ai.libs.jaicore.search.probleminputs;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
-import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,19 +31,19 @@ import ai.libs.jaicore.logging.ToJSONStringUtil;
  * @param <A>
  * @param <V>
  */
-public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> extends GraphSearchInput<N, A> implements IGraphSearchWithPathEvaluationsInput<N, A, V> {
+public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> extends GraphSearchInput<N, A> implements IPathSearchWithPathEvaluationsInput<N, A, V> {
 	private final IPathEvaluator<N, A, V> pathEvaluator;
 
-	public GraphSearchWithPathEvaluationsInput(final IGraphSearchInput<N, A> graphSearchInput, final IPathEvaluator<N, A, V> pathEvaluator) {
+	public GraphSearchWithPathEvaluationsInput(final IPathSearchInput<N, A> graphSearchInput, final IPathEvaluator<N, A, V> pathEvaluator) {
 		super(graphSearchInput);
 		this.pathEvaluator = pathEvaluator;
 	}
 
-	public GraphSearchWithPathEvaluationsInput(final IGraphSearchInput<N, A> graphSearchInput, final IObjectEvaluator<IPath<N, A>, V> pathEvaluator) {
+	public GraphSearchWithPathEvaluationsInput(final IPathSearchInput<N, A> graphSearchInput, final IObjectEvaluator<ILabeledPath<N, A>, V> pathEvaluator) {
 		this (graphSearchInput, new Evaluator<N, A, V>(pathEvaluator));
 	}
 
-	public GraphSearchWithPathEvaluationsInput(final IGraphGenerator<N, A> graphGenerator, final PathGoalTester<N, A> goalTester, final IObjectEvaluator<IPath<N, A>, V> pathEvaluator) {
+	public GraphSearchWithPathEvaluationsInput(final IGraphGenerator<N, A> graphGenerator, final IPathGoalTester<N, A> goalTester, final IObjectEvaluator<ILabeledPath<N, A>, V> pathEvaluator) {
 		this(new GraphSearchInput<>(graphGenerator, goalTester), pathEvaluator);
 	}
 
@@ -63,15 +63,15 @@ public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> 
 	private static class Evaluator<N, A, V extends Comparable<V>> implements IPathEvaluator<N, A, V>, ILoggingCustomizable {
 
 		private Logger logger = LoggerFactory.getLogger(Evaluator.class);
-		private final IObjectEvaluator<IPath<N, A>, V> pathEvaluator;
+		private final IObjectEvaluator<ILabeledPath<N, A>, V> pathEvaluator;
 
-		public Evaluator(final IObjectEvaluator<IPath<N, A>, V> pathEvaluator) {
+		public Evaluator(final IObjectEvaluator<ILabeledPath<N, A>, V> pathEvaluator) {
 			super();
 			this.pathEvaluator = pathEvaluator;
 		}
 
 		@Override
-		public V evaluate(final IPath<N, A> path) throws PathEvaluationException, InterruptedException {
+		public V evaluate(final ILabeledPath<N, A> path) throws PathEvaluationException, InterruptedException {
 			try {
 				this.logger.info("Forwarding query for path of length {} to {}", path.getNumberOfNodes(), this.pathEvaluator.getClass().getName());
 				return this.pathEvaluator.evaluate(path);

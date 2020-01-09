@@ -15,10 +15,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.http.client.ClientProtocolException;
+import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.kvstore.IKVStore;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.db.sql.rest.IRestDatabaseConfig;
 import ai.libs.jaicore.db.sql.rest.RestSqlAdapter;

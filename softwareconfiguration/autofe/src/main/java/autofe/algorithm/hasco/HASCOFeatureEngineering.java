@@ -18,10 +18,8 @@ import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.IAlgorithmConfig;
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -43,6 +41,8 @@ import ai.libs.hasco.optimizingfactory.OptimizingFactory;
 import ai.libs.hasco.optimizingfactory.OptimizingFactoryProblem;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.hasco.serialization.UnresolvableRequiredInterfaceException;
+import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
@@ -108,7 +108,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 	}
 
 	@Override
-	public AlgorithmEvent next() {
+	public IAlgorithmEvent next() {
 		try {
 			return this.nextWithException();
 		} catch (Exception e) {
@@ -117,7 +117,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public IAlgorithmEvent nextWithException() throws AlgorithmException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		switch (this.state) {
 		case CREATED:
 			return this.setupSearch();
@@ -128,7 +128,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		}
 	}
 
-	private AlgorithmEvent setupSearch() throws AlgorithmException, InterruptedException {
+	private IAlgorithmEvent setupSearch() throws AlgorithmException, InterruptedException {
 
 		/* check whether data has been set */
 		if (this.data == null) {
@@ -191,7 +191,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		return new AlgorithmInitializedEvent(this.getId());
 	}
 
-	private AlgorithmEvent search() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	private IAlgorithmEvent search() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		/* train the classifier returned by the optimizing factory */
 		long startOptimizationTime = System.currentTimeMillis();
 		this.selectedPipeline = this.optimizingFactory.call();
@@ -231,25 +231,25 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 	}
 
 	@Override
-	public void setTimeout(final TimeOut timeout) {
+	public void setTimeout(final Timeout timeout) {
 		this.config.setProperty(HASCOFeatureEngineeringConfig.K_TIMEOUT, String.valueOf((int) (timeout.milliseconds())));
 	}
 
 	@Override
-	public TimeOut getTimeout() {
-		return new TimeOut(this.config.timeout(), TimeUnit.MILLISECONDS);
+	public Timeout getTimeout() {
+		return new Timeout(this.config.timeout(), TimeUnit.MILLISECONDS);
 	}
 
 	@Override
-	public Iterator<AlgorithmEvent> iterator() {
-		return new Iterator<AlgorithmEvent>() {
+	public Iterator<IAlgorithmEvent> iterator() {
+		return new Iterator<IAlgorithmEvent>() {
 			@Override
 			public boolean hasNext() {
 				return HASCOFeatureEngineering.this.hasNext();
 			}
 
 			@Override
-			public AlgorithmEvent next() {
+			public IAlgorithmEvent next() {
 				try {
 					return HASCOFeatureEngineering.this.nextWithException();
 				} catch (Exception e) {
@@ -314,7 +314,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 	}
 
 	public AlgorithmInitializedEvent init() {
-		AlgorithmEvent e = null;
+		IAlgorithmEvent e = null;
 		while (this.hasNext()) {
 			e = this.next();
 			if (e instanceof AlgorithmInitializedEvent) {
@@ -410,7 +410,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 
 	@Override
 	public void setTimeout(final long timeout, final TimeUnit timeUnit) {
-		this.setTimeout(new TimeOut(timeout, timeUnit));
+		this.setTimeout(new Timeout(timeout, timeUnit));
 	}
 
 	@Override

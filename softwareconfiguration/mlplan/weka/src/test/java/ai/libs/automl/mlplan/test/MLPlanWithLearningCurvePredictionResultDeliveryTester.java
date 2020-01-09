@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 
 import ai.libs.automl.AutoMLAlgorithmResultProductionTester;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SimpleRandomSamplingFactory;
@@ -21,8 +21,8 @@ public class MLPlanWithLearningCurvePredictionResultDeliveryTester extends AutoM
 		try {
 			MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 			builder.withLearningCurveExtrapolationEvaluation(new int[] { 8, 16, 64, 128 }, new SimpleRandomSamplingFactory<>(), .7, new InversePowerLawExtrapolationMethod());
-			builder.withNodeEvaluationTimeOut(new TimeOut(15, TimeUnit.MINUTES));
-			builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.MINUTES));
+			builder.withNodeEvaluationTimeOut(new Timeout(15, TimeUnit.MINUTES));
+			builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.MINUTES));
 			MLPlan<IWekaClassifier> mlplan = builder.withDataset(data).build();
 			mlplan.setRandomSeed(1);
 			mlplan.setPortionOfDataForPhase2(.3f);

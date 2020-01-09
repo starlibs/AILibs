@@ -1,19 +1,19 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
-import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.ICancelableNodeEvaluator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.ICancelablePathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class DecoratingNodeEvaluator<N, A, V extends Comparable<V>>
-implements IPathEvaluator<N, A, V>, ICancelableNodeEvaluator, ILoggingCustomizable, IPotentiallyGraphDependentPathEvaluator<N, A, V>, IPotentiallySolutionReportingPathEvaluator<N, A, V> {
+implements IPathEvaluator<N, A, V>, ICancelablePathEvaluator, ILoggingCustomizable, IPotentiallyGraphDependentPathEvaluator<N, A, V>, IPotentiallySolutionReportingPathEvaluator<N, A, V> {
 
 	private boolean canceled = false;
 	private Logger logger = LoggerFactory.getLogger(DecoratingNodeEvaluator.class);
@@ -32,12 +32,12 @@ implements IPathEvaluator<N, A, V>, ICancelableNodeEvaluator, ILoggingCustomizab
 	}
 
 	@Override
-	public V evaluate(final IPath<N, A> node) throws PathEvaluationException, InterruptedException {
+	public V evaluate(final ILabeledPath<N, A> node) throws PathEvaluationException, InterruptedException {
 		return this.decoratedEvaluator.evaluate(node);
 	}
 
 	public boolean isDecoratedEvaluatorCancelable() {
-		return this.decoratedEvaluator instanceof ICancelableNodeEvaluator;
+		return this.decoratedEvaluator instanceof ICancelablePathEvaluator;
 	}
 
 	public boolean isDecoratedEvaluatorGraphDependent() {
@@ -69,7 +69,7 @@ implements IPathEvaluator<N, A, V>, ICancelableNodeEvaluator, ILoggingCustomizab
 	}
 
 	@Override
-	public void setGenerator(final IGraphGenerator<N, A> generator, final PathGoalTester<N, A> goalTester) {
+	public void setGenerator(final IGraphGenerator<N, A> generator, final IPathGoalTester<N, A> goalTester) {
 		this.logger.info("Setting graph generator of {} to {}", this, generator);
 		if (!this.requiresGraphGenerator()) {
 			throw new UnsupportedOperationException("This node evaluator is not graph dependent");
@@ -95,10 +95,10 @@ implements IPathEvaluator<N, A, V>, ICancelableNodeEvaluator, ILoggingCustomizab
 		}
 		this.canceled = true;
 		if (this.isDecoratedEvaluatorCancelable()) {
-			((ICancelableNodeEvaluator) this.decoratedEvaluator).cancelActiveTasks();
+			((ICancelablePathEvaluator) this.decoratedEvaluator).cancelActiveTasks();
 		}
-		if (this instanceof ICancelableNodeEvaluator) {
-			((ICancelableNodeEvaluator) this).cancelActiveTasks();
+		if (this instanceof ICancelablePathEvaluator) {
+			((ICancelablePathEvaluator) this).cancelActiveTasks();
 		}
 	}
 

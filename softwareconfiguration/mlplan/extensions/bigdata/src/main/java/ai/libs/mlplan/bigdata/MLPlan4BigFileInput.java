@@ -12,8 +12,8 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -90,7 +90,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		switch (this.getState()) {
 		case CREATED:
 
@@ -117,12 +117,12 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 			try {
 				builder = new MLPlanWekaBuilder();
 				builder.withLearningCurveExtrapolationEvaluation(this.anchorpointsTraining, new SimpleRandomSamplingFactory<>(), .7, new InversePowerLawExtrapolationMethod());
-				builder.withNodeEvaluationTimeOut(new TimeOut(15, TimeUnit.MINUTES));
-				builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.MINUTES));
+				builder.withNodeEvaluationTimeOut(new Timeout(15, TimeUnit.MINUTES));
+				builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.MINUTES));
 				this.mlplan = builder.withDataset(new WekaInstances(data)).build();
 				this.mlplan.setLoggerName(this.getLoggerName() + ".mlplan");
 				this.mlplan.registerListener(this);
-				this.mlplan.setTimeout(new TimeOut(this.getTimeout().seconds() - 30, TimeUnit.SECONDS));
+				this.mlplan.setTimeout(new Timeout(this.getTimeout().seconds() - 30, TimeUnit.SECONDS));
 				this.mlplan.setNumCPUs(3);
 				this.mlplan.setBuildSelectedClasifierOnGivenData(false); // we will build the classifier, ML-Plan should not waste time with this
 				this.logger.info("ML-Plan initialized, activation finished!");

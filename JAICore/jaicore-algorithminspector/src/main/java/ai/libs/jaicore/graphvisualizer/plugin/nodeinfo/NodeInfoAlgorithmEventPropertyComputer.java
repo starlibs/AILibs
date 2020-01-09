@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
@@ -28,7 +28,7 @@ public class NodeInfoAlgorithmEventPropertyComputer implements AlgorithmEventPro
 	}
 
 	@Override
-	public NodeInfo computeAlgorithmEventProperty(final AlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
+	public NodeInfo computeAlgorithmEventProperty(final IAlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
 		if (algorithmEvent instanceof GraphInitializedEvent) {
 			GraphInitializedEvent<?> graphInitializedEvent = (GraphInitializedEvent<?>) algorithmEvent;
 			Object mainNode = graphInitializedEvent.getRoot();

@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 
 import ai.libs.automl.AutoMLAlgorithmCoreFunctionalityTester;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
@@ -18,10 +18,10 @@ public class MLPlanCoreFunctionalityTester extends AutoMLAlgorithmCoreFunctional
 	public IAlgorithm<ILabeledDataset<?>, IWekaClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) {
 		try {
 			MLPlanWekaBuilder builder = new MLPlanWekaBuilder().withTinyWekaSearchSpace();
-			builder.withNodeEvaluationTimeOut(new TimeOut(10, TimeUnit.SECONDS));
-			builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.SECONDS));
+			builder.withNodeEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
+			builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.SECONDS));
 			builder.withNumCpus(1);
-			builder.withTimeOut(new TimeOut(5, TimeUnit.SECONDS));
+			builder.withTimeOut(new Timeout(5, TimeUnit.SECONDS));
 			MLPlan<IWekaClassifier> mlplan = builder.withDataset(data).build();
 			mlplan.setRandomSeed(1);
 			mlplan.setPortionOfDataForPhase2(0f);

@@ -13,24 +13,24 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
-import org.api4.java.algorithm.events.SolutionCandidateFoundEvent;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.events.result.ISolutionCandidateFoundEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.common.math.IMetric;
-import org.api4.java.datastructure.graph.implicit.RootGenerator;
+import org.api4.java.datastructure.graph.implicit.IRootGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.search.algorithms.standard.astar.AStar;
@@ -82,7 +82,7 @@ AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndS
 	// parent-child
 	// relation
 
-	private List<SolutionCandidateFoundEvent<EvaluatedSearchGraphPath<T, A, Double>>> unreturnedSolutionEvents = new LinkedList<>();
+	private List<ISolutionCandidateFoundEvent<EvaluatedSearchGraphPath<T, A, Double>>> unreturnedSolutionEvents = new LinkedList<>();
 
 	private Collection<AStar<T, A>> activeAStarSubroutines = new ArrayList<>();
 
@@ -142,10 +142,10 @@ AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndS
 		if (n.getParent() == null) {
 			throw new IllegalArgumentException("Can only re-evaluate nodes that have a parent!");
 		}
-		IGraphSearchInput<T, A> subProblem = new GraphSearchInput<>(new SubPathGraphGenerator<>(this.getInput().getGraphGenerator(), n.getParent().getHead()), c -> c.equals(n.getHead()));
+		IPathSearchInput<T, A> subProblem = new GraphSearchInput<>(new SubPathGraphGenerator<>(this.getInput().getGraphGenerator(), n.getParent().getHead()), c -> c.equals(n.getHead()));
 		AStar<T, A> astar = new AStar<>(new GraphSearchWithNumberBasedAdditivePathEvaluation<>(subProblem, (GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getNodeEvaluator()));
 		astar.setLoggerName(this.getLoggerName() + ".astar");
-		astar.setTimeout(new TimeOut(this.getRemainingTimeToDeadline().milliseconds(), TimeUnit.MILLISECONDS));
+		astar.setTimeout(new Timeout(this.getRemainingTimeToDeadline().milliseconds(), TimeUnit.MILLISECONDS));
 		this.logger.trace("Invoking AStar with root {} and only goal node {}", n.getParent().getHead(), n.getHead());
 		this.activeAStarSubroutines.add(astar);
 		EvaluatedSearchGraphPath<T, A, Double> optimalPath = astar.call();
@@ -177,7 +177,7 @@ AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndS
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException,
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException,
 	AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		try {
 
@@ -189,7 +189,7 @@ AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndS
 				AlgorithmInitializedEvent initializationEvent = this.activate();
 
 				/* Lines 14 to 17 */
-				RootGenerator<T> rootGenerator = this.getInput().getGraphGenerator().getRootGenerator();
+				IRootGenerator<T> rootGenerator = this.getInput().getGraphGenerator().getRootGenerator();
 				for (T root : rootGenerator.getRoots()) {
 					GammaNode<T, A> internalRoot = new GammaNode<>(root);
 					internalRoot.setScore(new RStarK(false, this.w * this.h.evaluate(internalRoot)));
@@ -278,7 +278,7 @@ AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndS
 						}
 					}
 				}
-				return new NodeExpansionCompletedEvent<>(this.getId(), n.getHead());
+				return new NodeExpansionCompletedEvent<>(this, n.getHead());
 
 			default:
 				throw new IllegalStateException("Cannot do anything in state " + this.getState());
@@ -390,7 +390,7 @@ AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndS
 					} else {
 						gammaNodeForThisChild = new GammaNode<>(childNode);
 						gammaNodeForThisChild
-						.setGoal(((NodeGoalTester<T, A>) this.getInput().getGoalTester()).isGoal(childNode));
+						.setGoal(((INodeGoalTester<T, A>) this.getInput().getGoalTester()).isGoal(childNode));
 					}
 
 					/* if this is a solution, add it as a new solution */
@@ -401,7 +401,7 @@ AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndS
 							this.updateBestSeenSolution(this.getFullExternalPath(n));
 						}
 						EvaluatedSearchSolutionCandidateFoundEvent<T, A, Double> solutionEvent = new EvaluatedSearchSolutionCandidateFoundEvent<>(
-								this.getId(), this.getFullExternalPath(gammaNodeForThisChild));
+								this, this.getFullExternalPath(gammaNodeForThisChild));
 						this.post(solutionEvent);
 						this.unreturnedSolutionEvents.add(solutionEvent);
 					}

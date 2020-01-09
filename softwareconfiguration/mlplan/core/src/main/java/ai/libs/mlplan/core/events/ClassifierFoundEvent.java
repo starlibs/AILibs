@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
-import org.api4.java.algorithm.events.ASolutionCandidateFoundEvent;
-import org.api4.java.algorithm.events.ScoredSolutionCandidateFoundEvent;
+import org.api4.java.algorithm.events.result.IScoredSolutionCandidateFoundEvent;
 
 import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.jaicore.basic.algorithm.ASolutionCandidateFoundEvent;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
-public class ClassifierFoundEvent extends ASolutionCandidateFoundEvent<ISupervisedLearner<?, ?>> implements ScoredSolutionCandidateFoundEvent<ISupervisedLearner<?, ?>, Double> {
+public class ClassifierFoundEvent extends ASolutionCandidateFoundEvent<ISupervisedLearner<?, ?>> implements IScoredSolutionCandidateFoundEvent<ISupervisedLearner<?, ?>, Double> {
 
 	private final double inSampleError;
 	private final ComponentInstance componentDescription;

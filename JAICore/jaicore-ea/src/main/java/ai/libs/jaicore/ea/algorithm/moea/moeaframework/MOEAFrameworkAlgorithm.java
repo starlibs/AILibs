@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -43,7 +43,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm<Population> {
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		this.checkAndConductTermination();
 
 		this.logger.info("{} step1: {}", this.getClass().getName(), this.getState());
@@ -80,7 +80,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm<Population> {
 				this.numberOfGenerationsWOChange = 0;
 			}
 
-			return new MOEAFrameworkAlgorithmResultEvent(this.getId(), this.getCurrentResult());
+			return new MOEAFrameworkAlgorithmResultEvent(this, this.getCurrentResult());
 		default:
 		case INACTIVE:
 			throw new AlgorithmException("The current algorithm state is >inactive<.");

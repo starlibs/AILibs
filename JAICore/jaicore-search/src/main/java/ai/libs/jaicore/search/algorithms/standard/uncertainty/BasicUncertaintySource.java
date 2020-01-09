@@ -4,19 +4,19 @@ import java.util.List;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IUncertaintySource;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 public class BasicUncertaintySource<T, A, V extends Comparable<V>> implements IUncertaintySource<T, A,V> {
 
 	@Override
-	public double calculateUncertainty(final IEvaluatedPath<T, A, V> n, final List<IPath<T, A>> simulationPaths, final List<V> simulationEvaluations) {
+	public double calculateUncertainty(final IEvaluatedPath<T, A, V> n, final List<ILabeledPath<T, A>> simulationPaths, final List<V> simulationEvaluations) {
 
 		double uncertainty = 1.0d;
 
 		if (simulationPaths != null && !simulationPaths.isEmpty()) {
 			T t = n.getHead();
 			double meanDepth = 0.0d;
-			for (IPath<T, A> path : simulationPaths) {
+			for (ILabeledPath<T, A> path : simulationPaths) {
 				if (path.getNodes().contains(t) && !path.isPoint()) {
 					double post = 0.0d;
 					boolean startsCounting = false;

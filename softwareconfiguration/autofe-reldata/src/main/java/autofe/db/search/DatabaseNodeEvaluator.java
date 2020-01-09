@@ -4,15 +4,15 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.function.ToDoubleFunction;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +68,7 @@ public class DatabaseNodeEvaluator implements IPathEvaluator<DatabaseNode, Strin
 	}
 
 	@Override
-	public Double f(final IPath<DatabaseNode, String> node) throws InterruptedException, NoSolutionFromRandomCompletionException, DatasetEvaluationFailedException {
+	public Double f(final ILabeledPath<DatabaseNode, String> node) throws InterruptedException, NoSolutionFromRandomCompletionException, DatasetEvaluationFailedException {
 		if (node.getHead().getSelectedFeatures().isEmpty()) {
 			LOGGER.warn("Return default value (0) for empty node");
 			return 0.0;
@@ -91,15 +91,15 @@ public class DatabaseNodeEvaluator implements IPathEvaluator<DatabaseNode, Strin
 
 		GraphSearchInput<DatabaseNode, String> problem = new GraphSearchInput<>(new IGraphGenerator<DatabaseNode, String>() {
 			@Override
-			public SingleRootGenerator<DatabaseNode> getRootGenerator() {
+			public ISingleRootGenerator<DatabaseNode> getRootGenerator() {
 				return node::getHead;
 			}
 
 			@Override
-			public SuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
+			public ISuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
 				return DatabaseNodeEvaluator.this.generator.getSuccessorGenerator();
 			}
-		}, new NodeGoalTester<DatabaseNode, String>() {
+		}, new INodeGoalTester<DatabaseNode, String>() {
 
 			@Override
 			public boolean isGoal(final DatabaseNode node) {

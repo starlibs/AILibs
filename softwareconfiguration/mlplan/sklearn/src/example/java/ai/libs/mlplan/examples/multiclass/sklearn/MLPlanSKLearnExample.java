@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicHomogeneousPredictionPerformanceMeasure;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +26,7 @@ public class MLPlanSKLearnExample {
 	private static final File DATASET = new File("testrsc/car.arff");
 	private static final IDeterministicHomogeneousPredictionPerformanceMeasure<Object> LOSS_MEASURE = EClassificationPerformanceMeasure.ERRORRATE;
 
-	private static final TimeOut TIMEOUT = new TimeOut(300, TimeUnit.SECONDS);
+	private static final Timeout TIMEOUT = new Timeout(300, TimeUnit.SECONDS);
 
 	public static void main(final String[] args) throws Exception {
 		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(60);
@@ -34,8 +34,8 @@ public class MLPlanSKLearnExample {
 
 		MLPlanSKLearnBuilder builder = new MLPlanSKLearnBuilder();
 		builder.withTimeOut(TIMEOUT);
-		builder.withNodeEvaluationTimeOut(new TimeOut(90, TimeUnit.SECONDS));
-		builder.withCandidateEvaluationTimeOut(new TimeOut(30, TimeUnit.SECONDS));
+		builder.withNodeEvaluationTimeOut(new Timeout(90, TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS));
 		builder.withDataset(testSplit.get(0));
 
 		MLPlan<ScikitLearnWrapper> mlplan = builder.build();

@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.ToDoubleFunction;
 
 import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
@@ -532,7 +532,7 @@ public final class EvaluationUtils {
 		return new AbstractHASCOFENodeEvaluator(maxPipelineSize) {
 
 			@Override
-			public Double f(final IPath<TFDNode, String> node) {
+			public Double f(final ILabeledPath<TFDNode, String> node) {
 				if (node.getNodes().size() == 1) {
 					return null;
 				}
@@ -561,7 +561,7 @@ public final class EvaluationUtils {
 
 		/* Initialize MLPlan using WEKA components */
 		MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forWeka();
-		builder.withTimeOut(new TimeOut(timeout, TimeUnit.SECONDS));
+		builder.withTimeOut(new Timeout(timeout, TimeUnit.SECONDS));
 		builder.withNumCpus(numCores);
 		builder.withDataset(training);
 		MLPlan mlplan = builder.build();

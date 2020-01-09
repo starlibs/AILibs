@@ -19,8 +19,8 @@ import com.google.common.eventbus.Subscribe;
 import ai.libs.hasco.events.HASCORunStartedEvent;
 import ai.libs.hasco.events.HASCORunTerminatedEvent;
 import ai.libs.hasco.events.HASCOSolutionEvaluationEvent;
-import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.basic.kvstore.IKVStore;
+import ai.libs.jaicore.db.sql.SQLAdapter;
 
 public class HASCOSQLEventLogger<T, V extends Comparable<V>> {
 

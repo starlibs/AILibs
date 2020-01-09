@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
 import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.RootGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.IRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
 import ai.libs.jaicore.problems.cannibals.CannibalProblem;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public class CannibalGraphGenerator implements IGraphGenerator<CannibalProblem, String> {
 
@@ -22,8 +22,8 @@ public class CannibalGraphGenerator implements IGraphGenerator<CannibalProblem, 
 	}
 
 	@Override
-	public RootGenerator<CannibalProblem> getRootGenerator() {
-		return new SingleRootGenerator<CannibalProblem>() {
+	public IRootGenerator<CannibalProblem> getRootGenerator() {
+		return new ISingleRootGenerator<CannibalProblem>() {
 
 			@Override
 			public CannibalProblem getRoot() {
@@ -33,8 +33,8 @@ public class CannibalGraphGenerator implements IGraphGenerator<CannibalProblem, 
 	}
 
 	@Override
-	public SuccessorGenerator<CannibalProblem, String> getSuccessorGenerator() {
-		return new SuccessorGenerator<CannibalProblem, String>() {
+	public ISuccessorGenerator<CannibalProblem, String> getSuccessorGenerator() {
+		return new ISuccessorGenerator<CannibalProblem, String>() {
 
 			@Override
 			public List<NodeExpansionDescription<CannibalProblem, String>> generateSuccessors(final CannibalProblem node) throws InterruptedException {

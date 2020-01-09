@@ -1,27 +1,29 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst.events;
 
+import org.api4.java.algorithm.IAlgorithm;
+
 public class NodeAnnotationEvent<T> extends BestFirstEvent {
 
 	private final T node;
 	private final String annotationName;
 	private final Object annotationValue;
 
-	public NodeAnnotationEvent(String algorithmId, T node, String annotationName, Object annotationValue) {
-		super(algorithmId);
+	public NodeAnnotationEvent(final IAlgorithm<?, ?> algorithm, final T node, final String annotationName, final Object annotationValue) {
+		super(algorithm);
 		this.node = node;
 		this.annotationName = annotationName;
 		this.annotationValue = annotationValue;
 	}
 
 	public T getNode() {
-		return node;
+		return this.node;
 	}
 
 	public String getAnnotationName() {
-		return annotationName;
+		return this.annotationName;
 	}
 
 	public Object getAnnotationValue() {
-		return annotationValue;
+		return this.annotationValue;
 	}
 }

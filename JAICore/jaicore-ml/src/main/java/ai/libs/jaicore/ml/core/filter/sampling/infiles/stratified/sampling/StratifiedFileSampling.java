@@ -12,7 +12,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.slf4j.Logger;
@@ -55,7 +55,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException()
+	public IAlgorithmEvent nextWithException()
 			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		switch (this.getState()) {
 		case CREATED:
@@ -84,7 +84,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 						this.assigner.assignDatapoint(datapoint);
 					}
 					this.streamedDatapoints++;
-					return new SampleElementAddedEvent(this.getId());
+					return new SampleElementAddedEvent(this);
 				} catch (IOException e) {
 					throw new AlgorithmException("Was not able to read datapoint line form input file", e);
 				}
@@ -98,7 +98,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 					// Start Reservoir Sampling inside the strati.
 					this.stratiSamplingStarted = true;
 					this.startReservoirSamplingForStrati(this.assigner.getAllCreatedStrati());
-					return new WaitForSamplingStepEvent(this.getId());
+					return new WaitForSamplingStepEvent(this);
 				} else {
 					if (!this.stratiSamplingFinished) {
 						// Check if all threads for sampling inside the strati are finished. If no, wait
@@ -108,7 +108,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 						} else {
 							Thread.sleep(100);
 						}
-						return new WaitForSamplingStepEvent(this.getId());
+						return new WaitForSamplingStepEvent(this);
 					} else {
 						// Write strati sampling results to the outputand terminate.
 						try {

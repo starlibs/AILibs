@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +81,7 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 	}
 
 	@Override
-	public Double evaluate(final IPath<TFDNode, String> path) throws ControlledNodeEvaluationException {
+	public Double evaluate(final ILabeledPath<TFDNode, String> path) throws ControlledNodeEvaluationException {
 		if (!this.propertiesDetermined) {
 			this.extractDatasetProperties();
 		}

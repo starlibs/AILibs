@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.collections.BidiMap;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
@@ -37,11 +37,10 @@ import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.ranking.IRanking;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.math.IVector;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.openml.webapplication.fantail.dc.LandmarkerCharacterizer;
 import org.slf4j.Logger;
@@ -51,6 +50,7 @@ import ai.libs.hasco.core.Util;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.serialization.ComponentLoader;
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
@@ -175,7 +175,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 	private SolutionEventBus<T> eventBus;
 
 	private IGraphGenerator<T, A> graphGenerator;
-	private PathGoalTester<T, A> goalTester;
+	private IPathGoalTester<T, A> goalTester;
 
 	private DyadMinMaxScaler scaler = null;
 
@@ -223,7 +223,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public V evaluate(final IPath<T, A> path) throws InterruptedException, PathEvaluationException {
+	public V evaluate(final ILabeledPath<T, A> path) throws InterruptedException, PathEvaluationException {
 		if (this.firstEvaluation == null) {
 			this.firstEvaluation = Instant.now();
 		}
@@ -301,7 +301,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	private List<List<T>> getNRandomPaths(final IPath<T, A> node) throws InterruptedException, TimeoutException {
+	private List<List<T>> getNRandomPaths(final ILabeledPath<T, A> node) throws InterruptedException, TimeoutException {
 		List<List<T>> completedPaths = new ArrayList<>();
 		for (int currentPath = 0; currentPath < this.randomlyCompletedPaths; currentPath++) {
 			/*
@@ -490,7 +490,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 	}
 
 	@Override
-	public void setGenerator(final IGraphGenerator<T, A> generator, final PathGoalTester<T, A> goalTester) {
+	public void setGenerator(final IGraphGenerator<T, A> generator, final IPathGoalTester<T, A> goalTester) {
 		this.graphGenerator = generator;
 		this.goalTester = goalTester;
 		this.initializeRandomSearch();

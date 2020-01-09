@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 
@@ -59,7 +59,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException()
+	public IAlgorithmEvent nextWithException()
 			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		switch (this.getState()) {
 		case CREATED:
@@ -113,7 +113,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 					assert datapoint != null;
 					this.outputFileWriter.write(datapoint + "\n");
 					this.addedDatapoints++;
-					return new SampleElementAddedEvent(this.getId());
+					return new SampleElementAddedEvent(this);
 				} catch (IOException e) {
 					throw new AlgorithmException("Was not able to read from sorted dataset file.", e);
 				}

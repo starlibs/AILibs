@@ -7,7 +7,7 @@ import java.util.Random;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ public abstract class CaseControlLikeSampling<D extends ILabeledDataset<? extend
 	public abstract List<Pair<ILabeledInstance, Double>> computeAcceptanceThresholds() throws ThresholdComputationFailedException, InterruptedException;
 
 	@Override
-	final public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
+	final public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
 		this.logger.debug("Executing next step.");
 		switch (this.getState()) {
 		case CREATED:
@@ -59,7 +59,7 @@ public abstract class CaseControlLikeSampling<D extends ILabeledDataset<? extend
 				this.currentlyConsideredIndex ++;
 				if (this.acceptanceThresholds.get(this.currentlyConsideredIndex - 1).getY().doubleValue() >= r) {
 					this.deriver.add(this.currentlyConsideredIndex - 1);
-					return new SampleElementAddedEvent(this.getId());
+					return new SampleElementAddedEvent(this);
 				}
 			}
 

@@ -1,7 +1,8 @@
 package ai.libs.hasco.events;
 
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
+
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 
 public class HASCORunStartedEvent<T, V extends Comparable<V>> extends AlgorithmInitializedEvent {
 	private final int seed, timeout, numberOfCPUS;

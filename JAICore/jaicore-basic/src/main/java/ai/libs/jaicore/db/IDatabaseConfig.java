@@ -1,6 +1,8 @@
-package ai.libs.jaicore.basic;
+package ai.libs.jaicore.db;
 
 import org.aeonbits.owner.Reloadable;
+
+import ai.libs.jaicore.basic.IOwnerBasedConfig;
 
 /**
  * Configuration interface to defined the access properties for a database connection

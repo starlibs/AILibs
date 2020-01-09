@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
@@ -36,7 +36,7 @@ public abstract class ASimplifiedTSCLearningAlgorithm<T, C extends ASimplifiedTS
 	 * {@inheritDoc}
 	 */
 	@Override
-	public AlgorithmEvent nextWithException() {
+	public IAlgorithmEvent nextWithException() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -44,7 +44,7 @@ public abstract class ASimplifiedTSCLearningAlgorithm<T, C extends ASimplifiedTS
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Iterator<AlgorithmEvent> iterator() {
+	public Iterator<IAlgorithmEvent> iterator() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -60,7 +60,7 @@ public abstract class ASimplifiedTSCLearningAlgorithm<T, C extends ASimplifiedTS
 	 * {@inheritDoc}
 	 */
 	@Override
-	public AlgorithmEvent next() {
+	public IAlgorithmEvent next() {
 		throw new NoSuchElementException("Cannot enumerate on this algorithm");
 	}
 

@@ -14,9 +14,7 @@ import java.util.stream.Collectors;
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearch;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -37,6 +35,8 @@ import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.hasco.model.UnparametrizedComponentInstance;
 import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import ai.libs.hasco.reduction.HASCOReduction;
+import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
@@ -142,7 +142,7 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 
 		/* check on termination */
 		this.logger.trace("Conducting next step in {}.", this.getId());
@@ -173,7 +173,7 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 			this.search.registerListener(new Object() {
 
 				@Subscribe
-				public void receiveSearchEvent(final AlgorithmEvent event) {
+				public void receiveSearchEvent(final IAlgorithmEvent event) {
 					if (!(event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent)) {
 						HASCO.this.post(event);
 					}
@@ -218,7 +218,7 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 			/* now initialize the search */
 			this.logger.debug("Initializing the search");
 			try {
-				AlgorithmEvent searchInitializationEvent = this.search.nextWithException();
+				IAlgorithmEvent searchInitializationEvent = this.search.nextWithException();
 				assert searchInitializationEvent instanceof AlgorithmInitializedEvent : "The first event emitted by the search was not the initialization event but " + searchInitializationEvent + "!";
 				this.logger.debug("Search has been initialized.");
 				this.logger.info("HASCO initialization completed.");
@@ -232,7 +232,7 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 
 			/* step search */
 			this.logger.debug("Stepping search algorithm.");
-			AlgorithmEvent searchEvent = this.search.nextWithException();
+			IAlgorithmEvent searchEvent = this.search.nextWithException();
 			this.logger.debug("Search step completed, observed {}.", searchEvent.getClass().getName());
 			if (searchEvent instanceof AlgorithmFinishedEvent) {
 				this.logger.info("The search algorithm has finished. Terminating HASCO.");

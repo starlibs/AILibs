@@ -6,16 +6,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.ILabeledPath;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(RandomSearch.class);
 
-	private final NodeGoalTester<N, A> goalTester;
+	private final INodeGoalTester<N, A> goalTester;
 
 	/* state of the algorithm */
 	private SearchGraphPath<N, A> currentPath;
@@ -52,19 +52,19 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 
 	public DepthFirstSearch(final GraphSearchInput<N, A> problem) {
 		super(problem);
-		this.goalTester = (NodeGoalTester<N, A>)problem.getGoalTester();
+		this.goalTester = (INodeGoalTester<N, A>)problem.getGoalTester();
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		try {
 			this.checkAndConductTermination();
 			this.registerActiveThread();
 			this.logger.debug("Conducting step. Current path length is {}", this.currentPath != null ? this.currentPath.getNumberOfNodes() : "0");
 			switch (this.getState()) {
 			case CREATED:
-				N root = ((SingleRootGenerator<N>) this.getInput().getGraphGenerator().getRootGenerator()).getRoot();
-				this.post(new GraphInitializedEvent<>(this.getId(), root));
+				N root = ((ISingleRootGenerator<N>) this.getInput().getGraphGenerator().getRootGenerator()).getRoot();
+				this.post(new GraphInitializedEvent<>(this, root));
 
 				/* check whether a path has already been set externally */
 				if (this.currentPath == null) {
@@ -79,13 +79,13 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 					for (int i = 0; i < n - 1; i++) {
 						N node = this.currentPath.getNodes().get(i);
 						for (N successor : this.successorsNodes.get(node)) {
-							this.post(new NodeAddedEvent<>(this.getId(), node, successor, "or_open"));
-							this.post(new NodeTypeSwitchEvent<>(this.getId(), node, "or_closed"));
+							this.post(new NodeAddedEvent<>(this, node, successor, "or_open"));
+							this.post(new NodeTypeSwitchEvent<>(this, node, "or_closed"));
 						}
 					}
 					N leaf = this.currentPath.getHead();
 					if (this.goalTester.isGoal(leaf)) {
-						this.post(new NodeTypeSwitchEvent<>(this.getId(), this.currentPath.getHead(), "or_solution"));
+						this.post(new NodeTypeSwitchEvent<>(this, this.currentPath.getHead(), "or_solution"));
 						this.lastNodeWasTrueLeaf = true;
 					} else if (this.getInput().getGraphGenerator().getSuccessorGenerator().generateSuccessors(leaf).isEmpty()) {
 						this.lastNodeWasTrueLeaf = true;
@@ -101,7 +101,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 				if (this.lastNodeWasTrueLeaf) {
 
 					/* find the deepest antecessor of the leaf that has not been exhausted */
-					IPath<N, A> pathToCurrentLeaf;
+					ILabeledPath<N, A> pathToCurrentLeaf;
 					N formerLeaf;
 					int indexOfChildInSuccessorsOfParent;
 					do {
@@ -130,28 +130,28 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 
 				if (this.goalTester.isGoal(leaf)) {
 					this.lastNodeWasTrueLeaf = true;
-					AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this.getId(), new SearchGraphPath<N, A>(this.currentPath));
+					IAlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this, new SearchGraphPath<N, A>(this.currentPath));
 					this.post(event);
-					this.post(new NodeTypeSwitchEvent<>(this.getId(), leaf, "or_solution"));
+					this.post(new NodeTypeSwitchEvent<>(this, leaf, "or_solution"));
 					this.logger.debug("The leaf node is a goal node. Returning goal path {}", this.currentPath);
 					return event;
 				} else {
 					this.logger.debug("The leaf node is not a goal node. Creating successors and diving into the first one.");
-					this.post(new NodeTypeSwitchEvent<>(this.getId(), leaf, "or_closed"));
+					this.post(new NodeTypeSwitchEvent<>(this, leaf, "or_closed"));
 					final N expandedLeaf = leaf;
-					List<NodeExpansionDescription<N, A>> successorsOfThis = this.computeTimeoutAware(
+					List<INewNodeDescription<N, A>> successorsOfThis = this.computeTimeoutAware(
 							() -> this.getInput().getGraphGenerator().getSuccessorGenerator().generateSuccessors(expandedLeaf), "DFS successor generation", true);
 					long lastTerminationCheck = 0;
 					List<N> successorNodes = new ArrayList<>();
 					List<A> successorEdges = new ArrayList<>();
-					for (NodeExpansionDescription<N, A> child : successorsOfThis) {
-						this.post(new NodeAddedEvent<>(this.getId(), expandedLeaf, child.getTo(), "or_open"));
+					for (INewNodeDescription<N, A> child : successorsOfThis) {
+						this.post(new NodeAddedEvent<>(this, expandedLeaf, child.getTo(), "or_open"));
 						if (System.currentTimeMillis() - lastTerminationCheck > 50) {
 							this.checkAndConductTermination();
 							lastTerminationCheck = System.currentTimeMillis();
 						}
 						successorNodes.add(child.getTo());
-						successorEdges.add(child.getAction());
+						successorEdges.add(child.getArcLabel());
 					}
 					this.successorsNodes.put(leaf, successorNodes);
 					this.successorsEdges.put(leaf, successorEdges);
@@ -163,7 +163,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 						assert this.checkPathConsistency(this.currentPath);
 						this.logger.debug("Computed {} successors for {}, and selected {} as the next successor. Current path is now {}.", successorsOfThis.size(), leaf, successorsOfThis.get(0), this.currentPath);
 					}
-					return new NodeExpansionCompletedEvent<>(this.getId(), leaf);
+					return new NodeExpansionCompletedEvent<>(this, leaf);
 				}
 
 			default:
@@ -174,14 +174,14 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 		}
 	}
 
-	public IPath<N, A> getCurrentPath() {
+	public ILabeledPath<N, A> getCurrentPath() {
 		return this.currentPath.getUnmodifiableAccessor();
 	}
 
 	public int[] getDecisionIndicesForCurrentPath() {
 		int n = this.currentPath.getNumberOfNodes();
 		int[] decisions = new int[n - 1];
-		IPath<N, A> tmpPath = this.getCurrentPath();
+		ILabeledPath<N, A> tmpPath = this.getCurrentPath();
 		N last = null;
 		for (int i = 0; i < n; i++) {
 			N current = tmpPath.getRoot();
@@ -195,18 +195,18 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 		return decisions;
 	}
 
-	public void setCurrentPath(final IPath<N, A> path) {
+	public void setCurrentPath(final ILabeledPath<N, A> path) {
 		try {
 
 			/* check that the root of the path is consistent with the true root */
-			Object root = this.currentPath.getNumberOfNodes() == 0 ? ((SingleRootGenerator<?>) this.getGraphGenerator().getRootGenerator()).getRoot() : this.currentPath.getNodes().get(0);
+			Object root = this.currentPath.getNumberOfNodes() == 0 ? ((ISingleRootGenerator<?>) this.getGraphGenerator().getRootGenerator()).getRoot() : this.currentPath.getNodes().get(0);
 			if (!root.equals(path.getRoot())) {
 				throw new IllegalArgumentException();
 			}
 
 			/* now check that all other nodes are also valid successors in the original graph */
 			Map<N, List<N>> tentativeSuccessors = new HashMap<>();
-			SuccessorGenerator<N, A> successorGenerator = this.getGraphGenerator().getSuccessorGenerator();
+			ISuccessorGenerator<N, A> successorGenerator = this.getGraphGenerator().getSuccessorGenerator();
 			int n = path.getNumberOfNodes();
 			for (int i = 0; i < n; i++) {
 				N node = path.getNodes().get(i);
@@ -214,7 +214,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 					throw new IllegalArgumentException("Node " + node + " is not a successor of " + path.getNodes().get(i - 1) + " in the original graph.");
 				}
 				if (i < n - 1) {
-					tentativeSuccessors.put(node, successorGenerator.generateSuccessors(node).stream().map(NodeExpansionDescription::getTo).collect(Collectors.toList()));
+					tentativeSuccessors.put(node, successorGenerator.generateSuccessors(node).stream().map(INewNodeDescription::getTo).collect(Collectors.toList()));
 				}
 			}
 
@@ -229,17 +229,17 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 
 	public void setCurrentPath(final int... decisions) {
 		try {
-			N root = this.currentPath.getNumberOfNodes() == 0 ? ((SingleRootGenerator<N>) this.getGraphGenerator().getRootGenerator()).getRoot() : this.currentPath.getRoot();
+			N root = this.currentPath.getNumberOfNodes() == 0 ? ((ISingleRootGenerator<N>) this.getGraphGenerator().getRootGenerator()).getRoot() : this.currentPath.getRoot();
 			SearchGraphPath<N, A> tentativePath = new SearchGraphPath<>(root);
 			Map<N, List<N>> tentativeSuccessors = new HashMap<>();
 			Map<N, List<A>> tentativeSuccessorActions = new HashMap<>();
-			SuccessorGenerator<N, A> successorGenerator = this.getGraphGenerator().getSuccessorGenerator();
+			ISuccessorGenerator<N, A> successorGenerator = this.getGraphGenerator().getSuccessorGenerator();
 			int n = decisions.length;
 			for (int i = 0; i < n; i++) {
 				N node = tentativePath.getHead();
-				List<NodeExpansionDescription<N, A>> descriptions = successorGenerator.generateSuccessors(node);
-				tentativeSuccessors.put(node, descriptions.stream().map(NodeExpansionDescription::getTo).collect(Collectors.toList()));
-				tentativeSuccessorActions.put(node, descriptions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toList()));
+				List<INewNodeDescription<N, A>> descriptions = successorGenerator.generateSuccessors(node);
+				tentativeSuccessors.put(node, descriptions.stream().map(INewNodeDescription::getTo).collect(Collectors.toList()));
+				tentativeSuccessorActions.put(node, descriptions.stream().map(INewNodeDescription::getArcLabel).collect(Collectors.toList()));
 				tentativePath.extend(tentativeSuccessors.get(node).get(decisions[i]), tentativeSuccessorActions.get(node).get(decisions[i]));
 			}
 
@@ -253,7 +253,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 		}
 	}
 
-	private boolean checkPathConsistency(final IPath<N, A> path) {
+	private boolean checkPathConsistency(final ILabeledPath<N, A> path) {
 		N last = null;
 		for (N node : path.getNodes()) {
 			if (last != null) {

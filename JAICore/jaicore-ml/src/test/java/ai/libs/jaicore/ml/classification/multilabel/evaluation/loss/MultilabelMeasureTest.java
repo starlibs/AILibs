@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.classification.multilabel;
+package ai.libs.jaicore.ml.classification.multilabel.evaluation.loss;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,9 +11,6 @@ import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClass
 import org.junit.Test;
 
 import ai.libs.jaicore.ml.classification.multilabel.MultiLabelClassification;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.F1MacroAverageL;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.Hamming;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.InstanceWiseF1;
 
 public class MultilabelMeasureTest {
 

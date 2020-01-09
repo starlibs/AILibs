@@ -1,6 +1,6 @@
 package ai.libs.jaicore.search.testproblems.enhancedttsp;
 
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
@@ -9,7 +9,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 import it.unimi.dsi.fastutil.shorts.ShortList;
 
 public class EnhancedTTSPToGraphSearchReducer
-implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double>, IPath<EnhancedTTSPNode, String>> {
+implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double>, ILabeledPath<EnhancedTTSPNode, String>> {
 
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double> encodeProblem(final EnhancedTTSP problem) {
@@ -17,7 +17,7 @@ implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithS
 	}
 
 	@Override
-	public ShortList decodeSolution(final IPath<EnhancedTTSPNode, String> solution) {
+	public ShortList decodeSolution(final ILabeledPath<EnhancedTTSPNode, String> solution) {
 		System.out.println(solution.getClass());
 		System.out.println(solution.getHead().getClass());
 		ShortList tour = solution.getHead().getCurTour();

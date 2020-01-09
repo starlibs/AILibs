@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +53,7 @@ public class ReductionOptimizer implements Classifier {
 	public void buildClassifier(final Instances data) throws Exception {
 		List<IWekaInstances> dataSplit = WekaUtil.getStratifiedSplit(new WekaInstances(data), this.seed, .6f);
 		Instances train = dataSplit.get(0).getList();
-		NodeGoalTester<RestProblem, Decision> tester = new NodeGoalTester<RestProblem, Decision>() {
+		INodeGoalTester<RestProblem, Decision> tester = new INodeGoalTester<RestProblem, Decision>() {
 
 			@Override
 			public boolean isGoal(final RestProblem n) {

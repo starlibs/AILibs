@@ -42,7 +42,11 @@ public class WekaInstancesUtil {
 
 	public static Instances datasetToWekaInstances(final ILabeledDataset<? extends ILabeledInstance> dataset) throws UnsupportedAttributeTypeException {
 		Instances wekaInstances = createDatasetFromSchema(dataset.getInstanceSchema());
+		int expectedAttributes = dataset.getInstanceSchema().getNumAttributes();
 		for (ILabeledInstance inst : dataset) {
+			if (inst.getNumAttributes() != expectedAttributes) {
+				throw new IllegalStateException("Dataset scheme defines a number of " + expectedAttributes + " attributes, but instance has " + inst.getNumAttributes() + ". Attributes in scheme: " + dataset.getInstanceSchema().getAttributeList().stream().map(a -> "\n\t" + a.getName() + " (" + a.toString() + ")").collect(Collectors.joining()) + ". Attributes in instance: " + Arrays.stream(inst.getAttributes()).map(a -> "\n\t" + a.toString()).collect(Collectors.joining()));
+			}
 			double[] point = inst.getPoint();
 			double[] pointWithLabel = Arrays.copyOf(point, point.length + 1);
 			DenseInstance iNew = new DenseInstance(1, pointWithLabel);
@@ -50,7 +54,7 @@ public class WekaInstancesUtil {
 			if (dataset.getLabelAttribute() instanceof ICategoricalAttribute) {
 				iNew.setClassValue(((ICategoricalAttribute) dataset.getLabelAttribute()).getLabelOfCategory((int)inst.getLabel()));
 			} else {
-				iNew.setClassValue((Double) inst.getLabel());
+				iNew.setClassValue(Double.parseDouble(inst.getLabel().toString()));
 			}
 			wekaInstances.add(iNew); // this MUST come here AFTER having set the class value; otherwise, the class is not registered correctly in the Instances object!!
 		}
@@ -64,9 +68,9 @@ public class WekaInstancesUtil {
 		for (int i = 0; i < schema.getNumAttributes(); i++) {
 			IAttribute attType = schema.getAttributeList().get(i);
 			if (attType instanceof NumericAttribute) {
-				attributes.add(new Attribute("att" + i));
+				attributes.add(new Attribute(attType.getName()));
 			} else if (attType instanceof IntBasedCategoricalAttribute) {
-				attributes.add(new Attribute("att" + i, ((IntBasedCategoricalAttribute) attType).getLabels()));
+				attributes.add(new Attribute(attType.getName(), ((IntBasedCategoricalAttribute) attType).getLabels()));
 			} else {
 				throw new UnsupportedAttributeTypeException("The class attribute has an unsupported attribute type " + attType.getName() + ".");
 			}
@@ -76,13 +80,12 @@ public class WekaInstancesUtil {
 		Attribute classAttribute;
 
 		if (classType instanceof INumericAttribute) {
-			classAttribute = new Attribute("class");
+			classAttribute = new Attribute(classType.getName());
 		} else if (classType instanceof ICategoricalAttribute) {
-			classAttribute = new Attribute("class", ((IntBasedCategoricalAttribute) classType).getLabels());
+			classAttribute = new Attribute(classType.getName(), ((IntBasedCategoricalAttribute) classType).getLabels());
 		} else {
 			throw new UnsupportedAttributeTypeException("The class attribute has an unsupported attribute type.");
 		}
-
 		ArrayList<Attribute> attributeList = new ArrayList<>(attributes);
 		attributeList.add(classAttribute);
 
@@ -133,6 +136,9 @@ public class WekaInstancesUtil {
 			iNew.setValue(iNew.numAttributes() - 1, ((ICategoricalAttribute) schema.getLabelAttribute()).getAsAttributeValue(instance.getLabel()).getValue());
 		} else {
 			throw new UnsupportedAttributeTypeException("Only categorical and numeric attributes are supported!");
+		}
+		if (iNew.numClasses() != dataset.numClasses()) {
+			throw new IllegalStateException();
 		}
 		return iNew;
 	}

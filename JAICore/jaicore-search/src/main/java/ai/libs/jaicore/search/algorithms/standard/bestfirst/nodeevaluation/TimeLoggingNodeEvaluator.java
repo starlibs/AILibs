@@ -5,17 +5,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 public class TimeLoggingNodeEvaluator<T, A, V extends Comparable<V>> extends DecoratingNodeEvaluator<T, A, V> {
 
-	private final Map<IPath<T, A>, Integer> times = new ConcurrentHashMap<>();
+	private final Map<ILabeledPath<T, A>, Integer> times = new ConcurrentHashMap<>();
 
 	public TimeLoggingNodeEvaluator(final IPathEvaluator<T, A,V> baseEvaluator) {
 		super(baseEvaluator);
 	}
 
-	public int getMSRequiredForComputation(final IPath<T, A> path) {
+	public int getMSRequiredForComputation(final ILabeledPath<T, A> path) {
 		if (!this.times.containsKey(path)) {
 			throw new IllegalArgumentException("No f-value has been computed for node: " + path);
 		}
@@ -23,7 +23,7 @@ public class TimeLoggingNodeEvaluator<T, A, V extends Comparable<V>> extends Dec
 	}
 
 	@Override
-	public V evaluate(final IPath<T, A> path) throws PathEvaluationException, InterruptedException {
+	public V evaluate(final ILabeledPath<T, A> path) throws PathEvaluationException, InterruptedException {
 		long start = System.currentTimeMillis();
 		V f = super.evaluate(path);
 		this.times.put(path, (int) (System.currentTimeMillis() - start));

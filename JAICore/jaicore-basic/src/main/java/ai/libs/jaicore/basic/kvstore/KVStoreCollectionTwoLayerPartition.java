@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.api4.java.datastructure.kvstore.IKVStore;
+
 /**
  * Automatically partitions a KVStoreCollection in a two-layered fashion according to a first and second level key when KVStores or KVStoreCollections are added.
  *

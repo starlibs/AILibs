@@ -9,7 +9,7 @@ import java.util.Random;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
 import ai.libs.jaicore.ml.core.dataset.DatasetDeriver;
@@ -27,7 +27,7 @@ public class SimpleRandomSampling<D extends IDataset<?>> extends ASamplingAlgori
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
+	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
 		int n = this.getInput().size();
 		switch (this.getState()) {
 		case CREATED:

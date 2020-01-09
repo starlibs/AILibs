@@ -9,8 +9,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.basic.kvstore.IKVStore;
+import ai.libs.jaicore.db.sql.SQLAdapter;
 
 /**
 * Connection for uploading results of AutoMLC experiments.

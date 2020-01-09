@@ -7,22 +7,22 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
-import org.api4.java.algorithm.events.ASolutionCandidateFoundEvent;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
-import org.api4.java.algorithm.events.SolutionCandidateFoundEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.events.result.ISolutionCandidateFoundEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.ILabeledPath;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.jaicore.basic.algorithm.ASolutionCandidateFoundEvent;
+import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.SuccessorComputationCompletedEvent;
@@ -59,7 +59,7 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 		}
 
 		@Override
-		public NodeOrderList evaluate(final IPath<T, A> node) {
+		public NodeOrderList evaluate(final ILabeledPath<T, A> node) {
 			NodeOrderList list = new NodeOrderList();
 			BackPointerPath<T, A, ?> parent = ((BackPointerPath<T, A, ?>)node).getParent();
 			if (parent == null) {
@@ -74,7 +74,7 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 
 		@Subscribe
 		public void receiveSuccessorsCreatedEvent(final SuccessorComputationCompletedEvent<T, A, ?> successorDescriptions) {
-			List<T> successors = successorDescriptions.getSuccessorDescriptions().stream().map(NodeExpansionDescription::getTo).sorted(this.heuristic).collect(Collectors.toList());
+			List<T> successors = successorDescriptions.getSuccessorDescriptions().stream().map(INewNodeDescription::getTo).sorted(this.heuristic).collect(Collectors.toList());
 			this.childOrdering.put(successorDescriptions.getNode(), successors);
 		}
 	}
@@ -104,22 +104,22 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		this.checkAndConductTermination();
 		if (this.getState().equals(EAlgorithmState.CREATED)) {
 			this.bestFirst.setTimeout(this.getTimeout());
 			return this.activate();
 		}
-		AlgorithmEvent e = this.bestFirst.nextWithException();
+		IAlgorithmEvent e = this.bestFirst.nextWithException();
 		if (e instanceof AlgorithmInitializedEvent) {
 			return this.nextWithException();
 		} else if (e instanceof AlgorithmFinishedEvent) {
 			return this.terminate();
-		} else if (e instanceof SolutionCandidateFoundEvent) {
+		} else if (e instanceof ISolutionCandidateFoundEvent) {
 			@SuppressWarnings({ "unchecked", "rawtypes" })
-			EvaluatedSearchGraphPath<T, A, NodeOrderList> solution = (EvaluatedSearchGraphPath<T, A, NodeOrderList>) ((SolutionCandidateFoundEvent) e).getSolutionCandidate();
+			EvaluatedSearchGraphPath<T, A, NodeOrderList> solution = (EvaluatedSearchGraphPath<T, A, NodeOrderList>) ((ISolutionCandidateFoundEvent) e).getSolutionCandidate();
 			EvaluatedSearchGraphPath<T, A, V> modifiedSolution = new EvaluatedSearchGraphPath<>(solution.getNodes(), solution.getArcs(), null);
-			return new ASolutionCandidateFoundEvent<>(this.getId(), modifiedSolution);
+			return new ASolutionCandidateFoundEvent<>(this, modifiedSolution);
 		} else {
 			return e;
 		}

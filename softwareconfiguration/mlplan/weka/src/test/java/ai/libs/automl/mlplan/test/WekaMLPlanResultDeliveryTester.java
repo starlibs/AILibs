@@ -12,7 +12,7 @@ import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFail
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 
 import ai.libs.automl.AutoMLAlgorithmResultProductionTester;
 import ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier;
@@ -30,10 +30,10 @@ public class WekaMLPlanResultDeliveryTester extends AutoMLAlgorithmResultProduct
 		try {
 			MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 			int baseTime = Math.max(5, (int)Math.ceil(1.2 * this.getTrainTimeOfMajorityClassifier(data) / 1000.0));
-			builder.withNodeEvaluationTimeOut(new TimeOut(baseTime * 12, TimeUnit.SECONDS));
-			builder.withCandidateEvaluationTimeOut(new TimeOut(baseTime * 6, TimeUnit.SECONDS));
+			builder.withNodeEvaluationTimeOut(new Timeout(baseTime * 12, TimeUnit.SECONDS));
+			builder.withCandidateEvaluationTimeOut(new Timeout(baseTime * 6, TimeUnit.SECONDS));
 			builder.withNumCpus(8);
-			builder.withTimeOut(new TimeOut(5 * (int)Math.pow(baseTime, 2), TimeUnit.SECONDS));
+			builder.withTimeOut(new Timeout(5 * (int)Math.pow(baseTime, 2), TimeUnit.SECONDS));
 			builder.withTinyWekaSearchSpace();
 			builder.withSeed(1);
 			builder.withPortionOfDataReservedForSelection(.0f);

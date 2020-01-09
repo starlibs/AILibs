@@ -3,15 +3,15 @@ package ai.libs.jaicore.search.testproblems.gridworld;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
 import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.RootGenerator;
+import org.api4.java.datastructure.graph.implicit.IRootGenerator;
 import org.api4.java.datastructure.graph.implicit.SerializableGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
 import ai.libs.jaicore.problems.gridworld.GridWorldNode;
 import ai.libs.jaicore.problems.gridworld.GridWorldProblem;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 @SuppressWarnings("serial")
 public class GridWorldBasicGraphGenerator implements SerializableGraphGenerator<GridWorldNode, String> {
@@ -24,8 +24,8 @@ public class GridWorldBasicGraphGenerator implements SerializableGraphGenerator<
 	}
 
 	@Override
-	public RootGenerator<GridWorldNode> getRootGenerator() {
-		return new SingleRootGenerator<GridWorldNode>() {
+	public IRootGenerator<GridWorldNode> getRootGenerator() {
+		return new ISingleRootGenerator<GridWorldNode>() {
 			@Override
 			public GridWorldNode getRoot() {
 				return new GridWorldNode(GridWorldBasicGraphGenerator.this.problem, GridWorldBasicGraphGenerator.this.problem.getStartX(), GridWorldBasicGraphGenerator.this.problem.getStartY());
@@ -34,8 +34,8 @@ public class GridWorldBasicGraphGenerator implements SerializableGraphGenerator<
 	}
 
 	@Override
-	public SuccessorGenerator<GridWorldNode, String> getSuccessorGenerator() {
-		return new SuccessorGenerator<GridWorldNode, String>() {
+	public ISuccessorGenerator<GridWorldNode, String> getSuccessorGenerator() {
+		return new ISuccessorGenerator<GridWorldNode, String>() {
 			@Override
 			public List<NodeExpansionDescription<GridWorldNode, String>> generateSuccessors(final GridWorldNode node) {
 				ArrayList<NodeExpansionDescription<GridWorldNode, String>> succ = new ArrayList<>();

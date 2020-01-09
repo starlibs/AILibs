@@ -4,7 +4,7 @@ import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.LoadType;
 import org.aeonbits.owner.Config.Sources;
 
-import ai.libs.jaicore.basic.IDatabaseConfig;
+import ai.libs.jaicore.db.IDatabaseConfig;
 import ai.libs.jaicore.ml.core.evaluation.experiment.IMultiClassClassificationExperimentConfig;
 
 @LoadPolicy(LoadType.MERGE)

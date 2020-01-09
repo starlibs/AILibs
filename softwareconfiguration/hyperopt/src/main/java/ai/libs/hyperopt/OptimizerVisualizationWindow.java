@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 
 import ai.libs.jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
 import ai.libs.jaicore.graphvisualizer.events.recorder.AlgorithmEventHistory;
@@ -68,7 +68,7 @@ public class OptimizerVisualizationWindow implements Runnable {
 	 * used when using a visualization in an online run.
 	 *
 	 * @param algorithm The {@link IAlgorithm} yielding information to be displayed.
-	 * @param algorithmEventPropertyComputers The {@link AlgorithmEventPropertyComputer}s computing all information from the {@link AlgorithmEvent}s provided by the {@link IAlgorithm} which are required by the {@link IGUIPlugin}s which are
+	 * @param algorithmEventPropertyComputers The {@link AlgorithmEventPropertyComputer}s computing all information from the {@link IAlgorithmEvent}s provided by the {@link IAlgorithm} which are required by the {@link IGUIPlugin}s which are
 	 *            registered.
 	 * @param mainPlugin The main {@link IGUIPlugin} which will be displayed as the main information source.
 	 * @param visualizationPlugins A list of additional {@link IGUIPlugin}s displaying side information.

@@ -69,7 +69,7 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 		this.logger.debug("Received request to evaluate component instance {}", c);
 		try {
 			if (this.benchmark instanceof IInformedObjectEvaluatorExtension) {
-				((IInformedObjectEvaluatorExtension<Double>) this.benchmark).updateBestScore(this.bestScore);
+				((IInformedObjectEvaluatorExtension<Double>) this.benchmark).informAboutBestScore(this.bestScore);
 			}
 			ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner = this.learnerFactory.getComponentInstantiation(c);
 			this.eventBus.post(new SupervisedLearnerCreatedEvent(c, learner)); // inform listeners about the creation of the classifier
@@ -87,7 +87,7 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 	}
 
 	@Override
-	public void updateBestScore(final Double bestScore) {
+	public void informAboutBestScore(final Double bestScore) {
 		this.bestScore = bestScore;
 	}
 

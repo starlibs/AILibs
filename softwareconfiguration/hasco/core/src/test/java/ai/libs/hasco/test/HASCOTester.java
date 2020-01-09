@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -133,7 +133,7 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 				continue;
 			}
 			List<ComponentInstance> solutions = new ArrayList<>();
-			for (AlgorithmEvent e : hasco) {
+			for (IAlgorithmEvent e : hasco) {
 				if (e instanceof HASCOSolutionEvent) {
 					solutions.add(((HASCOSolutionEvent<Double>) e).getSolutionCandidate().getComponentInstance());
 					this.logger.info("Found solution {}", CompositionSerializer.serializeComponentInstance(((HASCOSolutionEvent<Double>) e).getSolutionCandidate().getComponentInstance()));

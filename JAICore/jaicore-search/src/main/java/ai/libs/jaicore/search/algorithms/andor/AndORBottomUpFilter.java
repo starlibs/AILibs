@@ -12,9 +12,9 @@ import java.util.Queue;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearch;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.ai.graphsearch.problem.IPathSearch;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -22,9 +22,8 @@ import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
 import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +33,10 @@ import ai.libs.jaicore.basic.sets.RelationComputationProblem;
 import ai.libs.jaicore.graph.Graph;
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
-public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorithm<GraphSearchInput<N, A>, Graph<N>> implements IGraphSearch<GraphSearchInput<N, A>, Graph<N>, N, A> {
+public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorithm<GraphSearchInput<N, A>, Graph<N>> implements IPathSearch<GraphSearchInput<N, A>, Graph<N>, N, A> {
 
 	private Logger logger = LoggerFactory.getLogger(AndORBottomUpFilter.class);
 	private String loggerName;
@@ -72,24 +72,24 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	private Graph<N> bestSolutionBase;
 	private final int nodeLimit;
 
-	public AndORBottomUpFilter(final IGraphGenerator<N, A> gg, final PathGoalTester<N, A> gt,final IObjectEvaluator<Graph<N>, V> pEvaluator) {
+	public AndORBottomUpFilter(final IGraphGenerator<N, A> gg, final IPathGoalTester<N, A> gt,final IObjectEvaluator<Graph<N>, V> pEvaluator) {
 		this(gg, gt, pEvaluator, 1);
 	}
 
-	public AndORBottomUpFilter(final IGraphGenerator<N, A> gg, final PathGoalTester<N, A> gt, final IObjectEvaluator<Graph<N>, V> pEvaluator, final int andNodeLimit) {
+	public AndORBottomUpFilter(final IGraphGenerator<N, A> gg, final IPathGoalTester<N, A> gt, final IObjectEvaluator<Graph<N>, V> pEvaluator, final int andNodeLimit) {
 		super(new GraphSearchInput<>(gg, gt));
 		this.evaluator = pEvaluator;
 		this.nodeLimit = andNodeLimit;
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException {
+	public IAlgorithmEvent nextWithException() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		switch (this.getState()) {
 		case CREATED:
 
 			/* step 1: construct the whole graph */
 			Queue<InnerNodeLabel> open = new LinkedList<>();
-			InnerNodeLabel root = new InnerNodeLabel(((SingleRootGenerator<N>) this.getInput().getGraphGenerator().getRootGenerator()).getRoot(), NodeType.AND);
+			InnerNodeLabel root = new InnerNodeLabel(((ISingleRootGenerator<N>) this.getInput().getGraphGenerator().getRootGenerator()).getRoot(), NodeType.AND);
 			root.val = 0;
 			open.add(root);
 			this.post(new GraphInitializedEvent<N>(this.getId(), root.node));

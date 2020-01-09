@@ -3,12 +3,14 @@ package ai.libs.jaicore.search.algorithms.parallel.parallelexploration.distribut
 import java.util.ArrayList;
 import java.util.List;
 
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
 import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.RootGenerator;
+import org.api4.java.datastructure.graph.implicit.IRootGenerator;
 import org.api4.java.datastructure.graph.implicit.SerializableGraphGenerator;
 import org.api4.java.datastructure.graph.implicit.SerializableRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
+
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
 @SuppressWarnings("serial")
 public class DistributedBestFirstClusterTesterGenerator implements SerializableGraphGenerator<TestNode, String> {
@@ -24,7 +26,7 @@ public class DistributedBestFirstClusterTesterGenerator implements SerializableG
 	}
 
 	@Override
-	public SuccessorGenerator<TestNode, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<TestNode, String> getSuccessorGenerator() {
 		return n -> {
 			List<NodeExpansionDescription<TestNode, String>> l = new ArrayList<>();
 			TestNode parent = n;
@@ -38,7 +40,7 @@ public class DistributedBestFirstClusterTesterGenerator implements SerializableG
 	}
 
 	@Override
-	public RootGenerator<TestNode> getRootGenerator() {
+	public IRootGenerator<TestNode> getRootGenerator() {
 		return this.rootGenerator;
 	}
 }

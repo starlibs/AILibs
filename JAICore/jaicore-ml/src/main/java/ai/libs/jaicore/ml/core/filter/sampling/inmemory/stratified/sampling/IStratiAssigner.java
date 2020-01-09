@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.IInstance;
-import org.api4.java.common.parallelization.IParallelizable;
+import org.api4.java.common.control.IParallelizable;
 
 /**
  * Interface to write custom Assigner for datapoints to strati.

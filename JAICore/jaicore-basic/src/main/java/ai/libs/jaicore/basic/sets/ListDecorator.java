@@ -62,7 +62,7 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 	}
 
 	@Override
-	public Constructor<D> getConstructorForDecoratedItems() {
+	public Constructor<D> getConstructorForDecoratingItems() {
 		return this.constructorForDecoratedItems;
 	}
 

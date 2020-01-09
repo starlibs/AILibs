@@ -1,5 +1,7 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst.events;
 
+import org.api4.java.algorithm.IAlgorithm;
+
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 
 public class SolutionAnnotationEvent<T, A, V extends Comparable<V>> extends BestFirstEvent {
@@ -8,22 +10,22 @@ public class SolutionAnnotationEvent<T, A, V extends Comparable<V>> extends Best
 	private final String annotationName;
 	private final Object annotationValue;
 
-	public SolutionAnnotationEvent(String algorithmId, EvaluatedSearchGraphPath<T,A,V> solution, String annotationName, Object annotationValue) {
-		super(algorithmId);
+	public SolutionAnnotationEvent(final IAlgorithm<?, ?> algorithm, final EvaluatedSearchGraphPath<T,A,V> solution, final String annotationName, final Object annotationValue) {
+		super(algorithm);
 		this.solution = solution;
 		this.annotationName = annotationName;
 		this.annotationValue = annotationValue;
 	}
 
 	public EvaluatedSearchGraphPath<T,A,V> getSolution() {
-		return solution;
+		return this.solution;
 	}
 
 	public String getAnnotationName() {
-		return annotationName;
+		return this.annotationName;
 	}
 
 	public Object getAnnotationValue() {
-		return annotationValue;
+		return this.annotationValue;
 	}
 }

@@ -12,7 +12,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.IDatabaseConfig;
+import ai.libs.jaicore.db.IDatabaseConfig;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
 import ai.libs.jaicore.experiments.ExperimentDatabasePreparer;
 import ai.libs.jaicore.experiments.ExperimentRunner;

@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.hasco.core.Util;
 import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
@@ -54,7 +54,7 @@ public abstract class AbstractHASCOFENodeEvaluator extends AbstractHASCOFEEvalua
 		return this.getFactory().getComponentInstantiation(ci);
 	}
 
-	protected FilterPipeline extractPipelineFromNode(final IPath<TFDNode, String> path) throws PathEvaluationException {
+	protected FilterPipeline extractPipelineFromNode(final ILabeledPath<TFDNode, String> path) throws PathEvaluationException {
 		FilterPipeline pipe;
 		try {
 			pipe = this.getPipelineFromNode(path.getHead());
@@ -64,11 +64,11 @@ public abstract class AbstractHASCOFENodeEvaluator extends AbstractHASCOFEEvalua
 		return pipe;
 	}
 
-	boolean hasPathEmptyParent(final IPath<TFDNode, String> path) {
+	boolean hasPathEmptyParent(final ILabeledPath<TFDNode, String> path) {
 		return path.getNodes().size() == 1;
 	}
 
-	boolean hasPathExceededPipelineSize(final IPath<TFDNode, String> path) {
+	boolean hasPathExceededPipelineSize(final ILabeledPath<TFDNode, String> path) {
 		return path.getNodes().size() > this.maxPipelineSize;
 	}
 }

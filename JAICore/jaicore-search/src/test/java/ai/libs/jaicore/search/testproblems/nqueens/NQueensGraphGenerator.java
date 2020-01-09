@@ -3,11 +3,13 @@ package ai.libs.jaicore.search.testproblems.nqueens;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
 import org.api4.java.datastructure.graph.implicit.NodeType;
 import org.api4.java.datastructure.graph.implicit.SerializableGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
+
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
 @SuppressWarnings("serial")
 public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNode, String> {
@@ -20,12 +22,12 @@ public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNo
 	}
 
 	@Override
-	public SingleRootGenerator<QueenNode> getRootGenerator() {
+	public ISingleRootGenerator<QueenNode> getRootGenerator() {
 		return () -> new QueenNode(this.dimension);
 	}
 
 	@Override
-	public SuccessorGenerator<QueenNode, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<QueenNode, String> getSuccessorGenerator() {
 		return n -> {
 			List<NodeExpansionDescription<QueenNode, String>> l = new ArrayList<>();
 			int currentRow = n.getPositions().size();

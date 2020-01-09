@@ -2,7 +2,7 @@ package ai.libs.jaicore.search.algorithms.andor;
 
 import static org.junit.Assert.assertEquals;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.junit.Test;
 
@@ -20,7 +20,7 @@ public class AndOrTester {
 		int d = 4;
 		int limit = 1;
 		SyntheticAndGrid gg = new SyntheticAndGrid(k, b, d);
-		NodeGoalTester<NodeLabel, String> goalTester = n -> (n.depth == gg.getDepth());
+		INodeGoalTester<NodeLabel, String> goalTester = n -> (n.depth == gg.getDepth());
 		IObjectEvaluator<Graph<NodeLabel>, Double> evaluator = g -> {
 			double sum = 0;
 			for (NodeLabel leaf : g.getSinks()) {

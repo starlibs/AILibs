@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +39,9 @@ public class MLPlanOpenMLExample {
 
 		/* initialize mlplan, and let it run for 30 seconds */
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
-		builder.withNodeEvaluationTimeOut(new TimeOut(10, TimeUnit.SECONDS));
-		builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.SECONDS));
-		builder.withTimeOut(new TimeOut(2, TimeUnit.MINUTES));
+		builder.withNodeEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.SECONDS));
+		builder.withTimeOut(new Timeout(2, TimeUnit.MINUTES));
 		builder.withNumCpus(4);
 		builder.withSeed(1);
 		builder.withMCCVBasedCandidateEvaluationInSearchPhase().withNumMCIterations(12);

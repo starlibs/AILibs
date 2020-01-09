@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
 import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
+
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
 public class PDPuzzleGenerator implements IGraphGenerator<PDPuzzleNode, String> {
 
@@ -20,12 +22,12 @@ public class PDPuzzleGenerator implements IGraphGenerator<PDPuzzleNode, String> 
 	}
 
 	@Override
-	public SingleRootGenerator<PDPuzzleNode> getRootGenerator() {
+	public ISingleRootGenerator<PDPuzzleNode> getRootGenerator() {
 		return () -> this.root;
 	}
 
 	@Override
-	public SuccessorGenerator<PDPuzzleNode, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<PDPuzzleNode, String> getSuccessorGenerator() {
 		return n -> {
 			List<NodeExpansionDescription<PDPuzzleNode, String>> successors = new ArrayList<>();
 

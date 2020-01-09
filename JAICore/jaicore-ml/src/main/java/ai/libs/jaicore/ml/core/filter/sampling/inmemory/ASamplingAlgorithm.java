@@ -7,7 +7,7 @@ import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.core.filter.unsupervised.sampling.ISamplingAlgorithm;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -134,7 +134,7 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 		return (D) this.caps.dataForSample;
 	}
 
-	protected AlgorithmEvent doInactiveStep() throws AlgorithmException {
+	protected IAlgorithmEvent doInactiveStep() throws AlgorithmException {
 		if (this.sample.size() < this.sampleSize) {
 			throw new AlgorithmException("Expected sample size was not reached before termination");
 		} else {

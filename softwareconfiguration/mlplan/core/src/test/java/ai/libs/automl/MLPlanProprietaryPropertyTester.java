@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 import org.junit.Test;
 
 import com.google.common.eventbus.Subscribe;
@@ -29,7 +29,7 @@ public class MLPlanProprietaryPropertyTester {
 	@Test
 	public void testThatSelectionPhaseUsesSupersetOfSearchData() throws Exception {
 		final ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(30);
-		MLPlanSimpleBuilder builder = new MLPlanSimpleBuilder().withPortionOfDataReservedForSelection(.3).withTimeOut(new TimeOut(30, TimeUnit.SECONDS)).withDataset(ds);
+		MLPlanSimpleBuilder builder = new MLPlanSimpleBuilder().withPortionOfDataReservedForSelection(.3).withTimeOut(new Timeout(30, TimeUnit.SECONDS)).withDataset(ds);
 		final MLPlan<?> mlplan = builder.build();
 		final int dataSizeSearchPhase = (int)Math.round(ds.size() * .7);
 		final int dataSizeSelectionPhase = ds.size();

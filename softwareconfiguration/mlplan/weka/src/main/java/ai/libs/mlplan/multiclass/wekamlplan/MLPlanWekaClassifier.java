@@ -15,7 +15,7 @@ import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.exception.LearnerConfigurationFailedException;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -57,7 +57,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	private final transient MLPlanWekaBuilder builder;
 
 	/* The timeout for the selecting a classifier. */
-	private TimeOut timeout;
+	private Timeout timeout;
 
 	/* The output of mlplan, i.e., the selected classifier and the internal validation error measured on the given data. */
 	private IWekaClassifier classifierFoundByMLPlan;
@@ -141,7 +141,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 		return new String[] {};
 	}
 
-	public void setTimeout(final TimeOut timeout) {
+	public void setTimeout(final Timeout timeout) {
 		this.timeout = timeout;
 	}
 

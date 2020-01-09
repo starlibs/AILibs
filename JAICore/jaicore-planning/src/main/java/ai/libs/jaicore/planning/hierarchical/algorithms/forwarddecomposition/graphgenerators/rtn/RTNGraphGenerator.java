@@ -11,9 +11,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +30,7 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.planning.hierarchical.problems.rtn.RTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.Method;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.MethodInstance;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public class RTNGraphGenerator implements IGraphGenerator<RTNNode, RTNEdge> {
 
@@ -47,14 +48,14 @@ public class RTNGraphGenerator implements IGraphGenerator<RTNNode, RTNEdge> {
 	}
 
 	@Override
-	public SingleRootGenerator<RTNNode> getRootGenerator() {
+	public ISingleRootGenerator<RTNNode> getRootGenerator() {
 		return () -> new RTNNode(false, this.problem.getInit(), new ArrayList<>(this.util.getTaskChainOfTotallyOrderedNetwork(this.problem.getNetwork())));
 	}
 
 	@Override
-	public SuccessorGenerator<RTNNode, RTNEdge> getSuccessorGenerator() {
+	public ISuccessorGenerator<RTNNode, RTNEdge> getSuccessorGenerator() {
 		return l -> {
-			final List<NodeExpansionDescription<RTNNode, RTNEdge>> successors = new ArrayList<>();
+			final List<INewNodeDescription<RTNNode, RTNEdge>> successors = new ArrayList<>();
 			final Monom state = l.getState();
 			final List<Literal> currentlyRemainingTasks = l.getRemainingTasks();
 			final Literal nextTaskTmp = currentlyRemainingTasks.get(0);
@@ -97,7 +98,7 @@ public class RTNGraphGenerator implements IGraphGenerator<RTNNode, RTNEdge> {
 						final List<Literal> remainingTasks = new ArrayList<>(currentlyRemainingTasks);
 						remainingTasks.remove(0);
 						boolean isAndNode = this.remainingTasksInitializeANDNode(remainingTasks);
-						successors.add(new NodeExpansionDescription<>(new RTNNode(isAndNode, updatedState, remainingTasks), new RTNEdge(null, null, relevantAction), null));
+						successors.add(new NodeExpansionDescription<>(new RTNNode(isAndNode, updatedState, remainingTasks), new RTNEdge(null, null, relevantAction)));
 					}
 					assert checkDoubleNodes(successors);
 					logger.info("Computed {} successors", successors.size());
@@ -135,7 +136,7 @@ public class RTNGraphGenerator implements IGraphGenerator<RTNNode, RTNEdge> {
 
 						/* hard code the and-or-stuff for a moment */
 						boolean isAndNode = this.remainingTasksInitializeANDNode(remainingTasks);
-						successors.add(new NodeExpansionDescription<>(new RTNNode(isAndNode, state, remainingTasks), new RTNEdge(null, instance, null), null));
+						successors.add(new NodeExpansionDescription<>(new RTNNode(isAndNode, state, remainingTasks), new RTNEdge(null, instance, null)));
 					}
 				}
 			}
@@ -223,12 +224,12 @@ public class RTNGraphGenerator implements IGraphGenerator<RTNNode, RTNEdge> {
 					}
 
 					remainingTask.add(new Literal(task.getPropertyName().substring(task.getPropertyName().indexOf('-') + 1), paramsForTask));
-					successors.add(new NodeExpansionDescription<>(new RTNNode(false, reducedState, remainingTask), new RTNEdge(mapping, null, null), null));
+					successors.add(new NodeExpansionDescription<>(new RTNNode(false, reducedState, remainingTask), new RTNEdge(mapping, null, null)));
 				}
 
 				/* now create one node for the remaining tasks */
 				if (!tasksForLastNode.isEmpty()) {
-					successors.add(new NodeExpansionDescription<>(new RTNNode(false, state, tasksForLastNode), new RTNEdge(null, null, null), null));
+					successors.add(new NodeExpansionDescription<>(new RTNNode(false, state, tasksForLastNode), new RTNEdge(null, null, null)));
 				}
 			}
 
@@ -245,7 +246,7 @@ public class RTNGraphGenerator implements IGraphGenerator<RTNNode, RTNEdge> {
 		return followingTask.getPropertyName().contains("refine");
 	}
 
-	private static boolean checkDoubleNodes(final List<NodeExpansionDescription<RTNNode, RTNEdge>> successors) {
+	private static boolean checkDoubleNodes(final List<INewNodeDescription<RTNNode, RTNEdge>> successors) {
 		if (successors.size() != new HashSet<>(successors).size()) {
 			logger.error("Doppelte Knoten im Nachfolger!");
 			return false;

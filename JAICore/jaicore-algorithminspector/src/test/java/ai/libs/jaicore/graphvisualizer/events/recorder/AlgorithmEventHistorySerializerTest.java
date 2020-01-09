@@ -6,12 +6,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.api4.java.algorithm.events.AlgorithmCanceledEvent;
-import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
-import org.api4.java.algorithm.events.AlgorithmInterruptedEvent;
 import org.junit.Test;
 
+import ai.libs.jaicore.basic.algorithm.AlgorithmCanceledEvent;
+import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import ai.libs.jaicore.basic.algorithm.AlgorithmInterruptedEvent;
 import ai.libs.jaicore.basic.sets.TupleFoundEvent;
 import ai.libs.jaicore.basic.sets.TupleOfCartesianProductFoundEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;

@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
 import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
 import ai.libs.jaicore.problems.npuzzle.NPuzzleState;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 /**
  * A simple generator for the normal NPuzzleProblem.
@@ -39,12 +39,12 @@ public class NPuzzleGraphGenerator implements IGraphGenerator<NPuzzleState, Stri
 	}
 
 	@Override
-	public SingleRootGenerator<NPuzzleState> getRootGenerator() {
+	public ISingleRootGenerator<NPuzzleState> getRootGenerator() {
 		return () -> this.root;
 	}
 
 	@Override
-	public SuccessorGenerator<NPuzzleState, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<NPuzzleState, String> getSuccessorGenerator() {
 		return n -> {
 			List<NodeExpansionDescription<NPuzzleState, String>> successors = new ArrayList<>();
 

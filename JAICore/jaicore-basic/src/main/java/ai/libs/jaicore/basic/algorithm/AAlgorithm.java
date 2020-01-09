@@ -10,10 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -86,7 +84,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	@Override
-	public Iterator<AlgorithmEvent> iterator() {
+	public Iterator<IAlgorithmEvent> iterator() {
 		return this;
 	}
 
@@ -96,7 +94,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	@Override
-	public AlgorithmEvent next() {
+	public IAlgorithmEvent next() {
 		if (!this.hasNext()) {
 			throw new NoSuchElementException();
 		}
@@ -135,11 +133,11 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 	@Override
 	public void setTimeout(final long timeout, final TimeUnit timeUnit) {
-		this.setTimeout(new TimeOut(timeout, timeUnit));
+		this.setTimeout(new Timeout(timeout, timeUnit));
 	}
 
 	@Override
-	public void setTimeout(final TimeOut timeout) {
+	public void setTimeout(final Timeout timeout) {
 		this.logger.info("Setting timeout to {}ms", timeout.milliseconds());
 		this.getConfig().setProperty(IOwnerBasedAlgorithmConfig.K_TIMEOUT, timeout.milliseconds() + "");
 	}
@@ -153,8 +151,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	@Override
-	public TimeOut getTimeout() {
-		return new TimeOut(this.getConfig().timeout(), TimeUnit.MILLISECONDS);
+	public Timeout getTimeout() {
+		return new Timeout(this.getConfig().timeout(), TimeUnit.MILLISECONDS);
 	}
 
 	public boolean isTimeouted() {
@@ -168,11 +166,11 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		return false;
 	}
 
-	protected TimeOut getRemainingTimeToDeadline() {
+	protected Timeout getRemainingTimeToDeadline() {
 		if (this.deadline < 0) {
-			return new TimeOut(Integer.MAX_VALUE, TimeUnit.SECONDS);
+			return new Timeout(Integer.MAX_VALUE, TimeUnit.SECONDS);
 		}
-		return new TimeOut(this.deadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+		return new Timeout(this.deadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
 	}
 
 	public boolean isStopCriterionSatisfied() {
@@ -388,7 +386,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			this.deadline = this.activationTime + this.getTimeout().milliseconds();
 		}
 		this.state = EAlgorithmState.ACTIVE;
-		AlgorithmInitializedEvent event = new AlgorithmInitializedEvent(this.getId());
+		AlgorithmInitializedEvent event = new AlgorithmInitializedEvent(this);
 		this.eventBus.post(event);
 		this.logger.trace("Starting algorithm {} with problem {} and config {}", this.getId(), this.input, this.config);
 		return event;
@@ -402,7 +400,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected AlgorithmFinishedEvent terminate() {
 		this.logger.info("Terminating algorithm {}.", this.getId());
 		this.state = EAlgorithmState.INACTIVE;
-		AlgorithmFinishedEvent finishedEvent = new AlgorithmFinishedEvent(this.getId());
+		AlgorithmFinishedEvent finishedEvent = new AlgorithmFinishedEvent(this);
 		this.unregisterThreadAndShutdown();
 		this.eventBus.post(finishedEvent);
 		return finishedEvent;

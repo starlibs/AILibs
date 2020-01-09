@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.db.sql.SQLAdapter;
 import ai.libs.jaicore.ml.weka.classification.learner.reduction.splitter.RandomSplitter;
 
 public abstract class ABestOfKReductionStumpExperimentRunnerWrapper {

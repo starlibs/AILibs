@@ -5,16 +5,16 @@ import java.util.List;
 
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
 import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleSuccessorGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ILazySuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPNode;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 
@@ -30,13 +30,13 @@ public class EnhancedTTSPGraphGenerator implements IGraphGenerator<EnhancedTTSPN
 	}
 
 	@Override
-	public SingleRootGenerator<EnhancedTTSPNode> getRootGenerator() {
+	public ISingleRootGenerator<EnhancedTTSPNode> getRootGenerator() {
 		return () -> this.problem.getInitalState();
 	}
 
 	@Override
-	public SuccessorGenerator<EnhancedTTSPNode, String> getSuccessorGenerator() {
-		return new SingleSuccessorGenerator<EnhancedTTSPNode, String>() {
+	public ISuccessorGenerator<EnhancedTTSPNode, String> getSuccessorGenerator() {
+		return new ILazySuccessorGenerator<EnhancedTTSPNode, String>() {
 
 			private ShortList getPossibleDestinationsThatHaveNotBeenGeneratedYet(final EnhancedTTSPNode n) {
 				short curLoc = n.getCurLocation();

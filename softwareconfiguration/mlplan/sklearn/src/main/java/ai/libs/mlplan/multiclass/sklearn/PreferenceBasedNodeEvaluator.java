@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 	}
 
 	@Override
-	public Double evaluate(final IPath<TFDNode, String> n) {
+	public Double evaluate(final ILabeledPath<TFDNode, String> n) {
 		List<String> appliedMethods = new LinkedList<>();
 		for (TFDNode x : n.getNodes()) {
 			if (x.getAppliedMethodInstance() != null) {

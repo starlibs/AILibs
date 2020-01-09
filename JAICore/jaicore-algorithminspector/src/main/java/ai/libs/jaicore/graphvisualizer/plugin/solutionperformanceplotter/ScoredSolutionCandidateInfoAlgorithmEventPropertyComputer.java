@@ -1,7 +1,7 @@
 package ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.ScoredSolutionCandidateFoundEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.events.result.IScoredSolutionCandidateFoundEvent;
 
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyComputationFailedException;
@@ -21,9 +21,9 @@ public class ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer implement
 	}
 
 	@Override
-	public Object computeAlgorithmEventProperty(final AlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
-		if (algorithmEvent instanceof ScoredSolutionCandidateFoundEvent) {
-			ScoredSolutionCandidateFoundEvent<?, ?> solutionCandidateFoundEvent = (ScoredSolutionCandidateFoundEvent<?, ?>) algorithmEvent;
+	public Object computeAlgorithmEventProperty(final IAlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
+		if (algorithmEvent instanceof IScoredSolutionCandidateFoundEvent) {
+			IScoredSolutionCandidateFoundEvent<?, ?> solutionCandidateFoundEvent = (IScoredSolutionCandidateFoundEvent<?, ?>) algorithmEvent;
 			String solutionCandidateRepresentation = this.getStringRepresentationOfSolutionCandidate(solutionCandidateFoundEvent.getSolutionCandidate());
 			String score = solutionCandidateFoundEvent.getScore().toString();
 			return new ScoredSolutionCandidateInfo(solutionCandidateRepresentation, score);
