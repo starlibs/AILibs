@@ -11,7 +11,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeType;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class ReductionGraphGenerator implements IGraphGenerator<RestProblem, Dec
 	@Override
 	public ISuccessorGenerator<RestProblem, Decision> getSuccessorGenerator() {
 		return n -> {
-			List<NodeExpansionDescription<RestProblem, Decision>> restProblems = new ArrayList<>();
+			List<INewNodeDescription<RestProblem, Decision>> restProblems = new ArrayList<>();
 			try {
 				List<String> set = new ArrayList<>(n.get(0));
 				if (set.size() < 2) {
@@ -77,7 +77,7 @@ public class ReductionGraphGenerator implements IGraphGenerator<RestProblem, Dec
 						}
 						RestProblem rp = new RestProblem(new Decision(null, null, nodeType, AbstractClassifier.forName(classifier, null)));
 						rp.addAll(remainingProblems);
-						restProblems.add(new NodeExpansionDescription<>(rp, rp.getEdgeToParent(), NodeType.OR));
+						restProblems.add(new NodeExpansionDescription<>(rp, rp.getEdgeToParent()));
 					}
 
 					/* now go for splits (here we always apply direct) */
@@ -105,7 +105,7 @@ public class ReductionGraphGenerator implements IGraphGenerator<RestProblem, Dec
 						rp.addAll(remainingProblems);
 
 						/* add rest problem */
-						restProblems.add(new NodeExpansionDescription<>(rp, rp.getEdgeToParent(), NodeType.OR));
+						restProblems.add(new NodeExpansionDescription<>(rp, rp.getEdgeToParent()));
 					}
 				}
 			} catch (Exception e) {

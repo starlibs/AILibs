@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Queue;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.graph.LabeledGraph;
-import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public abstract class GraphGeneratorTester<N, A> {
 
@@ -56,14 +56,14 @@ public abstract class GraphGeneratorTester<N, A> {
 				if (expandedNode.depth > maxDepth) {
 					break;
 				}
-				List<NodeExpansionDescription<N, A>> successors = s.generateSuccessors(expandedNode.point);
+				List<INewNodeDescription<N, A>> successors = s.generateSuccessors(expandedNode.point);
 				if (maxDepth == Integer.MAX_VALUE && n1 >= maxN) {
 					maxDepth = expandedNode.depth;
 				}
 				successors.forEach(nd -> {
 					open.add(new Node(nd.getTo(), expandedNode.depth + 1));
 					g1.addItem(nd.getTo());
-					g1.addEdge(expandedNode.point, nd.getTo(), nd.getAction());
+					g1.addEdge(expandedNode.point, nd.getTo(), nd.getArcLabel());
 				});
 			}
 
@@ -79,7 +79,7 @@ public abstract class GraphGeneratorTester<N, A> {
 				if (expandedNode.depth > maxDepth) {
 					break;
 				}
-				List<NodeExpansionDescription<N, A>> successors = s.generateSuccessors(expandedNode.point);
+				List<INewNodeDescription<N, A>> successors = s.generateSuccessors(expandedNode.point);
 				Collections.reverse(successors);
 				if (maxDepth == Integer.MAX_VALUE && n2 >= maxN) {
 					maxDepth = expandedNode.depth;
@@ -87,7 +87,7 @@ public abstract class GraphGeneratorTester<N, A> {
 				successors.forEach(nd -> {
 					open.add(new Node(nd.getTo(), expandedNode.depth + 1));
 					g2.addItem(nd.getTo());
-					g2.addEdge(expandedNode.point, nd.getTo(), nd.getAction());
+					g2.addEdge(expandedNode.point, nd.getTo(), nd.getArcLabel());
 				});
 			}
 

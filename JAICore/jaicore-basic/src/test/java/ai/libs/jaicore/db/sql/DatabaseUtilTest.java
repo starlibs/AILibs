@@ -19,6 +19,6 @@ public class DatabaseUtilTest {
 	@Test
 	public void testTransfer() throws SQLException {
 		Map<String, Pair<Class<?>, Function<IKVStore, Object>>> transformations = new HashMap<>();
-		DatabaseUtil.createTableFromResult(ADAPTER, "SELECT * FROM testtable", Arrays.asList(), "newtable", transformations);
+		DatabaseUtil.createTableFromResult(ADAPTER, "SELECT * FROM testtable", Arrays.asList(), "newtable", Arrays.asList("a", "b"), transformations);
 	}
 }

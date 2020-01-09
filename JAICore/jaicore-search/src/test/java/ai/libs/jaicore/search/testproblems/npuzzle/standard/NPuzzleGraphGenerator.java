@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeType;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
@@ -46,23 +46,23 @@ public class NPuzzleGraphGenerator implements IGraphGenerator<NPuzzleState, Stri
 	@Override
 	public ISuccessorGenerator<NPuzzleState, String> getSuccessorGenerator() {
 		return n -> {
-			List<NodeExpansionDescription<NPuzzleState, String>> successors = new ArrayList<>();
+			List<INewNodeDescription<NPuzzleState, String>> successors = new ArrayList<>();
 
 			// Possible successors
 			if (n.getEmptyX() > 0) {
-				successors.add(new NodeExpansionDescription<>(this.move(n, "l"), "l", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "l"), "l"));
 			}
 
 			if (n.getEmptyX() < this.dimension - 1) {
-				successors.add(new NodeExpansionDescription<>(this.move(n, "r"), "r", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "r"), "r"));
 			}
 
 			if (n.getEmptyY() > 0) {
-				successors.add(new NodeExpansionDescription<>(this.move(n, "u"), "u", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "u"), "u"));
 			}
 
 			if (n.getEmptyY() < this.dimension - 1) {
-				successors.add(new NodeExpansionDescription<>(this.move(n, "d"), "d", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "d"), "d"));
 			}
 
 			return successors;
