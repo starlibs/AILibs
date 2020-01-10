@@ -120,10 +120,13 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 			return null;
 		} else if (value instanceof Integer) {
 			return (Integer) value;
+		}
+		else if (value instanceof Long) {
+			return Integer.valueOf(value.toString());
 		} else if (value instanceof String) {
 			return Integer.valueOf((String) value);
 		} else {
-			throw new IllegalStateException("Tried to get non-integer value as integer from KVStore.");
+			throw new IllegalStateException("Tried to get non-integer value as integer from KVStore. Type of value " + value + " is " + value.getClass().getName());
 		}
 	}
 

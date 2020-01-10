@@ -57,7 +57,11 @@ public class SupervisedLearnerExecutor implements ISupervisedLearnerExecutor, IL
 		long startTestTime = System.currentTimeMillis();
 		try {
 			return this.getReportForTrainedLearner(learner, null, test, -1, -1);
-		} catch (InterruptedException | PredictionException e) {
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new LearnerExecutionFailedException(-1, -1, startTestTime, System.currentTimeMillis(), e);
+		}
+		catch (PredictionException e) {
 			throw new LearnerExecutionFailedException(-1, -1, startTestTime, System.currentTimeMillis(), e);
 		}
 	}

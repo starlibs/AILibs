@@ -58,7 +58,7 @@ public class PCSBasedOptimizerGrpcServer {
 	 * @param args
 	 * @throws Exception
 	 */
-	public static void main(final String args[]) throws Exception {
+	public static void main(final String[] args) throws Exception {
 		init();
 		Server server = ServerBuilder.forPort(8080).addService(new PCSBasedOptimizerServiceImpl(evaluator, input)).build();
 
@@ -68,17 +68,17 @@ public class PCSBasedOptimizerGrpcServer {
 	}
 
 	private static void init() throws SplitFailedException {
-		ComponentLoader cl = null;
+		ComponentLoader cl;
 		try {
 			cl = new ComponentLoader(HASCOFileInput);
+			Collection<Component> components = cl.getComponents();
+			String requestedInterface = "BaseClassifier";
+			input = new PCSBasedOptimizerInput(components, requestedInterface);
+			ILearnerFactory<IWekaClassifier> classifierFactory = new WekaPipelineFactory();
+			evaluator = new WekaComponentInstanceEvaluator(classifierFactory, "iris.arff", "algoID");
 		} catch (IOException e) {
-
+			throw new SplitFailedException(e);
 		}
-		Collection<Component> components = cl.getComponents();
-		String requestedInterface = "BaseClassifier";
-		input = new PCSBasedOptimizerInput(components, requestedInterface);
-		ILearnerFactory<IWekaClassifier> classifierFactory = new WekaPipelineFactory();
-		evaluator = new WekaComponentInstanceEvaluator(classifierFactory, "iris.arff", "algoID");
 	}
 
 }

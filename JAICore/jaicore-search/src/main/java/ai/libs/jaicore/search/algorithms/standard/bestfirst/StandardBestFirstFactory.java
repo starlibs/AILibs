@@ -1,5 +1,7 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst;
 
+import java.util.Objects;
+
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -22,7 +24,8 @@ public class StandardBestFirstFactory<N, A, V extends Comparable<V>> extends Bes
 
 	public void setGraphGenerator(final IGraphGenerator<N, A> graphGenerator) {
 		GraphSearchWithSubpathEvaluationsInput<N, A, V> problem = this.getInput();
-		IPathGoalTester<N, A> gt = problem != null ? problem.getGoalTester() : null;
+		Objects.requireNonNull(problem);
+		IPathGoalTester<N, A> gt = problem.getGoalTester();
 		IPathEvaluator<N, A, V> evaluator = problem.getNodeEvaluator();
 		this.setProblemInput(new GraphSearchWithSubpathEvaluationsInput<>(graphGenerator, gt, evaluator));
 	}

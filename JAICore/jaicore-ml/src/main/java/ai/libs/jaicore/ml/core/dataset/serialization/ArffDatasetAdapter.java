@@ -158,7 +158,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		String attributeDefinitionSplit = line.replaceAll("\\t", " ").substring(EArffItem.ATTRIBUTE.getValue().length() + 1).trim();
 		String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION));
 		if (name.trim().startsWith("'") && !name.trim().endsWith("'")) {
-			int cutIndex = attributeDefinitionSplit.substring(name.length()).indexOf("'");
+			int cutIndex = attributeDefinitionSplit.substring(name.length()).indexOf('\'');
 			name += attributeDefinitionSplit.substring(name.length(), name.length() + cutIndex + 1);
 		}
 
@@ -263,7 +263,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		return readDataset(sparseMode, datasetFile, -1);
 	}
 
-	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile, final int columnWithClassIndex) throws DatasetDeserializationFailedException, InterruptedException {
+	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile, final int columnWithClassIndex) throws DatasetDeserializationFailedException {
 		try (BufferedReader br = Files.newBufferedReader(datasetFile.toPath())) {
 			ILabeledDataset<ILabeledInstance> dataset = null;
 			KVStore relationMetaData = new KVStore();
@@ -297,7 +297,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						try {
 							dataset = createDataset(relationMetaData, attributes);
 						} catch (IllegalArgumentException e) {
-							LOGGER.warn("Invalid class index in the dataset's meta data (" + relationMetaData.get(K_CLASS_INDEX) + "): Assuming last column to be the target attribute!");
+							LOGGER.warn("Invalid class index in the dataset's meta data ({}): Assuming last column to be the target attribute!", relationMetaData.get(K_CLASS_INDEX));
 							relationMetaData.put(K_CLASS_INDEX, attributes.size() - 1);
 							dataset = createDataset(relationMetaData, attributes);
 						}
@@ -330,7 +330,6 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			lineCounter++;
 			return dataset;
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new DatasetDeserializationFailedException("Could not deserialize dataset from ARFF file.", e);
 		}
 	}

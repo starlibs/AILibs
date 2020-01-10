@@ -249,7 +249,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 				this.nodeCharacterizations.remove(this.nodeCharacterizations.size() - 1);
 				return false;
 			} catch (InterruptedException e1) {
-				e1.printStackTrace();
+				Thread.currentThread().interrupt();
 				return false;
 			}
 		} else {

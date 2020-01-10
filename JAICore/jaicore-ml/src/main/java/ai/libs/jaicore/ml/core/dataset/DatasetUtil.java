@@ -27,10 +27,14 @@ import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 
 public class DatasetUtil {
 
+	private DatasetUtil() {
+		/* just to avoid instantiation */
+	}
+
 	public static Map<Object, Integer> getLabelCounts(final ILabeledDataset<?> ds) {
 		Map<Object, Integer> labelCounter = new HashMap<>();
 		ds.forEach(li -> {
-			Object label = ((ILabeledInstance)li).getLabel();
+			Object label = li.getLabel();
 			labelCounter.put(label, labelCounter.computeIfAbsent(label, l -> 0) + 1);
 		});
 		return labelCounter;
@@ -161,7 +165,7 @@ public class DatasetUtil {
 	public static final int EXPANSION_LOGARITHM = 2;
 	public static final int EXPANSION_PRODUCTS = 3;
 
-	public static Pair<List<IAttribute>, Map<IAttribute, Function<ILabeledInstance, Double>>> getPairOfNewAttributesAndExpansionMap(final ILabeledDataset<?> dataset, final int...expansions) {
+	public static Pair<List<IAttribute>, Map<IAttribute, Function<ILabeledInstance, Double>>> getPairOfNewAttributesAndExpansionMap(final ILabeledDataset<?> dataset, final int...expansions) throws InterruptedException {
 		List<IAttribute> attributeList = dataset.getInstanceSchema().getAttributeList();
 		List<IAttribute> newAttributes = new ArrayList<>();
 		boolean computeSquares = false;
@@ -178,6 +182,8 @@ public class DatasetUtil {
 			case EXPANSION_PRODUCTS:
 				computeProducts = true;
 				break;
+			default:
+				throw new UnsupportedOperationException("Unknown expansion " + expansion);
 			}
 		}
 
@@ -202,36 +208,32 @@ public class DatasetUtil {
 		if (computeProducts) {
 
 			/* compute all sub-sets of features */
-			try {
-				Collection<Collection<IAttribute>> featureSubSets = SetUtil.powerset(attributeList);
-				for (Collection<IAttribute> subset : featureSubSets) {
-					if (subset.size() > 3 || subset.size() < 2) {
-						continue;
-					}
-					StringBuilder featureName = new StringBuilder("x");
-					final List<Integer> indices = new ArrayList<>();
-					for (IAttribute feature : subset.stream().sorted((a1,a2) -> a1.getName().compareTo(a2.getName())).collect(Collectors.toList())) {
-						featureName.append("_" + feature.getName());
-						indices.add(attributeList.indexOf(feature));
-					}
-					IAttribute dAtt = new NumericAttribute(featureName.toString());
-					if (attributeList.contains(dAtt)) {
-						throw new IllegalStateException("Dataset already has attribute " + dAtt.getName());
-					}
-					else if (newAttributes.contains(dAtt)) {
-						throw new IllegalStateException("Already added attribute " + dAtt.getName());
-					}
-					newAttributes.add(dAtt);
-					transformations.put(dAtt, i -> {
-						double val = 1;
-						for (int index : indices) {
-							val *= Double.parseDouble(i.getAttributeValue(index).toString());
-						}
-						return val;
-					});
+			Collection<Collection<IAttribute>> featureSubSets = SetUtil.powerset(attributeList);
+			for (Collection<IAttribute> subset : featureSubSets) {
+				if (subset.size() > 3 || subset.size() < 2) {
+					continue;
 				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				StringBuilder featureName = new StringBuilder("x");
+				final List<Integer> indices = new ArrayList<>();
+				for (IAttribute feature : subset.stream().sorted((a1,a2) -> a1.getName().compareTo(a2.getName())).collect(Collectors.toList())) {
+					featureName.append("_" + feature.getName());
+					indices.add(attributeList.indexOf(feature));
+				}
+				IAttribute dAtt = new NumericAttribute(featureName.toString());
+				if (attributeList.contains(dAtt)) {
+					throw new IllegalStateException("Dataset already has attribute " + dAtt.getName());
+				}
+				else if (newAttributes.contains(dAtt)) {
+					throw new IllegalStateException("Already added attribute " + dAtt.getName());
+				}
+				newAttributes.add(dAtt);
+				transformations.put(dAtt, i -> {
+					double val = 1;
+					for (int index : indices) {
+						val *= Double.parseDouble(i.getAttributeValue(index).toString());
+					}
+					return val;
+				});
 			}
 		}
 		return new Pair<>(newAttributes, transformations);
@@ -254,16 +256,12 @@ public class DatasetUtil {
 		return ds;
 	}
 
-	public static ILabeledInstance getExpansionOfInstance(final ILabeledInstance i, final Pair<List<IAttribute>, Map<IAttribute, Function<ILabeledInstance, Double>>> expansionDescription) throws InterruptedException, DatasetCreationException {
+	public static ILabeledInstance getExpansionOfInstance(final ILabeledInstance i, final Pair<List<IAttribute>, Map<IAttribute, Function<ILabeledInstance, Double>>> expansionDescription)  {
 
-		List<Object> attributes = new ArrayList<>();
-		for (Object o : i.getAttributes()) {
-			attributes.add(o);
-		}
+		List<Object> attributes = new ArrayList<>(Arrays.asList(i.getAttributes()));
 		for (IAttribute newAtt : expansionDescription.getX()) {
 			attributes.add(expansionDescription.getY().get(newAtt).apply(i));
 		}
-		DenseInstance di = new DenseInstance(attributes, i.getLabel());
-		return di;
+		return new DenseInstance(attributes, i.getLabel());
 	}
 }

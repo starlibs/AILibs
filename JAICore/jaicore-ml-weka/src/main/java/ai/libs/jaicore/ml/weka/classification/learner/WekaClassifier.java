@@ -169,8 +169,7 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 				return new ReconstructionPlan(Arrays.asList(new ReconstructionInstruction(WekaClassifier.class.getMethod("createBaseClassifier", String.class, List.class), this.name, this.getOptionsAsList())));
 			}
 		} catch (NoSuchMethodException | SecurityException e) {
-			e.printStackTrace();
-			return null;
+			throw new UnsupportedOperationException(e);
 		}
 	}
 

@@ -1,6 +1,5 @@
 package ai.libs.jaicore.db.sql;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -17,7 +16,7 @@ import ai.libs.jaicore.logging.LoggerUtil;
 
 public class ResultSetToKVStoreSerializer {
 
-	public List<IKVStore> serialize(final ResultSet values) throws IOException {
+	public List<IKVStore> serialize(final ResultSet values) {
 		KVStoreCollection collection = new KVStoreCollection();
 		Iterator<IKVStore> it = this.getSerializationIterator(values);
 		while (it.hasNext()) {
@@ -29,25 +28,22 @@ public class ResultSetToKVStoreSerializer {
 	public Iterator<IKVStore> getSerializationIterator(final ResultSet values) {
 		return new Iterator<IKVStore>() {
 
-			boolean init = false;
-			boolean hasNext = false;
-
-			ResultSetMetaData rsmd ;
-			int numColumns;
-			String[] columnNames;
-			int[] columnTypes;
+			private boolean init = false;
+			private boolean hasNext = false;
+			private String[] columnNames;
+			private int[] columnTypes;
 
 			private void init() throws SQLException {
 				if (!this.init) {
 					this.init = true;
-					this.rsmd = values.getMetaData();
-					this.numColumns = this.rsmd.getColumnCount();
+					ResultSetMetaData rsmd = values.getMetaData();
+					int numColumns = rsmd.getColumnCount();
 					this.hasNext = values.next();
-					this.columnNames = new String[this.numColumns];
-					this.columnTypes = new int[this.numColumns];
+					this.columnNames = new String[numColumns];
+					this.columnTypes = new int[numColumns];
 					for (int i = 0; i < this.columnNames.length; i++) {
-						this.columnNames[i] = this.rsmd.getColumnLabel(i + 1);
-						this.columnTypes[i] = this.rsmd.getColumnType(i + 1);
+						this.columnNames[i] = rsmd.getColumnLabel(i + 1);
+						this.columnTypes[i] = rsmd.getColumnType(i + 1);
 					}
 				}
 			}

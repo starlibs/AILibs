@@ -58,7 +58,7 @@ public class MekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 		} catch (InterruptedException e) {
 			throw e;
 		} catch (Exception e) {
-			new TrainingException("Could not build classifier.", e);
+			throw new TrainingException("Could not build classifier.", e);
 		}
 	}
 

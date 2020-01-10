@@ -42,19 +42,16 @@ public class PCSBasedOptimizerServiceImpl extends PCSBasedOptimizerServiceImplBa
 	 *
 	 * ComponentInstance will be evaluated with the given evaluator. A response
 	 * containing an evalutation score will return to the caller script
+	 * @throws InterruptedException
+	 * @throws ObjectEvaluationFailedException
 	 */
 	@Override
-	public void evaluate(final PCSBasedComponentProto request, final StreamObserver<PCSBasedEvaluationResponseProto> responseObserver) {
+	public void evaluate(final PCSBasedComponentProto request, final StreamObserver<PCSBasedEvaluationResponseProto> responseObserver) throws ObjectEvaluationFailedException, InterruptedException {
 		Collection<Component> components = this.input.getComponents();
 		ComponentInstance componentInstance = this.resolveSatisfyingInterfaces(components, request.getName(), request.getParametersList());
 
-		Double score = 0.0;
-		try {
-			score = this.evaluator.evaluate(componentInstance);
-		} catch (InterruptedException | ObjectEvaluationFailedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Double score = this.evaluator.evaluate(componentInstance);
+
 
 		PCSBasedEvaluationResponseProto response = PCSBasedEvaluationResponseProto.newBuilder().setResult(score).build();
 
@@ -83,7 +80,7 @@ public class PCSBasedOptimizerServiceImpl extends PCSBasedOptimizerServiceImplBa
 			Optional<PCSBasedParameterProto> op = params.stream().filter(p -> p.getKey().contains(componentName + "." + hp)).findFirst();
 			if (op.isPresent()) {
 				PCSBasedParameterProto param = op.get();
-				int indexOfLastDot = param.getKey().lastIndexOf(".");
+				int indexOfLastDot = param.getKey().lastIndexOf('.');
 				String key = param.getKey().substring(indexOfLastDot + 1);
 				componentParameters.put(key, param.getValue());
 			}
@@ -94,15 +91,13 @@ public class PCSBasedOptimizerServiceImpl extends PCSBasedOptimizerServiceImplBa
 			return new ComponentInstance(cmp, componentParameters, satisfyingInterfaces);
 		}
 
-		for (String requiredInterface : requiredInterfaces) {
-			PCSBasedParameterProto param = params.stream().filter(p -> p.getKey().equals(requiredInterface)).findFirst().get();
-			String satisfyingClassName = param.getValue();
-			ComponentInstance compInstance = this.resolveSatisfyingInterfaces(components, satisfyingClassName, params);
-			Map<String, ComponentInstance> satisfyingInterfaces = new HashMap<>();
-			satisfyingInterfaces.put(componentName, compInstance);
-			return new ComponentInstance(cmp, componentParameters, satisfyingInterfaces);
-		}
-		return null;
+		String requiredInterface = requiredInterfaces.iterator().next();
+		PCSBasedParameterProto param = params.stream().filter(p -> p.getKey().equals(requiredInterface)).findFirst().get();
+		String satisfyingClassName = param.getValue();
+		ComponentInstance compInstance = this.resolveSatisfyingInterfaces(components, satisfyingClassName, params);
+		Map<String, ComponentInstance> satisfyingInterfaces = new HashMap<>();
+		satisfyingInterfaces.put(componentName, compInstance);
+		return new ComponentInstance(cmp, componentParameters, satisfyingInterfaces);
 	}
 
 }

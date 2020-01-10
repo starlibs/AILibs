@@ -142,8 +142,8 @@ public class SparseDyadRankingInstance extends ADyadRankingInstance {
 	@Override
 	public void setDyads(final Set<IDyad> dyads) {
 		this.assertThatAllContextsAreIdentical(dyads);
-		this.context = dyads.stream().findAny().get().getContext();
-		this.alternatives = dyads.stream().map(d -> d.getAlternative()).collect(Collectors.toSet());
+		this.context = dyads.iterator().next().getContext();
+		this.alternatives = dyads.stream().map(IDyad::getAlternative).collect(Collectors.toSet());
 	}
 
 	@Override
@@ -152,7 +152,7 @@ public class SparseDyadRankingInstance extends ADyadRankingInstance {
 	}
 
 	private void assertThatAllContextsAreIdentical(final Collection<IDyad> dyads) {
-		IDyad anyDyad = dyads.stream().findAny().get();
+		IDyad anyDyad = dyads.iterator().next();
 		boolean allContextsIdentical = dyads.stream().allMatch(d -> d.getContext().equals(anyDyad.getContext()));
 		if (!allContextsIdentical) {
 			throw new IllegalArgumentException("For a sparse dyad ranking instance, all contexts have to be identical.");

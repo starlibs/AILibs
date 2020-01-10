@@ -296,8 +296,6 @@ public class SQLAdapter implements IDatabaseAdapter {
 				statement.setString(i, values.get(i - 1));
 			}
 			return new ResultSetToKVStoreSerializer().serialize(statement.executeQuery());
-		} catch (IOException e) {
-			throw new SQLException("Could not serialize result set to KVStoreCollection.", e);
 		}
 	}
 

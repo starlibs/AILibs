@@ -69,7 +69,6 @@ import weka.core.SerializationHelper;
  * @author Helena Graf
  *
  */
-@SuppressWarnings("restriction")
 public class MLPlanCLI {
 
 	// CLI variables
@@ -288,13 +287,8 @@ public class MLPlanCLI {
 					new NodeDisplayInfoAlgorithmEventPropertyComputer<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new RolloutInfoAlgorithmEventPropertyComputer(nodeInfoAlgorithmEventPropertyComputer),
 					new ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer(new WekaClassifierSolutionCandidateRepresenter()));
 
-			if (commandLine.hasOption(testOption)) {
-				window = new AlgorithmVisualizationWindow(mlplan, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(), new SolutionPerformanceTimelinePlugin(),
-						new HASCOModelStatisticsPlugin());
-			} else {
-				window = new AlgorithmVisualizationWindow(mlplan, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(), new SolutionPerformanceTimelinePlugin(),
-						new HASCOModelStatisticsPlugin());
-			}
+			window = new AlgorithmVisualizationWindow(mlplan, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(), new SolutionPerformanceTimelinePlugin(),
+					new HASCOModelStatisticsPlugin());
 			Platform.runLater(window);
 		}
 

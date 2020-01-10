@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.classification.singlelabel.learner;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -22,6 +23,10 @@ public class MajorityClassifier extends ASupervisedLearner<ILabeledInstance, ILa
 	@Override
 	public void fit(final ILabeledDataset<? extends ILabeledInstance> dTrain) throws TrainingException, InterruptedException {
 		Map<Object, Integer> labelCounter = new HashMap<>();
+		Objects.requireNonNull(dTrain);
+		if (dTrain.isEmpty()) {
+			throw new IllegalArgumentException("Cannot train majority classifier with empty training set.");
+		}
 		for (ILabeledInstance i : dTrain) {
 			labelCounter.put(i.getLabel(), labelCounter.computeIfAbsent(i.getLabel(), t -> 0) + 1);
 		}

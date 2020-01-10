@@ -71,10 +71,10 @@ implements IHierarchicalPlanningToGraphSearchReduction<N, A, CostSensitiveHTNPla
 			this.logger = LoggerFactory.getLogger(name);
 			if (this.planEvaluator instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) this.planEvaluator).setLoggerName(name + ".pe");
-				this.logger.info("Setting logger of plan evaluator {} to {}", this.planEvaluator.getClass().getName(), name + ".pe");
+				this.logger.info("Setting logger of plan evaluator {} to {}.pe", this.planEvaluator.getClass().getName(), name);
 			}
 			else {
-				this.logger.info("Plan evaluator {} is not configurable for logging, so not configuring it.");
+				this.logger.info("Plan evaluator {} is not configurable for logging, so not configuring it.", this.planEvaluator);
 			}
 		}
 

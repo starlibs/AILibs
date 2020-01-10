@@ -13,7 +13,7 @@ public class SetOfObjectsAttribute<O> extends ACollectionOfObjectsAttribute<O> i
 	private static final long serialVersionUID = 4372755490714119056L;
 
 	private Class<O> classOfObject;
-	private Set<O> domain;
+	private transient Set<O> domain;
 
 	public SetOfObjectsAttribute(final String name, final Class<O> classOfObject, final Set<O> domain) {
 		super(name);
@@ -30,17 +30,15 @@ public class SetOfObjectsAttribute<O> extends ACollectionOfObjectsAttribute<O> i
 		if (value instanceof Set) {
 			Set<?> set = (Set<?>) value;
 			if (!set.isEmpty()) {
-				Object anyElement = set.stream().findAny().get();
-				if (classOfObject.isInstance(anyElement)) {
-					if (domain != null) {
-						return set.stream().allMatch(o -> domain.contains(o));
-					}
+				Object anyElement = set.iterator().next();
+				if (this.classOfObject.isInstance(anyElement) && this.domain != null) {
+					return set.stream().allMatch(o -> this.domain.contains(o));
 				}
 			}
 		}
 		if (value instanceof SetOfObjectsAttributeValue) {
 			Set<?> setOfObjects = ((SetOfObjectsAttributeValue<?>) value).getValue();
-			return isValidValue(setOfObjects);
+			return this.isValidValue(setOfObjects);
 		}
 		return false;
 	}
@@ -48,14 +46,14 @@ public class SetOfObjectsAttribute<O> extends ACollectionOfObjectsAttribute<O> i
 	@Override
 	public String getStringDescriptionOfDomain() {
 		String description = "[Set]";
-		if (domain != null) {
+		if (this.domain != null) {
 			StringJoiner stringJoiner = new StringJoiner(",");
-			for (O object : domain) {
+			for (O object : this.domain) {
 				stringJoiner.add(object.toString());
 			}
 			description += stringJoiner.toString();
 		}
-		return description + getName();
+		return description + this.getName();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -88,19 +86,55 @@ public class SetOfObjectsAttribute<O> extends ACollectionOfObjectsAttribute<O> i
 	@SuppressWarnings("unchecked")
 	@Override
 	protected Collection<O> getValueAsTypeInstance(final Object object) {
-		if (this.isValidValue(object)) {
-			if (object instanceof ISetOfObjectsAttributeValue) {
-				Set<?> set = ((ISetOfObjectsAttributeValue<?>) object).getValue();
-				if (!set.isEmpty()) {
-					Object elementFromSet = set.stream().findAny().get();
-					if (classOfObject.isInstance(elementFromSet)) {
-						return ((ISetOfObjectsAttributeValue<O>) object).getValue();
-					}
+		if (this.isValidValue(object) && object instanceof ISetOfObjectsAttributeValue) {
+			Set<?> set = ((ISetOfObjectsAttributeValue<?>) object).getValue();
+			if (!set.isEmpty()) {
+				Object elementFromSet = set.iterator().next();
+				if (this.classOfObject.isInstance(elementFromSet)) {
+					return ((ISetOfObjectsAttributeValue<O>) object).getValue();
 				}
 			}
-
 		}
+
 		throw new IllegalArgumentException("No valid value for the type");
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((this.classOfObject == null) ? 0 : this.classOfObject.hashCode());
+		result = prime * result + ((this.domain == null) ? 0 : this.domain.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		SetOfObjectsAttribute other = (SetOfObjectsAttribute) obj;
+		if (this.classOfObject == null) {
+			if (other.classOfObject != null) {
+				return false;
+			}
+		} else if (!this.classOfObject.equals(other.classOfObject)) {
+			return false;
+		}
+		if (this.domain == null) {
+			if (other.domain != null) {
+				return false;
+			}
+		} else if (!this.domain.equals(other.domain)) {
+			return false;
+		}
+		return true;
 	}
 
 }

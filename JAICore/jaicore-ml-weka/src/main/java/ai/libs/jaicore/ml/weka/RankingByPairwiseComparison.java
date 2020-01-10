@@ -1,9 +1,7 @@
 package ai.libs.jaicore.ml.weka;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -27,21 +25,19 @@ import weka.filters.unsupervised.attribute.Remove;
 public class RankingByPairwiseComparison {
 
 	private RPCConfig config;
-	private Instances dataset;
 
-	private Instances plainPWDataset = null;
 	private List<Integer> labelIndices;
 	private Set<String> labelSet = new HashSet<>();
 
 	class PairWiseClassifier {
-		String a;
-		String b;
-		Classifier c;
+		private String a;
+		private String b;
+		private Classifier c;
 	}
 
-	List<PairWiseClassifier> pwClassifiers = new LinkedList<>();
+	private List<PairWiseClassifier> pwClassifiers = new LinkedList<>();
 
-	public RankingByPairwiseComparison(final RPCConfig config) throws Exception {
+	public RankingByPairwiseComparison(final RPCConfig config) {
 		this.config = config;
 	}
 
@@ -77,26 +73,25 @@ public class RankingByPairwiseComparison {
 	}
 
 	public void fit(final Instances dataset, final int labels) throws Exception {
-		this.dataset = dataset;
-		this.labelIndices = getLabelIndices(labels, this.dataset);
-		this.labelIndices.stream().map(x -> this.dataset.attribute(x).name()).forEach(this.labelSet::add);
-		this.plainPWDataset = this.applyFiltersToDataset(this.dataset);
+		this.labelIndices = getLabelIndices(labels, dataset);
+		this.labelIndices.stream().map(x -> dataset.attribute(x).name()).forEach(this.labelSet::add);
+		Instances plainPWDataset = this.applyFiltersToDataset(dataset);
 
 		try {
 			for (int i = 0; i < this.labelIndices.size() - 1; i++) {
 				for (int j = i + 1; j < this.labelIndices.size(); j++) {
 
 					PairWiseClassifier pwc = new PairWiseClassifier();
-					pwc.a = this.dataset.attribute(this.labelIndices.get(i)).name();
-					pwc.b = this.dataset.attribute(this.labelIndices.get(j)).name();
+					pwc.a = dataset.attribute(this.labelIndices.get(i)).name();
+					pwc.b = dataset.attribute(this.labelIndices.get(j)).name();
 
 					pwc.c = AbstractClassifier.forName(this.config.getBaseLearner(), null);
 
-					Instances pwDataset = new Instances(this.plainPWDataset);
+					Instances pwDataset = new Instances(plainPWDataset);
 
 					for (int k = 0; k < pwDataset.size(); k++) {
 						String value;
-						if (this.dataset.get(k).value(this.labelIndices.get(i)) > this.dataset.get(k).value(this.labelIndices.get(j))) {
+						if (dataset.get(k).value(this.labelIndices.get(i)) > dataset.get(k).value(this.labelIndices.get(j))) {
 							value = "true";
 						} else {
 							value = "false";
@@ -114,7 +109,7 @@ public class RankingByPairwiseComparison {
 		}
 	}
 
-	public List<String> predict(final Instance xTest) throws PredictionException, InterruptedException {
+	public List<String> predict(final Instance xTest) throws PredictionException {
 		try {
 			Instances datasetCopy = new Instances(xTest.dataset(), 0);
 			datasetCopy.add(xTest);
@@ -146,12 +141,11 @@ public class RankingByPairwiseComparison {
 			ranking.sort((arg0, arg1) -> vote.get(arg1).compareTo(vote.get(arg0)));
 			return ranking;
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new PredictionException("Could not create a prediction.", e);
 		}
-		return null;
 	}
 
-	public static void main(final String[] args) throws FileNotFoundException, IOException, Exception {
+	public static void main(final String[] args) throws Exception {
 		Instances data = new Instances(new FileReader(new File("classifier-rank.arff")));
 		RankingByPairwiseComparison rpc = new RankingByPairwiseComparison(ConfigFactory.create(RPCConfig.class));
 		rpc.fit(data, -22);

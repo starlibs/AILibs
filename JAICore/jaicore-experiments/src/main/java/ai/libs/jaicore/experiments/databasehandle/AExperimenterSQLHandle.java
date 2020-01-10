@@ -229,7 +229,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		try {
 			return this.getExperimentsForSQLQuery(queryStringSB.toString());
 		} catch (SQLException e) {
-			throw new ExperimentDBInteractionFailedException(e);
+			throw new ExperimentDBInteractionFailedException("Given query was:\n" + queryStringSB.toString(), e);
 		}
 	}
 
@@ -239,7 +239,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		}
 		this.logger.debug("Executing query {}", sql);
 
-		List<IKVStore> res = this.adapter.getRowsOfTable(sql);
+		List<IKVStore> res = this.adapter.getResultsOfQuery(sql);
 		this.logger.debug("Obtained results, now building experiment objects.");
 		List<ExperimentDBEntry> experimentEntries = new ArrayList<>();
 

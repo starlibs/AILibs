@@ -59,7 +59,7 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		if (!this.isValidValue(attributeValue)) {
 			throw new IllegalArgumentException("No valid attribute value.");
 		}
-		return this.domain.indexOf(this.getLabelOfAttributeValue(attributeValue)) + 1;
+		return this.domain.indexOf(this.getLabelOfAttributeValue(attributeValue)) + 1.0;
 	}
 
 	@Override
@@ -168,9 +168,6 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		} else if (!this.domain.equals(other.domain)) {
 			return false;
 		}
-		if (this.numCategories != other.numCategories) {
-			return false;
-		}
-		return true;
+		return this.numCategories == other.numCategories;
 	}
 }

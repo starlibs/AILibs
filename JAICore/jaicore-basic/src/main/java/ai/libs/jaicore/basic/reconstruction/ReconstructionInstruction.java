@@ -28,12 +28,11 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 	 *
 	 */
 	private static final long serialVersionUID = -9034513607515486949L;
-	private Logger logger = LoggerFactory.getLogger(ReconstructionInstruction.class);
+	private transient Logger logger = LoggerFactory.getLogger(ReconstructionInstruction.class);
 	private final String clazzName;
 	private final String methodName;
 	private final Class<?>[] argumentTypes;
-	// private final Class<?>[] givenTypes;
-	private final Object[] arguments;
+	private final transient Object[] arguments;
 
 	public static boolean isArrayOfPrimitives(final Class<?> clazz) {
 		return clazz.isArray() && (boolean[].class.isAssignableFrom(clazz) || byte[].class.isAssignableFrom(clazz) || short[].class.isAssignableFrom(clazz) || int[].class.isAssignableFrom(clazz) || long[].class.isAssignableFrom(clazz)
@@ -49,7 +48,6 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 		this.clazzName = clazzName;
 		this.methodName = methodName;
 		this.argumentTypes = argumentTypes;
-		// this.givenTypes = Arrays.stream(arguments).map(a -> a.getClass()).toArray(Class[]::new);
 		this.arguments = arguments;
 		int n = argumentTypes.length;
 
@@ -74,7 +72,6 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 								"The " + i + "-th argument \"" + arguments[i] + "\" is neither a primitive (it's a " + arguments[i].getClass().getName() + ") nor a class object nor \"this\" and also not a reconstructible object.");
 					}
 				} catch (IOException | ReconstructionException e) {
-					e.printStackTrace();
 					throw new IllegalArgumentException(e);
 				}
 			}
@@ -106,29 +103,7 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 				} catch (ClassNotFoundException e) {
 					throw new IllegalArgumentException("Cannot create instruction. " + i + "-th argument is required to be a class object (" + argumentTypes[i].getName() + "). The provided object " + arguments[i] + " is a String that points to a class that does not exist! Cannot derive hence a class object.");
 				}
-				//
-				//				else { // for fields that require class objects, we must either have a string that starts with "class:" or a class object
-				//					if ((givenType != Class.class && givenType != String.class)) {
-				//						throw new IllegalArgumentException("Class arguments must be stored either as strings or as class objects.");
-				//					}
-				//					if (givenType == String.class && !((String)arguments[i]).startsWith("class:")) { // class objects must be encoded as strings)
-				//						throw new IllegalArgumentException("Class arguments stores as strings must start with \"class:\"");
-				//					}
-				//				}
-			}
-
-			/* if the argument is a class definition, replace it by the true class object */
-			//			if (arguments[i] instanceof String && ((String) arguments[i]).startsWith("class:")) {
-			//				try {
-			//					Class<?> clazzNameEncodedInArgument = Class.forName(((String) arguments[i]).substring("class:".length()));
-			//					arguments[i] = clazzNameEncodedInArgument;
-			//				} catch (ClassNotFoundException e) {
-			//					/* no class */
-			//				}
-			//			} else if (arguments[i] instanceof Class) {
-			//				arguments[i] = "class:" + arguments[i];
-			//			}
-		}
+			}		}
 	}
 
 	public ReconstructionInstruction(final Method method, final Object... arguments) {
@@ -136,7 +111,6 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 		this.clazzName = method.getDeclaringClass().getName();
 		this.methodName = method.getName();
 		this.argumentTypes = method.getParameterTypes();
-		// this.givenTypes = Arrays.stream(arguments).map(a -> a.getClass()).toArray(Class[]::new);
 		this.arguments = arguments;
 	}
 
@@ -150,10 +124,7 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 		if (clazz.equals(Class.class)) {
 			return false;
 		}
-		if (List.class.isAssignableFrom(clazz)) {
-			return false;
-		}
-		return true;
+		return !List.class.isAssignableFrom(clazz);
 	}
 
 	private Method getMethod() throws ClassNotFoundException, NoSuchMethodException  {
@@ -189,16 +160,12 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 				Object val = this.arguments[i];
 
 				/* first replace the encoding strings by their true value */
-				if (val != null && val instanceof String) {
+				if (val instanceof String) {
 					if (val.equals("this")) {
 						replacedArguments[i] = object;
 					} else {
-						try {
-							String json = (String) val;
-							replacedArguments[i] = new ObjectMapper().readValue(json, ReconstructionPlan.class).reconstructObject();
-						} catch (IOException e) {
-							throw new ReconstructionException(e);
-						}
+						String json = (String) val;
+						replacedArguments[i] = new ObjectMapper().readValue(json, ReconstructionPlan.class).reconstructObject();
 					}
 				} else {
 					replacedArguments[i] = this.arguments[i];
@@ -208,18 +175,8 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 				Class<?> type = replacedArguments[i].getClass();
 				Class<?> requiredType = method.getParameterTypes()[i];
 				if (!ClassUtils.isAssignable(type, requiredType, true)) {
-
-					/* check whether we can "repair" the type mismatch by converting from list to array or vice versa */
-					// if (type.isArray() && ClassUtils.isAssignable(requiredType, List.class)) {
-					// System.out.println("CONVERT");
-					// }
-					// else if (requiredType.isArray() && ClassUtils.isAssignable(type, List.class)) {
-					// replacedArguments[i] = ((List)replacedArguments[i]).toArray();
-					// }
-					// else {
 					throw new IllegalStateException(
 							"Error in reconstructing object via method " + this.clazzName + "." + this.methodName + ".\nCannot assign parameter of type " + type.getName() + " to required type " + requiredType.getName());
-					// }
 				}
 			}
 			int k = replacedArguments.length;
@@ -228,7 +185,7 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 				this.logger.debug("{}: {}: {}", i, replacedArguments[i].getClass().getName(), replacedArguments[i]);
 			}
 			return method.invoke(null, replacedArguments);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ClassNotFoundException e) {
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ClassNotFoundException | IOException e) {
 			throw new ReconstructionException(e);
 		}
 	}
