@@ -101,7 +101,7 @@ public class MLSophisticatedPipeline implements Classifier, FeatureGenerator, Se
 		this.trained = true;
 	}
 
-	private Instance applyPreprocessors(Instance data) throws Exception {
+	private Instance applyPreprocessors(Instance data) throws PreprocessingException {
 		long start = System.currentTimeMillis();
 
 		/* create features */
@@ -194,8 +194,12 @@ public class MLSophisticatedPipeline implements Classifier, FeatureGenerator, Se
 	}
 
 	@Override
-	public void prepare(final Instances data) throws Exception {
-		this.buildClassifier(data);
+	public void prepare(final Instances data) throws PreprocessingException {
+		try {
+			this.buildClassifier(data);
+		} catch (Exception e) {
+			throw new PreprocessingException(e);
+		}
 	}
 
 	private Instances getEmptyProbingResultDataset() {
@@ -211,20 +215,25 @@ public class MLSophisticatedPipeline implements Classifier, FeatureGenerator, Se
 	}
 
 	@Override
-	public Instance apply(final Instance data) throws Exception {
-		double[] classProbs = this.distributionForInstance(data);
-		Instance newInst = new DenseInstance(classProbs.length);
-		Instances dataset = this.getEmptyProbingResultDataset();
-		dataset.add(newInst);
-		newInst.setDataset(dataset);
-		for (int i = 0; i < classProbs.length; i++) {
-			newInst.setValue(i, classProbs[i]);
+	public Instance apply(final Instance data) throws PreprocessingException {
+		double[] classProbs;
+		try {
+			classProbs = this.distributionForInstance(data);
+			Instance newInst = new DenseInstance(classProbs.length);
+			Instances dataset = this.getEmptyProbingResultDataset();
+			dataset.add(newInst);
+			newInst.setDataset(dataset);
+			for (int i = 0; i < classProbs.length; i++) {
+				newInst.setValue(i, classProbs[i]);
+			}
+			return newInst;
+		} catch (Exception e) {
+			throw new PreprocessingException(e);
 		}
-		return newInst;
 	}
 
 	@Override
-	public Instances apply(final Instances data) throws Exception {
+	public Instances apply(final Instances data) throws PreprocessingException{
 		Instances probingResults = new Instances(this.getEmptyProbingResultDataset());
 		for (Instance inst : data) {
 			Instance probedInst = this.apply(inst);

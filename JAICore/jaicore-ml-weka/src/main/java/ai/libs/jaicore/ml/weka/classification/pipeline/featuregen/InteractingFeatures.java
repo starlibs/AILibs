@@ -5,6 +5,7 @@ import java.util.List;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.ml.weka.classification.pipeline.PreprocessingException;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -16,7 +17,7 @@ public class InteractingFeatures implements FeatureGenerator {
 	private List<Integer> indicesToInteract = new ArrayList<>();
 
 	@Override
-	public void prepare(final Instances data) throws Exception {
+	public void prepare(final Instances data) throws PreprocessingException {
 		ArrayList<Attribute> attributes = new ArrayList<>();
 		this.indicesToInteract.clear();
 		for (int i = 0; i < data.numAttributes(); i++) {
@@ -25,7 +26,6 @@ public class InteractingFeatures implements FeatureGenerator {
 				this.indicesToInteract.add(i);
 			}
 		}
-		// Instances squares = new Instances("squares", attributes, data.size());
 		this.isPrepared = true;
 	}
 
@@ -43,7 +43,7 @@ public class InteractingFeatures implements FeatureGenerator {
 	}
 
 	@Override
-	public Instance apply(final Instance data) throws Exception {
+	public Instance apply(final Instance data) throws PreprocessingException {
 		Instance newInstance = new DenseInstance(((int) Math.pow(this.indicesToInteract.size(), 2) - this.indicesToInteract.size()) / 2);
 		int index = 0;
 		for (Pair<Integer, Integer> pair : SetUtil.cartesianProduct(this.indicesToInteract, this.indicesToInteract)) {
@@ -58,7 +58,7 @@ public class InteractingFeatures implements FeatureGenerator {
 	}
 
 	@Override
-	public Instances apply(final Instances data) throws Exception {
+	public Instances apply(final Instances data) throws PreprocessingException {
 		Instances newDataset = this.getEmptyDataset();
 		for (Instance inst : data) {
 			Instance modInst = this.apply(inst);

@@ -46,41 +46,56 @@ public class SuvervisedFilterPreprocessor implements Serializable, FeaturePrepro
 	}
 
 	@Override
-	public void prepare(final Instances data) throws Exception {
-		this.selector.SelectAttributes(data);
+	public void prepare(final Instances data) throws PreprocessingException {
+		try {
+			this.selector.SelectAttributes(data);
+		} catch (Exception e) {
+			throw new PreprocessingException(e);
+		}
 		this.prepared = true;
 	}
 
 	@Override
-	public Instance apply(final Instance data) throws Exception {
+	public Instance apply(final Instance data) throws PreprocessingException {
 		if (!this.prepared) {
 			throw new IllegalStateException("Cannot apply preprocessor before it has been prepared!");
 		}
-		Instance inst = this.selector.reduceDimensionality(data);
-		if (inst.dataset().classIndex() >= 0) {
-			inst = WekaUtil.removeClassAttribute(inst);
+		try {
+			Instance inst = this.selector.reduceDimensionality(data);
+			if (inst.dataset().classIndex() >= 0) {
+				inst = WekaUtil.removeClassAttribute(inst);
+			}
+
+			for (int i = 0; i < inst.dataset().numAttributes(); i++) {
+				Attribute a = inst.dataset().attribute(i);
+				inst.dataset().renameAttribute(a, this.getClass().getSimpleName() + "_" + a.name());
+			}
+			return inst;
 		}
-		for (int i = 0; i < inst.dataset().numAttributes(); i++) {
-			Attribute a = inst.dataset().attribute(i);
-			inst.dataset().renameAttribute(a, this.getClass().getSimpleName() + "_" + a.name());
+		catch (Exception e) {
+			throw new PreprocessingException(e);
 		}
-		return inst;
 	}
 
 	@Override
-	public Instances apply(final Instances data) throws Exception {
+	public Instances apply(final Instances data) throws PreprocessingException {
 		if (!this.prepared) {
 			throw new IllegalStateException("Cannot apply preprocessor before it has been prepared!");
 		}
-		Instances inst = this.selector.reduceDimensionality(data);
-		if (inst.classIndex() >= 0) {
-			inst = WekaUtil.removeClassAttribute(inst);
+		try {
+			Instances inst = this.selector.reduceDimensionality(data);
+			if (inst.classIndex() >= 0) {
+				inst = WekaUtil.removeClassAttribute(inst);
+			}
+			for (int i = 0; i < inst.numAttributes(); i++) {
+				Attribute a = inst.attribute(i);
+				inst.renameAttribute(a, this.getClass().getSimpleName() + "_" + a.name());
+			}
+			return inst;
 		}
-		for (int i = 0; i < inst.numAttributes(); i++) {
-			Attribute a = inst.attribute(i);
-			inst.renameAttribute(a, this.getClass().getSimpleName() + "_" + a.name());
+		catch (Exception e) {
+			throw new PreprocessingException(e);
 		}
-		return inst;
 	}
 
 	@Override

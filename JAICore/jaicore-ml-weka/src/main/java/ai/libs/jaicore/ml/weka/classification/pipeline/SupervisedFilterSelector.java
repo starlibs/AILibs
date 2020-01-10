@@ -45,25 +45,37 @@ public class SupervisedFilterSelector implements Serializable, FeaturePreprocess
 	}
 
 	@Override
-	public void prepare(final Instances data) throws Exception {
-		this.selector.SelectAttributes(data);
+	public void prepare(final Instances data) throws PreprocessingException {
+		try {
+			this.selector.SelectAttributes(data);
+		} catch (Exception e) {
+			throw new PreprocessingException(e);
+		}
 		this.prepared = true;
 	}
 
 	@Override
-	public Instance apply(final Instance data) throws Exception {
+	public Instance apply(final Instance data) throws PreprocessingException {
 		if (!this.prepared) {
 			throw new IllegalStateException("Cannot apply preprocessor before it has been prepared!");
 		}
-		return this.selector.reduceDimensionality(data);
+		try {
+			return this.selector.reduceDimensionality(data);
+		} catch (Exception e) {
+			throw new PreprocessingException(e);
+		}
 	}
 
 	@Override
-	public Instances apply(final Instances data) throws Exception {
+	public Instances apply(final Instances data) throws PreprocessingException {
 		if (!this.prepared) {
 			throw new IllegalStateException("Cannot apply preprocessor before it has been prepared!");
 		}
-		return this.selector.reduceDimensionality(data);
+		try {
+			return this.selector.reduceDimensionality(data);
+		} catch (Exception e) {
+			throw new PreprocessingException(e);
+		}
 	}
 
 	@Override
