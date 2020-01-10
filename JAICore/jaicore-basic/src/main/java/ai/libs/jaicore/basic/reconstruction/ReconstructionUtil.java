@@ -7,6 +7,10 @@ import org.api4.java.common.reconstruction.IReconstructionInstruction;
 
 public class ReconstructionUtil {
 
+	private ReconstructionUtil() {
+		/* empty constructor to avoid instantiation */
+	}
+
 	public static void requireNonEmptyInstructionsIfReconstructibilityClaimed(final Object object) {
 
 		/* consistency check: check whether object, if reconstructible, already has a construction */

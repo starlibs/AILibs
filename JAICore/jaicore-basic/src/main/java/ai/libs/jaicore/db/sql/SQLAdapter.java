@@ -43,6 +43,9 @@ public class SQLAdapter implements IDatabaseAdapter {
 	private static final String DB_DRIVER = "mysql";
 	private static final String KEY_EQUALS_VALUE_TO_BE_SET = " = (?)";
 
+	private static final String STR_SPACE_AND = " AND ";
+	private static final String STR_SPACE_WHERE = " WHERE ";
+
 	/* Credentials and properties for the connection establishment. */
 	private final String driver;
 	private final String host;
@@ -227,9 +230,9 @@ public class SQLAdapter implements IDatabaseAdapter {
 		List<String> values = new ArrayList<>();
 		for (Entry<String, String> entry : conditions.entrySet()) {
 			if (conditionSB.length() > 0) {
-				conditionSB.append(" AND ");
+				conditionSB.append(STR_SPACE_AND);
 			} else {
-				conditionSB.append(" WHERE ");
+				conditionSB.append(STR_SPACE_WHERE);
 			}
 			conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
 			values.add(entry.getValue());
@@ -247,9 +250,9 @@ public class SQLAdapter implements IDatabaseAdapter {
 		List<String> values = new ArrayList<>();
 		for (Entry<String, String> entry : conditions.entrySet()) {
 			if (conditionSB.length() > 0) {
-				conditionSB.append(" AND ");
+				conditionSB.append(STR_SPACE_AND);
 			} else {
-				conditionSB.append(" WHERE ");
+				conditionSB.append(STR_SPACE_WHERE);
 			}
 			conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
 			values.add(entry.getValue());
@@ -552,7 +555,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 		StringBuilder conditionSB = new StringBuilder();
 		for (Entry<String, ? extends Object> entry : conditions.entrySet()) {
 			if (conditionSB.length() > 0) {
-				conditionSB.append(" AND ");
+				conditionSB.append(STR_SPACE_AND);
 			}
 			if (entry.getValue() != null) {
 				conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
@@ -569,7 +572,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 		sqlBuilder.append(table);
 		sqlBuilder.append(" SET ");
 		sqlBuilder.append(updateSB.toString());
-		sqlBuilder.append(" WHERE ");
+		sqlBuilder.append(STR_SPACE_WHERE);
 		sqlBuilder.append(conditionSB.toString());
 
 		try (PreparedStatement stmt = this.connect.prepareStatement(sqlBuilder.toString())) {

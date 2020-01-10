@@ -130,12 +130,12 @@ public class EnhancedTTSP {
 		double timeSinceLastLongBreak = n.getTimeTraveledSinceLastLongBreak();
 
 		double minTravelTime = Math.sqrt(Math.pow(this.xCoords.get(curLocation) - this.xCoords.get(destination), 2) + Math.pow(this.yCoords.get(curLocation)- this.yCoords.get(destination), 2)); // use Euclidean distance as min travel time
-		this.logger.info("Simulating the ride from {} to " + destination + ", which minimally takes " + minTravelTime + ". We are departing at {}", curLocation, curTime);
+		this.logger.info("Simulating the ride from {} to {}, which minimally takes {}. We are departing at {}", curLocation, destination , minTravelTime, curTime);
 
-		double timeToNextShortBreak = this.getTimeToNextShortBreak(curTime, Math.min(timeSinceLastShortBreak, timeSinceLastLongBreak));
+		double timeToNextShortBreak = this.getTimeToNextShortBreak(Math.min(timeSinceLastShortBreak, timeSinceLastLongBreak));
 		double timeToNextLongBreak = this.getTimeToNextLongBreak(curTime, timeSinceLastLongBreak);
-		this.logger.info("Next short break will be in " + timeToNextShortBreak + "h");
-		this.logger.info("Next long break will be in " + timeToNextLongBreak + "h");
+		this.logger.info("Next short break will be in {}h", timeToNextShortBreak);
+		this.logger.info("Next long break will be in {}h", timeToNextLongBreak);
 
 		/* if we can do the tour without a break, do it */
 		boolean arrived = false;
@@ -153,14 +153,14 @@ public class EnhancedTTSP {
 				timeOfArrival = curTime;
 				timeSinceLastLongBreak += travelTimeWithoutBreak;
 				timeSinceLastShortBreak += travelTimeWithoutBreak;
-				this.logger.info("\tDriving the remaining distance to goal without a break. This takes " + travelTimeWithoutBreak + " (min time for this distance is " + minTravelTime * (1 - shareOfTheTripDone) + ")");
+				this.logger.info("\tDriving the remaining distance to goal without a break. This takes {} (min time for this distance is {})", travelTimeWithoutBreak, minTravelTime * (1 - shareOfTheTripDone));
 			} else {
 
 				/* simulate driving to next break */
-				this.logger.info("\tCurrently achieved " + shareOfTheTripDone + "% of the trip.");
-				this.logger.info("\tCannot reach the goal within the permitted " + permittedTimeToTravel + ", because the travel without a break would take " + travelTimeWithoutBreak);
+				this.logger.info("\tCurrently achieved {}% of the trip.", shareOfTheTripDone);
+				this.logger.info("\tCannot reach the goal within the permitted {}, because the travel without a break would take {}", permittedTimeToTravel, travelTimeWithoutBreak);
 				shareOfTheTripDone = this.getShareOfTripWhenDrivingOverEdgeAtAGivenTimeForAGivenTimeWithoutDoingABreak(minTravelTime, curTime, shareOfTheTripDone, permittedTimeToTravel);
-				this.logger.info("\tDriving the permitted " + permittedTimeToTravel + "h. This allows us to finish " + (shareOfTheTripDone * 100) + "% of the trip.");
+				this.logger.info("\tDriving the permitted {}h. This allows us to finish {}% of the trip.", permittedTimeToTravel, (shareOfTheTripDone * 100));
 				if (permittedTimeToTravel == timeToNextLongBreak) {
 					this.logger.info("\tDo long break, because it is necessary");
 				}
@@ -173,7 +173,7 @@ public class EnhancedTTSP {
 					this.logger.info("\tDoing a long break ({}h)", this.durationOfLongBreak);
 					timeSinceLastShortBreak = 0;
 					timeSinceLastLongBreak = 0;
-					timeToNextShortBreak = this.getTimeToNextShortBreak(curTime, 0);
+					timeToNextShortBreak = this.getTimeToNextShortBreak(0);
 					timeToNextLongBreak = this.getTimeToNextLongBreak(curTime, 0);
 
 				} else {
@@ -182,7 +182,7 @@ public class EnhancedTTSP {
 					this.logger.info("\tDoing a short break ({}h)", this.durationOfShortBreak);
 					timeSinceLastShortBreak = 0;
 					timeSinceLastLongBreak += timeElapsed;
-					timeToNextShortBreak = this.getTimeToNextShortBreak(curTime, 0);
+					timeToNextShortBreak = this.getTimeToNextShortBreak(0);
 					timeToNextLongBreak = this.getTimeToNextLongBreak(curTime, timeSinceLastLongBreak);
 				}
 			}
@@ -197,7 +197,7 @@ public class EnhancedTTSP {
 
 
 
-	private double getTimeToNextShortBreak(final double time, final double timeSinceLastBreak) {
+	private double getTimeToNextShortBreak(final double timeSinceLastBreak) {
 		return this.maxConsecutiveDrivingTime - timeSinceLastBreak;
 	}
 
@@ -207,7 +207,7 @@ public class EnhancedTTSP {
 
 	private double getTimeToNextBlock(final double time) {
 		double timeToNextBlock = Math.ceil(time) - time;
-		while (!this.blockedHours.get((int) Math.round(time + timeToNextBlock) % this.numberOfConsideredHours)) {
+		while (!(boolean)this.blockedHours.get((int) Math.round(time + timeToNextBlock) % this.numberOfConsideredHours)) {
 			timeToNextBlock++;
 		}
 		return timeToNextBlock;
@@ -220,15 +220,12 @@ public class EnhancedTTSP {
 		double startSevenNineSubInterval = Math.max(7, departureTimeRelativeToSevenNineInterval);
 		double endSevenNineSubInterval = Math.min(9, departureTimeRelativeToSevenNineInterval + travelTime);
 		double travelTimeInSevenToNineSlot = Math.max(0, endSevenNineSubInterval - startSevenNineSubInterval);
-		// logger.info("Travel time in 7-9 slot: " + travelTimeInSevenToNineSlot
-		// + ". Increasing travel time by " + travelTimeInSevenToNineSlot * 0.2);
 		travelTime += travelTimeInSevenToNineSlot * 0.5;
 
 		int departureTimeRelativeToFourSixInterval = t > 18 ? t - 24 : t;
 		double startFourSixSubInterval = Math.max(16, departureTimeRelativeToFourSixInterval);
 		double endFourSixSubInterval = Math.min(18, departureTimeRelativeToFourSixInterval + travelTime);
 		double travelTimeInFourToSixSlot = Math.max(0, endFourSixSubInterval - startFourSixSubInterval);
-		// logger.info("Increasing travel time by " + travelTimeInFourToSixSlot);
 		travelTime += travelTimeInFourToSixSlot * 0.5;
 		return travelTime;
 	}
@@ -237,15 +234,15 @@ public class EnhancedTTSP {
 
 		/* do a somewhat crude numeric approximation */
 		double minTravelTimeForRest = minTravelTime * (1 - shareOfTripDone);
-		this.logger.info("\t\tMin travel time for rest: " + minTravelTimeForRest);
+		this.logger.info("\t\tMin travel time for rest: {}", minTravelTimeForRest);
 		double doableMinTravelTimeForRest = minTravelTimeForRest;
-		double estimatedTravelingTimeForThatPortion;
+		double estimatedTravelingTimeForThatPortion = 0;
 		while ((estimatedTravelingTimeForThatPortion = this.getActualDrivingTimeWithoutBreak(doableMinTravelTimeForRest, departureOfCurrentPoint, shareOfTripDone)) > drivingTime) {
 			doableMinTravelTimeForRest -= 0.01;
 		}
-		this.logger.info("\t\tDoable min travel time for rest: " + doableMinTravelTimeForRest + ". The estimated true travel time for that portion is " + estimatedTravelingTimeForThatPortion);
+		this.logger.info("\t\tDoable min travel time for rest: {}. The estimated true travel time for that portion is {}", doableMinTravelTimeForRest, estimatedTravelingTimeForThatPortion);
 		double additionalShare = (doableMinTravelTimeForRest / minTravelTimeForRest) * (1 - shareOfTripDone);
-		this.logger.info("\t\tAdditional share:" + additionalShare);
+		this.logger.info("\t\tAdditional share: {}", additionalShare);
 		return shareOfTripDone + additionalShare;
 	}
 

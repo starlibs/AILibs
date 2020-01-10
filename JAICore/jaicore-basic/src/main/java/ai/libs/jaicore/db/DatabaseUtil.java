@@ -18,6 +18,10 @@ import ai.libs.jaicore.db.sql.SQLAdapter;
 
 public class DatabaseUtil {
 
+	private DatabaseUtil() {
+		/* avoids instantiation */
+	}
+
 	public static void createTableFromResult(final SQLAdapter adapter, final String sqlQuery, final List<String> params, final String tableName, final List<String> fieldnames, final Map<String, Pair<Class<?>, Function<IKVStore, Object>>> transformation) throws SQLException {
 
 		if (fieldnames.size() != transformation.size() || !fieldnames.containsAll(transformation.keySet())) {
@@ -52,7 +56,6 @@ public class DatabaseUtil {
 		for (int page = 0; insertedLine; page ++) {
 			String qry = sqlQuery + " LIMIT " + (pageSize * page) + ", " + pageSize;
 			Iterator<IKVStore> rowIterator = adapter.getResultIteratorOfQuery(qry, params);
-			System.out.println(qry + ": " + rowIterator.hasNext());
 			insertedLine = false;
 			while (rowIterator.hasNext()) {
 				IKVStore row = rowIterator.next();
