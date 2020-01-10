@@ -8,7 +8,7 @@ class RestProblem extends ArrayList<Set<String>> {
 
 	private static int counter = 0;
 	private final int id = (counter ++);
-	private final Decision edgeToParent;
+	private final transient Decision edgeToParent;
 
 	public RestProblem(final Decision edgeToParent) {
 		super();

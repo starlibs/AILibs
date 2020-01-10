@@ -7,9 +7,11 @@ import java.util.List;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 
-public abstract class AMCTreeNode<C> implements Classifier, Serializable {
+public abstract class AMCTreeNode<C extends Serializable> implements Classifier {
 
-	protected final List<C> containedClasses;
+	private static final long serialVersionUID = 3014880172602719884L;
+
+	private final List<C> containedClasses;
 
 	public AMCTreeNode(final List<C> containedClasses) {
 		super();

@@ -172,10 +172,10 @@ public class ModifiedISAC extends ASupervisedLearner<ILabelRankingInstance, ILab
 
 	@Override
 	public IRankingPredictionBatch predict(ILabelRankingInstance[] dTest) throws PredictionException, InterruptedException {
-		List<IRanking<?>> rankings = new ArrayList<>();
+		List<IRanking<?>> rankingPredictions = new ArrayList<>();
 		for (ILabelRankingInstance instance : dTest) {
-			rankings.add(predict(instance));
+			rankingPredictions.add(predict(instance));
 		}
-		return new RankingPredictionBatch(rankings);
+		return new RankingPredictionBatch(rankingPredictions);
 	}
 }

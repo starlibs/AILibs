@@ -7,17 +7,20 @@ import weka.core.Instances;
 
 public class ConstantClassifier implements Classifier {
 
+	private static final long serialVersionUID = 8190066987365474681L;
+
 	@Override
-	public void buildClassifier(Instances data) throws Exception {
+	public void buildClassifier(final Instances data) throws Exception {
+		/* does nothing */
 	}
 
 	@Override
-	public double classifyInstance(Instance instance) throws Exception {
+	public double classifyInstance(final Instance instance) throws Exception {
 		return 0.0;
 	}
 
 	@Override
-	public double[] distributionForInstance(Instance instance) throws Exception {
+	public double[] distributionForInstance(final Instance instance) throws Exception {
 		return new double[] { 1.0 };
 	}
 
@@ -26,6 +29,7 @@ public class ConstantClassifier implements Classifier {
 		return null;
 	}
 
+	@Override
 	public Classifier clone() {
 		return new ConstantClassifier();
 	}

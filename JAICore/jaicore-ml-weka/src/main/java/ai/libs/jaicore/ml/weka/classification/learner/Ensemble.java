@@ -11,7 +11,7 @@ import weka.core.Utils;
 public class Ensemble extends LinkedList<Classifier> implements Classifier {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -4094417200499766748L;
 
@@ -36,7 +36,8 @@ public class Ensemble extends LinkedList<Classifier> implements Classifier {
 
 	@Override
 	public double[] distributionForInstance(final Instance instance) throws Exception {
-		double[] sums = new double[instance.classAttribute().numValues()], newProbs;
+		double[] sums = new double[instance.classAttribute().numValues()];
+		double[] newProbs;
 		for (Classifier c : this) {
 			newProbs = c.distributionForInstance(instance);
 			for (int j = 0; j < newProbs.length; j++) {

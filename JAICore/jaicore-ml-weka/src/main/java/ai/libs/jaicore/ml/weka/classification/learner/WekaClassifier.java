@@ -19,8 +19,6 @@ import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.common.reconstruction.IReconstructible;
 import org.api4.java.common.reconstruction.IReconstructionInstruction;
 import org.api4.java.common.reconstruction.IReconstructionPlan;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionPlan;
@@ -40,7 +38,6 @@ import weka.classifiers.Classifier;
 import weka.core.OptionHandler;
 
 public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> implements IWekaClassifier, IReconstructible {
-	private static final Logger LOGGER = LoggerFactory.getLogger(WekaClassifier.class);
 
 	private final String name;
 	private Classifier wrappedClassifier;

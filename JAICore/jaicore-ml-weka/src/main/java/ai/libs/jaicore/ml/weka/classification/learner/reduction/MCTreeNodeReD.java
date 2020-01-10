@@ -26,6 +26,8 @@ public class MCTreeNodeReD extends AMCTreeNode<String> {
 	 */
 	private static final long serialVersionUID = 8873192747068561266L;
 
+	private boolean debugMode = false;
+
 	@SuppressWarnings("serial")
 	private class ChildNode implements Serializable {
 		private List<String> containedClasses;
@@ -118,12 +120,12 @@ public class MCTreeNodeReD extends AMCTreeNode<String> {
 
 	public void addChild(final List<String> childClasses, final Classifier childClassifier) {
 		assert !this.trained : "Cannot insert children after the tree node has been trained!";
-		if (childClassifier instanceof MCTreeMergeNode) {
-			this.children.addAll(((MCTreeMergeNode) childClassifier).getChildren());
-		} else {
-			this.children.add(new ChildNode(childClasses, childClassifier));
-		}
-		this.containedClasses.addAll(childClasses);
+	if (childClassifier instanceof MCTreeMergeNode) {
+		this.children.addAll(((MCTreeMergeNode) childClassifier).getChildren());
+	} else {
+		this.children.add(new ChildNode(childClasses, childClassifier));
+	}
+	this.getContainedClasses().addAll(childClasses);
 	}
 
 	/**
@@ -131,16 +133,6 @@ public class MCTreeNodeReD extends AMCTreeNode<String> {
 	 */
 	public List<ChildNode> getChildren() {
 		return this.children;
-	}
-
-	/**
-	 * Get the classes contained in the leaves of this node.
-	 *
-	 * @return Returns a collection of the contained class values contained in the leaves of this node.
-	 */
-	@Override
-	public List<String> getContainedClasses() {
-		return this.containedClasses;
 	}
 
 	public boolean isCompletelyConfigured() {
@@ -156,21 +148,32 @@ public class MCTreeNodeReD extends AMCTreeNode<String> {
 	}
 
 	@Override
+	public List<String> getContainedClasses() {
+		return (List<String>)super.getContainedClasses();
+	}
+
+	@Override
 	public void buildClassifier(final Instances data) throws Exception {
 		if (data.isEmpty()) {
 			throw new IllegalArgumentException("Cannot train MCTree with empty set of instances.");
 		}
 		assert !this.children.isEmpty() : "Cannot train MCTree without children";
 		assert !this.trained : "Cannot retrain MCTreeNodeReD";
-		assert this.containedClasses.containsAll(WekaUtil.getClassesActuallyContainedInDataset(data)) : "The classes for which this MCTreeNodeReD has been defined (" + this.containedClasses
-				+ ") is not a superset of the given training data (" + WekaUtil.getClassesActuallyContainedInDataset(data) + ") ...";
-		assert WekaUtil.getClassesActuallyContainedInDataset(data).containsAll(this.containedClasses) : "The classes for which this MCTreeNodeReD has been defined (" + this.containedClasses + ") is not a subset of the given training data ("
-				+ WekaUtil.getClassesActuallyContainedInDataset(data) + ") ...";
+		if (this.debugMode) {
+			if (!this.getContainedClasses().containsAll(WekaUtil.getClassesActuallyContainedInDataset(data))) {
+				throw new IllegalStateException("The classes for which this MCTreeNodeReD has been defined (" + this.getContainedClasses()
+				+ ") is not a superset of the given training data (" + WekaUtil.getClassesActuallyContainedInDataset(data) + ") ...");
+			}
+			if (!WekaUtil.getClassesActuallyContainedInDataset(data).containsAll(this.getContainedClasses())) {
+				throw new IllegalStateException("The classes for which this MCTreeNodeReD has been defined (" + this.getContainedClasses() + ") is not a subset of the given training data ("
+						+ WekaUtil.getClassesActuallyContainedInDataset(data) + ") ...");
+			}
+		}
 
 		/* resort the contained classes based on the input data. This is necessary, because the order of classes in the given dataset might differ from the order of classes initially declared for the tree */
-		this.containedClasses.clear();
+		this.getContainedClasses().clear();
 		for (int i = 0; i < data.numClasses(); i++) {
-			this.containedClasses.add(data.classAttribute().value(i));
+			this.getContainedClasses().add(data.classAttribute().value(i));
 		}
 
 		/* create subsets of the training data filtering for the respective class values and build child classifier */
@@ -217,27 +220,27 @@ public class MCTreeNodeReD extends AMCTreeNode<String> {
 	public double[] distributionForInstance(final Instance instance) throws Exception {
 		assert this.trained : "Cannot get distribution from untrained classifier " + this.toStringWithOffset();
 
-		// compute distribution of the children clusters of the inner node's classifier
-		Instance refactoredInstance = WekaUtil.getRefactoredInstance(instance);
-		double[] innerNodeClassifierDistribution = this.innerNodeClassifier.distributionForInstance(refactoredInstance);
+	// compute distribution of the children clusters of the inner node's classifier
+	Instance refactoredInstance = WekaUtil.getRefactoredInstance(instance);
+	double[] innerNodeClassifierDistribution = this.innerNodeClassifier.distributionForInstance(refactoredInstance);
 
-		// recursively compute distribution for instance for all the children and assign the probabilities
-		// to classDistribution array
-		double[] classDistribution = new double[this.getContainedClasses().size()];
-		for (int childIndex = 0; childIndex < this.children.size(); childIndex++) {
-			ChildNode child = this.children.get(childIndex);
-			double[] childDistribution = child.childNodeClassifier.distributionForInstance(WekaUtil.getRefactoredInstance(instance, child.containedClasses));
-			assert childDistribution.length == child.containedClasses.size() : "Mismatch of child classes (" + child.containedClasses.size() + ") and distribution in child (" + childDistribution.length + ")";
-			for (int i = 0; i < childDistribution.length; i++) {
-				String classValue = child.containedClasses.get(i);
-				classDistribution[this.getContainedClasses().indexOf(classValue)] = childDistribution[i] * innerNodeClassifierDistribution[childIndex];
-			}
+	// recursively compute distribution for instance for all the children and assign the probabilities
+	// to classDistribution array
+	double[] classDistribution = new double[this.getContainedClasses().size()];
+	for (int childIndex = 0; childIndex < this.children.size(); childIndex++) {
+		ChildNode child = this.children.get(childIndex);
+		double[] childDistribution = child.childNodeClassifier.distributionForInstance(WekaUtil.getRefactoredInstance(instance, child.containedClasses));
+		assert childDistribution.length == child.containedClasses.size() : "Mismatch of child classes (" + child.containedClasses.size() + ") and distribution in child (" + childDistribution.length + ")";
+		for (int i = 0; i < childDistribution.length; i++) {
+			String classValue = child.containedClasses.get(i);
+			classDistribution[this.getContainedClasses().indexOf(classValue)] = childDistribution[i] * innerNodeClassifierDistribution[childIndex];
 		}
+	}
 
-		double sum = Arrays.stream(classDistribution).sum();
-		assert (sum - 1E-8 <= 1.0 && sum + 1E-8 >= 1.0) : "Distribution does not sum up to 1; actual some of distribution entries: " + sum;
+	double sum = Arrays.stream(classDistribution).sum();
+	assert (sum - 1E-8 <= 1.0 && sum + 1E-8 >= 1.0) : "Distribution does not sum up to 1; actual some of distribution entries: " + sum;
 
-		return classDistribution;
+	return classDistribution;
 	}
 
 	@Override

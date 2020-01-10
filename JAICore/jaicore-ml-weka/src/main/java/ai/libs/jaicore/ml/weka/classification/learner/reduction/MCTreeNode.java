@@ -159,7 +159,7 @@ public class MCTreeNode extends AMCTreeNode<Integer> implements ITreeClassifier,
 	public double[] distributionForInstance(final Instance instance) throws Exception {
 		assert this.trained : "Cannot get distribution from untrained classifier " + this.toStringWithOffset();
 
-	double[] classDistribution = new double[this.containedClasses.size()];
+	double[] classDistribution = new double[this.getContainedClasses().size()];
 	this.distributionForInstance(instance, classDistribution);
 	return classDistribution;
 	}

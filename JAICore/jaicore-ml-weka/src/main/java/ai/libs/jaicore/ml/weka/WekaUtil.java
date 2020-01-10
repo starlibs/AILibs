@@ -460,7 +460,7 @@ public class WekaUtil {
 			foldIndices.stream().forEach(i -> fold.add(data.get(i).getElement()));
 			folds.add(fold);
 		}
-		return folds.stream().map(x -> new WekaInstances(x)).collect(Collectors.toList());
+		return folds.stream().map(WekaInstances::new).collect(Collectors.toList());
 	}
 
 	public static ArrayNode splitToJsonArray(final Collection<Integer>[] splitDecision) {
@@ -471,7 +471,7 @@ public class WekaUtil {
 	}
 
 	public static List<Instances> getStratifiedSplit(final Instances data, final long seed, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
-		return getStratifiedSplit(new WekaInstances(data), new Random(seed), portionOfFirstFold).stream().map(i -> i.getInstances()).collect(Collectors.toList());
+		return getStratifiedSplit(new WekaInstances(data), new Random(seed), portionOfFirstFold).stream().map(IWekaInstances::getInstances).collect(Collectors.toList());
 	}
 
 	public static List<IWekaInstances> getStratifiedSplit(final IWekaInstances data, final long seed, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
@@ -488,7 +488,7 @@ public class WekaUtil {
 			if (split.get(0).size() + split.get(1).size() != data.size()) {
 				throw new IllegalStateException("The sum of fold sizes does not correspond to the size of the original dataset!");
 			}
-			return split.stream().map(x -> new WekaInstances(x)).collect(Collectors.toList());
+			return split.stream().map(WekaInstances::new).collect(Collectors.toList());
 		} catch (ClassCastException | AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException | DatasetCreationException e) {
 			throw new SplitFailedException(e);
 		}

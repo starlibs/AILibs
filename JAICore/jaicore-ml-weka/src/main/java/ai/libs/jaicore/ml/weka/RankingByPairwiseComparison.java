@@ -1,7 +1,5 @@
 package ai.libs.jaicore.ml.weka;
 
-import java.io.File;
-import java.io.FileReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -9,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 
@@ -144,12 +141,4 @@ public class RankingByPairwiseComparison {
 			throw new PredictionException("Could not create a prediction.", e);
 		}
 	}
-
-	public static void main(final String[] args) throws Exception {
-		Instances data = new Instances(new FileReader(new File("classifier-rank.arff")));
-		RankingByPairwiseComparison rpc = new RankingByPairwiseComparison(ConfigFactory.create(RPCConfig.class));
-		rpc.fit(data, -22);
-		System.out.println(rpc.predict(data.get(0)));
-	}
-
 }
