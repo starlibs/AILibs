@@ -53,7 +53,7 @@ public class SMACOptimizer extends AbstractPCSBasedOptimizer {
 	 * @param evaluator
 	 * @return
 	 */
-	public static Builder SMACOptimizerBuilder(final PCSBasedOptimizerInput input, final IObjectEvaluator<ComponentInstance, Double> evaluator) {
+	public static Builder getSMACOptimizerBuilder(final PCSBasedOptimizerInput input, final IObjectEvaluator<ComponentInstance, Double> evaluator) {
 		return new Builder(input, evaluator);
 	}
 
