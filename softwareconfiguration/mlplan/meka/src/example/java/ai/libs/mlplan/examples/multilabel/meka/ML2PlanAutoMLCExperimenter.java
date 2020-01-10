@@ -11,13 +11,13 @@ import java.util.Stack;
 import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigCache;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.db.sql.SQLAdapter;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
 import ai.libs.jaicore.experiments.ExperimentRunner;
 import ai.libs.jaicore.experiments.IExperimentDatabaseHandle;
@@ -85,8 +85,8 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 			IWekaInstances dataset = new WekaInstances(data);
 			List<IWekaInstances> trainTestSplit = WekaUtil.realizeSplit(dataset, WekaUtil.getArbitrarySplit(dataset, new Random(Integer.parseInt(testSeed)), 0.7));
 
-			TimeOut mlplanTimeOut = new TimeOut(Integer.parseInt(experimentDescription.get("timeout")), TimeUnit.MINUTES);
-			TimeOut nodeEvalTimeOut = new TimeOut(Integer.parseInt(experimentDescription.get("node_timeout")), TimeUnit.MINUTES);
+			Timeout mlplanTimeOut = new Timeout(Integer.parseInt(experimentDescription.get("timeout")), TimeUnit.MINUTES);
+			Timeout nodeEvalTimeOut = new Timeout(Integer.parseInt(experimentDescription.get("node_timeout")), TimeUnit.MINUTES);
 
 			// Prepare connection
 			ResultsDBConnection connection = new ResultsDBConnection("intermediate_measurements", "final_measurements", "ordered_metric", experimentEntry.getId(), "ML2Plan", adapter);

@@ -10,7 +10,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.commons.lang3.time.StopWatch;
-import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.openml.webapplication.fantail.dc.GlobalCharacterizer;
@@ -91,7 +91,7 @@ public class MetaMLPlan extends AbstractClassifier {
 
 		// Get lds
 		BestFirstLimitedDiscrepancySearchFactory<TFDNode, String, NodeOrderList> ldsFactory = new BestFirstLimitedDiscrepancySearchFactory<>();
-		IGraphSearchInput<TFDNode, String> originalInput = mlPlan.getSearchProblemInputGenerator();
+		IPathSearchInput<TFDNode, String> originalInput = mlPlan.getSearchProblemInputGenerator();
 		GraphSearchWithNodeRecommenderInput<TFDNode, String> problemInput = new GraphSearchWithNodeRecommenderInput<>(new ReducedGraphGenerator<>(originalInput.getGraphGenerator()), originalInput.getGoalTester(),
 				new MetaMinerBasedSorter(this.metaMiner, builder.getComponents()));
 		ldsFactory.setProblemInput(problemInput);
@@ -153,7 +153,7 @@ public class MetaMLPlan extends AbstractClassifier {
 				this.logger.info("Pipeline Score: {}", score);
 				trainingTimer.stop();
 
-				this.eventBus.post(new IntermediateSolutionEvent(this.algorithmId, pl, score));
+				this.eventBus.post(new IntermediateSolutionEvent(null, pl, score));
 
 				// Check if better than previous best
 				if (score < bestScore) {

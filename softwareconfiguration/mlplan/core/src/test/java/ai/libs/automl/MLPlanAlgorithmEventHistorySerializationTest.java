@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 import org.junit.Test;
 
 import ai.libs.jaicore.graphvisualizer.events.recorder.AlgorithmEventHistory;
@@ -34,9 +34,9 @@ public class MLPlanAlgorithmEventHistorySerializationTest {
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
 		MLPlanSimpleBuilder builder = new MLPlanSimpleBuilder();
-		builder.withNodeEvaluationTimeOut(new TimeOut(30, TimeUnit.SECONDS));
-		builder.withCandidateEvaluationTimeOut(new TimeOut(10, TimeUnit.SECONDS));
-		builder.withTimeOut(new TimeOut(90, TimeUnit.SECONDS));
+		builder.withNodeEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
+		builder.withTimeOut(new Timeout(90, TimeUnit.SECONDS));
 		builder.withNumCpus(2);
 
 		MLPlan<IClassifier> mlplan = builder.withDataset(split.get(0)).build();

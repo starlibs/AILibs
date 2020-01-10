@@ -1,7 +1,7 @@
 package ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter;
 
-import org.api4.java.algorithm.events.ScoredSolutionCandidateFoundEvent;
-import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.algorithm.events.result.IScoredSolutionCandidateFoundEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +26,8 @@ public class SolutionPerformanceTimelinePluginController extends ASimpleMVCPlugi
 	}
 
 	@Override
-	public void handleAlgorithmEventInternally(final PropertyProcessedAlgorithmEvent algorithmEvent) {
-		if (algorithmEvent.correspondsToEventOfClass(ScoredSolutionCandidateFoundEvent.class)) {
+	public void handleAlgorithmEventInternally(final IPropertyProcessedAlgorithmEvent algorithmEvent) {
+		if (algorithmEvent.correspondsToEventOfClass(IScoredSolutionCandidateFoundEvent.class)) {
 
 			this.logger.debug("Received solution event {}", algorithmEvent);
 

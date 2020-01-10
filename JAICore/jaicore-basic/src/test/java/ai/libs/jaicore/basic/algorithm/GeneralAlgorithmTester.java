@@ -16,10 +16,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -129,13 +127,13 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		}
 		CheckingEventListener listener = new CheckingEventListener();
 		try {
-			for (AlgorithmEvent e : algorithm) {
+			for (IAlgorithmEvent e : algorithm) {
 				listener.receiveEvent(e);
 			}
 		} catch (ExceptionInAlgorithmIterationException e) {
 			if (e.getCause() instanceof AlgorithmTimeoutedException) {
 				this.logger.warn("Algorithm has been timeouted. Cannot safely check that a finished event would have been returned.");
-				listener.receiveEvent(new AlgorithmFinishedEvent(algorithm.getId())); // pretend that the algorithm would have send an AlgorithmFinishedEvent
+				listener.receiveEvent(new AlgorithmFinishedEvent(algorithm)); // pretend that the algorithm would have send an AlgorithmFinishedEvent
 			} else {
 				throw e;
 			}
@@ -375,7 +373,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			assert algorithm.getConfig().threads() == allowedCPUs;
 		}
 		FutureTask<?> task = new FutureTask<>(algorithm);
-		TimeOut to = new TimeOut(TIMEOUT_DELAY, TimeUnit.MILLISECONDS);
+		Timeout to = new Timeout(TIMEOUT_DELAY, TimeUnit.MILLISECONDS);
 		algorithm.setTimeout(to.milliseconds(), TimeUnit.MILLISECONDS);
 		assert algorithm.getTimeout().equals(to) : "Algorithm timeout is " + algorithm.getTimeout() + " but " + to + " has been specified!";
 
@@ -472,7 +470,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		boolean observedFinish = false;
 		boolean observedFinishExactlyOnce = false;
 
-		public void receiveEvent(final AlgorithmEvent e) {
+		public void receiveEvent(final IAlgorithmEvent e) {
 
 			if (e instanceof AlgorithmInitializedEvent) {
 				this.receiveEvent((AlgorithmInitializedEvent) e);

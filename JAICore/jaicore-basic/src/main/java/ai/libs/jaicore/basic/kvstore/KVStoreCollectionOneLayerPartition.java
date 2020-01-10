@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.api4.java.datastructure.kvstore.IKVStore;
+
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 /**
@@ -22,21 +24,21 @@ public class KVStoreCollectionOneLayerPartition implements Iterable<Entry<String
 	private Map<String, KVStoreCollection> data;
 
 	/**
-		 * Creates an empty two layer {@link KVStoreCollection} partition.
-		 *
-		 * @param partitionKey The field name for the partitioning key.
-		 * @param collection The {@link KVStoreCollection} to initialize this partition.
-		 */
+	 * Creates an empty two layer {@link KVStoreCollection} partition.
+	 *
+	 * @param partitionKey The field name for the partitioning key.
+	 * @param collection The {@link KVStoreCollection} to initialize this partition.
+	 */
 	public KVStoreCollectionOneLayerPartition(final String partitionKey, final KVStoreCollection collection) {
 		this(partitionKey);
 		this.addAll(collection);
 	}
 
 	/**
-		 * Creates an empty two layer KVStorCollection partition.
-		 *
-		 * @param partitionKey The field name for the first level partition.
-		 */
+	 * Creates an empty two layer KVStorCollection partition.
+	 *
+	 * @param partitionKey The field name for the first level partition.
+	 */
 	public KVStoreCollectionOneLayerPartition(final String firstLevelKey) {
 		this.partitionKey = firstLevelKey;
 		this.data = new HashMap<>();
@@ -47,9 +49,9 @@ public class KVStoreCollectionOneLayerPartition implements Iterable<Entry<String
 	}
 
 	/**
-		 * Adds a signle {@link KVStore} to this {@link KVStoreCollectionOneLayerPartition}.
-		 * @param store
-		 */
+	 * Adds a signle {@link KVStore} to this {@link KVStoreCollectionOneLayerPartition}.
+	 * @param store
+	 */
 	public void add(final IKVStore store) {
 		/* First ensure that nested maps contain the required keys and KVStoreCollection respectively. */
 		String keyForPartition = store.getAsString(this.partitionKey);

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public class WekaDyadRankingExample {
 
 		try {
 			long start = System.currentTimeMillis();
-			mlplan.setTimeout(new TimeOut(60 - (start - starttime) / 1000, TimeUnit.SECONDS));
+			mlplan.setTimeout(new Timeout(60 - (start - starttime) / 1000, TimeUnit.SECONDS));
 			mlplan.buildClassifier(split.get(0).getInstances());
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			logger.info("Finished build of the classifier. Training time was {}s", trainTime);

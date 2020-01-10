@@ -323,10 +323,10 @@ public class FileUtil {
 	 * @throws IOException
 	 */
 	public static void writeFileAsList(final List<String> lines, final String filename) throws IOException {
-		FileWriter writer = new FileWriter(filename);
-		for (String line : lines) {
-			writer.write(line + System.lineSeparator());
+		try (FileWriter writer = new FileWriter(filename)) {
+			for (String line : lines) {
+				writer.write(line + System.lineSeparator());
+			}
 		}
-		writer.close();
 	}
 }

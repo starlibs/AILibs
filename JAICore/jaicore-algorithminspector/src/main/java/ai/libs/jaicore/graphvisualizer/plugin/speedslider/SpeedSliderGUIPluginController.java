@@ -1,6 +1,6 @@
 package ai.libs.jaicore.graphvisualizer.plugin.speedslider;
 
-import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import ai.libs.jaicore.graphvisualizer.events.gui.GUIEvent;
@@ -15,7 +15,7 @@ public class SpeedSliderGUIPluginController implements IGUIPluginController {
 	}
 
 	@Override
-	public void handleSerializableAlgorithmEvent(final PropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
+	public void handleSerializableAlgorithmEvent(final IPropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
 		// no need to handle any algorithm events
 	}
 

@@ -8,7 +8,7 @@ import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
@@ -44,7 +44,7 @@ public abstract class ClusterSampling<I extends ILabeledInstance & Clusterable, 
 		this.distanceMeassure = distanceMeassure;
 	}
 
-	public AlgorithmEvent doAlgorithmStep() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public IAlgorithmEvent doAlgorithmStep() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		if (this.currentCluster < this.clusterResults.size()) {
 			CentroidCluster<I> cluster = this.clusterResults.get(this.currentCluster++);
 			boolean same = true;
@@ -75,7 +75,7 @@ public abstract class ClusterSampling<I extends ILabeledInstance & Clusterable, 
 					this.sample.add(cluster.getPoints().get(i));
 				}
 			}
-			return new SampleElementAddedEvent(this.getId());
+			return new SampleElementAddedEvent(this);
 		} else {
 			return this.terminate();
 		}

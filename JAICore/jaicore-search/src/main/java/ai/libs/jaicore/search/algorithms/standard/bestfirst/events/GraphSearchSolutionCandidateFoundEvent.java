@@ -1,7 +1,8 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst.events;
 
-import org.api4.java.algorithm.events.ASolutionCandidateFoundEvent;
+import org.api4.java.algorithm.IAlgorithm;
 
+import ai.libs.jaicore.basic.algorithm.ASolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
 /**
@@ -14,7 +15,7 @@ import ai.libs.jaicore.search.model.other.SearchGraphPath;
  */
 public class GraphSearchSolutionCandidateFoundEvent<N, A, S extends SearchGraphPath<N, A>> extends ASolutionCandidateFoundEvent<S> {
 
-	public GraphSearchSolutionCandidateFoundEvent(final String algorithmId, final S solution) {
-		super(algorithmId, solution);
+	public GraphSearchSolutionCandidateFoundEvent(final IAlgorithm<?, ?> algorithm, final S solution) {
+		super(algorithm, solution);
 	}
 }

@@ -25,10 +25,9 @@ public class MLPlanSimpleBuilder extends AbstractMLPlanBuilder<IClassifier, MLPl
 			this.withMCCVBasedCandidateEvaluationInSearchPhase().withNumMCIterations(3).withTrainFoldSize(.7);
 			this.withMCCVBasedCandidateEvaluationInSelectionPhase().withNumMCIterations(3).withTrainFoldSize(.7);
 			this.withRequestedInterface("AbstractClassifier");
-			//			this.withSearchPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory<>());
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new IllegalStateException("The resource file could not be found or accessed!", e);
 		}
 	}
 

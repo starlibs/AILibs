@@ -6,13 +6,13 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.api4.java.common.control.ILoggingCustomizable;
-
-import ai.libs.jaicore.basic.kvstore.IKVStore;
+import org.api4.java.datastructure.kvstore.IKVStore;
 
 /**
  * This is a simple util interface for easy database access and query execution in sql. You need to make sure that the respective JDBC connector is in the class path. By default, the adapter uses the mysql driver, but any jdbc driver can be
@@ -28,6 +28,8 @@ public interface IDatabaseAdapter extends Serializable, AutoCloseable, ILoggingC
 	 * @throws SQLException Thrown, if there was an issue with reconnecting to the database server.
 	 */
 	public void checkConnection() throws SQLException;
+
+	public void createTable(final String tablename, final String nameOfPrimaryField, final Collection<String> fieldnames, final Map<String, String> types, final Collection<String> keys) throws SQLException;
 
 	/**
 	 * Retrieves all rows of a table.

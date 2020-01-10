@@ -8,6 +8,7 @@ import ai.libs.hasco.model.ComponentInstance;
 public class SupervisedLearnerCreatedEvent implements IEvent {
 	private final ComponentInstance instance;
 	private final ISupervisedLearner<?, ?> classifier;
+	private final long timestamp = System.currentTimeMillis();
 
 	public SupervisedLearnerCreatedEvent(final ComponentInstance instance, final ISupervisedLearner<?, ?> classifier) {
 		super();
@@ -21,5 +22,10 @@ public class SupervisedLearnerCreatedEvent implements IEvent {
 
 	public ISupervisedLearner<?, ?> getClassifier() {
 		return this.classifier;
+	}
+
+	@Override
+	public long getTimestamp() {
+		return this.timestamp;
 	}
 }

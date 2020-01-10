@@ -14,9 +14,15 @@ public class EnhancedTTSPNode {
 		super();
 		this.curLocation = curLocation;
 		this.curTour = curTour;
-		assert time >= 0 : "Cannot create TTSP node with negative time";
-		assert timeTraveledSinceLastShortBreak >= 0 : "Cannot create TTSP node with negative time since last short break";
-		assert timeTraveledSinceLastLongBreak >= 0 : "Cannot create TTSP node with negative time since last long break";
+		if (time < 0) {
+			throw new IllegalArgumentException("Cannot create TTSP node with negative time");
+		}
+		if (timeTraveledSinceLastShortBreak < 0) {
+			throw new IllegalArgumentException("Cannot create TTSP node with negative time since last short break");
+		}
+		if (timeTraveledSinceLastLongBreak < 0) {
+			throw new IllegalArgumentException("Cannot create TTSP node with negative time since last long break");
+		}
 		this.time = time;
 		this.timeTraveledSinceLastShortBreak = timeTraveledSinceLastShortBreak;
 		this.timeTraveledSinceLastLongBreak = timeTraveledSinceLastLongBreak;
@@ -86,10 +92,7 @@ public class EnhancedTTSPNode {
 		if (Double.doubleToLongBits(this.timeTraveledSinceLastLongBreak) != Double.doubleToLongBits(other.timeTraveledSinceLastLongBreak)) {
 			return false;
 		}
-		if (Double.doubleToLongBits(this.timeTraveledSinceLastShortBreak) != Double.doubleToLongBits(other.timeTraveledSinceLastShortBreak)) {
-			return false;
-		}
-		return true;
+		return (Double.doubleToLongBits(this.timeTraveledSinceLastShortBreak) == Double.doubleToLongBits(other.timeTraveledSinceLastShortBreak));
 	}
 
 	@Override

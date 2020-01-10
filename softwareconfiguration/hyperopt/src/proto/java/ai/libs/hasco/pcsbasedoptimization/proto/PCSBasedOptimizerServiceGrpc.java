@@ -7,10 +7,18 @@ import static io.grpc.stub.ClientCalls.futureUnaryCall;
 import static io.grpc.stub.ServerCalls.asyncUnaryCall;
 import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ai.libs.jaicore.logging.LoggerUtil;
+
 /**
  */
 @javax.annotation.Generated(value = "by gRPC proto compiler (version 1.23.0)", comments = "Source: PCSBasedComponentParameter.proto")
 public final class PCSBasedOptimizerServiceGrpc {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(PCSBasedOptimizerServiceGrpc.class);
 
 	private PCSBasedOptimizerServiceGrpc() {
 	}
@@ -65,7 +73,8 @@ public final class PCSBasedOptimizerServiceGrpc {
 
 		/**
 		 */
-		public void evaluate(final ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedComponentProto request, io.grpc.stub.StreamObserver<ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedEvaluationResponseProto> responseObserver) {
+		public void evaluate(final ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedComponentProto request, final io.grpc.stub.StreamObserver<ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedEvaluationResponseProto> responseObserver)
+				throws InterruptedException, ObjectEvaluationFailedException {
 			asyncUnimplementedUnaryCall(getEvaluateMethod(), responseObserver);
 		}
 
@@ -94,8 +103,8 @@ public final class PCSBasedOptimizerServiceGrpc {
 
 		/**
 		 */
-		public void evaluate(final ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedComponentProto request, io.grpc.stub.StreamObserver<ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedEvaluationResponseProto> responseObserver) {
-			asyncUnaryCall(getChannel().newCall(getEvaluateMethod(), getCallOptions()), request, responseObserver);
+		public void evaluate(final ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedComponentProto request, final io.grpc.stub.StreamObserver<ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedEvaluationResponseProto> responseObserver) {
+			asyncUnaryCall(this.getChannel().newCall(getEvaluateMethod(), this.getCallOptions()), request, responseObserver);
 		}
 	}
 
@@ -118,7 +127,7 @@ public final class PCSBasedOptimizerServiceGrpc {
 		/**
 		 */
 		public ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedEvaluationResponseProto evaluate(final ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedComponentProto request) {
-			return blockingUnaryCall(getChannel(), getEvaluateMethod(), getCallOptions(), request);
+			return blockingUnaryCall(this.getChannel(), getEvaluateMethod(), this.getCallOptions(), request);
 		}
 	}
 
@@ -141,14 +150,14 @@ public final class PCSBasedOptimizerServiceGrpc {
 		/**
 		 */
 		public com.google.common.util.concurrent.ListenableFuture<ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedEvaluationResponseProto> evaluate(final ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedComponentProto request) {
-			return futureUnaryCall(getChannel().newCall(getEvaluateMethod(), getCallOptions()), request);
+			return futureUnaryCall(this.getChannel().newCall(getEvaluateMethod(), this.getCallOptions()), request);
 		}
 	}
 
 	private static final int METHODID_EVALUATE = 0;
 
 	private static final class MethodHandlers<Req, Resp> implements io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>, io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>, io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
-			io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
+	io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
 		private final PCSBasedOptimizerServiceImplBase serviceImpl;
 		private final int methodId;
 
@@ -159,10 +168,17 @@ public final class PCSBasedOptimizerServiceGrpc {
 
 		@java.lang.Override
 		@java.lang.SuppressWarnings("unchecked")
-		public void invoke(final Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
+		public void invoke(final Req request, final io.grpc.stub.StreamObserver<Resp> responseObserver) {
 			switch (this.methodId) {
 			case METHODID_EVALUATE:
-				this.serviceImpl.evaluate((ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedComponentProto) request, (io.grpc.stub.StreamObserver<ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedEvaluationResponseProto>) responseObserver);
+				try {
+					this.serviceImpl.evaluate((ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedComponentProto) request,
+							(io.grpc.stub.StreamObserver<ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedEvaluationResponseProto>) responseObserver);
+				} catch (ObjectEvaluationFailedException e) {
+					LOGGER.error(LoggerUtil.getExceptionInfo(e));
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
 				break;
 			default:
 				throw new AssertionError();
@@ -170,8 +186,7 @@ public final class PCSBasedOptimizerServiceGrpc {
 		}
 
 		@java.lang.Override
-		@java.lang.SuppressWarnings("unchecked")
-		public io.grpc.stub.StreamObserver<Req> invoke(io.grpc.stub.StreamObserver<Resp> responseObserver) {
+		public io.grpc.stub.StreamObserver<Req> invoke(final io.grpc.stub.StreamObserver<Resp> responseObserver) {
 			switch (this.methodId) {
 			default:
 				throw new AssertionError();

@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.neighbo
 
 import java.util.ArrayList;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
@@ -47,7 +47,7 @@ public class ShotgunEnsembleLearnerAlgorithm extends ASimplifiedTSCLearningAlgor
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() {
+	public IAlgorithmEvent nextWithException() {
 		throw new UnsupportedOperationException();
 	}
 

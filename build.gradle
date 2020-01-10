@@ -49,12 +49,12 @@ allprojects {
 	    ossrhPassword = hasProperty('ossrhPassword') ? ossrhPassword : System.getenv("ossrhPassword")
 	    
 	    // api4 dependencies
-	    api4Version = '0.1.0'
-	    api4common = 'org.api4:common'
-	    api4algorithm = 'org.api4:algorithm'
-	    api4datastructure = 'org.api4:datastructure'
-	    api4AIgraphsearch = 'org.api4:ai-graphsearch'
-	    api4AIml = 'org.api4:ai-ml'
+	    api4Version = '1.0.0'
+	    api4common = 'org.api4:common:' + api4Version
+	    api4algorithm = 'org.api4:algorithm:' + api4Version
+	    api4datastructure = 'org.api4:datastructure:' + api4Version
+	    api4AIgraphsearch = 'org.api4:ai-graphsearch:' + api4Version
+	    api4AIml = 'org.api4:ai-ml:' + api4Version
 	    
 	    // apache dependencies
 	    apacheCommonsCollections = 'org.apache.commons:commons-collections4:4.1'

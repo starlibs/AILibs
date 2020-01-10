@@ -41,7 +41,6 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 
 	public WekaInstances(final Instances dataset) {
 		this(dataset, extractSchema(dataset));
-		this.reconstructionInstructions.add(new ReconstructionInstruction("Instances", "__construct", new Class<?>[] {}, new Object[] {}));
 	}
 
 	public WekaInstances(final Instances dataset, final ILabeledInstanceSchema schema) {
@@ -132,7 +131,7 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 	}
 
 	@Override
-	public Constructor<? extends IWekaInstance> getConstructorForDecoratedItems() {
+	public Constructor<? extends IWekaInstance> getConstructorForDecoratingItems() {
 		try {
 			return WekaInstance.class.getConstructor(this.getTypeOfDecoratedItems());
 		} catch (Exception e) {

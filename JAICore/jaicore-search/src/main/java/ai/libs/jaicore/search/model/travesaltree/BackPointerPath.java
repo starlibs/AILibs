@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.graph.ReadOnlyPathAccessor;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
@@ -191,7 +191,7 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 	}
 
 	@Override
-	public IPath<N, A> getUnmodifiableAccessor() {
+	public ILabeledPath<N, A> getUnmodifiableAccessor() {
 		return new ReadOnlyPathAccessor<>(this);
 	}
 

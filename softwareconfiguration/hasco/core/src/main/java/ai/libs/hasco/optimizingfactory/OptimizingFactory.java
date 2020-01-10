@@ -3,9 +3,7 @@ package ai.libs.hasco.optimizingfactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -19,6 +17,8 @@ import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.EvaluatedSoftwareConfigurationSolution;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
+import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
@@ -39,7 +39,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 		this.optimizer = this.factoryForOptimizationAlgorithm.getAlgorithm(this.getInput().getConfigurationProblem());
 		this.optimizer.registerListener(new Object() {
 			@Subscribe
-			public void receiveAlgorithmEvent(final AlgorithmEvent event) {
+			public void receiveAlgorithmEvent(final IAlgorithmEvent event) {
 				if (!(event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent)) {
 					OptimizingFactory.this.post(event);
 				}
@@ -48,7 +48,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
 		case CREATED:
 
@@ -58,7 +58,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 				this.optimizer.setLoggerName(this.loggerName + ".optAlgo");
 			}
 
-			AlgorithmEvent initEvent = this.optimizer.next();
+			IAlgorithmEvent initEvent = this.optimizer.next();
 			assert initEvent instanceof AlgorithmInitializedEvent : "The first event emitted by the optimizer has not been its AlgorithmInitializationEvent";
 			return this.activate();
 
@@ -93,7 +93,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 	}
 
 	public AlgorithmInitializedEvent init() {
-		AlgorithmEvent e = null;
+		IAlgorithmEvent e = null;
 		while (this.hasNext()) {
 			e = this.next();
 			if (e instanceof AlgorithmInitializedEvent) {

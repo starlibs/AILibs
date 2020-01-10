@@ -1,7 +1,7 @@
 package ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearch;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.ai.graphsearch.problem.IPathSearch;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -30,15 +30,15 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
  */
 public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> {
 
-	private final IGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm;
+	private final IPathSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm;
 
-	public IteratingGraphSearchOptimizer(final I problem, final IGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm) {
+	public IteratingGraphSearchOptimizer(final I problem, final IPathSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm) {
 		super(problem);
 		this.baseAlgorithm = baseAlgorithm;
 		baseAlgorithm.registerListener(new Object() {
 
 			@Subscribe
-			public void receiveEvent(final AlgorithmEvent e) {
+			public void receiveEvent(final IAlgorithmEvent e) {
 				IteratingGraphSearchOptimizer.this.post(e);
 			}
 		});
@@ -50,15 +50,15 @@ public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluati
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
-		AlgorithmEvent parentEvent = this.baseAlgorithm.nextWithException();
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+		IAlgorithmEvent parentEvent = this.baseAlgorithm.nextWithException();
 		if (parentEvent instanceof GraphSearchSolutionCandidateFoundEvent) {
 			try {
 				SearchGraphPath<N, A> path = ((GraphSearchSolutionCandidateFoundEvent<N,A,?>) parentEvent).getSolutionCandidate();
 				V score = this.getInput().getPathEvaluator().evaluate(path);
 				EvaluatedSearchGraphPath<N, A, V> evaluatedPath = new EvaluatedSearchGraphPath<>(path.getNodes(), path.getArcs(), score);
 				this.updateBestSeenSolution(evaluatedPath);
-				EvaluatedSearchSolutionCandidateFoundEvent<N,A,V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this.getId(), evaluatedPath);
+				EvaluatedSearchSolutionCandidateFoundEvent<N,A,V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this, evaluatedPath);
 				this.post(event);
 				return event;
 			} catch (ObjectEvaluationFailedException e) {
@@ -69,7 +69,7 @@ public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluati
 		}
 	}
 
-	public IGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> getBaseAlgorithm() {
+	public IPathSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> getBaseAlgorithm() {
 		return this.baseAlgorithm;
 	}
 

@@ -2,6 +2,7 @@ package ai.libs.jaicore.basic.kvstore;
 
 import java.util.Comparator;
 
+import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -13,10 +13,10 @@ import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 public class DatasetDeriver<D extends IDataset<?>> {
 
 	private class GenericCapsula<I extends IInstance> {
-		final IDataset<I> dsOriginal;
-		final int initialDatasetHashCode; // this is for consistency checks
-		final List<Integer> indicesToCopy = new ArrayList<>();
-		final Class<I> classOfInstances;
+		private final IDataset<I> dsOriginal;
+		private final int initialDatasetHashCode; // this is for consistency checks
+		private final List<Integer> indicesToCopy = new ArrayList<>();
+		private final Class<I> classOfInstances;
 
 		public GenericCapsula(final IDataset<I> dataset, final Class<I> clazz) {
 			super();
@@ -54,19 +54,9 @@ public class DatasetDeriver<D extends IDataset<?>> {
 		this.caps = new GenericCapsula<>((IDataset<I>) dataset, instanceClass);
 	}
 
-	//	public void add(final IInstance inst) {
-	//		this.caps.addInstance(inst);
-	//	}
-
 	public void add(final int item) {
 		this.caps.addInstance(item);
 	}
-
-	//	public void addAll(final Collection<? extends IInstance> instances) {
-	//		for (IInstance i : instances) {
-	//			this.add(i);
-	//		}
-	//	}
 
 	public void addIndices(final Collection<Integer> indices) {
 		for (int i : indices) {
@@ -95,10 +85,10 @@ public class DatasetDeriver<D extends IDataset<?>> {
 	}
 
 	public Collection<Integer> getIndicesOfNewInstancesInOriginalDataset(final Collection<Integer> indicesInBuiltDataset) {
-		return Collections.unmodifiableList(indicesInBuiltDataset.stream().map(i -> this.caps.indicesToCopy.get(i)).collect(Collectors.toList()));
+		return Collections.unmodifiableList(indicesInBuiltDataset.stream().map(this.caps.indicesToCopy::get).collect(Collectors.toList()));
 	}
 
 	public List<Integer> getIndicesOfNewInstancesInOriginalDataset(final List<Integer> indicesInBuiltDataset) {
-		return Collections.unmodifiableList(indicesInBuiltDataset.stream().map(i -> this.caps.indicesToCopy.get(i)).collect(Collectors.toList()));
+		return Collections.unmodifiableList(indicesInBuiltDataset.stream().map(this.caps.indicesToCopy::get).collect(Collectors.toList()));
 	}
 }

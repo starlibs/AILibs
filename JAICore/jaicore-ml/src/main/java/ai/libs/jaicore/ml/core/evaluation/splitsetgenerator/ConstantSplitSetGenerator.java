@@ -10,7 +10,7 @@ import ai.libs.jaicore.ml.core.dataset.splitter.DatasetSplitSet;
 
 public class ConstantSplitSetGenerator<I extends IInstance, D extends IDataset<? extends I>> implements IFixedDatasetSplitSetGenerator<D> {
 
-	DatasetSplitSet<D> set;
+	private final DatasetSplitSet<D> set;
 
 	public ConstantSplitSetGenerator(final IDatasetSplitSet<D> set) {
 		this.set = new DatasetSplitSet<>(set);

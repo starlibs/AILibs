@@ -1,6 +1,6 @@
 package ai.libs.jaicore.graphvisualizer.plugin.nodeinfo;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
@@ -27,7 +27,7 @@ public class NodeDisplayInfoAlgorithmEventPropertyComputer<N> implements Algorit
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String computeAlgorithmEventProperty(final AlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
+	public String computeAlgorithmEventProperty(final IAlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
 		String nodeInfo = null;
 		if (algorithmEvent instanceof GraphInitializedEvent) {
 			GraphInitializedEvent<N> graphInitializedEvent = (GraphInitializedEvent<N>) algorithmEvent;

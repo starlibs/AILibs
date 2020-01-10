@@ -43,7 +43,7 @@ implements IPathInORGraphSearch<I, O, N, A> {
 	}
 
 	protected GraphSearchSolutionCandidateFoundEvent<N, A, O> registerSolution(final O path) {
-		GraphSearchSolutionCandidateFoundEvent<N, A, O> event = new GraphSearchSolutionCandidateFoundEvent<>(this.getId(), path);
+		GraphSearchSolutionCandidateFoundEvent<N, A, O> event = new GraphSearchSolutionCandidateFoundEvent<>(this, path);
 		this.post(event);
 		return event;
 	}

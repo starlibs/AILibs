@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.neighbors;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
@@ -51,7 +51,7 @@ public class NearestNeighborLearningAlgorithm extends ASimplifiedTSCLearningAlgo
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() {
+	public IAlgorithmEvent nextWithException() {
 		throw new UnsupportedOperationException();
 	}
 }

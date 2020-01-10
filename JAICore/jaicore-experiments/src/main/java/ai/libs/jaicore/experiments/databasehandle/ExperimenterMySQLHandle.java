@@ -1,7 +1,7 @@
 package ai.libs.jaicore.experiments.databasehandle;
 
-import ai.libs.jaicore.basic.IDatabaseConfig;
-import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.db.IDatabaseConfig;
+import ai.libs.jaicore.db.sql.SQLAdapter;
 
 public class ExperimenterMySQLHandle extends AExperimenterSQLHandle {
 

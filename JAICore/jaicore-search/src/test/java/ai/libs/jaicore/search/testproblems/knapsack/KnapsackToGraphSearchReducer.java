@@ -2,11 +2,11 @@ package ai.libs.jaicore.search.testproblems.knapsack;
 
 import java.util.Set;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.problems.knapsack.KnapsackConfiguration;
@@ -18,7 +18,7 @@ public class KnapsackToGraphSearchReducer implements AlgorithmicProblemReduction
 
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<KnapsackConfiguration, String, Double> encodeProblem(final KnapsackProblem problem) {
-		return new GraphSearchWithSubpathEvaluationsInput<>(new KnapsackProblemGraphGenerator(problem), new NodeGoalTester<KnapsackConfiguration, String>() {
+		return new GraphSearchWithSubpathEvaluationsInput<>(new KnapsackProblemGraphGenerator(problem), new INodeGoalTester<KnapsackConfiguration, String>() {
 
 			@Override
 			public boolean isGoal(final KnapsackConfiguration n) {
@@ -32,7 +32,7 @@ public class KnapsackToGraphSearchReducer implements AlgorithmicProblemReduction
 		}, new IPathEvaluator<KnapsackConfiguration, String, Double>() {
 
 			@Override
-			public Double evaluate(final IPath<KnapsackConfiguration, String> path) throws PathEvaluationException, InterruptedException {
+			public Double evaluate(final ILabeledPath<KnapsackConfiguration, String> path) throws PathEvaluationException, InterruptedException {
 				try {
 					return problem.getSolutionEvaluator().evaluate(path.getHead());
 				}

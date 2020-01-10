@@ -1,10 +1,10 @@
 package ai.libs.hyperopt;
 
-import org.api4.java.algorithm.events.ScoredSolutionCandidateFoundEvent;
+import org.api4.java.algorithm.events.result.IScoredSolutionCandidateFoundEvent;
 
 import ai.libs.hasco.model.ComponentInstance;
 
-public class PCSBasedOptimizationEvent implements ScoredSolutionCandidateFoundEvent<ComponentInstance, Double> {
+public class PCSBasedOptimizationEvent implements IScoredSolutionCandidateFoundEvent<ComponentInstance, Double> {
 	private ComponentInstance componentInstance;
 	private Double score;
 	private String algorithmId;

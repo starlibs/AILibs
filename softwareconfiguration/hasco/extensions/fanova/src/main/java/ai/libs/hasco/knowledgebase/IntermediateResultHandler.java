@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.events.HASCOSolutionEvaluationEvent;
-import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.db.sql.SQLAdapter;
 
 /**
  * Class to handle HASCOSolutionEvaluationEvents and insert the results into the

@@ -6,7 +6,7 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,10 +40,10 @@ public abstract class TimeAwareNodeEvaluator<T, A, V extends Comparable<V>> impl
 		this.fallbackNodeEvaluator = pFallbackNodeEvaluator;
 	}
 
-	protected abstract V fTimeouted(IPath<T, A> node, int timeoutInMS) throws PathEvaluationException, InterruptedException;
+	protected abstract V fTimeouted(ILabeledPath<T, A> node, int timeoutInMS) throws PathEvaluationException, InterruptedException;
 
 	@Override
-	public final V evaluate(final IPath<T, A> path) throws PathEvaluationException, InterruptedException {
+	public final V evaluate(final ILabeledPath<T, A> path) throws PathEvaluationException, InterruptedException {
 
 		/* determine time available and granted for node evaluation */
 		int remainingTime;

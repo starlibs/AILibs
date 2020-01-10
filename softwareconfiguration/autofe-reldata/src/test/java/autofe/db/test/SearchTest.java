@@ -9,11 +9,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.junit.Test;
 
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import autofe.db.model.database.AbstractFeature;
@@ -56,7 +56,7 @@ public class SearchTest {
 	public void testLexicographicOrderEmptyFeatureList() throws Exception {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
-		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
+		ISuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
 		DatabaseNode node = new DatabaseNode();
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
 		assertEquals(6, successors.size());
@@ -84,7 +84,7 @@ public class SearchTest {
 	public void testLexicographicOrderForwardFeatureList() throws Exception {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
-		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
+		ISuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
 
 		Table bankAccount = DBUtils.getTableByName("BankAccount", db);
 		Attribute bankName = DBUtils.getAttributeByName("BankName", bankAccount);
@@ -118,7 +118,7 @@ public class SearchTest {
 	public void testLexicographicOrderBackwardFeatureList() throws Exception {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
-		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
+		ISuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
 
 		Table product = DBUtils.getTableByName("Product", db);
 		Attribute price = DBUtils.getAttributeByName("Price", product);
@@ -165,7 +165,7 @@ public class SearchTest {
 	public void testIntermediateNode() throws Exception {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
-		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
+		ISuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
 		Table product = DBUtils.getTableByName("Product", db);
 		Attribute price = DBUtils.getAttributeByName("Price", product);
 
@@ -188,7 +188,7 @@ public class SearchTest {
 	public void testIntermediateNodeDuplicateCheck2Path() throws Exception {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
-		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
+		ISuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
 		Table product = DBUtils.getTableByName("Product", db);
 		Attribute price = DBUtils.getAttributeByName("Price", product);
 
@@ -239,7 +239,7 @@ public class SearchTest {
 	public void testIntermediateNodeDuplicateCheck1Path() throws Exception {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
-		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
+		ISuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
 		Table product = DBUtils.getTableByName("Product", db);
 		Attribute price = DBUtils.getAttributeByName("Price", product);
 
@@ -274,7 +274,7 @@ public class SearchTest {
 	public void testStandardNodeDuplicateCheck() throws Exception {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(db);
-		SuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
+		ISuccessorGenerator<DatabaseNode, String> sg = generator.getSuccessorGenerator();
 		Table product = DBUtils.getTableByName("Product", db);
 		Attribute price = DBUtils.getAttributeByName("Price", product);
 

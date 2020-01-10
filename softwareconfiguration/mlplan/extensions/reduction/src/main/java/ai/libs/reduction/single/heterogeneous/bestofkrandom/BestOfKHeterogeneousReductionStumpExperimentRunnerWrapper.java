@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.SQLAdapter;
-import ai.libs.jaicore.basic.kvstore.IKVStore;
+import ai.libs.jaicore.db.sql.SQLAdapter;
 import ai.libs.reduction.single.ABestOfKReductionStumpExperimentRunnerWrapper;
 import ai.libs.reduction.single.BestOfKAtRandomExperiment;
 import ai.libs.reduction.single.MySQLReductionExperiment;

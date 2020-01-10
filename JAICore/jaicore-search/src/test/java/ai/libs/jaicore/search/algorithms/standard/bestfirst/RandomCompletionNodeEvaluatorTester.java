@@ -17,13 +17,13 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +77,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		/* gather all random completions over different seeds */
 		List<List<EnhancedTTSPNode>> completionsFoundSoFar = new ArrayList<>();
 		while (bf.getExpandedCounter() < NUM_NODES) {
-			AlgorithmEvent e = bf.nextWithException();
+			IAlgorithmEvent e = bf.nextWithException();
 			if (e instanceof NodeExpansionJobSubmittedEvent) {
 
 				/* get the expanded node and run all completers on it */
@@ -118,7 +118,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 
 		/* run completer on every 5-th node found while running BFS */
 		while (bf.getExpandedCounter() < 100) {
-			AlgorithmEvent e = bf.nextWithException();
+			IAlgorithmEvent e = bf.nextWithException();
 			if (e instanceof NodeExpansionJobSubmittedEvent && bf.getExpandedCounter() % 5 == 0) { // run the RCNE only every 5 node expansions
 
 				/* get the expanded node and run all completers on it */
@@ -152,7 +152,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		/* collect random completions for different nodes and make sure that no solution is seen twice (similar to the seed independence check) */
 		List<List<EnhancedTTSPNode>> completionsFoundSoFar = new ArrayList<>();
 		while (bf.hasNext()) {
-			AlgorithmEvent e = bf.nextWithException();
+			IAlgorithmEvent e = bf.nextWithException();
 			if (e instanceof NodeExpansionJobSubmittedEvent) {
 
 				/* get the expanded node and run all completers on it */
@@ -235,16 +235,16 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		}
 	}
 
-	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> getNodeEvaluator(final int problemDifficulty, final IObjectEvaluator<IPath<EnhancedTTSPNode, String>, Double> oe, final int seed,
+	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> getNodeEvaluator(final int problemDifficulty, final IObjectEvaluator<ILabeledPath<EnhancedTTSPNode, String>, Double> oe, final int seed,
 			final int numSamples, final int maxSamples, final int timeoutForNodeEvaluationInMs) {
 
 		/* create search that is the basis for the analysis (provides the nodes to be analyzed and the graph generator) */
 		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = this.getBF(problemDifficulty, n -> n.getNodes().size() * 1.0);
 
-		IObjectEvaluator<IPath<EnhancedTTSPNode, String>, Double> se = new IObjectEvaluator<IPath<EnhancedTTSPNode, String>, Double>() {
+		IObjectEvaluator<ILabeledPath<EnhancedTTSPNode, String>, Double> se = new IObjectEvaluator<ILabeledPath<EnhancedTTSPNode, String>, Double>() {
 
 			@Override
-			public Double evaluate(final IPath<EnhancedTTSPNode, String> solutionPath) throws InterruptedException, ObjectEvaluationFailedException {
+			public Double evaluate(final ILabeledPath<EnhancedTTSPNode, String> solutionPath) throws InterruptedException, ObjectEvaluationFailedException {
 				return oe.evaluate(solutionPath);
 			}
 		};

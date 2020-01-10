@@ -39,4 +39,8 @@ public class MCCVSplitEvaluationEvent implements IEvent {
 		return this.numInstancesUsedForValidation;
 	}
 
+	@Override
+	public long getTimestamp() {
+		throw new UnsupportedOperationException();
+	}
 }

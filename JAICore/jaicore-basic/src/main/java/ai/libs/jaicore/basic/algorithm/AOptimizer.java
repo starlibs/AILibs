@@ -3,8 +3,8 @@ package ai.libs.jaicore.basic.algorithm;
 import java.util.NoSuchElementException;
 
 import org.api4.java.algorithm.IOptimizationAlgorithm;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.SolutionCandidateFoundEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.events.result.ISolutionCandidateFoundEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -86,12 +86,12 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	}
 
 	@Override
-	public SolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	public ISolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		while (this.hasNext()) {
-			AlgorithmEvent event = this.nextWithException();
-			if (event instanceof SolutionCandidateFoundEvent) {
+			IAlgorithmEvent event = this.nextWithException();
+			if (event instanceof ISolutionCandidateFoundEvent) {
 				@SuppressWarnings("unchecked")
-				SolutionCandidateFoundEvent<O> castedEvent = (SolutionCandidateFoundEvent<O>) event;
+				ISolutionCandidateFoundEvent<O> castedEvent = (ISolutionCandidateFoundEvent<O>) event;
 				return castedEvent;
 			}
 		}

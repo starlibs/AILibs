@@ -13,7 +13,7 @@ public class ArrayUtil {
 	}
 
 	private static void columnSanityCheck(final int arrayLength, final Collection<Integer> columnIndices) {
-		if (columnIndices.stream().filter(x -> x >= arrayLength || x < 0).findAny().isPresent()) {
+		if (columnIndices.stream().anyMatch(x -> x >= arrayLength || x < 0)) {
 			throw new IllegalArgumentException("Cannot exclude non existing columns (" + columnIndices + "), array length: " + arrayLength);
 		}
 	}

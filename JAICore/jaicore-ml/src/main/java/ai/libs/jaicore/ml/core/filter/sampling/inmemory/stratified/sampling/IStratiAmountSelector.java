@@ -1,7 +1,7 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.common.parallelization.IParallelizable;
+import org.api4.java.common.control.IParallelizable;
 
 /**
  * Functional interface to write custom logic for selecting the amount of strati

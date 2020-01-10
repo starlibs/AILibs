@@ -6,7 +6,7 @@ import java.util.Random;
 import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
 import ai.libs.jaicore.ml.core.dataset.DatasetDeriver;
@@ -66,7 +66,7 @@ public class SystematicSampling<D extends ILabeledDataset<?>> extends ASamplingA
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
+	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
 		switch (this.getState()) {
 		case CREATED:
 			// Initialize variables and sort dataset.
@@ -89,7 +89,7 @@ public class SystematicSampling<D extends ILabeledDataset<?>> extends ASamplingA
 			if (this.sampleBuilder.currentSizeOfTarget() < this.sampleSize) {
 				int e = (this.startIndex + (this.index++) * this.k) % this.sortedDataset.size();
 				this.sampleBuilder.add(e);
-				return new SampleElementAddedEvent(this.getId());
+				return new SampleElementAddedEvent(this);
 			} else {
 				try {
 					this.sample = this.sampleBuilder.build();

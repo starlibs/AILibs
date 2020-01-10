@@ -13,4 +13,9 @@ public class LearningCurveExtrapolatedEvent implements IEvent {
 	public LearningCurveExtrapolator getExtrapolator() {
 		return this.extrapolator;
 	}
+
+	@Override
+	public long getTimestamp() {
+		throw new UnsupportedOperationException();
+	}
 }

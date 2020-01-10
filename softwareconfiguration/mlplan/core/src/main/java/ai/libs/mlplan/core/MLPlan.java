@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.ml.core.IDataConfigurable;
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
@@ -14,10 +14,8 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -43,6 +41,8 @@ import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
+import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.ml.core.dataset.DatasetUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
@@ -86,7 +86,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 
 		/* store builder and data for main algorithm */
 		this.builder = builder;
-		this.setTimeout(new TimeOut(builder.getAlgorithmConfig().timeout(), TimeUnit.MILLISECONDS));
+		this.setTimeout(new Timeout(builder.getAlgorithmConfig().timeout(), TimeUnit.MILLISECONDS));
 		Objects.requireNonNull(this.getInput());
 		if (this.getInput().isEmpty()) {
 			throw new IllegalArgumentException("Cannot run ML-Plan on empty dataset.");
@@ -96,7 +96,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
 		case CREATED:
 			this.logger.info("Starting an ML-Plan instance.");
@@ -118,15 +118,17 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 					if (splitter == null) {
 						throw new IllegalArgumentException("The builder does not specify a dataset splitter for the separation between search and selection phase data.");
 					}
-					this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%) with splitter {}.", this.getInput().size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2), MathExt.round(dataPortionUsedForSelection * 100, 2), splitter.getClass().getName());
+					this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%) with splitter {}.", this.getInput().size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2),
+							MathExt.round(dataPortionUsedForSelection * 100, 2), splitter.getClass().getName());
 					if (splitter instanceof ILoggingCustomizable) {
 						((ILoggingCustomizable) splitter).setLoggerName(this.getLoggerName() + ".searchselectsplitter");
 					}
 					List<ILabeledDataset<?>> split = splitter.split(this.getInput(), new Random(seed), dataPortionUsedForSelection);
-					final int expectedSearchSize = (int)Math.round(this.getInput().size() * (1 - dataPortionUsedForSelection)); // attention; this is a bit tricky (data portion for selection is in 0)
+					final int expectedSearchSize = (int) Math.round(this.getInput().size() * (1 - dataPortionUsedForSelection)); // attention; this is a bit tricky (data portion for selection is in 0)
 					final int expectedSelectionSize = this.getInput().size() - expectedSearchSize;
 					if (Math.abs(expectedSearchSize - split.get(1).size()) > 1 || Math.abs(expectedSelectionSize - split.get(0).size()) > 1) {
-						throw new IllegalStateException("Invalid split produced by " + splitter.getClass().getName() + "! Split sizes are " + split.get(1).size() + "/" + split.get(0).size() + " but expected sizes were " + expectedSearchSize + "/" + expectedSelectionSize);
+						throw new IllegalStateException("Invalid split produced by " + splitter.getClass().getName() + "! Split sizes are " + split.get(1).size() + "/" + split.get(0).size() + " but expected sizes were " + expectedSearchSize
+								+ "/" + expectedSelectionSize);
 					}
 					dataShownToSearch = split.get(1); // attention; this is a bit tricky (data portion for selection is in 0)
 					dataShownToSelection = this.getInput();
@@ -143,7 +145,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 				throw new IllegalStateException("Cannot search on no data.");
 			}
 			if (dataShownToSelection != null && dataShownToSelection.size() < dataShownToSearch.size()) {
-				throw new IllegalStateException("The search data (" + dataShownToSearch.size() + " data points) are bigger than the selection data (" + dataShownToSelection.size() +" data points)!");
+				throw new IllegalStateException("The search data (" + dataShownToSearch.size() + " data points) are bigger than the selection data (" + dataShownToSelection.size() + " data points)!");
 			}
 
 			/* check that class proportions are maintained */
@@ -153,7 +155,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 
 			/* check that reconstructibility is preserved */
 			if (this.getInput() instanceof IReconstructible) {
-				if (((IReconstructible)dataShownToSearch).getConstructionPlan().getInstructions().isEmpty()) {
+				if (((IReconstructible) dataShownToSearch).getConstructionPlan().getInstructions().isEmpty()) {
 					throw new IllegalStateException("Reconstructibility instructions have been lost in search/selection-split!");
 				}
 			}
@@ -193,7 +195,8 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			PipelineEvaluator classifierEvaluatorForSelection;
 			try {
 				classifierEvaluatorForSearch = new PipelineEvaluator(this.builder.getLearnerFactory(), evaluatorFactoryForSearch.getLearnerEvaluator(), this.getConfig().timeoutForCandidateEvaluation());
-				classifierEvaluatorForSelection = dataShownToSelection != null ? new PipelineEvaluator(this.builder.getLearnerFactory(), evaluatorFactoryForSelection.getLearnerEvaluator(), this.getConfig().timeoutForCandidateEvaluation()) : null;
+				classifierEvaluatorForSelection = dataShownToSelection != null ? new PipelineEvaluator(this.builder.getLearnerFactory(), evaluatorFactoryForSelection.getLearnerEvaluator(), this.getConfig().timeoutForCandidateEvaluation())
+						: null;
 			} catch (LearnerEvaluatorConstructionFailedException e2) {
 				throw new AlgorithmException("Could not create the pipeline evaluator", e2);
 			}
@@ -206,9 +209,10 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info(
 						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tData points used during search: {}\n\tData points used during selection: {}\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
-						this.getInput().hashCode(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
-						this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), dataShownToSearch.size(), dataShownToSelection != null ? dataShownToSelection.size() : 0, classifierEvaluatorForSearch.getBenchmark(),
-								classifierEvaluatorForSelection != null ? classifierEvaluatorForSelection.getBenchmark() : null, this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
+						this.getInput().hashCode(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000, this.getConfig().timeoutForNodeEvaluation() / 1000,
+						this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), dataShownToSearch.size(), dataShownToSelection != null ? dataShownToSelection.size() : 0,
+								classifierEvaluatorForSearch.getBenchmark(), classifierEvaluatorForSelection != null ? classifierEvaluatorForSelection.getBenchmark() : null, this.getConfig().expectedBlowupInSelection(),
+										this.getConfig().expectedBlowupInPostprocessing());
 			}
 
 			/* create 2-phase software configuration problem */
@@ -257,8 +261,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 						}
 
 						try {
-							MLPlan.this.post(
-									new ClassifierFoundEvent(MLPlan.this.getId(), solution.getComponentInstance(), MLPlan.this.builder.getLearnerFactory().getComponentInstantiation(solution.getComponentInstance()), solution.getScore()));
+							MLPlan.this.post(new ClassifierFoundEvent(MLPlan.this, solution.getComponentInstance(), MLPlan.this.builder.getLearnerFactory().getComponentInstantiation(solution.getComponentInstance()), solution.getScore()));
 						} catch (ComponentInstantiationFailedException e) {
 							MLPlan.this.logger.error("An issue occurred while preparing the description for the post of a ClassifierFoundEvent", e);
 						}
@@ -359,7 +362,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	}
 
 	@SuppressWarnings("unchecked")
-	public IGraphSearchInput<TFDNode, String> getSearchProblemInputGenerator() {
+	public IPathSearchInput<TFDNode, String> getSearchProblemInputGenerator() {
 		return ((TwoPhaseHASCO<? extends GraphSearchInput<TFDNode, String>, TFDNode, String>) this.optimizingFactory.getOptimizer()).getGraphSearchInput();
 	}
 
@@ -382,7 +385,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	}
 
 	public IAlgorithm<?, ?> getSearch() {
-		HASCO<?, ?, ?, ?> hasco = ((TwoPhaseHASCO<?, ?, ?>)this.optimizingFactory.getOptimizer()).getHasco();
+		HASCO<?, ?, ?, ?> hasco = ((TwoPhaseHASCO<?, ?, ?>) this.optimizingFactory.getOptimizer()).getHasco();
 		return hasco.getSearch();
 	}
 

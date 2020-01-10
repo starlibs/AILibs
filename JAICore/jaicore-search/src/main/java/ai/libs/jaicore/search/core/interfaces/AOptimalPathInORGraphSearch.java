@@ -1,7 +1,7 @@
 package ai.libs.jaicore.search.core.interfaces;
 
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearch;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -54,7 +54,7 @@ implements IOptimalPathInORGraphSearch<I, EvaluatedSearchGraphPath<N, A, V>, N, 
 
 	protected EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> registerSolution(final EvaluatedSearchGraphPath<N, A, V> path) {
 		this.updateBestSeenSolution(path);
-		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this.getId(), path);
+		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this, path);
 		this.logger.info("Identified solution with score {}. Enable DEBUG to see the concrete nodes and actions.", path.getScore());
 		this.logger.debug("Nodes: {}. Actions: {}", path.getNodes(), path.getArcs());
 		this.post(event);
@@ -66,7 +66,7 @@ implements IOptimalPathInORGraphSearch<I, EvaluatedSearchGraphPath<N, A, V>, N, 
 		return this.getInput().getGraphGenerator();
 	}
 
-	public PathGoalTester<N, A> getGoalTester() {
+	public IPathGoalTester<N, A> getGoalTester() {
 		return this.getInput().getGoalTester();
 	}
 

@@ -24,4 +24,9 @@ public class TrainTestSplitEvaluationCompletedEvent<I extends ILabeledInstance, 
 	public ILearnerRunReport getReport() {
 		return this.report;
 	}
+
+	@Override
+	public long getTimestamp() {
+		throw new UnsupportedOperationException();
+	}
 }

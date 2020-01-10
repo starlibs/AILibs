@@ -10,22 +10,22 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.RootGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.IRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,13 +58,13 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 	protected final Map<N, IEvaluatedPath<N, A, V>> ext2int = new HashMap<>();
 
 	protected final IGraphGenerator<N, A> graphGenerator;
-	protected final RootGenerator<N> rootGenerator;
-	protected final SuccessorGenerator<N, A> successorGenerator;
-	protected final NodeGoalTester<N, A> nodeGoalTester;
+	protected final IRootGenerator<N> rootGenerator;
+	protected final ISuccessorGenerator<N, A> successorGenerator;
+	protected final INodeGoalTester<N, A> nodeGoalTester;
 
 	protected final IPathUpdatablePolicy<N, A, V> treePolicy;
 	protected final IPolicy<N, A, V> defaultPolicy;
-	protected final IObjectEvaluator<IPath<N, A>, V> playoutSimulator;
+	protected final IObjectEvaluator<ILabeledPath<N, A>, V> playoutSimulator;
 
 	private final Map<List<N>, V> scoreCache = new HashMap<>();
 
@@ -83,17 +83,17 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = this.graphGenerator.getRootGenerator();
 		this.successorGenerator = this.graphGenerator.getSuccessorGenerator();
-		PathGoalTester<N, A> tmpGoalTester = problem.getGoalTester();
-		if (!(tmpGoalTester instanceof NodeGoalTester)) {
+		IPathGoalTester<N, A> tmpGoalTester = problem.getGoalTester();
+		if (!(tmpGoalTester instanceof INodeGoalTester)) {
 			throw new IllegalArgumentException("MCTS must be run with a NodeGoalEvaluator!");
 		}
-		this.nodeGoalTester = (NodeGoalTester<N, A>)tmpGoalTester;
+		this.nodeGoalTester = (INodeGoalTester<N, A>)tmpGoalTester;
 
 		this.treePolicy = treePolicy;
 		this.defaultPolicy = defaultPolicy;
 		this.playoutSimulator = problem.getPathEvaluator();
 		this.exploredGraph = new LabeledGraph<>();
-		this.root = ((SingleRootGenerator<N>) this.rootGenerator).getRoot();
+		this.root = ((ISingleRootGenerator<N>) this.rootGenerator).getRoot();
 		this.unexpandedNodes.add(this.root);
 		this.exploredGraph.addItem(this.root);
 		this.penaltyForFailedEvaluation = penaltyForFailedEvaluation;
@@ -182,7 +182,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 				this.logger.debug("Constructed complete solution with tree policy.");
 				return path;
 			}
-			this.post(new NodeTypeSwitchEvent<N>(this.getId(), next, NODESTATE_ROLLOUT));
+			this.post(new NodeTypeSwitchEvent<N>(this, next, NODESTATE_ROLLOUT));
 			level++;
 		}
 
@@ -221,7 +221,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 			current = untriedActionsAndTheirSuccessors.get(chosenAction);
 			assert this.unexpandedNodes.contains(current);
 			this.nodesExplicitlyAdded.add(current);
-			this.post(new NodeTypeSwitchEvent<N>(this.getId(), current, NODESTATE_ROLLOUT));
+			this.post(new NodeTypeSwitchEvent<N>(this, current, NODESTATE_ROLLOUT));
 			path.add(current);
 			this.logger.debug("Selected {} as the untried action with successor state {}. Now completing rest playout from this situation.", chosenAction, current);
 		} else {
@@ -249,7 +249,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 			}
 			current = actionsAndTheirSuccessorStates.get(this.defaultPolicy.getAction(current, actionsAndTheirSuccessorStates));
 			if (!this.isGoal(current)) {
-				this.post(new NodeTypeSwitchEvent<>(this.getId(), current, NODESTATE_ROLLOUT));
+				this.post(new NodeTypeSwitchEvent<>(this, current, NODESTATE_ROLLOUT));
 			}
 			this.nodesExplicitlyAdded.add(current);
 			path.add(current);
@@ -264,7 +264,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 		int n = path.size();
 		for (int i = n - 2; i > 0; i--) { // don't color the root and the leaf!
 			N node = path.get(i);
-			this.post(new NodeTypeSwitchEvent<N>(this.getId(), node, this.fullyExploredNodes.contains(node) ? "or_exhausted" : "or_closed"));
+			this.post(new NodeTypeSwitchEvent<N>(this, node, this.fullyExploredNodes.contains(node) ? "or_exhausted" : "or_closed"));
 		}
 	}
 
@@ -292,18 +292,18 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 		}
 		this.logger.trace("Situation {} has never been analyzed before, expanding the graph at the respective point.", node);
 		this.unexpandedNodes.remove(node);
-		Collection<NodeExpansionDescription<N, A>> availableActions = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node), "Successor generation", true);
-		assert availableActions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toList()).size() == availableActions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toSet())
+		Collection<INewNodeDescription<N, A>> availableActions = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node), "Successor generation", true);
+		assert availableActions.stream().map(INewNodeDescription::getArcLabel).collect(Collectors.toList()).size() == availableActions.stream().map(INewNodeDescription::getArcLabel).collect(Collectors.toSet())
 				.size() : "The actions under this node don't have unique names";
 				Map<A, N> successorStates = new HashMap<>();
-				for (NodeExpansionDescription<N, A> d : availableActions) {
+				for (INewNodeDescription<N, A> d : availableActions) {
 					this.checkAndConductTermination();
-					successorStates.put(d.getAction(), d.getTo());
-					this.logger.trace("Adding edge {} -> {} with label {}", node, d.getTo(), d.getAction());
+					successorStates.put(d.getArcLabel(), d.getTo());
+					this.logger.trace("Adding edge {} -> {} with label {}", node, d.getTo(), d.getArcLabel());
 					this.exploredGraph.addItem(d.getTo());
 					this.unexpandedNodes.add(d.getTo());
-					this.exploredGraph.addEdge(node, d.getTo(), d.getAction());
-					this.post(new NodeAddedEvent<>(this.getId(), node, d.getTo(), this.isGoal(d.getTo()) ? "or_solution" : "or_open"));
+					this.exploredGraph.addEdge(node, d.getTo(), d.getArcLabel());
+					this.post(new NodeAddedEvent<>(this, node, d.getTo(), this.isGoal(d.getTo()) ? "or_solution" : "or_open"));
 				}
 				return successorStates;
 	}
@@ -339,10 +339,10 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
 		case CREATED:
-			this.post(new GraphInitializedEvent<N>(this.getId(), this.root));
+			this.post(new GraphInitializedEvent<N>(this, this.root));
 			this.logger.info("Starting MCTS with node class {}", this.root.getClass().getName());
 			return this.activate();
 
@@ -356,7 +356,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 				while (this.getState() == EAlgorithmState.ACTIVE) {
 					this.checkAndConductTermination();
 					if (this.unexpandedNodes.isEmpty()) {
-						AlgorithmEvent finishEvent = this.terminate();
+						IAlgorithmEvent finishEvent = this.terminate();
 						this.logger.info("Finishing MCTS as all nodes have been expanded; the search graph has been exhausted.");
 						return finishEvent;
 					} else {
@@ -382,7 +382,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 								throw e; // if we get here (no exception for timeout or cancel has been thrown in check), we really have been interrupted
 							} catch (ObjectEvaluationFailedException e) {
 								this.scoreCache.put(path, this.penaltyForFailedEvaluation);
-								this.post(new NodeTypeSwitchEvent<>(this.getId(), path.get(path.size() - 1), "or_ffail"));
+								this.post(new NodeTypeSwitchEvent<>(this, path.get(path.size() - 1), "or_ffail"));
 								this.treePolicy.updatePath(path, this.penaltyForFailedEvaluation);
 								this.logger.warn("Could not evaluate playout {}", e);
 							} finally {

@@ -1,8 +1,8 @@
 package autofe.db.search;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ public class DatabaseGraphGenerator implements IGraphGenerator<DatabaseNode, Str
 	}
 
 	@Override
-	public SingleRootGenerator<DatabaseNode> getRootGenerator() {
+	public ISingleRootGenerator<DatabaseNode> getRootGenerator() {
 		return () -> {
 			try {
 				return new DatabaseNode();
@@ -31,7 +31,7 @@ public class DatabaseGraphGenerator implements IGraphGenerator<DatabaseNode, Str
 	}
 
 	@Override
-	public SuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
 		return new DatabaseSuccessorGenerator(this.database);
 	}
 

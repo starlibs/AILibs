@@ -1,8 +1,5 @@
 package ai.libs.jaicore.problems.knapsack;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 public class KnapsackConfiguration {
@@ -74,7 +71,7 @@ public class KnapsackConfiguration {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(packedObjects);
+		sb.append(this.packedObjects);
 		sb.append("-<" + this.usedCapacity + ">");
 		return sb.toString();
 	}

@@ -18,7 +18,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +32,6 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
-import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
-import ai.libs.jaicore.ml.classification.loss.dataset.Precision;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.AutoMEKAGGPFitnessMeasureLoss;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.ExactMatch;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.F1MacroAverageL;
@@ -71,7 +69,6 @@ import weka.core.SerializationHelper;
  * @author Helena Graf
  *
  */
-@SuppressWarnings("restriction")
 public class MLPlanCLI {
 
 	// CLI variables
@@ -260,9 +257,9 @@ public class MLPlanCLI {
 			File algoConfigFile = new File(commandLine.getOptionValue(algorithmConfigurationOption));
 			builder.withAlgorithmConfigFile(algoConfigFile);
 		}
-		builder.withNodeEvaluationTimeOut(new TimeOut(Integer.parseInt(commandLine.getOptionValue(nodeEvaluationTimeoutOption, nodeEvaluationTimeout)), TimeUnit.SECONDS));
-		builder.withCandidateEvaluationTimeOut(new TimeOut(Integer.parseInt(commandLine.getOptionValue(solutionEvaluationTimeoutOption, solutionEvaluationTimeout)), TimeUnit.SECONDS));
-		builder.withTimeOut(new TimeOut(Integer.parseInt(commandLine.getOptionValue(totalTimeoutOption, totalTimeout)), TimeUnit.SECONDS));
+		builder.withNodeEvaluationTimeOut(new Timeout(Integer.parseInt(commandLine.getOptionValue(nodeEvaluationTimeoutOption, nodeEvaluationTimeout)), TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new Timeout(Integer.parseInt(commandLine.getOptionValue(solutionEvaluationTimeoutOption, solutionEvaluationTimeout)), TimeUnit.SECONDS));
+		builder.withTimeOut(new Timeout(Integer.parseInt(commandLine.getOptionValue(totalTimeoutOption, totalTimeout)), TimeUnit.SECONDS));
 		builder.withNumCpus(Integer.parseInt(commandLine.getOptionValue(numCPUsOption, numCPUS)));
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(new WekaInstances(trainData)).build();
 
@@ -290,13 +287,8 @@ public class MLPlanCLI {
 					new NodeDisplayInfoAlgorithmEventPropertyComputer<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new RolloutInfoAlgorithmEventPropertyComputer(nodeInfoAlgorithmEventPropertyComputer),
 					new ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer(new WekaClassifierSolutionCandidateRepresenter()));
 
-			if (commandLine.hasOption(testOption)) {
-				window = new AlgorithmVisualizationWindow(mlplan, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(), new SolutionPerformanceTimelinePlugin(),
-						new HASCOModelStatisticsPlugin());
-			} else {
-				window = new AlgorithmVisualizationWindow(mlplan, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(), new SolutionPerformanceTimelinePlugin(),
-						new HASCOModelStatisticsPlugin());
-			}
+			window = new AlgorithmVisualizationWindow(mlplan, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(), new SolutionPerformanceTimelinePlugin(),
+					new HASCOModelStatisticsPlugin());
 			Platform.runLater(window);
 		}
 

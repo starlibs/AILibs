@@ -3,18 +3,18 @@ package ai.libs.jaicore.graph;
 import java.util.Collections;
 import java.util.List;
 
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
-public class ReadOnlyPathAccessor<N, A> implements IPath<N, A> {
-	private final IPath<N, A> path;
+public class ReadOnlyPathAccessor<N, A> implements ILabeledPath<N, A> {
+	private final ILabeledPath<N, A> path;
 
-	public ReadOnlyPathAccessor(final IPath<N, A> path) {
+	public ReadOnlyPathAccessor(final ILabeledPath<N, A> path) {
 		super();
 		this.path = path;
 	}
 
 	@Override
-	public IPath<N, A> getUnmodifiableAccessor() {
+	public ILabeledPath<N, A> getUnmodifiableAccessor() {
 		return this;
 	}
 
@@ -44,12 +44,12 @@ public class ReadOnlyPathAccessor<N, A> implements IPath<N, A> {
 	}
 
 	@Override
-	public IPath<N, A> getPathToParentOfHead() {
+	public ILabeledPath<N, A> getPathToParentOfHead() {
 		return this.path.getPathToParentOfHead();
 	}
 
 	@Override
-	public IPath<N, A> getPathFromChildOfRoot() {
+	public ILabeledPath<N, A> getPathFromChildOfRoot() {
 		return this.path.getPathFromChildOfRoot();
 	}
 

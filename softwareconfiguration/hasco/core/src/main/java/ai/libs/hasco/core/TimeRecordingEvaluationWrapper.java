@@ -51,9 +51,9 @@ public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements 
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void updateBestScore(final V bestScore) {
+	public void informAboutBestScore(final V bestScore) {
 		if(this.baseEvaluator instanceof IInformedObjectEvaluatorExtension) {
-			((IInformedObjectEvaluatorExtension<V>) this.baseEvaluator).updateBestScore(bestScore);
+			((IInformedObjectEvaluatorExtension<V>) this.baseEvaluator).informAboutBestScore(bestScore);
 		}
 	}
 

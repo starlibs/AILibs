@@ -16,6 +16,7 @@ import java.util.ListIterator;
  * @param <T>
  */
 public class ListView<T> implements List<T> {
+	private static final String MSG_READ_ONLY = "This is a read-only view.";
 	private List<?> list;
 
 	public ListView(final List<?> list) {
@@ -24,27 +25,27 @@ public class ListView<T> implements List<T> {
 
 	@Override
 	public boolean add(final T arg0) {
-		throw new UnsupportedOperationException("This is a read-only view.");
+		throw new UnsupportedOperationException(MSG_READ_ONLY);
 	}
 
 	@Override
 	public void add(final int arg0, final T arg1) {
-		throw new UnsupportedOperationException("This is a read-only view.");
+		throw new UnsupportedOperationException(MSG_READ_ONLY);
 	}
 
 	@Override
 	public boolean addAll(final Collection<? extends T> arg0) {
-		throw new UnsupportedOperationException("This is a read-only view.");
+		throw new UnsupportedOperationException(MSG_READ_ONLY);
 	}
 
 	@Override
 	public boolean addAll(final int arg0, final Collection<? extends T> arg1) {
-		throw new UnsupportedOperationException("This is a read-only view.");
+		throw new UnsupportedOperationException(MSG_READ_ONLY);
 	}
 
 	@Override
 	public void clear() {
-		throw new UnsupportedOperationException("This is a read-only view.");
+		throw new UnsupportedOperationException(MSG_READ_ONLY);
 	}
 
 	@Override
@@ -69,8 +70,7 @@ public class ListView<T> implements List<T> {
 
 	@Override
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.list.isEmpty();
 	}
 
 	@Override
@@ -97,37 +97,37 @@ public class ListView<T> implements List<T> {
 
 	@Override
 	public ListIterator<T> listIterator() {
-		throw new UnsupportedOperationException("This is a read-only view.");
+		throw new UnsupportedOperationException(MSG_READ_ONLY);
 	}
 
 	@Override
 	public ListIterator<T> listIterator(final int arg0) {
-		throw new UnsupportedOperationException("This is a read-only view.");
+		throw new UnsupportedOperationException(MSG_READ_ONLY);
 	}
 
 	@Override
 	public boolean remove(final Object arg0) {
-		throw new UnsupportedOperationException("This is a read-only view.");
+		throw new UnsupportedOperationException(MSG_READ_ONLY);
 	}
 
 	@Override
 	public T remove(final int arg0) {
-		throw new UnsupportedOperationException("This is a read-only view.");
+		throw new UnsupportedOperationException(MSG_READ_ONLY);
 	}
 
 	@Override
 	public boolean removeAll(final Collection<?> arg0) {
-		throw new UnsupportedOperationException("This is a read-only view.");
+		throw new UnsupportedOperationException(MSG_READ_ONLY);
 	}
 
 	@Override
 	public boolean retainAll(final Collection<?> arg0) {
-		throw new UnsupportedOperationException("This is a read-only view.");
+		throw new UnsupportedOperationException(MSG_READ_ONLY);
 	}
 
 	@Override
 	public T set(final int arg0, final T arg1) {
-		throw new UnsupportedOperationException("This is a read-only view.");
+		throw new UnsupportedOperationException(MSG_READ_ONLY);
 	}
 
 	@Override
@@ -137,7 +137,7 @@ public class ListView<T> implements List<T> {
 
 	@Override
 	public List<T> subList(final int arg0, final int arg1) {
-		throw new UnsupportedOperationException("This is a read-only view.");
+		throw new UnsupportedOperationException(MSG_READ_ONLY);
 	}
 
 	@Override

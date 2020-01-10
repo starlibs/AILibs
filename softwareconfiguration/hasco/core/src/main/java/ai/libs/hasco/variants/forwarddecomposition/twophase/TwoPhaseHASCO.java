@@ -20,10 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
-import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -41,6 +39,8 @@ import ai.libs.hasco.events.TwoPhaseHASCOPhaseSwitchEvent;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import ai.libs.hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
+import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.concurrent.NamedTimerTask;
@@ -98,7 +98,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 		this.hasco.registerListener(new Object() {
 
 			@Subscribe
-			public void receiveHASCOEvent(final AlgorithmEvent event) {
+			public void receiveHASCOEvent(final IAlgorithmEvent event) {
 
 				/*
 				 * forward the HASCO events and register solutions to update best seen solutions
@@ -120,7 +120,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		this.logger.info("Stepping 2phase HASCO. Current state: {}", this.getState());
 		switch (this.getState()) {
 		case CREATED:
@@ -206,10 +206,10 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 				if (this.logger.isInfoEnabled()) {
 					this.logger.info("Entering phase 2. Solutions seen so far had an (internal) error of {}", this.phase1ResultQueue.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
 				}
-				this.post(new TwoPhaseHASCOPhaseSwitchEvent(this.getId()));
+				this.post(new TwoPhaseHASCOPhaseSwitchEvent(this));
 				if (selectionBenchmark instanceof IInformedObjectEvaluatorExtension) {
 					this.logger.debug("Setting best score for selection phase node evaluator to {}", this.phase1ResultQueue.peek().getScore());
-					((IInformedObjectEvaluatorExtension<Double>) selectionBenchmark).updateBestScore(this.phase1ResultQueue.peek().getScore());
+					((IInformedObjectEvaluatorExtension<Double>) selectionBenchmark).informAboutBestScore(this.phase1ResultQueue.peek().getScore());
 				}
 				this.checkAndConductTermination();
 
@@ -559,7 +559,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 		this.getConfig().setProperty(TwoPhaseHASCOConfig.K_SELECTION_NUM_CONSIDERED_SOLUTIONS, numberOfConsideredSolutions + "");
 	}
 
-	public IGraphSearchInput<N, A> getGraphSearchInput() {
+	public IPathSearchInput<N, A> getGraphSearchInput() {
 		if (this.hasco == null) {
 			throw new IllegalStateException("Cannot retrieve GraphGenerator prior to algorithm initialization.");
 		}

@@ -10,11 +10,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
-import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.AlgorithmEventListener;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.core.ILearnerFactory;
 import weka.classifiers.Classifier;
@@ -48,9 +49,9 @@ public class WekaComponentInstanceEvaluator implements IComponentInstanceEvaluat
 		this.algorithmId = algorithmId;
 		Instances dataset = this.loadDataset(filePath);
 		try {
-			this.split = WekaUtil.getStratifiedSplit(new WekaInstances(dataset), 0, .7f).stream().map(x -> x.getList()).collect(Collectors.toList());
-		} catch (SplitFailedException | InterruptedException e) {
-			e.printStackTrace();
+			this.split = WekaUtil.getStratifiedSplit(new WekaInstances(dataset), 0, .7f).stream().map(IWekaInstances::getList).collect(Collectors.toList());
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -63,20 +64,16 @@ public class WekaComponentInstanceEvaluator implements IComponentInstanceEvaluat
 		try {
 			Classifier classifier = this.classifierFactory.getComponentInstantiation(componentInstance).getClassifier();
 			Evaluation eval = null;
-			try {
 
-				// Normalize dataset
-				classifier.buildClassifier(this.split.get(0));
-				eval = new Evaluation(this.split.get(0));
-				eval.evaluateModel(classifier, this.split.get(1));
-				score = eval.pctCorrect();
-				System.out.println("score:" + score);
-				System.out.println("comp:" + componentInstance);
-			} catch (Exception e) {
-				this.logger.error(e.getMessage());
-			}
-		} catch (ComponentInstantiationFailedException e) {
-			this.logger.error(e.getMessage());
+			// Normalize dataset
+			classifier.buildClassifier(this.split.get(0));
+			eval = new Evaluation(this.split.get(0));
+			eval.evaluateModel(classifier, this.split.get(1));
+			score = eval.pctCorrect();
+			this.logger.info("score: {}", score);
+			this.logger.info("comp: {}", componentInstance);
+		} catch (Exception e) {
+			this.logger.error(LoggerUtil.getExceptionInfo(e));
 		}
 		PCSBasedOptimizationEvent event = new PCSBasedOptimizationEvent(componentInstance, score, this.algorithmId);
 		this.eventBus.post(event);

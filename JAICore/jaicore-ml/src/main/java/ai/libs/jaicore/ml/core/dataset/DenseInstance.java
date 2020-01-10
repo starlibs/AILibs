@@ -42,11 +42,20 @@ public class DenseInstance extends AInstance {
 				val = 0;
 				//				throw new UnsupportedOperationException("The given instance cannot be cast to a point, because it has a missing value: " + this.attributes);
 			}
+			if (val instanceof Boolean) {
+				val = (boolean)val ? 1.0 : 0.0;
+			}
 			if (!(val instanceof Number)) {
 				throw new UnsupportedOperationException("The given instance cannot be cast to a point, because it has a non-numeric value: " + this.attributes);
 			}
 			if (val instanceof Integer) {
 				val = Double.valueOf((int) val);
+			}
+			if (val instanceof Long) {
+				val = Double.valueOf((long) val);
+			}
+			if (val instanceof Float) {
+				val = Double.valueOf((float) val);
 			}
 			point[i] = (double) val;
 		}

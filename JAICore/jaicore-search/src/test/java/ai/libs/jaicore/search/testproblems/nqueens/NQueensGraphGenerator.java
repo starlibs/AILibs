@@ -3,14 +3,14 @@ package ai.libs.jaicore.search.testproblems.nqueens;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.SerializableGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
-@SuppressWarnings("serial")
-public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNode, String> {
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
+
+public class NQueensGraphGenerator implements IGraphGenerator<QueenNode, String> {
 
 	private final int dimension;
 	private int countSinceLastSleep = 0;
@@ -20,14 +20,14 @@ public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNo
 	}
 
 	@Override
-	public SingleRootGenerator<QueenNode> getRootGenerator() {
+	public ISingleRootGenerator<QueenNode> getRootGenerator() {
 		return () -> new QueenNode(this.dimension);
 	}
 
 	@Override
-	public SuccessorGenerator<QueenNode, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<QueenNode, String> getSuccessorGenerator() {
 		return n -> {
-			List<NodeExpansionDescription<QueenNode, String>> l = new ArrayList<>();
+			List<INewNodeDescription<QueenNode, String>> l = new ArrayList<>();
 			int currentRow = n.getPositions().size();
 			for (int i = 0; i < this.dimension; i++, this.countSinceLastSleep ++) {
 				if (this.countSinceLastSleep % 100 == 0) {
@@ -37,7 +37,7 @@ public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNo
 					throw new InterruptedException("Successor generation has been interrupted.");
 				}
 				if (!n.attack(currentRow, i)) {
-					l.add(new NodeExpansionDescription<>(new QueenNode(n, i), "" + i, NodeType.OR));
+					l.add(new NodeExpansionDescription<>(new QueenNode(n, i), "" + i));
 				}
 			}
 			return l;

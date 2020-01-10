@@ -7,12 +7,17 @@ import java.util.Random;
 import java.util.Set;
 
 public class KnapsackProblemGenerator {
-	public static KnapsackProblem getKnapsackProblem(int numObjects) {
+
+	private KnapsackProblemGenerator() {
+		/* avoids instantiation */
+	}
+
+	public static KnapsackProblem getKnapsackProblem(final int numObjects) {
 		return getKnapsackProblem(numObjects, 0);
 	}
-	
-	public static KnapsackProblem getKnapsackProblem(int numObjects, int seed) {
-		
+
+	public static KnapsackProblem getKnapsackProblem(final int numObjects, final int seed) {
+
 		/* create knapsack problem */
 		Random r = new Random(seed);
 		Set<String> objects = new HashSet<>();
@@ -30,9 +35,10 @@ public class KnapsackProblemGenerator {
 				minWeight = weight;
 			}
 		}
-		for (int i = 0; i < numObjects; i++)
+		for (int i = 0; i < numObjects; i++) {
 			values.put("" + i, r.nextInt(100) * 1.0);
-		
+		}
+
 		bonusPoints = new HashMap<>();
 		Set<String> bonusCombination = new HashSet<>();
 		bonusCombination.add("0");

@@ -6,8 +6,6 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import org.api4.java.common.attributedobjects.IListDecorator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class solves the following problem: Sometimes you want to use objects of a concrete List class L
@@ -24,7 +22,6 @@ import org.slf4j.LoggerFactory;
  * @param <E>
  */
 public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> implements IListDecorator<L, E, D>, List<D> {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ListDecorator.class);
 
 	private final L list;
 	private final Class<E> typeOfDecoratedItems;
@@ -40,14 +37,12 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 			this.typeOfDecoratedItems = (Class<E>) this.getClassWithoutGenerics(genericTypes[1].getTypeName());
 			this.typeOfDecoratingItems = (Class<D>) this.getClassWithoutGenerics(genericTypes[2].getTypeName());
 			Constructor<D> vConstructorForDecoratedItems = null;
-			try {
-				vConstructorForDecoratedItems = this.typeOfDecoratingItems.getConstructor(this.typeOfDecoratedItems);
-			} catch (NoSuchMethodException e) {
-				LOGGER.error("The constructor of the list class could not be invoked.", e); // this should never be thrown
-			}
+			vConstructorForDecoratedItems = this.typeOfDecoratingItems.getConstructor(this.typeOfDecoratedItems);
 			this.constructorForDecoratedItems = vConstructorForDecoratedItems;
 		} catch (ClassNotFoundException e) {
 			throw new IllegalArgumentException("Could not determin class without generics", e);
+		} catch (NoSuchMethodException e) {
+			throw new IllegalArgumentException("The constructor of the list class could not be invoked.", e);
 		}
 	}
 
@@ -62,7 +57,7 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 	}
 
 	@Override
-	public Constructor<D> getConstructorForDecoratedItems() {
+	public Constructor<D> getConstructorForDecoratingItems() {
 		return this.constructorForDecoratedItems;
 	}
 

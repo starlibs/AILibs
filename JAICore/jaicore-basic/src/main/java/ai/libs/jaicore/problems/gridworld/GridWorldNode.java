@@ -2,11 +2,16 @@ package ai.libs.jaicore.problems.gridworld;
 
 public class GridWorldNode {
 	private final GridWorldProblem problem;
-	private final int posx, posy;
+	private final int posx;
+	private final int posy;
 
 	public GridWorldNode(final GridWorldProblem problem, final int x, final int y) {
-		assert x >= 0 && x < 16 : "x has to be greater equals zero and less 16. Given x = " + x;
-		assert y >= 0 && x < 16 : "y has to be greater equals zero and less 16. Given y = " + y;
+		if (x < 0 || x >= 16) {
+			throw new IllegalArgumentException("x has to be greater equals zero and less 16. Given x = " + x);
+		}
+		if (y < 0 || x >= 16) {
+			throw new IllegalArgumentException("y has to be greater equals zero and less 16. Given y = " + y);
+		}
 
 		this.problem = problem;
 		this.posx = x;

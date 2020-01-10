@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,9 +36,9 @@ public class MLPlanARFFExample {
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
-		builder.withNodeEvaluationTimeOut(new TimeOut(30, TimeUnit.SECONDS));
-		builder.withCandidateEvaluationTimeOut(new TimeOut(10, TimeUnit.SECONDS));
-		builder.withTimeOut(new TimeOut(3, TimeUnit.MINUTES));
+		builder.withNodeEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
+		builder.withTimeOut(new Timeout(3, TimeUnit.MINUTES));
 		builder.withNumCpus(4);
 
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(split.get(0)).build();

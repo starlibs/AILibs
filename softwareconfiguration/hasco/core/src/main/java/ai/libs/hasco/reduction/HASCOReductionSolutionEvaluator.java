@@ -38,7 +38,7 @@ public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements
 			throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(a -> a.getEncoding()).collect(Collectors.joining("\n\t")));
 		}
 		if (this.evaluator instanceof IInformedObjectEvaluatorExtension && this.reduction.getBestSolutionSupplier().get() != null) {
-			((IInformedObjectEvaluatorExtension<V>) this.evaluator).updateBestScore(this.reduction.getBestSolutionSupplier().get().getScore());
+			((IInformedObjectEvaluatorExtension<V>) this.evaluator).informAboutBestScore(this.reduction.getBestSolutionSupplier().get().getScore());
 		}
 		this.logger.info("Forwarding evaluation request to evaluator {}", this.evaluator.getClass().getName());
 		return this.evaluator.evaluate(solution);

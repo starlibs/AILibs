@@ -6,8 +6,8 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
 
 import org.api4.java.algorithm.ISolutionCandidateIterator;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.SolutionCandidateFoundEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.events.result.ISolutionCandidateFoundEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -35,17 +35,17 @@ public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> 
 
 	@Override
 	public O nextSolutionCandidate() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
-		SolutionCandidateFoundEvent<O> event = this.nextSolutionCandidateEvent();
+		ISolutionCandidateFoundEvent<O> event = this.nextSolutionCandidateEvent();
 		return event.getSolutionCandidate();
 	}
 
 	@Override
-	public SolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	public ISolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		while (this.hasNext()) {
-			AlgorithmEvent event = this.nextWithException();
-			if (event instanceof SolutionCandidateFoundEvent) {
+			IAlgorithmEvent event = this.nextWithException();
+			if (event instanceof ISolutionCandidateFoundEvent) {
 				@SuppressWarnings("unchecked")
-				SolutionCandidateFoundEvent<O> castedEvent = (SolutionCandidateFoundEvent<O>) event;
+				ISolutionCandidateFoundEvent<O> castedEvent = (ISolutionCandidateFoundEvent<O>) event;
 				return castedEvent;
 			}
 		}

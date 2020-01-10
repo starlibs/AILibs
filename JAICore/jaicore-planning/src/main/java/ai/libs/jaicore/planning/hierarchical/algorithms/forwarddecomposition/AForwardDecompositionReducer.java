@@ -2,7 +2,7 @@ package ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition;
 
 import java.util.stream.Collectors;
 
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.jaicore.planning.core.Plan;
@@ -18,7 +18,7 @@ import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningT
 import ai.libs.jaicore.planning.hierarchical.problems.stn.STNPlanningProblem;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
-public abstract class AForwardDecompositionReducer<I1 extends IHTNPlanningProblem, O1 extends IPlan, I2 extends GraphSearchInput<TFDNode, String>, O2 extends IPath<TFDNode, String>> implements IHierarchicalPlanningToGraphSearchReduction<TFDNode, String, I1, O1, I2, O2> {
+public abstract class AForwardDecompositionReducer<I1 extends IHTNPlanningProblem, O1 extends IPlan, I2 extends GraphSearchInput<TFDNode, String>, O2 extends ILabeledPath<TFDNode, String>> implements IHierarchicalPlanningToGraphSearchReduction<TFDNode, String, I1, O1, I2, O2> {
 
 	public GraphSearchInput<TFDNode, String> getGraphSearchInput(final I1 planningProblem) {
 		IGraphGenerator<TFDNode, String> graphGenerator;
@@ -34,7 +34,7 @@ public abstract class AForwardDecompositionReducer<I1 extends IHTNPlanningProble
 		return new GraphSearchInput<>(graphGenerator, l -> l.getHead().getRemainingTasks().isEmpty());
 	}
 
-	public Plan getPlanForSolution(final IPath<TFDNode, String> solution) {
+	public Plan getPlanForSolution(final ILabeledPath<TFDNode, String> solution) {
 		return new Plan(solution.getNodes().stream().filter(n -> n.getAppliedAction() != null).map(TFDNode::getAppliedAction).collect(Collectors.toList()));
 	}
 }

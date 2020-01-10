@@ -1,6 +1,6 @@
 package ai.libs.hasco.gui.statsplugin;
 
-import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 
 import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
@@ -21,7 +21,7 @@ public class HASCOModelStatisticsPluginController extends ASimpleMVCPluginContro
 	}
 
 	@Override
-	protected void handleAlgorithmEventInternally(final PropertyProcessedAlgorithmEvent algorithmEvent) {
+	protected void handleAlgorithmEventInternally(final IPropertyProcessedAlgorithmEvent algorithmEvent) {
 		if (algorithmEvent.correspondsToEventOfClass(HASCOSolutionEvent.class)) {
 			Object rawScoredSolutionCandidateInfo = algorithmEvent.getProperty(ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer.SCORED_SOLUTION_CANDIDATE_INFO_PROPERTY_NAME);
 			if (rawScoredSolutionCandidateInfo != null) {

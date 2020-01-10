@@ -8,14 +8,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.junit.Before;
 import org.junit.Test;
 
 import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
@@ -35,8 +35,8 @@ import weka.core.Instances;
  */
 public class MLPlanConfigConsistencyTester {
 
-	private final TimeOut timeoutForNodeEvaluation = new TimeOut(180, TimeUnit.SECONDS);
-	private final TimeOut timeoutForSingleSolutionEvaluation = new TimeOut(60, TimeUnit.SECONDS);
+	private final Timeout timeoutForNodeEvaluation = new Timeout(180, TimeUnit.SECONDS);
+	private final Timeout timeoutForSingleSolutionEvaluation = new Timeout(60, TimeUnit.SECONDS);
 	private Instances data;
 
 	@Before
@@ -50,7 +50,7 @@ public class MLPlanConfigConsistencyTester {
 	public void testEvaluationTimeoutsForRCNEIfSetWithBuilder() throws IOException {
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder().withNodeEvaluationTimeOut(this.timeoutForNodeEvaluation).withCandidateEvaluationTimeOut(this.timeoutForSingleSolutionEvaluation);
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(new WekaInstances(this.data)).build();
-		AlgorithmEvent event = mlplan.next();
+		IAlgorithmEvent event = mlplan.next();
 		assertTrue(event instanceof AlgorithmInitializedEvent);
 		TwoPhaseHASCO twoPhaseHasco = (TwoPhaseHASCO) mlplan.getOptimizingFactory().getOptimizer();
 		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = (RefinementConfiguredSoftwareConfigurationProblem<Double>) twoPhaseHasco.getHasco().getInput();
@@ -67,7 +67,7 @@ public class MLPlanConfigConsistencyTester {
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(new WekaInstances(this.data)).build();
 		mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, "" + this.timeoutForNodeEvaluation.milliseconds());
 		mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, "" + this.timeoutForSingleSolutionEvaluation.milliseconds());
-		AlgorithmEvent event = mlplan.next();
+		IAlgorithmEvent event = mlplan.next();
 		assertTrue(event instanceof AlgorithmInitializedEvent);
 		TwoPhaseHASCO twoPhaseHasco = (TwoPhaseHASCO) mlplan.getOptimizingFactory().getOptimizer();
 		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = (RefinementConfiguredSoftwareConfigurationProblem<Double>) twoPhaseHasco.getHasco().getInput();
@@ -82,7 +82,7 @@ public class MLPlanConfigConsistencyTester {
 	public void testEvaluationTimeoutsInSearchPhaseEvaluator() throws IOException {
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder().withNodeEvaluationTimeOut(this.timeoutForNodeEvaluation).withCandidateEvaluationTimeOut(this.timeoutForSingleSolutionEvaluation);
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(new WekaInstances(this.data)).build();
-		AlgorithmEvent event = mlplan.next();
+		IAlgorithmEvent event = mlplan.next();
 		assertTrue(event instanceof AlgorithmInitializedEvent);
 		TwoPhaseHASCO twoPhaseHasco = (TwoPhaseHASCO) mlplan.getOptimizingFactory().getOptimizer();
 		PipelineEvaluator evaluator = (PipelineEvaluator) ((RefinementConfiguredSoftwareConfigurationProblem) twoPhaseHasco.getHasco().getInput()).getCompositionEvaluator();
@@ -99,7 +99,7 @@ public class MLPlanConfigConsistencyTester {
 			mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + blowUpSelection);
 			mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, "" + blowUpPostProcessing);
 
-			AlgorithmEvent event = mlplan.next();
+			IAlgorithmEvent event = mlplan.next();
 			assertTrue(event instanceof AlgorithmInitializedEvent);
 			TwoPhaseHASCO twoPhaseHasco = (TwoPhaseHASCO) mlplan.getOptimizingFactory().getOptimizer();
 			PipelineEvaluator evaluator = (PipelineEvaluator) ((RefinementConfiguredSoftwareConfigurationProblem) twoPhaseHasco.getHasco().getInput()).getCompositionEvaluator();

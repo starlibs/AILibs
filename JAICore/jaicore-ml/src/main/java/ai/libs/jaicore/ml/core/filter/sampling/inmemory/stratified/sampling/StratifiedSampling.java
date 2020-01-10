@@ -9,7 +9,7 @@ import java.util.Random;
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
@@ -57,7 +57,7 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException {
 		switch (this.getState()) {
 		case CREATED:
 			if (!this.allDatapointsAssigned) {
@@ -111,7 +111,7 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 				if (totalItemsAssigned != this.getInput().size()) {
 					throw new IllegalStateException("Not all data have been collected.");
 				}
-				return new SampleElementAddedEvent(this.getId());
+				return new SampleElementAddedEvent(this);
 			} else {
 				if (!this.simpleRandomSamplingStarted) {
 
@@ -122,7 +122,7 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 						throw new AlgorithmException("Could not create sample from strati.", e);
 					}
 					this.simpleRandomSamplingStarted = true;
-					return new WaitForSamplingStepEvent(this.getId());
+					return new WaitForSamplingStepEvent(this);
 				} else {
 
 					/* Check if all threads are finished. If yes finish Stratified Sampling, wait shortly in this step otherwise. */

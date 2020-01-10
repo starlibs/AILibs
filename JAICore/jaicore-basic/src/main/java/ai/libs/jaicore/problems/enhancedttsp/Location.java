@@ -44,9 +44,6 @@ public class Location {
 			return false;
 		}
 		Location other = (Location) obj;
-		if (this.id != other.id) {
-			return false;
-		}
-		return true;
+		return this.id == other.id;
 	}
 }

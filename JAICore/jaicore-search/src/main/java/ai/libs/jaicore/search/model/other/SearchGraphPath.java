@@ -9,20 +9,20 @@ import java.util.NoSuchElementException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.graph.ReadOnlyPathAccessor;
 
-public class SearchGraphPath<N, A> implements IPath<N, A> {
+public class SearchGraphPath<N, A> implements ILabeledPath<N, A> {
 	private final List<N> nodes;
 	private final List<A> edges;
 	private final Map<String, Object> annotations;
 
-	public SearchGraphPath(final IPath<N, A> path) {
+	public SearchGraphPath(final ILabeledPath<N, A> path) {
 		this (path.getNodes(), path.getArcs(), (path instanceof SearchGraphPath) ? ((SearchGraphPath) path).annotations : new HashMap<>());
 	}
 
-	public SearchGraphPath(final IPath<N, A> pathA, final IPath<N, A> pathB, final A link) {
+	public SearchGraphPath(final ILabeledPath<N, A> pathA, final ILabeledPath<N, A> pathB, final A link) {
 		this.nodes = new ArrayList<>();
 		this.nodes.addAll(pathA.getNodes());
 		this.nodes.addAll(pathB.getNodes());
@@ -33,7 +33,7 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 		this.annotations = new HashMap<>();
 	}
 
-	public SearchGraphPath(final IPath<N, A> pathA, final N attachedNode, final A link) {
+	public SearchGraphPath(final ILabeledPath<N, A> pathA, final N attachedNode, final A link) {
 		this.nodes = new ArrayList<>();
 		this.nodes.addAll(pathA.getNodes());
 		this.nodes.add(attachedNode);
@@ -140,7 +140,7 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 	}
 
 	@Override
-	public IPath<N, A> getPathFromChildOfRoot() {
+	public ILabeledPath<N, A> getPathFromChildOfRoot() {
 		return new SearchGraphPath<>(this.nodes.subList(1, this.nodes.size()), this.edges != null ? this.edges.subList(1, this.edges.size()) : null);
 	}
 
@@ -160,7 +160,7 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 	}
 
 	@Override
-	public IPath<N, A> getUnmodifiableAccessor() {
+	public ILabeledPath<N, A> getUnmodifiableAccessor() {
 		return new ReadOnlyPathAccessor<>(this);
 	}
 

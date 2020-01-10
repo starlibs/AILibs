@@ -10,11 +10,11 @@ import java.util.List;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.http.client.ClientProtocolException;
+import org.api4.java.datastructure.kvstore.IKVStore;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.basic.kvstore.IKVStore;
 
 public class RestSqlAdapterTest {
 

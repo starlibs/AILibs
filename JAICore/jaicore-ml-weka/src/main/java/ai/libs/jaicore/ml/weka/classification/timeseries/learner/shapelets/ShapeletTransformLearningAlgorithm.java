@@ -12,8 +12,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.core.exception.TrainingException;
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -587,7 +587,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 	 * @throws InterruptedException
 	 *             Thrown if there was a timeout
 	 */
-	public static TimeSeriesDataset2 shapeletTransform(final TimeSeriesDataset2 dataSet, final List<Shapelet> shapelets, final TimeOut timeout, final long beginTime, final AMinimumDistanceSearchStrategy searchStrategy)
+	public static TimeSeriesDataset2 shapeletTransform(final TimeSeriesDataset2 dataSet, final List<Shapelet> shapelets, final Timeout timeout, final long beginTime, final AMinimumDistanceSearchStrategy searchStrategy)
 			throws InterruptedException {
 		// Since the original paper only works on univariate data, this is assumed to be
 		// the case
@@ -671,7 +671,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 	 * {@inheritDoc}
 	 */
 	@Override
-	public AlgorithmEvent nextWithException() {
+	public IAlgorithmEvent nextWithException() {
 		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 

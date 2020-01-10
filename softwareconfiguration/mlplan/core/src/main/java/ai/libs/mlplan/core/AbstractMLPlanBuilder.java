@@ -17,7 +17,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -241,7 +241,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 * @param timeout The timeout for ML-Plan to search for the best classifier.
 	 * @return The builder object.
 	 */
-	public B withTimeOut(final TimeOut timeout) {
+	public B withTimeOut(final Timeout timeout) {
 		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_TIMEOUT, timeout.milliseconds() + "");
 		this.update();
 		return this.getSelf();
@@ -250,15 +250,15 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/**
 	 * @return The timeout for ML-Plan to search for the best classifier.
 	 */
-	public TimeOut getTimeOut() {
-		return new TimeOut(this.algorithmConfig.timeout(), TimeUnit.MILLISECONDS);
+	public Timeout getTimeOut() {
+		return new Timeout(this.algorithmConfig.timeout(), TimeUnit.MILLISECONDS);
 	}
 
 	/**
 	 * @param timeout The timeout for a single candidate evaluation.
 	 * @return The builder object.
 	 */
-	public B withNodeEvaluationTimeOut(final TimeOut timeout) {
+	public B withNodeEvaluationTimeOut(final Timeout timeout) {
 		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, timeout.milliseconds() + "");
 		this.update();
 		return this.getSelf();
@@ -267,15 +267,15 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/**
 	 * @return The timeout for ML-Plan to search for the best classifier.
 	 */
-	public TimeOut getNodeEvaluationTimeOut() {
-		return new TimeOut(this.algorithmConfig.timeoutForNodeEvaluation(), TimeUnit.MILLISECONDS);
+	public Timeout getNodeEvaluationTimeOut() {
+		return new Timeout(this.algorithmConfig.timeoutForNodeEvaluation(), TimeUnit.MILLISECONDS);
 	}
 
 	/**
 	 * @param timeout The timeout for a single candidate evaluation.
 	 * @return The builder object.
 	 */
-	public B withCandidateEvaluationTimeOut(final TimeOut timeout) {
+	public B withCandidateEvaluationTimeOut(final Timeout timeout) {
 		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, timeout.milliseconds() + "");
 		this.update();
 		return this.getSelf();
@@ -284,8 +284,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/**
 	 * @return The timeout for ML-Plan to search for the best classifier.
 	 */
-	public TimeOut getCandidateEvaluationTimeOut() {
-		return new TimeOut(this.algorithmConfig.timeoutForCandidateEvaluation(), TimeUnit.MILLISECONDS);
+	public Timeout getCandidateEvaluationTimeOut() {
+		return new Timeout(this.algorithmConfig.timeoutForCandidateEvaluation(), TimeUnit.MILLISECONDS);
 	}
 
 	public MonteCarloCrossValidationEvaluatorFactory withMCCVBasedCandidateEvaluationInSearchPhase() {

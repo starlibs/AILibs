@@ -92,9 +92,6 @@ public class GridWorldProblem  {
 		if (this.startX != other.startX) {
 			return false;
 		}
-		if (this.startY != other.startY) {
-			return false;
-		}
-		return true;
+		return this.startY == other.startY;
 	}
 }
