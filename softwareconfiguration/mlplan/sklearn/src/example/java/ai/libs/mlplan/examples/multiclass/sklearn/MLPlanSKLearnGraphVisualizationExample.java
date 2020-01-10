@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
@@ -37,7 +37,7 @@ public class MLPlanSKLearnGraphVisualizationExample {
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */
-		MLPlan<ScikitLearnWrapper> mlplan = new MLPlanSKLearnBuilder().withNumCpus(4).withTimeOut(new TimeOut(1, TimeUnit.HOURS)).withDataset(split.get(0)).build();
+		MLPlan<ScikitLearnWrapper> mlplan = new MLPlanSKLearnBuilder().withNumCpus(4).withTimeOut(new Timeout(1, TimeUnit.HOURS)).withDataset(split.get(0)).build();
 
 		/* start visualization */
 		new JFXPanel();
