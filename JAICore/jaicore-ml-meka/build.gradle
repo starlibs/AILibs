@@ -10,8 +10,12 @@ dependencies {
 			exclude group: 'log4j'
 			exclude group: 'org.slf4j'
 	}
-	
-	testCompile project(path:':JAICore:jaicore-basic', configuration:'testArtifacts')
+
+	/* dependencies to test sources of other projects */
+	testCompile project(path :':JAICore:jaicore-basic', configuration:'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-ml', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-planning', configuration: 'testArtifacts')
 }
 
 configurations.all {

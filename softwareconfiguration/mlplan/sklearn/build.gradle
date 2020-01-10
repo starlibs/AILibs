@@ -10,4 +10,5 @@ dependencies {
 		exclude group: 'edu.stanford.nlp'
 	}
 	compile project(':mlplan-core')
+	testCompile project(path: ':mlplan-core', configuration: 'testArtifacts')
 }

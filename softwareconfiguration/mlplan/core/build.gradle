@@ -28,8 +28,9 @@ dependencies {
 	// https://mvnrepository.com/artifact/commons-cli/commons-cli
 	compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
 
-	//testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
-	//testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-ml', configuration: 'testArtifacts')
 }
 
 uploadArchives {

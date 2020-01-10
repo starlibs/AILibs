@@ -8,7 +8,7 @@ dependencies {
 	compile("$apacheCommonsLang")
 	compile("$mysql")
 	
-	//testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }
 			
 uploadArchives {
