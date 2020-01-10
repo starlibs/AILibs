@@ -9,15 +9,17 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hyperopt.optimizer.SMACOptimizer;
-
 /**
  * Utility class for handling scenario file for optimizer scripts
  * @author kadirayk
  *
  */
 public class ScenarioFileUtil {
-	private static Logger logger = LoggerFactory.getLogger(SMACOptimizer.class);
+	private static Logger logger = LoggerFactory.getLogger(ScenarioFileUtil.class);
+
+	private ScenarioFileUtil() {
+		/* avoid instantiation */
+	}
 
 	public static void updateMultipleParams(final String filePath, final Map<String, String> newParams) {
 		Map<String, String> params = readAsKeyValuePairs(filePath);

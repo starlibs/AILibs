@@ -76,7 +76,7 @@ public class FixedDataSplitSetGenerator<D extends IDataset<?>> implements IFixed
 		this.logger = LoggerFactory.getLogger(name);
 		if (this.generator instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) this.generator).setLoggerName(name + ".splitgen");
-			this.logger.info("Setting logger of base split generator {} to {}", this.generator.getClass().getName(), name + ".splitgen");
+			this.logger.info("Setting logger of base split generator {} to {}.splitgen", this.generator.getClass().getName(), name);
 		}
 		else {
 			this.logger.info("Base split generator {} is not configurable for logging, so not configuring it.", this.generator.getClass().getName());

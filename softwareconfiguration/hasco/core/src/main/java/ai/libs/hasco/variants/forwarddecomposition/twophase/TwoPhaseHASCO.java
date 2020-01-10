@@ -51,6 +51,8 @@ import ai.libs.jaicore.timing.TimedComputation;
 
 public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
 
+	private static final String SUFFIX_HASCO = ".hasco";
+
 	/* logging */
 	private Logger logger = LoggerFactory.getLogger(TwoPhaseHASCO.class);
 	private String loggerName;
@@ -92,7 +94,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 	public void setHasco(final HASCO<S, N, A, Double> hasco) {
 		this.hasco = hasco;
 		if (this.getLoggerName() != null) {
-			this.hasco.setLoggerName(this.getLoggerName() + ".hasco");
+			this.hasco.setLoggerName(this.getLoggerName() + SUFFIX_HASCO);
 		}
 		this.hasco.setConfig(this.getConfig());
 		this.hasco.registerListener(new Object() {
@@ -169,7 +171,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 								this.cancel();
 							}
 						}
-						catch (Throwable e) {
+						catch (Exception e) {
 							TwoPhaseHASCO.this.logger.error("Observed {} while checking termination of phase 1. Stack trace is: {}", e.getClass().getName(), Arrays.stream(e.getStackTrace()).map(se -> "\n\t" + se.toString()).collect(Collectors.joining()));
 						}
 					}
@@ -268,12 +270,10 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 		Collection<HASCOSolutionCandidate<Double>> potentialCandidates = new ArrayList<>(this.phase1ResultQueue).stream().filter(solution -> solution.getScore() <= optimalInternalScore + MAX_MARGIN_FROM_BEST).collect(Collectors.toList());
 		this.logger.debug("Computing {} best and {} random solutions for a max runtime of {}. Number of candidates that are at most {} worse than optimum {} is: {}/{}", bestK, randomK, remainingTime, MAX_MARGIN_FROM_BEST,
 				optimalInternalScore, potentialCandidates.size(), this.phase1ResultQueue.size());
-		//		assert potentialCandidates.contains(internallyOptimalSolution);
 		List<HASCOSolutionCandidate<Double>> selectionCandidates = potentialCandidates.stream().limit(bestK).collect(Collectors.toList());
 		List<HASCOSolutionCandidate<Double>> remainingCandidates = new ArrayList<>(SetUtil.difference(potentialCandidates, selectionCandidates));
 		Collections.shuffle(remainingCandidates, new Random(this.getConfig().randomSeed()));
 		selectionCandidates.addAll(remainingCandidates.stream().limit(randomK).collect(Collectors.toList()));
-		//		assert selectionCandidates.contains(internallyOptimalSolution);
 		if (this.logger.isTraceEnabled()) {
 			this.logger.trace("Determined the following candidates for selection phase (in this order): {}", selectionCandidates.stream().map(c -> "\n\t" + c.getScore() + ": " + c.getComponentInstance()).collect(Collectors.joining()));
 		}
@@ -593,11 +593,11 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			this.logger.info("HASCO object is null, so not setting a logger.");
 			return;
 		}
-		if (this.hasco.getLoggerName() != null && this.hasco.getLoggerName().equals(this.loggerName + ".hasco")) {
+		if (this.hasco.getLoggerName() != null && this.hasco.getLoggerName().equals(this.loggerName + SUFFIX_HASCO)) {
 			this.logger.info("HASCO logger has already been customized correctly, not customizing again.");
 			return;
 		}
-		this.logger.info("Setting logger of {} to {}", this.hasco.getId(), this.getLoggerName() + ".hasco");
-		this.hasco.setLoggerName(this.getLoggerName() + ".hasco");
+		this.logger.info("Setting logger of {} to {}{}", this.hasco.getId(), this.getLoggerName(), SUFFIX_HASCO);
+		this.hasco.setLoggerName(this.getLoggerName() + SUFFIX_HASCO);
 	}
 }

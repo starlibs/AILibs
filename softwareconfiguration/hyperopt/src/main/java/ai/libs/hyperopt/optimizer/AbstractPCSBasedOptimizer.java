@@ -12,6 +12,7 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hyperopt.FileUtil;
 import ai.libs.hyperopt.PCSBasedOptimizerGrpcServer;
 import ai.libs.hyperopt.PCSBasedOptimizerInput;
+import ai.libs.jaicore.logging.LoggerUtil;
 
 /**
  * Implements {@link IOptimizer} interface and contains common methods for
@@ -35,7 +36,8 @@ public abstract class AbstractPCSBasedOptimizer implements IOptimizer {
 			try {
 				PCSBasedOptimizerGrpcServer.start(this.evaluator, this.input);
 			} catch (IOException | InterruptedException e) {
-				logger.error(e.getMessage());
+				Thread.currentThread().interrupt();
+				logger.error("Shutting down the thread. Exception message sequence: {}", LoggerUtil.getExceptionInfo(e));
 			}
 		};
 		Thread thread = new Thread(task);

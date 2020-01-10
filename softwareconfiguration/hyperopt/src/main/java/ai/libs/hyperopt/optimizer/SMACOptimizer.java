@@ -246,7 +246,12 @@ public class SMACOptimizer extends AbstractPCSBasedOptimizer {
 	}
 
 	private void startSMACScript(final String filePath) throws OptimizationException {
-		PCSBasedOptimizerConfig config = PCSBasedOptimizerConfig.get("conf/smac-optimizer-config.properties");
+		PCSBasedOptimizerConfig config;
+		try {
+			config = PCSBasedOptimizerConfig.get("conf/smac-optimizer-config.properties");
+		} catch (IOException e1) {
+			throw new OptimizationException(e1);
+		}
 		Integer port = config.getPort();
 		ScenarioFileUtil.updateParam(filePath, "gRPC_port", String.valueOf(port));
 		ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c", "cd " + filePath + "&& python run.py --scenario scenario.txt");
@@ -270,7 +275,6 @@ public class SMACOptimizer extends AbstractPCSBasedOptimizer {
 				this.logger.error(e.getMessage());
 			}
 			smacOutLines.add(line);
-			System.out.println("SMAC out: " + line);
 			if (line == null) {
 				break;
 			}
@@ -278,7 +282,7 @@ public class SMACOptimizer extends AbstractPCSBasedOptimizer {
 		try {
 			FileUtil.writeFileAsList(smacOutLines, "testrsc/smac.log");
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new OptimizationException(e);
 		}
 	}
 

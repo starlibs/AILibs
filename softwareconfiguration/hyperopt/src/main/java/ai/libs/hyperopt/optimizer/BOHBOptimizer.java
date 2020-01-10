@@ -39,7 +39,7 @@ public class BOHBOptimizer extends AbstractPCSBasedOptimizer {
 	 * @param evaluator
 	 * @return
 	 */
-	public static Builder BOHBOptimizerBuilder(final PCSBasedOptimizerInput input, final IObjectEvaluator<ComponentInstance, Double> evaluator) {
+	public static Builder getBOHBOptimizerBuilder(final PCSBasedOptimizerInput input, final IObjectEvaluator<ComponentInstance, Double> evaluator) {
 		return new Builder(input, evaluator);
 	}
 
@@ -148,7 +148,12 @@ public class BOHBOptimizer extends AbstractPCSBasedOptimizer {
 	 * @throws OptimizationException
 	 */
 	private void startBOHBOptimizerScript(final String filePath, final String command) throws OptimizationException {
-		PCSBasedOptimizerConfig config = PCSBasedOptimizerConfig.get("conf/smac-optimizer-config.properties");
+		PCSBasedOptimizerConfig config;
+		try {
+			config = PCSBasedOptimizerConfig.get("conf/smac-optimizer-config.properties");
+		} catch (IOException e1) {
+			throw new OptimizationException(e1);
+		}
 		Integer port = config.getPort();
 		ScenarioFileUtil.updateParam(filePath, "gRPC_port", String.valueOf(port));
 
@@ -172,7 +177,6 @@ public class BOHBOptimizer extends AbstractPCSBasedOptimizer {
 				this.logger.error(e.getMessage());
 			}
 			bohbOutLines.add(line);
-			System.out.println("BOHB out: " + line);
 			if (line == null) {
 				break;
 			}
@@ -180,7 +184,7 @@ public class BOHBOptimizer extends AbstractPCSBasedOptimizer {
 		try {
 			FileUtil.writeFileAsList(bohbOutLines, "testrsc/bohb.log");
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new OptimizationException(e);
 		}
 	}
 

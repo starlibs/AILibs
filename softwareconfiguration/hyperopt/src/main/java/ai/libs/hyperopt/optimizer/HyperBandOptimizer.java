@@ -44,7 +44,7 @@ public class HyperBandOptimizer extends AbstractPCSBasedOptimizer {
 	 * @param evaluator
 	 * @return
 	 */
-	public static Builder HyperBandOptimizerBuilder(final PCSBasedOptimizerInput input, final IObjectEvaluator<ComponentInstance, Double> evaluator) {
+	public static Builder getHyperBandOptimizerBuilder(final PCSBasedOptimizerInput input, final IObjectEvaluator<ComponentInstance, Double> evaluator) {
 		return new Builder(input, evaluator);
 	}
 
@@ -155,7 +155,12 @@ public class HyperBandOptimizer extends AbstractPCSBasedOptimizer {
 	 * @throws OptimizationException
 	 */
 	private void startHyperBandScript(final String filePath, final String command) throws OptimizationException {
-		PCSBasedOptimizerConfig config = PCSBasedOptimizerConfig.get("conf/smac-optimizer-config.properties");
+		PCSBasedOptimizerConfig config;
+		try {
+			config = PCSBasedOptimizerConfig.get("conf/smac-optimizer-config.properties");
+		} catch (IOException e1) {
+			throw new OptimizationException(e1);
+		}
 		Integer port = config.getPort();
 		ScenarioFileUtil.updateParam(filePath, "gRPC_port", String.valueOf(port));
 
@@ -179,7 +184,6 @@ public class HyperBandOptimizer extends AbstractPCSBasedOptimizer {
 				this.logger.error(e.getMessage());
 			}
 			hpbandOutLines.add(line);
-			System.out.println("HpBandSter out: " + line);
 			if (line == null) {
 				break;
 			}
@@ -187,7 +191,7 @@ public class HyperBandOptimizer extends AbstractPCSBasedOptimizer {
 		try {
 			FileUtil.writeFileAsList(hpbandOutLines, "testrsc/hpband.log");
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new OptimizationException(e);
 		}
 	}
 

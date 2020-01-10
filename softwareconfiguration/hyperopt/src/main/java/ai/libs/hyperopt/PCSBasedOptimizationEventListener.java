@@ -10,9 +10,7 @@ public class PCSBasedOptimizationEventListener implements AlgorithmEventListener
 	@Override
 	public void handleAlgorithmEvent(final IAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
 		PCSBasedOptimizationEvent event = (PCSBasedOptimizationEvent) algorithmEvent;
-
-		System.out.println("event score: " + event.getScore());
-
+		throw new UnsupportedOperationException("Not implemented. This does nothing with the given event " + event);
 	}
 
 }

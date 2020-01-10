@@ -94,10 +94,10 @@ public class FilterBasedDatasetSplitter<D extends IDataset<?>> implements IDatas
 					portionsAsList.add(d);
 				}
 				List<IReconstructionInstruction> instructions = ((IReconstructible) data).getConstructionPlan().getInstructions();
-				instructions.forEach(i -> ((IReconstructible)firstFold).addInstruction(i));
+				instructions.forEach(((IReconstructible)firstFold)::addInstruction);
 				ReconstructionInstruction rInstForFirstFold = new ReconstructionInstruction(FilterBasedDatasetSplitter.class.getName(), "getFoldOfSplit", new Class<?>[] {IDataset.class, ISamplingAlgorithmFactory.class, long.class, int.class, List.class}, new Object[] {"this", samplerFactory, seed, 0, portionsAsList});
 				((IReconstructible)firstFold).addInstruction(rInstForFirstFold);
-				instructions.forEach(i -> ((IReconstructible)secondFold).addInstruction(i));
+				instructions.forEach(((IReconstructible)secondFold)::addInstruction);
 				ReconstructionInstruction rInstForSecondFold = new ReconstructionInstruction(FilterBasedDatasetSplitter.class.getName(), "getFoldOfSplit", new Class<?>[] {IDataset.class, ISamplingAlgorithmFactory.class, long.class, int.class, List.class}, new Object[] {"this", samplerFactory, seed, 1, portionsAsList});
 				((IReconstructible)secondFold).addInstruction(rInstForSecondFold);
 				ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(firstFold);

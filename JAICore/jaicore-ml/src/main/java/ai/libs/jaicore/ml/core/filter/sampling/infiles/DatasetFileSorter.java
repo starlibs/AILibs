@@ -12,7 +12,7 @@ import ai.libs.jaicore.basic.TempFileHandler;
 /**
  * Sorts a Dataset file with a Mergesort. A TempFileHandler can be given or a
  * new one will be created otherwise.
- * 
+ *
  * @author Lukas Brandt
  */
 public class DatasetFileSorter {
@@ -35,13 +35,13 @@ public class DatasetFileSorter {
 		return 0;
 	};
 
-	public DatasetFileSorter(File datasetFile, TempFileHandler tempFileHandler) {
+	public DatasetFileSorter(final File datasetFile, final TempFileHandler tempFileHandler) {
 		this.datasetFile = datasetFile;
 		this.tempFileHandler = tempFileHandler;
 		this.usesOwnTempFileHandler = false;
 	}
 
-	public DatasetFileSorter(File datasetFile) {
+	public DatasetFileSorter(final File datasetFile) {
 		this(datasetFile, new TempFileHandler());
 		this.usesOwnTempFileHandler = true;
 	}
@@ -50,21 +50,19 @@ public class DatasetFileSorter {
 	 * @param comparator
 	 *            Custom comparator for the dataset file lines.
 	 */
-	public void setComparator(Comparator<String> comparator) {
+	public void setComparator(final Comparator<String> comparator) {
 		this.comparator = comparator;
 	}
 
 	/**
-	 * 
+	 *
 	 * @param sortedFilePath
 	 * @return
 	 * @throws IOException
 	 */
-	public File sort(String sortedFilePath) throws IOException {
+	public File sort(final String sortedFilePath) throws IOException {
 		IOException exception;
-		try (FileWriter fileWriter = new FileWriter(new File(sortedFilePath));
-				FileReader fr = new FileReader(this.datasetFile);
-				BufferedReader datasetFileReader = new BufferedReader(fr)) {
+		try (FileWriter fileWriter = new FileWriter(new File(sortedFilePath)); FileReader fr = new FileReader(this.datasetFile); BufferedReader datasetFileReader = new BufferedReader(fr)) {
 			// Create a new file for the sorted dataset with the ARFF header
 			String arffHeader;
 			arffHeader = ArffUtilities.extractArffHeader(this.datasetFile);
@@ -88,10 +86,9 @@ public class DatasetFileSorter {
 				}
 			}
 			tempFileWriter.flush();
-			datasetFileReader.close();
 
 			// Sort the temp file
-			String sortedFileUUID = mergesort(tempFileUUID);
+			String sortedFileUUID = this.mergesort(tempFileUUID);
 
 			// Write the sorted lines from the temp file to the output file.
 			BufferedReader sortedReader = this.tempFileHandler.getFileReaderForTempFile(sortedFileUUID);
@@ -106,14 +103,14 @@ public class DatasetFileSorter {
 		} finally {
 			// Start clean up of the temporary file handler if a new one was used for this
 			// sorting.
-			if (usesOwnTempFileHandler) {
+			if (this.usesOwnTempFileHandler) {
 				this.tempFileHandler.close();
 			}
 		}
 		throw exception;
 	}
 
-	private String mergesort(String fileUUID) throws IOException {
+	private String mergesort(final String fileUUID) throws IOException {
 		int length = ArffUtilities.countDatasetEntries(this.tempFileHandler.getTempFile(fileUUID), false);
 		if (length <= 1) {
 			return fileUUID;
@@ -137,18 +134,17 @@ public class DatasetFileSorter {
 			leftWriter.flush();
 			rightWriter.flush();
 			// Sort the two halfs
-			String sortedLeftUUID = mergesort(leftUUID);
-			String sortedRightUUID = mergesort(rightUUID);
-			// Merge the sorted halfs back together ande delete the left and right temp
-			// files
-			String mergedFileUUID = merge(sortedLeftUUID, sortedRightUUID);
+			String sortedLeftUUID = this.mergesort(leftUUID);
+			String sortedRightUUID = this.mergesort(rightUUID);
+			// Merge the sorted halfs back together ande delete the left and right temp files
+			String mergedFileUUID = this.merge(sortedLeftUUID, sortedRightUUID);
 			this.tempFileHandler.deleteTempFile(leftUUID);
 			this.tempFileHandler.deleteTempFile(rightUUID);
 			return mergedFileUUID;
 		}
 	}
 
-	private String merge(String leftUUID, String rightUUID) throws IOException {
+	private String merge(final String leftUUID, final String rightUUID) throws IOException {
 		String uuid = this.tempFileHandler.createTempFile();
 		FileWriter writer = this.tempFileHandler.getFileWriterForTempFile(uuid);
 		BufferedReader leftReader = this.tempFileHandler.getFileReaderForTempFile(leftUUID);

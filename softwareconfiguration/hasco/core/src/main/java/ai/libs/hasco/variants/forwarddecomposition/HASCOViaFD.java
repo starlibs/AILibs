@@ -11,10 +11,10 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class HASCOViaFD<ISearch extends GraphSearchWithPathEvaluationsInput<TFDNode, String, V>, V extends Comparable<V>> extends HASCO<ISearch, TFDNode, String, V> {
+public class HASCOViaFD<I extends GraphSearchWithPathEvaluationsInput<TFDNode, String, V>, V extends Comparable<V>> extends HASCO<I, TFDNode, String, V> {
 
-	public HASCOViaFD(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IOptimalPathInORGraphSearchFactory<ISearch, EvaluatedSearchGraphPath<TFDNode, String, V>, TFDNode, String, V, ?> searchFactory,
-			final AlgorithmicProblemReduction<? super GraphSearchWithPathEvaluationsInput<TFDNode, String, V>, ? super EvaluatedSearchGraphPath<TFDNode, String, V>, ISearch, EvaluatedSearchGraphPath<TFDNode, String, V>> searchProblemTransformer) {
+	public HASCOViaFD(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IOptimalPathInORGraphSearchFactory<I, EvaluatedSearchGraphPath<TFDNode, String, V>, TFDNode, String, V, ?> searchFactory,
+			final AlgorithmicProblemReduction<? super GraphSearchWithPathEvaluationsInput<TFDNode, String, V>, ? super EvaluatedSearchGraphPath<TFDNode, String, V>, I, EvaluatedSearchGraphPath<TFDNode, String, V>> searchProblemTransformer) {
 		super(configurationProblem, new DefaultHASCOPlanningReduction<>(new SimpleForwardDecompositionReducer()), searchFactory, searchProblemTransformer);
 	}
 

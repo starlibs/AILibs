@@ -46,7 +46,7 @@ public class PCSBasedOptimizationRunner {
 		HASCOToPCSConverter.generatePCSFile(input, "PCSBasedOptimizerScripts/HyperBandOptimizer/");
 
 		// optimization
-		HyperBandOptimizer optimizer = HyperBandOptimizer.HyperBandOptimizerBuilder(input, evaluator).executionPath("PCSBasedOptimizerScripts/HyperBandOptimizer").maxBudget(230.0).minBudget(9.0).nIterations(4).build();
+		HyperBandOptimizer optimizer = HyperBandOptimizer.getHyperBandOptimizerBuilder(input, evaluator).executionPath("PCSBasedOptimizerScripts/HyperBandOptimizer").maxBudget(230.0).minBudget(9.0).nIterations(4).build();
 
 		new JFXPanel();
 		OptimizerVisualizationWindow window = null;

@@ -31,4 +31,34 @@ public class TwoPhaseSoftwareConfigurationProblem extends RefinementConfiguredSo
 	public IObjectEvaluator<ComponentInstance, Double> getSelectionBenchmark() {
 		return this.selectionBenchmark;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((this.selectionBenchmark == null) ? 0 : this.selectionBenchmark.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		TwoPhaseSoftwareConfigurationProblem other = (TwoPhaseSoftwareConfigurationProblem) obj;
+		if (this.selectionBenchmark == null) {
+			if (other.selectionBenchmark != null) {
+				return false;
+			}
+		} else if (!this.selectionBenchmark.equals(other.selectionBenchmark)) {
+			return false;
+		}
+		return true;
+	}
 }

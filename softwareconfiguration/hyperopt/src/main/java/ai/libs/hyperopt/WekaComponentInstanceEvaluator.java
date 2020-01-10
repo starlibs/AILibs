@@ -36,15 +36,12 @@ public class WekaComponentInstanceEvaluator implements IComponentInstanceEvaluat
 
 	private final ILearnerFactory<IWekaClassifier> classifierFactory;
 
-	private String filePath;
-
 	private EventBus eventBus;
 
 	private List<Instances> split;
 
 	public WekaComponentInstanceEvaluator(final ILearnerFactory<IWekaClassifier> classifierFactory, final String filePath, final String algorithmId) throws SplitFailedException {
 		this.classifierFactory = classifierFactory;
-		this.filePath = filePath;
 		this.eventBus = new EventBus();
 		this.algorithmId = algorithmId;
 		Instances dataset = this.loadDataset(filePath);

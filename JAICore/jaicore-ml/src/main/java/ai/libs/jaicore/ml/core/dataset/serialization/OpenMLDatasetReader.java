@@ -17,7 +17,7 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 
 	private static final OpenmlConnector connector = new OpenmlConnector();
 
-	public static ILabeledDataset<ILabeledInstance> deserializeDataset(final int openMLId) throws DatasetDeserializationFailedException, InterruptedException {
+	public static ILabeledDataset<ILabeledInstance> deserializeDataset(final int openMLId) throws DatasetDeserializationFailedException {
 		try {
 			DataSetDescription dsd = connector.dataGet(openMLId);
 			File arffFile = connector.datasetGet(dsd);

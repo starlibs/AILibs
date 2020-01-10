@@ -3,9 +3,9 @@ package ai.libs.hyperopt;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +31,10 @@ public class HASCOToPCSConverter {
 
 	private static Map<String, List<String>> componentConditionals = new HashMap<>();
 
+	private HASCOToPCSConverter() {
+		/* avoid instantiation */
+	}
+
 	/**
 	 * PCS Files will be generated for the components in the input, generated files
 	 * will be stored in the given outputDir. A separate PCS file will be generated for each Component
@@ -39,11 +43,11 @@ public class HASCOToPCSConverter {
 	 * @param outputDir
 	 * @throws Exception
 	 */
-	public static void generatePCSFile(final PCSBasedOptimizerInput input, final String outputDir) throws Exception {
+	public static void generatePCSFile(final PCSBasedOptimizerInput input, final String outputDir) {
 		Collection<Component> components = input.getComponents();
 		String requestedInterface = input.getRequestedInterface();
 		if (ComponentUtil.hasCycles(components, requestedInterface)) {
-			throw new Exception("Component has cycles. Not converting to PCS");
+			throw new IllegalArgumentException("Component has cycles. Not converting to PCS");
 		}
 		toPCS(components, requestedInterface, outputDir);
 	}
@@ -53,7 +57,7 @@ public class HASCOToPCSConverter {
 
 		for (Component cmp : componentsToGenerate) {
 			StringBuilder pcsContent = new StringBuilder();
-			int lastDot = cmp.getName().lastIndexOf(".");
+			int lastDot = cmp.getName().lastIndexOf('.');
 			String name = cmp.getName().substring(lastDot + 1);
 			Set<Parameter> params = cmp.getParameters();
 			Map<String, String> requiredInterfaces = cmp.getRequiredInterfaces();
@@ -71,12 +75,12 @@ public class HASCOToPCSConverter {
 				}
 			}
 
-			pcsContent.append(handleConditionals(cmp.getName()));
+			pcsContent.append(handleConditionals());
 
 			String finalContent = removeDuplicateLines(pcsContent);
 
 			try (FileWriter fw = new FileWriter(outputDir + name + ".pcs")) {
-				fw.write(finalContent.toString());
+				fw.write(finalContent);
 			} catch (IOException e) {
 				logger.error(e.getMessage());
 			}
@@ -85,18 +89,12 @@ public class HASCOToPCSConverter {
 
 	private static String removeDuplicateLines(final StringBuilder content) {
 		String[] lines = content.toString().split(System.lineSeparator());
-		Set<String> lineSet = new LinkedHashSet<>();
-		for (String line : lines) {
-			lineSet.add(line);
-		}
-
 		StringBuilder cleanContent = new StringBuilder();
-		lineSet.forEach(l -> cleanContent.append(l).append(System.lineSeparator()));
-
+		Arrays.stream(lines).forEach(l -> cleanContent.append(l).append(System.lineSeparator()));
 		return cleanContent.toString();
 	}
 
-	private static String handleConditionals(final String componentName) {
+	private static String handleConditionals() {
 		StringBuilder str = new StringBuilder();
 		str.append("Conditionals:").append(System.lineSeparator());
 		for (List<String> lines : componentConditionals.values()) {

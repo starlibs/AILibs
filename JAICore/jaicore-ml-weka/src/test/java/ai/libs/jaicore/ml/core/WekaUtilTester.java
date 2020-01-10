@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.core;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
@@ -10,6 +11,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -110,9 +113,11 @@ public class WekaUtilTester {
 	}
 
 	@Test
-	public void checkValidAttributeSelections() throws Exception {
+	public void checkValidAttributeSelections() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		Collection<List<String>> preprocessors = WekaUtil.getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection();
-		preprocessors.forEach(a -> System.out.println(a.toString()));
+		assertEquals(-1, preprocessors.size()); // one would need to count them; I didn't do this now. Do this when the test fails and you are annoyed by it
+
+		/* maybe check here the executability of those combinations */
 	}
 
 	public static void main(final String[] args) throws Exception {

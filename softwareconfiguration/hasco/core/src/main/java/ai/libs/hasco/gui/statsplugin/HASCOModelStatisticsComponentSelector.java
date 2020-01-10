@@ -26,7 +26,7 @@ import javafx.scene.control.TreeItem;
  */
 public class HASCOModelStatisticsComponentSelector extends TreeItem<HASCOModelStatisticsComponentSelector> {
 
-	private final static Logger logger = LoggerFactory.getLogger(HASCOModelStatisticsComponentSelector.class);
+	private static final Logger logger = LoggerFactory.getLogger(HASCOModelStatisticsComponentSelector.class);
 	private final HASCOModelStatisticsComponentSelector parent;
 	private final String requiredInterface;
 	private final ComboBox<String> componentSelector;

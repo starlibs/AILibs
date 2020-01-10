@@ -13,6 +13,11 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStra
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SimpleRandomSamplingFactory;
 
 public class SplitterUtil {
+
+	private SplitterUtil() {
+		/* avoids instantiation */
+	}
+
 	public static <D extends ILabeledDataset<?>> List<D> getLabelStratifiedTrainTestSplit(final D dataset, final long seed, final double relativeTrainSize) throws SplitFailedException, InterruptedException {
 		boolean isReproducible = dataset instanceof IReconstructible;
 		List<D> folds = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<D>(), relativeTrainSize, new Random(seed)).split(dataset);
@@ -68,7 +73,7 @@ public class SplitterUtil {
 			testFold.addInstruction(new ReconstructionInstruction(SplitterUtil.class.getMethod("getTestFoldOfLabelStratifiedTrainTestSplit", ILabeledDataset.class, long.class, double.class), "this", seed, relativeTrainSize));
 
 			ReconstructionInstruction instruction = new ReconstructionInstruction(SplitterUtil.class.getMethod("getLabelStratifiedTrainTestSplit", ILabeledDataset.class, long.class, double.class), "this", seed, relativeTrainSize);
-			return new ReproducibleSplit<ILabeledDataset<?>>(instruction, dataset, folds.get(0), folds.get(1));
+			return new ReproducibleSplit<>(instruction, dataset, folds.get(0), folds.get(1));
 		} catch (NoSuchMethodException | SecurityException e) {
 			throw new SplitFailedException(e);
 		}

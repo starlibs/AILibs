@@ -96,6 +96,8 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 
 	@Override
 	protected void cleanUp() {
+
+		/* no clean up activities necessary */
 	}
 
 }

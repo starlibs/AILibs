@@ -106,7 +106,7 @@ public class PCSBasedOptimizerTest {
 	@Test(expected = OptimizationException.class)
 	public void HyperBandOptimizationExceptionTest() throws Exception {
 		HASCOToPCSConverter.generatePCSFile(this.input, "PCSBasedOptimizerScripts/HyperBandOptimizer/");
-		HyperBandOptimizer optimizer = HyperBandOptimizer.HyperBandOptimizerBuilder(this.input, this.evaluator).executionPath("wrongPath").maxBudget(230.0).minBudget(9.0).nIterations(4).build();
+		HyperBandOptimizer optimizer = HyperBandOptimizer.getHyperBandOptimizerBuilder(this.input, this.evaluator).executionPath("wrongPath").maxBudget(230.0).minBudget(9.0).nIterations(4).build();
 		optimizer.optimize("weka.classifiers.functions.Logistic");
 
 	}
@@ -115,7 +115,7 @@ public class PCSBasedOptimizerTest {
 	@Test(expected = OptimizationException.class)
 	public void BOHBOptimizationExceptionTest() throws Exception {
 		HASCOToPCSConverter.generatePCSFile(this.input, "PCSBasedOptimizerScripts/BOHBOptimizer/");
-		BOHBOptimizer optimizer = BOHBOptimizer.BOHBOptimizerBuilder(this.input, this.evaluator).executionPath("wrongPath").maxBudget(230.0).minBudget(9.0).nIterations(4).build();
+		BOHBOptimizer optimizer = BOHBOptimizer.getBOHBOptimizerBuilder(this.input, this.evaluator).executionPath("wrongPath").maxBudget(230.0).minBudget(9.0).nIterations(4).build();
 		optimizer.optimize("weka.classifiers.functions.Logistic");
 
 	}
@@ -179,7 +179,7 @@ public class PCSBasedOptimizerTest {
 	@Test
 	public void spawnHyperBandTest() throws Exception {
 		HASCOToPCSConverter.generatePCSFile(this.input, "PCSBasedOptimizerScripts/HyperBandOptimizer/");
-		HyperBandOptimizer optimizer = HyperBandOptimizer.HyperBandOptimizerBuilder(this.input, this.evaluator).executionPath("PCSBasedOptimizerScripts/HyperBandOptimizer").maxBudget(230.0).minBudget(9.0).nIterations(4).build();
+		HyperBandOptimizer optimizer = HyperBandOptimizer.getHyperBandOptimizerBuilder(this.input, this.evaluator).executionPath("PCSBasedOptimizerScripts/HyperBandOptimizer").maxBudget(230.0).minBudget(9.0).nIterations(4).build();
 		optimizer.optimize("weka.classifiers.functions.Logistic");
 		List<String> hpbandOutLines = FileUtil.readFileAsList("testrsc/hpband.log");
 		List<Double> expectedValues = new ArrayList<>();
@@ -227,7 +227,7 @@ public class PCSBasedOptimizerTest {
 	@Test
 	public void spawnBOHBTest() throws Exception {
 		HASCOToPCSConverter.generatePCSFile(this.input, "PCSBasedOptimizerScripts/BOHBOptimizer/");
-		BOHBOptimizer optimizer = BOHBOptimizer.BOHBOptimizerBuilder(this.input, this.evaluator).executionPath("PCSBasedOptimizerScripts/BOHBOptimizer").maxBudget(230.0).minBudget(9.0).nIterations(4).build();
+		BOHBOptimizer optimizer = BOHBOptimizer.getBOHBOptimizerBuilder(this.input, this.evaluator).executionPath("PCSBasedOptimizerScripts/BOHBOptimizer").maxBudget(230.0).minBudget(9.0).nIterations(4).build();
 		optimizer.optimize("weka.classifiers.functions.Logistic");
 		List<String> bohbOutLines = FileUtil.readFileAsList("testrsc/bohb.log");
 		List<Double> expectedValues = new ArrayList<>();
@@ -293,7 +293,7 @@ public class PCSBasedOptimizerTest {
 	@Ignore
 	@Test
 	public void HyperBandBuilderTest() {
-		HyperBandOptimizer optimizer = HyperBandOptimizer.HyperBandOptimizerBuilder(this.input, this.evaluator).executionPath("testsrc").minBudget(10.0).maxBudget(100.0).nIterations(10).build();
+		HyperBandOptimizer optimizer = HyperBandOptimizer.getHyperBandOptimizerBuilder(this.input, this.evaluator).executionPath("testsrc").minBudget(10.0).maxBudget(100.0).nIterations(10).build();
 		String command = optimizer.setOptions();
 		assertEquals("python HpBandSterOptimizer.py --min_budget 10.0 --max_budget 100.0 --n_iterations 10", command);
 	}
@@ -301,7 +301,7 @@ public class PCSBasedOptimizerTest {
 	@Ignore
 	@Test
 	public void BOHBBuilderTest() {
-		BOHBOptimizer optimizer = BOHBOptimizer.BOHBOptimizerBuilder(this.input, this.evaluator).executionPath("testrsc").minBudget(10.0).maxBudget(100.0).nIterations(10).build();
+		BOHBOptimizer optimizer = BOHBOptimizer.getBOHBOptimizerBuilder(this.input, this.evaluator).executionPath("testrsc").minBudget(10.0).maxBudget(100.0).nIterations(10).build();
 		String command = optimizer.setOptions();
 		assertEquals("python BOHBOptimizerRunner.py --min_budget 10.0 --max_budget 100.0 --n_iterations 10", command);
 	}
@@ -311,7 +311,7 @@ public class PCSBasedOptimizerTest {
 		HASCOToPCSConverter.generatePCSFile(this.input, "PCSBasedOptimizerScripts/HyperBandOptimizer/");
 		AlgorithmEventListener listener = new PCSBasedOptimizationEventListener();
 		this.evaluator.registerListener(listener);
-		HyperBandOptimizer optimizer = HyperBandOptimizer.HyperBandOptimizerBuilder(this.input, this.evaluator).executionPath("PCSBasedOptimizerScripts/HyperBandOptimizer").maxBudget(230.0).minBudget(9.0).nIterations(4).build();
+		HyperBandOptimizer optimizer = HyperBandOptimizer.getHyperBandOptimizerBuilder(this.input, this.evaluator).executionPath("PCSBasedOptimizerScripts/HyperBandOptimizer").maxBudget(230.0).minBudget(9.0).nIterations(4).build();
 		optimizer.optimize("weka.classifiers.functions.Logistic");
 	}
 

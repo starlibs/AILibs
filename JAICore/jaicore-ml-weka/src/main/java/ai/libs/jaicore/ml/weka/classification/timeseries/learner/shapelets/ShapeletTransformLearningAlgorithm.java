@@ -458,7 +458,6 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 		for (int i = 0; i < numRemoveItems; i++) {
 			kShapelets.remove(kShapelets.size() - 1);
 		}
-
 		return kShapelets;
 	}
 

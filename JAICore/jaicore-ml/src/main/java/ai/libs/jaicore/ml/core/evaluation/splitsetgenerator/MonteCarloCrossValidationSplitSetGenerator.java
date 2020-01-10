@@ -54,7 +54,7 @@ public class MonteCarloCrossValidationSplitSetGenerator<D extends ILabeledDatase
 
 		if (this.datasetSplitter instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) this.datasetSplitter).setLoggerName(name + ".splitter");
-			this.logger.info("Setting logger of splitter {} to {}", this.datasetSplitter.getClass().getName(), name + ".splitter");
+			this.logger.info("Setting logger of splitter {} to {}.splitter", this.datasetSplitter.getClass().getName(), name);
 		}
 		else {
 			this.logger.info("Base splitter {} is not configurable for logging, so not configuring it.", this.datasetSplitter.getClass().getName());
@@ -82,9 +82,9 @@ public class MonteCarloCrossValidationSplitSetGenerator<D extends ILabeledDatase
 
 		List<List<D>> splits = new ArrayList<>(this.repeats);
 		for (int i = 0; i < this.repeats; i++) {
-			long seed = this.seed + this.runningSeed;
-			this.logger.debug("Invoking dataset splitter {} with Random({})", this.datasetSplitter, seed);
-			splits.add(this.datasetSplitter.split(data, new Random(seed)));
+			long vSeed = this.seed + this.runningSeed;
+			this.logger.debug("Invoking dataset splitter {} with Random({})", this.datasetSplitter, vSeed);
+			splits.add(this.datasetSplitter.split(data, new Random(vSeed)));
 			this.runningSeed ++;
 		}
 		return new DatasetSplitSet<>(splits);

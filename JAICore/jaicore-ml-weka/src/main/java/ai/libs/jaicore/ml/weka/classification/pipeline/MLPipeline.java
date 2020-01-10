@@ -100,7 +100,7 @@ public class MLPipeline extends SingleClassifierEnhancer implements Classifier, 
 		this.timeForExecutingClassifier = new DescriptiveStatistics();
 	}
 
-	private Instance applyPreprocessors(Instance data) throws Exception {
+	private Instance applyPreprocessors(Instance data) throws PreprocessingException  {
 		long start = System.currentTimeMillis();
 		for (SupervisedFilterSelector pp : this.preprocessors) {
 			data = pp.apply(data);

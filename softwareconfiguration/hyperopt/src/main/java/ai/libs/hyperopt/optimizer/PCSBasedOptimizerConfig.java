@@ -2,7 +2,6 @@ package ai.libs.hyperopt.optimizer;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -28,19 +27,13 @@ public interface PCSBasedOptimizerConfig extends Mutable, Accessible {
 	@DefaultValue("8080")
 	public Integer getPort();
 
-	public static PCSBasedOptimizerConfig get(final String file) {
+	public static PCSBasedOptimizerConfig get(final String file) throws IOException {
 		return get(new File(file));
 	}
 
-	public static PCSBasedOptimizerConfig get(final File file) {
+	public static PCSBasedOptimizerConfig get(final File file) throws IOException {
 		Properties props = new Properties();
-		try {
-			props.load(new FileInputStream(file));
-		} catch (FileNotFoundException e) {
-			System.err.println("Could not find config file " + file + ". Assuming default configuration");
-		} catch (IOException e) {
-			System.err.println("Encountered problem with config file " + file + ". Assuming default configuration. Problem:" + e.getMessage());
-		}
+		props.load(new FileInputStream(file));
 		return ConfigFactory.create(PCSBasedOptimizerConfig.class, props);
 	}
 

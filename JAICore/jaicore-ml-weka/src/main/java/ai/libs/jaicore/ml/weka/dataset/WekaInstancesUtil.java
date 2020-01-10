@@ -35,7 +35,7 @@ public class WekaInstancesUtil {
 		if (targetIndex < 0) {
 			throw new IllegalArgumentException("Class index of Instances object is not set!");
 		}
-		List<IAttribute> attributes = IntStream.range(0, dataset.numAttributes()).mapToObj(x -> dataset.attribute(x)).map(WekaInstancesUtil::transformWEKAAttributeToAttributeType).collect(Collectors.toList());
+		List<IAttribute> attributes = IntStream.range(0, dataset.numAttributes()).mapToObj(dataset::attribute).map(WekaInstancesUtil::transformWEKAAttributeToAttributeType).collect(Collectors.toList());
 		IAttribute labelAttribute = attributes.remove(targetIndex);
 		return new LabeledInstanceSchema(dataset.relationName(), attributes, labelAttribute);
 	}

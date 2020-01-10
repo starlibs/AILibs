@@ -1,5 +1,7 @@
 package ai.libs.jaicore.ml;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileReader;
 import java.util.Collections;
@@ -7,6 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+
+import org.junit.Test;
 
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.reduction.MCTreeNodeReD;
@@ -29,7 +33,8 @@ public class MCTreeNodeReDTest {
 	private static final String CLASSIFIER_NAME = RandomForest.class.getName();
 	private static final File DATASET = new File("testrsc/orig/vowel.arff");
 
-	public static void main(final String[] args) throws Exception {
+	@Test
+	public void test() throws Exception {
 
 		Instances data = new Instances(new FileReader(DATASET));
 		data.setClassIndex(data.numAttributes() - 1);
@@ -87,6 +92,8 @@ public class MCTreeNodeReDTest {
 
 				double maxCorrectDec = pctCorrectDecomposition.stream().mapToDouble(x -> x).max().getAsDouble();
 				double maxCorrectCls = pctCorrectClassifier.stream().mapToDouble(x -> x).max().getAsDouble();
+				assertTrue (maxCorrectDec > 0);
+				assertTrue (maxCorrectCls > 0);
 			}
 
 		}

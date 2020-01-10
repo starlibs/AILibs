@@ -17,7 +17,6 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
@@ -239,7 +238,7 @@ public class DatasetUtil {
 		return new Pair<>(newAttributes, transformations);
 	}
 
-	public static ILabeledDataset<?> getExpansionOfDataset(final ILabeledDataset<?> dataset, final int... expansions) throws InterruptedException, DatasetCreationException {
+	public static ILabeledDataset<?> getExpansionOfDataset(final ILabeledDataset<?> dataset, final int... expansions) throws InterruptedException {
 		return getExpansionOfDataset(dataset, getPairOfNewAttributesAndExpansionMap(dataset, expansions));
 	}
 
