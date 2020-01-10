@@ -65,9 +65,7 @@ public class PredictionDiff<E, A> implements IPredictionAndGroundTruthTable<E, A
 	}
 
 	public <T> List<T> getPredictionsAsList(final Class<T> clazz) {
-		List<T> cList = new ArrayList<>(this.predictions.size());
-		this.predictions.forEach(e -> cList.add((T) e));
-		return Collections.unmodifiableList(cList);
+		return Collections.unmodifiableList(new ListView<T>(this.predictions, clazz));
 	}
 
 	@Override
@@ -81,9 +79,7 @@ public class PredictionDiff<E, A> implements IPredictionAndGroundTruthTable<E, A
 	}
 
 	public <T> List<T> getGroundTruthAsList(final Class<T> clazz) {
-		List<T> cList = new ArrayList<>(this.groundTruths.size());
-		this.groundTruths.forEach(e -> cList.add((T) e));
-		return Collections.unmodifiableList(cList);
+		return Collections.unmodifiableList(new ListView<T>(this.groundTruths, clazz));
 	}
 
 	@Override

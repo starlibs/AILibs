@@ -32,7 +32,7 @@ public class WekaInstance extends ElementDecorator<Instance> implements IWekaIns
 		boolean isInteger = this.getElement().classAttribute().isNominal();
 		double classValue = this.getElement().classValue();
 		if (isInteger) {
-			int intClassValue = (int)classValue;
+			int intClassValue = (int)classValue; // do NOT return this value directly. The explicit cast into a new variable is required, because the var remains a double elsewise. Maybe this is a Java bug
 			return intClassValue;
 		}
 		else {

@@ -25,6 +25,8 @@ import ai.libs.jaicore.ml.core.dataset.ADataset;
  */
 public class TimeSeriesDataset extends ADataset<ITimeSeriesInstance> implements ILabeledDataset<ITimeSeriesInstance> {
 
+	private static final long serialVersionUID = -6819487387561457394L;
+
 	/** Values of time series variables. */
 	private List<INDArray> valueMatrices;
 
@@ -32,7 +34,7 @@ public class TimeSeriesDataset extends ADataset<ITimeSeriesInstance> implements 
 	private List<INDArray> timestampMatrices;
 
 	/** Target values for the instances. */
-	private List<Object> targets;
+	private transient List<Object> targets;
 
 	/**
 	 * Creates a TimeSeries dataset. Let `n` be the number of instances.
@@ -265,4 +267,49 @@ public class TimeSeriesDataset extends ADataset<ITimeSeriesInstance> implements 
 		return copy;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((this.targets == null) ? 0 : this.targets.hashCode());
+		result = prime * result + ((this.timestampMatrices == null) ? 0 : this.timestampMatrices.hashCode());
+		result = prime * result + ((this.valueMatrices == null) ? 0 : this.valueMatrices.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		TimeSeriesDataset other = (TimeSeriesDataset) obj;
+		if (this.targets == null) {
+			if (other.targets != null) {
+				return false;
+			}
+		} else if (!this.targets.equals(other.targets)) {
+			return false;
+		}
+		if (this.timestampMatrices == null) {
+			if (other.timestampMatrices != null) {
+				return false;
+			}
+		} else if (!this.timestampMatrices.equals(other.timestampMatrices)) {
+			return false;
+		}
+		if (this.valueMatrices == null) {
+			if (other.valueMatrices != null) {
+				return false;
+			}
+		} else if (!this.valueMatrices.equals(other.valueMatrices)) {
+			return false;
+		}
+		return true;
+	}
 }

@@ -96,7 +96,7 @@ public class EnsembleProvider {
 	 *            weights for the {@link MajorityConfidenceVote}
 	 * @return Returns the initialized (but untrained) HIVE COTE ensemble model.
 	 */
-	public static Classifier provideHIVECOTEEnsembleModel(final long seed, final int numFolds) {
+	public static Classifier provideHIVECOTEEnsembleModel(final long seed) {
 		Classifier[] classifier = new Classifier[7];
 
 		Vote voter = new MajorityConfidenceVote(5, seed);

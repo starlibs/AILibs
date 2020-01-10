@@ -37,7 +37,6 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 
 	private final Random rand;
 	private final double[] portions;
-	private final double portionSum;
 
 	private Logger logger = LoggerFactory.getLogger(RandomHoldoutSplitter.class);
 
@@ -50,15 +49,11 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 		if (!(portionSum > 0 && portionSum <= 1.0)) {
 			throw new IllegalArgumentException("The sum of the given portions must not be less or equal 0 or larger than 1. Given portions: " + Arrays.toString(portions));
 		}
-		this.portionSum = portionSum;
 		this.rand = rand;
 		if (portionSum == 1) {
 			this.portions = portions;
 		} else {
-			this.portions = new double[portions.length + 1];
-			for (int i = 0; i < portions.length; i++) {
-				this.portions[i] = portions[i];
-			}
+			this.portions = Arrays.copyOf(portions, portions.length + 1);
 			this.portions[portions.length] = 1 - portionSum;
 		}
 	}
@@ -133,7 +128,7 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 	private static void addReconstructionInfo(final IDataset<?> data, final IDataset<?> fold, final long seed, final int numFold, final double[] portions) {
 		if (data instanceof IReconstructible) { // make the data in the folds reconstructible
 			ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(data);
-			((IReconstructible) data).getConstructionPlan().getInstructions().forEach(inst -> ((IReconstructible) fold).addInstruction(inst));
+			((IReconstructible) data).getConstructionPlan().getInstructions().forEach(((IReconstructible) fold)::addInstruction);
 			((IReconstructible) fold).addInstruction(
 					new ReconstructionInstruction(RandomHoldoutSplitter.class.getName(), "getFoldOfSplit", new Class<?>[] { IDataset.class, long.class, int.class, double[].class }, new Object[] { "this", seed, numFold, portions }));
 		}

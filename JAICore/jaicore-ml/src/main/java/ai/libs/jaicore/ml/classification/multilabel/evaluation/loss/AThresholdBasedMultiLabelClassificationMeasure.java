@@ -30,26 +30,20 @@ public abstract class AThresholdBasedMultiLabelClassificationMeasure extends APr
 
 	protected double[][] listToRelevanceMatrix(final List<? extends IMultiLabelClassification> classificationList) {
 		double[][] matrix = new double[classificationList.size()][];
-		IntStream.range(0, classificationList.size()).forEach(x -> {
-			matrix[x] = classificationList.get(x).getPrediction();
-		});
+		IntStream.range(0, classificationList.size()).forEach(x -> matrix[x] = classificationList.get(x).getPrediction());
 
 		return matrix;
 	}
 
 	protected int[][] listToThresholdedRelevanceMatrix(final List<? extends IMultiLabelClassification> classificationList) {
 		int[][] matrix = new int[classificationList.size()][];
-		IntStream.range(0, classificationList.size()).forEach(x -> {
-			matrix[x] = classificationList.get(x).getPrediction(this.threshold);
-		});
+		IntStream.range(0, classificationList.size()).forEach(x -> matrix[x] = classificationList.get(x).getPrediction(this.threshold));
 		return matrix;
 	}
 
 	protected int[][] listToMatrix(final List<? extends int[]> classificationList) {
 		int[][] matrix = new int[classificationList.size()][];
-		IntStream.range(0, classificationList.size()).forEach(x -> {
-			matrix[x] = classificationList.get(x);
-		});
+		IntStream.range(0, classificationList.size()).forEach(x -> matrix[x] = classificationList.get(x));
 		return matrix;
 	}
 

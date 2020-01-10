@@ -72,12 +72,12 @@ public class MultiLabelAttribute extends ACollectionOfObjectsAttribute<String> i
 
 	@Override
 	public String serializeAttributeValue(final Object value) {
-		throw new UnsupportedOperationException("Not yet implemented.");// TODO
+		throw new UnsupportedOperationException("Not yet implemented.");
 	}
 
 	@Override
 	public Object deserializeAttributeValue(final String string) {
-		throw new UnsupportedOperationException("Not yet implemented.");// TODO
+		throw new UnsupportedOperationException("Not yet implemented.");
 	}
 
 	@Override
@@ -85,4 +85,33 @@ public class MultiLabelAttribute extends ACollectionOfObjectsAttribute<String> i
 		return this.domain;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((this.domain == null) ? 0 : this.domain.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		MultiLabelAttribute other = (MultiLabelAttribute) obj;
+		if (this.domain == null) {
+			if (other.domain != null) {
+				return false;
+			}
+		} else if (!this.domain.equals(other.domain)) {
+			return false;
+		}
+		return true;
+	}
 }

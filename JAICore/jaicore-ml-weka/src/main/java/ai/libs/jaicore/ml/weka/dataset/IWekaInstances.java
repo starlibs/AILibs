@@ -9,7 +9,7 @@ public interface IWekaInstances extends ILabeledDataset<IWekaInstance> {
 
 	public Instances getList();
 
-	default public Instances getInstances() {
+	public default Instances getInstances() {
 		return this.getList();
 	}
 

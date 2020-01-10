@@ -44,7 +44,7 @@ public class ChoquisticRelevanceLoss extends AMultiLabelClassificationMeasure {
 		listOfCis.add(0.0);
 		Collections.sort(listOfCis);
 		for (int i = 1; i < listOfCis.size(); i++) {
-			sum += (listOfCis.get(i) - listOfCis.get(i - 1)) * this.measure.mu(IntStream.range(i, listOfCis.size()).mapToObj(x -> listOfCis.get(x)).collect(Collectors.toList()), expected.length);
+			sum += (listOfCis.get(i) - listOfCis.get(i - 1)) * this.measure.mu(IntStream.range(i, listOfCis.size()).mapToObj(listOfCis::get).collect(Collectors.toList()), expected.length);
 		}
 		return sum;
 	}

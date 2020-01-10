@@ -9,7 +9,7 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.exception.NoneFi
 
 /**
  * @author Helen Beierling
- *         c.f. p. 1511 p. 1510 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
+ *         c.f. p. 1511 p. 1510 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schï¿½fer
  *         This class combines the MCB of finding the bins for a given set of DFT coefficients and SFA
  *         which selects the right letter for a DFT coefficient.
  */
@@ -144,9 +144,7 @@ public class SFA implements IFilter {
 				// If the number of instances is equal to the number of bins the breakpoints are set to this values
 				Arrays.sort(toBin);
 				if (toBin.length == this.alphabet.length - 1) {
-					for (int alphabetLetter = 0; alphabetLetter < this.alphabet.length - 1; alphabetLetter++) {
-						lookUpTable[coeficient][alphabetLetter] = toBin[alphabetLetter];
-					}
+					lookUpTable[coeficient] = Arrays.copyOf(toBin, this.alphabet.length - 1);
 				}
 				// If the number of instances is greater than the number of bins then the breakpoints are set
 				// in the way that all coefficients are spread equally over the bins
@@ -270,9 +268,7 @@ public class SFA implements IFilter {
 			// If the number of instances is equal to the number of bins the breakpoints are set to this values
 			Arrays.sort(toBin);
 			if (toBin.length == this.alphabet.length - 1) {
-				for (int alphabetLetter = 0; alphabetLetter < this.alphabet.length - 1; alphabetLetter++) {
-					this.lookUpTableMatrix[coeficient][alphabetLetter] = toBin[alphabetLetter];
-				}
+				this.lookUpTableMatrix[coeficient] = Arrays.copyOf(toBin, this.alphabet.length - 1);
 			}
 			// If the number of instances is greater than the number of bins then the breakpoints are set
 			// in the way that all coefficients are spread equally over the bins

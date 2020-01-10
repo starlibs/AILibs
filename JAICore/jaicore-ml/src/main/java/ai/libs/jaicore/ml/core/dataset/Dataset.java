@@ -25,7 +25,7 @@ public class Dataset extends ArrayList<ILabeledInstance> implements ILabeledData
 	private static final long serialVersionUID = -3643080541896274181L;
 
 	private final List<ReconstructionInstruction> instructions = new ArrayList<>();
-	private final ILabeledInstanceSchema schema;
+	private final transient ILabeledInstanceSchema schema;
 
 	public Dataset(final ILabeledInstanceSchema schema) {
 		this.schema = schema;
@@ -99,7 +99,7 @@ public class Dataset extends ArrayList<ILabeledInstance> implements ILabeledData
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		this.stream().map(x -> x.toString()).forEach(x -> sb.append(x + "\n"));
+		this.stream().map(ILabeledInstance::toString).forEach(x -> sb.append(x + "\n"));
 		return sb.toString();
 	}
 

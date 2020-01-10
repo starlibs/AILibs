@@ -243,7 +243,7 @@ public class DatasetUtil {
 		return getExpansionOfDataset(dataset, getPairOfNewAttributesAndExpansionMap(dataset, expansions));
 	}
 
-	public static ILabeledDataset<?> getExpansionOfDataset(final ILabeledDataset<?> dataset, final Pair<List<IAttribute>, Map<IAttribute, Function<ILabeledInstance, Double>>> expansionDescription) throws InterruptedException, DatasetCreationException {
+	public static ILabeledDataset<?> getExpansionOfDataset(final ILabeledDataset<?> dataset, final Pair<List<IAttribute>, Map<IAttribute, Function<ILabeledInstance, Double>>> expansionDescription) {
 
 		/* compute values for new attributes */
 		List<IAttribute> newAttributeList = new ArrayList<>(dataset.getInstanceSchema().getAttributeList());

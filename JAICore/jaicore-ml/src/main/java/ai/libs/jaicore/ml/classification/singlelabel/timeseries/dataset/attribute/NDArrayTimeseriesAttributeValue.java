@@ -7,11 +7,12 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 public class NDArrayTimeseriesAttributeValue implements ITimeseriesAttributeValue<INDArray> {
 
-	private ITimeseriesAttribute attribute;
+	private ITimeseriesAttribute<?> attribute;
 	private ITimeseries<INDArray> value;
 
-	public NDArrayTimeseriesAttributeValue(final ITimeseriesAttribute attribute, final ITimeseries<INDArray> value) {
+	public NDArrayTimeseriesAttributeValue(final ITimeseriesAttribute<?> attribute, final ITimeseries<INDArray> value) {
 		this.value = value;
+		this.attribute = attribute;
 	}
 
 	@Override
@@ -20,7 +21,7 @@ public class NDArrayTimeseriesAttributeValue implements ITimeseriesAttributeValu
 	}
 
 	@Override
-	public ITimeseriesAttribute getAttribute() {
+	public ITimeseriesAttribute<?> getAttribute() {
 		return this.attribute;
 	}
 

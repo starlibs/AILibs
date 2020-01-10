@@ -47,7 +47,7 @@ public class SparseInstance extends AInstance {
 
 	@Override
 	public Object[] getAttributes() {
-		return IntStream.range(0, this.numAttributes).mapToObj(x -> this.getAttributeValue(x)).toArray();
+		return IntStream.range(0, this.numAttributes).mapToObj(this::getAttributeValue).toArray();
 	}
 
 	@Override
@@ -66,9 +66,7 @@ public class SparseInstance extends AInstance {
 
 	@Override
 	public void setAttributeValue(final int pos, final Object value) {
-		if (this.nullElement == ENullElement.ZERO && value.equals(0)) {
-			return;
-		} else if (this.nullElement == ENullElement.UNKNOWN && value.equals("?")) {
+		if ((this.nullElement == ENullElement.ZERO && value.equals(0)) || (this.nullElement == ENullElement.UNKNOWN && value.equals("?"))) {
 			return;
 		}
 		this.attributeMap.put(pos, value);
@@ -115,10 +113,7 @@ public class SparseInstance extends AInstance {
 		if (this.nullElement != other.nullElement) {
 			return false;
 		}
-		if (this.numAttributes != other.numAttributes) {
-			return false;
-		}
-		return true;
+		return (this.numAttributes == other.numAttributes);
 	}
 
 	@Override

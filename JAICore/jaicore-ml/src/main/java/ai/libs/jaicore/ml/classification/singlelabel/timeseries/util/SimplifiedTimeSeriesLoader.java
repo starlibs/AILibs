@@ -337,8 +337,7 @@ public class SimplifiedTimeSeriesLoader {
 	 *             Throws exception when the given file could not be read
 	 */
 	public static int countFileLines(final File file) throws IOException {
-		InputStream is = new BufferedInputStream(new FileInputStream(file));
-		try {
+		try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
 			byte[] c = new byte[1024];
 
 			int readChars = is.read(c);
@@ -369,8 +368,6 @@ public class SimplifiedTimeSeriesLoader {
 			}
 
 			return count == 0 ? 1 : count;
-		} finally {
-			is.close();
 		}
 	}
 }

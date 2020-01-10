@@ -50,7 +50,7 @@ public class TimeSeriesInstance implements ITimeSeriesInstance {
 
 	@Override
 	public double[] getPoint() {
-		double[] point = new double[this.attributeValues.stream().mapToInt(x -> x.length()).sum()];
+		double[] point = new double[this.attributeValues.stream().mapToInt(INDArrayTimeseries::length).sum()];
 
 		int i = 0;
 		for (INDArrayTimeseries series : this.attributeValues) {

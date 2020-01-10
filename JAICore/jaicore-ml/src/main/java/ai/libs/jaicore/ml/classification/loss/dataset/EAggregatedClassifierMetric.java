@@ -36,7 +36,7 @@ public enum EAggregatedClassifierMetric implements IAggregatedPredictionPerforma
 
 	@Override
 	public double loss(final List<IPredictionAndGroundTruthTable<? extends Object, ? extends Object>> pairTables) {
-		return this.aggregation.aggregate(pairTables.stream().map(t -> this.lossFunction.loss(t)).collect(Collectors.toList()));
+		return this.aggregation.aggregate(pairTables.stream().map(this.lossFunction::loss).collect(Collectors.toList()));
 	}
 
 	@Override

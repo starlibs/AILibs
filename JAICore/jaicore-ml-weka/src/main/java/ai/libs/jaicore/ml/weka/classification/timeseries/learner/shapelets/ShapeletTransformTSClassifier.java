@@ -8,6 +8,7 @@ import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.ASimplifiedTSClassifier;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.FStat;
@@ -158,7 +159,7 @@ public class ShapeletTransformTSClassifier extends ASimplifiedTSClassifier<Integ
 		super();
 		this.config = ConfigCache.getOrCreate(IShapeletTransformLearningAlgorithmConfig.class);
 		this.config.setProperty(IShapeletTransformLearningAlgorithmConfig.K_NUMSHAPELETS, "" + k);
-		this.config.setProperty(IShapeletTransformLearningAlgorithmConfig.K_SEED, "" + seed);
+		this.config.setProperty(IOwnerBasedRandomizedAlgorithmConfig.K_SEED, "" + seed);
 		this.config.setProperty(IShapeletTransformLearningAlgorithmConfig.K_CLUSTERSHAPELETS, "" + clusterShapelets);
 		this.config.setProperty(IShapeletTransformLearningAlgorithmConfig.K_SHAPELETLENGTH_MIN, "" + minShapeletLength);
 		this.config.setProperty(IShapeletTransformLearningAlgorithmConfig.K_SHAPELETLENGTH_MAX, "" + maxShapeletLength);

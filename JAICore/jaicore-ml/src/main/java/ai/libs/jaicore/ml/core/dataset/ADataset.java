@@ -15,7 +15,7 @@ public abstract class ADataset<I extends ILabeledInstance> extends ArrayList<I> 
 	 */
 	private static final long serialVersionUID = 1158266286156653852L;
 
-	private ILabeledInstanceSchema schema;
+	private transient ILabeledInstanceSchema schema;
 
 	protected ADataset(final ILabeledInstanceSchema schema) {
 		super();
@@ -58,7 +58,36 @@ public abstract class ADataset<I extends ILabeledInstance> extends ArrayList<I> 
 
 	@Override
 	public Object[] getLabelVector() {
-		return this.stream().map(x -> x.getLabel()).toArray();
+		return this.stream().map(ILabeledInstance::getLabel).toArray();
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((this.schema == null) ? 0 : this.schema.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		ADataset other = (ADataset) obj;
+		if (this.schema == null) {
+			if (other.schema != null) {
+				return false;
+			}
+		} else if (!this.schema.equals(other.schema)) {
+			return false;
+		}
+		return true;
+	}
 }

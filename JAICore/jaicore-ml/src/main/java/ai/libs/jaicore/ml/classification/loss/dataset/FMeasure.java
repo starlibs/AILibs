@@ -20,11 +20,11 @@ public class FMeasure extends AHomogeneousPredictionPerformanceMeasure<Object> {
 			throw new IllegalArgumentException("Expected and actual must be of the same length.");
 		}
 
-		double precision = this.precision.score(expected, actual);
-		double recall = this.recall.score(expected, actual);
-		double denominator = ((Math.pow(this.beta, 2) * precision) + recall);
+		double vPrecision = this.precision.score(expected, actual);
+		double vRecall = this.recall.score(expected, actual);
+		double denominator = ((Math.pow(this.beta, 2) * vPrecision) + vRecall);
 
-		return denominator == 0.0 ? 0 : (1 + Math.pow(this.beta, 2)) * (precision * recall) / denominator;
+		return denominator == 0.0 ? 0 : (1 + Math.pow(this.beta, 2)) * (vPrecision * vRecall) / denominator;
 	}
 
 }

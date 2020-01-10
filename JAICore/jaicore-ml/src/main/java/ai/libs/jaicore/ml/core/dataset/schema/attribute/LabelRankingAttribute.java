@@ -9,9 +9,6 @@ import org.api4.java.ai.ml.ranking.IRanking;
 
 public class LabelRankingAttribute extends ARankingAttribute<String> {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -7357189772771718391L;
 
 	private final Collection<String> labels;
@@ -68,17 +65,46 @@ public class LabelRankingAttribute extends ARankingAttribute<String> {
 
 	@Override
 	public double toDouble(final Object object) {
-		throw new UnsupportedOperationException("Not yet implemented in LabelRankingAttribute"); // TODO
+		throw new UnsupportedOperationException("Not yet implemented in LabelRankingAttribute");
 	}
 
 	@Override
 	public String serializeAttributeValue(final Object value) {
-		throw new UnsupportedOperationException("Not yet implemented.");// TODO
+		throw new UnsupportedOperationException("Not yet implemented.");
 	}
 
 	@Override
 	public Object deserializeAttributeValue(final String string) {
-		throw new UnsupportedOperationException("Not yet implemented.");// TODO
+		throw new UnsupportedOperationException("Not yet implemented.");
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((this.labels == null) ? 0 : this.labels.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		LabelRankingAttribute other = (LabelRankingAttribute) obj;
+		if (this.labels == null) {
+			if (other.labels != null) {
+				return false;
+			}
+		} else if (!this.labels.equals(other.labels)) {
+			return false;
+		}
+		return true;
+	}
 }

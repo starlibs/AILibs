@@ -1,7 +1,6 @@
 package ai.libs.jaicore.ml.weka;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -19,7 +18,6 @@ import java.util.List;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -213,25 +211,6 @@ public class WekaInstancesTester {
 			assertTrue(i.equals(i));
 		}
 		assertEquals(wrapped, wrapped);
-	}
-
-	@Test
-	@Ignore // maybe this is not a useful test, because instances are allowed to occur several times!
-	public void testThatEveryInstanceOccursOnlyOnce() throws Exception {
-		Instances data = new Instances(new FileReader(this.dataset));
-		data.setClassIndex(data.numAttributes() - 1);
-		WekaInstances wrapped = new WekaInstances(data);
-		int n = wrapped.size();
-
-		for (int i = 0; i < n; i++) {
-			IWekaInstance x = wrapped.get(i);
-			for (int j = 0; j < n; j++) {
-				if (i != j) {
-					IWekaInstance y = wrapped.get(j);
-					assertFalse("Instance " + i + " and " + j + " are identical:\n\t" + Arrays.toString(x.getPoint()) + " with label " + x.getLabel() + "\n\t" + Arrays.toString(y.getPoint()) + " with label " + y.getLabel(), x.equals(y));
-				}
-			}
-		}
 	}
 
 	@Test

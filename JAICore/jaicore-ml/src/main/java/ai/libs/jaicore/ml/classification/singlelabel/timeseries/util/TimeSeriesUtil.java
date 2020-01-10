@@ -359,20 +359,12 @@ public class TimeSeriesUtil {
 	 *         values
 	 */
 	public static List<Integer> sortIndexes(final double[] vector, final boolean ascending) {
-		List<Integer> result = new ArrayList<>();
-
 		Integer[] indexes = new Integer[vector.length];
 		for (int i = 0; i < indexes.length; i++) {
 			indexes[i] = i;
 		}
-
 		Arrays.sort(indexes, (i1, i2) -> (ascending ? 1 : -1) * Double.compare(Math.abs(vector[i1]), Math.abs(vector[i2])));
-
-		for (int i = 0; i < indexes.length; i++) {
-			result.add(indexes[i]);
-		}
-
-		return result;
+		return Arrays.asList(indexes);
 	}
 
 	/**
@@ -612,11 +604,8 @@ public class TimeSeriesUtil {
 			throw new IllegalArgumentException("There must be at least one value matrix to generate a TimeSeriesDataset object!");
 		}
 
-		ArrayList<double[][]> values = new ArrayList<>();
+		List<double[][]> values = Arrays.asList(valueMatrices);
 
-		for (final double[][] matrix : valueMatrices) {
-			values.add(matrix);
-		}
 		return targets == null ? new TimeSeriesDataset2(values) : new TimeSeriesDataset2(values, targets);
 	}
 

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.reduction.MCTreeNodeReD;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -29,13 +30,12 @@ public class MCTreeNodeReDTest {
 	private static final File DATASET = new File("testrsc/orig/vowel.arff");
 
 	public static void main(final String[] args) throws Exception {
-		System.out.println(CLASSIFIER_NAME);
 
 		Instances data = new Instances(new FileReader(DATASET));
 		data.setClassIndex(data.numAttributes() - 1);
 
 		for (int s = 0; s < 10; s++) {
-			List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(new WekaInstances(data), s, 0.7).stream().map(x -> x.getList()).collect(Collectors.toList());
+			List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(new WekaInstances(data), s, 0.7).stream().map(IWekaInstances::getList).collect(Collectors.toList());
 
 			List<String> classValues = new LinkedList<>();
 			for (int i = 0; i < data.numClasses(); i++) {
@@ -75,20 +75,18 @@ public class MCTreeNodeReDTest {
 				root.buildClassifier(stratifiedSplit.get(0));
 
 				Evaluation eval = new Evaluation(data);
-				eval.evaluateModel(root, stratifiedSplit.get(1), new Object[] {});
+				eval.evaluateModel(root, stratifiedSplit.get(1));
 
 				double decomposition = eval.pctCorrect();
 				pctCorrectDecomposition.add(decomposition);
 
 				Classifier c = AbstractClassifier.forName(CLASSIFIER_NAME, null);
 				c.buildClassifier(stratifiedSplit.get(0));
-				eval.evaluateModel(c, stratifiedSplit.get(1), new Object[] {});
+				eval.evaluateModel(c, stratifiedSplit.get(1));
 				pctCorrectClassifier.add(eval.pctCorrect());
 
 				double maxCorrectDec = pctCorrectDecomposition.stream().mapToDouble(x -> x).max().getAsDouble();
 				double maxCorrectCls = pctCorrectClassifier.stream().mapToDouble(x -> x).max().getAsDouble();
-
-				System.out.println((maxCorrectCls - maxCorrectDec) + " (Decomp: " + (100 - maxCorrectDec) + "/Classifier: " + (100 - maxCorrectCls) + ")");
 			}
 
 		}

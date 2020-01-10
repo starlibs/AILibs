@@ -23,6 +23,15 @@ public class ListView<T> implements List<T> {
 		this.list = list;
 	}
 
+	public ListView(final List<?> list, final Class<T> clazz) {
+		this(list);
+		for (Object l : list) {
+			if (!clazz.isInstance(l)) {
+				throw new IllegalArgumentException();
+			}
+		}
+	}
+
 	@Override
 	public boolean add(final T arg0) {
 		throw new UnsupportedOperationException(MSG_READ_ONLY);

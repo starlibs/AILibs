@@ -88,7 +88,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 	}
 
-	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IFileDatasetDescriptor datasetFile, final String nameOfClassAttribute) throws DatasetDeserializationFailedException, InterruptedException {
+	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IFileDatasetDescriptor datasetFile, final String nameOfClassAttribute) throws DatasetDeserializationFailedException {
 		Objects.requireNonNull(datasetFile, "No dataset has been configured.");
 		/* read the file until the class parameter is found and count the params */
 		int numAttributes = 0;
@@ -111,7 +111,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		return this.deserializeDataset(datasetFile, numAttributes);
 	}
 
-	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IFileDatasetDescriptor datasetDescriptor, final int columnWithClassIndex) throws DatasetDeserializationFailedException, InterruptedException {
+	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IFileDatasetDescriptor datasetDescriptor, final int columnWithClassIndex) throws DatasetDeserializationFailedException {
 		Objects.requireNonNull(datasetDescriptor, "No dataset has been configured.");
 		return readDataset(this.sparseMode, datasetDescriptor.getDatasetDescription(), columnWithClassIndex);
 	}
@@ -158,7 +158,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		String attributeDefinitionSplit = line.replaceAll("\\t", " ").substring(EArffItem.ATTRIBUTE.getValue().length() + 1).trim();
 		String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION));
 		if (name.trim().startsWith("'") && !name.trim().endsWith("'")) {
-			int cutIndex = attributeDefinitionSplit.substring(name.length()).indexOf('\'');
+			int cutIndex = attributeDefinitionSplit.indexOf('\'', name.length());
 			name += attributeDefinitionSplit.substring(name.length(), name.length() + cutIndex + 1);
 		}
 
@@ -255,11 +255,11 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		return new Dataset(schema);
 	}
 
-	public static ILabeledDataset<ILabeledInstance> readDataset(final File datasetFile) throws DatasetDeserializationFailedException, InterruptedException {
+	public static ILabeledDataset<ILabeledInstance> readDataset(final File datasetFile) throws DatasetDeserializationFailedException {
 		return readDataset(false, datasetFile);
 	}
 
-	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile) throws DatasetDeserializationFailedException, InterruptedException {
+	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile) throws DatasetDeserializationFailedException {
 		return readDataset(sparseMode, datasetFile, -1);
 	}
 
@@ -294,9 +294,10 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 									"Error while parsing arff-file on line " + lineCounter + ": There is more in this line than just the data declaration " + EArffItem.DATA.getValue() + ", which is not supported");
 						}
 						instanceReadMode = true;
-						try {
+						if (relationMetaData.containsKey(K_CLASS_INDEX) && relationMetaData.getAsInt(K_CLASS_INDEX) >= 0) {
 							dataset = createDataset(relationMetaData, attributes);
-						} catch (IllegalArgumentException e) {
+						}
+						else {
 							LOGGER.warn("Invalid class index in the dataset's meta data ({}): Assuming last column to be the target attribute!", relationMetaData.get(K_CLASS_INDEX));
 							relationMetaData.put(K_CLASS_INDEX, attributes.size() - 1);
 							dataset = createDataset(relationMetaData, attributes);
@@ -313,8 +314,8 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 							@SuppressWarnings("unchecked")
 							Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
 							Object label = (parsedSparseInstance).containsKey(relationMetaData.getAsInt(K_CLASS_INDEX)) ? parsedSparseInstance.remove(relationMetaData.getAsInt(K_CLASS_INDEX)) : 0; // in sparse instance, the class attribute
-																																																		// may be missing; it is then assumed to
-																																																		// be 0
+							// may be missing; it is then assumed to
+							// be 0
 							if (label == null) {
 								throw new IllegalArgumentException("Cannot identify label for instance " + line);
 							}

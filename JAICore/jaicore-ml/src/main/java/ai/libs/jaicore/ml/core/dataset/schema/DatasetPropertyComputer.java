@@ -26,6 +26,10 @@ import com.google.common.collect.Lists;
 
 public class DatasetPropertyComputer {
 
+	private DatasetPropertyComputer() {
+		/* avoids instantiation */
+	}
+
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetPropertyComputer.class);
 
 	public static Map<Integer, Set<Object>> computeAttributeValues(final IDataset<?> dataset) {

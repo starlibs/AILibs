@@ -4,11 +4,8 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttributeValue;
 
-public class NumericAttribute extends AAttribute implements INumericAttribute {
+public class NumericAttribute extends AAttribute implements INumericAttribute{
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 657993241775006166L;
 
 	public NumericAttribute(final String name) {
@@ -17,10 +14,7 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 
 	@Override
 	public boolean isValidValue(final Object value) {
-		if (value == null || value instanceof Number || value instanceof INumericAttributeValue) {
-			return true;
-		}
-		return false;
+		return (value == null || value instanceof Number || value instanceof INumericAttributeValue);
 	}
 
 	@Override

@@ -19,8 +19,8 @@ public abstract class AGenericObjectAttribute<O> extends AAttribute {
 	 */
 	private static final long serialVersionUID = 614829108498630281L;
 
-	private Map<O, Double> objectToDoubleMap = new HashMap<>();
-	private Map<Double, O> doubleToObjectMap = new HashMap<>();
+	private transient Map<O, Double> objectToDoubleMap = new HashMap<>();
+	private transient Map<Double, O> doubleToObjectMap = new HashMap<>();
 	private AtomicInteger objectCounter = new AtomicInteger(1);
 
 	protected AGenericObjectAttribute(final String name) {
@@ -55,4 +55,49 @@ public abstract class AGenericObjectAttribute<O> extends AAttribute {
 
 	protected abstract O getValueAsTypeInstance(Object object);
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((this.doubleToObjectMap == null) ? 0 : this.doubleToObjectMap.hashCode());
+		result = prime * result + ((this.objectCounter == null) ? 0 : this.objectCounter.hashCode());
+		result = prime * result + ((this.objectToDoubleMap == null) ? 0 : this.objectToDoubleMap.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		AGenericObjectAttribute other = (AGenericObjectAttribute) obj;
+		if (this.doubleToObjectMap == null) {
+			if (other.doubleToObjectMap != null) {
+				return false;
+			}
+		} else if (!this.doubleToObjectMap.equals(other.doubleToObjectMap)) {
+			return false;
+		}
+		if (this.objectCounter == null) {
+			if (other.objectCounter != null) {
+				return false;
+			}
+		} else if (this.objectCounter.get() != other.objectCounter.get()) {
+			return false;
+		}
+		if (this.objectToDoubleMap == null) {
+			if (other.objectToDoubleMap != null) {
+				return false;
+			}
+		} else if (!this.objectToDoubleMap.equals(other.objectToDoubleMap)) {
+			return false;
+		}
+		return true;
+	}
 }

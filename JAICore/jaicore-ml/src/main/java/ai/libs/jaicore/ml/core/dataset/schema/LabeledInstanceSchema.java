@@ -42,4 +42,33 @@ public class LabeledInstanceSchema extends InstanceSchema implements ILabeledIns
 		return sb.toString();
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((this.labelAttribute == null) ? 0 : this.labelAttribute.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		LabeledInstanceSchema other = (LabeledInstanceSchema) obj;
+		if (this.labelAttribute == null) {
+			if (other.labelAttribute != null) {
+				return false;
+			}
+		} else if (!this.labelAttribute.equals(other.labelAttribute)) {
+			return false;
+		}
+		return true;
+	}
 }

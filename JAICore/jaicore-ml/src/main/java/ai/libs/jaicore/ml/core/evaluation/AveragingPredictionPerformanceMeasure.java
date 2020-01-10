@@ -6,7 +6,7 @@ import ai.libs.jaicore.basic.aggregate.reals.Mean;
 
 public class AveragingPredictionPerformanceMeasure<E, A> extends AggregatingPredictionPerformanceMeasure<E, A> {
 
-	private final static Mean MEAN = new Mean();
+	private static final Mean MEAN = new Mean();
 
 	public AveragingPredictionPerformanceMeasure(final IDeterministicPredictionPerformanceMeasure<E, A> baseMeasure) {
 		super(MEAN, baseMeasure);

@@ -235,7 +235,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 		logger.debug("Initializing ensemble classifier...");
 		Classifier classifier = null;
 		try {
-			classifier = this.getConfig().useHIVECOTEEnsemble() ? EnsembleProvider.provideHIVECOTEEnsembleModel(seed, this.getConfig().numFolds()) : EnsembleProvider.provideCAWPEEnsembleModel((int) seed, this.getConfig().numFolds());
+			classifier = this.getConfig().useHIVECOTEEnsemble() ? EnsembleProvider.provideHIVECOTEEnsembleModel(seed) : EnsembleProvider.provideCAWPEEnsembleModel((int) seed, this.getConfig().numFolds());
 		} catch (Exception e1) {
 			throw new AlgorithmException("Could not train model due to ensemble exception.", e1);
 		}
@@ -285,7 +285,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 					nextIndex += numInstances;
 				}
 				for (int k = 0; k < data[0].length; k++) {
-					tmpMatrix[j][k] = data[nextIndex][k];
+					tmpMatrix[j] = Arrays.copyOf(data[nextIndex], tmpMatrix[j].length);
 				}
 				tmpClasses[j] = classes[nextIndex];
 			}

@@ -10,6 +10,8 @@ import org.nd4j.linalg.api.ndarray.INDArray;
  */
 public class NDArrayTimeseriesAttribute extends ATimeseriesAttribute<INDArray> {
 
+	private static final String MSG_NOTIMPLEMENTED = "Not yet implemented";
+
 	/**
 	 *
 	 */
@@ -62,17 +64,17 @@ public class NDArrayTimeseriesAttribute extends ATimeseriesAttribute<INDArray> {
 
 	@Override
 	public double toDouble(final Object object) {
-		throw new UnsupportedOperationException("Not yet implemented");
+		throw new UnsupportedOperationException(MSG_NOTIMPLEMENTED);
 	}
 
 	@Override
 	public String serializeAttributeValue(final Object value) {
-		throw new UnsupportedOperationException("Not yet implemented");
+		throw new UnsupportedOperationException(MSG_NOTIMPLEMENTED);
 	}
 
 	@Override
 	public Object deserializeAttributeValue(final String string) {
-		throw new UnsupportedOperationException("Not yet implemented");
+		throw new UnsupportedOperationException(MSG_NOTIMPLEMENTED);
 	}
 
 }

@@ -16,13 +16,14 @@ public class DatasetDeriver<D extends IDataset<?>> {
 		private final IDataset<I> dsOriginal;
 		private final int initialDatasetHashCode; // this is for consistency checks
 		private final List<Integer> indicesToCopy = new ArrayList<>();
-		private final Class<I> classOfInstances;
 
 		public GenericCapsula(final IDataset<I> dataset, final Class<I> clazz) {
 			super();
 			this.dsOriginal = dataset;
 			this.initialDatasetHashCode = dataset.hashCode();
-			this.classOfInstances = clazz;
+			if (!clazz.isInstance(dataset.get(0))) {
+				throw new IllegalArgumentException();
+			}
 		}
 
 		public IDataset<I> getCopyBasedOnDefinedLines() throws InterruptedException, DatasetCreationException {

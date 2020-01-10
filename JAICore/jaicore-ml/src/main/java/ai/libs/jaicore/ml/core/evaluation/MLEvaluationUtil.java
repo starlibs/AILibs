@@ -17,18 +17,22 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 
 public class MLEvaluationUtil {
 
-	public static double evaluate(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> data, final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluator) throws ObjectEvaluationFailedException, InterruptedException {
+	private MLEvaluationUtil() {
+		/* avoids instantiation */
+	}
+
+	public static double evaluate(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluator) throws ObjectEvaluationFailedException, InterruptedException {
 		return evaluator.evaluate(learner);
 	}
 
-	public static double getLossForTrainedClassifier(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> testData, final IDeterministicPredictionPerformanceMeasure<Object, Object> measure) throws ObjectEvaluationFailedException, InterruptedException, LearnerExecutionFailedException {
+	public static double getLossForTrainedClassifier(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> testData, final IDeterministicPredictionPerformanceMeasure<Object, Object> measure) throws LearnerExecutionFailedException {
 		SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 		ILearnerRunReport report = executor.execute(learner, testData);
 		return measure.loss(report.getPredictionDiffList());
 	}
 
 	public static double mccv(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainFoldSize, final long seed, final EAggregatedClassifierMetric metric) throws ObjectEvaluationFailedException, InterruptedException {
-		return evaluate(learner, data, new MonteCarloCrossValidationEvaluator(data, repeats, trainFoldSize, new Random(seed), metric));
+		return evaluate(learner, new MonteCarloCrossValidationEvaluator(data, repeats, trainFoldSize, new Random(seed), metric));
 	}
 
 	public static double mccv(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainFoldSize, final long seed) throws ObjectEvaluationFailedException, InterruptedException {

@@ -33,18 +33,13 @@ public abstract class AMultiLabelClassificationMeasure extends APredictionPerfor
 
 	protected double[][] listToRelevanceMatrix(final List<IMultiLabelClassification> classificationList) {
 		double[][] matrix = new double[classificationList.size()][];
-		IntStream.range(0, classificationList.size()).forEach(x -> {
-			matrix[x] = classificationList.get(x).getPrediction();
-		});
-
+		IntStream.range(0, classificationList.size()).forEach(x -> matrix[x] = classificationList.get(x).getPrediction());
 		return matrix;
 	}
 
 	protected int[][] listToThresholdedRelevanceMatrix(final List<IMultiLabelClassification> classificationList) {
 		int[][] matrix = new int[classificationList.size()][];
-		IntStream.range(0, classificationList.size()).forEach(x -> {
-			matrix[x] = classificationList.get(x).getPrediction(this.threshold);
-		});
+		IntStream.range(0, classificationList.size()).forEach(x -> matrix[x] = classificationList.get(x).getPrediction(this.threshold));
 		return matrix;
 	}
 

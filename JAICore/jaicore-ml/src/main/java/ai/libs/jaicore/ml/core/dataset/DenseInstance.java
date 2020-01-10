@@ -40,7 +40,6 @@ public class DenseInstance extends AInstance {
 			Object val = this.attributes.get(i);
 			if (val == null) {
 				val = 0;
-				//				throw new UnsupportedOperationException("The given instance cannot be cast to a point, because it has a missing value: " + this.attributes);
 			}
 			if (val instanceof Boolean) {
 				val = (boolean)val ? 1.0 : 0.0;
