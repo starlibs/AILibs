@@ -15,6 +15,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.api4.java.ai.ml.core.exception.PredictionException;
@@ -51,10 +52,7 @@ public class LCNetClient {
 
 		JSONObject jsonData = new JSONObject();
 		for (int i = 0; i < xValues.length; i++) {
-			double[] tmpArray = new double[configurations[i].length + 2];
-			for (int j = 0; j < configurations[i].length; j++) {
-				tmpArray[j] = configurations[i][j];
-			}
+			double[] tmpArray = Arrays.copyOf(configurations[i], configurations[i].length + 2);
 			tmpArray[configurations[i].length] = (double) xValues[i] / dataSetSize;
 			tmpArray[configurations[i].length + 1] = yValues[i];
 			JSONArray allValues = new JSONArray(tmpArray);
@@ -78,10 +76,7 @@ public class LCNetClient {
 			httpCon = this.establishHttpCon("predict", identifier);
 
 			JSONObject jsonData = new JSONObject();
-			double[] tmpArray = new double[configurations.length + 1];
-			for (int i = 0; i < configurations.length; i++) {
-				tmpArray[i] = configurations[i];
-			}
+			double[] tmpArray = Arrays.copyOf(configurations, configurations.length + 1);
 			tmpArray[configurations.length] = xValue;
 			JSONArray allValues = new JSONArray(tmpArray);
 			jsonData.put("0", allValues);

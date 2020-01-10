@@ -66,7 +66,7 @@ import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
  * @author scheiblm
  */
 public class ScikitLearnWrapper extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch>
-		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
+implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 	private static final String PYTHON_FILE_EXT = ".py";
 	private static final String MODEL_DUMP_FILE_EXT = ".pcl";
 	private static final String RESULT_FILE_EXT = ".json";
@@ -106,7 +106,7 @@ public class ScikitLearnWrapper extends ASupervisedLearner<ILabeledInstance, ILa
 	 * Lists will keep the unflattened results until classifyInstances is called again. classifyInstances will only return a flattened representation of a multi-target prediction.
 	 * The outer list represents the rows whilst the inner list represents the x target values in this row.
 	 */
-	private transient List<List<Double>> rawLastClassificationResults = null;
+	private List<List<Double>> rawLastClassificationResults = null;
 
 	/**
 	 * Starts a new wrapper and creates its underlying script with the given parameters.
@@ -194,12 +194,15 @@ public class ScikitLearnWrapper extends ASupervisedLearner<ILabeledInstance, ILa
 				this.runProcess(trainCommand, listener);
 
 				if (!listener.getErrorOutput().isEmpty()) {
-					System.err.println("Raise error message");
-					throw new Exception(listener.getErrorOutput().split("\\n")[0]);
+					L.error("Raise error message");
+					throw new TrainingException(listener.getErrorOutput().split("\\n")[0]);
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		}
+		catch (TrainingException e) {
+			throw e;
+		}
+		catch (Exception e) {
 			throw new TrainingException("An exception occurred while training.", e);
 		}
 	}
@@ -275,9 +278,9 @@ public class ScikitLearnWrapper extends ASupervisedLearner<ILabeledInstance, ILa
 				this.runProcess(testCommand, listener);
 				if (!listener.getErrorOutput().isEmpty()) {
 					String[] message = listener.getErrorOutput().split("\\n");
-					throw new Exception(message[message.length - 1].trim());
+					throw new PredictionException(message[message.length - 1].trim());
 				}
-			} catch (InterruptedException e) {
+			} catch (InterruptedException | PredictionException e) {
 				throw e;
 			} catch (Exception e) {
 				throw new PredictionException("Could not run scikit-learn classifier.", e);
@@ -414,7 +417,7 @@ public class ScikitLearnWrapper extends ASupervisedLearner<ILabeledInstance, ILa
 		listener.listenTo(processBuilder.start());
 	}
 
-	public double[] distributionForInstance(final ILabeledInstance instance) throws Exception {
+	public double[] distributionForInstance(final ILabeledInstance instance) {
 		throw new UnsupportedOperationException("This method is not yet implemented");
 	}
 

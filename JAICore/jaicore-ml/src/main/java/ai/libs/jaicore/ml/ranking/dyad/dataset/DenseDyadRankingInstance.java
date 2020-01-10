@@ -72,11 +72,7 @@ public class DenseDyadRankingInstance extends ADyadRankingInstance {
 			}
 		}
 
-		if (!drInstance.getLabel().equals(this.getLabel())) {
-			return false;
-		}
-
-		return true;
+		return drInstance.getLabel().equals(this.getLabel());
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
+import ai.libs.jaicore.planning.core.Action;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;
 
 public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements IObjectEvaluator<IPlan, V>, ILoggingCustomizable {
@@ -35,7 +36,7 @@ public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements
 	public V evaluate(final IPlan plan) throws InterruptedException, ObjectEvaluationFailedException {
 		ComponentInstance solution = this.reduction.decodeSolution(plan);
 		if (solution == null) {
-			throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(a -> a.getEncoding()).collect(Collectors.joining("\n\t")));
+			throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(Action::getEncoding).collect(Collectors.joining("\n\t")));
 		}
 		if (this.evaluator instanceof IInformedObjectEvaluatorExtension && this.reduction.getBestSolutionSupplier().get() != null) {
 			((IInformedObjectEvaluatorExtension<V>) this.evaluator).informAboutBestScore(this.reduction.getBestSolutionSupplier().get().getScore());
@@ -60,7 +61,7 @@ public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
 		if (this.evaluator instanceof ILoggingCustomizable) {
-			this.logger.info("Setting logger of evaluator {} to {}", this.evaluator.getClass().getName(), name + ".be");
+			this.logger.info("Setting logger of evaluator {} to {}.be", this.evaluator.getClass().getName(), name);
 			((ILoggingCustomizable) this.evaluator).setLoggerName(name + ".be");
 		}
 		else {

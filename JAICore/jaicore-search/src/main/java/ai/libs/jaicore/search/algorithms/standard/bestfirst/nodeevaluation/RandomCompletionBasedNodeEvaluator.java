@@ -59,7 +59,7 @@ import ai.libs.jaicore.timing.TimedComputation;
 public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, A, V>
 implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V>, ICancelablePathEvaluator, IPotentiallyUncertaintyAnnotatingPathEvaluator<T, A, V>, ILoggingCustomizable {
 
-	private final IAlgorithm<?, ?> ALGORITHM = null;
+	private static final IAlgorithm<?, ?> ALGORITHM = null;
 	private static final boolean LOG_FAILURES_AS_ERRORS = false;
 
 	private String loggerName;
@@ -373,7 +373,9 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 			this.logger.debug("Starting search for next solution ...");
 			SearchGraphPath<T, A> solutionPathFromN = null;
 			try {
-				assert this.completer.getExploredGraph().hasItem(n.getHead());
+				if (!this.completer.getExploredGraph().hasItem(n.getHead())) {
+					throw new IllegalStateException("The completer does not know hte head.");
+				}
 				solutionPathFromN = this.completer.nextSolutionUnderSubPath(n);
 			} catch (AlgorithmExecutionCanceledException | TimeoutException e) {
 				this.logger.info("Completer has been canceled or timeouted. Returning control.");
@@ -560,7 +562,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 			this.completer.setLoggerName(name + ".randomsearch");
 		}
 		if (this.solutionEvaluator instanceof ILoggingCustomizable) {
-			this.logger.info("Setting logger of evaluator {} to {}", this.solutionEvaluator.getClass().getName(), name + ".evaluator");
+			this.logger.info("Setting logger of evaluator {} to {}.evaluator", this.solutionEvaluator.getClass().getName(), name);
 			((ILoggingCustomizable) this.solutionEvaluator).setLoggerName(name + ".evaluator");
 		}
 		else {

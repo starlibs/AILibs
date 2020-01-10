@@ -13,46 +13,43 @@ import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.hasco.model.UnparametrizedComponentInstance;
 
 public class HASCOModelStatisticsObserver {
-	
+
 	private final Map<UnparametrizedComponentInstance, List<HASCOSolutionEvent<Double>>> observedSolutionsGroupedByModuloParameters = new HashMap<>();
-	
+
 	@Subscribe
-	public void receiveSolutionEvent(HASCOSolutionEvent<Double> event) {
+	public void receiveSolutionEvent(final HASCOSolutionEvent<Double> event) {
 		UnparametrizedComponentInstance comp = new UnparametrizedComponentInstance(event.getSolutionCandidate().getComponentInstance());
-		if (!observedSolutionsGroupedByModuloParameters.containsKey(comp))
-			observedSolutionsGroupedByModuloParameters.put(comp, new ArrayList<>());
-		observedSolutionsGroupedByModuloParameters.get(comp).add(event);
+		if (!this.observedSolutionsGroupedByModuloParameters.containsKey(comp)) {
+			this.observedSolutionsGroupedByModuloParameters.put(comp, new ArrayList<>());
+		}
+		this.observedSolutionsGroupedByModuloParameters.get(comp).add(event);
 	}
 
 	public Map<UnparametrizedComponentInstance, List<HASCOSolutionEvent<Double>>> getObservedSolutionsGroupedByModuloParameters() {
-		return observedSolutionsGroupedByModuloParameters;
+		return this.observedSolutionsGroupedByModuloParameters;
 	}
-	
-	public DescriptiveStatistics getPerformanceStatisticsForComposition(UnparametrizedComponentInstance composition) {
+
+	public DescriptiveStatistics getPerformanceStatisticsForComposition(final UnparametrizedComponentInstance composition) {
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		observedSolutionsGroupedByModuloParameters.get(composition).forEach(e -> stats.addValue(e.getSolutionCandidate().getScore()));
+		this.observedSolutionsGroupedByModuloParameters.get(composition).forEach(e -> stats.addValue(e.getSolutionCandidate().getScore()));
 		return stats;
 	}
-	
+
 	public Map<UnparametrizedComponentInstance, DescriptiveStatistics> getPerformanceStatisticsPerComposition() {
 		Map<UnparametrizedComponentInstance, DescriptiveStatistics> statsMap = new HashMap<>();
-		for (UnparametrizedComponentInstance composition : observedSolutionsGroupedByModuloParameters.keySet()) {
-			statsMap.put(composition, getPerformanceStatisticsForComposition(composition));
+		for (UnparametrizedComponentInstance composition : this.observedSolutionsGroupedByModuloParameters.keySet()) {
+			statsMap.put(composition, this.getPerformanceStatisticsForComposition(composition));
 		}
 		return statsMap;
 	}
-	
-	public DescriptiveStatistics getEvaluationTimeStatisticsForComposition(UnparametrizedComponentInstance composition) {
+
+	public DescriptiveStatistics getEvaluationTimeStatisticsForComposition(final UnparametrizedComponentInstance composition) {
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		observedSolutionsGroupedByModuloParameters.get(composition).forEach(e -> stats.addValue(e.getSolutionCandidate().getTimeToEvaluateCandidate()));
+		this.observedSolutionsGroupedByModuloParameters.get(composition).forEach(e -> stats.addValue(e.getSolutionCandidate().getTimeToEvaluateCandidate()));
 		return stats;
 	}
-	
+
 	public Map<UnparametrizedComponentInstance, DescriptiveStatistics> getEvaluationTimeStatisticsPerComposition() {
-		Map<UnparametrizedComponentInstance, DescriptiveStatistics> statsMap = new HashMap<>();
-		for (UnparametrizedComponentInstance composition : observedSolutionsGroupedByModuloParameters.keySet()) {
-			statsMap.put(composition, getPerformanceStatisticsForComposition(composition));
-		}
-		return statsMap;
+		return this.getPerformanceStatisticsPerComposition();
 	}
 }

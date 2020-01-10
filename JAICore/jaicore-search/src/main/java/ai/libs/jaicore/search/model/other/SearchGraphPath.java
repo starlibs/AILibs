@@ -99,8 +99,7 @@ public class SearchGraphPath<N, A> implements ILabeledPath<N, A> {
 			return false;
 		}
 		SearchGraphPath other = (SearchGraphPath) obj;
-		boolean equals = new EqualsBuilder().append(this.nodes, other.nodes).append(this.edges, other.edges).isEquals();
-		return equals;
+		return new EqualsBuilder().append(this.nodes, other.nodes).append(this.edges, other.edges).isEquals();
 	}
 
 	@Override

@@ -26,7 +26,7 @@ public class LocalCaseControlSampling extends PilotEstimateSampling<ILabeledData
 		double loss;
 		for (ILabeledInstance instance : instances) {
 			try {
-				loss = 1 - pilotEstimator.predict(instance).getProbabilityOfLabel(instance.getLabel());// .distributionForInstance(wekaInstance)[(int) wekaInstance.classValue()];
+				loss = 1 - pilotEstimator.predict(instance).getProbabilityOfLabel(instance.getLabel());
 			} catch (Exception e) {
 				loss = 1;
 			}

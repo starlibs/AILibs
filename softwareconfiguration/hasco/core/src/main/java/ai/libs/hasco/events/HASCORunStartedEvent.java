@@ -6,7 +6,9 @@ import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 
 public class HASCORunStartedEvent<T, V extends Comparable<V>> extends AlgorithmInitializedEvent {
-	private final int seed, timeout, numberOfCPUS;
+	private final int seed;
+	private final int timeout;
+	private final int numberOfCPUS;
 	private IObjectEvaluator<T, V> benchmark;
 
 	public HASCORunStartedEvent(final IAlgorithm<?, ?> algorithm, final int seed, final int timeout, final int numberOfCPUS, final IObjectEvaluator<T, V> benchmark) {

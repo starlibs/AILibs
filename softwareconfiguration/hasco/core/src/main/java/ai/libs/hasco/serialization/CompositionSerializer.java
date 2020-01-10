@@ -6,6 +6,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import ai.libs.hasco.model.ComponentInstance;
 
 public class CompositionSerializer {
+
+	private CompositionSerializer() {
+		/* avoids instantiation */
+	}
+
 	public static ObjectNode serializeComponentInstance(final ComponentInstance instance) {
 		ObjectMapper om = new ObjectMapper();
 		ObjectNode on = om.createObjectNode();

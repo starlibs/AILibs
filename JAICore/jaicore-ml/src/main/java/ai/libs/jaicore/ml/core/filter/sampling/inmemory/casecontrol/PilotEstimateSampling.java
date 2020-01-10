@@ -63,7 +63,7 @@ public abstract class PilotEstimateSampling<D extends ILabeledDataset<? extends 
 		}
 	}
 
-	abstract public List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(D instances, IClassifier pilotEstimator);
+	public abstract List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(D instances, IClassifier pilotEstimator);
 
 	public IClassifier getPilotEstimator() {
 		return this.pilotEstimator;

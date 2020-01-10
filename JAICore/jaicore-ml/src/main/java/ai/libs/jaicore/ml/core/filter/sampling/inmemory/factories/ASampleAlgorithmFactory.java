@@ -20,7 +20,7 @@ public abstract class ASampleAlgorithmFactory<D extends IDataset<?>, A extends A
 	private long seed;
 	private Random random;
 
-	public static <D extends IDataset<?>, A extends ASamplingAlgorithm<D>, T extends ASampleAlgorithmFactory<D, A>> T create(final Class<T> factoryClazz, final int sampleSize, final long seed) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+	public static <D extends IDataset<?>, A extends ASamplingAlgorithm<D>, T extends ASampleAlgorithmFactory<D, A>> T create(final Class<T> factoryClazz, final int sampleSize, final long seed) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		T factory = factoryClazz.getConstructor().newInstance();
 		factory.setRandom(new Random(seed));
 		factory.setSampleSize(sampleSize);

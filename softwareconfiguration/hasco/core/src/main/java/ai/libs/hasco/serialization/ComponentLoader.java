@@ -39,6 +39,11 @@ public class ComponentLoader {
 
 	private static final Logger L = LoggerFactory.getLogger(ComponentLoader.class);
 
+	private static final String STR_VALUES = "values";
+	private static final String STR_DEFAULT = "default";
+	private static final String MSG_CANNOT_PARSE_LITERAL = "Cannot parse literal ";
+	private static final String MSG_DOMAIN_NOT_SUPPORTED = "Currently no support for parameters with domain \"";
+
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
 	private final Collection<Component> components = new ArrayList<>();
 	private final Set<String> parsedFiles = new HashSet<>();
@@ -114,10 +119,10 @@ public class ComponentLoader {
 
 	private void readFromJson(final JsonNode rootNode) throws IOException {
 		// get the array of components
-		JsonNode components = rootNode.path("components");
-		if (components != null) {
+		JsonNode describedComponents = rootNode.path("components");
+		if (describedComponents != null) {
 			Component c;
-			for (JsonNode component : components) {
+			for (JsonNode component : describedComponents) {
 				c = new Component(component.get("name").asText());
 				this.componentMap.put(c.getName(), component);
 
@@ -148,13 +153,13 @@ public class ComponentLoader {
 					// name of the parameter
 					String name = parameter.get("name").asText();
 					// possible string params
-					String[] stringParams = new String[] { "type", "values", "default" };
+					String[] stringParams = new String[] { "type", STR_VALUES, STR_DEFAULT };
 					String[] stringParamValues = new String[stringParams.length];
 					// possible boolean params
-					String[] boolParams = new String[] { "default", "includeExtremals" };
+					String[] boolParams = new String[] { STR_DEFAULT, "includeExtremals" };
 					boolean[] boolParamValues = new boolean[boolParams.length];
 					// possible double params
-					String[] doubleParams = new String[] { "default", "min", "max", "refineSplits", "minInterval" };
+					String[] doubleParams = new String[] { STR_DEFAULT, "min", "max", "refineSplits", "minInterval" };
 					double[] doubleParamValues = new double[doubleParams.length];
 
 					if (this.parameterMap.containsKey(name)) {
@@ -224,17 +229,17 @@ public class ComponentLoader {
 						p = new Parameter(name, new BooleanParameterDomain(), boolParamValues[0]);
 						break;
 					case "cat":
-						if (parameter.get("values") != null && parameter.get("values").isTextual()) {
+						if (parameter.get(STR_VALUES) != null && parameter.get(STR_VALUES).isTextual()) {
 							p = new Parameter(name, new CategoricalParameterDomain(Arrays.stream(stringParamValues[1].split(",")).collect(Collectors.toList())), stringParamValues[2]);
 						} else {
 							List<String> values = new LinkedList<>();
 
-							if (parameter.get("values") != null) {
-								for (JsonNode value : parameter.get("values")) {
+							if (parameter.get(STR_VALUES) != null) {
+								for (JsonNode value : parameter.get(STR_VALUES)) {
 									values.add(value.asText());
 								}
 							} else if (this.parameterMap.containsKey(name)) {
-								for (JsonNode value : this.parameterMap.get(name).get("values")) {
+								for (JsonNode value : this.parameterMap.get(name).get(STR_VALUES)) {
 									values.add(value.asText());
 								}
 							} else {
@@ -265,44 +270,43 @@ public class ComponentLoader {
 						for (String literal : literals) {
 							String[] parts = literal.trim().split(" ");
 							if (parts.length != 3) {
-								throw new IllegalArgumentException("Cannot parse literal " + literal + ". Literals must be of the form \"<a> P <b>\".");
+								throw new IllegalArgumentException(MSG_CANNOT_PARSE_LITERAL + literal + ". Literals must be of the form \"<a> P <b>\".");
 							}
 
 							Parameter param = c.getParameterWithName(parts[0]);
 							String target = parts[2];
 							switch (parts[1]) {
-							case "=": {
-								Pair<Parameter, IParameterDomain> conditionItem;
+							case "=":
+								Pair<Parameter, IParameterDomain> eqConditionItem;
 								if (param.isNumeric()) {
-									double val = Double.valueOf(target);
-									conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
+									double val = Double.parseDouble(target);
+									eqConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
 								} else if (param.isCategorical()) {
-									conditionItem = new Pair<>(param, new CategoricalParameterDomain(new String[] { target }));
+									eqConditionItem = new Pair<>(param, new CategoricalParameterDomain(new String[] { target }));
 								} else {
-									throw new IllegalArgumentException("Currently no support for parameters with domain \"" + param.getDefaultDomain().getClass().getName() + "\"");
+									throw new IllegalArgumentException(MSG_DOMAIN_NOT_SUPPORTED+ param.getDefaultDomain().getClass().getName() + "\"");
 								}
-								monomInPremise.add(conditionItem);
+								monomInPremise.add(eqConditionItem);
 								break;
-							}
-							case "in": {
-								Pair<Parameter, IParameterDomain> conditionItem;
+
+							case "in":
+								Pair<Parameter, IParameterDomain> inConditionItem;
 								if (param.isNumeric()) {
 									Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
-									conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
+									inConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
 								} else if (param.isCategorical()) {
 									if (!target.startsWith("[") && !target.startsWith("{")) {
 										throw new IllegalArgumentException("Illegal literal \"" + literal + "\" in the postcondition of dependency. This should be a set, but the target is not described by [...] or {...}");
 									}
 									Collection<String> values = target.startsWith("[") ? SetUtil.unserializeList(target) : SetUtil.unserializeSet(target);
-									conditionItem = new Pair<>(param, new CategoricalParameterDomain(values));
+									inConditionItem = new Pair<>(param, new CategoricalParameterDomain(values));
 								} else {
-									throw new IllegalArgumentException("Currently no support for parameters with domain \"" + param.getDefaultDomain().getClass().getName() + "\"");
+									throw new IllegalArgumentException(MSG_DOMAIN_NOT_SUPPORTED + param.getDefaultDomain().getClass().getName() + "\"");
 								}
-								monomInPremise.add(conditionItem);
+								monomInPremise.add(inConditionItem);
 								break;
-							}
 							default:
-								throw new IllegalArgumentException("Cannot parse literal " + literal + ". Currently no support for predicate \"" + parts[1] + "\".");
+								throw new IllegalArgumentException(MSG_CANNOT_PARSE_LITERAL + literal + ". Currently no support for predicate \"" + parts[1] + "\".");
 							}
 						}
 						premise.add(monomInPremise);
@@ -316,7 +320,7 @@ public class ComponentLoader {
 					for (String literal : literals) {
 						String[] parts = literal.trim().split(" ");
 						if (parts.length < 3) {
-							throw new IllegalArgumentException("Cannot parse literal " + literal + ". Literals must be of the form \"<a> P <b>\".");
+							throw new IllegalArgumentException(MSG_CANNOT_PARSE_LITERAL + literal + ". Literals must be of the form \"<a> P <b>\".");
 						}
 						if (parts.length > 3) {
 							for (int i = 3; i < parts.length; i++) {
@@ -327,38 +331,37 @@ public class ComponentLoader {
 						Parameter param = c.getParameterWithName(parts[0]);
 						String target = parts[2];
 						switch (parts[1]) {
-						case "=": {
-							Pair<Parameter, IParameterDomain> conditionItem;
+						case "=":
+							Pair<Parameter, IParameterDomain> eqConditionItem;
 							if (param.isNumeric()) {
-								double val = Double.valueOf(target);
-								conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
+								double val = Double.parseDouble(target);
+								eqConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
 							} else if (param.isCategorical()) {
-								conditionItem = new Pair<>(param, new CategoricalParameterDomain(new String[] { target }));
+								eqConditionItem = new Pair<>(param, new CategoricalParameterDomain(new String[] { target }));
 							} else {
-								throw new IllegalArgumentException("Currently no support for parameters with domain \"" + param.getDefaultDomain().getClass().getName() + "\"");
+								throw new IllegalArgumentException(MSG_DOMAIN_NOT_SUPPORTED + param.getDefaultDomain().getClass().getName() + "\"");
 							}
-							conclusion.add(conditionItem);
+							conclusion.add(eqConditionItem);
 							break;
-						}
-						case "in": {
-							Pair<Parameter, IParameterDomain> conditionItem;
+
+						case "in":
+							Pair<Parameter, IParameterDomain> inConditionItem;
 							if (param.isNumeric()) {
 								Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
-								conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
+								inConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
 							} else if (param.isCategorical()) {
 								if (!target.startsWith("[") && !target.startsWith("{")) {
 									throw new IllegalArgumentException("Illegal literal \"" + literal + "\" in the postcondition of dependency. This should be a set, but the target is not described by [...] or {...}");
 								}
 								Collection<String> values = target.startsWith("[") ? SetUtil.unserializeList(target) : SetUtil.unserializeSet(target);
-								conditionItem = new Pair<>(param, new CategoricalParameterDomain(values));
+								inConditionItem = new Pair<>(param, new CategoricalParameterDomain(values));
 							} else {
-								throw new IllegalArgumentException("Currently no support for parameters with domain \"" + param.getDefaultDomain().getClass().getName() + "\"");
+								throw new IllegalArgumentException(MSG_DOMAIN_NOT_SUPPORTED + param.getDefaultDomain().getClass().getName() + "\"");
 							}
-							conclusion.add(conditionItem);
+							conclusion.add(inConditionItem);
 							break;
-						}
 						default:
-							throw new IllegalArgumentException("Cannot parse literal " + literal + ". Currently no support for predicate \"" + parts[1] + "\".");
+							throw new IllegalArgumentException(MSG_CANNOT_PARSE_LITERAL + literal + ". Currently no support for predicate \"" + parts[1] + "\".");
 						}
 					}
 					/* add dependency to the component */
@@ -374,7 +377,7 @@ public class ComponentLoader {
 		}
 	}
 
-	public ComponentLoader loadComponents(final File componentDescriptionFile) throws IOException, UnresolvableRequiredInterfaceException {
+	public ComponentLoader loadComponents(final File componentDescriptionFile) throws IOException {
 		this.paramConfigs.clear();
 		this.components.clear();
 		this.uniqueComponentNames.clear();
@@ -434,7 +437,7 @@ public class ComponentLoader {
 		throw new NoSuchElementException("There is no component with the requested name");
 	}
 
-	public static void main(final String[] args) throws IOException, UnresolvableRequiredInterfaceException {
+	public static void main(final String[] args) throws IOException {
 		ComponentLoader cl = new ComponentLoader();
 		cl.loadComponents(new File("complexMLComponents.json"));
 	}

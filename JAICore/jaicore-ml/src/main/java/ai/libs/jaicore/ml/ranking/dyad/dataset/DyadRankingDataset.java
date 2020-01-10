@@ -38,12 +38,13 @@ import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
  * extension to the {@link ArrayList} implementation with typecasts to
  * {@link IDyadRankingInstance}.
  *
- * @author Helena Graf, Mirko J�rgens, Michael Braun, Jonas Hanselle
+ * @author Helena Graf, Mirko Jürgens, Michael Braun, Jonas Hanselle
  *
  */
 public class DyadRankingDataset extends AGeneralDatasetBackedDataset<IDyadRankingInstance> implements IDyadRankingDataset {
 
-	private transient Logger logger = LoggerFactory.getLogger(DyadRankingDataset.class);
+	private static final String MSG_REMOVAL_FORBIDDEN = "Cannot remove a column for dyad DyadRankingDataset.";
+	private Logger logger = LoggerFactory.getLogger(DyadRankingDataset.class);
 
 	private LabeledInstanceSchema labeledInstanceSchema;
 
@@ -231,17 +232,17 @@ public class DyadRankingDataset extends AGeneralDatasetBackedDataset<IDyadRankin
 
 	@Override
 	public void removeColumn(final int columnPos) {
-		throw new UnsupportedOperationException("Cannot remove a column for dyad DyadRankingDataset.");
+		throw new UnsupportedOperationException(MSG_REMOVAL_FORBIDDEN);
 	}
 
 	@Override
 	public void removeColumn(final String columnName) {
-		throw new UnsupportedOperationException("Cannot remove a column for dyad DyadRankingDataset.");
+		throw new UnsupportedOperationException(MSG_REMOVAL_FORBIDDEN);
 	}
 
 	@Override
 	public void removeColumn(final IAttribute attribute) {
-		throw new UnsupportedOperationException("Cannot remove a column for dyad DyadRankingDataset.");
+		throw new UnsupportedOperationException(MSG_REMOVAL_FORBIDDEN);
 	}
 
 	@Override

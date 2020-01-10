@@ -112,11 +112,10 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 				this.logger.debug("Expanding next node with hash code {}", node.hashCode());
 			}
 			boolean closeNodeAfterwards = false;
-			boolean nodeAdded = false;
 			if (this.isRandomizableSingleNodeSuccessorGenerator) {
 
 				/* generate the next successor */
-				Iterator<INewNodeDescription<N, A>> iterator = this.successorGenerators.computeIfAbsent(node, n -> ((ILazySuccessorGenerator<N, A>) this.gen).getIterativeGenerator(n));
+				Iterator<INewNodeDescription<N, A>> iterator = this.successorGenerators.computeIfAbsent(node, ((ILazySuccessorGenerator<N, A>) this.gen)::getIterativeGenerator);
 				if (!iterator.hasNext()) {
 					throw new IllegalStateException();
 				}
@@ -131,7 +130,6 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 				}
 				assert !this.exploredGraph.hasItem(successor.getTo()) : "Successor " + successor.getTo() + " has been reached before. Predecessors of that node are: " + this.exploredGraph.getPredecessors(successor.getTo());
 				this.addNodeToLocalModel(path, successor.getTo(), successor.getArcLabel());
-				nodeAdded = true;
 
 				/* if this was the last successor, set the close node flag to 1 */
 				closeNodeAfterwards = !iterator.hasNext();

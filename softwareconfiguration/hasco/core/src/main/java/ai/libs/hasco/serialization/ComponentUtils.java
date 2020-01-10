@@ -6,13 +6,17 @@ import ai.libs.hasco.model.Component;
 
 public class ComponentUtils {
 
-	  public static Component getComponentByName(String componentName, Collection<Component> components) throws ComponentNotFoundException  {
-			for (Component component : components) {
-				if (component.getName().equals(componentName)) {
-					return component; 
-				}
+	private ComponentUtils() {
+		/* avoids instantiation */
+	}
+
+	public static Component getComponentByName(final String componentName, final Collection<Component> components) throws ComponentNotFoundException {
+		for (Component component : components) {
+			if (component.getName().equals(componentName)) {
+				return component;
 			}
-			
-			throw new ComponentNotFoundException("No Component with this name loaded: " + componentName);
-	  }
+		}
+
+		throw new ComponentNotFoundException("No Component with this name loaded: " + componentName);
+	}
 }

@@ -24,7 +24,6 @@ import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
-import ai.libs.jaicore.search.algorithms.standard.random.RandomSearch;
 import ai.libs.jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
@@ -40,7 +39,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 
 	/* logging */
 	private String loggerName;
-	private Logger logger = LoggerFactory.getLogger(RandomSearch.class);
+	private Logger logger = LoggerFactory.getLogger(DepthFirstSearch.class);
 
 	private final INodeGoalTester<N, A> goalTester;
 
@@ -101,7 +100,6 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 				if (this.lastNodeWasTrueLeaf) {
 
 					/* find the deepest antecessor of the leaf that has not been exhausted */
-					ILabeledPath<N, A> pathToCurrentLeaf;
 					N formerLeaf;
 					int indexOfChildInSuccessorsOfParent;
 					do {
@@ -109,7 +107,6 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 							return this.terminate();
 						}
 						this.successorsNodes.remove(leaf); // this is relevant if the leaf is actually now an inner node
-						pathToCurrentLeaf = this.currentPath;
 						this.currentPath.cutHead();
 						formerLeaf = leaf;
 						this.logger.trace("Last node {} was a leaf node (goal or dead-end) in the original graph. Computing new leaf node by first switching to the next sibling of parent {}.", formerLeaf, leaf);

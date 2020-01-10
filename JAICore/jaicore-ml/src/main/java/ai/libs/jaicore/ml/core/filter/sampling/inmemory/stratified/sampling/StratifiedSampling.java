@@ -35,8 +35,6 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 	private DatasetDeriver<D>[] stratiBuilder = null;
 	private boolean allDatapointsAssigned = false;
 	private boolean simpleRandomSamplingStarted;
-	private int numSelectedPoints;
-	private int dsHash;
 
 	/**
 	 * Constructor for Stratified Sampling.
@@ -61,12 +59,12 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 		switch (this.getState()) {
 		case CREATED:
 			if (!this.allDatapointsAssigned) {
-				this.dsHash = this.getInput().hashCode();
+				int dsHash = this.getInput().hashCode();
 				this.stratiAmountSelector.setNumCPUs(this.getNumCPUs());
 				this.stratiAssigner.setNumCPUs(this.getNumCPUs());
 
 				/* create strati builder */
-				this.stratiBuilder= (DatasetDeriver<D>[])Array.newInstance(new DatasetDeriver<>(this.getInput()).getClass(), this.stratiAmountSelector.selectStratiAmount(this.getInput()));
+				this.stratiBuilder= (DatasetDeriver<D>[])Array.newInstance(DatasetDeriver.class, this.stratiAmountSelector.selectStratiAmount(this.getInput()));
 				for (int i = 0; i < this.stratiBuilder.length; i++) {
 					this.stratiBuilder[i] = new DatasetDeriver<>(this.getInput());
 				}
@@ -75,7 +73,7 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 				}
 
 				this.stratiAssigner.init(this.getInput(), this.stratiBuilder.length);
-				if (this.getInput().hashCode() != this.dsHash) {
+				if (this.getInput().hashCode() != dsHash) {
 					throw new IllegalStateException("Original dataset has been modified!");
 				}
 			}

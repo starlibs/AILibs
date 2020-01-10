@@ -52,12 +52,10 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePa
  * @param <T> a nodes external label i.e. a state of a problem
  * @param <A> action (action space of problem)
  */
-public class RStar<T, A> extends
-AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, T, A, Double> {
+public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, T, A, Double> {
 
 	/* Open list. */
-	protected PriorityQueue<GammaNode<T, A>> open = new PriorityQueue<>(
-			(n1, n2) -> (n1.getScore().compareTo(n2.getScore())));
+	protected PriorityQueue<GammaNode<T, A>> open = new PriorityQueue<>((n1, n2) -> (n1.getScore().compareTo(n2.getScore())));
 
 	/* Closed list of already expanded states. */
 	protected ArrayList<GammaNode<T, A>> closed = new ArrayList<>();
@@ -72,15 +70,7 @@ AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndS
 	private final IMetric<T> metricOverStates;
 
 	private GammaNode<T, A> bestSeenGoalNode;
-	private final Map<Pair<GammaNode<T, A>, GammaNode<T, A>>, SearchGraphPath<T, A>> externalPathsBetweenGammaNodes = new HashMap<>(); // the
-	// pairs
-	// should
-	// always
-	// be
-	// in
-	// a
-	// parent-child
-	// relation
+	private final Map<Pair<GammaNode<T, A>, GammaNode<T, A>>, SearchGraphPath<T, A>> externalPathsBetweenGammaNodes = new HashMap<>(); // the pairs should always be in a parent-child relation
 
 	private List<ISolutionCandidateFoundEvent<EvaluatedSearchGraphPath<T, A, Double>>> unreturnedSolutionEvents = new LinkedList<>();
 
@@ -95,13 +85,10 @@ AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndS
 	 * @param k
 	 * @param delta
 	 */
-	public RStar(final GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A> problem,
-			final double w, final int k, final double delta) {
+	public RStar(final GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A> problem, final double w, final int k, final double delta) {
 		super(problem);
-		this.h = ((GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getNodeEvaluator())
-				.getH();
-		this.hPath = ((GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer<T, A>) this
-				.getInput().getNodeEvaluator()).gethPath();
+		this.h = ((GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getNodeEvaluator()).getH();
+		this.hPath = ((GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer<T, A>) this.getInput().getNodeEvaluator()).gethPath();
 		this.w = w;
 		this.k = k;
 		this.metricOverStates = this.getInput().getMetricOverStates();
@@ -116,13 +103,11 @@ AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndS
 	 * @throws PathEvaluationException
 	 */
 	private void updateState(final GammaNode<T, A> n) throws PathEvaluationException, InterruptedException {
-		if ((n.getG() > this.w * this.h.evaluate(n))
-				|| ((n.getParent() == null || !this.isPathRealizationKnownForAbstractEdgeToNode(n)) && n.getAvoid())) {
+		if ((n.getG() > this.w * this.h.evaluate(n)) || ((n.getParent() == null || !this.isPathRealizationKnownForAbstractEdgeToNode(n)) && n.getAvoid())) {
 			n.setScore(new RStarK(true, n.getG() + this.w * this.h.evaluate(n)));
 		} else {
 			n.setScore(new RStarK(false, n.getG() + this.w * this.h.evaluate(n)));
 		}
-		//		this.open.add(n);
 	}
 
 	/**
@@ -169,16 +154,14 @@ AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndS
 		if (!n.isGoal()) {
 			try {
 				this.updateState(n);
-			}
-			catch (PathEvaluationException e) {
+			} catch (PathEvaluationException e) {
 				throw new AlgorithmException("Failed due to path evaluation failure.", e);
 			}
 		}
 	}
 
 	@Override
-	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException,
-	AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		try {
 
 			this.registerActiveThread();
@@ -216,8 +199,7 @@ AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndS
 				// Lines 18 & 19
 				GammaNode<T, A> n = this.open.poll();
 				this.logger.debug("Selected {} for expansion.", n);
-				if (n == null || (this.bestSeenGoalNode != null
-						&& n.getScore().compareTo(this.bestSeenGoalNode.getScore()) > 0)) {
+				if (n == null || (this.bestSeenGoalNode != null && n.getScore().compareTo(this.bestSeenGoalNode.getScore()) > 0)) {
 					this.logger.info("Terminating RStar.");
 					return this.terminate();
 				}
@@ -342,73 +324,61 @@ AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndS
 
 	/**
 	 * @throws AlgorithmExecutionCanceledException @throws
-	 * AlgorithmException @throws AlgorithmTimeoutedException Generates this.RStarK
-	 * Gamma graph successors for a state s within distance this.delta. Queries the
-	 * this.gammaSuccessorGenerator and checks if a generate state has been visited
-	 * i.e. generated in Gamma before. If yes, it takes the old reference from the
-	 * this.alreadyGeneratedStates list. Also maintains the predecessor set of
-	 * nodes.
+	 *             AlgorithmException @throws AlgorithmTimeoutedException Generates this.RStarK
+	 *             Gamma graph successors for a state s within distance this.delta. Queries the
+	 *             this.gammaSuccessorGenerator and checks if a generate state has been visited
+	 *             i.e. generated in Gamma before. If yes, it takes the old reference from the
+	 *             this.alreadyGeneratedStates list. Also maintains the predecessor set of
+	 *             nodes.
 	 *
 	 * @param n Gamma node to generate successors for. @return List of Gamma
-	 * nodes. @throws InterruptedException @throws
+	 *            nodes. @throws InterruptedException @throws
 	 */
-	private Collection<GammaNode<T, A>> generateGammaSuccessors(final GammaNode<T, A> n) throws InterruptedException,
-	AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
+	private Collection<GammaNode<T, A>> generateGammaSuccessors(final GammaNode<T, A> n) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 
 		/*
 		 * first create a list of k nodes that are in reach of delta of the current node
 		 */
 		this.logger.trace("Invoking distant successor generator timeout-aware.");
-		List<T> randomDistantSuccessors = this.computeTimeoutAware(() -> this.getInput().getDistantSuccessorGenerator()
-				.getDistantSuccessors(n.getHead(), this.k, this.metricOverStates, this.delta),
-				"Computing distant successors", true);
-		assert randomDistantSuccessors.size() == new HashSet<>(randomDistantSuccessors)
-				.size() : "Distant successor generator has created the same successor ar least twice: \n\t "
-				+ SetUtil.getMultiplyContainedItems(randomDistantSuccessors).stream().map(T::toString)
-				.collect(Collectors.joining("\n\t"));
-				this.logger.trace("Distant successor generator generated {}/{} successors.", randomDistantSuccessors.size(),
-						this.k);
+		List<T> randomDistantSuccessors = this.computeTimeoutAware(() -> this.getInput().getDistantSuccessorGenerator().getDistantSuccessors(n.getHead(), this.k, this.metricOverStates, this.delta), "Computing distant successors", true);
+		assert randomDistantSuccessors.size() == new HashSet<>(randomDistantSuccessors).size() : "Distant successor generator has created the same successor ar least twice: \n\t "
+				+ SetUtil.getMultiplyContainedItems(randomDistantSuccessors).stream().map(T::toString).collect(Collectors.joining("\n\t"));
+		this.logger.trace("Distant successor generator generated {}/{} successors.", randomDistantSuccessors.size(), this.k);
 
-				/*
-				 * remove nodes for which a node is already on CLOSED (no reopening in this
-				 * algorithm)
-				 */
-				randomDistantSuccessors.removeIf(
-						childNode -> this.closed.stream().anyMatch(closedNode -> closedNode.getHead().equals(childNode)));
-				this.logger.trace(
-						"{} successors are still considered after having removed nodes that already are on CLOSED, which holds {} item(s).",
-						randomDistantSuccessors.size(), this.closed.size());
+		/*
+		 * remove nodes for which a node is already on CLOSED (no reopening in this
+		 * algorithm)
+		 */
+		randomDistantSuccessors.removeIf(childNode -> this.closed.stream().anyMatch(closedNode -> closedNode.getHead().equals(childNode)));
+		this.logger.trace("{} successors are still considered after having removed nodes that already are on CLOSED, which holds {} item(s).", randomDistantSuccessors.size(), this.closed.size());
 
-				/* now transform these node into (possibly existing) GammaNode objects */
-				ArrayList<GammaNode<T, A>> succWithoutClosed = new ArrayList<>();
-				for (T childNode : randomDistantSuccessors) {
-					Optional<GammaNode<T, A>> representantOnOpen = this.open.stream()
-							.filter(closedNode -> closedNode.getHead().equals(childNode)).findFirst();
-					GammaNode<T, A> gammaNodeForThisChild;
-					if (representantOnOpen.isPresent()) {
-						gammaNodeForThisChild = representantOnOpen.get();
-					} else {
-						gammaNodeForThisChild = new GammaNode<>(childNode);
-						gammaNodeForThisChild
-						.setGoal(((INodeGoalTester<T, A>) this.getInput().getGoalTester()).isGoal(childNode));
-					}
+		/* now transform these node into (possibly existing) GammaNode objects */
+		ArrayList<GammaNode<T, A>> succWithoutClosed = new ArrayList<>();
+		for (T childNode : randomDistantSuccessors) {
+			Optional<GammaNode<T, A>> representantOnOpen = this.open.stream().filter(closedNode -> closedNode.getHead().equals(childNode)).findFirst();
+			GammaNode<T, A> gammaNodeForThisChild;
+			if (representantOnOpen.isPresent()) {
+				gammaNodeForThisChild = representantOnOpen.get();
+			} else {
+				gammaNodeForThisChild = new GammaNode<>(childNode);
+				gammaNodeForThisChild.setGoal(((INodeGoalTester<T, A>) this.getInput().getGoalTester()).isGoal(childNode));
+			}
 
-					/* if this is a solution, add it as a new solution */
-					if (gammaNodeForThisChild.isGoal()) {
-						this.logger.info("Found new solution. Adding it to the solution set.");
-						if (this.bestSeenGoalNode == null || this.bestSeenGoalNode.getG() > n.getG()) {
-							this.bestSeenGoalNode = n;
-							this.updateBestSeenSolution(this.getFullExternalPath(n));
-						}
-						EvaluatedSearchSolutionCandidateFoundEvent<T, A, Double> solutionEvent = new EvaluatedSearchSolutionCandidateFoundEvent<>(
-								this, this.getFullExternalPath(gammaNodeForThisChild));
-						this.post(solutionEvent);
-						this.unreturnedSolutionEvents.add(solutionEvent);
-					}
-					gammaNodeForThisChild.addPredecessor(n);
-					succWithoutClosed.add(gammaNodeForThisChild);
+			/* if this is a solution, add it as a new solution */
+			if (gammaNodeForThisChild.isGoal()) {
+				this.logger.info("Found new solution. Adding it to the solution set.");
+				if (this.bestSeenGoalNode == null || this.bestSeenGoalNode.getG() > n.getG()) {
+					this.bestSeenGoalNode = n;
+					this.updateBestSeenSolution(this.getFullExternalPath(n));
 				}
-				return succWithoutClosed;
+				EvaluatedSearchSolutionCandidateFoundEvent<T, A, Double> solutionEvent = new EvaluatedSearchSolutionCandidateFoundEvent<>(this, this.getFullExternalPath(gammaNodeForThisChild));
+				this.post(solutionEvent);
+				this.unreturnedSolutionEvents.add(solutionEvent);
+			}
+			gammaNodeForThisChild.addPredecessor(n);
+			succWithoutClosed.add(gammaNodeForThisChild);
+		}
+		return succWithoutClosed;
 	}
 
 	@Override

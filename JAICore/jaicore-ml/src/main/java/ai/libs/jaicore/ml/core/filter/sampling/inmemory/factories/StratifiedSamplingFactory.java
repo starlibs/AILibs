@@ -21,7 +21,7 @@ public class StratifiedSamplingFactory<D extends IDataset<?>> extends ASampleAlg
 
 	@Override
 	public StratifiedSampling<D> getAlgorithm(final int sampleSize, final D inputDataset, final Random random) {
-		StratifiedSampling<D> stratifiedSampling = new StratifiedSampling<D>(this.stratiAmountSelector, this.stratiAssigner, random, inputDataset);
+		StratifiedSampling<D> stratifiedSampling = new StratifiedSampling<>(this.stratiAmountSelector, this.stratiAssigner, random, inputDataset);
 
 		stratifiedSampling.setSampleSize(sampleSize);
 		return stratifiedSampling;

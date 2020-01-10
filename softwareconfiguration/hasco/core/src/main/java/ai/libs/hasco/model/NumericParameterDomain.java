@@ -5,8 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class NumericParameterDomain implements IParameterDomain {
 	private final boolean isInteger;
-	private final double min, max;
-	
+	private final double min;
+	private final double max;
+
 	@SuppressWarnings("unused")
 	private NumericParameterDomain() {
 		// for serialization
@@ -92,9 +93,6 @@ public class NumericParameterDomain implements IParameterDomain {
 		if (Double.doubleToLongBits(this.max) != Double.doubleToLongBits(other.max)) {
 			return false;
 		}
-		if (Double.doubleToLongBits(this.min) != Double.doubleToLongBits(other.min)) {
-			return false;
-		}
-		return true;
+		return Double.doubleToLongBits(this.min) == Double.doubleToLongBits(other.min);
 	}
 }

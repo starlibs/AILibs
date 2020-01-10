@@ -15,7 +15,7 @@ import javafx.scene.control.TreeView;
 import javafx.scene.layout.VBox;
 
 /**
- * 
+ *
  * @author fmohr
  *
  */
@@ -24,40 +24,38 @@ public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOMo
 	private final HASCOModelStatisticsComponentSelector rootNode; // the root of the TreeView shown at the top
 	private final Histogram histogram; // the histogram shown on the bottom
 
-	public HASCOModelStatisticsPluginView(HASCOModelStatisticsPluginModel model) {
+	public HASCOModelStatisticsPluginView(final HASCOModelStatisticsPluginModel model) {
 		this(model, 100);
 	}
 
-	public HASCOModelStatisticsPluginView(HASCOModelStatisticsPluginModel model, int n) {
+	public HASCOModelStatisticsPluginView(final HASCOModelStatisticsPluginModel model, final int n) {
 		super(model, new VBox());
-		rootNode = new HASCOModelStatisticsComponentSelector(this, model);
+		this.rootNode = new HASCOModelStatisticsComponentSelector(this, model);
 		TreeView<HASCOModelStatisticsComponentSelector> treeView = new TreeView<>();
-		treeView.setCellFactory((TreeView<HASCOModelStatisticsComponentSelector> tv) -> new HASCOModelStatisticsComponentCell(tv));
-		treeView.setRoot(rootNode);
-		getNode().getChildren().add(treeView);
-		histogram = new Histogram(n);
-		histogram.setTitle("Performances observed on the filtered solutions");
-		getNode().getChildren().add(histogram);
+		treeView.setCellFactory(HASCOModelStatisticsComponentCell::new);
+		treeView.setRoot(this.rootNode);
+		this.getNode().getChildren().add(treeView);
+		this.histogram = new Histogram(n);
+		this.histogram.setTitle("Performances observed on the filtered solutions");
+		this.getNode().getChildren().add(this.histogram);
 	}
 
 	@Override
 	public void update() {
-		rootNode.update();
-		updateHistogram();
+		this.rootNode.update();
+		this.updateHistogram();
 	}
 
 	/**
 	 * Updates the histogram at the bottom. This is called in both the update method of the general view as well as in the change listener of the combo boxes.
 	 */
 	public void updateHistogram() {
-		Collection<List<Pair<String, String>>> activeFilters = rootNode.getAllSelectionsOnPathToAnyLeaf();
-		List<ScoredSolutionCandidateInfo> activeSolutions = getModel().getAllSeenSolutionCandidateFoundInfosUnordered().stream()
-				.filter(i -> getModel().deserializeComponentInstance(i.getSolutionCandidateRepresentation()).matchesPathRestrictions(activeFilters)).collect(Collectors.toList());
+		Collection<List<Pair<String, String>>> activeFilters = this.rootNode.getAllSelectionsOnPathToAnyLeaf();
+		List<ScoredSolutionCandidateInfo> activeSolutions = this.getModel().getAllSeenSolutionCandidateFoundInfosUnordered().stream()
+				.filter(i -> this.getModel().deserializeComponentInstance(i.getSolutionCandidateRepresentation()).matchesPathRestrictions(activeFilters)).collect(Collectors.toList());
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		activeSolutions.forEach(s -> stats.addValue(getModel().parseScoreToDouble(s.getScore())));
-		Platform.runLater(() -> {
-			histogram.update(stats);
-		});
+		activeSolutions.forEach(s -> stats.addValue(this.getModel().parseScoreToDouble(s.getScore())));
+		Platform.runLater(() -> this.histogram.update(stats));
 	}
 
 	@Override
@@ -67,7 +65,7 @@ public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOMo
 
 	@Override
 	public void clear() {
-		rootNode.clear();
-		histogram.clear();
+		this.rootNode.clear();
+		this.histogram.clear();
 	}
 }

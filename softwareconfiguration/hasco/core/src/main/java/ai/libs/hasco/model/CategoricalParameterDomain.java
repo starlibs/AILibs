@@ -8,11 +8,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CategoricalParameterDomain implements IParameterDomain {
 	private final String[] values;
-	
+
 	@SuppressWarnings("unused")
 	private CategoricalParameterDomain() {
 		// for serialization
-		values = null;
+		this.values = null;
 	}
 
 	@JsonCreator
@@ -50,10 +50,7 @@ public class CategoricalParameterDomain implements IParameterDomain {
 			return false;
 		}
 		CategoricalParameterDomain other = (CategoricalParameterDomain) obj;
-		if (!Arrays.equals(this.values, other.values)) {
-			return false;
-		}
-		return true;
+		return Arrays.equals(this.values, other.values);
 	}
 
 	@Override

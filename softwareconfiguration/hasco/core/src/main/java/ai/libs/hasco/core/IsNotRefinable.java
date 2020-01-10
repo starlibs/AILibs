@@ -11,11 +11,11 @@ import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.logic.fol.theories.EvaluablePredicate;
 
-public class isNotRefinable implements EvaluablePredicate {
+public class IsNotRefinable implements EvaluablePredicate {
 	
 	private final IsValidParameterRangeRefinementPredicate p;
 	
-	public isNotRefinable(Collection<Component> components, Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration) {
+	public IsNotRefinable(Collection<Component> components, Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration) {
 		super();
 		this.p = new IsValidParameterRangeRefinementPredicate(components, refinementConfiguration);
 	}

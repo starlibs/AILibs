@@ -41,7 +41,7 @@ public abstract class CaseControlLikeSampling<D extends ILabeledDataset<? extend
 	public abstract List<Pair<ILabeledInstance, Double>> computeAcceptanceThresholds() throws ThresholdComputationFailedException, InterruptedException;
 
 	@Override
-	final public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
+	public final IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
 		this.logger.debug("Executing next step.");
 		switch (this.getState()) {
 		case CREATED:

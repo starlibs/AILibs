@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -172,8 +173,12 @@ public class ArffDatasetAdapterTest {
 	}
 
 	@Test
-	public void testWritingADatasetToFile() throws DatasetDeserializationFailedException, InterruptedException, IOException {
+	public void testWritingADatasetToFile() throws DatasetDeserializationFailedException, IOException {
 		File datasetFile = new File("testrsc/dataset/arff/classifier-rank.arff");
-		ArffDatasetAdapter.serializeDataset(new File("testrsc/dataset/arff/classifier-rank.arff.copy"), ArffDatasetAdapter.readDataset(datasetFile));
+		ILabeledDataset<?> ds = ArffDatasetAdapter.readDataset(datasetFile);
+		File datasetCopyFile = new File("testrsc/dataset/arff/classifier-rank.arff.copy");
+		ArffDatasetAdapter.serializeDataset(datasetCopyFile, ds);
+		assertEquals(ds, ArffDatasetAdapter.readDataset(datasetCopyFile));
+		Files.delete(datasetCopyFile.toPath());
 	}
 }

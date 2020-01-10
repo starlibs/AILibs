@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -31,9 +28,6 @@ import ai.libs.jaicore.logging.ToJSONStringUtil;
  */
 @JsonPropertyOrder(alphabetic = true)
 public class ComponentInstance {
-
-	/* Logger */
-	private static final Logger L = LoggerFactory.getLogger(ComponentInstance.class);
 
 	/* The component which serves as a kind of "type". */
 	private final Component component;

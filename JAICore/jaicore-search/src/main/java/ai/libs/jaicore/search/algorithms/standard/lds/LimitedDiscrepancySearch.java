@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
@@ -137,7 +138,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		if (this.pathGoalTester.isGoal(this.getPathForGoalCheck(node.getValue()))) {
 			this.updateExhaustMap(node);
 			List<T> path = node.getValuesOnPathFromRoot();
-			List<A> actions = path.stream().map(n -> this.actionToNode.get(n)).filter(a -> a != null).collect(Collectors.toList());
+			List<A> actions = path.stream().map(n -> this.actionToNode.get(n)).filter(Objects::nonNull).collect(Collectors.toList());
 			EvaluatedSearchGraphPath<T, A, V> solution = new EvaluatedSearchGraphPath<>(path, actions, null);
 			this.updateBestSeenSolution(solution);
 			this.logger.debug("Found solution {}.", node.getValue());

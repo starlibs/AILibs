@@ -97,7 +97,7 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 					this.logger.debug("Execution completed. Classifier predicted {}/{} test instances correctly.", (m-mistakes), m);
 				}
 			}
-			double score = this.metric.loss(reports.stream().map(r -> r.getPredictionDiffList()).collect(Collectors.toList()));
+			double score = this.metric.loss(reports.stream().map(ILearnerRunReport::getPredictionDiffList).collect(Collectors.toList()));
 			this.logger.info("Computed value for metric {} of {} executions. Metric value is: {}", this.metric, n, score);
 			return score;
 		} catch (LearnerExecutionFailedException | SplitFailedException e) {
@@ -119,18 +119,13 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 		this.logger = LoggerFactory.getLogger(name);
 		if (this.splitGenerator instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) this.splitGenerator).setLoggerName(name + ".splitgen");
-			this.logger.info("Setting logger of split generator {} to {}", this.splitGenerator.getClass().getName(), name + ".splitgen");
+			this.logger.info("Setting logger of split generator {} to {}.splitgen", this.splitGenerator.getClass().getName(), name);
 		}
 		else {
 			this.logger.info("Split generator {} is not configurable for logging, so not configuring it.", this.splitGenerator.getClass().getName());
 		}
-		if (this.executor instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) this.executor).setLoggerName(name + ".executor");
-			this.logger.info("Setting logger of learner executor {} to {}", this.executor.getClass().getName(), name + ".executor");
-		}
-		else {
-			this.logger.info("Learner executor {} is not configurable for logging, so not configuring it.", this.executor.getClass().getName());
-		}
+		this.executor.setLoggerName(name + ".executor");
+		this.logger.info("Setting logger of learner executor {} to {}.executor", this.executor.getClass().getName(), name);
 	}
 
 	@Override

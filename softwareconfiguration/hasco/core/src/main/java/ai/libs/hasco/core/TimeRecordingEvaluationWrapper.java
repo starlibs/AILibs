@@ -66,7 +66,7 @@ public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements 
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
 		if (this.baseEvaluator instanceof ILoggingCustomizable) {
-			this.logger.info("Setting logger of evaluator {} to {}", this.baseEvaluator.getClass().getName(), name + ".be");
+			this.logger.info("Setting logger of evaluator {} to {}.be", this.baseEvaluator.getClass().getName(), name);
 			((ILoggingCustomizable) this.baseEvaluator).setLoggerName(name + ".be");
 		}
 		else {

@@ -25,20 +25,12 @@ public class PairWisePreferenceToBinaryClassificationFilter implements IUnsuperv
 
 	@Override
 	public ILabeledDataset<ILabeledInstance> predict(final ILabeledDataset<ILabeledInstance> input) throws InterruptedException, FilterApplicationFailedException {
-		try {
-			ILabeledDataset<ILabeledInstance> dataset = input.createEmptyCopy();
-
-			return null;
-		} catch (InterruptedException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new FilterApplicationFailedException("Could not apply " + this.getClass().getName(), e);
-		}
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public ILabeledDataset<ILabeledInstance> predict(final ILabeledInstance input) throws InterruptedException, FilterApplicationFailedException {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 }

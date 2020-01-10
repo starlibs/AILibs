@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * The LinearCombinationLearningCurve consists of the actual linear combination
  * function that describes the learning curve, as well as the derivative of this
  * function. The derivative is used in order to calculate the saturation point.
- * 
+ *
  * @author Felix Weiland
  *
  */
@@ -57,13 +57,13 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 	/** Size of the data set this learning curve was produced on */
 	private int dataSetSize;
 
-	public LinearCombinationLearningCurve(LinearCombinationLearningCurveConfiguration configuration, int dataSetSize) {
+	public LinearCombinationLearningCurve(final LinearCombinationLearningCurveConfiguration configuration, final int dataSetSize) {
 		List<UnivariateFunction> learningCurves = new ArrayList<>();
 		List<UnivariateFunction> derivatives = new ArrayList<>();
 
 		for (LinearCombinationParameterSet parameterSet : configuration.getParameterSets()) {
-			learningCurves.add(generateLearningCurve(parameterSet));
-			derivatives.add(generateDerivative(parameterSet));
+			learningCurves.add(this.generateLearningCurve(parameterSet));
+			derivatives.add(this.generateDerivative(parameterSet));
 		}
 
 		List<Double> weights = new ArrayList<>();
@@ -77,7 +77,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 		this.dataSetSize = dataSetSize;
 	}
 
-	private LinearCombinationFunction generateLearningCurve(LinearCombinationParameterSet parameterSet) {
+	private LinearCombinationFunction generateLearningCurve(final LinearCombinationParameterSet parameterSet) {
 		List<UnivariateFunction> functions = new ArrayList<>();
 		List<Double> weights = new ArrayList<>();
 
@@ -87,7 +87,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.VAPOR_PRESSURE)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double c = this.getParams().get(LinearCombinationConstants.C);
@@ -104,7 +104,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.POW_3)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double c = this.getParams().get(LinearCombinationConstants.C);
@@ -121,7 +121,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.LOG_LOG_LINEAR)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					return Math.log(a * Math.log(x) + b);
@@ -137,7 +137,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.HILL_3)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double y = this.getParams().get(LinearCombinationConstants.Y);
 					double eta = this.getParams().get(LinearCombinationConstants.ETA);
 					double kappa = this.getParams().get(LinearCombinationConstants.KAPPA);
@@ -154,7 +154,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.LOG_POWER)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double c = this.getParams().get(LinearCombinationConstants.C);
@@ -171,7 +171,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.POW_4)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double c = this.getParams().get(LinearCombinationConstants.C);
@@ -189,7 +189,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.MMF)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double beta = this.getParams().get(LinearCombinationConstants.BETA);
 					double delta = this.getParams().get(LinearCombinationConstants.DELTA);
@@ -207,7 +207,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.EXP_4)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double c = this.getParams().get(LinearCombinationConstants.C);
@@ -225,7 +225,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.JANOSCHEK)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double beta = this.getParams().get(LinearCombinationConstants.BETA);
 					double delta = this.getParams().get(LinearCombinationConstants.DELTA);
@@ -243,7 +243,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.WEIBULL)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double beta = this.getParams().get(LinearCombinationConstants.BETA);
 					double delta = this.getParams().get(LinearCombinationConstants.DELTA);
@@ -261,7 +261,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.ILOG_2)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double c = this.getParams().get(LinearCombinationConstants.C);
 					return c - (a / Math.log(x));
@@ -274,7 +274,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 		return new LinearCombinationFunction(functions, weights);
 	}
 
-	private LinearCombinationFunction generateDerivative(LinearCombinationParameterSet parameterSet) {
+	private LinearCombinationFunction generateDerivative(final LinearCombinationParameterSet parameterSet) {
 		List<UnivariateFunction> functions = new ArrayList<>();
 		List<Double> weights = new ArrayList<>();
 
@@ -284,7 +284,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.VAPOR_PRESSURE)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double c = this.getParams().get(LinearCombinationConstants.C);
@@ -301,7 +301,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.POW_3)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					return a * alpha * Math.pow(x, -alpha - 1);
@@ -317,7 +317,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.LOG_LOG_LINEAR)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					return a / (a * x * Math.log(x) + b * x);
@@ -333,7 +333,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.HILL_3)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double y = this.getParams().get(LinearCombinationConstants.Y);
 					double eta = this.getParams().get(LinearCombinationConstants.ETA);
 					double kappa = this.getParams().get(LinearCombinationConstants.KAPPA);
@@ -351,7 +351,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.LOG_POWER)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double c = this.getParams().get(LinearCombinationConstants.C);
@@ -369,7 +369,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.POW_4)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
@@ -386,7 +386,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.MMF)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double beta = this.getParams().get(LinearCombinationConstants.BETA);
 					double delta = this.getParams().get(LinearCombinationConstants.DELTA);
@@ -405,7 +405,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.EXP_4)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
@@ -422,7 +422,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.JANOSCHEK)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double beta = this.getParams().get(LinearCombinationConstants.BETA);
 					double delta = this.getParams().get(LinearCombinationConstants.DELTA);
@@ -441,7 +441,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.WEIBULL)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double beta = this.getParams().get(LinearCombinationConstants.BETA);
 					double delta = this.getParams().get(LinearCombinationConstants.DELTA);
@@ -460,7 +460,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 					parameterSet.getParameters().get(LinearCombinationConstants.ILOG_2)) {
 
 				@Override
-				public double value(double x) {
+				public double value(final double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					return a / (x * Math.pow(Math.log(x), 2));
 				}
@@ -473,17 +473,17 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 	}
 
 	@Override
-	public double getCurveValue(double x) {
-		return learningCurve.value(x);
+	public double getCurveValue(final double x) {
+		return this.learningCurve.value(x);
 	}
 
 	@Override
-	public double getSaturationPoint(double epsilon) {
-		return this.computeDerivativeRoot(epsilon, -1 * SLOPE_SATURATION_POINT, dataSetSize);
+	public double getSaturationPoint(final double epsilon) {
+		return this.computeDerivativeRoot(epsilon, -1 * SLOPE_SATURATION_POINT, this.dataSetSize);
 	}
 
 	@Override
-	public double getDerivativeCurveValue(double x) {
+	public double getDerivativeCurveValue(final double x) {
 		this.derivative.setOffset(0);
 		return this.derivative.value(x);
 	}
@@ -491,11 +491,11 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 	@Override
 	public double getConvergenceValue() {
 		int x = (int) this.computeDerivativeRoot(TOLERANCE_CONVERGENCE_VALUE, -1 * SLOPE_CONVERGENCE_VALUE,
-				dataSetSize * 100);
+				this.dataSetSize * 100);
 		return this.getCurveValue(x);
 	}
 
-	private double computeDerivativeRoot(double epsilon, double offset, int upperIntervalBoundStart) {
+	private double computeDerivativeRoot(final double epsilon, final double offset, final int upperIntervalBoundStart) {
 		UnivariateSolver solver = new BrentSolver(0, epsilon);
 
 		double result = -1;
@@ -534,7 +534,7 @@ public class LinearCombinationLearningCurve implements IAnalyticalLearningCurve 
 		}
 
 		if (result == -1) {
-			throw new RuntimeException(
+			throw new IllegalArgumentException(
 					String.format("No solution could be found in interval [1,%d]", upperIntervalBound));
 		}
 		return result;

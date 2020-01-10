@@ -19,9 +19,7 @@ public class UnparametrizedComponentInstance {
 	public UnparametrizedComponentInstance(final ComponentInstance composition) {
 		Map<String, ComponentInstance> resolvedRequiredInterfaces = composition.getSatisfactionOfRequiredInterfaces();
 		this.satisfactionOfRequiredInterfaces = new HashMap<>();
-		resolvedRequiredInterfaces.keySet().forEach(r -> {
-			this.satisfactionOfRequiredInterfaces.put(r, new UnparametrizedComponentInstance(resolvedRequiredInterfaces.get(r)));
-		});
+		resolvedRequiredInterfaces.keySet().forEach(r -> this.satisfactionOfRequiredInterfaces.put(r, new UnparametrizedComponentInstance(resolvedRequiredInterfaces.get(r))));
 		this.componentName = composition.getComponent().getName();
 	}
 

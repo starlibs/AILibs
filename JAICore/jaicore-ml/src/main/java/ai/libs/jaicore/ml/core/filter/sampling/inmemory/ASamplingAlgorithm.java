@@ -77,7 +77,6 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 				// The dataset size is exactly the specified sample size, so just return the
 				// whole dataset.
 				this.dataForSample = (IDataset<I>) dataset;
-				return;
 			} else {
 				// Working configuration, so create the actual sample.
 				ASamplingAlgorithm.this.setState(EAlgorithmState.CREATED);
@@ -113,6 +112,9 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 	protected <I extends IInstance> ASamplingAlgorithm(final D input, final Class<I> instanceClass) {
 		super(input);
 		IDataset<I> dsCopy = (IDataset<I>) input;
+		if (!instanceClass.isInstance(input.get(0))) {
+			throw new IllegalArgumentException("The class " + instanceClass.getName() + " is not a valid cast for the given dataset.");
+		}
 		this.caps = new Caps<>(dsCopy);
 	}
 

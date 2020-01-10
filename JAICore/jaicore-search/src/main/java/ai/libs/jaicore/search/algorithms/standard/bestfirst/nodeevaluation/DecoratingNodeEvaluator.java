@@ -97,9 +97,6 @@ implements IPathEvaluator<N, A, V>, ICancelablePathEvaluator, ILoggingCustomizab
 		if (this.isDecoratedEvaluatorCancelable()) {
 			((ICancelablePathEvaluator) this.decoratedEvaluator).cancelActiveTasks();
 		}
-		if (this instanceof ICancelablePathEvaluator) {
-			((ICancelablePathEvaluator) this).cancelActiveTasks();
-		}
 	}
 
 	@Override

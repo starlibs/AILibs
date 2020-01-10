@@ -18,9 +18,9 @@ import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfo;
 
 /**
- * 
+ *
  * @author fmohr
- * 
+ *
  *         Holds all the information to supply the HASCOModelStatisticsPluginView with what it needs.
  */
 public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCOModelStatisticsPluginView, HASCOModelStatisticsPluginController> {
@@ -34,35 +34,35 @@ public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCO
 
 	/**
 	 * Informs the plugin about a new HASCOSolution. This solution will be considered in the combo boxes as well as in the histogram.
-	 * 
+	 *
 	 * @param solutionEvent
 	 */
-	public final void addEntry(ScoredSolutionCandidateInfo scoredSolutionCandidateInfo) {
-		ComponentInstance ci = deserializeComponentInstance(scoredSolutionCandidateInfo.getSolutionCandidateRepresentation());
+	public final void addEntry(final ScoredSolutionCandidateInfo scoredSolutionCandidateInfo) {
+		ComponentInstance ci = this.deserializeComponentInstance(scoredSolutionCandidateInfo.getSolutionCandidateRepresentation());
 		if (ci == null) {
 			return;
 		}
 		UnparametrizedComponentInstance uci = new UnparametrizedComponentInstance(ci);
-		if (!observedSolutionsGroupedModuloParameters.containsKey(uci)) {
-			observedSolutionsGroupedModuloParameters.put(uci, new ArrayList<>());
+		if (!this.observedSolutionsGroupedModuloParameters.containsKey(uci)) {
+			this.observedSolutionsGroupedModuloParameters.put(uci, new ArrayList<>());
 		}
-		observedSolutionsGroupedModuloParameters.get(uci).add(scoredSolutionCandidateInfo);
+		this.observedSolutionsGroupedModuloParameters.get(uci).add(scoredSolutionCandidateInfo);
 		ci.getContainedComponents().forEach(c -> {
-			if (!knownComponents.containsKey(c.getName())) {
-				knownComponents.put(c.getName(), c);
+			if (!this.knownComponents.containsKey(c.getName())) {
+				this.knownComponents.put(c.getName(), c);
 			}
 		});
-		getView().update();
+		this.getView().update();
 	}
 
 	/**
 	 * Gets an (unordered) collection of the solutions received so far.
-	 * 
+	 *
 	 * @return Collection of solutions.
 	 */
 	public Collection<ScoredSolutionCandidateInfo> getAllSeenSolutionCandidateFoundInfosUnordered() {
 		List<ScoredSolutionCandidateInfo> solutionEvents = new ArrayList<>();
-		observedSolutionsGroupedModuloParameters.values().forEach(l -> solutionEvents.addAll(l));
+		this.observedSolutionsGroupedModuloParameters.values().forEach(solutionEvents::addAll);
 		return solutionEvents;
 	}
 
@@ -70,17 +70,17 @@ public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCO
 	 * @return A map that assigns, for each known component, its name to the Component object.
 	 */
 	public Map<String, Component> getKnownComponents() {
-		return knownComponents;
+		return this.knownComponents;
 	}
 
 	/**
-	 * 
+	 *
 	 * @param composition
 	 * @return
 	 */
-	public DescriptiveStatistics getPerformanceStatisticsForComposition(UnparametrizedComponentInstance composition) {
+	public DescriptiveStatistics getPerformanceStatisticsForComposition(final UnparametrizedComponentInstance composition) {
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		observedSolutionsGroupedModuloParameters.get(composition).forEach(e -> stats.addValue(parseScoreToDouble(e.getScore())));
+		this.observedSolutionsGroupedModuloParameters.get(composition).forEach(e -> stats.addValue(this.parseScoreToDouble(e.getScore())));
 		return stats;
 	}
 
@@ -89,21 +89,21 @@ public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCO
 	 */
 	@Override
 	public void clear() {
-		observedSolutionsGroupedModuloParameters.clear();
-		knownComponents.clear();
-		getView().clear();
+		this.observedSolutionsGroupedModuloParameters.clear();
+		this.knownComponents.clear();
+		this.getView().clear();
 	}
 
-	public ComponentInstance deserializeComponentInstance(String serializedComponentInstance) {
+	public ComponentInstance deserializeComponentInstance(final String serializedComponentInstance) {
 		try {
-			return componentInstanceSerializer.deserializeComponentInstance(serializedComponentInstance);
+			return this.componentInstanceSerializer.deserializeComponentInstance(serializedComponentInstance);
 		} catch (IOException e) {
 			LOGGER.warn("Cannot deserialize component instance {}.", serializedComponentInstance, e);
 		}
 		return null;
 	}
 
-	public double parseScoreToDouble(String score) throws NumberFormatException {
+	public double parseScoreToDouble(final String score) {
 		return Double.parseDouble(score);
 	}
 
