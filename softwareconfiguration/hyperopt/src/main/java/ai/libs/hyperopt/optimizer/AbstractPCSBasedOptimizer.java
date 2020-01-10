@@ -9,9 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hyperopt.FileUtil;
 import ai.libs.hyperopt.PCSBasedOptimizerGrpcServer;
 import ai.libs.hyperopt.PCSBasedOptimizerInput;
+import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.logging.LoggerUtil;
 
 /**

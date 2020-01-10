@@ -17,7 +17,9 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.common.reconstruction.IReconstructible;
 
+import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
@@ -87,6 +89,15 @@ public class DatasetUtil {
 			datasetModified.add(ci);
 		}
 
+		/* add reconstruction instructions to the dataset */
+		if (dataset instanceof IReconstructible) {
+			((IReconstructible) dataset).getConstructionPlan().getInstructions().forEach(datasetModified::addInstruction);
+			try {
+				datasetModified.addInstruction(new ReconstructionInstruction(DatasetUtil.class.getMethod("convertToClassificationDataset", ILabeledDataset.class), "this"));
+			} catch (NoSuchMethodException | SecurityException e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 		return datasetModified;
 	}
 

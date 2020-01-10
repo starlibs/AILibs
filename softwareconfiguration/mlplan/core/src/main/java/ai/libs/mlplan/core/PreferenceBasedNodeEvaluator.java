@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multiclass.sklearn;
+package ai.libs.mlplan.core;
 
 import java.util.ArrayList;
 import java.util.Collection;

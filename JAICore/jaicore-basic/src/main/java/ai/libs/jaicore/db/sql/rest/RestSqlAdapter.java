@@ -1,6 +1,9 @@
 package ai.libs.jaicore.db.sql.rest;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +24,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import ai.libs.jaicore.basic.kvstore.KVStoreUtil;
+import ai.libs.jaicore.db.IDatabaseAdapter;
 
 /**
  * This is a simple util class for easy database access and query execution in sql. You need to make sure that the respective JDBC connector is in the class path. By default, the adapter uses the mysql driver, but any jdbc driver can be
@@ -30,7 +34,7 @@ import ai.libs.jaicore.basic.kvstore.KVStoreUtil;
  *
  */
 @SuppressWarnings("serial")
-public class RestSqlAdapter {
+public class RestSqlAdapter implements IDatabaseAdapter {
 
 	private final IRestDatabaseConfig config;
 
@@ -38,12 +42,13 @@ public class RestSqlAdapter {
 		this.config = config;
 	}
 
-	public List<IKVStore> select(final String query) throws IOException {
+	public List<IKVStore> select(final String query) throws SQLException {
 		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getSelectSuffix(), query);
 		return KVStoreUtil.readFromJson(res);
 	}
 
-	public int[] insert(final String table, final Map<String, Object> values) throws IOException {
+	@Override
+	public int[] insert(final String table, final Map<String, ? extends Object> values) throws SQLException  {
 		StringBuilder queryBuilder = new StringBuilder();
 		List<String> keys = new LinkedList<>(values.keySet());
 		queryBuilder.append("INSERT INTO " + table + "(");
@@ -54,7 +59,8 @@ public class RestSqlAdapter {
 		return this.insert(queryBuilder.toString());
 	}
 
-	public int[] insertMultiple(final String tablename, final List<String> keys, final List<List<?>> values) throws IOException {
+	@Override
+	public int[] insertMultiple(final String tablename, final List<String> keys, final List<List<?>> values) throws SQLException {
 		StringBuilder queryBuilder = new StringBuilder();
 		queryBuilder.append("INSERT INTO " + tablename + " (");
 		queryBuilder.append(keys.stream().collect(Collectors.joining(",")));
@@ -64,7 +70,7 @@ public class RestSqlAdapter {
 		return this.insert(queryBuilder.toString());
 	}
 
-	public int[] insert(final String query) throws IOException {
+	public int[] insert(final String query) throws SQLException  {
 		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getInsertSuffix(), query);
 		if (res instanceof ArrayNode) {
 			ArrayNode array = (ArrayNode) res;
@@ -74,17 +80,19 @@ public class RestSqlAdapter {
 		}
 	}
 
-	public int update(final String query) throws IOException {
+	@Override
+	public int update(final String query) throws SQLException  {
 		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getUpdateSuffix(), query);
 		return res.asInt();
 	}
 
-	public List<IKVStore> query(final String query) throws IOException {
+	@Override
+	public List<IKVStore> query(final String query) throws SQLException {
 		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getQuerySuffix(), query);
 		return KVStoreUtil.readFromJson(res);
 	}
 
-	public JsonNode executeRESTCall(final String URL, final String query) throws IOException {
+	public JsonNode executeRESTCall(final String URL, final String query) throws SQLException {
 		CloseableHttpClient client = HttpClientBuilder.create().build();
 		try {
 			ObjectMapper mapper = new ObjectMapper();
@@ -97,18 +105,25 @@ public class RestSqlAdapter {
 			post.setEntity(requestEntity);
 			CloseableHttpResponse response = client.execute(post);
 			return mapper.readTree(response.getEntity().getContent());
+		} catch (UnsupportedOperationException | IOException e) {
+			throw new SQLException(e);
 		} finally {
-			client.close();
+			try {
+				client.close();
+			} catch (IOException e) {
+				throw new SQLException(e);
+			}
 		}
 	}
 
-	public int update(final String tablename, final Map<String, String> valuesToWrite, final Map<String, String> where) throws IOException {
+	@Override
+	public int update(final String tablename, final Map<String, ? extends Object> valuesToWrite, final Map<String, ? extends Object> where) throws SQLException {
 		StringBuilder queryBuilder = new StringBuilder();
 		queryBuilder.append("UPDATE " + tablename + " SET ");
 		queryBuilder.append(valuesToWrite.entrySet().stream().map(e -> e.getKey() + "='" + e.getValue() + "'").collect(Collectors.joining(",")));
 		if (!where.isEmpty()) {
 			queryBuilder.append(" WHERE ");
-			queryBuilder.append(where.entrySet().stream().map(e -> RestSqlAdapter.whereClauseElement(e.getKey(), e.getValue())).collect(Collectors.joining(" AND ")));
+			queryBuilder.append(where.entrySet().stream().map(e -> RestSqlAdapter.whereClauseElement(e.getKey(), e.getValue().toString())).collect(Collectors.joining(" AND ")));
 		}
 		return this.update(queryBuilder.toString());
 	}
@@ -124,6 +139,60 @@ public class RestSqlAdapter {
 			sb.append("'");
 		}
 		return sb.toString();
+	}
+
+	@Override
+	public String getLoggerName() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void checkConnection() throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void createTable(final String tablename, final String nameOfPrimaryField, final Collection<String> fieldnames, final Map<String, String> types, final Collection<String> keys) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IKVStore> getRowsOfTable(final String table, final Map<String, String> conditions) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<IKVStore> getResultsOfQuery(final String query, final List<String> values) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int[] insert(final String sql, final List<? extends Object> values) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int[] insertMultiple(final String table, final List<String> keys, final List<List<? extends Object>> datarows, final int chunkSize) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int update(final String sql, final List<? extends Object> values) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+	@Override
+	public void executeQueriesAtomically(final List<PreparedStatement> queries) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void close() {
+		throw new UnsupportedOperationException();
 	}
 
 }

@@ -26,6 +26,7 @@ import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
+import ai.libs.mlplan.core.PreferenceBasedNodeEvaluator;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 
 public class MLPlanSKLearnBuilder extends AbstractMLPlanBuilder<ScikitLearnWrapper, MLPlanSKLearnBuilder> {

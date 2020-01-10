@@ -24,6 +24,7 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEv
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.ILearnerFactory;
+import ai.libs.mlplan.core.PreferenceBasedNodeEvaluator;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 
 public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IMekaClassifier, MLPlanMekaBuilder> {

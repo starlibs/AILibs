@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -32,8 +33,8 @@ public class RestSqlAdapterTest {
 	}
 
 	@Test
-	public void testSelectQuery() throws ClientProtocolException, IOException {
-		List<IKVStore> res = adapter.select("SELECT * FROM " + SELECT_TABLE);
+	public void testSelectQuery() throws SQLException {
+		List<IKVStore> res = adapter.getResultsOfQuery("SELECT * FROM " + SELECT_TABLE);
 		if (res.isEmpty() || res.size() > 1) {
 			fail("No result or too many results returned for select query.");
 		}
@@ -45,7 +46,7 @@ public class RestSqlAdapterTest {
 	}
 
 	@Test
-	public void testInsertQuery() throws ClientProtocolException, IOException {
+	public void testInsertQuery() throws ClientProtocolException, IOException, SQLException {
 		int numEntriesBefore = this.numEntries(DELETE_FROM_INSERT_TABLE);
 		adapter.insert("INSERT INTO " + DELETE_FROM_INSERT_TABLE + " (y) VALUES (2)");
 		int numEntriesAfter = this.numEntries(DELETE_FROM_INSERT_TABLE);
@@ -53,7 +54,7 @@ public class RestSqlAdapterTest {
 	}
 
 	@Test
-	public void testRemoveEntryQuery() throws ClientProtocolException, IOException {
+	public void testRemoveEntryQuery() throws ClientProtocolException, IOException, SQLException {
 		int numEntriesBefore = this.numEntries(DELETE_FROM_INSERT_TABLE);
 		adapter.insert("DELETE FROM " + DELETE_FROM_INSERT_TABLE + " LIMIT 1");
 		int numEntriesAfter = this.numEntries(DELETE_FROM_INSERT_TABLE);
@@ -61,7 +62,7 @@ public class RestSqlAdapterTest {
 	}
 
 	@Test
-	public void testCreateAndDropTable() throws ClientProtocolException, IOException {
+	public void testCreateAndDropTable() throws ClientProtocolException, IOException, SQLException {
 		System.out.println("Create table...");
 		adapter.query("CREATE TABLE " + CREATE_DROP_TABLE + " (a VARCHAR(1))");
 		System.out.println("Insert into table...");
@@ -70,7 +71,7 @@ public class RestSqlAdapterTest {
 		adapter.query("DROP TABLE " + CREATE_DROP_TABLE);
 	}
 
-	public int numEntries(final String table) throws ClientProtocolException, IOException {
+	public int numEntries(final String table) throws ClientProtocolException, IOException, SQLException {
 		return adapter.select("SELECT * FROM " + table).size();
 	}
 

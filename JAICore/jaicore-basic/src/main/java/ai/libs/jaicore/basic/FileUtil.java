@@ -311,4 +311,18 @@ public class FileUtil {
 		}
 		Files.delete(dir.toPath());// The directory is empty now and can be deleted.
 	}
+
+	/**
+	 * Writes List of strings as lines to given file
+	 * @param lines
+	 * @param filename
+	 * @throws IOException
+	 */
+	public static void writeFileAsList(final List<String> lines, final String filename) throws IOException {
+		try (FileWriter writer = new FileWriter(filename)) {
+			for (String line : lines) {
+				writer.write(line + System.lineSeparator());
+			}
+		}
+	}
 }

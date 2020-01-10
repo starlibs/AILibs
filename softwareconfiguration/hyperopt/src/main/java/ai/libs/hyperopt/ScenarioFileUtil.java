@@ -9,6 +9,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.FileUtil;
+
 /**
  * Utility class for handling scenario file for optimizer scripts
  * @author kadirayk

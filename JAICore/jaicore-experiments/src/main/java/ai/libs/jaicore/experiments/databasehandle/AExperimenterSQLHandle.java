@@ -46,8 +46,8 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	private static final String FIELD_TIME_END = FIELD_TIME + "_end";
 	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-	private final IDatabaseAdapter adapter;
-	private final String tablename;
+	protected final IDatabaseAdapter adapter;
+	protected final String tablename;
 
 	private IExperimentSetConfig config;
 
@@ -134,7 +134,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		}
 	}
 
-	private String getSQLPrefixForSelectQuery() {
+	protected String getSQLPrefixForSelectQuery() {
 		StringBuilder queryStringSB = new StringBuilder();
 		queryStringSB.append("SELECT * FROM `");
 		queryStringSB.append(this.tablename);
@@ -233,7 +233,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		}
 	}
 
-	private List<ExperimentDBEntry> getExperimentsForSQLQuery(final String sql) throws SQLException {
+	protected List<ExperimentDBEntry> getExperimentsForSQLQuery(final String sql) throws SQLException {
 		if (this.config == null || this.keyFields == null) {
 			throw new IllegalStateException(ERROR_NOSETUP);
 		}
@@ -307,9 +307,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		List<String> keys = new ArrayList<>();
 		keys.add(FIELD_MEMORY + "_max");
 		keys.add(FIELD_NUMCPUS);
-		for (String key : this.keyFields) {
-			keys.add(key);
-		}
+		keys.addAll(Arrays.asList(this.keyFields));
 
 		List<List<?>> values = new ArrayList<>();
 		for (Experiment exp : experiments) {
@@ -398,7 +396,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		this.finishExperiment(expEntry, null);
 	}
 
-	private String getDatabaseFieldnameForConfigEntry(final String configKey) {
+	protected String getDatabaseFieldnameForConfigEntry(final String configKey) {
 		return configKey.replace("\\.", "_");
 	}
 
@@ -458,6 +456,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		queryStringSB.append("SELECT * FROM `");
 		queryStringSB.append(this.tablename);
 		queryStringSB.append("` WHERE experiment_id = " + id);
+
 		try {
 			return this.getExperimentsForSQLQuery(queryStringSB.toString()).get(0);
 		} catch (SQLException e) {
