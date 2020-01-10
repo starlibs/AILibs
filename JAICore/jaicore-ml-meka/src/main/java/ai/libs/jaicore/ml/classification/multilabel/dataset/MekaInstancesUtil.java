@@ -42,7 +42,7 @@ public class MekaInstancesUtil {
 		if (targetIndex < 0) {
 			throw new IllegalArgumentException("Class index of Instances object is not set!");
 		}
-		List<IAttribute> attributes = IntStream.range(dataset.classIndex(), dataset.numAttributes()).mapToObj(x -> dataset.attribute(x)).map(MekaInstancesUtil::transformWEKAAttributeToAttributeType).collect(Collectors.toList());
+		List<IAttribute> attributes = IntStream.range(dataset.classIndex(), dataset.numAttributes()).mapToObj(dataset::attribute).map(MekaInstancesUtil::transformWEKAAttributeToAttributeType).collect(Collectors.toList());
 
 		List<String> values = IntStream.range(0, dataset.classIndex()).mapToObj(x -> dataset.attribute(x).name()).collect(Collectors.toList());
 		IAttribute labelAttribute = new MultiLabelAttribute("labels", values);

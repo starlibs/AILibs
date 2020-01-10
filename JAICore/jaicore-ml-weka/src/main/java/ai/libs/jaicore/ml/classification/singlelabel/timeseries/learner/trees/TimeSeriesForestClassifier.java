@@ -9,6 +9,7 @@ import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.ASimplifiedTSClassifier;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.TimeSeriesForestLearningAlgorithm.ITimeSeriesForestConfig;
@@ -65,7 +66,7 @@ public class TimeSeriesForestClassifier extends ASimplifiedTSClassifier<Integer>
 	}
 
 	public void setSeed(final int seed) {
-		this.config.setProperty(ITimeSeriesForestConfig.K_SEED, "" + seed);
+		this.config.setProperty(IOwnerBasedRandomizedAlgorithmConfig.K_SEED, "" + seed);
 	}
 
 	/**

@@ -90,7 +90,7 @@ public class TimeSeriesForestLearningAlgorithm extends ASimplifiedTSCLearningAlg
 		for (int i = 0; i < config.numTrees(); i++) {
 			ITimeSeriesTreeConfig configOfTree = ConfigCache.getOrCreate(ITimeSeriesTreeConfig.class);
 			configOfTree.setProperty(ITimeSeriesTreeConfig.K_MAXDEPTH, "" + config.maxDepth());
-			configOfTree.setProperty(ITimeSeriesTreeConfig.K_SEED, "" + config.seed() + i);
+			configOfTree.setProperty(IOwnerBasedRandomizedAlgorithmConfig.K_SEED, "" + config.seed() + i);
 			configOfTree.setProperty(ITimeSeriesTreeConfig.K_FEATURECACHING, "" + config.useFeatureCaching());
 			TimeSeriesTreeClassifier tst = new TimeSeriesTreeClassifier(configOfTree);
 			futures[i] = execService.submit(new Callable<TimeSeriesTreeClassifier>() {

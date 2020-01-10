@@ -19,6 +19,8 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 	 */
 	private static final double EPS = 0.00001;
 
+	private static final String MSG_NOMATCH = "The generated features do not match the expected results.";
+
 	private TimeSeriesBagOfFeaturesLearningAlgorithm algorithm;
 
 	/**
@@ -63,7 +65,7 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 		int numInstances = 1;
 		int numClasses = 3;
 
-		Pair<int[][][], int[][]> result = TimeSeriesBagOfFeaturesLearningAlgorithm.formHistogramsAndRelativeFreqs(discretizedProbs, targets, numInstances, numClasses, numBins);
+		Pair<int[][][], int[][]> result = TimeSeriesBagOfFeaturesLearningAlgorithm.formHistogramsAndRelativeFreqs(discretizedProbs, numInstances, numClasses, numBins);
 		int[][][] histograms = result.getX();
 		int[][] relativeFreqs = result.getY();
 
@@ -102,16 +104,16 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 		double[][][][] generatedFeatures = TimeSeriesBagOfFeaturesLearningAlgorithm.generateFeatures(data, subsequences, intervals);
 
 		// Features of the first interval (first instance)
-		Assert.assertArrayEquals("The generated features do not match the expected results.", new double[] { 1.5, 0.25, 1 }, generatedFeatures[0][0][0], EPS);
+		Assert.assertArrayEquals(MSG_NOMATCH, new double[] { 1.5, 0.25, 1 }, generatedFeatures[0][0][0], EPS);
 
 		// Features of the first interval (last instance)
-		Assert.assertArrayEquals("The generated features do not match the expected results.", new double[] { 0, 0, 0 }, generatedFeatures[1][0][0], EPS);
+		Assert.assertArrayEquals(MSG_NOMATCH, new double[] { 0, 0, 0 }, generatedFeatures[1][0][0], EPS);
 
 		// Features of the subsequence (first instance)
-		Assert.assertArrayEquals("The generated features do not match the expected results.", new double[] { 2, 0.66667, 1 }, generatedFeatures[0][0][1], EPS);
+		Assert.assertArrayEquals(MSG_NOMATCH, new double[] { 2, 0.66667, 1 }, generatedFeatures[0][0][1], EPS);
 
 		// Features of the subsequence (last instance)
-		Assert.assertArrayEquals("The generated features do not match the expected results.", new double[] { 0, 0, 0 }, generatedFeatures[1][0][1], EPS);
+		Assert.assertArrayEquals(MSG_NOMATCH, new double[] { 0, 0, 0 }, generatedFeatures[1][0][1], EPS);
 	}
 
 	/**
@@ -131,11 +133,11 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 		final int[][][] intervals = subsequencesAndIntervals.getY();
 
 		// Check subsequences dimensionality
-		Assert.assertEquals("The dimensionality of the calculated subsequences does not match the expected result.", r - d, subsequences.length);
+		Assert.assertEquals("The dimensionality of the calculated subsequences does not match the expected result.", r - (long)d, subsequences.length);
 		Assert.assertEquals("The dimensionality of the calculated subsequence indices does not match the expected result.", 2, subsequences[0].length);
 
 		// Check intervals dimensionality
-		Assert.assertEquals("The dimensionality of the calculated intervals does not match the expected result.", r - d, intervals.length);
+		Assert.assertEquals("The dimensionality of the calculated intervals does not match the expected result.", r - (long)d, intervals.length);
 		Assert.assertEquals("The dimensionality of the calculated intervals per subsequence does not match the expected result.", d, intervals[0].length);
 
 		// Check interval values

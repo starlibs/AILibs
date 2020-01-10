@@ -30,8 +30,6 @@ public class MekaInstance extends ElementDecorator<Instance> implements IMekaIns
 	@Override
 	public double[] getLabel() {
 		double[] labels = new double[this.getElement().classIndex()];
-		IntStream.range(0, this.getElement().classIndex()).mapToObj(x -> this.getElement().attribute(x).value((int) this.getElement().value(x))).forEach(System.out::println);
-
 		IntStream.range(0, this.getNumLabels()).forEach(x -> labels[x] = Integer.parseInt(this.getElement().attribute(x).value((int) this.getElement().value(x))));
 		return labels;
 	}

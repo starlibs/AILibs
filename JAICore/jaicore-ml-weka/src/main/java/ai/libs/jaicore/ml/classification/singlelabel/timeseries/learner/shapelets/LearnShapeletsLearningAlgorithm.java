@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.shapelets;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -226,9 +227,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 			double[][] tmpResult = new double[clusterCentroids.numInstances()][clusterCentroids.numAttributes()];
 			for (int j = 0; j < tmpResult.length; j++) {
 				double[] instValues = clusterCentroids.get(j).toDoubleArray();
-				for (int k = 0; k < tmpResult[j].length; k++) {
-					tmpResult[j][k] = instValues[k];
-				}
+				tmpResult[j] = Arrays.copyOf(instValues, tmpResult[j].length);
 			}
 			result[r] = tmpResult;
 		}

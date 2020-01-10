@@ -19,8 +19,6 @@ import org.api4.java.common.attributedobjects.IListDecorator;
 import org.api4.java.common.reconstruction.IReconstructible;
 import org.api4.java.common.reconstruction.IReconstructionInstruction;
 import org.api4.java.common.reconstruction.IReconstructionPlan;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionPlan;
@@ -31,11 +29,7 @@ import weka.core.Instances;
 
 public class MekaInstances implements IMekaInstances, IListDecorator<Instances, Instance, IMekaInstance>, IReconstructible {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -1980814429448333405L;
-	private static final Logger LOGGER = LoggerFactory.getLogger(MekaInstances.class);
 
 	private ILabeledInstanceSchema schema;
 
@@ -68,7 +62,7 @@ public class MekaInstances implements IMekaInstances, IListDecorator<Instances, 
 		}
 		if (this.dataset.numAttributes() != dataset.getNumAttributes() + this.dataset.classIndex()) {
 			throw new IllegalStateException("Number of attributes in the MekaInstances do not coincide. We have " + this.dataset.numAttributes() + " while given dataset had " + dataset.getNumAttributes()
-					+ ". There should be a difference of " + this.dataset.classIndex() + ", because WEKA counts the labels as an attribute each.");
+			+ ". There should be a difference of " + this.dataset.classIndex() + ", because WEKA counts the labels as an attribute each.");
 		}
 		this.reconstructionInstructions = (dataset instanceof IReconstructible) ? ((ReconstructionPlan) ((IReconstructible) dataset).getConstructionPlan()).getInstructions() : null;
 	}

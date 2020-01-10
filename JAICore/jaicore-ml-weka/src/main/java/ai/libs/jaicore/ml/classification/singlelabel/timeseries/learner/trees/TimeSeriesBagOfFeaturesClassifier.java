@@ -10,6 +10,7 @@ import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesFeature;
@@ -119,7 +120,7 @@ public class TimeSeriesBagOfFeaturesClassifier extends ASimplifiedTSClassifier<I
 	 */
 	public TimeSeriesBagOfFeaturesClassifier(final int seed, final int numBins, final int numFolds, final double zProp, final int minIntervalLength, final boolean useZNormalization) {
 		this.config = ConfigCache.getOrCreate(ITimeSeriesBagOfFeaturesConfig.class);
-		this.config.setProperty(ITimeSeriesBagOfFeaturesConfig.K_SEED, "" + seed);
+		this.config.setProperty(IOwnerBasedRandomizedAlgorithmConfig.K_SEED, "" + seed);
 		this.setNumBins(numBins);
 		this.config.setProperty(ITimeSeriesBagOfFeaturesConfig.K_NUMFOLDS, "" + numFolds);
 		this.config.setProperty(ITimeSeriesBagOfFeaturesConfig.K_ZPROP, "" + zProp);
@@ -189,7 +190,7 @@ public class TimeSeriesBagOfFeaturesClassifier extends ASimplifiedTSClassifier<I
 
 		// Discretize probabilities and create histograms for final Weka instance
 		int[][] discretizedProbs = TimeSeriesBagOfFeaturesLearningAlgorithm.discretizeProbs(this.getNumBins(), probs);
-		Pair<int[][][], int[][]> histFreqPair = TimeSeriesBagOfFeaturesLearningAlgorithm.formHistogramsAndRelativeFreqs(discretizedProbs, predictedTargets, 1, this.numClasses, this.getNumBins());
+		Pair<int[][][], int[][]> histFreqPair = TimeSeriesBagOfFeaturesLearningAlgorithm.formHistogramsAndRelativeFreqs(discretizedProbs, 1, this.numClasses, this.getNumBins());
 		int[][][] histograms = histFreqPair.getX();
 		int[][] relativeFrequencies = histFreqPair.getY();
 

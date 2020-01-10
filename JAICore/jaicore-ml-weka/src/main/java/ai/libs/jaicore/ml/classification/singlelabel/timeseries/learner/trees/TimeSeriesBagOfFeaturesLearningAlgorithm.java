@@ -211,7 +211,7 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 
 		// Discretize probability and form histogram
 		int[][] discretizedProbs = discretizeProbs(this.getConfig().numBins(), probs);
-		Pair<int[][][], int[][]> histFreqPair = formHistogramsAndRelativeFreqs(discretizedProbs, targets, data.length, numClasses, this.getConfig().numBins());
+		Pair<int[][][], int[][]> histFreqPair = formHistogramsAndRelativeFreqs(discretizedProbs, data.length, numClasses, this.getConfig().numBins());
 		int[][][] histograms = histFreqPair.getX();
 		int[][] relativeFrequencies = histFreqPair.getY();
 
@@ -467,7 +467,7 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 	 *         (<code>numInstances</code> in total) and the corresponding relative
 	 *         frequencies (normalized)
 	 */
-	public static Pair<int[][][], int[][]> formHistogramsAndRelativeFreqs(final int[][] discretizedProbs, final int[] targets, final int numInstances, final int numClasses, final int numBins) {
+	public static Pair<int[][][], int[][]> formHistogramsAndRelativeFreqs(final int[][] discretizedProbs, final int numInstances, final int numClasses, final int numBins) {
 
 		if (discretizedProbs.length < numInstances) {
 			throw new IllegalArgumentException("The number of discretized probabilities must not be lower than the number of instances!");

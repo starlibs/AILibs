@@ -268,7 +268,8 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		final List<Integer> classes = new ArrayList<>(new HashSet<Integer>(Arrays.asList(ArrayUtils.toObject(targets))));
 
 		// Initialize solution storing variables
-		double deltaEntropyStar = 0, thresholdStar = 0d;
+		double deltaEntropyStar = 0;
+		double thresholdStar = 0;
 		int t1t2Star = -1;
 		int fStar = -1;
 		double[] eStarPerFeatureType = new double[NUM_FEATURE_TYPES];
@@ -282,7 +283,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		// Search for the best splitting criterion in terms of the best Entrance gain
 		// for each feature type due to different feature scales
 		List<Integer> t1 = pairOfIntervalLists.getX();
-		List<Integer> T2 = pairOfIntervalLists.getY();
+		List<Integer> t2 = pairOfIntervalLists.getY();
 		for (int i = 0; i < t1.size(); i++) {
 			for (int k = 0; k < NUM_FEATURE_TYPES; k++) {
 				for (final double cand : thresholdCandidates.get(k)) {
@@ -318,7 +319,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		// Update node's decision function
 		nodeToBeFilled.getValue().f = FeatureType.values()[fStar];
 		nodeToBeFilled.getValue().t1 = t1.get(t1t2Star);
-		nodeToBeFilled.getValue().t2 = T2.get(t1t2Star);
+		nodeToBeFilled.getValue().t2 = t2.get(t1t2Star);
 		nodeToBeFilled.getValue().threshold = thresholdStar;
 
 		// Assign data instances and the corresponding targets to the child nodes
@@ -659,8 +660,8 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 
 		List<Integer> iList1 = new ArrayList<>();
 		List<Integer> iList2 = new ArrayList<>();
-		List<Integer> W = randomlySampleNoReplacement(IntStream.rangeClosed(1, m).boxed().collect(Collectors.toList()), (int) Math.sqrt(m), seed);
-		for (int w : W) {
+		List<Integer> bigW = randomlySampleNoReplacement(IntStream.rangeClosed(1, m).boxed().collect(Collectors.toList()), (int) Math.sqrt(m), seed);
+		for (int w : bigW) {
 			List<Integer> tmpSampling = randomlySampleNoReplacement(IntStream.rangeClosed(0, m - w).boxed().collect(Collectors.toList()), (int) Math.sqrt(m - w + 1.0), seed);
 			iList1.addAll(tmpSampling);
 			for (int t1 : tmpSampling) {

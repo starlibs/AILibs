@@ -9,7 +9,7 @@ public interface IMekaInstances extends ILabeledDataset<IMekaInstance> {
 
 	public Instances getList();
 
-	default public Instances getInstances() {
+	public default Instances getInstances() {
 		return this.getList();
 	}
 

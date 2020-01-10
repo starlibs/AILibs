@@ -58,8 +58,6 @@ public class MekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 		} else {
 			dataset = new WekaInstances(dTrain);
 		}
-
-		System.out.println("Fit classifier " + this);
 		try {
 			this.classifier.buildClassifier(dataset.getInstances());
 		} catch (InterruptedException e) {

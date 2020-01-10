@@ -8,6 +8,7 @@ import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.ASimplifiedTSClassifier;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.LearnPatternSimilarityLearningAlgorithm.IPatternSimilarityConfig;
@@ -96,7 +97,7 @@ public class LearnPatternSimilarityClassifier extends ASimplifiedTSClassifier<In
 	 */
 	public LearnPatternSimilarityClassifier(final int seed, final int numTrees, final int maxTreeDepth, final int numSegments) {
 		this.config = ConfigCache.getOrCreate(IPatternSimilarityConfig.class);
-		this.config.setProperty(IPatternSimilarityConfig.K_SEED, "" + seed);
+		this.config.setProperty(IOwnerBasedRandomizedAlgorithmConfig.K_SEED, "" + seed);
 		this.config.setProperty(IPatternSimilarityConfig.K_NUMTREES, "" + numTrees);
 		this.config.setProperty(IPatternSimilarityConfig.K_MAXDEPTH, "" + maxTreeDepth);
 		this.config.setProperty(IPatternSimilarityConfig.K_NUMSEGMENTS, "" + numSegments);
