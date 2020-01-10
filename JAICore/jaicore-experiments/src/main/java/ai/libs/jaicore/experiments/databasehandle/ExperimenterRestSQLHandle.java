@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.http.client.ClientProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -213,7 +212,7 @@ public class ExperimenterRestSQLHandle implements IExperimentDatabaseHandle {
 		}
 	}
 
-	private List<ExperimentDBEntry> getExperimentsForSQLQuery(final String sql) throws ClientProtocolException, IOException {
+	private List<ExperimentDBEntry> getExperimentsForSQLQuery(final String sql) throws IOException {
 		if (this.config == null || this.keyFields == null) {
 			throw new IllegalStateException(ERROR_NOSETUP);
 		}
@@ -288,9 +287,7 @@ public class ExperimenterRestSQLHandle implements IExperimentDatabaseHandle {
 		List<String> keys = new ArrayList<>();
 		keys.add(FIELD_MEMORY + "_max");
 		keys.add(FIELD_NUMCPUS);
-		for (String key : this.keyFields) {
-			keys.add(key);
-		}
+		keys.addAll(Arrays.asList(this.keyFields));
 
 		List<List<?>> values = new ArrayList<>();
 		for (Experiment exp : experiments) {

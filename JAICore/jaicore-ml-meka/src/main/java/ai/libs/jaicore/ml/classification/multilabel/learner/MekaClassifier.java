@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
@@ -22,6 +23,7 @@ import ai.libs.jaicore.basic.reconstruction.ReconstructionPlan;
 import ai.libs.jaicore.ml.classification.multilabel.MultiLabelClassification;
 import ai.libs.jaicore.ml.classification.multilabel.MultiLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
@@ -29,13 +31,17 @@ import meka.classifiers.multilabel.MultiLabelClassifier;
 
 public class MekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, IMultiLabelClassification, IMultiLabelClassificationPredictionBatch> implements IMekaClassifier, IReconstructible {
 
+	private static final AtomicInteger ID_COUNTER = new AtomicInteger(0);
+
 	private MultiLabelClassifier classifier;
 	private IReconstructionPlan reconstructionPlan;
 	private ILabeledInstanceSchema schema;
+	private final int id;
 
 	public MekaClassifier(final MultiLabelClassifier classifier) {
 		this.reconstructionPlan = new ReconstructionPlan();
 		this.classifier = classifier;
+		this.id = ID_COUNTER.getAndIncrement();
 	}
 
 	@Override
@@ -53,12 +59,13 @@ public class MekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 			dataset = new WekaInstances(dTrain);
 		}
 
+		System.out.println("Fit classifier " + this);
 		try {
 			this.classifier.buildClassifier(dataset.getInstances());
 		} catch (InterruptedException e) {
 			throw e;
 		} catch (Exception e) {
-			new TrainingException("Could not build classifier.", e);
+			throw new TrainingException("Could not build classifier.", e);
 		}
 	}
 
@@ -107,6 +114,16 @@ public class MekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 			batch.add(this.predict(instance));
 		}
 		return new MultiLabelClassificationPredictionBatch(batch);
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("#");
+		sb.append(this.id);
+		sb.append(": ");
+		sb.append(WekaUtil.getClassifierDescriptor(this.classifier));
+		return sb.toString();
 	}
 
 }

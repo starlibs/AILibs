@@ -66,7 +66,7 @@ import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
  * @author scheiblm
  */
 public class ScikitLearnWrapper extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch>
-implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
+		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 	private static final String PYTHON_FILE_EXT = ".py";
 	private static final String MODEL_DUMP_FILE_EXT = ".pcl";
 	private static final String RESULT_FILE_EXT = ".json";
@@ -175,7 +175,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void fit(final ILabeledDataset<? extends ILabeledInstance> data) throws TrainingException {
+	public void fit(final ILabeledDataset<? extends ILabeledInstance> data) throws TrainingException, InterruptedException {
 		try {
 			/* Ensure model dump directory exists and get the name of the dump */
 			MODEL_DUMPS_DIRECTORY.mkdirs();
@@ -190,9 +190,16 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 				if (L.isDebugEnabled()) {
 					L.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
 				}
-				this.runProcess(trainCommand, new DefaultProcessListener(VERBOSE));
+				DefaultProcessListener listener = new DefaultProcessListener(VERBOSE);
+				this.runProcess(trainCommand, listener);
+
+				if (!listener.getErrorOutput().isEmpty()) {
+					System.err.println("Raise error message");
+					throw new Exception(listener.getErrorOutput().split("\\n")[0]);
+				}
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new TrainingException("An exception occurred while training.", e);
 		}
 	}
@@ -221,7 +228,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 
 	@Override
 	public ISingleLabelClassification predict(final ILabeledInstance instance) throws PredictionException, InterruptedException {
-		return (ISingleLabelClassification)this.predict(new ILabeledInstance[] { instance }).get(0);
+		return this.predict(new ILabeledInstance[] { instance }).get(0);
 	}
 
 	@Override
@@ -263,9 +270,16 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 				L.debug("Run train test mode with {}", Arrays.toString(testCommand));
 			}
 
+			DefaultProcessListener listener = new DefaultProcessListener(VERBOSE);
 			try {
-				this.runProcess(testCommand, new DefaultProcessListener(VERBOSE));
-			} catch (IOException e) {
+				this.runProcess(testCommand, listener);
+				if (!listener.getErrorOutput().isEmpty()) {
+					String[] message = listener.getErrorOutput().split("\\n");
+					throw new Exception(message[message.length - 1].trim());
+				}
+			} catch (InterruptedException e) {
+				throw e;
+			} catch (Exception e) {
 				throw new PredictionException("Could not run scikit-learn classifier.", e);
 			}
 		}

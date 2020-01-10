@@ -19,10 +19,9 @@ import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.AutoMEKAGGPFitnessMeasureLoss;
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.InstanceWiseF1;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
+import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
-import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
-import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
@@ -39,8 +38,7 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IMekaClassifier, ML
 	private static final IMultiLabelClassificationPredictionPerformanceMeasure DEFAULT_PERFORMANCE_MEASURE = new InstanceWiseF1();
 
 	private static final ILearnerFactory<IMekaClassifier> DEF_CLASSIFIER_FACTORY = new MekaPipelineFactory();
-	private static final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> DEF_SEARCH_SELECT_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE,
-			new Random(0));
+	private static final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> DEF_SEARCH_SELECT_SPLITTER = new RandomHoldoutSplitter<>(new Random(0), DEFAULT_SEARCH_TRAIN_FOLD_SIZE);
 	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS)
 			.withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE).withMeasure(DEFAULT_PERFORMANCE_MEASURE);
 	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS)

@@ -249,6 +249,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					if (newNode.getScore() == null) {
 						BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, ENodeType.OR_PRUNED.toString()));
 						return;
+					} else {
+						BestFirst.this.post(new NodeInfoAlteredEvent<>(BestFirst.this.getId(), newNode));
 					}
 					if (BestFirst.this.isStopCriterionSatisfied()) {
 						this.communicateJobFinished();
@@ -261,6 +263,9 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					BestFirst.this.logger.debug("Worker has been interrupted, exiting.");
 					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, ENodeAnnotation.F_ERROR.toString(), e));
 					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, ENodeType.OR_PRUNED.toString()));
+
+					BestFirst.this.post(new NodeInfoAlteredEvent<>(BestFirst.this.getId(), newNode));
+
 					Thread.currentThread().interrupt();
 					return;
 				} catch (TimeoutException e) {
@@ -268,12 +273,18 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					newNode.setAnnotation(ENodeAnnotation.F_ERROR.toString(), e);
 					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, ENodeAnnotation.F_ERROR.toString(), e));
 					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, ENodeType.OR_TIMEDOUT.toString()));
+
+					BestFirst.this.post(new NodeInfoAlteredEvent<>(BestFirst.this.getId(), newNode));
+
 					return;
 				} catch (Exception e) {
 					BestFirst.this.logger.debug("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
 					newNode.setAnnotation(ENodeAnnotation.F_ERROR.toString(), e);
 					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, ENodeAnnotation.F_ERROR.toString(), e));
 					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, ENodeType.OR_PRUNED.toString()));
+
+					BestFirst.this.post(new NodeInfoAlteredEvent<>(BestFirst.this.getId(), newNode));
+
 					return;
 				}
 
@@ -525,9 +536,6 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		/* eventually set the label */
 		node.setScore(label);
 		assert node.getScore() != null : "Node label must not be NULL";
-
-		// XXX
-		this.post(new NodeInfoAlteredEvent<BackPointerPath<N, A, V>>(this.getId(), node));
 	}
 
 	/**

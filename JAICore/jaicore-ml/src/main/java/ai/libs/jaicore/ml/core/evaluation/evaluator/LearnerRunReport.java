@@ -1,8 +1,13 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.IPredictionAndGroundTruthTable;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
+
+import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class LearnerRunReport implements ILearnerRunReport {
 
@@ -39,7 +44,8 @@ public class LearnerRunReport implements ILearnerRunReport {
 		this.exception = exception;
 	}
 
-	public LearnerRunReport(final ILabeledDataset<?> trainSet, final ILabeledDataset<?> testSet, final long trainStartTime, final long trainEndTime, final long testStartTime, final long testEndTime, final IPredictionAndGroundTruthTable diff) {
+	public LearnerRunReport(final ILabeledDataset<?> trainSet, final ILabeledDataset<?> testSet, final long trainStartTime, final long trainEndTime, final long testStartTime, final long testEndTime,
+			final IPredictionAndGroundTruthTable diff) {
 		super();
 		this.trainSet = trainSet;
 		this.testSet = testSet;
@@ -89,5 +95,17 @@ public class LearnerRunReport implements ILearnerRunReport {
 	@Override
 	public Throwable getException() {
 		return this.exception;
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("trainStartTime", this.trainStartTime);
+		fields.put("trainEndTime", this.trainEndTime);
+		fields.put("testStartTime", this.testStartTime);
+		fields.put("testEndTime", this.testEndTime);
+		fields.put("exception", this.exception);
+		fields.put("diffClass", this.diff.getClass().getName());
+		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 }

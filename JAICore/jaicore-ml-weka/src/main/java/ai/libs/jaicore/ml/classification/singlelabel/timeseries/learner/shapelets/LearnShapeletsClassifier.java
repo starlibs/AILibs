@@ -11,6 +11,7 @@ import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.ASimplifiedTSClassifier;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.shapelets.LearnShapeletsLearningAlgorithm.ILearnShapeletsLearningAlgorithmConfig;
@@ -105,7 +106,7 @@ public class LearnShapeletsClassifier extends ASimplifiedTSClassifier<Integer> {
 		this.config.setProperty(ILearnShapeletsLearningAlgorithmConfig.K_REGULARIZATION, "" + regularization);
 		this.config.setProperty(ILearnShapeletsLearningAlgorithmConfig.K_SCALER, "" + scaleR);
 		this.config.setProperty(ILearnShapeletsLearningAlgorithmConfig.K_SHAPELETLENGTH_RELMIN, "" + minShapeLengthPercentage);
-		this.config.setProperty(ILearnShapeletsLearningAlgorithmConfig.K_SEED, "" + seed);
+		this.config.setProperty(IOwnerBasedRandomizedAlgorithmConfig.K_SEED, "" + seed);
 		this.config.setProperty(ILearnShapeletsLearningAlgorithmConfig.K_MAXITER, "" + maxIter);
 		this.config.setProperty(ILearnShapeletsLearningAlgorithmConfig.K_LEARNINGRATE, "" + learningRate);
 		this.config.setProperty(ILearnShapeletsLearningAlgorithmConfig.K_GAMMA, "" + gamma);

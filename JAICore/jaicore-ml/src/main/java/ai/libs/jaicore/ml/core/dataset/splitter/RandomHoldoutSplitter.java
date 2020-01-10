@@ -5,11 +5,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.IRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
 import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSetGenerator;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
@@ -23,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
-import ai.libs.jaicore.ml.core.dataset.DatasetUtil;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.SimpleRandomSampling;
 
 /**
@@ -33,7 +33,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.SimpleRandomSampling;
  *
  * @param <D>
  */
-public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomDatasetSplitter<D>, IDatasetSplitSetGenerator<D>, ILoggingCustomizable {
+public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomDatasetSplitter<D>, IDatasetSplitSetGenerator<D>, ILoggingCustomizable, IFoldSizeConfigurableRandomDatasetSplitter<D> {
 
 	private final Random rand;
 	private final double[] portions;
@@ -54,8 +54,7 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 		this.rand = rand;
 		if (portionSum == 1) {
 			this.portions = portions;
-		}
-		else {
+		} else {
 			this.portions = new double[portions.length + 1];
 			for (int i = 0; i < portions.length; i++) {
 				this.portions[i] = portions[i];
@@ -80,25 +79,35 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 	 * @throws SplitFailedException
 	 * @throws InterruptedException
 	 */
-	public static <D extends IDataset<?>> List<D> createSplit(final D data, final long seed, final Logger logger, final double... portions) throws SplitFailedException, InterruptedException {
+	public static <D extends IDataset<?>> List<D> createSplit(final D data, final long seed, final Logger logger, final double... pPortions) throws SplitFailedException, InterruptedException {
+		double portionsSum = Arrays.stream(pPortions).sum();
+		if (portionsSum > 1) {
+			throw new IllegalArgumentException("Sum of portions must not be greater than 1.");
+		}
+
+		final double[] portions;
+		if (portionsSum < 1.0 - 1E-8) {
+			portions = new double[pPortions.length + 1];
+			IntStream.range(0, pPortions.length).forEach(x -> portions[x] = pPortions[x]);
+			portions[portions.length - 1] = 1.0 - portionsSum;
+		} else {
+			portions = pPortions;
+		}
 		logger.info("Creating new split with {} folds.", portions.length);
 		List<D> folds = new ArrayList<>(portions.length);
 
 		/* create sub-indices for the respective folds */
 		int totalItems = data.size();
 		try {
-			D copy = (D)data.createCopy();
+			D copy = (D) data.createCopy();
 			Collections.shuffle(copy, new Random(seed));
-			if (copy instanceof ILabeledDataset<?> && logger.isDebugEnabled()) {
-				logger.debug("Class distribution is {}", DatasetUtil.getLabelCounts((ILabeledDataset<?>)copy));
-			}
 			double remainingMass = 1;
 			for (int numFold = 0; numFold < portions.length; numFold++) {
 				double portion = numFold < portions.length ? portions[numFold] : remainingMass;
 				remainingMass -= portion;
 				if (remainingMass > 0) {
 					SimpleRandomSampling<D> subSampler = new SimpleRandomSampling<>(new Random(seed), copy);
-					int sampleSize = (int)Math.round(portion * totalItems);
+					int sampleSize = (int) Math.round(portion * totalItems);
 					subSampler.setSampleSize(sampleSize);
 					logger.debug("Computing fold of size {}/{}, i.e. a portion of {}", sampleSize, totalItems, portion);
 					D fold = subSampler.call();
@@ -106,8 +115,7 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 					folds.add(fold);
 					copy = subSampler.getComplementOfLastSample();
 					logger.debug("Reduced the data by the fold. Remaining items: {}", copy.size());
-				}
-				else {
+				} else {
 					logger.debug("This is the last fold, which exhausts the complete original data, so no more sampling will be conducted.");
 					folds.add(copy);
 					addReconstructionInfo(data, copy, seed, numFold, portions);
@@ -125,12 +133,13 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 	private static void addReconstructionInfo(final IDataset<?> data, final IDataset<?> fold, final long seed, final int numFold, final double[] portions) {
 		if (data instanceof IReconstructible) { // make the data in the folds reconstructible
 			ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(data);
-			((IReconstructible) data).getConstructionPlan().getInstructions().forEach(inst -> ((IReconstructible)fold).addInstruction(inst));
-			((IReconstructible) fold).addInstruction(new ReconstructionInstruction(RandomHoldoutSplitter.class.getName(), "getFoldOfSplit", new Class<?>[] {IDataset.class, long.class, int.class, double[].class}, new Object[] {"this", seed, numFold, portions}));
+			((IReconstructible) data).getConstructionPlan().getInstructions().forEach(inst -> ((IReconstructible) fold).addInstruction(inst));
+			((IReconstructible) fold).addInstruction(
+					new ReconstructionInstruction(RandomHoldoutSplitter.class.getName(), "getFoldOfSplit", new Class<?>[] { IDataset.class, long.class, int.class, double[].class }, new Object[] { "this", seed, numFold, portions }));
 		}
 	}
 
-	public static <D extends IDataset<?>> D getFoldOfSplit(final D data, final long seed, final int fold, final double...portions) throws SplitFailedException, InterruptedException {
+	public static <D extends IDataset<?>> D getFoldOfSplit(final D data, final long seed, final int fold, final double... portions) throws SplitFailedException, InterruptedException {
 		return createSplit(data, seed, portions).get(fold);
 	}
 
@@ -173,4 +182,10 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 	public String toString() {
 		return "RandomHoldoutSplitter [rand=" + this.rand + ", portions=" + Arrays.toString(this.portions) + "]";
 	}
+
+	@Override
+	public List<D> split(final D data, final Random random, final double... relativeFoldSizes) throws SplitFailedException, InterruptedException {
+		return createSplit(data, random.nextLong(), this.logger, relativeFoldSizes);
+	}
+
 }

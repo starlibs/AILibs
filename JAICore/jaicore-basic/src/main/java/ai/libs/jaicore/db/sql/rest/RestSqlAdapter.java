@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -39,15 +38,14 @@ public class RestSqlAdapter {
 		this.config = config;
 	}
 
-	public List<IKVStore> select(final String query) throws ClientProtocolException, IOException {
+	public List<IKVStore> select(final String query) throws IOException {
 		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getSelectSuffix(), query);
 		return KVStoreUtil.readFromJson(res);
 	}
 
-	public int[] insert(final String table, final Map<String, Object> values) throws ClientProtocolException, IOException {
+	public int[] insert(final String table, final Map<String, Object> values) throws IOException {
 		StringBuilder queryBuilder = new StringBuilder();
 		List<String> keys = new LinkedList<>(values.keySet());
-
 		queryBuilder.append("INSERT INTO " + table + "(");
 		queryBuilder.append(keys.stream().collect(Collectors.joining(",")));
 		queryBuilder.append(") VALUES ('");
@@ -56,7 +54,7 @@ public class RestSqlAdapter {
 		return this.insert(queryBuilder.toString());
 	}
 
-	public int[] insertMultiple(final String tablename, final List<String> keys, final List<List<?>> values) throws ClientProtocolException, IOException {
+	public int[] insertMultiple(final String tablename, final List<String> keys, final List<List<?>> values) throws IOException {
 		StringBuilder queryBuilder = new StringBuilder();
 		queryBuilder.append("INSERT INTO " + tablename + " (");
 		queryBuilder.append(keys.stream().collect(Collectors.joining(",")));
@@ -66,7 +64,7 @@ public class RestSqlAdapter {
 		return this.insert(queryBuilder.toString());
 	}
 
-	public int[] insert(final String query) throws ClientProtocolException, IOException {
+	public int[] insert(final String query) throws IOException {
 		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getInsertSuffix(), query);
 		if (res instanceof ArrayNode) {
 			ArrayNode array = (ArrayNode) res;
@@ -76,19 +74,17 @@ public class RestSqlAdapter {
 		}
 	}
 
-	public int update(final String query) throws ClientProtocolException, IOException {
+	public int update(final String query) throws IOException {
 		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getUpdateSuffix(), query);
 		return res.asInt();
 	}
 
-	public List<IKVStore> query(final String query) throws ClientProtocolException, IOException {
+	public List<IKVStore> query(final String query) throws IOException {
 		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getQuerySuffix(), query);
-
-		System.out.println(new ObjectMapper().writeValueAsString(res));
 		return KVStoreUtil.readFromJson(res);
 	}
 
-	public JsonNode executeRESTCall(final String URL, final String query) throws ClientProtocolException, IOException {
+	public JsonNode executeRESTCall(final String URL, final String query) throws IOException {
 		CloseableHttpClient client = HttpClientBuilder.create().build();
 		try {
 			ObjectMapper mapper = new ObjectMapper();
@@ -106,7 +102,7 @@ public class RestSqlAdapter {
 		}
 	}
 
-	public int update(final String tablename, final Map<String, String> valuesToWrite, final Map<String, String> where) throws ClientProtocolException, IOException {
+	public int update(final String tablename, final Map<String, String> valuesToWrite, final Map<String, String> where) throws IOException {
 		StringBuilder queryBuilder = new StringBuilder();
 		queryBuilder.append("UPDATE " + tablename + " SET ");
 		queryBuilder.append(valuesToWrite.entrySet().stream().map(e -> e.getKey() + "='" + e.getValue() + "'").collect(Collectors.joining(",")));
