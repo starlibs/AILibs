@@ -138,7 +138,7 @@ public class MekaInstances implements IMekaInstances, IListDecorator<Instances, 
 	}
 
 	@Override
-	public Constructor<? extends IMekaInstance> getConstructorForDecoratedItems() {
+	public Constructor<? extends IMekaInstance> getConstructorForDecoratingItems() {
 		try {
 			return MekaInstance.class.getConstructor(this.getTypeOfDecoratedItems());
 		} catch (Exception e) {
@@ -191,4 +191,5 @@ public class MekaInstances implements IMekaInstances, IListDecorator<Instances, 
 	public void addInstruction(final IReconstructionInstruction instruction) {
 		this.reconstructionInstructions.add(instruction);
 	}
+
 }
