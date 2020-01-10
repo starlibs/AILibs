@@ -93,8 +93,7 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 	}
 
 	public JsonNode executeRESTCall(final String URL, final String query) throws SQLException {
-		CloseableHttpClient client = HttpClientBuilder.create().build();
-		try {
+		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			ObjectMapper mapper = new ObjectMapper();
 			ObjectNode root = mapper.createObjectNode();
 			root.set("token", root.textNode(this.config.getToken()));
@@ -107,12 +106,6 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 			return mapper.readTree(response.getEntity().getContent());
 		} catch (UnsupportedOperationException | IOException e) {
 			throw new SQLException(e);
-		} finally {
-			try {
-				client.close();
-			} catch (IOException e) {
-				throw new SQLException(e);
-			}
 		}
 	}
 
