@@ -5,9 +5,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
+import ai.libs.jaicore.graphvisualizer.events.graph.NodeInfoAlteredEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeRemovedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
@@ -21,31 +23,36 @@ public class NodeInfoAlgorithmEventPropertyComputer implements AlgorithmEventPro
 	private AtomicInteger idCounter;
 
 	public NodeInfoAlgorithmEventPropertyComputer() {
-		nodeToIdMap = new ConcurrentHashMap<>();
-		idCounter = new AtomicInteger();
+		this.nodeToIdMap = new ConcurrentHashMap<>();
+		this.idCounter = new AtomicInteger();
 	}
 
 	@Override
-	public NodeInfo computeAlgorithmEventProperty(AlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
+	public NodeInfo computeAlgorithmEventProperty(final IAlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
 		if (algorithmEvent instanceof GraphInitializedEvent) {
 			GraphInitializedEvent<?> graphInitializedEvent = (GraphInitializedEvent<?>) algorithmEvent;
 			Object mainNode = graphInitializedEvent.getRoot();
-			return new NodeInfo(getIdOfNode(mainNode), null, null, null);
+			return new NodeInfo(this.getIdOfNode(mainNode), null, null, null);
 		} else if (algorithmEvent instanceof NodeAddedEvent) {
 			NodeAddedEvent<?> nodeAddedEvent = (NodeAddedEvent<?>) algorithmEvent;
 			Object mainNode = nodeAddedEvent.getNode();
-			String mainNodeId = getIdOfNode(mainNode);
-			String parentNodeId = getIdOfNode(nodeAddedEvent.getParent());
+			String mainNodeId = this.getIdOfNode(mainNode);
+			String parentNodeId = this.getIdOfNode(nodeAddedEvent.getParent());
 			String nodeType = nodeAddedEvent.getType();
 			return new NodeInfo(mainNodeId, Arrays.asList(parentNodeId), null, nodeType);
+		} else if (algorithmEvent instanceof NodeInfoAlteredEvent) {
+			NodeInfoAlteredEvent<?> nodeAddedEvent = (NodeInfoAlteredEvent<?>) algorithmEvent;
+			Object mainNode = nodeAddedEvent.getNode();
+			String mainNodeId = this.getIdOfNode(mainNode);
+			return new NodeInfo(mainNodeId, null, null, null);
 		} else if (algorithmEvent instanceof NodeRemovedEvent) {
 			NodeRemovedEvent<?> nodeRemovedEvent = (NodeRemovedEvent<?>) algorithmEvent;
-			String mainNodeId = getIdOfNode(nodeRemovedEvent.getNode());
+			String mainNodeId = this.getIdOfNode(nodeRemovedEvent.getNode());
 			return new NodeInfo(mainNodeId, null, null, null);
 		} else if (algorithmEvent instanceof NodeTypeSwitchEvent) {
 			NodeTypeSwitchEvent<?> nodeAddedEvent = (NodeTypeSwitchEvent<?>) algorithmEvent;
 			Object mainNode = nodeAddedEvent.getNode();
-			String mainNodeId = getIdOfNode(mainNode);
+			String mainNodeId = this.getIdOfNode(mainNode);
 			String nodeType = nodeAddedEvent.getType();
 			return new NodeInfo(mainNodeId, null, null, nodeType);
 		}
@@ -57,16 +64,16 @@ public class NodeInfoAlgorithmEventPropertyComputer implements AlgorithmEventPro
 		return NODE_INFO_PROPERTY_NAME;
 	}
 
-	private String getIdOfNode(Object node) {
-		if (!nodeToIdMap.containsKey(node)) {
-			int nodeId = idCounter.getAndIncrement();
-			nodeToIdMap.put(node, nodeId);
+	private String getIdOfNode(final Object node) {
+		if (!this.nodeToIdMap.containsKey(node)) {
+			int nodeId = this.idCounter.getAndIncrement();
+			this.nodeToIdMap.put(node, nodeId);
 		}
-		return String.valueOf(nodeToIdMap.get(node));
+		return String.valueOf(this.nodeToIdMap.get(node));
 	}
 
-	public String getIdOfNodeIfExistent(Object node) {
-		return String.valueOf(nodeToIdMap.get(node));
+	public String getIdOfNodeIfExistent(final Object node) {
+		return String.valueOf(this.nodeToIdMap.get(node));
 	}
 
 }

@@ -2,13 +2,14 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import java.util.concurrent.ExecutionException;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
-import ai.libs.jaicore.search.model.travesaltree.Node;
 import ai.libs.jaicore.timing.TimedComputation;
 
 /**
@@ -22,27 +23,27 @@ import ai.libs.jaicore.timing.TimedComputation;
  * @param <T>
  * @param <V>
  */
-public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> implements INodeEvaluator<T, V>, ILoggingCustomizable {
+public abstract class TimeAwareNodeEvaluator<T, A, V extends Comparable<V>> implements IPathEvaluator<T, A, V>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(TimeAwareNodeEvaluator.class);
 	private final int timeoutForNodeEvaluationInMS;
 	private long totalDeadline = -1; // this deadline can be set to guarantee that there will be no activity after this timestamp
-	private final INodeEvaluator<T, V> fallbackNodeEvaluator;
+	private final IPathEvaluator<T, A, V> fallbackNodeEvaluator;
 
 	public TimeAwareNodeEvaluator(final int pTimeoutInMS) {
 		this(pTimeoutInMS, n -> null);
 	}
 
-	public TimeAwareNodeEvaluator(final int pTimeoutInMS, final INodeEvaluator<T, V> pFallbackNodeEvaluator) {
+	public TimeAwareNodeEvaluator(final int pTimeoutInMS, final IPathEvaluator<T, A, V> pFallbackNodeEvaluator) {
 		super();
 		this.timeoutForNodeEvaluationInMS = pTimeoutInMS;
 		this.fallbackNodeEvaluator = pFallbackNodeEvaluator;
 	}
 
-	protected abstract V fTimeouted(Node<T, ?> node, int timeoutInMS) throws NodeEvaluationException, InterruptedException;
+	protected abstract V fTimeouted(ILabeledPath<T, A> node, int timeoutInMS) throws PathEvaluationException, InterruptedException;
 
 	@Override
-	public final V f(final Node<T, ?> node) throws NodeEvaluationException, InterruptedException {
+	public final V evaluate(final ILabeledPath<T, A> path) throws PathEvaluationException, InterruptedException {
 
 		/* determine time available and granted for node evaluation */
 		int remainingTime;
@@ -60,20 +61,19 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 
 		/* execute evaluation */
 		try {
-			return TimedComputation.compute(() -> this.fTimeouted(node, grantedTime), interruptionTime, "Node evaluation has timed out (" + TimeAwareNodeEvaluator.class.getName() + "::" + Thread.currentThread() + "-" + System.currentTimeMillis() + ")");
+			return TimedComputation.compute(() -> this.fTimeouted(path, grantedTime), interruptionTime,
+					"Node evaluation has timed out (" + TimeAwareNodeEvaluator.class.getName() + "::" + Thread.currentThread() + "-" + System.currentTimeMillis() + ")");
 		} catch (AlgorithmTimeoutedException e) {
-			this.logger.warn("Computation of f-value for {} failed due to exception {} with message {}", node, e.getClass().getName(), e.getMessage());
-			return this.fallbackNodeEvaluator.f(node);
-		}
-		catch (InterruptedException e) {
+			this.logger.warn("Computation of f-value for {} failed due to exception {} with message {}", path, e.getClass().getName(), e.getMessage());
+			return this.fallbackNodeEvaluator.evaluate(path);
+		} catch (InterruptedException e) {
 			this.logger.warn("Got interrupted during node evaluation. Throwing an InterruptedException");
 			throw e;
-		}
-		catch (ExecutionException e) {
-			if (e.getCause() instanceof NodeEvaluationException) {
-				throw (NodeEvaluationException)e.getCause();
+		} catch (ExecutionException e) {
+			if (e.getCause() instanceof PathEvaluationException) {
+				throw (PathEvaluationException) e.getCause();
 			} else {
-				throw new NodeEvaluationException(e.getCause(), "Could not evaluate path.");
+				throw new PathEvaluationException("Could not evaluate path.", e.getCause());
 			}
 		}
 	}
@@ -82,7 +82,7 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 		return this.timeoutForNodeEvaluationInMS;
 	}
 
-	public INodeEvaluator<T, V> getFallbackNodeEvaluator() {
+	public IPathEvaluator<T, A, V> getFallbackNodeEvaluator() {
 		return this.fallbackNodeEvaluator;
 	}
 

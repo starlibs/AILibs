@@ -1,9 +1,7 @@
 package ai.libs.jaicore.ml.scikitwrapper;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +13,14 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassificationPredictionBatch;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.exception.DatasetCreationException;
+import org.api4.java.ai.ml.core.exception.PredictionException;
+import org.api4.java.ai.ml.core.exception.TrainingException;
+import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 import org.slf4j.Logger;
@@ -24,12 +30,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceUtil;
-import ai.libs.jaicore.ml.evaluation.IInstancesClassifier;
-import weka.classifiers.Classifier;
-import weka.core.Capabilities;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
+import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
+import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 
 /**
  * Wraps a Scikit-Learn Python process by utilizing a template to start a classifier in Scikit with the given classifier.
@@ -58,9 +62,11 @@ import weka.core.Instances;
  * After a multi target prediction the results might be more accessible with the unflattened representation that can be obtained with getRawLastClassificationResults.
  * For debug purposes the wrapper might be set to be verbose with setIsVerbose.
  *
- * @author wever scheiblm
+ * @author wever
+ * @author scheiblm
  */
-public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
+public class ScikitLearnWrapper extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch>
+implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 	private static final String PYTHON_FILE_EXT = ".py";
 	private static final String MODEL_DUMP_FILE_EXT = ".pcl";
 	private static final String RESULT_FILE_EXT = ".json";
@@ -75,6 +81,8 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private static final File MODEL_DUMPS_DIRECTORY = new File(TMP_FOLDER, "model_dumps");
 	private static final boolean VERBOSE = false; // If true the output stream of the python process is printed.
 	private static final boolean DELETE_TEMPORARY_FILES_ON_EXIT = true;
+
+	private ILabeledDataset<ILabeledInstance> dataset;
 
 	/* The type of problem that is to be solved by the ScikitLearn classifier. */
 	public enum ProblemType {
@@ -98,7 +106,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	 * Lists will keep the unflattened results until classifyInstances is called again. classifyInstances will only return a flattened representation of a multi-target prediction.
 	 * The outer list represents the rows whilst the inner list represents the x target values in this row.
 	 */
-	private transient List<List<Double>> rawLastClassificationResults = null;
+	private List<List<Double>> rawLastClassificationResults = null;
 
 	/**
 	 * Starts a new wrapper and creates its underlying script with the given parameters.
@@ -111,17 +119,17 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		this.withoutModelDump = withoutModelDump;
 		this.constructInstruction = constructInstruction;
 
-		Map<String, Object> templateValues = getTemplateValueMap(constructInstruction, imports);
+		Map<String, Object> templateValues = this.getTemplateValueMap(constructInstruction, imports);
 		String hashCode = StringUtils.join(constructInstruction, imports).hashCode() + "";
-		configurationUID = hashCode.startsWith("-") ? hashCode.replace("-", "1") : "0" + hashCode;
+		this.configurationUID = hashCode.startsWith("-") ? hashCode.replace("-", "1") : "0" + hashCode;
 
 		if (!TMP_FOLDER.exists()) {
 			TMP_FOLDER.mkdirs();
 		}
 
-		File scriptFile = getSKLearnScriptFile();
+		File scriptFile = this.getSKLearnScriptFile();
 		if (!scriptFile.createNewFile() && L.isDebugEnabled()) {
-			L.debug("Script file for configuration UID {} already exists in {}", configurationUID, scriptFile.getAbsolutePath());
+			L.debug("Script file for configuration UID {} already exists in {}", this.configurationUID, scriptFile.getAbsolutePath());
 		}
 		if (DELETE_TEMPORARY_FILES_ON_EXIT) {
 			scriptFile.deleteOnExit();
@@ -146,15 +154,15 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 
 	public ScikitLearnWrapper(final String constructInstruction, final String imports, final File trainedModelPath) throws IOException {
 		this(constructInstruction, imports, false);
-		modelFile = trainedModelPath;
+		this.modelFile = trainedModelPath;
 	}
 
 	/**
 	 * @return The file holding the python script for the wrapper.
 	 */
 	private File getSKLearnScriptFile() {
-		Objects.requireNonNull(configurationUID);
-		return new File(TMP_FOLDER, configurationUID + PYTHON_FILE_EXT);
+		Objects.requireNonNull(this.configurationUID);
+		return new File(TMP_FOLDER, this.configurationUID + PYTHON_FILE_EXT);
 	}
 
 	/**
@@ -162,24 +170,40 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	 * @return The file where the results are to be stored.
 	 */
 	private File getResultFile(final String arffName) {
-		return new File(MODEL_DUMPS_DIRECTORY, arffName + "_" + configurationUID + RESULT_FILE_EXT);
+		return new File(MODEL_DUMPS_DIRECTORY, arffName + "_" + this.configurationUID + RESULT_FILE_EXT);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void buildClassifier(final Instances data) throws Exception {
-		/* Ensure model dump directory exists and get the name of the dump */
-		MODEL_DUMPS_DIRECTORY.mkdirs();
-		String arffName = getArffName(data);
-		trainArff = getArffFile(data, arffName);
+	public void fit(final ILabeledDataset<? extends ILabeledInstance> data) throws TrainingException, InterruptedException {
+		try {
+			/* Ensure model dump directory exists and get the name of the dump */
+			MODEL_DUMPS_DIRECTORY.mkdirs();
+			String arffName = this.getArffName(data);
+			this.trainArff = this.getArffFile(data, arffName);
+			this.dataset = (ILabeledDataset<ILabeledInstance>) data.createEmptyCopy();
 
-		if (!withoutModelDump) {
-			modelFile = new File(MODEL_DUMPS_DIRECTORY, configurationUID + "_" + arffName + MODEL_DUMP_FILE_EXT);
-			String[] trainCommand = new SKLearnWrapperCommandBuilder().withTrainMode().withArffFile(trainArff).withOutputFile(modelFile).toCommandArray();
+			if (!this.withoutModelDump) {
+				this.modelFile = new File(MODEL_DUMPS_DIRECTORY, this.configurationUID + "_" + arffName + MODEL_DUMP_FILE_EXT);
+				String[] trainCommand = new SKLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff).withOutputFile(this.modelFile).toCommandArray();
 
-			if (L.isDebugEnabled()) {
-				L.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
+				if (L.isDebugEnabled()) {
+					L.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
+				}
+				DefaultProcessListener listener = new DefaultProcessListener(VERBOSE);
+				this.runProcess(trainCommand, listener);
+
+				if (!listener.getErrorOutput().isEmpty()) {
+					L.error("Raise error message");
+					throw new TrainingException(listener.getErrorOutput().split("\\n")[0]);
+				}
 			}
-			runProcess(trainCommand, new DefaultProcessListener(VERBOSE));
+		}
+		catch (TrainingException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new TrainingException("An exception occurred while training.", e);
 		}
 	}
 
@@ -191,7 +215,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	 * @return File object corresponding to the arff file.
 	 * @throws IOException During the serialization of the data as an arff file something went wrong.
 	 */
-	private File getArffFile(final Instances data, final String arffName) throws IOException {
+	private File getArffFile(final ILabeledDataset<? extends ILabeledInstance> data, final String arffName) throws IOException {
 		File arffOutputFile = new File(TMP_FOLDER, arffName + ".arff");
 		if (DELETE_TEMPORARY_FILES_ON_EXIT) {
 			arffOutputFile.deleteOnExit();
@@ -201,37 +225,66 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 			L.debug("Reusing {}.arff", arffName);
 			return arffOutputFile;
 		}
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(arffOutputFile))) {
-			bw.write(data.toString());
-		}
+		ArffDatasetAdapter.serializeDataset(arffOutputFile, data);
 		return arffOutputFile;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public double[] classifyInstances(final Instances data) throws Exception {
-		MODEL_DUMPS_DIRECTORY.mkdirs();
-		String arffName = getArffName(data);
+	public ISingleLabelClassification predict(final ILabeledInstance instance) throws PredictionException, InterruptedException {
+		return this.predict(new ILabeledInstance[] { instance }).get(0);
+	}
 
-		File testArff = getArffFile(data, arffName);
-		File outputFile = getResultFile(arffName);
+	@Override
+	public ISingleLabelClassificationPredictionBatch predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
+		ILabeledDataset<ILabeledInstance> data;
+		try {
+			data = this.dataset.createEmptyCopy();
+		} catch (DatasetCreationException e1) {
+			throw new PredictionException("Could not replicate labeled dataset instance", e1);
+		}
+		Arrays.stream(dTest).forEach(data::add);
+
+		MODEL_DUMPS_DIRECTORY.mkdirs();
+		String arffName = this.getArffName(data);
+		File testArff;
+		try {
+			testArff = this.getArffFile(data, arffName);
+		} catch (IOException e1) {
+			throw new PredictionException("Could not dump arff file for prediction", e1);
+		}
+		File outputFile = this.getResultFile(arffName);
 		outputFile.getParentFile().mkdirs();
 
-		if (!withoutModelDump) {
-			String[] testCommand = new SKLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff).withModelFile(modelFile).withOutputFile(outputFile).toCommandArray();
+		if (!this.withoutModelDump) {
+			String[] testCommand = new SKLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff).withModelFile(this.modelFile).withOutputFile(outputFile).toCommandArray();
 
 			if (L.isDebugEnabled()) {
 				L.debug("Run test mode with {}", Arrays.toString(testCommand));
 			}
 
-			runProcess(testCommand, new DefaultProcessListener(VERBOSE));
+			try {
+				this.runProcess(testCommand, new DefaultProcessListener(VERBOSE));
+			} catch (IOException e) {
+				throw new PredictionException("Could not run scikit-learn classifier.", e);
+			}
 		} else {
-			String[] testCommand = new SKLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(trainArff).withTestArffFile(testArff).withOutputFile(outputFile).toCommandArray();
+			String[] testCommand = new SKLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff).withTestArffFile(testArff).withOutputFile(outputFile).toCommandArray();
 			if (L.isDebugEnabled()) {
 				L.debug("Run train test mode with {}", Arrays.toString(testCommand));
 			}
 
-			runProcess(testCommand, new DefaultProcessListener(VERBOSE));
+			DefaultProcessListener listener = new DefaultProcessListener(VERBOSE);
+			try {
+				this.runProcess(testCommand, listener);
+				if (!listener.getErrorOutput().isEmpty()) {
+					String[] message = listener.getErrorOutput().split("\\n");
+					throw new PredictionException(message[message.length - 1].trim());
+				}
+			} catch (InterruptedException | PredictionException e) {
+				throw e;
+			} catch (Exception e) {
+				throw new PredictionException("Could not run scikit-learn classifier.", e);
+			}
 		}
 
 		String fileContent = "";
@@ -242,30 +295,16 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 				java.nio.file.Files.delete(outputFile.toPath());
 			}
 			ObjectMapper objMapper = new ObjectMapper();
-			rawLastClassificationResults = objMapper.readValue(fileContent, List.class);
+			this.rawLastClassificationResults = objMapper.readValue(fileContent, List.class);
 		} catch (IOException e) {
-			throw new IOException("Could not read result file or parse the json content to a list", e);
+			throw new PredictionException("Could not read result file or parse the json content to a list", e);
 		}
 
 		/* Since Scikit supports multiple target results but Weka does not, the results have to be flattened.
 		 * The structured results of the last classifyInstances call is accessable over
 		 * getRawLastClassificationResults().
 		 * */
-		List<Double> flatresults = rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList());
-		double[] resultsArray = new double[flatresults.size()];
-		for (int i = 0; i < resultsArray.length; i++) {
-			resultsArray[i] = flatresults.get(i);
-		}
-		return resultsArray;
-	}
-
-	@Override
-	public double classifyInstance(final Instance instance) throws Exception {
-		Instances copyOfInstances = new Instances(instance.dataset(), 0);
-		Instance newI = new DenseInstance(instance);
-		newI.setDataset(copyOfInstances);
-		copyOfInstances.add(newI);
-		return classifyInstances(copyOfInstances)[0];
+		return new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification((int) (double) x)).collect(Collectors.toList()));
 	}
 
 	/**
@@ -334,7 +373,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	}
 
 	public List<List<Double>> getRawLastClassificationResults() {
-		return rawLastClassificationResults;
+		return this.rawLastClassificationResults;
 	}
 
 	public void setProblemType(final ProblemType problemType) {
@@ -350,7 +389,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	}
 
 	public File getModelPath() {
-		return modelFile;
+		return this.modelFile;
 	}
 
 	/**
@@ -359,7 +398,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	 * @param data Instances to get a hash code for.
 	 * @return A hash for the given Instances.
 	 */
-	private String getArffName(final Instances data) {
+	private String getArffName(final ILabeledDataset<? extends ILabeledInstance> data) {
 		String hash = "" + data.hashCode();
 		hash = hash.startsWith("-") ? hash.replace("-", "1") : "0" + hash;
 		return hash;
@@ -378,14 +417,8 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		listener.listenTo(processBuilder.start());
 	}
 
-	@Override
-	public double[] distributionForInstance(final Instance instance) throws Exception {
+	public double[] distributionForInstance(final ILabeledInstance instance) {
 		throw new UnsupportedOperationException("This method is not yet implemented");
-	}
-
-	@Override
-	public Capabilities getCapabilities() {
-		return null;
 	}
 
 	/**
@@ -404,7 +437,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 
 		@Override
 		public String toString() {
-			return name;
+			return this.name;
 		}
 	}
 
@@ -439,19 +472,19 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		}
 
 		public SKLearnWrapperCommandBuilder withTrainMode() {
-			return withMode(WrapperExecutionMode.TRAIN);
+			return this.withMode(WrapperExecutionMode.TRAIN);
 		}
 
 		public SKLearnWrapperCommandBuilder withTestMode() {
-			return withMode(WrapperExecutionMode.TEST);
+			return this.withMode(WrapperExecutionMode.TEST);
 		}
 
 		public SKLearnWrapperCommandBuilder withTrainTestMode() {
-			return withMode(WrapperExecutionMode.TRAIN_TEST);
+			return this.withMode(WrapperExecutionMode.TRAIN_TEST);
 		}
 
 		private SKLearnWrapperCommandBuilder withMode(final WrapperExecutionMode execMode) {
-			mode = execMode;
+			this.mode = execMode;
 			return this;
 		}
 
@@ -477,11 +510,11 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		}
 
 		private String[] toCommandArray() {
-			Objects.requireNonNull(mode);
-			Objects.requireNonNull(outputFile);
-			Objects.requireNonNull(arffFile);
+			Objects.requireNonNull(this.mode);
+			Objects.requireNonNull(this.outputFile);
+			Objects.requireNonNull(this.arffFile);
 
-			File scriptFile = getSKLearnScriptFile();
+			File scriptFile = ScikitLearnWrapper.this.getSKLearnScriptFile();
 
 			if (!scriptFile.exists()) {
 				throw new IllegalArgumentException("The wrapped sklearn script " + scriptFile.getAbsolutePath() + " file does not exist");
@@ -493,25 +526,25 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 			processParameters.add(scriptFile.getAbsolutePath()); // Script to be executed.
 
 			// set mode, output, and arff
-			processParameters.addAll(Arrays.asList(MODE_FLAG, mode.toString()));
-			processParameters.addAll(Arrays.asList(ARFF_FLAG, arffFile));
-			if (testArffFile != null) {
-				processParameters.addAll(Arrays.asList(TEST_ARFF_FLAG, testArffFile));
+			processParameters.addAll(Arrays.asList(MODE_FLAG, this.mode.toString()));
+			processParameters.addAll(Arrays.asList(ARFF_FLAG, this.arffFile));
+			if (this.testArffFile != null) {
+				processParameters.addAll(Arrays.asList(TEST_ARFF_FLAG, this.testArffFile));
 			}
-			processParameters.addAll(Arrays.asList(OUTPUT_FLAG, outputFile));
+			processParameters.addAll(Arrays.asList(OUTPUT_FLAG, this.outputFile));
 
-			if (problemType == ScikitLearnWrapper.ProblemType.REGRESSION) {
+			if (ScikitLearnWrapper.this.problemType == ScikitLearnWrapper.ProblemType.REGRESSION) {
 				processParameters.add(REGRESSION_FLAG);
 			}
 
-			if (mode == WrapperExecutionMode.TEST) {
-				Objects.requireNonNull(modelFile);
-				processParameters.addAll(Arrays.asList(MODEL_FLAG, modelFile));
+			if (this.mode == WrapperExecutionMode.TEST) {
+				Objects.requireNonNull(this.modelFile);
+				processParameters.addAll(Arrays.asList(MODEL_FLAG, this.modelFile));
 			}
 
-			if (targetColumns != null && targetColumns.length > 0) {
+			if (ScikitLearnWrapper.this.targetColumns != null && ScikitLearnWrapper.this.targetColumns.length > 0) {
 				processParameters.add("--targets");
-				for (int i : targetColumns) {
+				for (int i : ScikitLearnWrapper.this.targetColumns) {
 					processParameters.add("" + i);
 				}
 			}
@@ -522,7 +555,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 
 	@Override
 	public String toString() {
-		return constructInstruction;
+		return this.constructInstruction;
 	}
 
 }

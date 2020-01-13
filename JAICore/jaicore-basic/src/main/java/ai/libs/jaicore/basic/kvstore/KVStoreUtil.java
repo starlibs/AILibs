@@ -5,13 +5,20 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.api4.java.datastructure.kvstore.IKVStore;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.db.sql.SQLAdapter;
 
 /**
  * A util for serializing and deserializing {@link KVStoreCollection}s from and to certain formats.
@@ -281,6 +288,53 @@ public class KVStoreUtil {
 	private static KVStoreCollection addCommonFields(final KVStoreCollection collection, final Map<String, String> commonFields) {
 		collection.stream().forEach(x -> x.putAll(commonFields));
 		return collection;
+	}
+
+	public static KVStoreCollection readFromJson(final JsonNode res) {
+		if (res instanceof ArrayNode) {
+			return readFromJsonArray((ArrayNode) res);
+		} else {
+			return readFromJsonArray((ArrayNode) res.get(0));
+		}
+	}
+
+	public static KVStoreCollection readFromJsonArray(final ArrayNode list) {
+		KVStoreCollection col = new KVStoreCollection();
+		for (JsonNode node : list) {
+			col.add(readObjectNodeToKVStore((ObjectNode) node));
+		}
+		return col;
+	}
+
+	private static IKVStore readObjectNodeToKVStore(final ObjectNode node) {
+		Iterator<String> fieldNameIt = node.fieldNames();
+		IKVStore store = new KVStore();
+
+		while (fieldNameIt.hasNext()) {
+			String fieldName = fieldNameIt.next();
+			JsonNode value = node.get(fieldName);
+			switch (value.getNodeType()) {
+			case BOOLEAN:
+				store.put(fieldName, value.asBoolean());
+				break;
+			case MISSING:
+				store.put(fieldName, null);
+				break;
+			case NULL:
+				store.put(fieldName, null);
+				break;
+			case NUMBER:
+				store.put(fieldName, value.asText());
+				break;
+			case STRING:
+				store.put(fieldName, value.asText());
+				break;
+			default:
+				store.put(fieldName, value.asText());
+				break;
+			}
+		}
+		return store;
 	}
 
 }

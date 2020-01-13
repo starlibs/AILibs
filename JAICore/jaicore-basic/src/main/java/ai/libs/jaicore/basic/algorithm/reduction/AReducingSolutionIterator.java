@@ -2,21 +2,21 @@ package ai.libs.jaicore.basic.algorithm.reduction;
 
 import java.util.NoSuchElementException;
 
+import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.algorithm.IAlgorithmFactory;
+import org.api4.java.algorithm.ISolutionCandidateIterator;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.events.result.ISolutionCandidateFoundEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.basic.TimeOut;
+import ai.libs.jaicore.basic.algorithm.ASolutionCandidateFoundEvent;
 import ai.libs.jaicore.basic.algorithm.ASolutionCandidateIterator;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
-import ai.libs.jaicore.basic.algorithm.IAlgorithmFactory;
-import ai.libs.jaicore.basic.algorithm.ISolutionCandidateIterator;
-import ai.libs.jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 
 public class AReducingSolutionIterator<I1, O1, I2, O2> extends ASolutionCandidateIterator<I1, O1> {
 	private Logger logger = LoggerFactory.getLogger(AReducingSolutionIterator.class);
@@ -26,7 +26,7 @@ public class AReducingSolutionIterator<I1, O1, I2, O2> extends ASolutionCandidat
 	private final AlgorithmicProblemReduction<I1, O1, I2, O2> problemTransformer;
 	private final ISolutionCandidateIterator<I2, O2> baseAlgorithm;
 
-	public AReducingSolutionIterator(final I1 problem, final AlgorithmicProblemReduction<I1, O1, I2, O2> problemTransformer, final IAlgorithmFactory<I2, O2> baseFactory) {
+	public AReducingSolutionIterator(final I1 problem, final AlgorithmicProblemReduction<I1, O1, I2, O2> problemTransformer, final IAlgorithmFactory<I2, O2, ?> baseFactory) {
 		super(problem);
 		this.problemTransformer = problemTransformer;
 		this.baseAlgorithm = (ISolutionCandidateIterator<I2, O2>)baseFactory.getAlgorithm(problemTransformer.encodeProblem(problem));
@@ -42,12 +42,12 @@ public class AReducingSolutionIterator<I1, O1, I2, O2> extends ASolutionCandidat
 		/* by default, this is an empty hook */
 	}
 
-	protected SolutionCandidateFoundEvent<O1> getSolutionEvent(final O1 solution) {
-		return new ASolutionCandidateFoundEvent<>(this.getId(), solution);
+	protected ISolutionCandidateFoundEvent<O1> getSolutionEvent(final O1 solution) {
+		return new ASolutionCandidateFoundEvent<>(this, solution);
 	}
 
 	@Override
-	public final AlgorithmEvent nextWithException() throws AlgorithmExecutionCanceledException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException {
+	public final IAlgorithmEvent nextWithException() throws AlgorithmExecutionCanceledException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException {
 		if (this.isCanceled()) {
 			throw new IllegalStateException("The algorithm has already been canceled. Cannot conduct futŕther steps.");
 		}
@@ -57,7 +57,7 @@ public class AReducingSolutionIterator<I1, O1, I2, O2> extends ASolutionCandidat
 			this.runPreCreationHook();
 
 			/* set timeout on base algorithm */
-			TimeOut to = this.getTimeout();
+			Timeout to = this.getTimeout();
 			this.logger.debug("Setting timeout of search to {}", to);
 			this.baseAlgorithm.setTimeout(to);
 			return this.activate();
@@ -72,7 +72,7 @@ public class AReducingSolutionIterator<I1, O1, I2, O2> extends ASolutionCandidat
 				}
 				this.logger.info("Next solution found.");
 				O1 solutionToOriginalProlem = this.problemTransformer.decodeSolution(solution);
-				SolutionCandidateFoundEvent<O1> event = this.getSolutionEvent(solutionToOriginalProlem);
+				ISolutionCandidateFoundEvent<O1> event = this.getSolutionEvent(solutionToOriginalProlem);
 				this.post(event);
 				return event;
 			} catch (NoSuchElementException e) { // if no more solution exists, terminate

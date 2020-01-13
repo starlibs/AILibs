@@ -1,18 +1,20 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst.events;
 
-import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import org.api4.java.algorithm.IAlgorithm;
 
-public class RemovedGoalNodeFromOpenEvent<N, V extends Comparable<V>> extends AAlgorithmEvent {
+import ai.libs.jaicore.basic.algorithm.AAlgorithmEvent;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
-	private final Node<N, V> goalNode;
+public class RemovedGoalNodeFromOpenEvent<N,A, V extends Comparable<V>> extends AAlgorithmEvent {
 
-	public RemovedGoalNodeFromOpenEvent(final String algorithmId, final Node<N, V> goalNode) {
-		super(algorithmId);
+	private final BackPointerPath<N, A, V> goalNode;
+
+	public RemovedGoalNodeFromOpenEvent(final IAlgorithm<?, ?> algorithm, final BackPointerPath<N, A, V> goalNode) {
+		super(algorithm);
 		this.goalNode = goalNode;
 	}
 
-	public Node<N, V> getGoalNode() {
+	public BackPointerPath<N, A, V> getGoalNode() {
 		return this.goalNode;
 	}
 }

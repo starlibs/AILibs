@@ -1,0 +1,99 @@
+sourceSets {
+    main {
+        resources {
+        	srcDir 'resources'
+    	}
+    }
+}
+
+
+dependencies {
+	compile project(':mlplan-weka')
+	
+	// linear algebra
+	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-beta2'
+	compile group: 'org.nd4j', name: 'nd4j-api', version: '1.0.0-beta2'
+	
+	// gradient descent (but forbid that the guy uses his log4j-stuff, which we will bride to slf4j)
+	compile ('de.jungblut.common:thomasjungblut-common:1.1') {
+	  exclude group: 'log4j'
+	  exclude group: 'org.slf4j'
+	  exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+	  exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+	  exclude group: 'commons-cli'
+	}
+	
+	// https://mvnrepository.com/artifact/commons-cli/commons-cli
+	compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+
+	//testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	//testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+}
+
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+      		}	
+      		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+      		}
+
+      		pom.project {
+        		name 'MLPlan'
+        		packaging 'jar'
+        		// optionally artifactId can be defined here 
+        		description 'This project provides an implementation of the AutoML tool ML-Plan.'
+        		url 'https://libs.ai'
+
+        		scm {
+          			connection 'scm:git:https://github.com/fmohr/AILibs.git'
+          			developerConnection 'scm:git:https://github.com/fmohr/AILibs.git'
+          			url 'https://github.com/fmohr/AILibs'
+        		}
+
+        		licenses {
+          			license {
+            			name 'GPLv3'
+            			url 'https://www.gnu.org/licenses/gpl-3.0.en.html'
+          			}
+        		}
+
+        		developers {
+          			developer {
+            			id 'fmohr'
+            			name 'Felix Mohr'
+            			email 'felix.mohr@upb.de'
+          			}
+          			developer {
+          				id 'mwever'    
+          			    name 'Marcel Wever'
+          			    email 'marcel.wever@upb.de'
+          			}
+          			developer {
+          			    id 'ahetzer'
+          			    name 'Alexander Hetzer'
+          			    email 'alexander.hetzer@upb.de'
+          			}
+        		}
+      		}
+    	}
+  	}
+}
+
+//task mlplanCLIjar(type: Jar) {
+//	zip64 = true
+//    manifest {
+//        attributes 'Main-Class': 'de.upb.crc901.mlplan.cli.MLPlanCLI'
+//    }
+//    destinationDir = file("${projectDir}/cli")
+//    archivesBaseName="mlplancli"
+//    exclude ('META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA')
+//    from sourceSets.main.allSource
+//    from { (configurations.compile)
+//            .collect { it.isDirectory() ? it : zipTree(it) } }
+//    with jar
+//}
+

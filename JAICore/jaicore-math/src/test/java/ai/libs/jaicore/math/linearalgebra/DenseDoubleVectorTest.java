@@ -4,11 +4,12 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+import org.api4.java.common.math.IVector;
 import org.junit.Test;
 
 /**
  * This class tests every method which can be called on the {@link DenseDoubleVector}.
- * 
+ *
  * @author Alexander Hetzer
  *
  */
@@ -22,10 +23,10 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testAddVectorFromArrayWithoutCopy() {
 		double[] data = { 2, 2 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		vector.addVector(data);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -34,11 +35,11 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testAddVectorWithoutCopy() {
 		double[] data = { 2, 2 };
-		Vector toAdd = new DenseDoubleVector(data);
-		Vector vector = new DenseDoubleVector(data);
+		IVector toAdd = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		vector.addVector(toAdd);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -47,10 +48,10 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testAddVectorFromArrayWithCopy() {
 		double[] data = { 2, 2 };
-		Vector vector = new DenseDoubleVector(data);
-		Vector resultVector = vector.addVectorToCopy(data);
+		IVector vector = new DenseDoubleVector(data);
+		IVector resultVector = vector.addVectorToCopy(data);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -59,11 +60,11 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testAddVectorWithCopy() {
 		double[] data = { 2, 2 };
-		Vector toAdd = new DenseDoubleVector(data);
-		Vector vector = new DenseDoubleVector(data);
-		Vector resultVector = vector.addVectorToCopy(toAdd);
+		IVector toAdd = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
+		IVector resultVector = vector.addVectorToCopy(toAdd);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -73,10 +74,10 @@ public class DenseDoubleVectorTest {
 	public void testAddConstantWithCopy() {
 		double[] data = { 2, 2 };
 		double toAdd = 2;
-		Vector vector = new DenseDoubleVector(data);
-		Vector resultVector = vector.addConstantToCopy(toAdd);
+		IVector vector = new DenseDoubleVector(data);
+		IVector resultVector = vector.addConstantToCopy(toAdd);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -86,10 +87,10 @@ public class DenseDoubleVectorTest {
 	public void testAddConstantWithoutCopy() {
 		double[] data = { 2, 2 };
 		double toAdd = 2;
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		vector.addConstant(toAdd);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -99,11 +100,11 @@ public class DenseDoubleVectorTest {
 	public void testSubtractVectorWithoutCopy() {
 		double[] data = { 8, 8 };
 		double[] toSubtractData = { 4, 4 };
-		Vector toSubtract = new DenseDoubleVector(toSubtractData);
-		Vector vector = new DenseDoubleVector(data);
+		IVector toSubtract = new DenseDoubleVector(toSubtractData);
+		IVector vector = new DenseDoubleVector(data);
 		vector.subtractVector(toSubtract);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -113,11 +114,11 @@ public class DenseDoubleVectorTest {
 	public void testSubtractVectorWithCopy() {
 		double[] data = { 8, 8 };
 		double[] toSubtractData = { 4, 4 };
-		Vector toSubtract = new DenseDoubleVector(toSubtractData);
-		Vector vector = new DenseDoubleVector(data);
-		Vector resultVector = vector.subtractVectorFromCopy(toSubtract);
+		IVector toSubtract = new DenseDoubleVector(toSubtractData);
+		IVector vector = new DenseDoubleVector(data);
+		IVector resultVector = vector.subtractVectorFromCopy(toSubtract);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -127,10 +128,10 @@ public class DenseDoubleVectorTest {
 	public void testSubtractArrayFromVectorWithoutCopy() {
 		double[] data = { 8, 8 };
 		double[] toSubtractData = { 4, 4 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		vector.subtractVector(toSubtractData);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -140,10 +141,10 @@ public class DenseDoubleVectorTest {
 	public void testSubtractArrayFromVectorWithCopy() {
 		double[] data = { 8, 8 };
 		double[] toSubtractData = { 4, 4 };
-		Vector vector = new DenseDoubleVector(data);
-		Vector resultVector = vector.subtractVectorFromCopy(toSubtractData);
+		IVector vector = new DenseDoubleVector(data);
+		IVector resultVector = vector.subtractVectorFromCopy(toSubtractData);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -153,10 +154,10 @@ public class DenseDoubleVectorTest {
 	public void testSubtractConstantWithoutCopy() {
 		double[] data = { 8, 8 };
 		double toSubtract = 4;
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		vector.subtractConstant(toSubtract);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -166,10 +167,10 @@ public class DenseDoubleVectorTest {
 	public void testSubtractConstantWithCopy() {
 		double[] data = { 8, 8 };
 		double toSubtract = 4;
-		Vector vector = new DenseDoubleVector(data);
-		Vector resultVector = vector.subtractConstantFromCopy(toSubtract);
+		IVector vector = new DenseDoubleVector(data);
+		IVector resultVector = vector.subtractConstantFromCopy(toSubtract);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -178,11 +179,11 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testMultiplyByVectorPairwiseWithoutCopy() {
 		double[] data = { 2, 2 };
-		Vector toMultiply = new DenseDoubleVector(data);
-		Vector vector = new DenseDoubleVector(data);
+		IVector toMultiply = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		vector.multiplyByVectorPairwise(toMultiply);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -191,11 +192,11 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testMultiplyByVectorPairwiseWithCopy() {
 		double[] data = { 2, 2 };
-		Vector toMultiply = new DenseDoubleVector(data);
-		Vector vector = new DenseDoubleVector(data);
-		Vector resultVector = vector.multiplyByVectorPairwiseToCopy(toMultiply);
+		IVector toMultiply = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
+		IVector resultVector = vector.multiplyByVectorPairwiseToCopy(toMultiply);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -204,10 +205,10 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testMultiplyByVectorPairwiseFromArrayWithoutCopy() {
 		double[] data = { 2, 2 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		vector.multiplyByVectorPairwise(data);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -216,10 +217,10 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testMultiplyByVectorPairwiseFromArrayWithCopy() {
 		double[] data = { 2, 2 };
-		Vector vector = new DenseDoubleVector(data);
-		Vector resultVector = vector.multiplyByVectorPairwiseToCopy(data);
+		IVector vector = new DenseDoubleVector(data);
+		IVector resultVector = vector.multiplyByVectorPairwiseToCopy(data);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -229,10 +230,10 @@ public class DenseDoubleVectorTest {
 	public void testMultiplyByConstantWithoutCopy() {
 		double[] data = { 2, 2 };
 		double toMultiply = 2;
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		vector.multiplyByConstant(toMultiply);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -242,10 +243,10 @@ public class DenseDoubleVectorTest {
 	public void testMultiplyByConstantWithCopy() {
 		double[] data = { 2, 2 };
 		double toMultiply = 2;
-		Vector vector = new DenseDoubleVector(data);
-		Vector resultVector = vector.multiplyByConstantToCopy(toMultiply);
+		IVector vector = new DenseDoubleVector(data);
+		IVector resultVector = vector.multiplyByConstantToCopy(toMultiply);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -254,13 +255,13 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testDivideByVectorPairwiseWithoutCopy() {
 		double[] toDivideData = { 2, 2 };
-		Vector toDivide = new DenseDoubleVector(toDivideData);
+		IVector toDivide = new DenseDoubleVector(toDivideData);
 
 		double[] data = { 8, 8 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		vector.divideByVectorPairwise(toDivide);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -269,13 +270,13 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testDivideByVectorPairwiseWithCopy() {
 		double[] toDivideData = { 2, 2 };
-		Vector toDivide = new DenseDoubleVector(toDivideData);
+		IVector toDivide = new DenseDoubleVector(toDivideData);
 
 		double[] data = { 8, 8 };
-		Vector vector = new DenseDoubleVector(data);
-		Vector resultVector = vector.divideByVectorPairwiseToCopy(toDivide);
+		IVector vector = new DenseDoubleVector(data);
+		IVector resultVector = vector.divideByVectorPairwiseToCopy(toDivide);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -286,10 +287,10 @@ public class DenseDoubleVectorTest {
 		double[] toDivideData = { 2, 2 };
 
 		double[] data = { 8, 8 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		vector.divideByVectorPairwise(toDivideData);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -300,10 +301,10 @@ public class DenseDoubleVectorTest {
 		double[] toDivideData = { 2, 2 };
 
 		double[] data = { 8, 8 };
-		Vector vector = new DenseDoubleVector(data);
-		Vector resultVector = vector.divideByVectorPairwiseToCopy(toDivideData);
+		IVector vector = new DenseDoubleVector(data);
+		IVector resultVector = vector.divideByVectorPairwiseToCopy(toDivideData);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -313,10 +314,10 @@ public class DenseDoubleVectorTest {
 	public void testDivideByConstantWithoutCopy() {
 		double[] data = { 8, 8 };
 		double toDivide = 2;
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		vector.divideByConstant(toDivide);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -326,10 +327,10 @@ public class DenseDoubleVectorTest {
 	public void testDivideByConstantWithCopy() {
 		double[] data = { 8, 8 };
 		double toDivide = 2;
-		Vector vector = new DenseDoubleVector(data);
-		Vector resultVector = vector.divideByConstantToCopy(toDivide);
+		IVector vector = new DenseDoubleVector(data);
+		IVector resultVector = vector.divideByConstantToCopy(toDivide);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -339,7 +340,7 @@ public class DenseDoubleVectorTest {
 	public void testGetValue() {
 		double expectedValue = 2;
 		double[] data = { 2, 2 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		assertEquals(expectedValue, vector.getValue(0), DOUBLE_COMPARISON_DELTA);
 	}
 
@@ -349,9 +350,9 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testSetValue() {
 		double[] expectedVectorData = { 4, 2 };
-		Vector expectedVector = new DenseDoubleVector(expectedVectorData);
+		IVector expectedVector = new DenseDoubleVector(expectedVectorData);
 		double[] data = { 2, 2 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		vector.setValue(0, 4);
 		assertEquals(expectedVector, vector);
 	}
@@ -362,10 +363,10 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testDotProduct() {
 		double[] vectorData1 = { 4, 1 };
-		Vector vector1 = new DenseDoubleVector(vectorData1);
+		IVector vector1 = new DenseDoubleVector(vectorData1);
 
 		double[] vectorData2 = { 2, 2 };
-		Vector vector2 = new DenseDoubleVector(vectorData2);
+		IVector vector2 = new DenseDoubleVector(vectorData2);
 
 		assertEquals(10, vector1.dotProduct(vector2), DOUBLE_COMPARISON_DELTA);
 	}
@@ -376,7 +377,7 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testSum() {
 		double[] data = { 4, 2 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 
 		assertEquals(6, vector.sum(), DOUBLE_COMPARISON_DELTA);
 	}
@@ -387,7 +388,7 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testMean() {
 		double[] data = { 4, 2 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 
 		assertEquals(3, vector.mean(), DOUBLE_COMPARISON_DELTA);
 	}
@@ -398,7 +399,7 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testStandardDeviation() {
 		double[] data = { 4, 2, 1, 3 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		assertEquals(1.118, vector.standardDeviation(), DOUBLE_COMPARISON_DELTA);
 	}
 
@@ -408,9 +409,9 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testDuplicate() {
 		double[] data = { 4, 2 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 
-		Vector vectorCopy = vector.duplicate();
+		IVector vectorCopy = vector.duplicate();
 		vectorCopy.addConstant(2);
 
 		assertNotEquals(vector, vectorCopy);
@@ -422,10 +423,10 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testZeroAllDimensions() {
 		double[] data = { 4, 2 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		vector.zeroAllDimensions();
 
-		Vector expectedVector = new DenseDoubleVector(2);
+		IVector expectedVector = new DenseDoubleVector(2);
 
 		assertEquals(expectedVector, vector);
 	}
@@ -436,7 +437,7 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testEuclideanNorm() {
 		double[] data = { 4, 2 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 
 		double expectedEuclideanNorm = Math.sqrt(4 * 4 + 2 * 2);
 
@@ -449,27 +450,27 @@ public class DenseDoubleVectorTest {
 	@Test
 	public void testAsArray() {
 		double[] data = { 4, 2 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 
 		assertArrayEquals(data, vector.asArray(), DOUBLE_COMPARISON_DELTA);
 	}
 
 	/**
 	 * Asserts that the given vector is a (4,4) vector.
-	 * 
+	 *
 	 * @param resultVector
 	 *            The vector to be tested.
 	 */
-	private void assertResultVectorIs4(Vector resultVector) {
+	private void assertResultVectorIs4(final IVector resultVector) {
 		double[] expectedVectorValues = { 4, 4 };
-		Vector expectedVector = new DenseDoubleVector(expectedVectorValues);
+		IVector expectedVector = new DenseDoubleVector(expectedVectorValues);
 		// assert that the operation yields the correct result
 		assertEquals(expectedVector, resultVector);
 	}
 
 	/**
 	 * Asserts that the given vector is a (4,4) vector and that the given callee did not change.
-	 * 
+	 *
 	 * @param expectedCalleeData
 	 *            The expected callee data.
 	 * @param callee
@@ -477,8 +478,8 @@ public class DenseDoubleVectorTest {
 	 * @param resultVector
 	 *            The vector to be checked to be (4,4).
 	 */
-	private void assertResultVectorIs4AndCalleeIsUnchanged(double[] expectedCalleeData, Vector callee, Vector resultVector) {
-		assertResultVectorIs4(resultVector);
+	private void assertResultVectorIs4AndCalleeIsUnchanged(final double[] expectedCalleeData, final IVector callee, final IVector resultVector) {
+		this.assertResultVectorIs4(resultVector);
 		// assert that the original vector did not change
 		assertArrayEquals(expectedCalleeData, callee.asArray(), DOUBLE_COMPARISON_DELTA);
 	}

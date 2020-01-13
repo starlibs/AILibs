@@ -3,16 +3,17 @@ package ai.libs.jaicore.planning.classical.algorithms.strips.forward;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+
 import ai.libs.jaicore.planning.classical.problems.strips.StripsAction;
 import ai.libs.jaicore.planning.classical.problems.strips.StripsPlanningProblem;
 import ai.libs.jaicore.planning.core.Plan;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
 public class STRIPSForwardSearchReducer implements ISTRIPSPlanningGraphGeneratorDeriver<StripsForwardPlanningNode, String> {
 
 	@Override
-	public GraphGenerator<StripsForwardPlanningNode, String> encodeProblem(final StripsPlanningProblem problem) {
+	public IGraphGenerator<StripsForwardPlanningNode, String> encodeProblem(final StripsPlanningProblem problem) {
 		return new StripsForwardPlanningGraphGenerator(problem);
 	}
 

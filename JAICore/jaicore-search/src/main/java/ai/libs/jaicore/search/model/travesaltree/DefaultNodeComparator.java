@@ -2,10 +2,10 @@ package ai.libs.jaicore.search.model.travesaltree;
 
 import java.util.Comparator;
 
-public class DefaultNodeComparator<N, V extends Comparable<V>> implements Comparator<Node<N,V>> {
+public class DefaultNodeComparator<N, A, V extends Comparable<V>> implements Comparator<BackPointerPath<N, A, V>> {
 
 	@Override
-	public int compare(final Node<N, V> arg0, final Node<N, V> arg1) {
-		return arg0.getInternalLabel().compareTo(arg1.getInternalLabel());
+	public int compare(final BackPointerPath<N, A, V> arg0, final BackPointerPath<N, A, V> arg1) {
+		return arg0.getScore().compareTo(arg1.getScore());
 	}
 }

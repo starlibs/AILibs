@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,13 +20,11 @@ import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.SupervisedFilterSelector;
 
-public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, Double> {
+public class AutoFEMLPreferredNodeEvaluator implements IPathEvaluator<TFDNode, String, Double> {
 
 	private static final Logger logger = LoggerFactory.getLogger(AutoFEMLPreferredNodeEvaluator.class);
 
@@ -46,7 +47,7 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 		this.classifiers = FileUtils.readLines(new File("model/weka/precedenceList.txt"), Charset.defaultCharset());
 	}
 
-	public AutoFEWekaPipeline getPipelineFromNode(final Node<TFDNode, ?> node) throws ComponentInstantiationFailedException {
+	public AutoFEWekaPipeline getPipelineFromNode(final BackPointerPath<TFDNode, String, ?> node) throws ComponentInstantiationFailedException {
 		return this.factory.getComponentInstantiation(this.getComponentInstanceFromNode(node));
 	}
 
@@ -54,35 +55,35 @@ public class AutoFEMLPreferredNodeEvaluator implements INodeEvaluator<TFDNode, D
 		return this.factory.getComponentInstantiation(ci);
 	}
 
-	public ComponentInstance getComponentInstanceFromNode(final Node<TFDNode, ?> node) {
+	public ComponentInstance getComponentInstanceFromNode(final BackPointerPath<TFDNode, String, ?> node) {
 		if (this.components == null || this.factory == null) {
 			throw new IllegalArgumentException("Collection of components and factory need to be set to make node evaluators work.");
 		}
 
-		return Util.getSolutionCompositionFromState(this.components, node.getPoint().getState(), true);
+		return Util.getSolutionCompositionFromState(this.components, node.getHead().getState(), true);
 	}
 
 	@Override
-	public Double f(final Node<TFDNode, ?> node) throws NodeEvaluationException {
-		if (node.getParent() == null) {
+	public Double f(final ILabeledPath<TFDNode, String> path) throws PathEvaluationException {
+		if (path.getNodes().size() == 1) {
 			return 0.0;
 		}
 
 		/* get partial component */
-		ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, node.getPoint().getState(), true);
+		ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, path.getHead().getState(), true);
 
 		AutoFEWekaPipeline pipe;
 		try {
 			pipe = this.getPipelineFromComponentInstance(ci);
 		} catch (ComponentInstantiationFailedException e) {
-			throw new NodeEvaluationException(e, "Node evaluation failed due to error in pipeline construction.");
+			throw new PathEvaluationException("Node evaluation failed due to error in pipeline construction.", e);
 		}
 		logger.trace("Todo has algorithm selection tasks. Calculate node evaluation for {}.", pipe);
 
-		List<String> remainingASTasks = node.getPoint().getRemainingTasks().stream().map(Literal::getProperty).filter(x -> x.startsWith("1_")).collect(Collectors.toList());
-		String appliedMethod = (node.getPoint().getAppliedMethodInstance() != null ? node.getPoint().getAppliedMethodInstance().getMethod().getName() : "");
+		List<String> remainingASTasks = path.getHead().getRemainingTasks().stream().map(Literal::getProperty).filter(x -> x.startsWith("1_")).collect(Collectors.toList());
+		String appliedMethod = (path.getHead().getAppliedMethodInstance() != null ? path.getHead().getAppliedMethodInstance().getMethod().getName() : "");
 		logger.trace("Remaining AS Tasks: {}. Applied method: {}", remainingASTasks, appliedMethod);
-		boolean toDoHasAlgorithmSelection = node.getPoint().getRemainingTasks().stream().anyMatch(x -> x.getProperty().startsWith("1_"));
+		boolean toDoHasAlgorithmSelection = path.getHead().getRemainingTasks().stream().anyMatch(x -> x.getProperty().startsWith("1_"));
 
 		if (toDoHasAlgorithmSelection) {
 			if (pipe != null) {

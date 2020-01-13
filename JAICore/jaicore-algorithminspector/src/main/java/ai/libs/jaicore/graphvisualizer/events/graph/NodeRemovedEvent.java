@@ -1,13 +1,15 @@
 package ai.libs.jaicore.graphvisualizer.events.graph;
 
-import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
+import org.api4.java.algorithm.IAlgorithm;
+
+import ai.libs.jaicore.basic.algorithm.AAlgorithmEvent;
 
 public class NodeRemovedEvent<T> extends AAlgorithmEvent implements GraphEvent {
 
 	private final T node;
 
-	public NodeRemovedEvent(final String algorithmId, final T node) {
-		super(algorithmId);
+	public NodeRemovedEvent(final IAlgorithm<?, ?> algorithm, final T node) {
+		super(algorithm);
 		this.node = node;
 	}
 

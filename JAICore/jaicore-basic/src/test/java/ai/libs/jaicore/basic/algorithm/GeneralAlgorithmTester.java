@@ -15,25 +15,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.algorithm.exceptions.ExceptionInAlgorithmIterationException;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.StringUtil;
-import ai.libs.jaicore.basic.TimeOut;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.concurrent.ThreadGroupObserver;
 import ai.libs.jaicore.interrupt.Interrupter;
@@ -46,10 +46,8 @@ import ai.libs.jaicore.interrupt.Interrupter;
  */
 
 @RunWith(Parameterized.class)
-public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
+public abstract class GeneralAlgorithmTester extends Tester {
 
-	private String loggerName;
-	private Logger logger = LoggerFactory.getLogger(GeneralAlgorithmTester.class);
 	protected static final String TESTEDALGORITHM_LOGGERNAME = "testedalgorithm";
 	private static final int TIMEOUT_DELAY = 12000;
 	private static final int TOTAL_EXPERIMENT_TIMEOUT = 20000;
@@ -126,13 +124,13 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		}
 		CheckingEventListener listener = new CheckingEventListener();
 		try {
-			for (AlgorithmEvent e : algorithm) {
+			for (IAlgorithmEvent e : algorithm) {
 				listener.receiveEvent(e);
 			}
 		} catch (ExceptionInAlgorithmIterationException e) {
 			if (e.getCause() instanceof AlgorithmTimeoutedException) {
 				this.logger.warn("Algorithm has been timeouted. Cannot safely check that a finished event would have been returned.");
-				listener.receiveEvent(new AlgorithmFinishedEvent(algorithm.getId())); // pretend that the algorithm would have send an AlgorithmFinishedEvent
+				listener.receiveEvent(new AlgorithmFinishedEvent(algorithm)); // pretend that the algorithm would have send an AlgorithmFinishedEvent
 			} else {
 				throw e;
 			}
@@ -163,12 +161,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 	@Test
 	public void testTimeout() throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
-		try {
-			this.runTimeoutTest(false);
-		}
-		finally {
-
-		}
+		this.runTimeoutTest(false);
 	}
 
 	@Test
@@ -373,7 +366,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			assert algorithm.getConfig().threads() == allowedCPUs;
 		}
 		FutureTask<?> task = new FutureTask<>(algorithm);
-		TimeOut to = new TimeOut(TIMEOUT_DELAY, TimeUnit.MILLISECONDS);
+		Timeout to = new Timeout(TIMEOUT_DELAY, TimeUnit.MILLISECONDS);
 		algorithm.setTimeout(to.milliseconds(), TimeUnit.MILLISECONDS);
 		assert algorithm.getTimeout().equals(to) : "Algorithm timeout is " + algorithm.getTimeout() + " but " + to + " has been specified!";
 
@@ -441,7 +434,6 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			fail(msg);
 		}
 
-
 		assert allTasksResolved;
 	}
 
@@ -471,7 +463,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		boolean observedFinish = false;
 		boolean observedFinishExactlyOnce = false;
 
-		public void receiveEvent(final AlgorithmEvent e) {
+		public void receiveEvent(final IAlgorithmEvent e) {
 
 			if (e instanceof AlgorithmInitializedEvent) {
 				this.receiveEvent((AlgorithmInitializedEvent) e);
@@ -517,22 +509,4 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	public IAlgorithmTestProblemSet<?> getProblemSet() {
 		return this.problemSet;
 	}
-
-	@Override
-	public String getLoggerName() {
-		return this.loggerName;
-	}
-
-	protected Logger getLogger() {
-		return this.logger;
-	}
-
-	@Override
-	public void setLoggerName(final String name) {
-		this.logger.info("Switching logger name from {} to {}.", this.loggerName, name);
-		this.loggerName = name;
-		this.logger = LoggerFactory.getLogger(this.loggerName);
-		this.logger.info("Switched logger name to {}.", this.loggerName);
-	}
-
 }

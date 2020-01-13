@@ -1,6 +1,8 @@
 package ai.libs.jaicore.logic.fol.util;
 
-import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
+import org.api4.java.algorithm.IAlgorithm;
+
+import ai.libs.jaicore.basic.algorithm.AAlgorithmEvent;
 
 /**
  * This is used if a binding is found that is ok for positive literals, but negative literals of the conclusions are in the factbase.
@@ -8,8 +10,8 @@ import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
  */
 public class ForwardChainingFailedCWABindingEvent extends AAlgorithmEvent {
 
-	public ForwardChainingFailedCWABindingEvent(String algorithmId) {
-		super(algorithmId);
+	public ForwardChainingFailedCWABindingEvent(final IAlgorithm<?, ?> algorithm) {
+		super(algorithm);
 	}
 
 }

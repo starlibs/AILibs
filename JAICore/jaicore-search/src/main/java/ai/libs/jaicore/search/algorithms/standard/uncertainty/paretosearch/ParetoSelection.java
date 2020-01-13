@@ -6,7 +6,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.ENodeAnnotation;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
 /**
  * Open collection pareto front implementation.
@@ -16,17 +17,17 @@ import ai.libs.jaicore.search.model.travesaltree.Node;
  * @param <V>
  *            external label of node
  */
-public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T, V>> {
+public class ParetoSelection<T, A, V extends Comparable<V>> implements Queue<BackPointerPath<T, A, V>> {
 
-	private static final String UNCERTAINTY = "uncertainty";
+	private static final String UNCERTAINTY = ENodeAnnotation.F_UNCERTAINTY.name();
 	private static final String DOMINATES = "dominates";
 	private static final String DOMINATED_BY = "dominatedBy";
 
 	/* Contains all open nodes. */
-	private final LinkedList<Node<T, V>> open;
+	private final LinkedList<BackPointerPath<T, A, V>> open;
 
 	/* Contains all maximal open nodes. */
-	private final Queue<Node<T, V>> pareto;
+	private final Queue<BackPointerPath<T, A, V>> pareto;
 
 	/* Node counter. */
 	private int n = 0;
@@ -37,7 +38,7 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	 * @param pareto
 	 *            Pareto set implementation.
 	 */
-	public ParetoSelection(final Queue<Node<T, V>> pareto) {
+	public ParetoSelection(final Queue<BackPointerPath<T, A, V>> pareto) {
 		this.open = new LinkedList<>();
 		this.pareto = pareto;
 	}
@@ -50,7 +51,7 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	 * @return true if p dominates q. False, otherwise.
 	 */
 	@SuppressWarnings("unchecked")
-	private boolean dominates(final Node<T, V> p, final Node<T, V> q) {
+	private boolean dominates(final BackPointerPath<T, A, V> p, final BackPointerPath<T, A, V> q) {
 		if (!p.getAnnotations().containsKey(UNCERTAINTY)) {
 			throw new IllegalArgumentException("Node " + p + " has no uncertainty information.");
 		}
@@ -74,8 +75,8 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private boolean isMaximal(final Node<T, V> n) {
-		return ((HashSet<Node<T, V>>) n.getAnnotation(DOMINATED_BY)).size() == 0;
+	private boolean isMaximal(final BackPointerPath<T, A, V> n) {
+		return ((HashSet<BackPointerPath<T, A, V>>) n.getAnnotation(DOMINATED_BY)).size() == 0;
 	}
 
 	/**
@@ -86,21 +87,21 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	 * @return
 	 */
 	@Override
-	public boolean add(final Node<T, V> n) {
-		if (n.getInternalLabel() == null) {
+	public boolean add(final BackPointerPath<T, A, V> n) {
+		if (n.getScore() == null) {
 			throw new IllegalArgumentException("Cannot add nodes with value NULL to OPEN!");
 		}
 
 		// Initialize annotations necessary for pareto queue.
 		n.setAnnotation("n", this.n++);
-		n.setAnnotation(DOMINATES, new HashSet<Node<T, V>>());
-		n.setAnnotation(DOMINATED_BY, new HashSet<Node<T, V>>());
+		n.setAnnotation(DOMINATES, new HashSet<BackPointerPath<T, A, V>>());
+		n.setAnnotation(DOMINATED_BY, new HashSet<BackPointerPath<T, A, V>>());
 
-		for (Node<T, V> q : this.open) {
+		for (BackPointerPath<T, A, V> q : this.open) {
 			// n dominates q
 			if (this.dominates(n, q)) {
-				((HashSet<Node<T, V>>) n.getAnnotation(DOMINATES)).add(q);
-				((HashSet<Node<T, V>>) q.getAnnotation(DOMINATED_BY)).add(n);
+				((HashSet<BackPointerPath<T, A, V>>) n.getAnnotation(DOMINATES)).add(q);
+				((HashSet<BackPointerPath<T, A, V>>) q.getAnnotation(DOMINATED_BY)).add(n);
 
 				// Remove q from pareto front if its now dominated i.e. not maximal anymore.
 				if (!this.isMaximal(q)) {
@@ -109,8 +110,8 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 			}
 			// n dominated by q
 			if (this.dominates(q, n)) {
-				((HashSet<Node<T, V>>) n.getAnnotation(DOMINATES)).add(q);
-				((HashSet<Node<T, V>>) q.getAnnotation(DOMINATED_BY)).add(n);
+				((HashSet<BackPointerPath<T, A, V>>) n.getAnnotation(DOMINATES)).add(q);
+				((HashSet<BackPointerPath<T, A, V>>) q.getAnnotation(DOMINATED_BY)).add(n);
 			}
 		}
 
@@ -123,9 +124,9 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	}
 
 	@Override
-	public boolean addAll(final Collection<? extends Node<T, V>> c) {
+	public boolean addAll(final Collection<? extends BackPointerPath<T, A, V>> c) {
 		boolean changed = false;
-		for (Node<T, V> p : c) {
+		for (BackPointerPath<T, A, V> p : c) {
 			changed |= this.add(p);
 		}
 		return changed;
@@ -152,7 +153,7 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	}
 
 	@Override
-	public Iterator<Node<T, V>> iterator() {
+	public Iterator<BackPointerPath<T, A, V>> iterator() {
 		return this.pareto.iterator();
 	}
 
@@ -185,7 +186,7 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	 * Return a node from pareto front.
 	 */
 	@Override
-	public Node<T, V> peek() {
+	public BackPointerPath<T, A, V> peek() {
 		return this.pareto.isEmpty() ? null : this.pareto.peek();
 	}
 
@@ -197,18 +198,18 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	 */
 	@Override
 	public boolean remove(final Object o) {
-		if (o instanceof Node) {
-			Node<T, V> node = (Node<T, V>) o;
+		if (o instanceof BackPointerPath) {
+			BackPointerPath<T, A, V> node = (BackPointerPath<T, A, V>) o;
 			// Remove all associations of n.
-			for (Node<T, V> q : (HashSet<Node<T, V>>) node.getAnnotation(DOMINATES)) {
-				((HashSet<Node<T, V>>) q.getAnnotation(DOMINATED_BY)).remove(node);
+			for (BackPointerPath<T, A, V> q : (HashSet<BackPointerPath<T, A, V>>) node.getAnnotation(DOMINATES)) {
+				((HashSet<BackPointerPath<T, A, V>>) q.getAnnotation(DOMINATED_BY)).remove(node);
 				// Add q to pareto if its now no longer dominated by any other point.
 				if (this.isMaximal(q)) {
 					this.pareto.add(q);
 				}
 			}
-			for (Node<T, V> q : (HashSet<Node<T, V>>) node.getAnnotation(DOMINATED_BY)) {
-				((HashSet<Node<T, V>>) q.getAnnotation(DOMINATES)).remove(node); // TODO: Is this even necessary?
+			for (BackPointerPath<T, A, V> q : (HashSet<BackPointerPath<T, A, V>>) node.getAnnotation(DOMINATED_BY)) {
+				((HashSet<BackPointerPath<T, A, V>>) q.getAnnotation(DOMINATES)).remove(node); // TODO: Is this even necessary?
 			}
 			// Remove n from Pareto set and Open list.
 			this.pareto.remove(node);
@@ -222,13 +223,13 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("OPEN LIST: \n");
-		for (Node p : this.open) {
+		for (BackPointerPath p : this.open) {
 			sb.append(p.toString());
 			sb.append("\n");
 		}
 		sb.append("PARETO = [");
-		for (Node<T, V> p : this.pareto) {
-			sb.append(p.getPoint());
+		for (BackPointerPath<T, A, V> p : this.pareto) {
+			sb.append(p.getHead());
 			sb.append(", ");
 		}
 		sb.append("]");
@@ -236,24 +237,24 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	}
 
 	@Override
-	public Node<T, V> element() {
+	public BackPointerPath<T, A, V> element() {
 		return this.peek();
 	}
 
 	@Override
-	public boolean offer(final Node<T, V> arg0) {
+	public boolean offer(final BackPointerPath<T, A, V> arg0) {
 		return this.add(arg0);
 	}
 
 	@Override
-	public Node<T, V> poll() {
-		Node<T, V> node = this.peek();
+	public BackPointerPath<T, A, V> poll() {
+		BackPointerPath<T, A, V> node = this.peek();
 		this.remove(node);
 		return node;
 	}
 
 	@Override
-	public Node<T, V> remove() {
+	public BackPointerPath<T, A, V> remove() {
 		return this.poll();
 	}
 }

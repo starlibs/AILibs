@@ -1,0 +1,20 @@
+{
+	"repository" : "ML-Plan",
+	"include": ["./scikit-learn-classifiers-tpot.json", "./scikit-learn-preprocessors-tpot.json"],
+	"components" : [
+	  	{
+	  	    "name" : "sklearn.pipeline.make_pipeline",
+	  	    "providedInterface" : [ "MLPipeline", "AbstractClassifier" ],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "preprocessor",
+	  	    		"name": "AbstractPreprocessor"
+	  	    	}, { 
+	  	    		"id": "classifier",
+	  	    		"name": "BasicClassifier"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    }
+	]
+}

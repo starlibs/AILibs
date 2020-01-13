@@ -46,10 +46,13 @@ public class TempFileHandler implements Closeable {
 		this.tempFiles = new HashMap<>();
 		this.tempFileReaders = new HashMap<>();
 		this.tempFileWriters = new HashMap<>();
+		if (!tempFileDirectory.exists()) {
+			tempFileDirectory.mkdirs();
+		}
 	}
 
 	public TempFileHandler() {
-		this(new File(System.getProperty("user.home")));
+		this(new File(System.getProperty("user.home") + "/.ailibs"));
 	}
 
 	/**
@@ -65,7 +68,6 @@ public class TempFileHandler implements Closeable {
 		File file = new File(path);
 		file.deleteOnExit();
 		this.tempFiles.put(uuid, file);
-
 		return uuid;
 	}
 
@@ -160,6 +162,7 @@ public class TempFileHandler implements Closeable {
 			} catch (IOException e) {
 				this.logger.error(String.format("Cannot delete file for UUID %s", uuid), e);
 			}
+			this.tempFiles.remove(uuid);
 		}
 	}
 

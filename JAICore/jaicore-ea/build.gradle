@@ -1,6 +1,7 @@
 dependencies {
     compile project(":JAICore:jaicore-basic")
-    compile group: 'org.moeaframework', name: 'moeaframework', version: '2.12'
+    
+    compile("$moea")
 }
 
 uploadArchives {

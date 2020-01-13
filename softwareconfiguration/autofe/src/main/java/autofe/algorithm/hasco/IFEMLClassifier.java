@@ -1,9 +1,9 @@
 package autofe.algorithm.hasco;
 
+import org.api4.java.ai.ml.core.exception.PredictionException;
+import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import ai.libs.jaicore.ml.core.exception.PredictionException;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import autofe.util.DataSet;
 import weka.classifiers.Classifier;
 import weka.core.Instance;

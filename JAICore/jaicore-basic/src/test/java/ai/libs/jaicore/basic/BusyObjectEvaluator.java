@@ -1,7 +1,7 @@
 package ai.libs.jaicore.basic;
 
-import ai.libs.jaicore.basic.IObjectEvaluator;
-import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 
 /**
  * This is a universal object evaluator that will never return a value in reasonable time but is interruptible.

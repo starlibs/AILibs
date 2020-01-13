@@ -12,7 +12,7 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import autofe.util.DataSetUtils;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LDA;

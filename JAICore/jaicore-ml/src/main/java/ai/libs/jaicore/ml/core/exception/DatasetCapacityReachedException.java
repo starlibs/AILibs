@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.core.exception;
 
-import ai.libs.jaicore.ml.core.dataset.TimeSeriesDataset;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset;
 
 /**
  * Exception that indicates that the capacity of a {@link TimeSeriesDataset} is

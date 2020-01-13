@@ -3,28 +3,30 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
-public class TimeLoggingNodeEvaluator<T, V extends Comparable<V>> extends DecoratingNodeEvaluator<T, V> {
+public class TimeLoggingNodeEvaluator<T, A, V extends Comparable<V>> extends DecoratingNodeEvaluator<T, A, V> {
 
-	private final Map<Node<T, ?>, Integer> times = new ConcurrentHashMap<>();
+	private final Map<ILabeledPath<T, A>, Integer> times = new ConcurrentHashMap<>();
 
-	public TimeLoggingNodeEvaluator(INodeEvaluator<T, V> baseEvaluator) {
+	public TimeLoggingNodeEvaluator(final IPathEvaluator<T, A,V> baseEvaluator) {
 		super(baseEvaluator);
 	}
 
-	public int getMSRequiredForComputation(Node<T, V> node) {
-		if (!times.containsKey(node))
-			throw new IllegalArgumentException("No f-value has been computed for node: " + node);
-		return times.get(node);
+	public int getMSRequiredForComputation(final ILabeledPath<T, A> path) {
+		if (!this.times.containsKey(path)) {
+			throw new IllegalArgumentException("No f-value has been computed for node: " + path);
+		}
+		return this.times.get(path);
 	}
 
 	@Override
-	public V f(Node<T, ?> node) throws NodeEvaluationException, InterruptedException {
+	public V evaluate(final ILabeledPath<T, A> path) throws PathEvaluationException, InterruptedException {
 		long start = System.currentTimeMillis();
-		V f = super.f(node);
-		times.put(node, (int) (System.currentTimeMillis() - start));
+		V f = super.evaluate(path);
+		this.times.put(path, (int) (System.currentTimeMillis() - start));
 		return f;
 	}
 }

@@ -7,12 +7,12 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 /**
@@ -25,48 +25,48 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends StandardBes
 	private Logger logger = LoggerFactory.getLogger(BestFirstEpsilon.class);
 	private String loggerName;
 
-	private final INodeEvaluator<T, W> secondaryNodeEvaluator;
-	private final Map<Node<T, Double>, W> secondaryCache = new HashMap<>();
+	private final IPathEvaluator<T, A, W> secondaryNodeEvaluator;
+	private final Map<BackPointerPath<T, A, Double>, W> secondaryCache = new HashMap<>();
 	private final OpenList focalBasedOpenList = new OpenList();
 	private final boolean absolute;
 	private final double epsilon;
 
 	@SuppressWarnings("serial")
-	private class OpenList extends PriorityQueue<Node<T, Double>> {
+	private class OpenList extends PriorityQueue<BackPointerPath<T, A, Double>> {
 
 		@Override
-		public Node<T, Double> peek() {
+		public BackPointerPath<T, A, Double> peek() {
 			if (BestFirstEpsilon.this.epsilon <= 0 || BestFirstEpsilon.this.open.isEmpty()) {
 				return super.peek();
 			}
 
 			/* build focal list and compute secondary f values for the elements in the list */
-			double best = super.peek().getInternalLabel();
+			double best = super.peek().getScore();
 			double threshold = (BestFirstEpsilon.this.absolute ? (best >= 0 ? best + BestFirstEpsilon.this.epsilon : best - BestFirstEpsilon.this.epsilon)
 					: best * (best >= 0 ? 1 + BestFirstEpsilon.this.epsilon : 1 - BestFirstEpsilon.this.epsilon));
-			Collection<Node<T, Double>> focal = super.stream().filter(n -> n.getInternalLabel() <= threshold).collect(Collectors.toList());
+			Collection<BackPointerPath<T, A, Double>> focal = super.stream().filter(n -> n.getScore() <= threshold).collect(Collectors.toList());
 			focal.stream().filter(n -> !BestFirstEpsilon.this.secondaryCache.containsKey(n)).forEach(n -> {
 				try {
-					BestFirstEpsilon.this.secondaryCache.put(n, BestFirstEpsilon.this.secondaryNodeEvaluator.f(n));
+					BestFirstEpsilon.this.secondaryCache.put(n, BestFirstEpsilon.this.secondaryNodeEvaluator.evaluate(n));
 				} catch (Exception e) {
 					BestFirstEpsilon.this.logger.error("Observed exception during computation of f: {}", e);
 				}
 			});
-			Optional<Node<T, Double>> choice = focal.stream().min((p1, p2) -> BestFirstEpsilon.this.secondaryCache.get(p1).compareTo(BestFirstEpsilon.this.secondaryCache.get(p2)));
+			Optional<BackPointerPath<T, A, Double>> choice = focal.stream().min((p1, p2) -> BestFirstEpsilon.this.secondaryCache.get(p1).compareTo(BestFirstEpsilon.this.secondaryCache.get(p2)));
 			if (!choice.isPresent()) {
 				throw new IllegalStateException("No choice found!");
 			}
-			BestFirstEpsilon.this.logger.info("Best score is {}. Threshold for focal is {}. Choose node with f1 {} and best f2 {}. Size of focal was {}.", best, threshold, choice.get().getInternalLabel(),
+			BestFirstEpsilon.this.logger.info("Best score is {}. Threshold for focal is {}. Choose node with f1 {} and best f2 {}. Size of focal was {}.", best, threshold, choice.get().getScore(),
 					BestFirstEpsilon.this.secondaryCache.get(choice.get()), focal.size());
 			return choice.get();
 		}
 	}
 
-	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final int epsilon) {
+	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final IPathEvaluator<T, A, W> pSecondaryNodeEvaluator, final int epsilon) {
 		this(problem, pSecondaryNodeEvaluator, epsilon, true);
 	}
 
-	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final double epsilon, final boolean absolute) {
+	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final IPathEvaluator<T, A, W> pSecondaryNodeEvaluator, final double epsilon, final boolean absolute) {
 		super(problem);
 		this.secondaryNodeEvaluator = pSecondaryNodeEvaluator;
 		this.epsilon = epsilon;

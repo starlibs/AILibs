@@ -1,7 +1,13 @@
 dependencies {
 	compile project(":JAICore:jaicore-basic")
-	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	
+	compile ("$api4common")
+  	compile ("$api4algorithm")
+  	
+  	/* dependencies to test sources of other projects */
+  	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }
+
 uploadArchives {
 	repositories {
 		mavenDeployer {

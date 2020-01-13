@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ai.libs.jaicore.graph.Graph;
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import autofe.algorithm.hasco.AutoFEWekaPipeline;
 import autofe.algorithm.hasco.filter.image.PretrainedNNFilter;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;

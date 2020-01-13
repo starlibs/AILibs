@@ -3,7 +3,8 @@ package ai.libs.jaicore.search.gui.plugins.rollouthistograms;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyComputationFailedException;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
@@ -15,22 +16,22 @@ public class RolloutInfoAlgorithmEventPropertyComputer implements AlgorithmEvent
 
 	private NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer;
 
-	public RolloutInfoAlgorithmEventPropertyComputer(NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer) {
+	public RolloutInfoAlgorithmEventPropertyComputer(final NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer) {
 		this.nodeInfoAlgorithmEventPropertyComputer = nodeInfoAlgorithmEventPropertyComputer;
 	}
 
 	@Override
-	public Object computeAlgorithmEventProperty(AlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
+	public Object computeAlgorithmEventProperty(final IAlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
 		if (algorithmEvent instanceof RolloutEvent) {
 			RolloutEvent<?, ?> rolloutEvent = (RolloutEvent<?, ?>) algorithmEvent;
 			List<?> rolloutPath = rolloutEvent.getPath();
-			return new RolloutInfo(convertNodeToNodeIds(rolloutPath), rolloutEvent.getScore());
+			return new RolloutInfo(this.convertNodeToNodeIds(rolloutPath), rolloutEvent.getScore());
 		}
 		return null;
 	}
 
-	private List<String> convertNodeToNodeIds(List<?> pathNodes) throws PropertyComputationFailedException {
-		List<String> path = pathNodes.stream().map(n -> (Object) n).map(n -> nodeInfoAlgorithmEventPropertyComputer.getIdOfNodeIfExistent(n)).collect(Collectors.toList());
+	private List<String> convertNodeToNodeIds(final List<?> pathNodes) throws PropertyComputationFailedException {
+		List<String> path = pathNodes.stream().map(n -> (Object) n).map(n -> this.nodeInfoAlgorithmEventPropertyComputer.getIdOfNodeIfExistent(n)).collect(Collectors.toList());
 		if (path.contains(null)) {
 			throw new PropertyComputationFailedException("Cannot compute rollout score due to null nodes in path: " + path);
 		}

@@ -2,7 +2,7 @@ package ai.libs.jaicore.search.testproblems.npuzzle.parentdiscarding;
 
 import java.util.Arrays;
 
-import ai.libs.jaicore.testproblems.npuzzle.NPuzzleState;
+import ai.libs.jaicore.problems.npuzzle.NPuzzleState;
 
 public class PDPuzzleNode extends NPuzzleState {
 

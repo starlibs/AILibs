@@ -3,14 +3,14 @@ package ai.libs.jaicore.search.testproblems.npuzzle.parentdiscarding;
 import java.util.ArrayList;
 import java.util.List;
 
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
-public class PDPuzzleGenerator implements GraphGenerator<PDPuzzleNode, String> {
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
+
+public class PDPuzzleGenerator implements IGraphGenerator<PDPuzzleNode, String> {
 
 	protected int dimension;
 	private PDPuzzleNode root;
@@ -21,41 +21,33 @@ public class PDPuzzleGenerator implements GraphGenerator<PDPuzzleNode, String> {
 	}
 
 	@Override
-	public SingleRootGenerator<PDPuzzleNode> getRootGenerator() {
+	public ISingleRootGenerator<PDPuzzleNode> getRootGenerator() {
 		return () -> this.root;
 	}
 
 	@Override
-	public SuccessorGenerator<PDPuzzleNode, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<PDPuzzleNode, String> getSuccessorGenerator() {
 		return n -> {
-			List<NodeExpansionDescription<PDPuzzleNode, String>> successors = new ArrayList<>();
+			List<INewNodeDescription<PDPuzzleNode, String>> successors = new ArrayList<>();
 
 			// Possible successors
 			if (n.getEmptyX() > 0) {
-				successors.add(new NodeExpansionDescription<>(this.move(n, "l"), "l", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "l"), "l"));
 			}
 
 			if (n.getEmptyX() < this.dimension - 1) {
-				successors.add(new NodeExpansionDescription<>(this.move(n, "r"), "r", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "r"), "r"));
 			}
 
 			if (n.getEmptyY() > 0) {
-				successors.add(new NodeExpansionDescription<>(this.move(n, "u"), "u", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "u"), "u"));
 			}
 
 			if (n.getEmptyY() < this.dimension - 1) {
-				successors.add(new NodeExpansionDescription<>(this.move(n, "d"), "d", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "d"), "d"));
 			}
 
 			return successors;
-		};
-	}
-
-	@Override
-	public NodeGoalTester<PDPuzzleNode> getGoalTester() {
-		return n -> {
-			int[][] board = n.getBoard();
-			return (board[this.dimension - 1][this.dimension - 1] == 0);
 		};
 	}
 

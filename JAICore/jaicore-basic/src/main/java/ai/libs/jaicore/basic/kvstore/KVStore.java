@@ -17,6 +17,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.api4.java.datastructure.kvstore.IKVFilter;
+import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,19 +92,19 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 		Object value = this.get(key);
 		if (value == null) {
 			return null;
-		}
-
-		if (value instanceof String) {
+		} else if (value instanceof String) {
 			return (String) value;
 		} else {
-			return value.toString();
+			return value + "";
 		}
 	}
 
 	@Override
 	public Boolean getAsBoolean(final String key) {
 		Object value = this.get(key);
-		if (value instanceof Boolean) {
+		if (value == null) {
+			return false;
+		} else if (value instanceof Boolean) {
 			return (Boolean) value;
 		} else if (value instanceof String) {
 			return Boolean.valueOf((String) value);
@@ -114,19 +116,26 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 	@Override
 	public Integer getAsInt(final String key) {
 		Object value = this.get(key);
-		if (value instanceof Integer) {
+		if (value == null) {
+			return null;
+		} else if (value instanceof Integer) {
 			return (Integer) value;
+		}
+		else if (value instanceof Long) {
+			return Integer.valueOf(value.toString());
 		} else if (value instanceof String) {
 			return Integer.valueOf((String) value);
 		} else {
-			throw new IllegalStateException("Tried to get non-integer value as integer from KVStore.");
+			throw new IllegalStateException("Tried to get non-integer value as integer from KVStore. Type of value " + value + " is " + value.getClass().getName());
 		}
 	}
 
 	@Override
 	public Double getAsDouble(final String key) {
 		Object value = this.get(key);
-		if (value instanceof Double) {
+		if (value == null) {
+			return null;
+		} else if (value instanceof Double) {
 			return (Double) value;
 		} else if (value instanceof String) {
 			return Double.valueOf((String) value);
@@ -140,7 +149,9 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 	@Override
 	public Long getAsLong(final String key) {
 		Object value = this.get(key);
-		if (value instanceof Long) {
+		if (value == null) {
+			return null;
+		} else if (value instanceof Long) {
 			return (Long) value;
 		} else if (value instanceof String) {
 			return Long.valueOf((String) value);
@@ -152,7 +163,9 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 	@Override
 	public Short getAsShort(final String key) {
 		Object value = this.get(key);
-		if (value instanceof Short) {
+		if (value == null) {
+			return null;
+		} else if (value instanceof Short) {
 			return (Short) value;
 		} else if (value instanceof String) {
 			return Short.valueOf((String) value);
@@ -164,7 +177,9 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 	@Override
 	public Byte getAsByte(final String key) {
 		Object value = this.get(key);
-		if (value instanceof Byte) {
+		if (value == null) {
+			return null;
+		} else if (value instanceof Byte) {
 			return (Byte) value;
 		} else if (value instanceof String) {
 			return Byte.valueOf((String) value);
@@ -174,7 +189,7 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 	}
 
 	@Override
-	public Object getAsObject(final String key, final Class<?> objectClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	public <T> T getAsObject(final String key, final Class<T> objectClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		return objectClass.getConstructor().newInstance(this.get(key));
 	}
 

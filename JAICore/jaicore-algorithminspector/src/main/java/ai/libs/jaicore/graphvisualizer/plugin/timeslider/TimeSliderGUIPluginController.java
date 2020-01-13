@@ -1,6 +1,7 @@
 package ai.libs.jaicore.graphvisualizer.plugin.timeslider;
 
-import ai.libs.jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
+
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import ai.libs.jaicore.graphvisualizer.events.gui.GUIEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginController;
@@ -14,33 +15,33 @@ public class TimeSliderGUIPluginController implements IGUIPluginController {
 
 	private int amountOfEventsToIgnore;
 
-	public TimeSliderGUIPluginController(TimeSliderGUIPluginModel model) {
+	public TimeSliderGUIPluginController(final TimeSliderGUIPluginModel model) {
 		this.model = model;
 		this.amountOfEventsToIgnore = 0;
 	}
 
 	@Override
-	public void handleSerializableAlgorithmEvent(PropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
-		if (amountOfEventsToIgnore <= 0) {
-			model.increaseCurrentTimeStep();
-			model.increaseMaximumTimeStep();
+	public void handleSerializableAlgorithmEvent(final IPropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
+		if (this.amountOfEventsToIgnore <= 0) {
+			this.model.increaseCurrentTimeStep();
+			this.model.increaseMaximumTimeStep();
 		} else {
-			amountOfEventsToIgnore--;
+			this.amountOfEventsToIgnore--;
 		}
 	}
 
 	@Override
-	public void handleGUIEvent(GUIEvent guiEvent) {
+	public void handleGUIEvent(final GUIEvent guiEvent) {
 		if (guiEvent instanceof ResetEvent) {
-			model.reset();
+			this.model.reset();
 		} else if (guiEvent instanceof PauseEvent) {
-			model.pause();
+			this.model.pause();
 		} else if (guiEvent instanceof PlayEvent) {
-			model.unpause();
+			this.model.unpause();
 		} else if (guiEvent instanceof GoToTimeStepEvent) {
 			int newTimeStep = ((GoToTimeStepEvent) guiEvent).getNewTimeStep();
-			amountOfEventsToIgnore = newTimeStep;
-			model.setCurrentTimeStep(newTimeStep);
+			this.amountOfEventsToIgnore = newTimeStep;
+			this.model.setCurrentTimeStep(newTimeStep);
 		}
 	}
 

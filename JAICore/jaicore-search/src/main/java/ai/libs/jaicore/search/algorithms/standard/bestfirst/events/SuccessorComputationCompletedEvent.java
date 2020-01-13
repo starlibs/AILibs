@@ -2,33 +2,35 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.events;
 
 import java.util.List;
 
-import ai.libs.jaicore.search.model.travesaltree.Node;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
+import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 
-public class SuccessorComputationCompletedEvent<T, A> extends BestFirstEvent {
-	private Node<T, ?> node;
-	private List<NodeExpansionDescription<T, A>> successorDescriptions;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
-	public SuccessorComputationCompletedEvent(String algorithmId, Node<T, ?> node,
-			List<NodeExpansionDescription<T, A>> successorDescriptions) {
-		super(algorithmId);
-		this.node = node;
+public class SuccessorComputationCompletedEvent<T, A, V extends Comparable<V>> extends BestFirstEvent {
+	private BackPointerPath<T, A, V> path;
+	private List<INewNodeDescription<T, A>> successorDescriptions;
+
+	public SuccessorComputationCompletedEvent(final IAlgorithm<?, ?> algorithm, final BackPointerPath<T, A, V> path,
+			final List<INewNodeDescription<T, A>> successorDescriptions) {
+		super(algorithm);
+		this.path = path;
 		this.successorDescriptions = successorDescriptions;
 	}
 
-	public Node<T, ?> getNode() {
-		return node;
+	public BackPointerPath<T, A, V> getNode() {
+		return this.path;
 	}
 
-	public void setNode(Node<T, ?> node) {
-		this.node = node;
+	public void setNode(final BackPointerPath<T, A, V> node) {
+		this.path = node;
 	}
 
-	public List<NodeExpansionDescription<T, A>> getSuccessorDescriptions() {
-		return successorDescriptions;
+	public List<INewNodeDescription<T, A>> getSuccessorDescriptions() {
+		return this.successorDescriptions;
 	}
 
-	public void setSuccessorDescriptions(List<NodeExpansionDescription<T, A>> successorDescriptions) {
+	public void setSuccessorDescriptions(final List<INewNodeDescription<T, A>> successorDescriptions) {
 		this.successorDescriptions = successorDescriptions;
 	}
 }

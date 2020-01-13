@@ -2,23 +2,25 @@ package ai.libs.jaicore.search.algorithms.standard.uncertainty;
 
 import java.util.List;
 
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IUncertaintySource;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
-public class BasicUncertaintySource<T, V extends Comparable<V>> implements IUncertaintySource<T, V> {
+public class BasicUncertaintySource<T, A, V extends Comparable<V>> implements IUncertaintySource<T, A,V> {
 
 	@Override
-	public double calculateUncertainty(Node<T, V> n, List<List<T>> simulationPaths, List<V> simulationEvaluations) {
+	public double calculateUncertainty(final IEvaluatedPath<T, A, V> n, final List<ILabeledPath<T, A>> simulationPaths, final List<V> simulationEvaluations) {
 
 		double uncertainty = 1.0d;
 
 		if (simulationPaths != null && !simulationPaths.isEmpty()) {
-			T t = n.getPoint();
+			T t = n.getHead();
 			double meanDepth = 0.0d;
-			for (List<T> path : simulationPaths) {
-				if (path.contains(t) && !path.isEmpty()) {
+			for (ILabeledPath<T, A> path : simulationPaths) {
+				if (path.getNodes().contains(t) && !path.isPoint()) {
 					double post = 0.0d;
 					boolean startsCounting = false;
-					for (T pe : path) {
+					for (T pe : path.getNodes()) {
 						if (startsCounting) {
 							post++;
 						}
@@ -27,11 +29,11 @@ public class BasicUncertaintySource<T, V extends Comparable<V>> implements IUnce
 						}
 					}
 
-					meanDepth += post / (double) path.size();
+					meanDepth += post / path.getNumberOfNodes();
 				}
 			}
 			if (meanDepth != 0.0d) {
-				uncertainty = meanDepth / ((double) simulationPaths.size());
+				uncertainty = meanDepth / (simulationPaths.size());
 			}
 		}
 

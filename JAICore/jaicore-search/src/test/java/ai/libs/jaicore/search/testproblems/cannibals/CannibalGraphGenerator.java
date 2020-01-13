@@ -3,17 +3,16 @@ package ai.libs.jaicore.search.testproblems.cannibals;
 import java.util.ArrayList;
 import java.util.List;
 
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.GoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.RootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
-import ai.libs.jaicore.testproblems.cannibals.CannibalProblem;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.IRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
-public class CannibalGraphGenerator implements GraphGenerator<CannibalProblem, String> {
+import ai.libs.jaicore.problems.cannibals.CannibalProblem;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
+
+public class CannibalGraphGenerator implements IGraphGenerator<CannibalProblem, String> {
 
 	private final CannibalProblem initState;
 
@@ -23,8 +22,8 @@ public class CannibalGraphGenerator implements GraphGenerator<CannibalProblem, S
 	}
 
 	@Override
-	public RootGenerator<CannibalProblem> getRootGenerator() {
-		return new SingleRootGenerator<CannibalProblem>() {
+	public IRootGenerator<CannibalProblem> getRootGenerator() {
+		return new ISingleRootGenerator<CannibalProblem>() {
 
 			@Override
 			public CannibalProblem getRoot() {
@@ -34,12 +33,12 @@ public class CannibalGraphGenerator implements GraphGenerator<CannibalProblem, S
 	}
 
 	@Override
-	public SuccessorGenerator<CannibalProblem, String> getSuccessorGenerator() {
-		return new SuccessorGenerator<CannibalProblem, String>() {
+	public ISuccessorGenerator<CannibalProblem, String> getSuccessorGenerator() {
+		return new ISuccessorGenerator<CannibalProblem, String>() {
 
 			@Override
-			public List<NodeExpansionDescription<CannibalProblem, String>> generateSuccessors(final CannibalProblem node) throws InterruptedException {
-				List<NodeExpansionDescription<CannibalProblem, String>> successors = new ArrayList<>();
+			public List<INewNodeDescription<CannibalProblem, String>> generateSuccessors(final CannibalProblem node) throws InterruptedException {
+				List<INewNodeDescription<CannibalProblem, String>> successors = new ArrayList<>();
 				int ml = node.getMissionariesOnLeft();
 				int mr = node.getMissionariesOnRight();
 				int cl = node.getCannibalsOnLeft();
@@ -51,35 +50,35 @@ public class CannibalGraphGenerator implements GraphGenerator<CannibalProblem, S
 						CannibalProblem candidate = new CannibalProblem(false, ml - 2, cl, mr + 2, cr);
 						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<>(candidate, "2m->", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "2m->"));
 						}
 					}
 					if (ml >= 1) {
 						CannibalProblem candidate = new CannibalProblem(false, ml - 1, cl, mr + 1, cr);
 						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<>(candidate, "1m->", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "1m->"));
 						}
 					}
 					if (cl >= 1) {
 						CannibalProblem candidate = new CannibalProblem(false, ml, cl - 1, mr, cr + 1);
 						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<>(candidate, "1c->", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "1c->"));
 						}
 					}
 					if (ml >= 1 && cl >= 1) {
 						CannibalProblem candidate = new CannibalProblem(false, ml - 1, cl - 1, mr + 1, cr + 1);
 						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<>(candidate, "1m1c->", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "1m1c->"));
 						}
 					}
 					if (cl >= 2) {
 						CannibalProblem candidate = new CannibalProblem(false, ml, cl - 2, mr, cr + 2);
 						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<>(candidate, "2c->", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "2c->"));
 						}
 					}
 				}
@@ -90,35 +89,35 @@ public class CannibalGraphGenerator implements GraphGenerator<CannibalProblem, S
 						CannibalProblem candidate = new CannibalProblem(true, ml + 2, cl, mr - 2, cr);
 						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<>(candidate, "2m<-", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "2m<-"));
 						}
 					}
 					if (mr >= 1) {
 						CannibalProblem candidate = new CannibalProblem(true, ml + 1, cl, mr - 1, cr);
 						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<>(candidate, "1m<-", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "1m<-"));
 						}
 					}
 					if (cr >= 1) {
 						CannibalProblem candidate = new CannibalProblem(true, ml, cl + 1, mr, cr - 1);
 						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<>(candidate, "1c<-", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "1c<-"));
 						}
 					}
 					if (mr >= 1 && cr >= 1) {
 						CannibalProblem candidate = new CannibalProblem(true, ml + 1, cl + 1, mr - 1, cr - 1);
 						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<>(candidate, "1m1c<-", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "1m1c<-"));
 						}
 					}
 					if (cr >= 2) {
 						CannibalProblem candidate = new CannibalProblem(true, ml, cl + 2, mr, cr - 2);
 						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<>(candidate, "2c<-", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "2c<-"));
 						}
 					}
 				}
@@ -131,10 +130,5 @@ public class CannibalGraphGenerator implements GraphGenerator<CannibalProblem, S
 		if (a.getTotalNumberOfPeople() != b.getTotalNumberOfPeople()) {
 			throw new IllegalStateException("Number of people has changed from " + a.getTotalNumberOfPeople() + " to " + b.getTotalNumberOfPeople());
 		}
-	}
-
-	@Override
-	public GoalTester<CannibalProblem> getGoalTester() {
-		return (NodeGoalTester<CannibalProblem>)(CannibalProblem::isWon);
 	}
 }

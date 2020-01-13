@@ -1,11 +1,12 @@
 package ai.libs.jaicore.search.model.other;
 
-import ai.libs.jaicore.basic.IObjectEvaluator;
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
-public class AgnosticPathEvaluator<N, A> implements IObjectEvaluator<SearchGraphPath<N, A>, Double> {
+public class AgnosticPathEvaluator<N, A> implements IObjectEvaluator<ILabeledPath<N, A>, Double> {
 
 	@Override
-	public Double evaluate(final SearchGraphPath<N, A> solutionPath) {
+	public Double evaluate(final ILabeledPath<N, A> solutionPath) {
 		return 0.0;
 	}
 }

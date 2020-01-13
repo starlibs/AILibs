@@ -42,11 +42,55 @@ allprojects {
 
 	//Project properties
 	project.group = 'ai.libs'
-	project.version = '0.1.5'
+	project.version = '0.2.0'
 	
 	ext {
-	    ossrhUsername = project.hasProperty('ossrhUsername') ? ossrhUsername : System.getenv("ossrhUsername")
-	    ossrhPassword = project.hasProperty('ossrhPassword') ? ossrhPassword : System.getenv("ossrhPassword")
+	    ossrhUsername = hasProperty('ossrhUsername') ? ossrhUsername : System.getenv("ossrhUsername")
+	    ossrhPassword = hasProperty('ossrhPassword') ? ossrhPassword : System.getenv("ossrhPassword")
+	    
+	    // api4 dependencies
+	    api4Version = '1.0.0'
+	    api4common = 'org.api4:common:' + api4Version
+	    api4algorithm = 'org.api4:algorithm:' + api4Version
+	    api4datastructure = 'org.api4:datastructure:' + api4Version
+	    api4AIgraphsearch = 'org.api4:ai-graphsearch:' + api4Version
+	    api4AIml = 'org.api4:ai-ml:' + api4Version
+	    
+	    // apache dependencies
+	    apacheCommonsCollections = 'org.apache.commons:commons-collections4:4.1'
+	    apacheCommonsMath = 'org.apache.commons:commons-math3:3.6.1'
+	    apacheCommonsLang = 'org.apache.commons:commons-lang3:3.9'
+	    
+	    // openml dependencies
+	    openmlAPIConnector = 'org.openml:apiconnector:1.0.23'
+	    
+	    // graphstream
+	    gsCore = 'com.github.mwever:gs-core:2.0.2-synchrofix'
+	    gsUIJavaFX = 'com.github.graphstream:gs-ui-javafx:2.0-alpha'
+	    gsAlgo = 'com.github.graphstream:gs-algo:2.0-alpha'
+	    
+	    // ProtoBuf
+	    grpcAPI = 'io.grpc:grpc-api:1.24.1'
+	    grpcCore = 'io.grpc:grpc-core:1.24.1'
+	    grpcStub = 'io.grpc:grpc-stub:1.24.1'
+	    grpcPB = 'io.grpc:grpc-protobuf:1.24.1'
+	    protoBuf = 'com.google.protobuf:protobuf-java:3.11.0'
+	    
+	    // Common utilities
+	    jsonDatabind = 'com.fasterxml.jackson.core:jackson-databind:2.9.7'
+	    owner = 'org.aeonbits.owner:owner-java8:1.0.10'
+	    guava = 'com.google.guava:guava:27.0-jre'
+	    
+	    // Specific Utils
+	    fastUtil = 'it.unimi.dsi:fastutil:8.2.1' // JAICore-Basic
+	    mtj = 'io.github.andreas-solti.matrix-toolkits-java:mtj:1.0.8'
+	    jna = 'net.java.dev.jna:jna:4.5.2' // JAICore-Processes
+	    weka = 'ai.libs.thirdparty:interruptible-weka:0.1.2'
+	    wekaRotationForest = 'nz.ac.waikato.cms.weka:rotationForest:1.0.3'
+	    meka = 'ai.libs.thirdparty:interruptible-meka:0.1.0'
+	    mysql = 'mysql:mysql-connector-java:5.1.45'
+	    moea = 'org.moeaframework:moeaframework:2.12'
+	    cli = 'commons-cli:commons-cli:1.4'
 	}
 
 	
@@ -75,19 +119,14 @@ allprojects {
 		maven { url "https://jitpack.io" }
 		maven { url "http://clojars.org/repo/" }
 		maven { url "https://plugins.gradle.org/m2/" }
-		maven { url "https://nexus.cs.upb.de/repository/maven-releases/" }
-		flatDir {
-			dirs 'lib'
-		}
 	}
 	//Dependencies for all(!) projects
 	dependencies {
 		
 		// configuration
-		compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.10'
-		
+		compile ('org.aeonbits.owner:owner-java8:1.0.10')
 		// event bus
-		compile group: 'com.google.guava', name: 'guava', version: '27.0-jre'
+		compile('com.google.guava:guava:27.0-jre')
 	
 		//Logger
 		compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
@@ -122,27 +161,9 @@ allprojects {
 			properties["sonar.sourceEncoding"] = project.compileJava.options.encoding
 			properties["sonar.java.source"] = project.sourceCompatibility
 			properties["sonar.java.target"] = project.targetCompatibility
-			properties["sonar.java.binaries"] = sourceSets.main.output.classesDir
-			properties["sonar.java.test.binaries"] = sourceSets.test.output.classesDir
 		}
 	}
 
-	publishing {
-		publications {
-			shadow(MavenPublication) { publication ->
-				project.shadow.component(publication)
-			}
-  		}	
-		repositories {
-			maven {
-				url "${nexusBaseUrl}/repository/${nexusUpRepo}-${'snapshots'}"
-				credentials {
-					username "${nexusUser}"
-					password "${nexusPassword}"
-				}
-			}
-		}
-	}
 	// This task creates a jar with test classes.
 	task testClassesJar(type: Jar) {
 		classifier = 'tests'
@@ -176,15 +197,53 @@ allprojects {
 	signing {
 		sign configurations.archives
 	}
+	
+
+	eclipse {
+	    project.natures "org.eclipse.buildship.core.gradleprojectnature"
+	}
+
+
+	test {
+     		reports {
+        		junitXml.enabled = false
+        		html.enabled = true
+		}
+
+		minHeapSize = "1g"
+     		maxHeapSize = "6g"
+     		ignoreFailures = true
+		forkEvery = 1		
+		maxParallelForks = 1
+     		testLogging {
+			events "failed"
+			exceptionFormat "full"
+     		} 
+	}
+}
+
+task showDirs {
+    doLast {
+        logger.quiet(rootDir.toPath().relativize(project.reportsDir.toPath()).toString())
+        logger.quiet(rootDir.toPath().relativize(project.testResultsDir.toPath()).toString())
+    }
 }
 
 
-
 dependencies{
-	compile project(":hasco")
-	compile project(":autofe")
-	compile project(":autofe-reldata")
-	compile project(":mlplan")
+	compile project(":hasco-core")
+	compile project(":hasco-fanova")
+	compile project(":hyperopt")
+	//compile project(":autofe")
+	//compile project(":autofe-reldata")
+	compile project(":mlplan-core")
+	compile project(":mlplan-weka")
+	compile project(":mlplan-sklearn")
+	compile project(":mlplan-meka")
+	compile project(":mlplan-ext-metalearning")
+	compile project(":mlplan-ext-reduction")
+	compile project(":mlplan-ext-bigdata")
+	compile project(":mlplan-full")
 	compile project(":JAICore:jaicore-basic")
 	compile (project(":JAICore:jaicore-ea")) {
 		exclude group: 'commons-cli'
@@ -194,13 +253,11 @@ dependencies{
 	compile project(":JAICore:jaicore-logic")
 	compile project(":JAICore:jaicore-math")
 	compile project(":JAICore:jaicore-ml")
+	compile project(":JAICore:jaicore-ml-weka")
+	compile project(":JAICore:jaicore-ml-meka")
 	compile project(":JAICore:jaicore-planning")
 	compile project(":JAICore:jaicore-processes")
 	compile project(":JAICore:jaicore-search")
-}
-
-test{
-     maxHeapSize = "4g"
 }
 
 publish.dependsOn shadowJar

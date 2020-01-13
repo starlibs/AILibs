@@ -1,6 +1,4 @@
 dependencies {
-    compile project(':mlplan')
-    
     // TODO: Check if we need all of them
     compile project(':JAICore:jaicore-logic')
 	compile project(':JAICore:jaicore-basic')
@@ -8,6 +6,7 @@ dependencies {
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
 	compile project(':JAICore:jaicore-experiments')
+    compile project(':mlplan-core')
 	
 	compile project(':autofe')
 

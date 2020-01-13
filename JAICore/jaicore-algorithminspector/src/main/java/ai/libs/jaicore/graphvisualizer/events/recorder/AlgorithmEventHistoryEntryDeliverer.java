@@ -3,10 +3,10 @@ package ai.libs.jaicore.graphvisualizer.events.recorder;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.AlgorithmEventListener;
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import ai.libs.jaicore.graphvisualizer.events.gui.GUIEvent;
@@ -40,7 +40,7 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Prope
 
 	/**
 	 * Creates a new {@link AlgorithmEventHistoryEntryDeliverer} with the given {@link AlgorithmEventHistory} and the maximum sleep time between checking for new events from the history and sending them to the registered listeners.
-	 * 
+	 *
 	 * @param eventHistory The {@link AlgorithmEventHistory} from which the events are pulled.
 	 * @param maximumSleepTimeInMilliseconds The maximum sleep time between checking for new events from the history and sending them to the registered listeners
 	 */
@@ -58,7 +58,7 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Prope
 
 	/**
 	 * Creates a new {@link AlgorithmEventHistoryEntryDeliverer} with the given {@link AlgorithmEventHistory}.
-	 * 
+	 *
 	 * @param eventHistory The {@link AlgorithmEventHistory} from which the events are pulled.
 	 */
 	public AlgorithmEventHistoryEntryDeliverer(final AlgorithmEventHistory eventHistory) {
@@ -80,7 +80,7 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Prope
 		while (!Thread.currentThread().isInterrupted()) {
 			if (!this.paused && this.timestep < this.eventHistory.getLength()) {
 				AlgorithmEventHistoryEntry historyEntry = this.eventHistory.getEntryAtTimeStep(this.timestep);
-				PropertyProcessedAlgorithmEvent algorithmEvent = historyEntry.getAlgorithmEvent();
+				IPropertyProcessedAlgorithmEvent algorithmEvent = historyEntry.getAlgorithmEvent();
 				this.logger.debug("Pulled event entry {} associated with event {} at position {}.", historyEntry, algorithmEvent, this.timestep);
 
 				this.sendAlgorithmEventToListeners(algorithmEvent);
@@ -106,7 +106,7 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Prope
 		}
 	}
 
-	private void sendAlgorithmEventToListeners(final PropertyProcessedAlgorithmEvent algorithmEvent) {
+	private void sendAlgorithmEventToListeners(final IPropertyProcessedAlgorithmEvent algorithmEvent) {
 		for (PropertyProcessedAlgorithmEventListener eventListener : this.algorithmEventListeners) {
 			try {
 				this.sendAlgorithmEventToListener(algorithmEvent, eventListener);
@@ -117,7 +117,7 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Prope
 		this.logger.info("Pulled and sent event {} as entry at time step {}.", algorithmEvent, this.timestep);
 	}
 
-	private void sendAlgorithmEventToListener(final PropertyProcessedAlgorithmEvent algorithmEvent, final PropertyProcessedAlgorithmEventListener eventListener) throws HandleAlgorithmEventException {
+	private void sendAlgorithmEventToListener(final IPropertyProcessedAlgorithmEvent algorithmEvent, final PropertyProcessedAlgorithmEventListener eventListener) throws HandleAlgorithmEventException {
 		this.logger.debug("Sending event {} to listener {}.", algorithmEvent, eventListener);
 
 		long startTime = System.currentTimeMillis();
@@ -165,7 +165,7 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Prope
 		this.resetTimeStep();
 		GoToTimeStepEvent goToTimeStepEvent = (GoToTimeStepEvent) guiEvent;
 		while (this.timestep < goToTimeStepEvent.getNewTimeStep() && this.timestep < this.eventHistory.getLength()) {
-			PropertyProcessedAlgorithmEvent algorithmEvent = this.eventHistory.getEntryAtTimeStep(this.timestep).getAlgorithmEvent();
+			IPropertyProcessedAlgorithmEvent algorithmEvent = this.eventHistory.getEntryAtTimeStep(this.timestep).getAlgorithmEvent();
 			this.sendAlgorithmEventToListeners(algorithmEvent);
 			this.timestep++;
 		}

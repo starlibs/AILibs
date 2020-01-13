@@ -1,8 +1,8 @@
 package ai.libs.jaicore.planning.hierarchical.algorithms;
 
+import org.api4.java.algorithm.IAlgorithmFactory;
 import org.slf4j.Logger;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithmFactory;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.classical.problems.strips.Operation;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedGraphSearchBasedPlan;
@@ -30,7 +30,7 @@ public class CostSensitiveGraphSearchBasedHTNPlanningAlgorithm<P extends IHTNPla
 extends CostSensitiveGraphSearchBasedPlanningAlgorithm<P, S, N, A, V> {
 
 	public CostSensitiveGraphSearchBasedHTNPlanningAlgorithm(final P problem, final AlgorithmicProblemReduction<P, IEvaluatedGraphSearchBasedPlan<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> problemTransformer,
-			final IAlgorithmFactory<S, EvaluatedSearchGraphPath<N, A, V>> baseFactory) {
+			final IAlgorithmFactory<S, EvaluatedSearchGraphPath<N, A, V>, ?> baseFactory) {
 		super(problem, problemTransformer, baseFactory);
 	}
 

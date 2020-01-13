@@ -1,11 +1,11 @@
 package autofe.algorithm.hasco.evaluation;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
-import ai.libs.jaicore.search.model.travesaltree.Node;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.util.DataSet;
 import autofe.util.EvaluationUtils;
@@ -19,25 +19,26 @@ public class EnsembleNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 	}
 
 	@Override
-	public Double f(final Node<TFDNode, ?> node) throws NodeEvaluationException {
-		if(hasNodeEmptyParent(node))
+	public Double f(final ILabeledPath<TFDNode, String> path) throws PathEvaluationException {
+		if(this.hasPathEmptyParent(path)) {
 			return null;
+		}
 
 		// If pipeline is too deep, assign worst value
-		if (hasPathExceededPipelineSize(node)) {
+		if (this.hasPathExceededPipelineSize(path)) {
 			return MAX_EVAL_VALUE;
 		}
 
-		FilterPipeline pipe = extractPipelineFromNode(node);
+		FilterPipeline pipe = this.extractPipelineFromNode(path);
 
 		if (pipe != null && pipe.getFilters() != null) {
 			try {
 				logger.debug("Applying and evaluating pipeline {}", pipe);
-				DataSet dataSet = pipe.applyFilter(data, true);
+				DataSet dataSet = pipe.applyFilter(this.data, true);
 				logger.debug("Applied pipeline. Starting benchmarking...");
 
 				double ensembleScore = EvaluationUtils.performEnsemble(dataSet.getInstances());
-				double finalScore = Math.min(1 - ensembleScore + ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(data.getInstances()), MAX_EVAL_VALUE - 1);
+				double finalScore = Math.min(1 - ensembleScore + ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()), MAX_EVAL_VALUE - 1);
 
 				logger.debug("Ensemble benchmark result: {}", finalScore);
 

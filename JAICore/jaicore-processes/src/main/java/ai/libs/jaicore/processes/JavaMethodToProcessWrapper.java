@@ -16,11 +16,11 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.timing.TimedComputation;
 
 /**

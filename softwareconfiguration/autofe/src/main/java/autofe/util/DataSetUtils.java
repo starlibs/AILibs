@@ -18,6 +18,7 @@ import java.util.stream.IntStream;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -29,8 +30,7 @@ import org.slf4j.LoggerFactory;
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.FastBitmap.ColorSpace;
 import Catalano.Imaging.Filters.Crop;
-import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
+import ai.libs.jaicore.ml.weka.StratifyUtil;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -386,10 +386,11 @@ public final class DataSetUtils {
 		return getStratifiedSplit(data, rand, false, trainingPortion);
 	}
 
-	public static List<DataSet> getStratifiedSplit(final DataSet data, final Random rand, final boolean onlyKeepFirst, final double trainingPortion) throws SplitFailedException, InterruptedException {
+	public static List<DataSet> getStratifiedSplit(final DataSet data, final Random rand, final boolean onlyKeepFirst, final double trainingPortion)
+			throws InterruptedException, org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException {
 
 		final List<DataSet> splits = new LinkedList<>();
-		List<Instances> wekaSplits = WekaUtil.getStratifiedSplit(data.getInstances(), rand, trainingPortion);
+		List<Instances> wekaSplits = StratifyUtil.stratifiedSplit(data.getInstances(), rand.nextInt(), trainingPortion);
 
 		if (onlyKeepFirst) {
 			wekaSplits = Arrays.asList(wekaSplits.get(0));
@@ -414,7 +415,7 @@ public final class DataSetUtils {
 	public static DataSet getDataSetByID(final int datasetID) throws Exception {
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(datasetID);
-		File file = ds.getDataset(API_KEY);
+		File file = connector.datasetGet(ds);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 

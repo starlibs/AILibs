@@ -2,14 +2,17 @@ package ai.libs.jaicore.basic.algorithm;
 
 import java.util.NoSuchElementException;
 
+import org.api4.java.algorithm.IOptimizationAlgorithm;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.events.result.ISolutionCandidateFoundEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.attributedobjects.ScoredItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.ScoredItem;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 
 /**
  * The AOptimizer represents an algorithm that is meant to optimize for a single best solution.
@@ -44,7 +47,7 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	 * @param config The parameterization of the algorithm.
 	 * @param input The input to the algorithm (the problem to solve).
 	 */
-	protected AOptimizer(final IAlgorithmConfig config, final I input) {
+	protected AOptimizer(final IOwnerBasedAlgorithmConfig config, final I input) {
 		super(config, input);
 	}
 
@@ -83,12 +86,12 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	}
 
 	@Override
-	public SolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	public ISolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		while (this.hasNext()) {
-			AlgorithmEvent event = this.nextWithException();
-			if (event instanceof SolutionCandidateFoundEvent) {
+			IAlgorithmEvent event = this.nextWithException();
+			if (event instanceof ISolutionCandidateFoundEvent) {
 				@SuppressWarnings("unchecked")
-				SolutionCandidateFoundEvent<O> castedEvent = (SolutionCandidateFoundEvent<O>) event;
+				ISolutionCandidateFoundEvent<O> castedEvent = (ISolutionCandidateFoundEvent<O>) event;
 				return castedEvent;
 			}
 		}

@@ -15,20 +15,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.ToDoubleFunction;
 
 import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.TimeOut;
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.model.travesaltree.Node;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.core.MLPlanWekaBuilder;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
+import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEEvaluator;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFENodeEvaluator;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
@@ -532,13 +532,13 @@ public final class EvaluationUtils {
 		return new AbstractHASCOFENodeEvaluator(maxPipelineSize) {
 
 			@Override
-			public Double f(final Node<TFDNode, ?> node) {
-				if (node.getParent() == null) {
+			public Double evaluate(final ILabeledPath<TFDNode, String> node) {
+				if (node.getNodes().size() == 1) {
 					return null;
 				}
 
 				// If pipeline is too deep, assign worst value
-				if (node.path().size() > this.maxPipelineSize) {
+				if (node.getNodes().size() > this.maxPipelineSize) {
 					return AbstractHASCOFEEvaluator.MAX_EVAL_VALUE;
 				}
 
@@ -561,7 +561,7 @@ public final class EvaluationUtils {
 
 		/* Initialize MLPlan using WEKA components */
 		MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forWeka();
-		builder.withTimeOut(new TimeOut(timeout, TimeUnit.SECONDS));
+		builder.withTimeOut(new Timeout(timeout, TimeUnit.SECONDS));
 		builder.withNumCpus(numCores);
 		builder.withDataset(training);
 		MLPlan mlplan = builder.build();

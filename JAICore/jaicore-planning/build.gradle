@@ -3,7 +3,9 @@ dependencies {
 	compile project(":JAICore:jaicore-basic")
 	compile project(":JAICore:jaicore-logic")
 	compile project(":JAICore:jaicore-algorithminspector")
-	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	
+	testCompile project(path :':JAICore:jaicore-basic', configuration:'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
 }
 uploadArchives {
 	repositories {

@@ -5,11 +5,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.api4.java.ai.graphsearch.problem.IPathSearch;
+import org.api4.java.algorithm.IAlgorithm;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
-import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPAsGraphSearchSet;
 import ai.libs.jaicore.search.testproblems.knapsack.KnapsackProblemAsGraphSearchSet;
@@ -22,7 +22,7 @@ public abstract class GeneralGraphSearchAlgorithmTester extends GeneralAlgorithm
 		return this.getSearchAlgorithm((GraphSearchInput<?, ?>) problem);
 	}
 
-	public abstract <N, A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(GraphSearchInput<N, A> problem);
+	public abstract <N, A> IPathSearch<?, ?, N, A> getSearchAlgorithm(GraphSearchInput<N, A> problem);
 
 	// creates the test data
 	@Parameters(name = "problemset = {0}")

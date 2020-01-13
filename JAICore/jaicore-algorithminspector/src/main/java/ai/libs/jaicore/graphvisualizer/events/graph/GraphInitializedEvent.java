@@ -1,13 +1,15 @@
 package ai.libs.jaicore.graphvisualizer.events.graph;
 
-import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
+import org.api4.java.algorithm.IAlgorithm;
+
+import ai.libs.jaicore.basic.algorithm.AAlgorithmEvent;
 
 public class GraphInitializedEvent<T> extends AAlgorithmEvent implements GraphEvent {
 
 	private T root;
 
-	public GraphInitializedEvent(final String algorithmId, final T root) {
-		super(algorithmId);
+	public GraphInitializedEvent(final IAlgorithm<?, ?> algorithm, final T root) {
+		super(algorithm);
 		this.root = root;
 	}
 

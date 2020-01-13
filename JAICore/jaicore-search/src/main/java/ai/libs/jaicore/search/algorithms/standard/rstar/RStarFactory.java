@@ -1,14 +1,15 @@
 package ai.libs.jaicore.search.algorithms.standard.rstar;
 
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+
 import ai.libs.jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic;
 
-public class RStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, EvaluatedSearchGraphPath<T, A, Double>, T, A, Double> {
+public class RStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, EvaluatedSearchGraphPath<T, A, Double>, T, A, Double, RStar<T, A>> {
 
 	private int timeoutForFInMS;
-	private INodeEvaluator<T, Double> timeoutEvaluator;
+	private IPathEvaluator<T, A, Double> timeoutEvaluator;
 	private String loggerName;
 	private double w = 1.0;
 	private int k = 3;
@@ -63,7 +64,7 @@ public class RStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearch
 		return search;
 	}
 
-	public void setTimeoutForFComputation(final int timeoutInMS, final INodeEvaluator<T, Double> timeoutEvaluator) {
+	public void setTimeoutForFComputation(final int timeoutInMS, final IPathEvaluator<T, A, Double> timeoutEvaluator) {
 		this.timeoutForFInMS = timeoutInMS;
 		this.timeoutEvaluator = timeoutEvaluator;
 	}
@@ -72,7 +73,7 @@ public class RStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearch
 		return this.timeoutForFInMS;
 	}
 
-	public INodeEvaluator<T, Double> getTimeoutEvaluator() {
+	public IPathEvaluator<T, A, Double> getTimeoutEvaluator() {
 		return this.timeoutEvaluator;
 	}
 

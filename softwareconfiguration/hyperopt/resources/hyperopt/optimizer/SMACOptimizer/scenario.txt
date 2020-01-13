@@ -1,0 +1,7 @@
+paramfile = Logistic.pcs
+deterministic = 1
+run_obj = quality
+algo_runs_timelimit = 99
+gRPC_port = 8081
+algo = python SMACOptimizerClient.py
+runcount_limit = 11

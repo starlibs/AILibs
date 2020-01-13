@@ -1,52 +1,59 @@
 package ai.libs.jaicore.search.model.travesaltree;
 
-public class Edge<T,V extends Comparable<V>> {
+public class Edge<T, A, V extends Comparable<V>> {
 
-	private final Node<T,V> from, to;
+	private final BackPointerPath<T, A, V> from, to;
 
-	public Edge(Node<T,V> from, Node<T,V> to) {
+	public Edge(final BackPointerPath<T, A, V> from, final BackPointerPath<T, A, V> to) {
 		super();
 		this.from = from;
 		this.to = to;
 	}
 
-	public Node<T,V> getFrom() {
-		return from;
+	public BackPointerPath<T, A, V> getFrom() {
+		return this.from;
 	}
 
-	public Node<T,V> getTo() {
-		return to;
+	public BackPointerPath<T, A, V> getTo() {
+		return this.to;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((from == null) ? 0 : from.hashCode());
-		result = prime * result + ((to == null) ? 0 : to.hashCode());
+		result = prime * result + ((this.from == null) ? 0 : this.from.hashCode());
+		result = prime * result + ((this.to == null) ? 0 : this.to.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		@SuppressWarnings("unchecked")
-		Edge<T,V> other = (Edge<T,V>) obj;
-		if (from == null) {
-			if (other.from != null)
+		Edge<T, A, V> other = (Edge<T, A, V>) obj;
+		if (this.from == null) {
+			if (other.from != null) {
 				return false;
-		} else if (!from.equals(other.from))
+			}
+		} else if (!this.from.equals(other.from)) {
 			return false;
-		if (to == null) {
-			if (other.to != null)
+		}
+		if (this.to == null) {
+			if (other.to != null) {
 				return false;
-		} else if (!to.equals(other.to))
+			}
+		} else if (!this.to.equals(other.to)) {
 			return false;
+		}
 		return true;
 	}
 }

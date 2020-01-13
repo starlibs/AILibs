@@ -5,7 +5,7 @@ import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
 
 public class BestFirstLimitedDiscrepancySearchFactory<N, A, V extends Comparable<V>>
-extends StandardORGraphSearchFactory<GraphSearchWithNodeRecommenderInput<N, A>, EvaluatedSearchGraphPath<N, A, V>, N, A, V> {
+extends StandardORGraphSearchFactory<GraphSearchWithNodeRecommenderInput<N, A>, EvaluatedSearchGraphPath<N, A, V>, N, A, V, BestFirstLimitedDiscrepancySearch<N, A, V>> {
 
 	@Override
 	public BestFirstLimitedDiscrepancySearch<N, A, V> getAlgorithm() {
