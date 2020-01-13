@@ -183,7 +183,10 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 
 	private <I extends ILabeledInstance> void testNoDuplicates(final ILabeledDataset<I> dataset) {
 		Set<I> dsAsSet = new HashSet<>(dataset);
-		assertEquals("Cannot check sampling, because the original dataset already has duplicates.", dataset.size(), dsAsSet.size());
+		if (dataset.size() != dsAsSet.size()) {
+			this.logger.warn("Not checking on duplicates, because the original dataset already contains duplicates.");
+			return;
+		}
 		@SuppressWarnings("unchecked")
 		ASamplingAlgorithm<ILabeledDataset<I>> samplingAlgorithm = (ASamplingAlgorithm<ILabeledDataset<I>>) this.getAlgorithm(dataset);
 		samplingAlgorithm.setLoggerName(SAMPLER_LOGGER_NAME);

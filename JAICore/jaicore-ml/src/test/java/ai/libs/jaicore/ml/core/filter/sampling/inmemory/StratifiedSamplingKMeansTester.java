@@ -57,4 +57,40 @@ public class StratifiedSamplingKMeansTester extends GeneralSamplingTester<Object
 		assertTrue(true);
 	}
 
+	@Override
+	public void testTimeout() {
+		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
+		assertTrue(true);
+	}
+
+	@Override
+	public void testTimeoutWhenParallelized() {
+		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
+		assertTrue(true);
+	}
+
+	@Override
+	public void testInterrupt() {
+		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
+		assertTrue(true);
+	}
+
+	@Override
+	public void testInterruptWhenParallelized() {
+		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
+		assertTrue(true);
+	}
+
+	@Override
+	public void testCancel() {
+		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
+		assertTrue(true);
+	}
+
+	@Override
+	public void testCancelWhenParallelized() {
+		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
+		assertTrue(true);
+	}
+
 }
