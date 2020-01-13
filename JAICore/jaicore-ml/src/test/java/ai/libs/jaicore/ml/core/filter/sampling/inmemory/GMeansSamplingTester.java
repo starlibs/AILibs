@@ -15,14 +15,21 @@ public class GMeansSamplingTester extends GeneralSamplingTester<Number> {
 	private static final long SEED = 1;
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
+
 	@Override
-	public void testSampleSizeLargeProblem() {
+	public void testSampleSizeSimpleProblem() {
 		// Sample Size is not supported for GMeansSampling
 		assertTrue(true);
 	}
 
 	@Override
 	public void testSampleSizeMediumProblem() {
+		// Sample Size is not supported for GMeansSampling
+		assertTrue(true);
+	}
+
+	@Override
+	public void testSampleSizeLargeProblem() {
 		// Sample Size is not supported for GMeansSampling
 		assertTrue(true);
 	}

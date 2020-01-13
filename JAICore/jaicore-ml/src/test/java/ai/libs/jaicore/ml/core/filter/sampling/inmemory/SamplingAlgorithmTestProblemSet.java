@@ -1,11 +1,16 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithmTestProblemSet;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
+import ai.libs.jaicore.ml.core.dataset.DatasetDeriver;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 
 public class SamplingAlgorithmTestProblemSet extends AAlgorithmTestProblemSet<ILabeledDataset<ILabeledInstance>> {
@@ -35,10 +40,14 @@ public class SamplingAlgorithmTestProblemSet extends AAlgorithmTestProblemSet<IL
 
 	@Override
 	public ILabeledDataset<ILabeledInstance> getDifficultProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException, InterruptedException {
-		// Load higgs data set
+		// Load vancouver employee data set (more than 1.5 million instances but only 13 features)
 		try {
-			return this.loadDatasetFromOpenML(23512);
-		} catch (DatasetDeserializationFailedException e) {
+			int blowUpFactor = 20;
+			ILabeledDataset<ILabeledInstance> ds = this.loadDatasetFromOpenML(1237); // load large dataset and blow it up by the given factor
+			DatasetDeriver<ILabeledDataset<ILabeledInstance>> deriver = new DatasetDeriver<>(ds);
+			deriver.addIndices(IntStream.range(0, ds.size()).boxed().collect(Collectors.toList()),  blowUpFactor);
+			return deriver.build();
+		} catch (DatasetDeserializationFailedException | DatasetCreationException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
 	}

@@ -17,13 +17,19 @@ public class KMeansSamplingTester extends GeneralSamplingTester<Number> {
 	private static final int K = 100;
 
 	@Override
-	public void testSampleSizeLargeProblem() {
+	public void testSampleSizeSimpleProblem() {
 		// Sample Size is not supported for KMeansSampling
 		assertTrue(true);
 	}
 
 	@Override
 	public void testSampleSizeMediumProblem() {
+		// Sample Size is not supported for KMeansSampling
+		assertTrue(true);
+	}
+
+	@Override
+	public void testSampleSizeLargeProblem() {
 		// Sample Size is not supported for KMeansSampling
 		assertTrue(true);
 	}

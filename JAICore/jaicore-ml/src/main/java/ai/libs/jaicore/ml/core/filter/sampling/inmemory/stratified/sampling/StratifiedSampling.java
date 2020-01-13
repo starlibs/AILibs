@@ -11,6 +11,8 @@ import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +57,7 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
 		switch (this.getState()) {
 		case CREATED:
 			if (!this.allDatapointsAssigned) {
@@ -84,10 +86,14 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 			if (!this.allDatapointsAssigned) {
 
 				/* sort all points into their respective stratum */
+				this.logger.info("Starting to sort all datapoints into their strati.");
 				D dataset = this.getInput();
 				int n = dataset.size();
 				for (int i = 0; i < n; i ++) {
 					IInstance datapoint = dataset.get(i);
+					if (i % 100 == 0) {
+						this.checkAndConductTermination();
+					}
 					this.logger.debug("Computing statrum for next data point {}", datapoint);
 					int assignedStratum = this.stratiAssigner.assignToStrati(datapoint);
 					if (assignedStratum < 0 || assignedStratum >= this.stratiBuilder.length) {
@@ -144,8 +150,10 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 	 * Thread for each stratum.
 	 * @throws DatasetCreationException
 	 * @throws InterruptedException
+	 * @throws AlgorithmExecutionCanceledException
+	 * @throws AlgorithmTimeoutedException
 	 */
-	private void startSimpleRandomSamplingForStrati() throws InterruptedException, DatasetCreationException {
+	private void startSimpleRandomSamplingForStrati() throws InterruptedException, DatasetCreationException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
 
 		if (this.sampleSize == -1) {
 			throw new IllegalStateException("No valid sample size specified");
@@ -202,6 +210,7 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 				sampleDeriver.addIndices(stratumBuilder.getIndicesOfNewInstancesInOriginalDataset()); // add the complete stratum
 			}
 			else {
+				this.checkAndConductTermination();
 				SimpleRandomSampling<D> simpleRandomSampling = new SimpleRandomSampling<>(this.random, stratum);
 				simpleRandomSampling.setSampleSize(sampleSizeForStrati[i]);
 				this.logger.info("Setting sample size for {}-th stratus to {}", i, sampleSizeForStrati[i]);
@@ -209,7 +218,10 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 					this.logger.debug("Calling SimpleRandomSampling");
 					simpleRandomSampling.call();
 					this.logger.debug("SimpleRandomSampling finished");
-				} catch (Exception e) {
+				} catch (InterruptedException e) {
+					throw e;
+				}
+				catch (Exception e) {
 					this.logger.error("Unexpected exception during simple random sampling!", e);
 				}
 				if (simpleRandomSampling.getChosenIndices().size() != sampleSizeForStrati[i]) {
@@ -221,6 +233,7 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 		if (sampleDeriver.currentSizeOfTarget() != this.sampleSize) {
 			throw new IllegalStateException("The deriver says that the target has " + sampleDeriver.currentSizeOfTarget() + " elements, but it should have been configured for " + this.sampleSize);
 		}
+		this.checkAndConductTermination();
 		this.logger.info("Strati sub-samples completed, building the final sample and shuffling it.");
 		this.sample = sampleDeriver.build();
 		if (this.sample.size() != numSamplesTotal) {
