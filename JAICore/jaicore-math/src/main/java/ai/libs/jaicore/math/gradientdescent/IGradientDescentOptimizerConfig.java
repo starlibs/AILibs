@@ -4,7 +4,7 @@ import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.Mutable;
 
 @Sources({ "file:conf/opt/graddesc.properties" })
-public interface GradientDescentOptimizerConfig extends Mutable{
+public interface IGradientDescentOptimizerConfig extends Mutable {
 
 	/**
 	 * Specifies the maximum of gradient update steps. Can be set to -1 to specify

@@ -1,5 +1,7 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Random;
 
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
@@ -41,6 +43,18 @@ public class StratifiedSamplingKMeansTester extends GeneralSamplingTester<Object
 			return factory.getAlgorithm(sampleSize, dataset, new Random(RANDOM_SEED));
 		}
 		return null;
+	}
+
+	@Override
+	public void testSampleSizeLargeProblem() {
+		/* skip this test, because K-Means is not applicable for large data */
+		assertTrue(true);
+	}
+
+	@Override
+	public void testSampleSizeMediumProblem() {
+		/* skip this test, because K-Means is not applicable for intermediate size data */
+		assertTrue(true);
 	}
 
 }

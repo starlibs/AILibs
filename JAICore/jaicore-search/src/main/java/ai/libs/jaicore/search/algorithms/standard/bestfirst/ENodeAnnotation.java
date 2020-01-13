@@ -1,7 +1,7 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst;
 
 public enum ENodeAnnotation {
-	F_ERROR("fError"), F_MESSAGE("fMessage"), F_TIME("fTime");
+	F_SCORE("f"), F_ERROR("fError"), F_MESSAGE("fMessage"), F_TIME("fTime"), F_UNCERTAINTY("fUncertainty");
 
 	private String name;
 

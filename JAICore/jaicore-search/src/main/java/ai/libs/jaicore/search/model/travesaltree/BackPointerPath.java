@@ -44,7 +44,7 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 	@SuppressWarnings("unchecked")
 	@Override
 	public V getScore() {
-		return (V) this.annotations.get(ENodeAnnotation.F_ERROR.toString());
+		return (V) this.annotations.get(ENodeAnnotation.F_SCORE.toString());
 	}
 
 	public void setParent(final BackPointerPath<N, A, V> newParent) {
@@ -52,7 +52,7 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 	}
 
 	public void setScore(final V internalLabel) {
-		this.setAnnotation(ENodeAnnotation.F_ERROR.toString(), internalLabel);
+		this.setAnnotation(ENodeAnnotation.F_SCORE.toString(), internalLabel);
 	}
 
 	public void setAnnotation(final String annotationName, final Object annotationValue) {
@@ -120,7 +120,8 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("externalLabel", this.nodeLabel);
 		fields.put("goal", this.goal);
-		fields.put("annotations", this.annotations);
+		fields.put(ENodeAnnotation.F_SCORE.name(), this.getScore());
+		fields.put(ENodeAnnotation.F_ERROR.name(), this.annotations.get(ENodeAnnotation.F_ERROR.name()));
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 

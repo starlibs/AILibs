@@ -41,8 +41,10 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 	 */
 	@Test
 	public void testSampleSizeSmallProblem() throws Exception {
+		this.logger.info("Test sample size for big problem.");
 		File input = this.getSimpleProblemInputForGeneralTestPurposes();
 		this.testSampleSize(input);
+		this.logger.info("Finished.");
 	}
 
 	/**
@@ -53,20 +55,25 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 	 */
 	@Test
 	public void testSampleSizeBigProblem() throws Exception {
+		this.logger.info("Test sample size for big problem.");
 		File input = this.getDifficultProblemInputForGeneralTestPurposes();
 		this.testSampleSize(input);
+		this.logger.info("Finished.");
 	}
 
 	private void testSampleSize(final File input) throws Exception {
 		AFileSamplingAlgorithm samplingAlgorithm = (AFileSamplingAlgorithm) this.getAlgorithm(input);
+		samplingAlgorithm.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		this.logger.info("Testing {}.", samplingAlgorithm.getClass().getName());
 		int inputSize = ArffUtilities.countDatasetEntries(input, true);
 		int sampleSize = (int) (inputSize * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
 		samplingAlgorithm.setOutputFileName(OUTPUT_FILE_NAME);
 		samplingAlgorithm.call();
+		this.logger.info("Call to {} completed.", samplingAlgorithm.getClass().getName());
 		int outputSize = ArffUtilities.countDatasetEntries(new File(OUTPUT_FILE_NAME), true);
 		// Allow sample size to be one off, in case of rounding errors
-		assertTrue(sampleSize >= outputSize - 1 && sampleSize <= outputSize + 1);
+		assertTrue(Math.abs(sampleSize - outputSize) <= 1);
 	}
 
 	/**
@@ -94,6 +101,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 	}
 
 	private void testNoDuplicates(final File input) throws Exception {
+		this.logger.info("Starting test for duplicates with file {} and sampling test {}", input, this.getClass().getName());
 		AFileSamplingAlgorithm samplingAlgorithm = (AFileSamplingAlgorithm) this.getAlgorithm(input);
 		int inputSize = ArffUtilities.countDatasetEntries(input, true);
 		int sampleSize = (int) (inputSize * DEFAULT_SAMPLE_FRACTION);
@@ -141,7 +149,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 
 	public File getSimpleProblemInputForGeneralTestPurposes() throws Exception {
 		OpenmlConnector client = new OpenmlConnector();
-		return client.datasetGet(client.dataGet(188));
+		return client.datasetGet(client.dataGet(560));
 	}
 
 	public File getDifficultProblemInputForGeneralTestPurposes() throws Exception {

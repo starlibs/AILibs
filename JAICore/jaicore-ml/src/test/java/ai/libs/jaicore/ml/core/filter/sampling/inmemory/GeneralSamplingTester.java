@@ -17,7 +17,6 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.algorithm.IAlgorithm;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
@@ -37,7 +36,6 @@ import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
 public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
-	private Logger logger = LoggerFactory.getLogger(GeneralSamplingTester.class);
 	private static final String SAMPLER_LOGGER_NAME = "testedalgorithm";
 
 	@Parameters(name = "problemset = {0}")
@@ -71,9 +69,9 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	public abstract IAlgorithm<?, ?> getAlgorithm(ILabeledDataset<?> dataset);
 
 	@Test
-	public void testSampleSizeTinyProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException {
+	public void testSampleSizeSimpleProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		SamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
-		ILabeledDataset<?> dataset = problemSet.getTinyProblemInputForGeneralTestPurposes();
+		ILabeledDataset<?> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		this.logger.info("Testing sample on dataset with {} data points.", dataset.size());
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
@@ -81,7 +79,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	/**
 	 * This test verifies that the produced samples have the desired size.
 	 *
-	 * This test executes the test on a small problem/data set.
+	 * This test executes the test on a medium problem/data set.
 	 *
 	 * @param sampleFraction
 	 * @throws AlgorithmTestProblemSetCreationException
@@ -90,9 +88,9 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	 * @throws Exception
 	 */
 	@Test
-	public void testSampleSizeSmallProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException {
+	public void testSampleSizeMediumProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		SamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
-		ILabeledDataset<?> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
+		ILabeledDataset<?> dataset = problemSet.getMediumProblemInputForGeneralTestPurposes();
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
 
@@ -130,7 +128,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	/**
 	 * This test verifies that the produced samples do not contain duplicates.
 	 *
-	 * This test executes the test on a tiny problem/data set. This is useful to test algorithms with quadratic runtime.
+	 * This test executes the test on a simple problem/data set. This is useful to test algorithms with quadratic runtime.
 	 *
 	 * @throws AlgorithmCreationException
 	 * @throws InterruptedException
@@ -141,7 +139,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	@Test
 	public void testNoDuplicatesTinyProblem() throws AlgorithmTestProblemSetCreationException, AlgorithmCreationException, InterruptedException {
 		SamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
-		ILabeledDataset<?> dataset = problemSet.getTinyProblemInputForGeneralTestPurposes();
+		ILabeledDataset<?> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		this.testNoDuplicates(dataset);
 	}
 
@@ -183,7 +181,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 		this.testNoDuplicates(dataset);
 	}
 
-	private <I extends ILabeledInstance> void testNoDuplicates(final ILabeledDataset<I> dataset) throws AlgorithmCreationException {
+	private <I extends ILabeledInstance> void testNoDuplicates(final ILabeledDataset<I> dataset) {
 		Set<I> dsAsSet = new HashSet<>(dataset);
 		assertEquals("Cannot check sampling, because the original dataset already has duplicates.", dataset.size(), dsAsSet.size());
 		@SuppressWarnings("unchecked")
@@ -214,7 +212,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	@Test
 	public <I extends ILabeledInstance> void checkOriginalDataSetNotModified() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		SamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
-		ILabeledDataset<? extends ILabeledInstance> dataset = problemSet.getTinyProblemInputForGeneralTestPurposes();
+		ILabeledDataset<? extends ILabeledInstance> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		int hashCode = dataset.hashCode();
 		@SuppressWarnings("unchecked")
 		ASamplingAlgorithm<ILabeledDataset<I>> samplingAlgorithm = (ASamplingAlgorithm<ILabeledDataset<I>>) this.getAlgorithm(dataset);

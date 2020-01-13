@@ -1,5 +1,7 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Random;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -25,4 +27,15 @@ public class StratifiedSamplingGMeansTester extends GeneralSamplingTester<Object
 		return null;
 	}
 
+	@Override
+	public void testSampleSizeLargeProblem() {
+		/* skip this test, because G-Means is not applicable for large data */
+		assertTrue(true);
+	}
+
+	@Override
+	public void testSampleSizeMediumProblem() {
+		/* skip this test, because G-Means is not applicable for intermediate size data */
+		assertTrue(true);
+	}
 }

@@ -19,6 +19,7 @@ public class MLPlanWithLearningCurvePredictionResultDeliveryTester extends AutoM
 	@Override
 	public IAlgorithm<ILabeledDataset<?>, IWekaClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) {
 		try {
+			this.logger.info("Creating ML-Plan instance.");
 			MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 			builder.withLearningCurveExtrapolationEvaluation(new int[] { 8, 16, 64, 128 }, new SimpleRandomSamplingFactory<>(), .7, new InversePowerLawExtrapolationMethod());
 			builder.withNodeEvaluationTimeOut(new Timeout(15, TimeUnit.MINUTES));
@@ -27,6 +28,7 @@ public class MLPlanWithLearningCurvePredictionResultDeliveryTester extends AutoM
 			mlplan.setRandomSeed(1);
 			mlplan.setPortionOfDataForPhase2(.3f);
 			mlplan.setNumCPUs(2);
+			this.logger.info("Done");
 			return mlplan;
 		} catch (IOException e) {
 			e.printStackTrace();

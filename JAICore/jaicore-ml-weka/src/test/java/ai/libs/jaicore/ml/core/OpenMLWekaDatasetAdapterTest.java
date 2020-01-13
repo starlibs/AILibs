@@ -14,13 +14,14 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
+import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetAdapterTest;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 
 @RunWith(Parameterized.class)
-public class OpenMLWekaDatasetAdapterTest {
+public class OpenMLWekaDatasetAdapterTest extends Tester {
 
 	// creates the test data
 	@Parameters(name = "{0}")

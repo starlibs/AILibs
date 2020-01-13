@@ -23,7 +23,7 @@ public class KMeansSamplingTester extends GeneralSamplingTester<Number> {
 	}
 
 	@Override
-	public void testSampleSizeSmallProblem() {
+	public void testSampleSizeMediumProblem() {
 		// Sample Size is not supported for KMeansSampling
 		assertTrue(true);
 	}

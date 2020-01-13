@@ -84,19 +84,13 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="sklmlplanc">
-    <level value="warn" />
+  <logger name="testers">
+    <level value="debug" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
     <appender-ref ref="errFileAppender" />
     <appender-ref ref="traceFileAppender" />
-  </logger>
-  <logger name="sklmlplanc.mlplan.optimizingfactory">
-    <level value="warn" />
-  </logger>
-  <logger name="sklmlplanc.mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
-    <level value="debug" />
   </logger>
   
   <logger name="mlplan">

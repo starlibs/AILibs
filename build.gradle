@@ -202,8 +202,32 @@ allprojects {
 	eclipse {
 	    project.natures "org.eclipse.buildship.core.gradleprojectnature"
 	}
+
+
+	test {
+     		reports {
+        		junitXml.enabled = false
+        		html.enabled = true
+		}
+
+		minHeapSize = "1g"
+     		maxHeapSize = "6g"
+     		ignoreFailures = true
+		forkEvery = 1		
+		maxParallelForks = 1
+     		testLogging {
+			events "failed"
+			exceptionFormat "full"
+     		} 
+	}
 }
 
+task showDirs {
+    doLast {
+        logger.quiet(rootDir.toPath().relativize(project.reportsDir.toPath()).toString())
+        logger.quiet(rootDir.toPath().relativize(project.testResultsDir.toPath()).toString())
+    }
+}
 
 
 dependencies{
@@ -234,10 +258,6 @@ dependencies{
 	compile project(":JAICore:jaicore-planning")
 	compile project(":JAICore:jaicore-processes")
 	compile project(":JAICore:jaicore-search")
-}
-
-test{
-     maxHeapSize = "4g"
 }
 
 publish.dependsOn shadowJar

@@ -14,7 +14,8 @@ public class SamplingAlgorithmTestProblemSet extends AAlgorithmTestProblemSet<IL
 		super("Sampling");
 	}
 
-	public ILabeledDataset<ILabeledInstance> getTinyProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException, InterruptedException {
+	@Override
+	public ILabeledDataset<ILabeledInstance> getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		// Load bodyfat data set
 		try {
 			return this.loadDatasetFromOpenML(560);
@@ -23,8 +24,7 @@ public class SamplingAlgorithmTestProblemSet extends AAlgorithmTestProblemSet<IL
 		}
 	}
 
-	@Override
-	public ILabeledDataset<ILabeledInstance> getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException, InterruptedException {
+	public ILabeledDataset<ILabeledInstance> getMediumProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		// Load whine quality data set
 		try {
 			return this.loadDatasetFromOpenML(287);

@@ -36,10 +36,13 @@ public class DyadRankingInstanceSupplier {
 	 */
 	public static DenseDyadRankingInstance getDyadRankingInstance(final int maxLength, final int seed) {
 		List<IDyad> dyads = new ArrayList<>();
-
-		int actualLength = new Random(seed).nextInt(maxLength + 1);
+		if (maxLength <= 1) {
+			throw new IllegalArgumentException("Length must be at least 2.");
+		}
+		Random random = new Random(seed);
+		int actualLength = random.nextInt(maxLength + 1);
 		while (actualLength == 0) {
-			actualLength = new Random(seed).nextInt(maxLength + 1);
+			actualLength = random.nextInt(maxLength + 1);
 		}
 		for (int i = 0; i < actualLength; i++) {
 			Dyad dyad = DyadSupplier.getRandomDyad(i, 2, 2);
@@ -77,7 +80,7 @@ public class DyadRankingInstanceSupplier {
 	 * <code>
 	 * f((x_1,y_1) , (x_2, y_2)) = x1*y1 + x2*y2 + x1*y2 + x2*y1
 	 * </code>
-	 * 
+	 *
 	 * @param scoreVec1 (x_1, y_1)
 	 * @param scoreVec2 (x_2, y_2)
 	 * @return

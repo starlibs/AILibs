@@ -48,9 +48,9 @@ import ai.libs.jaicore.ml.ranking.loss.KendallsTauDyadRankingLoss;
 @RunWith(Parameterized.class)
 public class DyadRankerGATSPTest {
 
-	private static final String XXL_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-LR.txt";
-	private static final String ALTERNATIVES_FEATURE_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-labeldescriptions.csv";
-	private static final String ORDERINGS_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/orderings.csv";
+	private static final String XXL_FILE = "testrsc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-LR.txt";
+	private static final String ALTERNATIVES_FEATURE_FILE = "testrsc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-labeldescriptions.csv";
+	private static final String ORDERINGS_FILE = "testrsc/ml/dyadranking/ga-tsp/data_meta/orderings.csv";
 
 	// M = average ranking length
 	private static final int M = 30;

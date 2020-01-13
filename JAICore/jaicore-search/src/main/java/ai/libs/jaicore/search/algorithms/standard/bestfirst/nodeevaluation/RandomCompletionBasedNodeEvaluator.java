@@ -43,6 +43,7 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.ENodeAnnotation;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
@@ -189,13 +190,17 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 							+ ") whose f-value we may want to reuse.\nThis is only allowed for top-level nodes, but the actual path is: "
 							+ n.path().stream().map(k -> "\n\t" + k.hashCode() + "\t(f-value: " + k.getScore() + ")").collect(Collectors.joining());
 					boolean nodeHasSibling = this.completer.getExploredGraph().getSuccessors(n.getParent().getHead()).size() > 1;
-					if (nodeList.size() > 1 && !nodeHasSibling && parentHasFValue) {
+					if (!n.isPoint() && !nodeHasSibling && parentHasFValue) {
 						V score = this.fValues.get(n.getParent());
 						this.fValues.put(n, score);
 						this.logger.debug("Score {} of parent can be used since the last action did not affect the performance.", score);
 						if (score == null) {
 							this.logger.warn("Returning score NULL inherited from parent, this should not happen.");
 						}
+						if (this.uncertaintySource != null) { // inherit uncertainty from parent
+							n.setAnnotation(ENodeAnnotation.F_UNCERTAINTY.name(), n.getParent().getAnnotation(ENodeAnnotation.F_UNCERTAINTY.name()));
+						}
+						assert !this.annotatesUncertainty() || n.getAnnotation(ENodeAnnotation.F_UNCERTAINTY.name()) != null : "No uncertainty has been annotated to node " + n + " even though we claim to annotate!";
 						return score;
 					}
 				}
@@ -336,13 +341,13 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 
 			/* set uncertainty if an uncertainty source has been set */
 			if (this.uncertaintySource != null) {
-				n.setAnnotation("uncertainty", uncertainty);
+				n.setAnnotation(ENodeAnnotation.F_UNCERTAINTY.name(), uncertainty);
 			}
 		}
 		assert this.fValues.containsKey(n);
 
 		V f = this.fValues.get(n);
-		this.logger.info("Returning f-value: {}. Annotated uncertainty is {}", f, n.getAnnotation("uncertainty"));
+		this.logger.info("Returning f-value: {}. Annotated uncertainty is {}", f, n.getAnnotation(ENodeAnnotation.F_UNCERTAINTY.name()));
 		return f;
 	}
 

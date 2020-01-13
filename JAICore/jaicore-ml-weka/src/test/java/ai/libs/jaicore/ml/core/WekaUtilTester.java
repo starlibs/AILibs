@@ -16,6 +16,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
@@ -25,7 +26,7 @@ import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 
-public class WekaUtilTester {
+public class WekaUtilTester extends Tester {
 
 	private static final File BASE_FOLDER = new File("testrsc/ml/orig/");
 	private static final File VOWEL_ARFF = new File(BASE_FOLDER, "vowel.arff");

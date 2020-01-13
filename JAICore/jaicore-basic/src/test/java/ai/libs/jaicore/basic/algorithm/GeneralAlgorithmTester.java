@@ -29,12 +29,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.basic.StringUtil;
+import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.concurrent.ThreadGroupObserver;
 import ai.libs.jaicore.interrupt.Interrupter;
@@ -47,10 +46,8 @@ import ai.libs.jaicore.interrupt.Interrupter;
  */
 
 @RunWith(Parameterized.class)
-public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
+public abstract class GeneralAlgorithmTester extends Tester {
 
-	private String loggerName;
-	private Logger logger = LoggerFactory.getLogger(GeneralAlgorithmTester.class);
 	protected static final String TESTEDALGORITHM_LOGGERNAME = "testedalgorithm";
 	private static final int TIMEOUT_DELAY = 12000;
 	private static final int TOTAL_EXPERIMENT_TIMEOUT = 20000;
@@ -164,11 +161,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 	@Test
 	public void testTimeout() throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
-		try {
-			this.runTimeoutTest(false);
-		} finally {
-
-		}
+		this.runTimeoutTest(false);
 	}
 
 	@Test
@@ -516,22 +509,4 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	public IAlgorithmTestProblemSet<?> getProblemSet() {
 		return this.problemSet;
 	}
-
-	@Override
-	public String getLoggerName() {
-		return this.loggerName;
-	}
-
-	protected Logger getLogger() {
-		return this.logger;
-	}
-
-	@Override
-	public void setLoggerName(final String name) {
-		this.logger.info("Switching logger name from {} to {}.", this.loggerName, name);
-		this.loggerName = name;
-		this.logger = LoggerFactory.getLogger(this.loggerName);
-		this.logger.info("Switched logger name to {}.", this.loggerName);
-	}
-
 }

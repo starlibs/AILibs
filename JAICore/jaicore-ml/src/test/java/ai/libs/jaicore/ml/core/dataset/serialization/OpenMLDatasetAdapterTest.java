@@ -103,7 +103,7 @@ public class OpenMLDatasetAdapterTest {
 			return;
 		}
 		System.gc();
-		ILabeledDataset<?> dataset = OpenMLDatasetReader.deserializeDataset(this.problemSet.getId());
+		ILabeledDataset<?> dataset = this.problemSet.getDataset();
 
 		/* create stratified split and test that folds are reproducible */
 		System.out.println("Creating a stratified split.");

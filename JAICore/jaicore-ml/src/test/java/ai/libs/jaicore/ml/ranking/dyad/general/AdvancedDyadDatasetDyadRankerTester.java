@@ -10,6 +10,7 @@ import org.api4.java.ai.ml.ranking.IRanking;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -48,6 +49,7 @@ public class AdvancedDyadDatasetDyadRankerTester {
 	}
 
 	@Test
+	@Ignore
 	public void testSwapOrdering1() throws PredictionException, InterruptedException {
 
 		int maxDyadRankingLength = 4;
@@ -70,13 +72,13 @@ public class AdvancedDyadDatasetDyadRankerTester {
 	@Parameters
 	public static List<IPLDyadRanker[]> supplyDyadRankers() {
 		PLNetDyadRanker ranker1 = new PLNetDyadRanker();
-//		ranker1.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "0");
-//		ranker1.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8");
-//		ranker1.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
+		//		ranker1.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "0");
+		//		ranker1.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8");
+		//		ranker1.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
 		PLNetDyadRanker ranker2 = new PLNetDyadRanker();
-//		ranker2.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
-//		ranker2.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_TRAIN_RATIO, "1.0");
-//		ranker2.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8,4");
+		//		ranker2.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
+		//		ranker2.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_TRAIN_RATIO, "1.0");
+		//		ranker2.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8,4");
 
 		return Arrays.asList(new PLNetDyadRanker[] { ranker1 }, new PLNetDyadRanker[] { ranker2 }, new PLNetDyadRanker[] { new PLNetDyadRanker() });
 	}

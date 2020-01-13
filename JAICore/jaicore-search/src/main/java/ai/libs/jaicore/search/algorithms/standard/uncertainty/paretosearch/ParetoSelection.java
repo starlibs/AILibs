@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.ENodeAnnotation;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
 /**
@@ -18,7 +19,7 @@ import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
  */
 public class ParetoSelection<T, A, V extends Comparable<V>> implements Queue<BackPointerPath<T, A, V>> {
 
-	private static final String UNCERTAINTY = "uncertainty";
+	private static final String UNCERTAINTY = ENodeAnnotation.F_UNCERTAINTY.name();
 	private static final String DOMINATES = "dominates";
 	private static final String DOMINATED_BY = "dominatedBy";
 

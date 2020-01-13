@@ -2,6 +2,7 @@ package ai.libs.jaicore.search.algorithms.standard.uncertainty.paretosearch;
 
 import java.util.Comparator;
 
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.ENodeAnnotation;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
 public class CosinusDistanceComparator<T, A, V extends Comparable<V>> implements Comparator<BackPointerPath<T, A, V>> {
@@ -24,11 +25,11 @@ public class CosinusDistanceComparator<T, A, V extends Comparable<V>> implements
 	@Override
 	public int compare(final BackPointerPath<T, A, V> first, final BackPointerPath<T, A, V> second) {
 
-		Double firstF = (Double) first.getAnnotation("f");
-		Double firstU = (Double) first.getAnnotation("uncertainty");
+		Double firstF = (Double) first.getAnnotation(ENodeAnnotation.F_SCORE.name());
+		Double firstU = (Double) first.getAnnotation(ENodeAnnotation.F_UNCERTAINTY.name());
 
-		Double secondF = (Double) second.getAnnotation("f");
-		Double secondU = (Double) second.getAnnotation("uncertainty");
+		Double secondF = (Double) second.getAnnotation(ENodeAnnotation.F_SCORE.name());
+		Double secondU = (Double) second.getAnnotation(ENodeAnnotation.F_UNCERTAINTY.name());
 
 		double cosDistanceFirst = 1 - this.cosineSimilarity(firstF, firstU);
 		double cosDistanceSecond = 1 - this.cosineSimilarity(secondF, secondU);

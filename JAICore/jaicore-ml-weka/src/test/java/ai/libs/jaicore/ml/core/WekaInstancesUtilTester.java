@@ -20,9 +20,9 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
+import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.ml.core.dataset.SparseInstance;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetAdapterTest;
-import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
@@ -35,7 +35,7 @@ import weka.classifiers.rules.ZeroR;
 import weka.core.Instances;
 
 @RunWith(Parameterized.class)
-public class WekaInstancesUtilTester {
+public class WekaInstancesUtilTester extends Tester {
 
 	// creates the test data
 	@Parameters(name = "{0}")
@@ -50,7 +50,7 @@ public class WekaInstancesUtilTester {
 
 	@Test
 	public void testUtilConversion() throws DatasetDeserializationFailedException, InterruptedException, UnsupportedAttributeTypeException {
-		ILabeledDataset<?> dataset = OpenMLDatasetReader.deserializeDataset(this.problemSet.getId());
+		ILabeledDataset<?> dataset = this.problemSet.getDataset();
 		Instances wekaInstances = WekaInstancesUtil.datasetToWekaInstances(dataset);
 		assertEquals(dataset.size(), wekaInstances.size());
 		assertEquals(dataset.getNumAttributes(), wekaInstances.numAttributes() - (long)1);
@@ -58,7 +58,7 @@ public class WekaInstancesUtilTester {
 
 	@Test
 	public void testWekaInstancesConstructor() throws DatasetDeserializationFailedException, InterruptedException {
-		ILabeledDataset<?> dataset = OpenMLDatasetReader.deserializeDataset(this.problemSet.getId());
+		ILabeledDataset<?> dataset = this.problemSet.getDataset();
 		IWekaInstances wekaInstances = new WekaInstances(dataset);
 		assertEquals(dataset.size(), wekaInstances.size());
 		assertEquals(dataset.getNumAttributes(), wekaInstances.getNumAttributes());
@@ -71,16 +71,19 @@ public class WekaInstancesUtilTester {
 
 	@Test
 	public void testWekaInstanceConstructor() throws DatasetDeserializationFailedException, InterruptedException, UnsupportedAttributeTypeException {
-		ILabeledDataset<?> dataset = OpenMLDatasetReader.deserializeDataset(this.problemSet.getId());
+		ILabeledDataset<?> dataset = this.problemSet.getDataset();
 		for (ILabeledInstance i : dataset) {
+			long start = System.currentTimeMillis();
 			IWekaInstance wekaInstance = new WekaInstance(dataset.getInstanceSchema(), i);
 			assertEquals(dataset.getNumAttributes(), wekaInstance.getNumAttributes());
+			long constructionTime = System.currentTimeMillis() - start;
+			assertTrue("The construction time for the instance was " + constructionTime + " but at most 1ms is allowed.", constructionTime <= 1);
 		}
 	}
 
 	@Test
 	public void testSparse2SparseAndDense2Dense() throws DatasetDeserializationFailedException, InterruptedException {
-		ILabeledDataset<?> dataset = OpenMLDatasetReader.deserializeDataset(this.problemSet.getId());
+		ILabeledDataset<?> dataset = this.problemSet.getDataset();
 		for (ILabeledInstance i : dataset) {
 			assertTrue((i instanceof SparseInstance) == (((WekaInstance)i).getElement() instanceof weka.core.SparseInstance));
 		}
@@ -88,7 +91,7 @@ public class WekaInstancesUtilTester {
 
 	@Test
 	public void testTrainingAndPrediction() throws DatasetDeserializationFailedException, InterruptedException, TrainingException, SplitFailedException, PredictionException {
-		ILabeledDataset<?> dataset = OpenMLDatasetReader.deserializeDataset(this.problemSet.getId());
+		ILabeledDataset<?> dataset = this.problemSet.getDataset();
 		List<ILabeledDataset<?>> split = SplitterUtil.getSimpleTrainTestSplit(dataset, 0, .7);
 		WekaClassifier c = new WekaClassifier(new ZeroR());
 		ISingleLabelClassificationPredictionBatch batch = c.fitAndPredict(split.get(0), split.get(1));

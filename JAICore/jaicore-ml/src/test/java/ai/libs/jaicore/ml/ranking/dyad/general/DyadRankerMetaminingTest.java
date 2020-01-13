@@ -47,7 +47,7 @@ import ai.libs.jaicore.ml.ranking.loss.KendallsTauDyadRankingLoss;
 @RunWith(Parameterized.class)
 public class DyadRankerMetaminingTest {
 
-	private static final String DATASET_FILE = "testsrc/ml/dyadranking/MLPlan-Data.txt";
+	private static final String DATASET_FILE = "testrsc/ml/dyadranking/MLPlan-Data.txt";
 
 	// N = number of training instances
 	private static final int N = 300;

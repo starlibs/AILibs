@@ -22,7 +22,7 @@ public class GMeansSamplingTester extends GeneralSamplingTester<Number> {
 	}
 
 	@Override
-	public void testSampleSizeSmallProblem() {
+	public void testSampleSizeMediumProblem() {
 		// Sample Size is not supported for GMeansSampling
 		assertTrue(true);
 	}

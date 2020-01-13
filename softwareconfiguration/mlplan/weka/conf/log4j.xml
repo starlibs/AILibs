@@ -45,6 +45,15 @@
       <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
     </layout>
   </appender>
+ 
+  <logger name="testers">
+    <level value="debug" />
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
 
   <logger name="ai.libs">
     <level value="warn" />

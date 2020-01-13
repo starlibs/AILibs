@@ -2,6 +2,7 @@ package ai.libs.automl.mlplan.test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,7 @@ public class WekaMLPlanResultDeliveryTester extends AutoMLAlgorithmResultProduct
 	@Override
 	public IAlgorithm<ILabeledDataset<?>, IWekaClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) {
 		try {
+			this.logger.info("Creating ML-Plan instance.");
 			MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 			int baseTime = Math.max(5, (int)Math.ceil(1.2 * this.getTrainTimeOfMajorityClassifier(data) / 1000.0));
 			builder.withNodeEvaluationTimeOut(new Timeout(baseTime * 12, TimeUnit.SECONDS));
@@ -38,11 +40,11 @@ public class WekaMLPlanResultDeliveryTester extends AutoMLAlgorithmResultProduct
 			builder.withSeed(1);
 			builder.withPortionOfDataReservedForSelection(.0f);
 			MLPlan<IWekaClassifier> mlplan = builder.withDataset(data).build();
-
-			/* check that ML-Plan will use a validating node evaluator */
+			this.logger.info("Done");
 			return mlplan;
 		} catch (IOException | TrainingException | InterruptedException | DatasetDeserializationFailedException e) {
 			e.printStackTrace();
+			fail("Could not create ML-Plan instance");
 			return null;
 		}
 	}

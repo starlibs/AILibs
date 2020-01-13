@@ -35,14 +35,14 @@ public class GradientDescentOptimizer implements IGradientBasedOptimizer {
 	 *
 	 * @param config
 	 */
-	public GradientDescentOptimizer(final GradientDescentOptimizerConfig config) {
+	public GradientDescentOptimizer(final IGradientDescentOptimizerConfig config) {
 		this.learningRate = config.learningRate();
 		this.gradientThreshold = config.gradientThreshold();
 		this.maxIterations = config.maxIterations();
 	}
 
 	public GradientDescentOptimizer() {
-		this(ConfigFactory.create(GradientDescentOptimizerConfig.class));
+		this(ConfigFactory.create(IGradientDescentOptimizerConfig.class));
 	}
 
 	@Override
