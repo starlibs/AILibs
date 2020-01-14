@@ -71,7 +71,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 		super(input);
 	}
 
-	private void downsampleData(final File from, final File to, final int size) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	private void downsampleData(final File from, final File to, final int size) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
 		ReservoirSampling sampler = new ReservoirSampling(new Random(0), this.getInput());
 		try {
 			File outputFolder = to.getParentFile();
