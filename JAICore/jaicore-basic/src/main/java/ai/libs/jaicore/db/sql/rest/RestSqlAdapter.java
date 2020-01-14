@@ -43,7 +43,6 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 	}
 
 	public List<IKVStore> select(final String query) throws SQLException {
-		System.out.println(this.config.getHost() + this.config.getSelectSuffix());
 		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getSelectSuffix(), query);
 		return KVStoreUtil.readFromJson(res);
 	}
