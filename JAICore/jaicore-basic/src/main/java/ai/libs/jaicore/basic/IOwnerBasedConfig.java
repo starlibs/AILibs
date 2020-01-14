@@ -8,10 +8,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
+import org.aeonbits.owner.Accessible;
+import org.aeonbits.owner.ConfigFactory;
 import org.aeonbits.owner.Mutable;
 import org.api4.java.common.control.IConfig;
 
-public interface IOwnerBasedConfig extends Mutable, IConfig {
+public interface IOwnerBasedConfig extends Mutable, Accessible, IConfig {
 
 	/**
 	 * Reads properties of a config from a config file.
@@ -21,7 +23,7 @@ public interface IOwnerBasedConfig extends Mutable, IConfig {
 	@Override
 	default IOwnerBasedConfig loadPropertiesFromFile(final File file) {
 		try {
-			return loadPropertiesFromList(FileUtil.readFileAsList(file));
+			return this.loadPropertiesFromList(FileUtil.readFileAsList(file));
 		} catch (IOException e) {
 			throw new PropertiesLoadFailedException("Could not load properties from the given file.", e);
 		}
@@ -48,7 +50,7 @@ public interface IOwnerBasedConfig extends Mutable, IConfig {
 		}
 
 		if (content != null) {
-			return loadPropertiesFromList(Arrays.asList(content.split("\n")));
+			return this.loadPropertiesFromList(Arrays.asList(content.split("\n")));
 		}
 		return this;
 	}
@@ -65,8 +67,19 @@ public interface IOwnerBasedConfig extends Mutable, IConfig {
 				continue;
 			}
 			String[] split = line.split("=");
-			setProperty(split[0].trim(), split[1].trim());
+			this.setProperty(split[0].trim(), split[1].trim());
 		}
 		return this;
+	}
+
+	default <T extends IOwnerBasedAlgorithmConfig> T copy(final Class<T> configInterface) {
+		if (!configInterface.isInstance(this)) {
+			throw new IllegalArgumentException("The config " + this + " does not implement the interface " + configInterface.getClass().getName());
+		}
+		T clone = ConfigFactory.create(configInterface);
+		for (String property : this.propertyNames()) {
+			clone.setProperty(property, this.getProperty(property));
+		}
+		return clone;
 	}
 }

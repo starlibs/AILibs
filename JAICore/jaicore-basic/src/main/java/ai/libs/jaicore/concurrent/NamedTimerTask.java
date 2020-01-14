@@ -1,8 +1,6 @@
 package ai.libs.jaicore.concurrent;
 
-import java.util.TimerTask;
-
-public abstract class NamedTimerTask extends TimerTask {
+public abstract class NamedTimerTask extends TrackableTimerTask {
 
 	private String descriptor;
 

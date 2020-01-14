@@ -31,6 +31,7 @@ import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseE
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyStartedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentUpdateFailedException;
+import ai.libs.jaicore.logging.LoggerUtil;
 
 public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggingCustomizable {
 
@@ -380,12 +381,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	public void finishExperiment(final ExperimentDBEntry expEntry, final Throwable error) throws ExperimentDBInteractionFailedException {
 		Map<String, Object> valuesToAddAfterRun = new HashMap<>();
 		if (error != null) {
-			StringBuilder exceptionEntry = new StringBuilder();
-			exceptionEntry.append(error.getClass().getName() + "\n" + error.getMessage());
-			for (StackTraceElement se : error.getStackTrace()) {
-				exceptionEntry.append("\n\t" + se);
-			}
-			valuesToAddAfterRun.put("exception", exceptionEntry.toString());
+			valuesToAddAfterRun.put("exception", LoggerUtil.getExceptionInfo(error));
 		}
 		valuesToAddAfterRun.put(FIELD_TIME_END, new SimpleDateFormat(DATE_FORMAT).format(new Date()));
 		this.updateExperiment(expEntry, valuesToAddAfterRun);

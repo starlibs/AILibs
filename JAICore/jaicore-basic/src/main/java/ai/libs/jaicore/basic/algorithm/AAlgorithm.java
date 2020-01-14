@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
-import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.timing.TimedComputation;
 
@@ -450,8 +449,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 	protected <T> T computeTimeoutAware(final Callable<T> r, final String reasonToLogOnTimeout, final boolean shutdownOnStoppingCriterionSatisfied)
 			throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
-		this.logger.debug("Received request to execute {} with awareness of timeout {}. Currently active threads: {}. Currently active tasks in global timer: {}", r, this.getTimeout(), this.activeThreads,
-				GlobalTimer.getInstance().getActiveTasks());
+		this.logger.debug("Received request to execute {} with awareness of timeout {}. Currently active threads: {}.", r, this.getTimeout(), this.activeThreads);
 
 		/* if no timeout is sharp, just execute the task */
 		if (this.getTimeout().milliseconds() < 0) {
