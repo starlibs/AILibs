@@ -22,15 +22,19 @@ public interface IRestDatabaseConfig extends IOwnerBasedConfig, Reloadable {
 	public String getToken();
 
 	@Key(K_REST_DB_URL_INSERT)
+	@DefaultValue("/insert")
 	public String getInsertSuffix();
 
 	@Key(K_REST_DB_URL_UPDATE)
+	@DefaultValue("/update")
 	public String getUpdateSuffix();
 
 	@Key(K_REST_DB_URL_SELECT)
+	@DefaultValue("/query")
 	public String getSelectSuffix();
 
 	@Key(K_REST_DB_URL_QUERY)
+	@DefaultValue("/query")
 	public String getQuerySuffix();
 
 	@Key(K_REST_DB_TABLE)

@@ -14,10 +14,14 @@ import org.apache.http.client.ClientProtocolException;
 import org.api4.java.datastructure.kvstore.IKVStore;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.FileUtil;
 
 public class RestSqlAdapterTest {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(RestSqlAdapterTest.class);
 
 	private static IRestDatabaseConfig config;
 	private static RestSqlAdapter adapter;
@@ -29,6 +33,19 @@ public class RestSqlAdapterTest {
 	@BeforeClass
 	public static void setup() throws IOException {
 		config = ConfigFactory.create(IRestDatabaseConfig.class, FileUtil.readPropertiesFile(new File("testrsc/test.restSqlAdapter.properties")));
+		if (config.getHost() == null || config.getHost().isBlank()) {
+			config.setProperty(IRestDatabaseConfig.K_REST_DB_HOST, System.getenv("REST_DB_HOST"));
+		}
+		if (config.getToken() == null || config.getToken().isBlank()) {
+			config.setProperty(IRestDatabaseConfig.K_REST_DB_TOKEN, System.getenv("REST_DB_TOKEN"));
+		}
+
+		if (config.getHost() == null || config.getToken() == null) {
+			LOGGER.error("The host and the token for the REST DB connection could not be loaded. Either add the proper values to the properties file or via environment variables 'REST_DB_HOST' and 'REST_DB_TOKEN'");
+			throw new IllegalArgumentException("Could not load host and token information information");
+		} else {
+			LOGGER.info("Carry out tests with server backend at {} with token {}.", config.getHost(), config.getToken());
+		}
 		adapter = new RestSqlAdapter(config);
 	}
 

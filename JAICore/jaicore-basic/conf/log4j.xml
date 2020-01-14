@@ -71,6 +71,10 @@
     <level value="debug" />
   </logger>
   
+  <logger name="ai.libs.jaicore.db">
+    <level value="debug" />
+  </logger>
+  
   <logger name="testedalgorithm">
     <level value="debug" />
     
