@@ -32,6 +32,7 @@ import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.events.HASCOSolutionEvent;
+import ai.libs.hasco.events.TwoPhaseHASCOPhaseSwitchEvent;
 import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.optimizingfactory.OptimizingFactory;
@@ -52,6 +53,7 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
+import ai.libs.mlplan.core.events.MLPlanPhaseSwitchedEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 
 public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> extends AAlgorithm<ILabeledDataset<?>, L> implements ILoggingCustomizable {
@@ -245,7 +247,10 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 					if (event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent) {
 						return;
 					}
-					if (event instanceof HASCOSolutionEvent) {
+					if (event instanceof TwoPhaseHASCOPhaseSwitchEvent) {
+						MLPlan.this.post(new MLPlanPhaseSwitchedEvent(MLPlan.this));
+					}
+					else if (event instanceof HASCOSolutionEvent) {
 						@SuppressWarnings("unchecked")
 						HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
 						try {

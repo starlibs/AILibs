@@ -57,7 +57,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
 		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
 		problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
-		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
+		//		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
 		problemSets.add(new OpenMLProblemSet(1457)); // amazon
 		problemSets.add(new OpenMLProblemSet(1501)); // semeion
 		//		problemSets.add(new OpenMLProblemSet(149)); // CovP	okElec
@@ -77,7 +77,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 		problemSets.add(new OpenMLProblemSet(1104)); // leukemia
 		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
 		//		problemSets.add(new OpenMLProblemSet(554)); // mnist
-		problemSets.add(new OpenMLProblemSet(155)); // pokerhand
+		//		problemSets.add(new OpenMLProblemSet(155)); // pokerhand
 		problemSets.add(new OpenMLProblemSet(40691)); // winequality
 		//		problemSets.add(new OpenMLProblemSet(41026)); // gisette
 		//		problemSets.add(new OpenMLProblemSet(41065)); // mnist-rotate
