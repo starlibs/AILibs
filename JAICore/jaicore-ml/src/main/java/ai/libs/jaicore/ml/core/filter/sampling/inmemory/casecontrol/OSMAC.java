@@ -7,6 +7,8 @@ import java.util.Random;
 import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
@@ -24,7 +26,7 @@ public class OSMAC<D extends ILabeledDataset<? extends ILabeledInstance>> extend
 	}
 
 	@Override
-	public List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(final D instances, final IClassifier pilotEstimator) {
+	public List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(final D instances, final IClassifier pilotEstimator) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		double boundaryOfCurrentInstance = 0.0;
 		ArrayList<Pair<ILabeledInstance, Double>> probabilityBoundaries = new ArrayList<>();
 		double sumOfDistributionLosses = 0;
@@ -32,6 +34,9 @@ public class OSMAC<D extends ILabeledDataset<? extends ILabeledInstance>> extend
 		int n = instances.size();
 		double[] normalizedLosses = new double[n];
 		for (int i = 0; i < n; i++) {
+			if (i % 100 == 0) {
+				this.checkAndConductTermination();
+			}
 			ILabeledInstance instance = instances.get(i);
 			vectorLength = 0;
 			for (Object attributeVal : instance.getAttributes()) {
@@ -53,6 +58,9 @@ public class OSMAC<D extends ILabeledDataset<? extends ILabeledInstance>> extend
 		}
 
 		for (int i = 0; i < n; i++) {
+			if (i % 100 == 0) {
+				this.checkAndConductTermination();
+			}
 			boundaryOfCurrentInstance += normalizedLosses[i] / sumOfDistributionLosses;
 			probabilityBoundaries.add(new Pair<>(instances.get(i), boundaryOfCurrentInstance));
 		}

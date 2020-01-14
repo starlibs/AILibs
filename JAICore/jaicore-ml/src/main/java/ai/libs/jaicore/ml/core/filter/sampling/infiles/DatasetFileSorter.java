@@ -7,6 +7,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Comparator;
 
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.common.control.ICancelable;
+
 import ai.libs.jaicore.basic.TempFileHandler;
 
 /**
@@ -15,11 +18,12 @@ import ai.libs.jaicore.basic.TempFileHandler;
  *
  * @author Lukas Brandt
  */
-public class DatasetFileSorter {
+public class DatasetFileSorter implements ICancelable {
 
 	private File datasetFile;
 	private TempFileHandler tempFileHandler;
 	private boolean usesOwnTempFileHandler;
+	private boolean canceled;
 
 	// Default comperator, which compared the single features as strings
 	private Comparator<String> comparator = (s1, s2) -> {
@@ -37,6 +41,9 @@ public class DatasetFileSorter {
 
 	public DatasetFileSorter(final File datasetFile, final TempFileHandler tempFileHandler) {
 		this.datasetFile = datasetFile;
+		if (!datasetFile.exists()) {
+			throw new IllegalArgumentException("Cannot sort items of non-existent file " + datasetFile);
+		}
 		this.tempFileHandler = tempFileHandler;
 		this.usesOwnTempFileHandler = false;
 	}
@@ -59,8 +66,10 @@ public class DatasetFileSorter {
 	 * @param sortedFilePath
 	 * @return
 	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws AlgorithmExecutionCanceledException
 	 */
-	public File sort(final String sortedFilePath) throws IOException {
+	public File sort(final String sortedFilePath) throws IOException, InterruptedException, AlgorithmExecutionCanceledException {
 		IOException exception;
 		try (FileWriter fileWriter = new FileWriter(new File(sortedFilePath)); FileReader fr = new FileReader(this.datasetFile); BufferedReader datasetFileReader = new BufferedReader(fr)) {
 			// Create a new file for the sorted dataset with the ARFF header
@@ -110,7 +119,7 @@ public class DatasetFileSorter {
 		throw exception;
 	}
 
-	private String mergesort(final String fileUUID) throws IOException {
+	private String mergesort(final String fileUUID) throws IOException, InterruptedException, AlgorithmExecutionCanceledException {
 		int length = ArffUtilities.countDatasetEntries(this.tempFileHandler.getTempFile(fileUUID), false);
 		if (length <= 1) {
 			return fileUUID;
@@ -124,6 +133,9 @@ public class DatasetFileSorter {
 			int i = 0;
 			String line;
 			while ((line = reader.readLine()) != null) {
+				if (i % 100 == 0 && Thread.interrupted()) {
+					throw new InterruptedException();
+				}
 				if (i < (length / 2)) {
 					leftWriter.write(line + "\n");
 				} else {
@@ -131,12 +143,21 @@ public class DatasetFileSorter {
 				}
 				i++;
 			}
+			if (Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			leftWriter.flush();
 			rightWriter.flush();
 			// Sort the two halfs
 			String sortedLeftUUID = this.mergesort(leftUUID);
 			String sortedRightUUID = this.mergesort(rightUUID);
 			// Merge the sorted halfs back together ande delete the left and right temp files
+			if (Thread.interrupted()) {
+				throw new InterruptedException();
+			}
+			if (this.canceled) {
+				throw new AlgorithmExecutionCanceledException(0);
+			}
 			String mergedFileUUID = this.merge(sortedLeftUUID, sortedRightUUID);
 			this.tempFileHandler.deleteTempFile(leftUUID);
 			this.tempFileHandler.deleteTempFile(rightUUID);
@@ -171,6 +192,11 @@ public class DatasetFileSorter {
 		}
 		writer.flush();
 		return uuid;
+	}
+
+	@Override
+	public void cancel() {
+		this.canceled = true;
 	}
 
 }

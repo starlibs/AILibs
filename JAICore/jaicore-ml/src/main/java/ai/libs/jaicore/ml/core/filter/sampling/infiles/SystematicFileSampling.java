@@ -9,13 +9,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 import ai.libs.jaicore.basic.TempFileHandler;
 import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
+import ai.libs.jaicore.timing.TimedComputation;
 
 /**
  * File-level implementation of Systematic Sampling: Sort datapoints and pick
@@ -32,6 +35,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 	private Comparator<String> datapointComparator;
 	private BufferedReader sortedDatasetFileReader;
 	private List<Integer> indicesForSelection;
+	private DatasetFileSorter sorter; // this is an object variable in order to be cancelable
 
 	/**
 	 * Simple constructor that uses the default datapoint comparator.
@@ -60,22 +64,27 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 
 	@Override
 	public IAlgorithmEvent nextWithException()
-			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
 		case CREATED:
 			// Sort dataset and skip with reader the ARFF header.
 			File sortedDatasetFile = null;
 			try {
-				DatasetFileSorter sorter = new DatasetFileSorter(this.getInput(), this.tempFileHandler);
+				this.sorter = new DatasetFileSorter(this.getInput(), this.tempFileHandler);
 				if (this.datapointComparator != null) {
-					sorter.setComparator(this.datapointComparator);
+					this.sorter.setComparator(this.datapointComparator);
 				}
-				sortedDatasetFile = sorter.sort(
-						this.tempFileHandler.getTempFileDirPath() + File.separator + UUID.randomUUID().toString());
+				this.setDeadline();
+				long remainingMS = this.getRemainingTimeToDeadline().milliseconds() - this.getTimeoutPrecautionOffset();
+				sortedDatasetFile = TimedComputation.compute(() -> this.sorter.sort(
+						this.tempFileHandler.getTempFileDirPath() + File.separator + UUID.randomUUID().toString()), remainingMS, "No time left");
 				sortedDatasetFile.deleteOnExit();
 				this.sortedDatasetFileReader = new BufferedReader(new FileReader(sortedDatasetFile));
 				ArffUtilities.skipWithReaderToDatapoints(this.sortedDatasetFileReader);
-			} catch (IOException e) {
+			} catch (IOException | ExecutionException e) {
+				if (e.getCause() instanceof AlgorithmExecutionCanceledException) {
+					throw (AlgorithmExecutionCanceledException)e.getCause();
+				}
 				throw new AlgorithmException("Was not able to create a sorted dataset file.", e);
 			}
 			// Count datapoints in the sorted dataset and initialize variables.
@@ -88,6 +97,9 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 				int startIndex = this.random.nextInt(datapointAmount);
 				int i = 0;
 				while (this.indicesForSelection.size() < this.sampleSize) {
+					if (i % 100 == 0) {
+						this.checkAndConductTermination();
+					}
 					int e = (startIndex + k * (i++)) % datapointAmount;
 					this.indicesForSelection.add(e);
 				}
@@ -101,11 +113,18 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 			// systematic sampling method.
 			if (this.addedDatapoints < this.sampleSize) {
 				try {
+					if (this.addedDatapoints % 100 == 0) {
+						this.checkAndConductTermination();
+					}
+
 					// Determine and find the next k-th element.
 					int e = this.indicesForSelection.get(this.addedDatapoints);
 					String datapoint = this.sortedDatasetFileReader.readLine();
 					this.index++;
 					while (this.index < e) {
+						if (this.index % 100 == 0) {
+							this.checkAndConductTermination();
+						}
 						datapoint = this.sortedDatasetFileReader.readLine();
 						this.index++;
 					}
@@ -133,6 +152,12 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 			this.cleanUp();
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
+	}
+
+	@Override
+	public void cancel() {
+		super.cancel();
+		this.sorter.cancel();
 	}
 
 	@Override

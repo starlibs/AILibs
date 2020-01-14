@@ -96,8 +96,7 @@ public class Dataset extends ArrayList<ILabeledInstance> implements ILabeledData
 		return new ReconstructionPlan(this.instructions);
 	}
 
-	@Override
-	public String toString() {
+	public String getInstancesAsString() {
 		StringBuilder sb = new StringBuilder();
 		this.stream().map(ILabeledInstance::toString).forEach(x -> sb.append(x + "\n"));
 		return sb.toString();

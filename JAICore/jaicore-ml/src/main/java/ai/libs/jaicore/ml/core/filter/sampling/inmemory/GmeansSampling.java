@@ -55,18 +55,12 @@ public class GmeansSampling<I extends IClusterableInstance, D extends ILabeledDa
 				GMeans<I> gMeansCluster = new GMeans<>(this.getInput(), this.distanceMeassure, this.seed);
 				this.clusterResults = gMeansCluster.cluster(); // this is not interruptible!!
 			}
-
 			return this.activate();
 		case ACTIVE:
-			this.doAlgorithmStep();
-			break;
-		case INACTIVE:
-			this.doInactiveStep();
-			break;
+			return this.doAlgorithmStep();
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
-		return null;
 	}
 
 }

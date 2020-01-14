@@ -9,8 +9,8 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.dataset.DatasetDeriver;
@@ -19,7 +19,6 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 
 public abstract class CaseControlLikeSampling<D extends ILabeledDataset<? extends ILabeledInstance>> extends ASamplingAlgorithm<D> {
 
-	private Logger logger = LoggerFactory.getLogger(CaseControlLikeSampling.class);
 	protected Random rand;
 	protected List<Pair<ILabeledInstance, Double>> acceptanceThresholds = null;
 	private final DatasetDeriver<D> deriver;
@@ -38,10 +37,10 @@ public abstract class CaseControlLikeSampling<D extends ILabeledDataset<? extend
 		this.acceptanceThresholds = thresholds;
 	}
 
-	public abstract List<Pair<ILabeledInstance, Double>> computeAcceptanceThresholds() throws ThresholdComputationFailedException, InterruptedException;
+	public abstract List<Pair<ILabeledInstance, Double>> computeAcceptanceThresholds() throws ThresholdComputationFailedException, InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException;
 
 	@Override
-	public final IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
+	public final IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
 		this.logger.debug("Executing next step.");
 		switch (this.getState()) {
 		case CREATED:
@@ -50,11 +49,16 @@ public abstract class CaseControlLikeSampling<D extends ILabeledDataset<? extend
 			} catch (ThresholdComputationFailedException e1) {
 				throw new AlgorithmException("Sampler initialization failed due to problems in threshold computation.", e1);
 			}
+			this.logger.info("Initialized sampler with {} acceptance thresholds and {}x{}-dataset", this.acceptanceThresholds.size(), this.getInput().size(), this.getInput().getNumAttributes());
 			return this.activate();
 		case ACTIVE:
 
 			/* draw next sample element */
+			int i = 0;
 			while (this.deriver.currentSizeOfTarget() < this.sampleSize && this.currentlyConsideredIndex < this.acceptanceThresholds.size()) {
+				if (i++ % 100 == 0) {
+					this.checkAndConductTermination();
+				}
 				double r = this.rand.nextDouble();
 				this.currentlyConsideredIndex ++;
 				if (this.acceptanceThresholds.get(this.currentlyConsideredIndex - 1).getY().doubleValue() >= r) {
@@ -69,6 +73,7 @@ public abstract class CaseControlLikeSampling<D extends ILabeledDataset<? extend
 			} catch (DatasetCreationException e) {
 				throw new AlgorithmException("Could not create split.", e);
 			}
+			this.logger.info("Sampling has finished. Shutting down sampling algorithm.");
 			return this.doInactiveStep();
 		default:
 			throw new IllegalStateException("No actions defined for algorithm state " + this.getState());

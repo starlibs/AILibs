@@ -17,13 +17,19 @@ public class KMeansSamplingTester extends GeneralSamplingTester<Number> {
 	private static final int K = 100;
 
 	@Override
-	public void testSampleSizeLargeProblem() {
+	public void testSampleSizeSimpleProblem() {
 		// Sample Size is not supported for KMeansSampling
 		assertTrue(true);
 	}
 
 	@Override
 	public void testSampleSizeMediumProblem() {
+		// Sample Size is not supported for KMeansSampling
+		assertTrue(true);
+	}
+
+	@Override
+	public void testSampleSizeLargeProblem() {
 		// Sample Size is not supported for KMeansSampling
 		assertTrue(true);
 	}
@@ -44,5 +50,41 @@ public class KMeansSamplingTester extends GeneralSamplingTester<Number> {
 			return factory.getAlgorithm(sampleSize, (ILabeledDataset<IClusterableInstance>)dataset, new Random(SEED));
 		}
 		return null;
+	}
+
+	@Override
+	public void testTimeout() {
+		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
+		assertTrue(true);
+	}
+
+	@Override
+	public void testTimeoutWhenParallelized() {
+		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
+		assertTrue(true);
+	}
+
+	@Override
+	public void testInterrupt() {
+		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
+		assertTrue(true);
+	}
+
+	@Override
+	public void testInterruptWhenParallelized() {
+		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
+		assertTrue(true);
+	}
+
+	@Override
+	public void testCancel() {
+		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
+		assertTrue(true);
+	}
+
+	@Override
+	public void testCancelWhenParallelized() {
+		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
+		assertTrue(true);
 	}
 }

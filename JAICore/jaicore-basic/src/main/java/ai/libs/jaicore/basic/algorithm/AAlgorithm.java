@@ -30,7 +30,7 @@ import ai.libs.jaicore.timing.TimedComputation;
 public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable {
 
 	/* Logger variables */
-	private Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
+	protected Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
 	private String loggerName;
 
 	/* Parameters of the algorithm. */
@@ -249,14 +249,16 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		}
 
 		if (this.isCanceled()) { // for a cancel, we assume that the shutdown has already been triggered by the canceler
-			this.logger.info("Cancel detected for {}.", this.getId());
+			this.logger.info("Cancel detected for {}. Cancel was issued {}ms ago.", this.getId(), (System.currentTimeMillis() - this.canceled));
 			if (Thread.interrupted()) { // reset the flag
 				this.logger.debug("Thread has been interrupted during shutdown. Resetting the flag and not invoking shutdown again.");
 			}
 			this.logger.debug("Throwing AlgorithmExecutionCanceledException.");
 			throw new AlgorithmExecutionCanceledException(System.currentTimeMillis() - this.canceled);
 		}
-		this.logger.debug("No termination condition observed.");
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug("No termination condition observed. Remaining time to timeout is {}", this.getRemainingTimeToDeadline());
+		}
 	}
 
 	protected void checkAndConductTermination() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
@@ -382,14 +384,28 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected AlgorithmInitializedEvent activate() {
 		assert this.state == EAlgorithmState.CREATED : "Can only activate an algorithm as long as its state has not been changed from CREATED to something else. It is currently " + this.state;
 		this.activationTime = System.currentTimeMillis();
-		if (this.getTimeout().milliseconds() > 0) {
-			this.deadline = this.activationTime + this.getTimeout().milliseconds();
+		if (this.getTimeout().milliseconds() > 0 && this.deadline < 0) {
+			this.setDeadline();
 		}
 		this.state = EAlgorithmState.ACTIVE;
 		AlgorithmInitializedEvent event = new AlgorithmInitializedEvent(this);
 		this.eventBus.post(event);
-		this.logger.trace("Starting algorithm {} with problem {} and config {}", this.getId(), this.input, this.config);
+		this.logger.debug("Starting algorithm {} with problem of type {} and config {}.", this.getId(), this.input.getClass().getName(), this.config);
 		return event;
+	}
+
+	protected void setDeadline() {
+		if (this.deadline >= 0) {
+			throw new IllegalStateException();
+		}
+		if (this.getTimeout().milliseconds() > 0) {
+			this.deadline = System.currentTimeMillis() + this.getTimeout().milliseconds() - this.timeoutPrecautionOffset;
+			this.logger.info("Timeout is {}. Setting deadline to timestamp {}. Remaining time: {}", this.getTimeout(), this.deadline, this.getRemainingTimeToDeadline());
+		}
+		else {
+			this.deadline = System.currentTimeMillis() + 86400 * 1000 * 365;
+			this.logger.info("No timeout defined. Setting deadline to timestamp {}. Remaining time: {}", this.deadline, this.getRemainingTimeToDeadline());
+		}
 	}
 
 	/**

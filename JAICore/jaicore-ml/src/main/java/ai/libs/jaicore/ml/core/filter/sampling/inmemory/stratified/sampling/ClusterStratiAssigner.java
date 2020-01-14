@@ -28,7 +28,10 @@ public abstract class ClusterStratiAssigner implements IStratiAssigner {
 			throw new IllegalArgumentException("Cannot compute strati for empty dataset.");
 		}
 		if (!Clusterable.class.isAssignableFrom(dataset.getClassOfInstances())) {
-			throw new IllegalArgumentException("Dataset does not contain clusterable elements, but elements of class " + dataset.getClassOfInstances() + ".");
+			boolean allElementsClusterable = dataset.stream().allMatch(Clusterable.class::isInstance);
+			if (!allElementsClusterable) {
+				throw new IllegalArgumentException("Dataset does contain elements that are not clusterable elements, but only elements of class " + dataset.getClassOfInstances() + ".");
+			}
 		}
 		this.dataset = dataset;
 	}
