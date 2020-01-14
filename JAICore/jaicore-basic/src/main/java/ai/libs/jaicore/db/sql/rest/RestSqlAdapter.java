@@ -18,7 +18,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.api4.java.datastructure.kvstore.IKVStore;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -91,11 +90,6 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 	@Override
 	public List<IKVStore> query(final String query) throws SQLException {
 		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getQuerySuffix(), query);
-		try {
-			System.out.println(new ObjectMapper().writeValueAsString(res));
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
 		return KVStoreUtil.readFromJson(res);
 	}
 
