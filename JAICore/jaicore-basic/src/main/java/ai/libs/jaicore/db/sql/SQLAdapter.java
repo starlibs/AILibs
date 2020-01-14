@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
@@ -54,6 +53,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 	private final String database;
 	private final boolean ssl;
 	private final Properties connectionProperties;
+	private final ISQLQueryBuilder queryBuilder = new MySQLQueryBuilder();
 
 	/* Connection object */
 	private transient Connection connect;
@@ -363,7 +363,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 	 */
 	@Override
 	public int[] insert(final String table, final Map<String, ? extends Object> map) throws SQLException {
-		Pair<String, List<Object>> insertStatement = this.buildInsertStatement(table, map);
+		Pair<String, List<Object>> insertStatement = this.queryBuilder.buildInsertStatement(table, map);
 		return this.insert(insertStatement.getX(), insertStatement.getY());
 	}
 
@@ -397,7 +397,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 			for (int i = 0; i < Math.ceil(n * 1.0 / chunkSize); i++) {
 				int startIndex = i * chunkSize;
 				int endIndex = Math.min((i + 1) * chunkSize, n);
-				String sql = this.getSQLForMultiInsert(table, keys, datarows.subList(startIndex, endIndex));
+				String sql = this.queryBuilder.buildMultiInsertSQLCommand(table, keys, datarows.subList(startIndex, endIndex));
 				this.logger.debug("Created SQL for {} entries", endIndex - startIndex);
 				this.logger.trace("Adding sql statement {} to batch", sql);
 				stmt.addBatch(sql);
@@ -412,79 +412,6 @@ public class SQLAdapter implements IDatabaseAdapter {
 			}
 			return ids.stream().mapToInt(x -> x).toArray();
 		}
-	}
-
-	private Pair<String, List<Object>> buildInsertStatement(final String table, final Map<String, ? extends Object> map) {
-		StringBuilder sb1 = new StringBuilder();
-		StringBuilder sb2 = new StringBuilder();
-		List<Object> values = new ArrayList<>();
-		for (Entry<String, ? extends Object> entry : map.entrySet()) {
-			if (entry.getValue() == null) {
-				continue;
-			}
-			if (sb1.length() != 0) {
-				sb1.append(", ");
-				sb2.append(", ");
-			}
-			sb1.append(entry.getKey());
-			sb2.append("?");
-			values.add(entry.getValue());
-		}
-		String statement = "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
-		return new Pair<>(statement, values);
-	}
-
-	protected String buildFinalInsertStatement(final String table, final Map<String, ? extends Object> map) {
-		StringBuilder sb1 = new StringBuilder();
-		StringBuilder sb2 = new StringBuilder();
-		for (Entry<String, ? extends Object> entry : map.entrySet()) {
-			if (entry.getValue() == null) {
-				continue;
-			}
-			if (sb1.length() != 0) {
-				sb1.append(", ");
-				sb2.append(", ");
-			}
-			sb1.append(entry.getKey());
-			sb2.append("\"" + entry.getValue().toString().replace("\"", "\\\"") + "\"");
-		}
-		return "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
-	}
-
-	private String getSQLForMultiInsert(final String table, final List<String> keys, final List<List<?>> datarows) {
-		StringBuilder sbMain = new StringBuilder();
-		StringBuilder sbKeys = new StringBuilder();
-		StringBuilder sbValues = new StringBuilder();
-
-		/* create command phrase */
-		sbMain.append("INSERT INTO `");
-		sbMain.append(table);
-		sbMain.append("` (");
-
-		/* create key phrase */
-		for (String key : keys) {
-			if (sbKeys.length() != 0) {
-				sbKeys.append(", ");
-			}
-			sbKeys.append(key);
-		}
-		sbMain.append(sbKeys);
-		sbMain.append(") VALUES\n");
-
-		/* create value phrases */
-		for (List<?> datarow : datarows) {
-			if (datarow.contains(null)) { // the rule that fires here is wrong! The list CAN contain a null element
-				throw new IllegalArgumentException("Row " + datarow + " contains null element!");
-			}
-			if (sbValues.length() > 0) {
-				sbValues.append(",\n ");
-			}
-			sbValues.append("(");
-			sbValues.append(datarow.stream().map(s -> "\"" + s.toString().replace("\"", "\\\"") + "\"").collect(Collectors.joining(", ")));
-			sbValues.append(")");
-		}
-		sbMain.append(sbValues);
-		return sbMain.toString();
 	}
 
 	/**

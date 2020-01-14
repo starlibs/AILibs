@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,6 +16,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.api4.java.datastructure.kvstore.IKVStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +26,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import ai.libs.jaicore.basic.kvstore.KVStoreUtil;
 import ai.libs.jaicore.db.IDatabaseAdapter;
+import ai.libs.jaicore.db.sql.ISQLQueryBuilder;
+import ai.libs.jaicore.db.sql.MySQLQueryBuilder;
 
 /**
  * This is a simple util class for easy database access and query execution in sql. You need to make sure that the respective JDBC connector is in the class path. By default, the adapter uses the mysql driver, but any jdbc driver can be
@@ -37,6 +40,8 @@ import ai.libs.jaicore.db.IDatabaseAdapter;
 public class RestSqlAdapter implements IDatabaseAdapter {
 
 	private final IRestDatabaseConfig config;
+	private final ISQLQueryBuilder queryBuilder = new MySQLQueryBuilder();
+	private Logger logger = LoggerFactory.getLogger(RestSqlAdapter.class);
 
 	public RestSqlAdapter(final IRestDatabaseConfig config) {
 		this.config = config;
@@ -49,25 +54,12 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 
 	@Override
 	public int[] insert(final String table, final Map<String, ? extends Object> values) throws SQLException {
-		StringBuilder queryBuilder = new StringBuilder();
-		List<String> keys = new LinkedList<>(values.keySet());
-		queryBuilder.append("INSERT INTO " + table + "(");
-		queryBuilder.append(keys.stream().collect(Collectors.joining(",")));
-		queryBuilder.append(") VALUES ('");
-		queryBuilder.append(keys.stream().map(x -> values.get(x) + "").collect(Collectors.joining("','")));
-		queryBuilder.append("')");
-		return this.insert(queryBuilder.toString());
+		return this.insert(this.queryBuilder.buildInsertSQLCommand(table, values));
 	}
 
 	@Override
 	public int[] insertMultiple(final String tablename, final List<String> keys, final List<List<?>> values) throws SQLException {
-		StringBuilder queryBuilder = new StringBuilder();
-		queryBuilder.append("INSERT INTO " + tablename + " (");
-		queryBuilder.append(keys.stream().collect(Collectors.joining(",")));
-		queryBuilder.append(") VALUES (");
-		queryBuilder.append(values.stream().map(x -> "'" + x.stream().map(y -> y + "").collect(Collectors.joining("','")) + "'").collect(Collectors.joining("), (")));
-		queryBuilder.append(")");
-		return this.insert(queryBuilder.toString());
+		return this.insert(this.queryBuilder.buildMultiInsertSQLCommand(tablename, keys, values));
 	}
 
 	public int[] insert(final String query) throws SQLException {
@@ -170,7 +162,7 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 
 	@Override
 	public int[] insert(final String sql, final List<? extends Object> values) throws SQLException {
-		throw new UnsupportedOperationException();
+		return this.insert(this.queryBuilder.parseSQLCommand(sql, values));
 	}
 
 	@Override
@@ -180,7 +172,7 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 
 	@Override
 	public int update(final String sql, final List<? extends Object> values) throws SQLException {
-		throw new UnsupportedOperationException();
+		return this.update(this.queryBuilder.parseSQLCommand(sql, values));
 	}
 
 	@Override
