@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,7 @@ import java.util.concurrent.Executors;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,8 +58,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 	}
 
 	@Override
-	public IAlgorithmEvent nextWithException()
-			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
 		case CREATED:
 			// Initialize variables.
@@ -76,6 +78,9 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 				throw new AlgorithmException("Was not able to count the datapoints.", e);
 			}
 		case ACTIVE:
+			if (this.streamedDatapoints % 100 == 0) {
+				this.checkAndConductTermination();
+			}
 			if (this.streamedDatapoints < this.datapointAmount) {
 				try {
 					// Assign each datapoint to a stratum.
@@ -89,6 +94,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 					throw new AlgorithmException("Was not able to read datapoint line form input file", e);
 				}
 			} else {
+				this.logger.debug("All datapoints are assigned, now sampling from strati.");
 				try {
 					this.reader.close();
 				} catch (IOException e) {
@@ -112,7 +118,13 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 					} else {
 						// Write strati sampling results to the outputand terminate.
 						try {
+							if (this.sample.size() != this.sampleSize) {
+								throw new IllegalStateException("Will write " + this.sample.size() + " instead of " + this.sampleSize + " instances.");
+							}
 							for (int i = 0; i < this.sample.size(); i++) {
+								if (i % 100 == 0) {
+									this.checkAndConductTermination();
+								}
 								this.outputFileWriter.write(this.sample.get(i) + "\n");
 							}
 							return this.terminate();
@@ -124,8 +136,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 				}
 			}
 		case INACTIVE:
-			if (this.streamedDatapoints < this.datapointAmount || !this.stratiSamplingStarted
-					|| !this.stratiSamplingFinished) {
+			if (this.streamedDatapoints < this.datapointAmount || !this.stratiSamplingStarted || !this.stratiSamplingFinished) {
 				throw new AlgorithmException("Expected sample size was not reached before termination");
 			} else {
 				return this.terminate();
@@ -147,24 +158,36 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 	 * Thread for each stratum.
 	 */
 	private void startReservoirSamplingForStrati(final Map<String, Integer> strati) {
+		this.logger.info("Start reservoir sampling for strati.");
 		// Calculate the amount of datapoints that will be used from each strati
 		int[] sampleSizeForStrati = new int[strati.keySet().size()];
 		// Calculate for each stratum the sample size by StratiSize / DatasetSize
 		int i = 0;
+		int numOfSamplesThatWillBeCreated = 0;
+		List<Integer> fillupStrati = new ArrayList<>(); // strati to fill up rounding instances
 		for (Entry<String, Integer> entry : strati.entrySet()) {
-			sampleSizeForStrati[i] = Math
-					.round((float) (this.sampleSize * ((double) strati.get(entry.getKey()) / (double) this.datapointAmount)));
+			sampleSizeForStrati[i] = (int)Math.floor((float) (this.sampleSize * ((double) strati.get(entry.getKey()) / (double) this.datapointAmount)));
+			numOfSamplesThatWillBeCreated += sampleSizeForStrati[i];
+			fillupStrati.add(i);
 			i++;
+		}
+		while (numOfSamplesThatWillBeCreated < this.sampleSize) {
+			Collections.shuffle(fillupStrati, this.random);
+			int indexForNextFillUp = fillupStrati.remove(0);
+			sampleSizeForStrati[indexForNextFillUp] ++;
+			numOfSamplesThatWillBeCreated ++;
+		}
+		if (numOfSamplesThatWillBeCreated != this.sampleSize) {
+			throw new IllegalStateException("The strati sum up to a size of " + numOfSamplesThatWillBeCreated + " instead of " + this.sampleSize + ".");
 		}
 
 		// Start a Reservoir Sampling thread for each stratum
 		i = 0;
 		for (Entry<String, Integer> entry : strati.entrySet()) {
-			int index = i;
+			final int index = i;
 			this.executorService.execute(() -> {
 				String outputFile = this.tempFileHandler.createTempFile();
-				ReservoirSampling reservoirSampling = new ReservoirSampling(this.random,
-						this.tempFileHandler.getTempFile(entry.getKey()));
+				ReservoirSampling reservoirSampling = new ReservoirSampling(this.random, this.tempFileHandler.getTempFile(entry.getKey()));
 				reservoirSampling.setSampleSize(sampleSizeForStrati[index]);
 				try {
 					reservoirSampling.setOutputFileName(this.tempFileHandler.getTempFile(outputFile).getAbsolutePath());
@@ -185,6 +208,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 			});
 			i++;
 		}
+
 		// Prevent executor service from more threads being added.
 		this.executorService.shutdown();
 	}

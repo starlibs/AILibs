@@ -11,15 +11,11 @@ import org.api4.java.ai.ml.core.filter.unsupervised.sampling.ISamplingAlgorithm;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 
 public abstract class PilotEstimateSampling<D extends ILabeledDataset<? extends ILabeledInstance>> extends CaseControlLikeSampling<D> {
-
-	private Logger logger = LoggerFactory.getLogger(PilotEstimateSampling.class);
 
 	private final ISamplingAlgorithm<D> subSampler;
 	protected int preSampleSize;
@@ -43,27 +39,23 @@ public abstract class PilotEstimateSampling<D extends ILabeledDataset<? extends 
 	}
 
 	@Override
-	public List<Pair<ILabeledInstance, Double>> computeAcceptanceThresholds() throws ThresholdComputationFailedException, InterruptedException {
-		try {
+	public List<Pair<ILabeledInstance, Double>> computeAcceptanceThresholds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
 
-			/* if the pilot estimator should be trained only on a subset, build this subset now. Otherwise train it on the whole dataset. */
-			if (this.subSampler != null) {
-				D subSample = this.subSampler.call();
-				this.logger.info("Fitting pilot with reduced dataset of {}/{} instances.", subSample.size(), this.getInput().size());
-				this.pilotEstimator.fit(subSample);
-			}
-			else {
-				this.logger.info("Fitting pilot with full dataset.");
-				this.pilotEstimator.fit(this.getInput());
-			}
-
-			return this.calculateAcceptanceThresholdsWithTrainedPilot(this.getInput(), this.pilotEstimator);
-		} catch (AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException e) {
-			throw new ThresholdComputationFailedException(e);
+		/* if the pilot estimator should be trained only on a subset, build this subset now. Otherwise train it on the whole dataset. */
+		if (this.subSampler != null) {
+			D subSample = this.subSampler.call();
+			this.logger.info("Fitting pilot with reduced dataset of {}/{} instances.", subSample.size(), this.getInput().size());
+			this.pilotEstimator.fit(subSample);
 		}
+		else {
+			this.logger.info("Fitting pilot with full dataset.");
+			this.pilotEstimator.fit(this.getInput());
+		}
+
+		return this.calculateAcceptanceThresholdsWithTrainedPilot(this.getInput(), this.pilotEstimator);
 	}
 
-	public abstract List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(D instances, IClassifier pilotEstimator);
+	public abstract List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(D instances, IClassifier pilotEstimator) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException;
 
 	public IClassifier getPilotEstimator() {
 		return this.pilotEstimator;

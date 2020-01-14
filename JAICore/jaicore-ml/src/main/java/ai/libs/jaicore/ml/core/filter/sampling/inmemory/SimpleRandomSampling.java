@@ -11,6 +11,8 @@ import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 import ai.libs.jaicore.ml.core.dataset.DatasetDeriver;
 
@@ -27,7 +29,7 @@ public class SimpleRandomSampling<D extends IDataset<?>> extends ASamplingAlgori
 	}
 
 	@Override
-	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
+	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
 		int n = this.getInput().size();
 		switch (this.getState()) {
 		case CREATED:
@@ -39,6 +41,9 @@ public class SimpleRandomSampling<D extends IDataset<?>> extends ASamplingAlgori
 			if (this.isLargeSample) {
 				this.chosenIndices = new ArrayList<>(n);
 				for (int i = 0; i < n; i++) {
+					if (i % 100 == 0) {
+						this.checkAndConductTermination();
+					}
 					this.chosenIndices.add(i);
 				}
 				Collections.shuffle((List<Integer>) this.chosenIndices, this.random);
@@ -50,6 +55,9 @@ public class SimpleRandomSampling<D extends IDataset<?>> extends ASamplingAlgori
 				this.chosenIndices = new HashSet<>();
 				while (this.numberOfLastSample < this.sampleSize) {
 					int i;
+					if (this.numberOfLastSample % 100 == 0) {
+						this.checkAndConductTermination();
+					}
 					do {
 						i = this.random.nextInt(this.sampleSize);
 					} while (this.chosenIndices.contains(i));

@@ -19,7 +19,7 @@ public abstract class AWeightedTrigometricDistance implements IDistanceMetric {
 		if (alpha > Math.PI / 2 || alpha < 0) {
 			throw new IllegalArgumentException("Parameter alpha has to be between 0 (inclusive) and pi/2 (inclusive).");
 		}
-		this.alpha = alpha;
+		this.setAlpha(alpha);
 	}
 
 	/**
@@ -45,7 +45,6 @@ public abstract class AWeightedTrigometricDistance implements IDistanceMetric {
 	public double getAlpha() {
 		return this.alpha;
 	}
-
 
 	/**
 	 * Getter for the <code>a</code> parameter. @see #a

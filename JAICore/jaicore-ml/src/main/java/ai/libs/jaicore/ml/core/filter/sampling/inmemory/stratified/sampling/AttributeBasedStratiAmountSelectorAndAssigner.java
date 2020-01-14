@@ -191,7 +191,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmo
 			this.stratumIDs.put(tuple, stratumCounter++);
 		}
 
-		this.logger.debug("init(): leave");
+		this.logger.info("Initialized strati assigner with {} strati.", this.stratumIDs.size());
 		this.initialized = true;
 	}
 
@@ -229,10 +229,9 @@ public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmo
 			}
 			instanceAttributeValues.add(value);
 		}
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug("Attribute values are: {}", instanceAttributeValues);
-		}
-		return this.stratumIDs.get(instanceAttributeValues);
+		int stratum = this.stratumIDs.get(instanceAttributeValues);
+		this.logger.debug("Attribute values are: {}. Corresponding stratum is: {}", instanceAttributeValues, stratum);
+		return stratum;
 	}
 
 	private boolean toBeDiscretized(final int index) {

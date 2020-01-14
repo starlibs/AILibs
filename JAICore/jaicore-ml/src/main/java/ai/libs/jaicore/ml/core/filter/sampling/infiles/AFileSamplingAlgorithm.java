@@ -43,7 +43,7 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 	}
 
 	@Override
-	public File call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public File call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
 		Instant timeoutTime = null;
 		if (this.getTimeout().milliseconds() <= 0) {
 			LOG.debug("Invalid or no timeout set. There will be no timeout in this algorithm run");
@@ -91,7 +91,7 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 				this.cancel();
 				throw new AlgorithmException("Algorithm is running even though it has been timeouted");
 			} else {
-				this.next();
+				this.nextWithException();
 			}
 		}
 		try {

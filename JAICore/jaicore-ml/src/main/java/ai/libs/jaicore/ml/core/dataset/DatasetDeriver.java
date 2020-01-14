@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
@@ -40,8 +41,10 @@ public class DatasetDeriver<D extends IDataset<?>> {
 			return copy;
 		}
 
-		public void addInstance(final int inst) {
-			this.indicesToCopy.add(inst);
+		public void addInstance(final int inst, final int count) {
+			for (int i = 0; i < count; i++) {
+				this.indicesToCopy.add(inst);
+			}
 		}
 	}
 
@@ -55,14 +58,23 @@ public class DatasetDeriver<D extends IDataset<?>> {
 		this.caps = new GenericCapsula<>((IDataset<I>) dataset, instanceClass);
 	}
 
+	public void add(final int item, final int count) {
+		this.caps.addInstance(item, count);
+	}
+
 	public void add(final int item) {
-		this.caps.addInstance(item);
+		this.add(item, 1);
+	}
+
+	public void addIndices(final Collection<Integer> indices, final int count) {
+		Objects.requireNonNull(indices);
+		for (int i : indices) {
+			this.caps.addInstance(i, count);
+		}
 	}
 
 	public void addIndices(final Collection<Integer> indices) {
-		for (int i : indices) {
-			this.caps.addInstance(i);
-		}
+		this.addIndices(indices, 1);
 	}
 
 	public boolean contains(final IInstance inst) {

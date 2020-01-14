@@ -99,11 +99,9 @@ public class KmeansSampling<I extends ILabeledInstance & Clusterable, D extends 
 				KMeansPlusPlusClusterer<I> kMeansCluster = new KMeansPlusPlusClusterer<>(this.k, -1, this.distanceMeassure, r);
 				this.clusterResults = kMeansCluster.cluster(this.getInput()); // this is not interruptible!!
 			}
-
 			return this.activate();
 		case ACTIVE:
-			this.doAlgorithmStep();
-			return this.doInactiveStep();
+			return this.doAlgorithmStep();
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}

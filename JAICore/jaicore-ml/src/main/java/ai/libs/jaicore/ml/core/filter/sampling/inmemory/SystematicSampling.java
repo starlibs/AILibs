@@ -8,6 +8,8 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 import ai.libs.jaicore.ml.core.dataset.DatasetDeriver;
 import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
@@ -66,7 +68,7 @@ public class SystematicSampling<D extends ILabeledDataset<?>> extends ASamplingA
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
+	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
 		switch (this.getState()) {
 		case CREATED:
 			// Initialize variables and sort dataset.
@@ -87,6 +89,9 @@ public class SystematicSampling<D extends ILabeledDataset<?>> extends ASamplingA
 			// If the sample size is not reached yet, add the next datapoint from the
 			// systematic sampling method.
 			if (this.sampleBuilder.currentSizeOfTarget() < this.sampleSize) {
+				if (this.index % 100 == 0) {
+					this.checkAndConductTermination();
+				}
 				int e = (this.startIndex + (this.index++) * this.k) % this.sortedDataset.size();
 				this.sampleBuilder.add(e);
 				return new SampleElementAddedEvent(this);

@@ -48,7 +48,7 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 	}
 
 	@Override
-	public int[] insert(final String table, final Map<String, ? extends Object> values) throws SQLException  {
+	public int[] insert(final String table, final Map<String, ? extends Object> values) throws SQLException {
 		StringBuilder queryBuilder = new StringBuilder();
 		List<String> keys = new LinkedList<>(values.keySet());
 		queryBuilder.append("INSERT INTO " + table + "(");
@@ -70,7 +70,7 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 		return this.insert(queryBuilder.toString());
 	}
 
-	public int[] insert(final String query) throws SQLException  {
+	public int[] insert(final String query) throws SQLException {
 		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getInsertSuffix(), query);
 		if (res instanceof ArrayNode) {
 			ArrayNode array = (ArrayNode) res;
@@ -81,7 +81,7 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 	}
 
 	@Override
-	public int update(final String query) throws SQLException  {
+	public int update(final String query) throws SQLException {
 		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getUpdateSuffix(), query);
 		return res.asInt();
 	}
@@ -161,7 +161,11 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 
 	@Override
 	public List<IKVStore> getResultsOfQuery(final String query, final List<String> values) throws SQLException {
-		throw new UnsupportedOperationException();
+		if (values.isEmpty()) {
+			return this.select(query);
+		} else {
+			throw new UnsupportedOperationException("Cannot cope with prepared statements and values to set.");
+		}
 	}
 
 	@Override
@@ -178,6 +182,7 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 	public int update(final String sql, final List<? extends Object> values) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
+
 	@Override
 	public void executeQueriesAtomically(final List<PreparedStatement> queries) throws SQLException {
 		throw new UnsupportedOperationException();

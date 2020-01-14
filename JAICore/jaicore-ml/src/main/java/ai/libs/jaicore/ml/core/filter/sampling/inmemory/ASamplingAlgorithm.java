@@ -1,8 +1,5 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
@@ -11,8 +8,6 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
@@ -28,8 +23,6 @@ import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
  */
 public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorithm<D, D> implements ISamplingAlgorithm<D> {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ASamplingAlgorithm.class);
-
 	protected int sampleSize = -1;
 	protected D sample = null;
 
@@ -43,22 +36,13 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 		}
 
 		private void computeSample() throws AlgorithmException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
-			Instant timeoutTime = null;
-			if (ASamplingAlgorithm.this.getTimeout().milliseconds() <= 0) {
-				LOG.debug("Invalid or no timeout set. There will be no timeout in this algorithm run");
-				timeoutTime = Instant.MAX;
-			} else {
-				timeoutTime = Instant.now().plus(ASamplingAlgorithm.this.getTimeout().milliseconds(), ChronoUnit.MILLIS);
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Set timeout to {}", timeoutTime);
-				}
-			}
+
 			// Check missing or invalid configuration.
 			if (ASamplingAlgorithm.this.sampleSize == -1) {
 				throw new AlgorithmException("No valid sample size specified");
 			}
 			if (ASamplingAlgorithm.this.sampleSize == 0) {
-				LOG.warn("Sample size is 0, so an empty data set is returned!");
+				ASamplingAlgorithm.this.logger.warn("Sample size is 0, so an empty data set is returned!");
 				try {
 					this.dataForSample = (IDataset<I>) ASamplingAlgorithm.this.getInput().createEmptyCopy();
 					return;
@@ -73,26 +57,20 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 			if (dataset.size() < ASamplingAlgorithm.this.sampleSize) {
 				throw new AlgorithmException("Specified sample size is bigger than the dataset.");
 			} else if (dataset.size() == ASamplingAlgorithm.this.sampleSize) {
-				LOG.warn("Sample size and data set size are equal. Returning the original data set");
-				// The dataset size is exactly the specified sample size, so just return the
-				// whole dataset.
+				ASamplingAlgorithm.this.logger.warn("Sample size and data set size are equal. Returning the original data set");
+				// The dataset size is exactly the specified sample size, so just return the whole dataset.
 				this.dataForSample = (IDataset<I>) dataset;
 			} else {
 				// Working configuration, so create the actual sample.
 				ASamplingAlgorithm.this.setState(EAlgorithmState.CREATED);
+				ASamplingAlgorithm.this.setDeadline();
+				ASamplingAlgorithm.this.logger.info("Now running actual sample routine. Timeout is {}. Remaining time: {}", ASamplingAlgorithm.this.getTimeout(), ASamplingAlgorithm.this.getRemainingTimeToDeadline());
+				int i = 0;
 				while (ASamplingAlgorithm.this.hasNext()) {
-					try {
+					if (i++ % 100 == 0) {
 						ASamplingAlgorithm.this.checkAndConductTermination();
-					} catch (AlgorithmTimeoutedException e) {
-						throw new AlgorithmException(e.getMessage());
 					}
-					if (Instant.now().isAfter(timeoutTime)) {
-						LOG.warn("Algorithm is running even though it has been timeouted. Cancelling..");
-						ASamplingAlgorithm.this.cancel();
-						throw new AlgorithmException("Algorithm is running even though it has been timeouted");
-					} else {
-						ASamplingAlgorithm.this.nextWithException();
-					}
+					ASamplingAlgorithm.this.nextWithException();
 				}
 				this.dataForSample = (IDataset<I>) ASamplingAlgorithm.this.sample;
 			}
@@ -138,7 +116,7 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 
 	protected IAlgorithmEvent doInactiveStep() throws AlgorithmException {
 		if (this.sample.size() < this.sampleSize) {
-			throw new AlgorithmException("Expected sample size was not reached before termination");
+			throw new AlgorithmException("Expected sample size was not reached before termination. Current sample size is " + this.sample.size());
 		} else {
 			return this.terminate();
 		}
