@@ -13,9 +13,9 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.ml.core.dataset.DatasetDeriver;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 
-public class SamplingAlgorithmTestProblemSet extends AAlgorithmTestProblemSet<ILabeledDataset<ILabeledInstance>> {
+public class MemoryBasedSamplingAlgorithmTestProblemSet extends AAlgorithmTestProblemSet<ILabeledDataset<ILabeledInstance>> {
 
-	public SamplingAlgorithmTestProblemSet() {
+	public MemoryBasedSamplingAlgorithmTestProblemSet() {
 		super("Sampling");
 	}
 

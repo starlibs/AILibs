@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
@@ -48,7 +49,7 @@ import ai.libs.jaicore.interrupt.Interrupter;
 @RunWith(Parameterized.class)
 public abstract class GeneralAlgorithmTester extends Tester {
 
-	protected static final String TESTEDALGORITHM_LOGGERNAME = "testedalgorithm";
+	public static final String TESTEDALGORITHM_LOGGERNAME = "testedalgorithm";
 	private static final int TIMEOUT_DELAY = 12000;
 	private static final int TOTAL_EXPERIMENT_TIMEOUT = 20000;
 	private static final int INTERRUPTION_DELAY = 5000;
@@ -242,9 +243,11 @@ public abstract class GeneralAlgorithmTester extends Tester {
 			}
 		}
 		int runtime = (int) (System.currentTimeMillis() - start.get());
-		int reactionTime = interruptEvent.get() > 0 ? (int) (System.currentTimeMillis() - interruptEvent.get()) : Integer.MAX_VALUE;
+		int reactionTime = interruptEvent.get() > 0 ? (int) (System.currentTimeMillis() - interruptEvent.get()) : 0;
 		this.logger.info("Executing thread has returned control after {}ms. Reaction time was {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime, reactionTime);
-		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY - EARLY_TERMINATION_TOLERANCE);
+		if (runtime < INTERRUPTION_DELAY - EARLY_TERMINATION_TOLERANCE) {
+			this.logger.warn("Runtime was {}ms and hence less than {}ms, actually should be at least 10 seconds.", runtime, INTERRUPTION_DELAY - EARLY_TERMINATION_TOLERANCE);
+		}
 		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after the interrupt.", reactionTime <= INTERRUPTION_CLEANUP_TOLERANCE);
 		if (!finishedEarly) {
 			assertTrue("The algorithm has not emitted an interrupted exception.", controlledInterruptedExceptionSeen);
@@ -348,7 +351,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 			timer.cancel();
 		}
 		int runtime = (int) (System.currentTimeMillis() - start.get());
-		int reactionTime = cancelEvent.get() > 0 ? (int) (System.currentTimeMillis() - cancelEvent.get()) : Integer.MAX_VALUE;
+		int reactionTime = cancelEvent.get() > 0 ? (int) (System.currentTimeMillis() - cancelEvent.get()) : 0;
 		assertFalse("Thread must not be interrupted after cancel!", Thread.currentThread().isInterrupted());
 		assertTrue("The cancel command blocked the thread for " + timeRequiredToProcessCancel + "ms, but only " + MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER + " are allowed.",
 				timeRequiredToProcessCancel.get() <= MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER);
@@ -358,7 +361,9 @@ public abstract class GeneralAlgorithmTester extends Tester {
 					.asList(threadCountObserverThread.getThreadsAtPointOfViolation() != null ? threadCountObserverThread.getThreadsAtPointOfViolation() : new Thread[0]).stream().map(Thread::getName).collect(Collectors.joining("\n\t- ")),
 					!threadCountObserverThread.isThreadConstraintViolated());
 		}
-		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY - EARLY_TERMINATION_TOLERANCE);
+		if (runtime < INTERRUPTION_DELAY - EARLY_TERMINATION_TOLERANCE) {
+			this.logger.warn("Runtime was {}ms and hence less than {}ms, actually should be at least 10 seconds.", runtime, INTERRUPTION_DELAY - EARLY_TERMINATION_TOLERANCE);
+		}
 		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after it has been canceled.", reactionTime <= INTERRUPTION_CLEANUP_TOLERANCE);
 		if (!finishedEarly) {
 			assertTrue("The algorithm has not emitted an AlgorithmExecutionCanceledException.", cancellationExceptionSeen);
@@ -454,6 +459,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 	}
 
 	protected void checkPreconditionForTest() throws InterruptedException {
+		Objects.requireNonNull(this.problemSet);
 		assert !Thread.currentThread().isInterrupted() : "Execution thread must not be interrupted at start of test!";
 		boolean allTasksResolved = GlobalTimer.getInstance().getNumberOfActiveTasks() == 0;
 		if (!allTasksResolved) {

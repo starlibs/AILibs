@@ -29,6 +29,11 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 		}
 	}
 
+	public static File getArffFileOfOpenMLID(final int id) throws Exception {
+		DataSetDescription dsd = connector.dataGet(id);
+		return connector.datasetGet(dsd);
+	}
+
 	@Override
 	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IDatasetDescriptor descriptor) throws DatasetDeserializationFailedException, InterruptedException {
 		if (!(descriptor instanceof OpenMLDatasetDescriptor)) {
