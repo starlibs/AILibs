@@ -54,6 +54,8 @@ public class TransformDistanceTest {
 		TransformDistance td = new TransformDistance(alpha, transform, euclideanDistance);
 		double distance = td.distance(timeSeries1, timeSeries2);
 
+		System.out.println(distance);
+		System.out.println(expectation);
 		assertEquals(expectation, distance, 1.0E-5);
 	}
 

@@ -1,5 +1,7 @@
 package ai.libs.jaicore.basic.metric;
 
+import java.util.Arrays;
+
 import org.api4.java.common.metric.IDistanceMetric;
 
 import ai.libs.jaicore.basic.transform.vector.CosineTransform;
@@ -130,6 +132,9 @@ public class TransformDistance extends AWeightedTrigometricDistance {
 	public double distance(final double[] a, final double[] b) {
 		double[] transformA = this.transform.transform(a);
 		double[] transformB = this.transform.transform(b);
+		System.out.println(Arrays.toString(transformA) + " " + Arrays.toString(transformB));
+		System.out.println(this.getA());
+		System.out.println(this.getB());
 		return this.getA() * this.timeSeriesDistance.distance(a, b) + this.getB() * this.baseTransformDistance.distance(transformA, transformB);
 	}
 }

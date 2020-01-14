@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter.transform;
+package ai.libs.jaicore.basic.transform.vector;
 
 import static org.junit.Assert.assertArrayEquals;
 
