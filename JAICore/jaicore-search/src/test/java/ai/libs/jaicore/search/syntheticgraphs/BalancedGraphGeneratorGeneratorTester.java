@@ -3,6 +3,7 @@ package ai.libs.jaicore.search.syntheticgraphs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -63,7 +64,7 @@ public class BalancedGraphGeneratorGeneratorTester {
 		DepthFirstSearch<ITransparentTreeNode, Integer> dfs = new DepthFirstSearch<>(input);
 
 		int solutions = 0;
-		Map<Integer, Set<Long>> idsPerLayer = new HashMap<>();
+		Map<Integer, Set<BigInteger>> idsPerLayer = new HashMap<>();
 		while (dfs.hasNext()) {
 			try {
 				SearchGraphPath<ITransparentTreeNode, Integer> path = dfs.nextSolutionCandidate();
@@ -79,9 +80,9 @@ public class BalancedGraphGeneratorGeneratorTester {
 		/* check that all ids per layer have been enumerated */
 		for (int d = 0; d < this.depth; d++) {
 			long expectedNodesInThisLayer = (long)Math.pow(this.branchingFactor, d);
-			Set<Long> idsInLayer = idsPerLayer.get(d);
+			Set<BigInteger> idsInLayer = idsPerLayer.get(d);
 			for (long i = 0; i < expectedNodesInThisLayer; i++) {
-				assertTrue(idsInLayer.contains(i));
+				assertTrue(idsInLayer.contains(BigInteger.valueOf(i)));
 			}
 		}
 		assertEquals((int) Math.pow(this.branchingFactor, this.depth), solutions);

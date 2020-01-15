@@ -4,16 +4,19 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleSuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ILazySuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 
+import ai.libs.jaicore.basic.MappingIterator;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 
 class BalancedGraphGeneratorGenerator {
@@ -166,19 +169,19 @@ class BalancedGraphGeneratorGenerator {
 		return new IGraphGenerator<ITransparentTreeNode, Integer>() {
 
 			@Override
-			public SingleRootGenerator<ITransparentTreeNode> getRootGenerator() {
+			public ISingleRootGenerator<ITransparentTreeNode> getRootGenerator() {
 				return BalancedTreeNode::new;
 			}
 
 			@Override
-			public SingleSuccessorGenerator<ITransparentTreeNode, Integer> getSuccessorGenerator() {
-				return new SingleSuccessorGenerator<ITransparentTreeNode, Integer>() {
+			public ILazySuccessorGenerator<ITransparentTreeNode, Integer> getSuccessorGenerator() {
+				return new ILazySuccessorGenerator<ITransparentTreeNode, Integer>() {
 
 					private Map<ITransparentTreeNode, Set<Integer>> successors = new HashMap<>();
 
 					@Override
-					public List<NodeExpansionDescription<ITransparentTreeNode, Integer>> generateSuccessors(final ITransparentTreeNode node) throws InterruptedException {
-						List<NodeExpansionDescription<ITransparentTreeNode, Integer>> successorsOfThisNode = new ArrayList<>();
+					public List<INewNodeDescription<ITransparentTreeNode, Integer>> generateSuccessors(final ITransparentTreeNode node) {
+						List<INewNodeDescription<ITransparentTreeNode, Integer>> successorsOfThisNode = new ArrayList<>();
 						int d = node.getDepth() + 1;
 						if (d > BalancedGraphGeneratorGenerator.this.maxDepth) {
 							return successorsOfThisNode;
@@ -189,8 +192,7 @@ class BalancedGraphGeneratorGenerator {
 						return successorsOfThisNode;
 					}
 
-					@Override
-					public NodeExpansionDescription<ITransparentTreeNode, Integer> generateSuccessor(final ITransparentTreeNode node, final int i) throws InterruptedException {
+					public NodeExpansionDescription<ITransparentTreeNode, Integer> generateSuccessor(final ITransparentTreeNode node, final int i) {
 						int j = i % BalancedGraphGeneratorGenerator.this.branchingFactor;
 						int d = node.getDepth() + 1;
 						BigInteger offsetForIdOnLayer = BigInteger.valueOf(BalancedGraphGeneratorGenerator.this.branchingFactor).multiply(node.getNumberOfLeftRelativesInSameGeneration());
@@ -198,12 +200,12 @@ class BalancedGraphGeneratorGenerator {
 						successor.depth = d;
 						successor.idOfNodeOnLayer = offsetForIdOnLayer.add(BigInteger.valueOf(j));
 						this.successors.computeIfAbsent(node, n -> new HashSet<>()).add(j);
-						return new NodeExpansionDescription<>(successor, j, NodeType.OR);
+						return new NodeExpansionDescription<>(successor, j);
 					}
 
 					@Override
-					public boolean allSuccessorsComputed(final ITransparentTreeNode node) {
-						return this.successors.get(node) != null && this.successors.get(node).size() == BalancedGraphGeneratorGenerator.this.branchingFactor;
+					public Iterator<INewNodeDescription<ITransparentTreeNode, Integer>> getIterativeGenerator(final ITransparentTreeNode node) {
+						return new MappingIterator<>(IntStream.range(0, BalancedGraphGeneratorGenerator.this.branchingFactor).iterator(), i -> this.generateSuccessor(node, i));
 					}
 				};
 			}

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
@@ -56,7 +56,7 @@ public class ChaoticMeansTreasureModel extends NoisyMeanTreasureModel {
 		return this.indicesOfIslands.contains(island);
 	}
 
-	public boolean isPathToTreasureIsland(final IPath<ITransparentTreeNode, Integer> path) {
+	public boolean isPathToTreasureIsland(final ILabeledPath<ITransparentTreeNode, Integer> path) {
 		return this.isTreasureIsland(this.getIslandModel().getIsland(path));
 	}
 

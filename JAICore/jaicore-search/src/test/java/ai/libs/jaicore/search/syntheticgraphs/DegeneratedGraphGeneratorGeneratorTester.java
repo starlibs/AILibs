@@ -3,6 +3,7 @@ package ai.libs.jaicore.search.syntheticgraphs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -85,7 +86,7 @@ public class DegeneratedGraphGeneratorGeneratorTester {
 		/* compute number of totally expected solutions */
 		int totalSolutionsExpected = this.getNumOfSolutionsInDepth(this.depth);
 		int solutions = 0;
-		Map<Integer, Set<Long>> idsPerLayer = new HashMap<>();
+		Map<Integer, Set<BigInteger>> idsPerLayer = new HashMap<>();
 		while (dfs.hasNext()) {
 			try {
 				SearchGraphPath<ITransparentTreeNode, Integer> path = dfs.nextSolutionCandidate();
@@ -102,9 +103,9 @@ public class DegeneratedGraphGeneratorGeneratorTester {
 		/* check that all ids per layer have been enumerated */
 		for (int d = 0; d < this.depth; d++) {
 			long expectedNodesInThisLayer = this.getNumOfNodesInDepth(d);
-			Set<Long> idsInLayer = idsPerLayer.get(d);
+			Set<BigInteger> idsInLayer = idsPerLayer.get(d);
 			for (long i = 0; i < expectedNodesInThisLayer; i++) {
-				assertTrue("Id " + i + " is missing in layer of depth " + d + ". Total expected number of nodes: " + expectedNodesInThisLayer + ". Ids: " + idsInLayer, idsInLayer.contains(i));
+				assertTrue("Id " + i + " is missing in layer of depth " + d + ". Total expected number of nodes: " + expectedNodesInThisLayer + ". Ids: " + idsInLayer, idsInLayer.contains(BigInteger.valueOf(i)));
 			}
 		}
 

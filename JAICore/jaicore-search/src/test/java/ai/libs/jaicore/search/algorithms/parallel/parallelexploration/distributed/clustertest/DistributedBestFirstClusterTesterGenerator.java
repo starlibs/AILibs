@@ -3,42 +3,39 @@ package ai.libs.jaicore.search.algorithms.parallel.parallelexploration.distribut
 import java.util.ArrayList;
 import java.util.List;
 
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.RootGenerator;
-import org.api4.java.datastructure.graph.implicit.SerializableGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.SerializableRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.IRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
-@SuppressWarnings("serial")
-public class DistributedBestFirstClusterTesterGenerator implements SerializableGraphGenerator<TestNode, String> {
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
-	private SerializableRootGenerator<TestNode> rootGenerator;
-	private int target;
+public class DistributedBestFirstClusterTesterGenerator implements IGraphGenerator<TestNode, String> {
 
-	public DistributedBestFirstClusterTesterGenerator(final int size, final int target) {
+	private ISingleRootGenerator<TestNode> rootGenerator;
+
+	public DistributedBestFirstClusterTesterGenerator(final int size) {
 		super();
-		this.target = target;
 		this.rootGenerator =  () -> new TestNode(0, size);
-		System.out.println("Trying to find " + target + " within a space of " + size + " items.");
 	}
 
 	@Override
-	public SuccessorGenerator<TestNode, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<TestNode, String> getSuccessorGenerator() {
 		return n -> {
-			List<NodeExpansionDescription<TestNode, String>> l = new ArrayList<>();
+			List<INewNodeDescription<TestNode, String>> l = new ArrayList<>();
 			TestNode parent = n;
 			if (parent.min < parent.max) {
 				int split = (int) Math.floor((parent.min + parent.max) / 2f);
-				l.add(new NodeExpansionDescription<>(new TestNode(parent.min, split), "edge label", NodeType.OR));
-				l.add(new NodeExpansionDescription<>(new TestNode(split + 1, parent.max), "edge label", NodeType.OR));
+				l.add(new NodeExpansionDescription<>(new TestNode(parent.min, split), "edge label"));
+				l.add(new NodeExpansionDescription<>(new TestNode(split + 1, parent.max), "edge label"));
 			}
 			return l;
 		};
 	}
 
 	@Override
-	public RootGenerator<TestNode> getRootGenerator() {
+	public IRootGenerator<TestNode> getRootGenerator() {
 		return this.rootGenerator;
 	}
 }

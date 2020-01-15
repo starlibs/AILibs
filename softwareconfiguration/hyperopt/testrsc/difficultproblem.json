@@ -1,0 +1,85 @@
+{
+  "repository" : "DifficultProblem",
+  "components" : [ {
+    "name" : "A",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "IFace" ],
+    "parameter" : [ {
+      "name" : "a1",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "a2",
+      "type" : "cat",
+      "default" : "v2",
+      "values" : [ "v1", "v2", "v3" ]
+    }, {
+      "name" : "a3",
+      "type" : "double",
+      "default" : 1.0E-7,
+      "min" : 1.0E-12,
+      "max" : 10.0,
+      "refineSplits" : 8,
+      "minInterval" : 1
+    }, {
+      "name" : "a4",
+      "type" : "double",
+      "default" : 1.0E-7,
+      "min" : 1.0E-12,
+      "max" : 10.0,
+      "refineSplits" : 8,
+      "minInterval" : 1
+    }, {
+      "name" : "a5",
+      "type" : "double",
+      "default" : 1.0E-7,
+      "min" : 1.0E-12,
+      "max" : 10.0,
+      "refineSplits" : 8,
+      "minInterval" : 1
+    } ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "B",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "IFace" ],
+    "parameter" : [ {
+      "name" : "c",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "d",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "a3",
+      "type" : "double",
+      "default" : 1.0E-7,
+      "min" : 1.0E-12,
+      "max" : 10.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "a4",
+      "type" : "double",
+      "default" : 1.0E-7,
+      "min" : 1.0E-12,
+      "max" : 10.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "a5",
+      "type" : "double",
+      "default" : 1.0E-7,
+      "min" : 1.0E-12,
+      "max" : 10.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    } ],
+    "dependencies" : [ {
+      "pre" : "c in {true}",
+      "post" : "d in {false, true}"
+    } ]
+  }
+  ]
+}

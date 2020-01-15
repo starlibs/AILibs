@@ -9,7 +9,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.math.linearalgebra.AffineFunction;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
@@ -67,7 +67,7 @@ public class RelativeFunnelTreasureModel extends AIslandTreasureModel {
 	}
 
 	@Override
-	public Double evaluate(final IPath<ITransparentTreeNode, Integer> path) throws PathEvaluationException, InterruptedException {
+	public Double evaluate(final ILabeledPath<ITransparentTreeNode, Integer> path) throws PathEvaluationException, InterruptedException {
 		if (this.indicesOfIslands.isEmpty()) {
 			this.getIslandModel().setRootNode(path.getRoot());
 			this.distributeTreasures();

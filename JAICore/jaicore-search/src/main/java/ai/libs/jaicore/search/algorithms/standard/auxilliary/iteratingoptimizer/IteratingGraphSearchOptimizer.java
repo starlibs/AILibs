@@ -1,6 +1,7 @@
 package ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer;
 
 import org.api4.java.ai.graphsearch.problem.IPathSearch;
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -15,7 +16,6 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSo
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
 /**
  * This is a wrapper class to turn non-optimization algorithms into (uninformed working) optimizers.
@@ -30,9 +30,9 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
  */
 public class IteratingGraphSearchOptimizer<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> {
 
-	private final IPathSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm;
+	private final IPathSearch<IPathSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm;
 
-	public IteratingGraphSearchOptimizer(final I problem, final IPathSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm) {
+	public IteratingGraphSearchOptimizer(final I problem, final IPathSearch<IPathSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm) {
 		super(problem);
 		this.baseAlgorithm = baseAlgorithm;
 		baseAlgorithm.registerListener(new Object() {
@@ -69,7 +69,7 @@ public class IteratingGraphSearchOptimizer<I extends IPathSearchWithPathEvaluati
 		}
 	}
 
-	public IPathSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> getBaseAlgorithm() {
+	public IPathSearch<IPathSearchInput<N, A>, SearchGraphPath<N, A>, N, A> getBaseAlgorithm() {
 		return this.baseAlgorithm;
 	}
 

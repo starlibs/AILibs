@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.Random;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
@@ -29,7 +29,7 @@ public abstract class NoisyMeanTreasureModel extends AIslandTreasureModel implem
 	public abstract double getMeanOfIsland(BigInteger island);
 
 	@Override
-	public Double evaluate(final IPath<ITransparentTreeNode, Integer> path) throws PathEvaluationException, InterruptedException {
+	public Double evaluate(final ILabeledPath<ITransparentTreeNode, Integer> path) throws PathEvaluationException, InterruptedException {
 		this.getIslandModel().setRootNode(path.getRoot());
 		BigInteger island = this.getIslandModel().getIsland(path);
 		double mean = this.getMeanOfIsland(island);

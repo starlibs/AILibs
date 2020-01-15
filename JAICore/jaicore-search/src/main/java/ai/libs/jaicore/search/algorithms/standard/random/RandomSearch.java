@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -35,7 +36,6 @@ import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
 /**
  * This search randomly draws paths from the root. At every node, each successor is chosen with the same probability except if a priority predicate is defined. A priority predicate says whether or not a node lies on a path that has
@@ -46,7 +46,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
  * @param <N>
  * @param <A>
  */
-public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> implements ILoggingCustomizable {
+public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput<N, A>, SearchGraphPath<N, A>, N, A> implements ILoggingCustomizable {
 
 	/* logging */
 	private String loggerName;
@@ -64,19 +64,19 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 	private final Random random;
 	private final Map<N, Iterator<INewNodeDescription<N, A>>> successorGenerators = new HashMap<>();
 
-	public RandomSearch(final GraphSearchInput<N, A> problem) {
+	public RandomSearch(final IPathSearchInput<N, A> problem) {
 		this(problem, 0);
 	}
 
-	public RandomSearch(final GraphSearchInput<N, A> problem, final int seed) {
+	public RandomSearch(final IPathSearchInput<N, A> problem, final int seed) {
 		this(problem, new Random(seed));
 	}
 
-	public RandomSearch(final GraphSearchInput<N, A> problem, final Random random) {
+	public RandomSearch(final IPathSearchInput<N, A> problem, final Random random) {
 		this(problem, null, random);
 	}
 
-	public RandomSearch(final GraphSearchInput<N, A> problem, final Predicate<N> priorityPredicate, final Random random) {
+	public RandomSearch(final IPathSearchInput<N, A> problem, final Predicate<N> priorityPredicate, final Random random) {
 		super(problem);
 		N rootNode = ((ISingleRootGenerator<N>) problem.getGraphGenerator().getRootGenerator()).getRoot();
 		this.gen = problem.getGraphGenerator().getSuccessorGenerator();

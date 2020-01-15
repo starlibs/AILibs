@@ -1,6 +1,6 @@
 package ai.libs.jaicore.search.exampleproblemtesters;
 
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.basic.algorithm.ReductionBasedAlgorithmTestProblemSet;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
@@ -11,7 +11,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 import it.unimi.dsi.fastutil.shorts.ShortList;
 
 public class EnhancedTTSPAsGraphSearchSet
-extends ReductionBasedAlgorithmTestProblemSet<GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPState, String, Double>, IPath<EnhancedTTSPState, String>, EnhancedTTSP, ShortList> {
+extends ReductionBasedAlgorithmTestProblemSet<GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPState, String, Double>, ILabeledPath<EnhancedTTSPState, String>, EnhancedTTSP, ShortList> {
 
 	public EnhancedTTSPAsGraphSearchSet() {
 		super("Enhanced TTSP as graph search", new EnhancedTTSPProblemSet(), new EnhancedTTSPToSimpleGraphSearchReducer());

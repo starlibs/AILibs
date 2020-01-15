@@ -1,0 +1,18 @@
+{
+	"repository": "ML-Plan Simple Config",
+	"components": [
+		{
+			"name": "ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"AbstractClassifier",
+				"BaseClassifier"
+			],
+			"parameter": [
+			],
+			"dependencies": [
+			]
+		}
+	]
+}

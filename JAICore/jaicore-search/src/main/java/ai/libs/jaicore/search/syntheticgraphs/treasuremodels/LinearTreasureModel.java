@@ -3,7 +3,7 @@ package ai.libs.jaicore.search.syntheticgraphs.treasuremodels;
 import java.math.BigInteger;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 
@@ -27,7 +27,7 @@ public class LinearTreasureModel implements ITreasureModel {
 	}
 
 	@Override
-	public Double evaluate(final IPath<ITransparentTreeNode, Integer> path) throws PathEvaluationException, InterruptedException {
+	public Double evaluate(final ILabeledPath<ITransparentTreeNode, Integer> path) throws PathEvaluationException, InterruptedException {
 		BigInteger numLeafsBefore = path.getHead().getNumberOfLeafsPriorToNodeViaDFS();
 		return this.asc ? numLeafsBefore.doubleValue() : path.getRoot().getNumberOfLeafsUnderNode().subtract(numLeafsBefore).doubleValue();
 	}

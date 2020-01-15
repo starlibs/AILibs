@@ -1,0 +1,8 @@
+meka.classifiers.multilabel.CCq
+meka.classifiers.multilabel.MLCBMaD
+meka.classifiers.multilabel.meta.SubsetMapper
+meka.classifiers.multilabel.BRq
+meka.classifiers.multilabel.meta.EnsembleML
+meka.classifiers.multilabel.meta.BaggingML
+meka.classifiers.multilabel.meta.BaggingMLdup
+meka.classifiers.multilabel.meta.RandomSubspaceML

@@ -1,0 +1,275 @@
+{
+    "repository": "Auto-WEKA",
+    "components": [
+        {
+            "name": "weka.classifiers.bayes.NaiveBayes",
+            "requiredInterface": [],
+            "providedInterface": [
+                "AbstractClassifier",
+                "WekaBaseClassifier",
+                "BaseClassifier"
+            ],
+            "parameter": [
+                {
+                    "name": "K",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                {
+                    "name": "D",
+                    "type": "boolean",
+                    "default": "true"
+                }
+            ],
+            "dependencies": [
+                {
+                    "pre": "D in {true}",
+                    "post": "K in {false}"
+                }
+            ]
+        },
+        {
+            "name": "weka.classifiers.functions.supportVector.NormalizedPolyKernel",
+            "requiredInterface": [],
+            "providedInterface": [
+                "K"
+            ],
+            "parameter": []
+        },
+        {
+            "name": "weka.classifiers.functions.supportVector.PolyKernel",
+            "requiredInterface": [],
+            "providedInterface": [
+                "K"
+            ],
+            "parameter": []
+        },
+        {
+            "name": "weka.classifiers.functions.supportVector.RBFKernel",
+            "requiredInterface": [],
+            "providedInterface": [
+                "K"
+            ],
+            "parameter": []
+        },
+        {
+            "name": "weka.classifiers.functions.SMO",
+            "requiredInterface": [
+                {
+                    "id": "K",
+                    "name": "K"
+                }
+            ],
+            "providedInterface": [
+                "AbstractClassifier",
+                "WekaBaseClassifier",
+                "BaseClassifier"
+            ],
+            "parameter": [
+                {
+                    "name": "C",
+                    "type": "double",
+                    "default": 1,
+                    "min": 0.5,
+                    "max": 1.5,
+                    "refineSplits": 8,
+                    "minInterval": 10
+                },
+                {
+                    "name": "N",
+                    "type": "cat",
+                    "default": "0",
+                    "values": [
+                        "0",
+                        "1",
+                        "2"
+                    ]
+                },
+                {
+                    "name": "M",
+                    "type": "boolean",
+                    "default": "true"
+                }
+            ],
+            "dependencies": []
+        },
+        {
+            "name": "weka.classifiers.functions.supportVector.Puk",
+            "requiredInterface": [],
+            "providedInterface": [
+                "K"
+            ],
+            "parameter": []
+        },
+        {
+            "name": "weka.classifiers.lazy.IBk",
+            "requiredInterface": [],
+            "providedInterface": [
+                "AbstractClassifier",
+                "WekaBaseClassifier",
+                "BaseClassifier"
+            ],
+            "parameter": [
+                {
+                    "name": "E",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                {
+                    "name": "K",
+                    "type": "int",
+                    "default": 1,
+                    "min": 1,
+                    "max": 64,
+                    "refineSplits": 8,
+                    "minInterval": 10
+                },
+                {
+                    "name": "X",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                {
+                    "name": "F",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                {
+                    "name": "I",
+                    "type": "boolean",
+                    "default": "true"
+                }
+            ],
+            "dependencies": [
+                {
+                    "pre": "I in {true}",
+                    "post": "F in {false, true}"
+                }
+            ]
+        },
+        {
+            "name": "weka.classifiers.trees.J48",
+            "requiredInterface": [],
+            "providedInterface": [
+                "AbstractClassifier",
+                "WekaBaseClassifier",
+                "BaseClassifier",
+                "Test"
+            ],
+            "parameter": [
+                {
+                    "name": "O",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                {
+                    "name": "U",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                {
+                    "name": "B",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                {
+                    "name": "J",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                {
+                    "name": "A",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                {
+                    "name": "M",
+                    "type": "int",
+                    "default": 2,
+                    "min": 1,
+                    "max": 64,
+                    "refineSplits": 8,
+                    "minInterval": 10
+                }
+            ],
+            "dependencies": []
+        },
+        {
+            "name": "weka.classifiers.trees.RandomForest",
+            "requiredInterface": [],
+            "providedInterface": [
+                "AbstractClassifier",
+                "WekaBaseClassifier",
+                "BaseClassifier"
+            ],
+            "parameter": [
+                {
+                    "name": "I",
+                    "type": "int",
+                    "default": 10,
+                    "min": 2,
+                    "max": 256,
+                    "refineSplits": 8,
+                    "minInterval": 10
+                },
+                {
+                    "name": "featuresActivator",
+                    "type": "cat",
+                    "default": "0",
+                    "values": [
+                        "0",
+                        "1"
+                    ]
+                },
+                {
+                    "name": "K",
+                    "type": "int",
+                    "default": "0",
+                    "min": 0,
+                    "max": 0,
+                    "refineSplits": 8,
+                    "minInterval": 10
+                },
+                {
+                    "name": "depthActivator",
+                    "type": "cat",
+                    "default": "0",
+                    "values": [
+                        "0",
+                        "1"
+                    ]
+                },
+                {
+                    "name": "depth",
+                    "type": "int",
+                    "default": "0",
+                    "values": [
+                        "0"
+                    ],
+                    "min": 0,
+                    "max": 0,
+                    "refineSplits": 8,
+                    "minInterval": 10
+                }
+            ],
+            "dependencies": [
+                {
+                    "pre": "featuresActivator in {0}",
+                    "post": "K in {0}"
+                },
+                {
+                    "pre": "featuresActivator in {1}",
+                    "post": "K in [1.0,32.0]"
+                },
+                {
+                    "pre": "depthActivator in {0}",
+                    "post": "depth in {0}"
+                },
+                {
+                    "pre": "depthActivator in {1}",
+                    "post": "depth in [1.0,20.0]"
+                }
+            ]
+        }
+    ]
+}

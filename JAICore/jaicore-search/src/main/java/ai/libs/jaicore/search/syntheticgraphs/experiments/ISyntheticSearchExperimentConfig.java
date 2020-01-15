@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.aeonbits.owner.Config.Sources;
 
-import ai.libs.jaicore.basic.IDatabaseConfig;
 import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
+import ai.libs.jaicore.db.IDatabaseConfig;
 import ai.libs.jaicore.experiments.IExperimentSetConfig;
 import ai.libs.jaicore.experiments.configurations.IAlgorithmMaxIterConfig;
 import ai.libs.jaicore.experiments.configurations.IAlgorithmNameConfig;

@@ -4,17 +4,20 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleSuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ILazySuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 
+import ai.libs.jaicore.basic.MappingIterator;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 import ai.libs.jaicore.search.syntheticgraphs.ISyntheticGraphGeneratorBuilder;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 
@@ -237,20 +240,20 @@ public class DegeneratedGraphGeneratorGenerator implements ISyntheticGraphGenera
 		return new IGraphGenerator<ITransparentTreeNode, Integer>() {
 
 			@Override
-			public SingleRootGenerator<ITransparentTreeNode> getRootGenerator() {
+			public ISingleRootGenerator<ITransparentTreeNode> getRootGenerator() {
 				return () -> new TreeNode(null, 0, BigInteger.ZERO, 0, BigInteger.ZERO, true, 0, BigInteger.ZERO);
 			}
 
 			@Override
-			public SingleSuccessorGenerator<ITransparentTreeNode, Integer> getSuccessorGenerator() {
-				return new SingleSuccessorGenerator<ITransparentTreeNode, Integer>() {
+			public ILazySuccessorGenerator<ITransparentTreeNode, Integer> getSuccessorGenerator() {
+				return new ILazySuccessorGenerator<ITransparentTreeNode, Integer>() {
 
 					private Map<ITransparentTreeNode, Set<Integer>> successors = new HashMap<>();
 
 					@Override
-					public List<NodeExpansionDescription<ITransparentTreeNode, Integer>> generateSuccessors(final ITransparentTreeNode node) throws InterruptedException {
+					public List<INewNodeDescription<ITransparentTreeNode, Integer>> generateSuccessors(final ITransparentTreeNode node) throws InterruptedException {
 						TreeNode tNode = (TreeNode) node;
-						List<NodeExpansionDescription<ITransparentTreeNode, Integer>> successorsOfThisNode = new ArrayList<>();
+						List<INewNodeDescription<ITransparentTreeNode, Integer>> successorsOfThisNode = new ArrayList<>();
 						if (!tNode.hasChildren) {
 							return successorsOfThisNode;
 						}
@@ -258,19 +261,19 @@ public class DegeneratedGraphGeneratorGenerator implements ISyntheticGraphGenera
 						if (d > DegeneratedGraphGeneratorGenerator.this.maxDepth) {
 							return successorsOfThisNode;
 						}
-						for (int i = 0; i < DegeneratedGraphGeneratorGenerator.this.branchingFactor; i++) {
-							successorsOfThisNode.add(this.generateSuccessor(node, i));
+						Iterator<INewNodeDescription<ITransparentTreeNode, Integer>> it = this.getIterativeGenerator(node);
+						while (it.hasNext()) {
+							successorsOfThisNode.add(it.next());
 						}
 						return successorsOfThisNode;
 					}
 
-					@Override
-					public NodeExpansionDescription<ITransparentTreeNode, Integer> generateSuccessor(final ITransparentTreeNode node, final int i) throws InterruptedException {
+					private INewNodeDescription<ITransparentTreeNode, Integer> getSuccessor(final ITransparentTreeNode node, final int indexOfChild) {
 						TreeNode tNode = (TreeNode) node;
 						if (!tNode.hasChildren) {
 							throw new IllegalArgumentException("Node " + node + " has no children and, hence, cannot have any successor being generated.");
 						}
-						int j = i % DegeneratedGraphGeneratorGenerator.this.branchingFactor; // note that j is also the number of left siblings
+						int j = indexOfChild % DegeneratedGraphGeneratorGenerator.this.branchingFactor; // note that j is also the number of left siblings
 						int d = node.getDepth() + 1;
 
 						/* compute offset of ids for successors under this node, and also the number of nodes left of the successor that have children */
@@ -294,17 +297,17 @@ public class DegeneratedGraphGeneratorGenerator implements ISyntheticGraphGenera
 						BigInteger numberOfSolutionsFoundByDFS = tNode.numberOfLeafsFoundByDFSWhenReachingThisNode.add(numOfSolutionsUnderLeftSiblings);
 
 						/* check whether the node has children itself */
-						boolean hasChildren = !tNode.indicesOfChildrenWithoutChildren.contains(i) && d < DegeneratedGraphGeneratorGenerator.this.maxDepth;
+						boolean hasChildren = !tNode.indicesOfChildrenWithoutChildren.contains(indexOfChild) && d < DegeneratedGraphGeneratorGenerator.this.maxDepth;
 
 						/* create node */
 						TreeNode successor = new TreeNode(tNode, d, offsetForIdOnLayer.add(BigInteger.valueOf(j)), j, numOfLeftRelativesThatHaveChildren, hasChildren, numOfLeftSiblingsThatHaveChildren, numberOfSolutionsFoundByDFS);
 						this.successors.computeIfAbsent(node, n -> new HashSet<>()).add(j);
-						return new NodeExpansionDescription<>(successor, j, NodeType.OR);
+						return new NodeExpansionDescription<>(successor, j);
 					}
 
 					@Override
-					public boolean allSuccessorsComputed(final ITransparentTreeNode node) {
-						return this.successors.get(node) != null && this.successors.get(node).size() == DegeneratedGraphGeneratorGenerator.this.branchingFactor;
+					public Iterator<INewNodeDescription<ITransparentTreeNode, Integer>> getIterativeGenerator(final ITransparentTreeNode node) {
+						return new MappingIterator<>(IntStream.range(0, DegeneratedGraphGeneratorGenerator.this.branchingFactor).iterator(), i -> this.getSuccessor(node, i));
 					}
 				};
 			}

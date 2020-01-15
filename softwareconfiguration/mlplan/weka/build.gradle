@@ -1,0 +1,19 @@
+dependencies {
+	compile (project(':JAICore:jaicore-ml')) {
+		exclude group: 'org.nd4j'
+		exclude group: 'org.deeplearning4j'
+		exclude group: 'edu.stanford.nlp'
+	}
+	compile (project(':JAICore:jaicore-ml-weka')) {
+		exclude group: 'org.nd4j'
+		exclude group: 'org.deeplearning4j'
+		exclude group: 'edu.stanford.nlp'
+	}
+	compile project(':mlplan-core')
+	
+	/* dependencies to the test sources of other projects */
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-ml', configuration: 'testArtifacts')
+	testCompile project(path: ':mlplan-core', configuration: 'testArtifacts')
+}

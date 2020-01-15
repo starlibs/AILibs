@@ -2,7 +2,7 @@ package ai.libs.jaicore.search.syntheticgraphs.islandmodels.equalsized;
 
 import java.math.BigInteger;
 
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
@@ -13,13 +13,17 @@ public class EqualSizedIslandsModel implements IIslandModel {
 	private long numberOfIslands = -1;
 	private ITransparentTreeNode rootNode;
 
+	public EqualSizedIslandsModel(final int size) {
+		this(BigInteger.valueOf(size));
+	}
+
 	public EqualSizedIslandsModel(final BigInteger size) {
 		super();
 		this.size = size;
 	}
 
 	@Override
-	public BigInteger getIsland(final IPath<ITransparentTreeNode, Integer> path) {
+	public BigInteger getIsland(final ILabeledPath<ITransparentTreeNode, Integer> path) {
 		return path.getHead().getNumberOfSubtreesWithMaxNumberOfNodesPriorToThisNode(this.size);
 	}
 
@@ -37,8 +41,8 @@ public class EqualSizedIslandsModel implements IIslandModel {
 	}
 
 	@Override
-	public BigInteger getSizeOfIsland(final IPath<ITransparentTreeNode, Integer> path) {
-		IPath<ITransparentTreeNode, Integer> currentPath = path;
+	public BigInteger getSizeOfIsland(final ILabeledPath<ITransparentTreeNode, Integer> path) {
+		ILabeledPath<ITransparentTreeNode, Integer> currentPath = path;
 		while (!currentPath.getArcs().isEmpty() && currentPath.getPathToParentOfHead().getHead().getNumberOfLeafsUnderNode().compareTo(this.size) <= 0) {
 			currentPath = currentPath.getPathToParentOfHead();
 		}
@@ -47,7 +51,7 @@ public class EqualSizedIslandsModel implements IIslandModel {
 	}
 
 	@Override
-	public BigInteger getPositionOnIsland(final IPath<ITransparentTreeNode, Integer> path) {
+	public BigInteger getPositionOnIsland(final ILabeledPath<ITransparentTreeNode, Integer> path) {
 		return path.getHead().getNumberOfLeafsPriorToNodeViaDFS().subtract(path.getHead().getNumberOfLeafsInSubtreesWithMaxNumberOfNodesPriorToThisNode(this.size));
 	}
 }

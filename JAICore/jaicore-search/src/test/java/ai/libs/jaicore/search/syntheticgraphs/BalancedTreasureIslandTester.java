@@ -3,6 +3,7 @@ package ai.libs.jaicore.search.syntheticgraphs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.NoSuchElementException;
@@ -65,7 +66,7 @@ public class BalancedTreasureIslandTester {
 
 	@Test
 	public void testNumberOfTreasurePaths() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
-		IIslandModel model = new EqualSizedIslandsModel((long)Math.pow(this.branchingFactor, this.depth - this.distanceToIslands));
+		IIslandModel model = new EqualSizedIslandsModel(BigInteger.valueOf((long)Math.pow(this.branchingFactor, this.depth - this.distanceToIslands)));
 		ChaoticMeansTreasureModel gen = new ChaoticMeansTreasureModel(this.numberOfIslandsWithTreasure, model, 0);
 		BalancedGraphSearchWithPathEvaluationsProblem input = new BalancedGraphSearchWithPathEvaluationsProblem(this.branchingFactor, this.depth, gen);
 		NoisyMeanTreasureModel evaluator = (NoisyMeanTreasureModel)input.getPathEvaluator();

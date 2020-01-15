@@ -32,14 +32,14 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.basic.BusyObjectEvaluator;
 import ai.libs.jaicore.basic.PartiallyFailingObjectEvaluator;
-import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPNode;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPState;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionJobSubmittedEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.RCNEPathCompletionFailedException;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
-public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double>> {
+public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(RandomCompletionNodeEvaluatorTester.class);
 
@@ -66,8 +66,8 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		final int DIFFICULTY = 10;
 
 		/* create one RCNE for each seed */
-		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = this.getBF(DIFFICULTY, n -> n.getNodes().size() * 1.0);
-		Map<Integer, RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double>> completers = new HashMap<>();
+		StandardBestFirst<EnhancedTTSPState, String, Double> bf = this.getBF(DIFFICULTY, n -> n.getNodes().size() * 1.0);
+		Map<Integer, RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double>> completers = new HashMap<>();
 		for (int seed = 0; seed < NUM_SEEDS; seed++) {
 			completers.put(seed, this.getSeededNodeEvaluator(DIFFICULTY, seed, 1, 1)); // the number of samples is irrelevant here, because we call the respective method manually
 			completers.get(seed).setLoggerName("testednodeevaluator"); // all completers will have the same logger
@@ -75,16 +75,16 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		}
 
 		/* gather all random completions over different seeds */
-		List<List<EnhancedTTSPNode>> completionsFoundSoFar = new ArrayList<>();
+		List<List<EnhancedTTSPState>> completionsFoundSoFar = new ArrayList<>();
 		while (bf.getExpandedCounter() < NUM_NODES) {
 			IAlgorithmEvent e = bf.nextWithException();
 			if (e instanceof NodeExpansionJobSubmittedEvent) {
 
 				/* get the expanded node and run all completers on it */
-				BackPointerPath<EnhancedTTSPNode, String, ?> nodeToEvaluate = ((NodeExpansionJobSubmittedEvent) e).getExpandedNode();
-				for (Entry<Integer, RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double>> entry : completers.entrySet()) {
+				BackPointerPath<EnhancedTTSPState, String, ?> nodeToEvaluate = ((NodeExpansionJobSubmittedEvent) e).getExpandedNode();
+				for (Entry<Integer, RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double>> entry : completers.entrySet()) {
 					for (int i = 0; i < NUM_SAMPLES; i++) {
-						List<EnhancedTTSPNode> completion = entry.getValue().getNextRandomPathCompletionForNode(nodeToEvaluate).getNodes();
+						List<EnhancedTTSPState> completion = entry.getValue().getNextRandomPathCompletionForNode(nodeToEvaluate).getNodes();
 						int numCompletionsFoundByNow = completionsFoundSoFar.size();
 
 						/* check that the solution has not been identified by any completer (including itself) earlier. This is a very strong (perhaps unnecessarily and too strong) condition. */
@@ -104,7 +104,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 	 * @throws AlgorithmTimeoutedException
 	 * @throws AlgorithmExecutionCanceledException
 	 * @throws AlgorithmException
-	 * @throws PathEvaluationException 
+	 * @throws PathEvaluationException
 	 */
 	@Test
 	public void testRobustnessOnMissingEvaluations() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
@@ -112,8 +112,8 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		final int DIFFICULTY = 10;
 
 		/* create search that is the basis for the analysis (provides the nodes to be analyzed and the graph generator) */
-		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = this.getBF(DIFFICULTY, n -> n.getNodes().size() * 1.0);
-		RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> completer = this.getSeededNodeEvaluator(DIFFICULTY, 0, 1, 1); // the number of samples is irrelevant here, because we call the respective method manually
+		StandardBestFirst<EnhancedTTSPState, String, Double> bf = this.getBF(DIFFICULTY, n -> n.getNodes().size() * 1.0);
+		RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> completer = this.getSeededNodeEvaluator(DIFFICULTY, 0, 1, 1); // the number of samples is irrelevant here, because we call the respective method manually
 		completer.setLoggerName("testednodeevaluator");
 
 		/* run completer on every 5-th node found while running BFS */
@@ -122,7 +122,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 			if (e instanceof NodeExpansionJobSubmittedEvent && bf.getExpandedCounter() % 5 == 0) { // run the RCNE only every 5 node expansions
 
 				/* get the expanded node and run all completers on it */
-				BackPointerPath<EnhancedTTSPNode, String, ?> nodeToEvaluate = ((NodeExpansionJobSubmittedEvent) e).getExpandedNode();
+				BackPointerPath<EnhancedTTSPState, String, ?> nodeToEvaluate = ((NodeExpansionJobSubmittedEvent) e).getExpandedNode();
 				assertTrue(completer.evaluate(nodeToEvaluate) >= 0);
 			}
 		}
@@ -145,21 +145,21 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		final int CITIES = 4;
 
 		/* create search that is the basis for the analysis (provides the nodes to be analyzed and the graph generator) */
-		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = this.getBF(CITIES, n -> n.getNodes().size() * 1.0);
-		RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> completer = this.getSeededNodeEvaluator(CITIES, 0, 1, 1); // the number of samples is irrelevant here, because we call the respective method manually
+		StandardBestFirst<EnhancedTTSPState, String, Double> bf = this.getBF(CITIES, n -> n.getNodes().size() * 1.0);
+		RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> completer = this.getSeededNodeEvaluator(CITIES, 0, 1, 1); // the number of samples is irrelevant here, because we call the respective method manually
 		completer.setLoggerName("testednodeevaluator");
 
 		/* collect random completions for different nodes and make sure that no solution is seen twice (similar to the seed independence check) */
-		List<List<EnhancedTTSPNode>> completionsFoundSoFar = new ArrayList<>();
+		List<List<EnhancedTTSPState>> completionsFoundSoFar = new ArrayList<>();
 		while (bf.hasNext()) {
 			IAlgorithmEvent e = bf.nextWithException();
 			if (e instanceof NodeExpansionJobSubmittedEvent) {
 
 				/* get the expanded node and run all completers on it */
-				BackPointerPath<EnhancedTTSPNode, String, ?> nodeToEvaluate = ((NodeExpansionJobSubmittedEvent) e).getExpandedNode();
+				BackPointerPath<EnhancedTTSPState, String, ?> nodeToEvaluate = ((NodeExpansionJobSubmittedEvent) e).getExpandedNode();
 				for (int i = 0; i < NUM_SAMPLES; i++) {
 					try {
-						List<EnhancedTTSPNode> completion = completer.getNextRandomPathCompletionForNode(nodeToEvaluate).getNodes();
+						List<EnhancedTTSPState> completion = completer.getNextRandomPathCompletionForNode(nodeToEvaluate).getNodes();
 
 						/* check that the solution has not been identified by any completer (including itself) earlier. This is a very strong (perhaps unnecessarily and too strong) condition. */
 						assertFalse("Solution has been found twice!", completionsFoundSoFar.contains(completion));
@@ -203,23 +203,23 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		final int NUM_SAMPLES = n;
 
 		/* create search that is the basis for the analysis (provides the nodes to be analyzed and the graph generator) */
-		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = this.getBF(cities, node -> node.getNodes().size() * 1.0);
+		StandardBestFirst<EnhancedTTSPState, String, Double> bf = this.getBF(cities, node -> node.getNodes().size() * 1.0);
 
 		for (int seed = 0; seed < NUM_SEEDS; seed++) {
 			for (int lastSuccessfulInvocation = k; lastSuccessfulInvocation <= NUM_SAMPLES; lastSuccessfulInvocation++) { // defines the number of the evaluation under the node that will be successful (all other will fail)
-				Set<List<EnhancedTTSPNode>> seenSolutions = new HashSet<>();
+				Set<List<EnhancedTTSPState>> seenSolutions = new HashSet<>();
 				List<Double> seenScores = new ArrayList<>();
 				List<Integer> successfulInvocations = new ArrayList<>();
 				for (int i = lastSuccessfulInvocation - k; i < lastSuccessfulInvocation; i++) {
 					successfulInvocations.add(i + 1);
 				}
-				RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> ne = this.getNodeEvaluator(cities, new PartiallyFailingObjectEvaluator<>(successfulInvocations, 0.0), seed, k, lastSuccessfulInvocation, -1);
+				RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> ne = this.getNodeEvaluator(cities, new PartiallyFailingObjectEvaluator<>(successfulInvocations, 0.0), seed, k, lastSuccessfulInvocation, -1);
 				ne.setLoggerName("testednodeevaluator");
 				ne.setGenerator(bf.getGraphGenerator(), bf.getGoalTester());
 				ne.registerSolutionListener(new Object() {
 					@Subscribe
-					public void receiveSolution(final EvaluatedSearchSolutionCandidateFoundEvent<EnhancedTTSPNode, String, Double> e) {
-						List<EnhancedTTSPNode> solution = e.getSolutionCandidate().getNodes();
+					public void receiveSolution(final EvaluatedSearchSolutionCandidateFoundEvent<EnhancedTTSPState, String, Double> e) {
+						List<EnhancedTTSPState> solution = e.getSolutionCandidate().getNodes();
 						seenSolutions.add(solution);
 						seenScores.add(e.getScore());
 					}
@@ -227,7 +227,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 
 				/* now evaluate the root node */
 				bf.initGraph();
-				BackPointerPath<EnhancedTTSPNode, String, ?> root = bf.getOpen().get(0);
+				BackPointerPath<EnhancedTTSPState, String, ?> root = bf.getOpen().get(0);
 				ne.evaluate(root);
 				assertEquals("There should be exactly " + k + " solutions.", k, seenSolutions.size());
 				assertEquals("There should be exactly " + k + " scores.", k, seenScores.size());
@@ -235,46 +235,46 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		}
 	}
 
-	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> getNodeEvaluator(final int problemDifficulty, final IObjectEvaluator<ILabeledPath<EnhancedTTSPNode, String>, Double> oe, final int seed,
+	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> getNodeEvaluator(final int problemDifficulty, final IObjectEvaluator<ILabeledPath<EnhancedTTSPState, String>, Double> oe, final int seed,
 			final int numSamples, final int maxSamples, final int timeoutForNodeEvaluationInMs) {
 
 		/* create search that is the basis for the analysis (provides the nodes to be analyzed and the graph generator) */
-		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = this.getBF(problemDifficulty, n -> n.getNodes().size() * 1.0);
+		StandardBestFirst<EnhancedTTSPState, String, Double> bf = this.getBF(problemDifficulty, n -> n.getNodes().size() * 1.0);
 
-		IObjectEvaluator<ILabeledPath<EnhancedTTSPNode, String>, Double> se = new IObjectEvaluator<ILabeledPath<EnhancedTTSPNode, String>, Double>() {
+		IObjectEvaluator<ILabeledPath<EnhancedTTSPState, String>, Double> se = new IObjectEvaluator<ILabeledPath<EnhancedTTSPState, String>, Double>() {
 
 			@Override
-			public Double evaluate(final ILabeledPath<EnhancedTTSPNode, String> solutionPath) throws InterruptedException, ObjectEvaluationFailedException {
+			public Double evaluate(final ILabeledPath<EnhancedTTSPState, String> solutionPath) throws InterruptedException, ObjectEvaluationFailedException {
 				return oe.evaluate(solutionPath);
 			}
 		};
-		RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> rcne = new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, maxSamples, se, -1, timeoutForNodeEvaluationInMs);
+		RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> rcne = new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, maxSamples, se, -1, timeoutForNodeEvaluationInMs);
 		rcne.setGenerator(bf.getGraphGenerator(), bf.getGoalTester());
 		return rcne;
 	}
 
-	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> getSeededNodeEvaluator(final int problemDifficulty, final int seed, final int numSamples, final int maxSamples) {
+	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> getSeededNodeEvaluator(final int problemDifficulty, final int seed, final int numSamples, final int maxSamples) {
 		return this.getNodeEvaluator(problemDifficulty, n -> Math.abs(n.hashCode() * 1.0), seed, numSamples, maxSamples, -1); // maps each solution path to its hash code
 	}
 
 	@Override
-	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> getNodeEvaluator() {
+	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> getNodeEvaluator() {
 		return this.getSeededNodeEvaluator(1000, 0, 3, 6);
 	}
 
 	@Override
-	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> getBusyNodeEvaluator() {
+	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> getBusyNodeEvaluator() {
 		return this.getTimedNodeEvaluator(-1);
 	}
 
 	@Override
-	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> getTimedNodeEvaluator(final int timeoutInMS) {
+	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> getTimedNodeEvaluator(final int timeoutInMS) {
 		return this.getNodeEvaluator(1000, new BusyObjectEvaluator<>(), 0, 3, 6, timeoutInMS);
 	}
 
 	@Override
-	public Collection<BackPointerPath<EnhancedTTSPNode, String, Double>> getNodesToTestInDifficultProblem(final int numNodes) {
-		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = this.getBF(100, n -> 0.0);
+	public Collection<BackPointerPath<EnhancedTTSPState, String, Double>> getNodesToTestInDifficultProblem(final int numNodes) {
+		StandardBestFirst<EnhancedTTSPState, String, Double> bf = this.getBF(100, n -> 0.0);
 		bf.next();
 		bf.next();
 		return bf.getOpen().stream().limit(numNodes).collect(Collectors.toList());

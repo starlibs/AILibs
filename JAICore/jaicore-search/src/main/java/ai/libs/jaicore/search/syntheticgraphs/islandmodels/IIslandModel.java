@@ -2,7 +2,7 @@ package ai.libs.jaicore.search.syntheticgraphs.islandmodels;
 
 import java.math.BigInteger;
 
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 
@@ -19,11 +19,11 @@ public interface IIslandModel {
 
 	public void setRootNode(ITransparentTreeNode root);
 
-	public BigInteger getIsland(IPath<ITransparentTreeNode, Integer> path);
+	public BigInteger getIsland(ILabeledPath<ITransparentTreeNode, Integer> path);
 
-	public BigInteger getSizeOfIsland(IPath<ITransparentTreeNode, Integer> path);
+	public BigInteger getSizeOfIsland(ILabeledPath<ITransparentTreeNode, Integer> path);
 
-	public BigInteger getPositionOnIsland(IPath<ITransparentTreeNode, Integer> path);
+	public BigInteger getPositionOnIsland(ILabeledPath<ITransparentTreeNode, Integer> path);
 
 	public BigInteger getNumberOfIslands();
 }

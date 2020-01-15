@@ -1,7 +1,7 @@
 package ai.libs.jaicore.search.syntheticgraphs;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
@@ -30,7 +30,7 @@ public class SyntheticSearchProblemBuilder {
 		return this;
 	}
 
-	public IGraphSearchWithPathEvaluationsInput<ITransparentTreeNode, Integer, Double> build() {
+	public IPathSearchWithPathEvaluationsInput<ITransparentTreeNode, Integer, Double> build() {
 		if (this.ggBuilder != null) {
 			this.graphGenerator = this.ggBuilder.build();
 		}
@@ -40,7 +40,7 @@ public class SyntheticSearchProblemBuilder {
 		if (this.treasureModel == null) {
 			throw new IllegalStateException("TreasureModel has not been set yet.");
 		}
-		return new GraphSearchWithPathEvaluationsInput<>(this.graphGenerator, new NodeGoalTester<ITransparentTreeNode, Integer>() {
+		return new GraphSearchWithPathEvaluationsInput<>(this.graphGenerator, new INodeGoalTester<ITransparentTreeNode, Integer>() {
 
 			@Override
 			public boolean isGoal(final ITransparentTreeNode node) {
