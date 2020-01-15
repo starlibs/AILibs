@@ -14,4 +14,6 @@ public interface ISQLQueryBuilder {
 	public String buildInsertSQLCommand(final String table, final Map<String, ? extends Object> values);
 
 	public String buildMultiInsertSQLCommand(final String table, final List<String> keys, final List<List<?>> datarows);
+
+	public String buildSelectSQLCommand(String table, final Map<String, String> conditions);
 }

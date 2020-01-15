@@ -226,18 +226,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 	 */
 	@Override
 	public List<IKVStore> getRowsOfTable(final String table, final Map<String, String> conditions) throws SQLException {
-		StringBuilder conditionSB = new StringBuilder();
-		List<String> values = new ArrayList<>();
-		for (Entry<String, String> entry : conditions.entrySet()) {
-			if (conditionSB.length() > 0) {
-				conditionSB.append(STR_SPACE_AND);
-			} else {
-				conditionSB.append(STR_SPACE_WHERE);
-			}
-			conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
-			values.add(entry.getValue());
-		}
-		return this.getResultsOfQuery("SELECT * FROM `" + table + "`" + conditionSB.toString(), values);
+		return this.getResultsOfQuery(this.queryBuilder.buildSelectSQLCommand(table, conditions));
 	}
 
 

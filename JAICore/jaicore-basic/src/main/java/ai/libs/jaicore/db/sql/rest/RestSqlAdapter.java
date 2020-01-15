@@ -64,6 +64,8 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 	}
 
 	public List<IKVStore> select(final String query) throws SQLException {
+		this.logger.info("Sending query {}", query);
+		System.out.println(query);
 		JsonNode res = this.executeRESTCall(this.host + this.selectSuffix, query);
 		return KVStoreUtil.readFromJson(res);
 	}
@@ -124,7 +126,7 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 		queryBuilder.append(valuesToWrite.entrySet().stream().map(e -> e.getKey() + "='" + e.getValue() + "'").collect(Collectors.joining(",")));
 		if (!where.isEmpty()) {
 			queryBuilder.append(" WHERE ");
-			queryBuilder.append(where.entrySet().stream().map(e -> RestSqlAdapter.whereClauseElement(e.getKey(), e.getValue().toString())).collect(Collectors.joining(" AND ")));
+			queryBuilder.append(where.entrySet().stream().map(e -> RestSqlAdapter.whereClauseElement(e.getKey(), e.getValue() != null ? e.getValue().toString() : null)).collect(Collectors.joining(" AND ")));
 		}
 		return this.update(queryBuilder.toString());
 	}
@@ -164,7 +166,7 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 
 	@Override
 	public List<IKVStore> getRowsOfTable(final String table, final Map<String, String> conditions) throws SQLException {
-		throw new UnsupportedOperationException();
+		return this.query(this.queryBuilder.buildSelectSQLCommand(table, conditions));
 	}
 
 	@Override

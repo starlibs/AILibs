@@ -12,6 +12,12 @@ import ai.libs.jaicore.basic.sets.Pair;
 
 public class MySQLQueryBuilder implements ISQLQueryBuilder {
 
+	private static final String DB_DRIVER = "mysql";
+	private static final String KEY_EQUALS_VALUE_TO_BE_SET = " = (?)";
+
+	private static final String STR_SPACE_AND = " AND ";
+	private static final String STR_SPACE_WHERE = " WHERE ";
+
 	@Override
 	public Pair<String, List<Object>> buildInsertStatement(final String table, final Map<String, ? extends Object> map) {
 		StringBuilder sb1 = new StringBuilder();
@@ -99,6 +105,22 @@ public class MySQLQueryBuilder implements ISQLQueryBuilder {
 			index ++;
 		}
 		return modifiedSql;
+	}
+
+	@Override
+	public String buildSelectSQLCommand(final String table, final Map<String, String> conditions) {
+		StringBuilder conditionSB = new StringBuilder();
+		List<String> values = new ArrayList<>();
+		for (Entry<String, String> entry : conditions.entrySet()) {
+			if (conditionSB.length() > 0) {
+				conditionSB.append(STR_SPACE_AND);
+			} else {
+				conditionSB.append(STR_SPACE_WHERE);
+			}
+			conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
+			values.add(entry.getValue());
+		}
+		return this.parseSQLCommand("SELECT * FROM `" + table + "`" + conditionSB.toString(), values);
 	}
 
 }
