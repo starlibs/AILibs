@@ -243,7 +243,9 @@ public class PerformanceKnowledgeBase {
 		DenseInstance instanceInd = new DenseInstance(instancesInd.numAttributes());
 		for (int i = 0; i < instancesInd.numAttributes() - 1; i++) {
 			Attribute attr = instancesInd.attribute(i);
-			Parameter param = ci.getComponent().getParameterWithName(attr.name());
+			String attrFQN = attr.name();
+			String attrName = attrFQN.substring(attrFQN.indexOf("::") + 2);
+			Parameter param = ci.getComponent().getParameterWithName(attrName);
 			String value;
 			if (ci.getParametersThatHaveBeenSetExplicitly().contains(param)) {
 				value = ci.getParameterValues().get(param.getName());
