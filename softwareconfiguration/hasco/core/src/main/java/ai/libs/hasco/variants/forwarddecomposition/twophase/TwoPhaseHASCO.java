@@ -152,7 +152,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 				this.phase1CancellationTask = new NamedTimerTask() {
 
 					@Override
-					public void run() {
+					public void exec() {
 
 						try {
 							/* check whether the algorithm has been shutdown, then also cancel this task */

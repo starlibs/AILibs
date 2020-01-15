@@ -28,7 +28,7 @@ public class CancellationTimerTask extends NamedTimerTask {
 	}
 
 	@Override
-	public void run() {
+	public void exec() {
 		if (this.hookToExecutePriorToCancel != null) {
 			logger.info("Executing pre-interruption hook.");
 			this.hookToExecutePriorToCancel.run();

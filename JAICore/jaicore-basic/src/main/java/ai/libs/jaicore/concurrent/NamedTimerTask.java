@@ -23,6 +23,6 @@ public abstract class NamedTimerTask extends TrackableTimerTask {
 
 	@Override
 	public String toString() {
-		return "NamedTimerTask: " + this.descriptor;
+		return "NamedTimerTask: " + this.descriptor + ", canceled: " + this.isCanceled();
 	}
 }

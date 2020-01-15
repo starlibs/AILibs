@@ -139,8 +139,8 @@ public class TrackableTimer extends Timer implements ICancelable {
 		this.ratesOfReocurringTasks.put(task, period);
 	}
 
-	public boolean hasTaskBeExecutedInPast(final TrackableTimerTask task) {
-		return task.scheduledExecutionTime() < System.currentTimeMillis();
+	public boolean hasTaskBeenExecutedInPast(final TrackableTimerTask task) {
+		return task.hasBeenExecuted();
 	}
 
 	public boolean willTaskBeExecutedInFuture(final TrackableTimerTask task) {
@@ -148,7 +148,7 @@ public class TrackableTimer extends Timer implements ICancelable {
 			return false;
 		}
 		if (this.scheduledSingleInvocationTasks.contains(task)) {
-			return !this.hasTaskBeExecutedInPast(task);
+			return !this.hasTaskBeenExecutedInPast(task);
 		}
 		if (this.scheduledReocurringTasks.contains(task)) {
 			return true;

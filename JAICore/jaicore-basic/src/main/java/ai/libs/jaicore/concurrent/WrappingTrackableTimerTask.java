@@ -12,7 +12,7 @@ public class WrappingTrackableTimerTask extends TrackableTimerTask {
 	}
 
 	@Override
-	public void run() {
+	public void exec() {
 		this.tt.run();
 	}
 }

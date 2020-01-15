@@ -15,7 +15,7 @@ public class GlobalTimer extends TrackableTimer {
 		/* immediately give the thread of the timer maximum priority */
 		this.schedule(new TrackableTimerTask() {
 			@Override
-			public void run() {
+			public void exec() {
 				Thread timerThread = Thread.currentThread();
 				logger.info("Changing global timer thread {} priority from {} to {}", timerThread, timerThread.getPriority(), Thread.MAX_PRIORITY);
 				timerThread.setPriority(Thread.MAX_PRIORITY);
