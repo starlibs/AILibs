@@ -1,10 +1,10 @@
 package autofe.db.search;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DatabaseNodeGoalPredicate implements NodeGoalTester<DatabaseNode, String> {
+public class DatabaseNodeGoalPredicate implements INodeGoalTester<DatabaseNode, String> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseNodeGoalPredicate.class);
 

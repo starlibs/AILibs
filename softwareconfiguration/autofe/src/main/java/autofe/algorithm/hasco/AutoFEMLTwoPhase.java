@@ -5,12 +5,12 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.algorithm.TrainingException;
-import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
-import ai.libs.mlplan.core.MLPlanWekaBuilder;
+import ai.libs.mlplan.multiclass.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEObjectEvaluator;
@@ -36,9 +36,9 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 	private int maxPipelineSize;
 	private int cpus;
 
-	private TimeOut feTimeOut; // timeout for the feature engineering phase
-	private TimeOut amlTimeOut; // timeout for the automl phase
-	private TimeOut evalTimeOut; // timeout for single node evaluation
+	private Timeout feTimeOut; // timeout for the feature engineering phase
+	private Timeout amlTimeOut; // timeout for the automl phase
+	private Timeout evalTimeOut; // timeout for single node evaluation
 
 	private Random rand;
 	private File componentFile;
@@ -51,8 +51,8 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 
 	public AutoFEMLTwoPhase(final HASCOFeatureEngineeringConfig hascoFEConfig, final int cpus,
 			final String benchmarkType, final double subsampleRatio, final double mlplanSubsampleRatioFactor,
-			final int minInstances, final long seed, final TimeOut feTimeOut, final TimeOut amlTimeOut,
-			final TimeOut evalTimeOut, final int maxPipelineSize) {
+			final int minInstances, final long seed, final Timeout feTimeOut, final Timeout amlTimeOut,
+			final Timeout evalTimeOut, final int maxPipelineSize) {
 
 		this.cpus = cpus;
 		this.subsampleRatio = subsampleRatio;
@@ -142,9 +142,9 @@ public class AutoFEMLTwoPhase extends AbstractAutoFEMLClassifier {
 			logger.info("Run 2nd AutoFEML phase performing AutoML");
 			mlplan.buildClassifier(wekaDataset);
 			this.internalMlPlanScore = mlplan.getInternalValidationErrorOfSelectedClassifier();
-			logger.info("Finished 2nd AutoFEML phase. Found solution {}.", mlplan.getSelectedClassifier());
+			logger.info("Finished 2nd AutoFEML phase. Found solution {}.", mlplan.getSelectedWekaClassifier());
 
-			this.setSelectedPipeline(new AutoFEWekaPipeline(solution, mlplan.getSelectedClassifier()));
+			this.setSelectedPipeline(new AutoFEWekaPipeline(solution, mlplan.getSelectedWekaClassifier()));
 
 			logger.info("Finished entire AutoFEML process.");
 		} catch (Exception e) {

@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +64,7 @@ public class AutoFEMLPreferredNodeEvaluator implements IPathEvaluator<TFDNode, S
 	}
 
 	@Override
-	public Double evaluate(final IPath<TFDNode, String> path) throws PathEvaluationException {
+	public Double f(final ILabeledPath<TFDNode, String> path) throws PathEvaluationException {
 		if (path.getNodes().size() == 1) {
 			return 0.0;
 		}
