@@ -236,7 +236,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 
 		if (!this.randomPathCompleter.knowsNode(path.getHead())) {
 			synchronized (this.randomPathCompleter) {
-				this.randomPathCompleter.appendPathToNode(path);
+				this.randomPathCompleter.appendPathToModel(path);
 			}
 		}
 		// draw N paths at random

@@ -472,11 +472,11 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 		N current = this.exploredGraph.getRoot();
 		List<N> pathNodes = path.getNodes();
 		assert current.equals(pathNodes.get(0)) : "The root of the path does not match the root of the graph!";
-		for (int i = 1; i < pathNodes.size(); i++) {
-			assert this.exploredGraph.getSuccessors(current).contains(pathNodes.get(i)) : "Invalid path. The " + i + "-th entry " + pathNodes.get(i) + " of the path " + path + " is not a successor of the " + (i - 1)
-			+ "-th node whose successors are " + this.exploredGraph.getSuccessors(current) + "!";
-			current = pathNodes.get(i);
-		}
+		//		for (int i = 1; i < pathNodes.size(); i++) {
+		//			assert this.exploredGraph.getSuccessors(current).contains(pathNodes.get(i)) : "Invalid path. The " + i + "-th entry " + pathNodes.get(i) + " of the path " + path + " is not a successor of the " + (i - 1)
+		//			+ "-th node whose successors are " + this.exploredGraph.getSuccessors(current) + "!";
+		//			current = pathNodes.get(i);
+		//		}
 		assert !pathNodes.isEmpty() : "Solution paths cannot be empty!";
 		assert this.goalTester.isGoal(path) : "The head of a solution path must be a goal node, but this is not the case for this path: \n\t" + pathNodes.stream().map(N::toString).collect(Collectors.joining("\n\t"));
 	}

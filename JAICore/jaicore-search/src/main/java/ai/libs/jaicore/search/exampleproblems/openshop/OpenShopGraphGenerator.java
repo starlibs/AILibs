@@ -17,6 +17,7 @@ import ai.libs.jaicore.problems.scheduling.openshop.OpenShopProblem;
 public class OpenShopGraphGenerator implements IGraphGenerator<OpenShopState, String> {
 
 	private final OpenShopProblem problem;
+	private final boolean pruneInactiveNodes = false;
 
 	public OpenShopGraphGenerator(final OpenShopProblem problem) {
 		super();
@@ -32,10 +33,16 @@ public class OpenShopGraphGenerator implements IGraphGenerator<OpenShopState, St
 	public SuccessorGenerator<OpenShopState, String> getSuccessorGenerator() {
 		return n -> {
 			List<NodeExpansionDescription<OpenShopState, String>> succ = new ArrayList<>();
+
+			/* for actives schedules, continue as usual */
 			if (n instanceof OpenShopOperationSelectionState) {
 				for (String opName : ((OpenShopOperationSelectionState) n).getUnselectedOperations()) {
 					OpenShopMachineSelectionState successor = new OpenShopMachineSelectionState(this.problem, (OpenShopOperationSelectionState)n, this.problem.getOperation(opName));
-					succ.add(new NodeExpansionDescription<>(successor, opName, NodeType.OR));
+
+					/* add successor only if the solution can still be active! */
+					if (!this.pruneInactiveNodes || successor.getSchedule().isActive()) {
+						succ.add(new NodeExpansionDescription<>(successor, opName, NodeType.OR));
+					}
 				}
 			}
 			else if (n instanceof OpenShopMachineSelectionState) {
@@ -50,7 +57,11 @@ public class OpenShopGraphGenerator implements IGraphGenerator<OpenShopState, St
 						throw new IllegalStateException("Agenda has not been reduced. Operation that was supposed to be removed: " + removeOp);
 					}
 					OpenShopOperationSelectionState successor = new OpenShopOperationSelectionState(this.problem, (OpenShopMachineSelectionState)n, m, possibleOps);
-					succ.add(new NodeExpansionDescription<>(successor, m.getMachineID(), NodeType.OR));
+
+					/* add successor only if the solution can still be active! */
+					if (!this.pruneInactiveNodes || successor.getSchedule().isActive()) {
+						succ.add(new NodeExpansionDescription<>(successor, m.getMachineID(), NodeType.OR));
+					}
 				}
 			}
 			else {

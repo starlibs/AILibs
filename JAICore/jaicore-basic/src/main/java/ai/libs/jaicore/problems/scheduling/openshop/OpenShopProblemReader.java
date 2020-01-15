@@ -13,6 +13,36 @@ import ai.libs.jaicore.basic.FileUtil;
  */
 public class OpenShopProblemReader {
 
+	public static OpenShopProblem getFromJobFileWithoutSetupTimesAndWithOneMachinePerWorkcenter(final File jobFile, final OpenShopMetric metric) throws IOException {
+
+		/* get number of work centers */
+		List<String> jobFileLines = FileUtil.readFileAsList(jobFile);
+		final int numJobs = Integer.parseInt(jobFileLines.remove(0));
+		final int numWorkcenters = Integer.parseInt(jobFileLines.remove(0));
+
+		/* setup work centers with no setup times (assuming that the number of operations = number of jobs */
+		OpenShopProblemBuilder builder = new OpenShopProblemBuilder();
+		int[][] zeroSetupTimesArray = new int[numJobs + 1][numJobs + 1];
+		for (int i = 0; i <= numJobs; i++) {
+			for (int j = 0; j <= numJobs; j++) {
+				zeroSetupTimesArray[i][j] = 0;
+			}
+		}
+		for (int i = 0; i < numWorkcenters; i++) {
+			String wcId = "W" + (i + 1);
+			String machineId = "M" + (i + 1);
+			builder.withWorkcenter(wcId, zeroSetupTimesArray);
+			builder.withMachineForWorkcenter(machineId, wcId, 0, 0);
+		}
+
+		/* add jobs */
+		configureBuilderWithJobsFromJobFile(builder, jobFile);
+
+		/* setup metric and return */
+		builder.withMetric(metric);
+		return builder.build();
+	}
+
 	/**
 	 * Reads the problem from a job file, a setup times file, and a file describing the number of parallel machines in each work center.
 	 *
@@ -28,9 +58,6 @@ public class OpenShopProblemReader {
 	public static OpenShopProblem mergeFromFiles(final File jobFile, final File setupTimesFile, final File parallelMachinesFile, final OpenShopMetric metric) throws IOException {
 
 		/* existence check for files */
-		if (jobFile == null || !jobFile.exists()) {
-			throw new IllegalArgumentException("Cannot read job file \"" + jobFile + "\"");
-		}
 		if (setupTimesFile == null || !setupTimesFile.exists()) {
 			throw new IllegalArgumentException("Cannot read setup times file \"" + setupTimesFile + "\"");
 		}
@@ -89,6 +116,21 @@ public class OpenShopProblemReader {
 			}
 		}
 
+		/* configure jobs */
+		configureBuilderWithJobsFromJobFile(builder, jobFile);
+
+		/* build the problem */
+		return builder.withMetric(metric).build();
+	}
+
+	private static void configureBuilderWithJobsFromJobFile(final OpenShopProblemBuilder builder, final File jobFile) throws IOException {
+
+		final int numWorkcentersDefinedInBuilder = builder.getWorkcenters().size();
+
+		if (jobFile == null || !jobFile.exists()) {
+			throw new IllegalArgumentException("Cannot read job file \"" + jobFile + "\"");
+		}
+
 		/* read job file
 		 * 1st line is number of jobs
 		 * 2nd line is number of work centers
@@ -97,25 +139,22 @@ public class OpenShopProblemReader {
 		List<String> jobFileLines = FileUtil.readFileAsList(jobFile);
 		final int numJobs = Integer.parseInt(jobFileLines.remove(0));
 		final int numWorkcentersHere = Integer.parseInt(jobFileLines.remove(0));
-		if (numWorkcenters != numWorkcentersHere) {
-			throw new IllegalArgumentException("Number of work centers in setup file is " + numWorkcenters + " but in job description is " + numWorkcentersHere);
+		if (numWorkcentersDefinedInBuilder != numWorkcentersHere) {
+			throw new IllegalArgumentException("Number of work centers in setup file is " + numWorkcentersDefinedInBuilder + " but in job description is " + numWorkcentersHere);
 		}
 		int opIndex = 1;
 		for (int i = 0; i < numJobs; i++) {
 			String jobId = "J" + (i + 1);
 			String line = jobFileLines.remove(0);
 			String[] processTimeParts = line.replace("|", " ").trim().split(" ");
-			if (processTimeParts.length != (numWorkcenters)) { // add one field for the first and last pipe respectively
-				throw new IllegalArgumentException("Ill-defined job specification \"" + line + "\" for " + numWorkcenters + " work centers. Split length is " + processTimeParts.length + ": " + Arrays.toString(processTimeParts));
+			if (processTimeParts.length != (numWorkcentersDefinedInBuilder)) { // add one field for the first and last pipe respectively
+				throw new IllegalArgumentException("Ill-defined job specification \"" + line + "\" for " + numWorkcentersDefinedInBuilder + " work centers. Split length is " + processTimeParts.length + ": " + Arrays.toString(processTimeParts));
 			}
 			builder.withJob(jobId, 0, Integer.MAX_VALUE, 1);
-			for (int j = 0; j < numWorkcenters; j++) {
+			for (int j = 0; j < numWorkcentersDefinedInBuilder; j++) {
 				builder.withOperationForJob("O" + opIndex, jobId, Integer.parseInt(processTimeParts[j]), j + 1, "W" + (j + 1)); // the status is j + 1, because status 0 is the inital state
 				opIndex++;
 			}
 		}
-
-		/* build the problem */
-		return builder.withMetric(metric).build();
 	}
 }

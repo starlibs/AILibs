@@ -67,4 +67,11 @@ public class OpenShopMachineSelectionState extends OpenShopState {
 		}
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "OpenShopMachineSelectionState [parent=" + this.parent + ", operationSelectedInParent=" + this.operationSelectedInParent + "]";
+	}
+
+
 }

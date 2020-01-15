@@ -80,6 +80,7 @@ public class OpenShopProblem {
 			sb.append("\n\n");
 			for (Workcenter w : this.workcenters.values().stream().sorted((w1,w2) -> w1.getWorkcenterID().compareTo(w2.getWorkcenterID())).collect(Collectors.toList())) {
 				sb.append(w.getWorkcenterID());
+				sb.append(" (" + w.getMachines().size() + " machines)");
 				sb.append("\n");
 				for (Machine m : w.getMachines()) {
 					sb.append("Machine: \t" + m.getMachineID());

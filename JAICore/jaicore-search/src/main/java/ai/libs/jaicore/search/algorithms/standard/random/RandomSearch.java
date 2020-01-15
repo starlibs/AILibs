@@ -271,7 +271,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IGraphSearchInpu
 		}
 	}
 
-	public void appendPathToNode(final IPath<N, A> path) {
+	public void appendPathToModel(final IPath<N, A> path) {
 		IPath<N, A> cPath = new SearchGraphPath<>(path.getRoot());
 		for (N node : path.getNodes()) {
 			if (!this.exploredGraph.getItems().contains(node)) {

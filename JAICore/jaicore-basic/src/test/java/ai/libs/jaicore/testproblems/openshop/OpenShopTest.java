@@ -1,6 +1,7 @@
 package ai.libs.jaicore.testproblems.openshop;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -60,9 +61,9 @@ public class OpenShopTest {
 		OpenShopProblemBuilder builder = new OpenShopProblemBuilder();
 
 		/* setup work centers */
-		final int[][] setupMatrix1 = new int[][] {{1, 2, 1}, {1, 1, 2}, {2, 1, 3}};
-		final int[][] setupMatrix2 = new int[][] {{1, 2, 1}, {1, 1, 2}, {2, 1, 3}};
-		final int[][] setupMatrix3 = new int[][] {{1, 2, 1}, {1, 1, 2}, {2, 1, 3}};
+		final int[][] setupMatrix1 = new int[][] {{0, 2, 1}, {1, 0, 2}, {2, 1, 0}};
+		final int[][] setupMatrix2 = new int[][] {{0, 2, 1}, {1, 0, 2}, {2, 1, 0}};
+		final int[][] setupMatrix3 = new int[][] {{0, 2, 1}, {1, 0, 2}, {2, 1, 0}};
 		builder.withWorkcenter(W_1, setupMatrix1).withMachineForWorkcenter(M_1, W_1, 2, 1).withMachineForWorkcenter(M_2, W_1, 2, 0);
 		builder.withWorkcenter(W_2, setupMatrix2).withMachineForWorkcenter(M_3, W_2, 8, 0);
 		builder.withWorkcenter(W_3, setupMatrix3).withMachineForWorkcenter(M_4, W_3, 2, 1).withMachineForWorkcenter(M_5, W_3, 6, 1);
@@ -90,7 +91,7 @@ public class OpenShopTest {
 		OpenShopProblem problem = problemBuilder.fork().withMetric(OpenShopMetric.TOTALFLOWTIME).build();
 		problem.printWorkcenters();
 		problem.printJobs();
-		System.out.println(solution.getGanttAsString());
+		System.out.println(solution.getAsString());
 		assertEquals(7, problem.getOperations().size());
 		assertEquals(5, problem.getMachines().size());
 		assertEquals(3, problem.getJobs().size());
@@ -99,7 +100,7 @@ public class OpenShopTest {
 
 	private OpenShopProblem getSingleOperationProblem(final int availability, final int setupTime, final int processTime, final boolean correctState) {
 		OpenShopProblemBuilder pb = new OpenShopProblemBuilder();
-		pb.withWorkcenter(W_1, new int[][] {{1, setupTime}, {setupTime, 1}}).withMachineForWorkcenter(M_1, W_1, availability, 0);
+		pb.withWorkcenter(W_1, new int[][] {{0, setupTime}, {setupTime, 0}}).withMachineForWorkcenter(M_1, W_1, availability, 0);
 		pb.withJob(J_1, 0, 10, 1).withOperationForJob(O_1, J_1, processTime, correctState ? 0 : 1, W_1);
 		pb.withMetric(OpenShopMetric.MAKESPAN);
 		return pb.build();
@@ -107,10 +108,28 @@ public class OpenShopTest {
 
 	private OpenShopProblem getTwoOperationProblem(final int availability, final int setupTime, final int processTime1, final int processTime2, final boolean correctState) {
 		OpenShopProblemBuilder pb = new OpenShopProblemBuilder();
-		pb.withWorkcenter(W_1, new int[][] {{1, setupTime}, {setupTime, 1}}).withMachineForWorkcenter(M_1, W_1, availability, 0);
+		pb.withWorkcenter(W_1, new int[][] {{0, setupTime}, {setupTime, 0}}).withMachineForWorkcenter(M_1, W_1, availability, 0);
 		pb.withJob(J_1, 0, 10, 1).withOperationForJob(O_1, J_1, processTime1, 0, W_1).withOperationForJob(O_2, J_1, processTime2, correctState ? 0 : 1, W_1);
 		pb.withMetric(OpenShopMetric.MAKESPAN);
 		return pb.build();
+	}
+
+	@Test
+	public void testNonActiveScheduleDetection() {
+
+		/* create problem with two work centers (one machine each) and two jobs (with two operations each) */
+		OpenShopProblemBuilder pb = new OpenShopProblemBuilder();
+		pb.withWorkcenter(W_1, new int[][] {{0}}).withMachineForWorkcenter(M_1, W_1, 0, 0);
+		pb.withWorkcenter(W_2, new int[][] {{0}}).withMachineForWorkcenter(M_2, W_2, 0, 0);
+		int processTime = 1;
+		pb.withJob(J_1, 0, 10, 1).withOperationForJob(O_1, J_1, processTime, 0, W_1).withOperationForJob(O_2, J_1, processTime, 0, W_2);
+		pb.withJob(J_2, 0, 10, 1).withOperationForJob(O_3, J_2, processTime, 0, W_1).withOperationForJob(O_4, J_2, processTime, 0, W_2);
+		pb.withMetric(OpenShopMetric.MAKESPAN);
+
+		/* now create a stupid (non-active) allocation */
+		Schedule s = new ScheduleBuilder(pb.build()).assign(O_1, M_1).assign(O_2, M_2).assign(O_4, M_2).assign(O_3, M_1).build();
+		System.out.println(s.getGanttAsString());
+		assertFalse(s.isActive());
 	}
 
 	@Test

@@ -338,7 +338,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 		/* make sure that the completer has the path from the root to the node in question and that the f-values of the nodes above are added to the map */
 		if (!this.completer.knowsNode(n.getHead())) {
 			synchronized (this.completer) {
-				this.completer.appendPathToNode(n);
+				this.completer.appendPathToModel(n);
 			}
 			BackPointerPath<T, A, ?> current = n.getParent();
 			while (current != null && !this.fValues.containsKey(current)) {

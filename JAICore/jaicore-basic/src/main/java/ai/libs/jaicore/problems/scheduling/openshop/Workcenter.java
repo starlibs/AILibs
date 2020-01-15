@@ -17,6 +17,11 @@ public class Workcenter {
 	Workcenter(final String workcenterID,  final int[][] setupMatrix) {
 		super();
 		this.workcenterID = workcenterID;
+		for (int i = 0; i < setupMatrix.length; i++) {
+			if (setupMatrix[i][i] != 0) {
+				throw new IllegalArgumentException("The diagonal entries of the setup matrix must always be 0.");
+			}
+		}
 		this.setupMatrix = setupMatrix;
 	}
 
