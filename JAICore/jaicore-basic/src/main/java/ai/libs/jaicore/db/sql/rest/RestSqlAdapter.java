@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -42,13 +43,28 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 	private final IRestDatabaseConfig config;
 	private final ISQLQueryBuilder queryBuilder = new MySQLQueryBuilder();
 	private Logger logger = LoggerFactory.getLogger(RestSqlAdapter.class);
+	private final String host;
+	private final String querySuffix;
+	private final String selectSuffix;
+	private final String insertSuffix;
+	private final String updateSuffix;
 
 	public RestSqlAdapter(final IRestDatabaseConfig config) {
 		this.config = config;
+		this.host = this.config.getHost();
+		this.querySuffix = config.getQuerySuffix();
+		this.selectSuffix = config.getSelectSuffix();
+		this.updateSuffix = config.getUpdateSuffix();
+		this.insertSuffix = config.getInsertSuffix();
+		Objects.requireNonNull(this.host);
+		Objects.requireNonNull(this.insertSuffix);
+		Objects.requireNonNull(this.updateSuffix);
+		Objects.requireNonNull(this.selectSuffix);
+		Objects.requireNonNull(this.querySuffix);
 	}
 
 	public List<IKVStore> select(final String query) throws SQLException {
-		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getSelectSuffix(), query);
+		JsonNode res = this.executeRESTCall(this.host + this.selectSuffix, query);
 		return KVStoreUtil.readFromJson(res);
 	}
 
@@ -63,7 +79,7 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 	}
 
 	public int[] insert(final String query) throws SQLException {
-		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getInsertSuffix(), query);
+		JsonNode res = this.executeRESTCall(this.host + this.insertSuffix, query);
 		if (res instanceof ArrayNode) {
 			ArrayNode array = (ArrayNode) res;
 			return IntStream.range(0, array.size()).map(i -> array.get(i).asInt()).toArray();
@@ -74,13 +90,13 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 
 	@Override
 	public int update(final String query) throws SQLException {
-		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getUpdateSuffix(), query);
+		JsonNode res = this.executeRESTCall(this.host + this.updateSuffix, query);
 		return res.asInt();
 	}
 
 	@Override
 	public List<IKVStore> query(final String query) throws SQLException {
-		JsonNode res = this.executeRESTCall(this.config.getHost() + this.config.getQuerySuffix(), query);
+		JsonNode res = this.executeRESTCall(this.host + this.querySuffix, query);
 		return KVStoreUtil.readFromJson(res);
 	}
 
@@ -128,12 +144,12 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 
 	@Override
 	public String getLoggerName() {
-		throw new UnsupportedOperationException();
+		return this.logger.getName();
 	}
 
 	@Override
 	public void setLoggerName(final String name) {
-		throw new UnsupportedOperationException();
+		this.logger = LoggerFactory.getLogger(name);
 	}
 
 	@Override
