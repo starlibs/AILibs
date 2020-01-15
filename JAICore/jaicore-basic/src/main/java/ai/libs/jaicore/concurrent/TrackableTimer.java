@@ -39,36 +39,54 @@ public class TrackableTimer extends Timer implements ICancelable {
 		super(name);
 	}
 
-	@Override
+	/**
+	 * @deprecated({@link TrackableTimer} do not allow to schedule ordinary {@link TimerTask} objects but only {@link TrackableTimerTask} objects)
+	 */
 	@Deprecated
+	@Override
 	public void schedule(final TimerTask task, final Date time) {
 		throw new UnsupportedOperationException(MSG_ERROR);
 	}
 
+	/**
+	 * @deprecated({@link TrackableTimer} do not allow to schedule ordinary {@link TimerTask} objects but only {@link TrackableTimerTask} objects)
+	 */
 	@Override
 	@Deprecated
 	public void schedule(final TimerTask task, final Date time, final long period) {
 		throw new UnsupportedOperationException(MSG_ERROR);
 	}
 
+	/**
+	 * @deprecated({@link TrackableTimer} do not allow to schedule ordinary {@link TimerTask} objects but only {@link TrackableTimerTask} objects)
+	 */
 	@Override
 	@Deprecated
 	public void schedule(final TimerTask task, final long delay) {
 		throw new UnsupportedOperationException(MSG_ERROR);
 	}
 
+	/**
+	 * @deprecated({@link TrackableTimer} do not allow to schedule ordinary {@link TimerTask} objects but only {@link TrackableTimerTask} objects)
+	 */
 	@Override
 	@Deprecated
 	public void schedule(final TimerTask task, final long delay, final long period) {
 		throw new UnsupportedOperationException(MSG_ERROR);
 	}
 
+	/**
+	 * @deprecated({@link TrackableTimer} do not allow to schedule ordinary {@link TimerTask} objects but only {@link TrackableTimerTask} objects)
+	 */
 	@Override
 	@Deprecated
 	public void scheduleAtFixedRate(final TimerTask task, final Date firstTime, final long period) {
 		throw new UnsupportedOperationException(MSG_ERROR);
 	}
 
+	/**
+	 * @deprecated({@link TrackableTimer} do not allow to schedule ordinary {@link TimerTask} objects but only {@link TrackableTimerTask} objects)
+	 */
 	@Override
 	@Deprecated
 	public void scheduleAtFixedRate(final TimerTask task, final long delay, final long period) {
@@ -77,35 +95,47 @@ public class TrackableTimer extends Timer implements ICancelable {
 
 	public void schedule(final TrackableTimerTask task, final Date time) {
 		super.schedule(task, time);
-		this.scheduledSingleInvocationTasks.add(task);
+		synchronized (this.scheduledSingleInvocationTasks) {
+			this.scheduledSingleInvocationTasks.add(task);
+		}
 	}
 
 	public void schedule(final TrackableTimerTask task, final Date time, final long period) {
 		super.schedule(task, time, period);
-		this.scheduledReocurringTasks.add(task);
+		synchronized (this.scheduledReocurringTasks) {
+			this.scheduledReocurringTasks.add(task);
+		}
 		this.ratesOfReocurringTasks.put(task, period);
 	}
 
 	public void schedule(final TrackableTimerTask task, final long delay) {
 		super.schedule(task, delay);
-		this.scheduledSingleInvocationTasks.add(task);
+		synchronized (this.scheduledSingleInvocationTasks) {
+			this.scheduledSingleInvocationTasks.add(task);
+		}
 	}
 
 	public void schedule(final TrackableTimerTask task, final long delay, final long period) {
 		super.schedule(task, delay, period);
-		this.scheduledReocurringTasks.add(task);
+		synchronized (this.scheduledReocurringTasks) {
+			this.scheduledReocurringTasks.add(task);
+		}
 		this.ratesOfReocurringTasks.put(task, period);
 	}
 
 	public void scheduleAtFixedRate(final TrackableTimerTask task, final Date firstTime, final long period) {
 		super.scheduleAtFixedRate(task, firstTime, period);
-		this.scheduledReocurringTasks.add(task);
+		synchronized (this.scheduledReocurringTasks) {
+			this.scheduledReocurringTasks.add(task);
+		}
 		this.ratesOfReocurringTasks.put(task, period);
 	}
 
 	public void scheduleAtFixedRate(final TrackableTimerTask task, final long delay, final long period) {
 		super.scheduleAtFixedRate(task, delay, period);
-		this.scheduledReocurringTasks.add(task);
+		synchronized (this.scheduledReocurringTasks) {
+			this.scheduledReocurringTasks.add(task);
+		}
 		this.ratesOfReocurringTasks.put(task, period);
 	}
 
@@ -139,7 +169,11 @@ public class TrackableTimer extends Timer implements ICancelable {
 	}
 
 	public List<TrackableTimerTask> getActiveTasks() {
-		return SetUtil.union(this.scheduledSingleInvocationTasks, this.scheduledReocurringTasks).stream().filter(this::willTaskBeExecutedInFuture).collect(Collectors.toList());
+		synchronized (this.scheduledSingleInvocationTasks) {
+			synchronized (this.scheduledReocurringTasks) {
+				return SetUtil.union(this.scheduledSingleInvocationTasks, this.scheduledReocurringTasks).stream().filter(this::willTaskBeExecutedInFuture).collect(Collectors.toList());
+			}
+		}
 	}
 
 	public int getNumberOfActiveTasks() {

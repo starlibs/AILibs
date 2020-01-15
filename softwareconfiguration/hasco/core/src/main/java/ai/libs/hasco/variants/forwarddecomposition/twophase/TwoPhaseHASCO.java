@@ -190,7 +190,9 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			} catch (AlgorithmTimeoutedException e) {
 				this.logger.warn("HASCO has timeouted. In fact, time to deadline is {}ms", this.getTimeout().milliseconds() - (System.currentTimeMillis() - this.timeOfStart));
 			} finally {
-				this.phase1CancellationTask.cancel();
+				if (this.phase1CancellationTask != null) {
+					this.phase1CancellationTask.cancel();
+				}
 			}
 			this.secondsSpentInPhase1 = (int) Math.round(System.currentTimeMillis() - this.timeOfStart / 1000.0);
 
