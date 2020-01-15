@@ -22,15 +22,6 @@ addons:
 script:
   - ./gradlew compileJava
   - ./gradlew testClasses
-#  - ./gradlew --continue JAICore:jaicore-basic:test
-  - ./gradlew --continue JAICore:jaicore-ea:test
-  - ./gradlew --continue JAICore:jaicore-experiments:test
-  - ./gradlew --continue JAICore:jaicore-logic:test
-  - ./gradlew --continue JAICore:jaicore-math:test
-#  - ./gradlew --continue JAICore:jaicore-ml:test
-#  - ./gradlew --continue JAICore:jaicore-ml-weka:test
-  - ./gradlew --continue JAICore:jaicore-planning:test
-#  - ./gradlew --continue JAICore:jaicore-search:test
   - git fetch --no-tags --unshallow https://github.com/fmohr/AILibs.git +master:refs/heads/master
   - git fetch --no-tags https://github.com/fmohr/AILibs.git +dev:refs/heads/dev
   - ./gradlew sonarqube -x test
