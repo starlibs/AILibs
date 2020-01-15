@@ -22,9 +22,10 @@ addons:
 script:
   - ./gradlew compileJava
   - ./gradlew testClasses
+  - ./gradlew --continue test
   - git fetch --no-tags --unshallow https://github.com/fmohr/AILibs.git +master:refs/heads/master
   - git fetch --no-tags https://github.com/fmohr/AILibs.git +dev:refs/heads/dev
-  - ./gradlew sonarqube -x test
+  - ./gradlew sonarqube
 
 env:
   global:
