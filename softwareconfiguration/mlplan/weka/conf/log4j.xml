@@ -156,7 +156,7 @@
   
   <!-- configuration for example classes -->
   <logger name="example">
-    <level value="debug" />
+    <level value="info" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -167,7 +167,7 @@
   
   <!-- configuration for ML-Plan Test logging -->
   <logger name="testedalgorithm">
-    <level value="trace" />
+    <level value="warn" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -177,33 +177,33 @@
   </logger>
   
   <logger name="testedalgorithm.searchselectsplitter.sampler">
-  	<level value="info" />
+  	<level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search">
-    <level value="debug" />
+    <level value="warn" />
   </logger>
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
-    <level value="debug" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.randomsearch">
-  	<level value="info" />
+  	<level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary">
-  	<level value="debug" />
+  	<level value="warn" />
   </logger>
 </log4j:configuration>
