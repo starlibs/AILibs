@@ -19,10 +19,10 @@ import org.junit.runners.Parameterized.Parameters;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.problems.nqueens.NQueensProblem;
 import ai.libs.jaicore.search.algorithms.standard.dfs.TinyDepthFirstSearch;
-import ai.libs.jaicore.search.exampleproblems.nqueens.NQueensToGraphSearchReducer;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness;
+import ai.libs.jaicore.search.testproblems.nqueens.NQueensToGraphSearchReducer;
 
 @RunWith(Parameterized.class)
 public class BestFirstSearchRuntimeTest {
@@ -31,7 +31,7 @@ public class BestFirstSearchRuntimeTest {
 	public static Collection<Object[]> data() {
 		List<Object> problemSets = new ArrayList<>();
 		NQueensToGraphSearchReducer nQueensReducer = new NQueensToGraphSearchReducer();
-		for (int i = 4; i < 16; i++) {
+		for (int i = 7; i <= 10; i++) {
 			problemSets.add(nQueensReducer.encodeProblem(new NQueensProblem(i)));
 		}
 

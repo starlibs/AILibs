@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.search.algorithms.standard.mcts.ActionPredictionFailedException;
 import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
@@ -56,7 +56,7 @@ public class FixedCommitmentPolicy<N, A> implements IPathUpdatablePolicy<N, A, D
 	}
 
 	@Override
-	public void updatePath(final IPath<N, A> path, final Double playout, final int pathLength) {
+	public void updatePath(final ILabeledPath<N, A> path, final Double playout, final int pathLength) {
 		for (N node : path.getNodes()) {
 			DescriptiveStatistics statsOfNode = this.observationsPerNode.computeIfAbsent(node, n -> new DescriptiveStatistics());
 			statsOfNode.addValue(playout);

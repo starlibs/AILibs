@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
@@ -105,7 +105,7 @@ public class LabeledGraph<T, L> extends Graph<T> {
 		}
 	}
 
-	public void addPath(final IPath<T, L> path) {
+	public void addPath(final ILabeledPath<T, L> path) {
 		List<T> nodes = path.getNodes();
 		List<L> labels = path.getArcs();
 		int n = nodes.size();

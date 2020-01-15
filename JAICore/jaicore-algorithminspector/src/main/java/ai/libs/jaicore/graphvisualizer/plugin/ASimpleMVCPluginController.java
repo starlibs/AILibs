@@ -3,7 +3,7 @@ package ai.libs.jaicore.graphvisualizer.plugin;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +15,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel<?, ?>, V extends ASimpleMVCPluginView<?, ?, ?>> extends Thread implements IGUIPluginController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ASimpleMVCPluginController.class);
-	private final Queue<PropertyProcessedAlgorithmEvent> eventQueue;
+	private final Queue<IPropertyProcessedAlgorithmEvent> eventQueue;
 
 	private final V view;
 	private final M model;
@@ -36,14 +36,14 @@ public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel
 	}
 
 	@Override
-	public final void handleSerializableAlgorithmEvent(final PropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
+	public final void handleSerializableAlgorithmEvent(final IPropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
 		this.eventQueue.add(algorithmEvent);
 	}
 
 	@Override
 	public void run() {
 		while (true) {
-			PropertyProcessedAlgorithmEvent event = this.eventQueue.poll();
+			IPropertyProcessedAlgorithmEvent event = this.eventQueue.poll();
 			if (event != null) {
 				try {
 					this.handleAlgorithmEventInternally(event);
@@ -54,7 +54,7 @@ public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel
 		}
 	}
 
-	protected abstract void handleAlgorithmEventInternally(PropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException;
+	protected abstract void handleAlgorithmEventInternally(IPropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException;
 
 	@Override
 	public void handleGUIEvent(final GUIEvent guiEvent) {

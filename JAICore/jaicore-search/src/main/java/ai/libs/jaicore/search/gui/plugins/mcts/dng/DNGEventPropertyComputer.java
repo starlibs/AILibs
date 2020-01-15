@@ -1,6 +1,6 @@
 package ai.libs.jaicore.search.gui.plugins.mcts.dng;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyComputationFailedException;
@@ -19,7 +19,7 @@ public class DNGEventPropertyComputer implements AlgorithmEventPropertyComputer 
 	}
 
 	@Override
-	public Object computeAlgorithmEventProperty(final AlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
+	public Object computeAlgorithmEventProperty(final IAlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
 		if (algorithmEvent instanceof DNGQSampleEvent) {
 			DNGQSampleEvent<?,?> dngEvent = (DNGQSampleEvent<?,?>) algorithmEvent;
 			String idOfNode = this.nodeInfoAlgorithmEventPropertyComputer.getIdOfNodeIfExistent(dngEvent.getNode());

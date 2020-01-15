@@ -10,17 +10,17 @@ import java.util.stream.Collectors;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.common.event.IRelaxedEventEmitter;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
-import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.search.algorithms.standard.mcts.ActionPredictionFailedException;
 import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
@@ -37,7 +37,7 @@ import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
  * @param <N>
  * @param <A>
  */
-public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILoggingCustomizable, IEventEmitter {
+public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILoggingCustomizable, IRelaxedEventEmitter {
 
 	private Logger logger = LoggerFactory.getLogger(DNGPolicy.class);
 	private EventBus eventBus = new EventBus();
@@ -56,11 +56,11 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	private final Map<N, DescriptiveStatistics> statsPerNode = new HashMap<>();
 	private final Map<String, Integer> winsPerMetric = new HashMap<>();
 
-	private final NodeGoalTester<N, A> goalTester;
+	private final INodeGoalTester<N, A> goalTester;
 	private final IObjectEvaluator<N, Double> leafNodeEvaluator;
 	private final double varianceFactor;
 
-	public DNGPolicy(final NodeGoalTester<N, A> goalTester, final IObjectEvaluator<N, Double> leafNodeEvaluator, final double varianceFactor, final double lambda) {
+	public DNGPolicy(final INodeGoalTester<N, A> goalTester, final IObjectEvaluator<N, Double> leafNodeEvaluator, final double varianceFactor, final double lambda) {
 		super();
 		this.goalTester = goalTester;
 		this.leafNodeEvaluator = leafNodeEvaluator;
@@ -88,7 +88,7 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	 * In fact, without inner rewards and without discounting, this just amounts to use the playout score
 	 * for all nodes on the path, which can be done in a simple loop.
 	 */
-	public void updatePath(final IPath<N, A> path, final Double playoutScore, final int lengthOfPlayoutPath) {
+	public void updatePath(final ILabeledPath<N, A> path, final Double playoutScore, final int lengthOfPlayoutPath) {
 		for (N node : path.getNodes()) {
 			double lambdaOfN = this.lambda.computeIfAbsent(node, n -> this.initLambda);
 			double muOfN = this.mu.computeIfAbsent(node, n -> this.initMu);
@@ -96,7 +96,7 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 			this.beta.put(node, this.beta.computeIfAbsent(node, n -> this.initBeta) + (lambdaOfN * Math.pow(playoutScore - muOfN, 2) / (lambdaOfN + 1)) / 2);
 			this.mu.put(node, (muOfN * lambdaOfN + playoutScore) / (lambdaOfN + 1));
 			this.lambda.put(node, lambdaOfN + 1);
-			this.eventBus.post(new DNGBeliefUpdateEvent<N>("", node, this.mu.get(node), this.alpha.get(node), this.beta.get(node), this.lambda.get(node)));
+			this.eventBus.post(new DNGBeliefUpdateEvent<N>(null, node, this.mu.get(node), this.alpha.get(node), this.beta.get(node), this.lambda.get(node)));
 			if (this.metricTracking) {
 				this.statsPerNode.computeIfAbsent(node, n -> new DescriptiveStatistics()).addValue(playoutScore);
 			}
@@ -138,13 +138,13 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 
 		for (Entry<A, N> actionStatePair : actions.entrySet()) {
 			double score = this.getQValue(state, actionStatePair.getValue());
-			if (metricTracking) {
-			DescriptiveStatistics stats = this.statsPerNode.get(actionStatePair.getValue());
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Sampled score {} for action {} with successor {}. Stats for this node is min/mean (believed)/max {}/{} ({})/{} with {} visits. Deviation in estimation: {}", score, actionStatePair.getKey(), actionStatePair.getValue(), stats.getMin(), stats.getMean(), this.mu.get(actionStatePair.getValue()), stats.getMax(), stats.getN(), this.mu.get(actionStatePair.getValue()) - stats.getMean());
+			if (this.metricTracking) {
+				DescriptiveStatistics stats = this.statsPerNode.get(actionStatePair.getValue());
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("Sampled score {} for action {} with successor {}. Stats for this node is min/mean (believed)/max {}/{} ({})/{} with {} visits. Deviation in estimation: {}", score, actionStatePair.getKey(), actionStatePair.getValue(), stats.getMin(), stats.getMean(), this.mu.get(actionStatePair.getValue()), stats.getMax(), stats.getN(), this.mu.get(actionStatePair.getValue()) - stats.getMean());
+				}
 			}
-			}
-			this.eventBus.post(new DNGQSampleEvent<N, A>("", state, actionStatePair.getValue(), actionStatePair.getKey(), score));
+			this.eventBus.post(new DNGQSampleEvent<N, A>(null, state, actionStatePair.getValue(), actionStatePair.getKey(), score));
 			if (score < bestScore) {
 				bestAction = actionStatePair.getKey();
 				bestScore = score;

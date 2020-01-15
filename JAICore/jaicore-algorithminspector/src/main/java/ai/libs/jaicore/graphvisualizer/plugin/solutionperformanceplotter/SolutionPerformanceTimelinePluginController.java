@@ -1,8 +1,7 @@
 package ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter;
 
-import org.api4.java.algorithm.events.ScoredSolutionCandidateFoundEvent;
-import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
-import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.algorithm.events.result.IScoredSolutionCandidateFoundEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +10,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
 import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
-public class SolutionPerformanceTimelinePluginController extends ASimpleMVCPluginController<SolutionPerformanceTimelinePluginModel, SolutionPerformanceTimelinePluginView> implements ILoggingCustomizable {
+public class SolutionPerformanceTimelinePluginController extends ASimpleMVCPluginController<SolutionPerformanceTimelinePluginModel, SolutionPerformanceTimelinePluginView> {
 
 	private Logger logger = LoggerFactory.getLogger(SolutionPerformanceTimelinePlugin.class);
 
@@ -27,8 +26,8 @@ public class SolutionPerformanceTimelinePluginController extends ASimpleMVCPlugi
 	}
 
 	@Override
-	public void handleAlgorithmEventInternally(final PropertyProcessedAlgorithmEvent algorithmEvent) {
-		if (algorithmEvent.correspondsToEventOfClass(ScoredSolutionCandidateFoundEvent.class)) {
+	public void handleAlgorithmEventInternally(final IPropertyProcessedAlgorithmEvent algorithmEvent) {
+		if (algorithmEvent.correspondsToEventOfClass(IScoredSolutionCandidateFoundEvent.class)) {
 
 			this.logger.debug("Received solution event {}", algorithmEvent);
 
@@ -37,7 +36,7 @@ public class SolutionPerformanceTimelinePluginController extends ASimpleMVCPlugi
 				ScoredSolutionCandidateInfo scoredSolutionCandidateInfo = (ScoredSolutionCandidateInfo) rawScoredSolutionCandidateInfo;
 
 				try {
-					this.logger.debug("Adding solution found at timestamp {} to model and updating view.", algorithmEvent.getTimestampOfEvent());
+					this.logger.debug("Adding solution to model and updating view.");
 					this.getModel().addEntry(algorithmEvent.getTimestampOfEvent(), this.parseScoreToDouble(scoredSolutionCandidateInfo.getScore()));
 					this.logger.debug("Added solution to model.");
 				} catch (NumberFormatException exception) {
@@ -49,16 +48,6 @@ public class SolutionPerformanceTimelinePluginController extends ASimpleMVCPlugi
 
 	private double parseScoreToDouble(final String score) throws NumberFormatException {
 		return Double.parseDouble(score);
-	}
-
-	@Override
-	public String getLoggerName() {
-		return this.logger.getName();
-	}
-
-	@Override
-	public void setLoggerName(final String name) {
-		this.logger = LoggerFactory.getLogger(name);
 	}
 
 }

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.graph.LabeledGraph;
 import ai.libs.jaicore.search.algorithms.standard.mcts.ActionPredictionFailedException;
@@ -60,7 +60,7 @@ public class EnsembleTreePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	}
 
 	@Override
-	public void updatePath(final IPath<N, A> path, final Double playoutScore, final int lengthOfPlayoutPath) {
+	public void updatePath(final ILabeledPath<N, A> path, final Double playoutScore, final int lengthOfPlayoutPath) {
 		for (IPathUpdatablePolicy<N, A, Double> policy : this.treePolicies) {
 			policy.updatePath(path, playoutScore, lengthOfPlayoutPath);
 		}

@@ -1,11 +1,11 @@
 package ai.libs.jaicore.search.exampleproblems.enhancedttsp.binarytelescope;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPBinaryTelescopeNode;
 
-public class EnhancedTTSPBinaryTelescopeSolutionPredicate implements NodeGoalTester<EnhancedTTSPBinaryTelescopeNode, String> {
+public class EnhancedTTSPBinaryTelescopeSolutionPredicate implements INodeGoalTester<EnhancedTTSPBinaryTelescopeNode, String> {
 	private EnhancedTTSP problem;
 
 	public EnhancedTTSPBinaryTelescopeSolutionPredicate(final EnhancedTTSP problem) {

@@ -17,30 +17,33 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
-import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.ICancelableNodeEvaluator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.ICancelablePathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyUncertaintyAnnotatingPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IUncertaintySource;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
+import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.ENodeAnnotation;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
@@ -55,9 +58,9 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 import ai.libs.jaicore.timing.TimedComputation;
 
 public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, A, V>
-implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V>, ICancelableNodeEvaluator, IPotentiallyUncertaintyAnnotatingPathEvaluator<T, A, V>, ILoggingCustomizable {
+implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V>, ICancelablePathEvaluator, IPotentiallyUncertaintyAnnotatingPathEvaluator<T, A, V>, ILoggingCustomizable {
 
-	private static final String ALGORITHM_ID = "RandomCompletion";
+	private static final IAlgorithm<?, ?> ALGORITHM = null;
 	private static final boolean LOG_FAILURES_AS_ERRORS = false;
 
 	private String loggerName;
@@ -66,19 +69,18 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 	private final int timeoutForSingleCompletionEvaluationInMS;
 
 	protected Set<List<T>> unsuccessfulPaths = Collections.synchronizedSet(new HashSet<>());
-	protected Set<IPath<T, A>> postedSolutions = new HashSet<>();
+	protected Set<ILabeledPath<T, A>> postedSolutions = new HashSet<>();
 	protected Map<List<T>, Integer> timesToComputeEvaluations = new HashMap<>();
 
-	/* caches and statistics */
 	protected Map<List<T>, V> scoresOfSolutionPaths = new ConcurrentHashMap<>();
-	protected Map<IPath<T, A>, V> fValues = new ConcurrentHashMap<>();
+	protected Map<ILabeledPath<T, A>, V> fValues = new ConcurrentHashMap<>();
 	protected Map<String, Integer> ppFails = new ConcurrentHashMap<>();
 	protected Map<String, Integer> plFails = new ConcurrentHashMap<>();
 	protected Map<String, Integer> plSuccesses = new ConcurrentHashMap<>();
-	private List<Integer> completionTimes = new ArrayList<>();
 
+	protected T root;
 	protected IGraphGenerator<T, A> generator;
-	protected PathGoalTester<T, A> goalTester;
+	protected IPathGoalTester<T, A> goalTester;
 	protected long timestampOfFirstEvaluation;
 
 	/* algorithm parameters */
@@ -89,26 +91,26 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 
 	private RandomSearch<T, A> completer;
 	private final Semaphore completerInsertionSemaphore = new Semaphore(0); // this is required since the step-method of the completer is asynchronous
-	protected final IObjectEvaluator<IPath<T, A>, V> solutionEvaluator;
+	protected final IObjectEvaluator<ILabeledPath<T, A>, V> solutionEvaluator;
 	protected IUncertaintySource<T, A, V> uncertaintySource;
 	protected SolutionEventBus<T> eventBus = new SolutionEventBus<>();
 	private final Map<List<T>, V> bestKnownScoreUnderNodeInCompleterGraph = new HashMap<>();
 	private boolean visualizeSubSearch;
 
-	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final IObjectEvaluator<IPath<T, A>, V> solutionEvaluator) {
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final IObjectEvaluator<ILabeledPath<T, A>, V> solutionEvaluator) {
 		this(random, samples, samples, solutionEvaluator, -1, -1);
 	}
 
-	public RandomCompletionBasedNodeEvaluator(final Random random, final int desiredNumberOfSuccessfulSamples, final int maxSamples, final IObjectEvaluator<IPath<T, A>, V> solutionEvaluator) {
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int desiredNumberOfSuccessfulSamples, final int maxSamples, final IObjectEvaluator<ILabeledPath<T, A>, V> solutionEvaluator) {
 		this(random, desiredNumberOfSuccessfulSamples, maxSamples, solutionEvaluator, -1, -1);
 	}
 
-	public RandomCompletionBasedNodeEvaluator(final Random random, final int desiredNumberOfSuccessfulSamples, final int maxSamples, final IObjectEvaluator<IPath<T, A>, V> solutionEvaluator,
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int desiredNumberOfSuccessfulSamples, final int maxSamples, final IObjectEvaluator<ILabeledPath<T, A>, V> solutionEvaluator,
 			final int timeoutForSingleCompletionEvaluationInMS, final int timeoutForNodeEvaluationInMS) {
 		this(random, desiredNumberOfSuccessfulSamples, maxSamples, solutionEvaluator, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, null);
 	}
 
-	public RandomCompletionBasedNodeEvaluator(final Random random, final int desiredNumberOfSuccessfulSamples, final int maxSamples, final IObjectEvaluator<IPath<T, A>, V> solutionEvaluator,
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int desiredNumberOfSuccessfulSamples, final int maxSamples, final IObjectEvaluator<ILabeledPath<T, A>, V> solutionEvaluator,
 			final int timeoutForSingleCompletionEvaluationInMS, final int timeoutForNodeEvaluationInMS, final Predicate<T> priorityPredicateForRDFS) {
 		super(timeoutForNodeEvaluationInMS);
 		if (random == null) {
@@ -148,13 +150,13 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected V fTimeouted(final IPath<T, A> path, final int timeout) throws InterruptedException, PathEvaluationException {
+	protected V fTimeouted(final ILabeledPath<T, A> path, final int timeout) throws InterruptedException, PathEvaluationException {
 		assert this.generator != null : "Cannot compute f as no generator has been set!";
 		if (!(path instanceof BackPointerPath)) {
 			throw new IllegalArgumentException("Random Completer currently can only work with backpointer-based paths.");
 		}
 		BackPointerPath<T, A, V> n = (BackPointerPath<T, A, V>) path;
-		this.eventBus.post(new NodeAnnotationEvent<>(ALGORITHM_ID, n.getHead(), "f-computing thread", Thread.currentThread().getName()));
+		this.eventBus.post(new NodeAnnotationEvent<>(ALGORITHM, n.getHead(), "f-computing thread", Thread.currentThread().getName()));
 		this.logger.info("Received request for f-value of node with hashCode {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms. Enable DEBUG for node details.", n.hashCode(),
 				this.desiredNumberOfSuccesfulSamples, this.getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS);
 		this.logger.debug("Node details: {}", n);
@@ -188,13 +190,17 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 							+ ") whose f-value we may want to reuse.\nThis is only allowed for top-level nodes, but the actual path is: "
 							+ n.path().stream().map(k -> "\n\t" + k.hashCode() + "\t(f-value: " + k.getScore() + ")").collect(Collectors.joining());
 					boolean nodeHasSibling = this.completer.getExploredGraph().getSuccessors(n.getParent().getHead()).size() > 1;
-					if (nodeList.size() > 1 && !nodeHasSibling && parentHasFValue) {
+					if (!n.isPoint() && !nodeHasSibling && parentHasFValue) {
 						V score = this.fValues.get(n.getParent());
 						this.fValues.put(n, score);
 						this.logger.debug("Score {} of parent can be used since the last action did not affect the performance.", score);
 						if (score == null) {
 							this.logger.warn("Returning score NULL inherited from parent, this should not happen.");
 						}
+						if (this.uncertaintySource != null) { // inherit uncertainty from parent
+							n.setAnnotation(ENodeAnnotation.F_UNCERTAINTY.name(), n.getParent().getAnnotation(ENodeAnnotation.F_UNCERTAINTY.name()));
+						}
+						assert !this.annotatesUncertainty() || n.getAnnotation(ENodeAnnotation.F_UNCERTAINTY.name()) != null : "No uncertainty has been annotated to node " + n + " even though we claim to annotate!";
 						return score;
 					}
 				}
@@ -204,10 +210,10 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 				AtomicInteger successfulSamples = new AtomicInteger();
 				int countedExceptions = 0;
 				List<V> evaluations = new ArrayList<>();
-				List<IPath<T, A>> completedPaths = new ArrayList<>();
+				List<ILabeledPath<T, A>> completedPaths = new ArrayList<>();
 				this.logger.debug("Now drawing {} successful examples but no more than {}", this.desiredNumberOfSuccesfulSamples, this.maxSamples);
 				while (successfulSamples.get() < this.desiredNumberOfSuccesfulSamples) {
-					this.logger.debug("Drawing next sample. {} samples have been drawn already, {} have been successful.", drawnSamples, successfulSamples);
+					this.logger.debug("Drawing next sample. {} samples have been drawn already, {} have been successful. Thread interruption state is: {}", drawnSamples, successfulSamples, Thread.currentThread().isInterrupted());
 					this.checkInterruption();
 					if (deadline > 0 && deadline < System.currentTimeMillis()) {
 						this.logger.info("Deadline for random completions hit! Finishing node evaluation.");
@@ -228,11 +234,10 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 					}
 
 					/* complete the current path by the dfs-solution; we assume that this goes quickly */
-					IPath<T, A> tmpCompletedPath = null;
+					ILabeledPath<T, A> tmpCompletedPath = null;
 					try {
-						long timeOfCompletionStart = System.currentTimeMillis();
+						this.logger.debug("Computed remaining time for evaluation: {}ms. Timeout for the job is hence {}ms. Now drawing new solution.", remainingTimeForNodeEvaluation, timeoutForJob);
 						tmpCompletedPath = this.getNextRandomPathCompletionForNode(n);
-						this.completionTimes.add((int)(System.currentTimeMillis() - timeOfCompletionStart));
 					} catch (RCNEPathCompletionFailedException e1) {
 						if (e1.getCause() instanceof InterruptedException) {
 							throw (InterruptedException) e1.getCause();
@@ -240,38 +245,48 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 						this.logger.info("Stopping sampling.");
 						break;
 					}
-					final IPath<T, A> completedPath = tmpCompletedPath;
+					final ILabeledPath<T, A> completedPath = tmpCompletedPath;
 					completedPaths.add(completedPath);
+					final int evaluationId = this.random.nextInt(1000000);
+					this.logger.debug("Identified complete path with {} nodes. Now evaluating the path; assigning evaluation id {}", completedPath.getNumberOfNodes(), evaluationId);
 
 					/* evaluate the found solution and update internal value model */
 					try {
+						this.logger.debug("Enqueuing timed computation with timeout {} and evaluation id {}", timeoutForJob, evaluationId);
 						TimedComputation.compute(() -> {
+							this.logger.debug("Starting timed computation with timeout {} and evaluation id {}", timeoutForJob, evaluationId);
 							drawnSamples.incrementAndGet();
 							V val = this.getFValueOfSolutionPath(completedPath);
-							this.logger.debug("Completed path evaluation. Score is {}", val);
+							this.logger.debug("Completed path evaluation with id {}. Score is {}", evaluationId, val);
 							successfulSamples.incrementAndGet();
-							this.eventBus.post(new RolloutEvent<>(ALGORITHM_ID, n.path(), val));
+							this.eventBus.post(new RolloutEvent<>(ALGORITHM, n.path(), val));
 							if (val != null) {
 								evaluations.add(val);
 								this.updateMapOfBestScoreFoundSoFar(completedPath, val);
 							} else {
-								this.logger.warn("Got NULL result as score for path {}", completedPath);
+								this.logger.warn("Got NULL result as score for evaluation with id {}", evaluationId);
 							}
 							return true;
-						}, timeoutForJob, "RCNE-timeout");
+						}, timeoutForJob, "RCNE-timeout for evaluation with id " + evaluationId);
 					} catch (InterruptedException e) { // Interrupts are directly re-thrown
 						this.logger.debug("Path evaluation has been interrupted.");
 						throw e;
-					} catch (Exception ex) {
+					}
+					catch (Exception ex) {
 						if (countedExceptions == this.maxSamples) {
 							this.logger.warn("Too many retry attempts, giving up. {} samples were drawn, {} were successful.", drawnSamples, successfulSamples);
 							throw new PathEvaluationException("Error in the evaluation of a node!", ex);
 						} else {
 							countedExceptions++;
-							if (LOG_FAILURES_AS_ERRORS) {
-								this.logger.error("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
-							} else {
-								this.logger.debug("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
+							if (ex instanceof AlgorithmTimeoutedException) {
+								this.logger.debug("Candidate evaluation failed due to timeout (either for this candidate or for the whole node).");
+							}
+							else {
+								if (LOG_FAILURES_AS_ERRORS) {
+									this.logger.error("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
+								} else {
+									this.logger.debug("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
+								}
 							}
 						}
 					} finally { // make sure that the abortion task is definitely killed
@@ -283,6 +298,9 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 				V best = this.bestKnownScoreUnderNodeInCompleterGraph.get(n.getNodes());
 				this.logger.debug("Finished sampling. {} samples were drawn, {} were successful. Best seen score is {}", drawnSamples, successfulSamples, best);
 				if (best == null) {
+					if (n.getHead().equals(this.root)) {
+						this.logger.error("No completion could be drawn for the root. Apparently there is no solution in this graph!");
+					}
 					this.checkInterruption();
 					if (countedExceptions > 0) {
 						throw new NoSuchElementException("Among " + drawnSamples + " evaluated candidates, we could not identify any candidate that did not throw an exception.");
@@ -323,22 +341,22 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 
 			/* set uncertainty if an uncertainty source has been set */
 			if (this.uncertaintySource != null) {
-				n.setAnnotation("uncertainty", uncertainty);
+				n.setAnnotation(ENodeAnnotation.F_UNCERTAINTY.name(), uncertainty);
 			}
 		}
 		assert this.fValues.containsKey(n);
 
 		V f = this.fValues.get(n);
-		this.logger.info("Returning f-value: {}. Annotated uncertainty is {}", f, n.getAnnotation("uncertainty"));
+		this.logger.info("Returning f-value: {}. Annotated uncertainty is {}", f, n.getAnnotation(ENodeAnnotation.F_UNCERTAINTY.name()));
 		return f;
 	}
 
-	public IPath<T, A> getNextRandomPathCompletionForNode(final BackPointerPath<T, A, ?> n) throws InterruptedException, RCNEPathCompletionFailedException {
+	public ILabeledPath<T, A> getNextRandomPathCompletionForNode(final BackPointerPath<T, A, ?> n) throws InterruptedException, RCNEPathCompletionFailedException {
 
 		/* make sure that the completer has the path from the root to the node in question and that the f-values of the nodes above are added to the map */
 		if (!this.completer.knowsNode(n.getHead())) {
 			synchronized (this.completer) {
-				this.completer.appendPathToModel(n);
+				this.completer.appendPathToNode(n);
 			}
 			BackPointerPath<T, A, ?> current = n.getParent();
 			while (current != null && !this.fValues.containsKey(current)) {
@@ -349,7 +367,8 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 		}
 
 		/* now draw random completion */
-		IPath<T, A> solutionPathOverN = null;
+		ILabeledPath<T, A> pathCompletion = null;
+		ILabeledPath<T, A> completedPath = null;
 		synchronized (this.completer) {
 			long startCompletion = System.currentTimeMillis();
 			if (this.completer.isCanceled()) {
@@ -357,30 +376,35 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 				throw new RCNEPathCompletionFailedException("Completer has been canceled.");
 			}
 			this.logger.debug("Starting search for next solution ...");
+			SearchGraphPath<T, A> solutionPathFromN = null;
 			try {
-				assert this.completer.getExploredGraph().hasItem(n.getHead());
-				solutionPathOverN = this.completer.nextSolutionUnderSubPath(n);
+				if (!this.completer.getExploredGraph().hasItem(n.getHead())) {
+					throw new IllegalStateException("The completer does not know hte head.");
+				}
+				solutionPathFromN = this.completer.nextSolutionUnderSubPath(n);
 			} catch (AlgorithmExecutionCanceledException | TimeoutException e) {
 				this.logger.info("Completer has been canceled or timeouted. Returning control.");
 				throw new RCNEPathCompletionFailedException(e);
 			}
-			if (solutionPathOverN == null) {
+			if (solutionPathFromN == null) {
 				this.logger.info("No completion was found for path {}.", n.getNodes());
 				throw new RCNEPathCompletionFailedException("No completion found for path " + n.getNodes());
 			}
-			assert solutionPathOverN.getArcs() != null : "The RandomSearch has returned a solution path with a null pointer for the edges.";
-			assert solutionPathOverN.getNumberOfNodes() == solutionPathOverN.getArcs().size() + 1;
+			assert solutionPathFromN.getArcs() != null : "The RandomSearch has returned a solution path with a null pointer for the edges.";
+			assert solutionPathFromN.getNumberOfNodes() == solutionPathFromN.getArcs().size() + 1;
 			long finishedCompletion = System.currentTimeMillis();
-			this.logger.debug("Found solution of length {} in {}ms. Enable TRACE for details.", solutionPathOverN.getNodes().size(), finishedCompletion - startCompletion);
-			this.logger.trace("Solution path is {}", solutionPathOverN);
+			this.logger.debug("Found solution of length {} in {}ms. Enable TRACE for details.", solutionPathFromN.getNodes().size(), finishedCompletion - startCompletion);
+			this.logger.trace("Solution path is {}", solutionPathFromN);
+			pathCompletion = solutionPathFromN.getPathFromChildOfRoot();
+			completedPath = new SearchGraphPath<>(n, pathCompletion, solutionPathFromN.getArcs() != null ? solutionPathFromN.getArcs().get(0) : null);
 		}
-		return solutionPathOverN;
+		return completedPath;
 	}
 
-	private void updateMapOfBestScoreFoundSoFar(final IPath<T, A> nodeInCompleterGraph, final V scoreOnOriginalBenchmark) {
+	private void updateMapOfBestScoreFoundSoFar(final ILabeledPath<T, A> nodeInCompleterGraph, final V scoreOnOriginalBenchmark) {
 		V bestKnownScore = this.bestKnownScoreUnderNodeInCompleterGraph.get(nodeInCompleterGraph.getNodes());
 		if (bestKnownScore == null || scoreOnOriginalBenchmark.compareTo(bestKnownScore) < 0) {
-			this.logger.debug("Updating best score of path, because score {} is better than previously observed best score {} under path {}", scoreOnOriginalBenchmark, bestKnownScore, nodeInCompleterGraph);
+			this.logger.debug("Updating best score of path, because score {} is better than previously observed best score {}", scoreOnOriginalBenchmark, bestKnownScore);
 			this.bestKnownScoreUnderNodeInCompleterGraph.put(nodeInCompleterGraph.getNodes(), scoreOnOriginalBenchmark);
 			if (!nodeInCompleterGraph.isPoint()) {
 				this.updateMapOfBestScoreFoundSoFar(nodeInCompleterGraph.getPathToParentOfHead(), scoreOnOriginalBenchmark);
@@ -388,7 +412,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 		}
 	}
 
-	protected V getFValueOfSolutionPath(final IPath<T, A> path) throws InterruptedException, PathEvaluationException {
+	protected V getFValueOfSolutionPath(final ILabeledPath<T, A> path) throws InterruptedException, PathEvaluationException {
 		boolean knownPath = this.scoresOfSolutionPaths.containsKey(path.getNodes());
 		if (!knownPath) {
 			if (this.unsuccessfulPaths.contains(path.getNodes())) {
@@ -396,7 +420,9 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 				return null;
 			}
 			this.logger.debug("Associated plan is new. Calling solution evaluator {} to compute f-value for path of length {}. Enable TRACE for exact plan.", this.solutionEvaluator.getClass().getName(), path.getNumberOfNodes());
-			this.logger.trace("The path is {}", path);
+			if (this.logger.isTraceEnabled()) {
+				this.logger.trace("The hash code of the path is {}", path.hashCode());
+			}
 
 			/* compute value of solution */
 			long start = System.currentTimeMillis();
@@ -447,9 +473,9 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 		return score;
 	}
 
-	protected void postSolution(final IPath<T, A> solution) {
+	protected void postSolution(final ILabeledPath<T, A> solution) {
 		assert !this.postedSolutions.contains(solution) : "Solution " + solution.toString() + " already posted!";
-		assert this.goalTester.isGoal(solution) : "Last node of \n\t" + solution.getNodes().stream().map(Object::toString).collect(Collectors.joining("\n\t")) + "\n is not a goal node!";
+		assert this.goalTester.isGoal(solution) : "Last node is not a goal node!";
 		this.postedSolutions.add(solution);
 		try {
 
@@ -465,7 +491,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 			solutionObject.setAnnotation("timeToSolution", (int) (System.currentTimeMillis() - this.timestampOfFirstEvaluation));
 			solutionObject.setAnnotation("nodesEvaluatedToSolution", numberOfComputedFValues);
 			this.logger.debug("Posting solution {}", solutionObject);
-			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(ALGORITHM_ID, solutionObject));
+			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(ALGORITHM, solutionObject));
 		} catch (Exception e) {
 			List<Pair<String, Object>> explanations = new ArrayList<>();
 			if (this.logger.isDebugEnabled()) {
@@ -478,8 +504,9 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 	}
 
 	@Override
-	public void setGenerator(final IGraphGenerator<T, A> generator, final PathGoalTester<T, A> goalTester) {
+	public void setGenerator(final IGraphGenerator<T, A> generator, final IPathGoalTester<T, A> goalTester) {
 		this.generator = generator;
+		this.root = generator.getRootGenerator().getRoots().iterator().next();
 		this.goalTester = goalTester;
 
 		/* create the completion algorithm and initialize it */
@@ -487,12 +514,12 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 		GraphSearchWithSubpathEvaluationsInput<T, A, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(this.generator, this.goalTester, nodeEvaluator);
 		this.completer = new RandomSearch<>(completionProblem, this.priorityPredicateForRDFS, this.random);
 		if (this.getTotalDeadline() >= 0) {
-			this.completer.setTimeout(new TimeOut(this.getTotalDeadline() - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
+			this.completer.setTimeout(new Timeout(this.getTotalDeadline() - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
 		}
 		if (this.loggerName != null) {
 			this.completer.setLoggerName(this.loggerName + ".completer");
 		}
-		AlgorithmEvent e = this.completer.next();
+		IAlgorithmEvent e = this.completer.next();
 		assert e instanceof AlgorithmInitializedEvent : "First event of completer is not the initialization event!";
 		this.logger.info("Generator has been set, and completer has been initialized");
 	}
@@ -518,7 +545,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 		this.uncertaintySource = uncertaintySource;
 	}
 
-	public IObjectEvaluator<IPath<T, A>, V> getSolutionEvaluator() {
+	public IObjectEvaluator<ILabeledPath<T, A>, V> getSolutionEvaluator() {
 		return this.solutionEvaluator;
 	}
 
@@ -535,8 +562,16 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 		this.loggerName = name;
 		this.logger.info("Switching logger (name) of object of class {} to {}", this.getClass().getName(), name);
 		this.logger = LoggerFactory.getLogger(name);
+		super.setLoggerName(name + "._parent");
 		if (this.completer != null) {
 			this.completer.setLoggerName(name + ".randomsearch");
+		}
+		if (this.solutionEvaluator instanceof ILoggingCustomizable) {
+			this.logger.info("Setting logger of evaluator {} to {}.evaluator", this.solutionEvaluator.getClass().getName(), name);
+			((ILoggingCustomizable) this.solutionEvaluator).setLoggerName(name + ".evaluator");
+		}
+		else {
+			this.logger.info("Evaluator {} is not customizable for logger, so not configuring it.", this.solutionEvaluator.getClass().getName());
 		}
 		this.logger.info("Switched logger (name) of {} to {}", this, name);
 		this.logger.info("Reprinting RandomCompletionEvaluator configuration after logger switch: timeout {}ms for single evaluations and {}ms in total per node", this.timeoutForSingleCompletionEvaluationInMS,

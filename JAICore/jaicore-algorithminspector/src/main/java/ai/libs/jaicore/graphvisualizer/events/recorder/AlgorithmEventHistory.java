@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An {@link AlgorithmEventHistory} stores {@link AlgorithmEventHistoryEntry}s constructed from {@link PropertyProcessedAlgorithmEvent}s representing the recorded behavior of an {@link IAlgorithm}. Such an {@link AlgorithmEventHistory} can
+ * An {@link AlgorithmEventHistory} stores {@link AlgorithmEventHistoryEntry}s constructed from {@link IPropertyProcessedAlgorithmEvent}s representing the recorded behavior of an {@link IAlgorithm}. Such an {@link AlgorithmEventHistory} can
  * be stored and loaded using an
  * {@link AlgorithmEventHistorySerializer}.
  *
@@ -49,17 +49,17 @@ public class AlgorithmEventHistory implements ILoggingCustomizable, Serializable
 	}
 
 	/**
-	 * Adds the given {@link PropertyProcessedAlgorithmEvent} to this {@link AlgorithmEventHistoryEntry}.
+	 * Adds the given {@link IPropertyProcessedAlgorithmEvent} to this {@link AlgorithmEventHistoryEntry}.
 	 *
-	 * @param propertyProcessedAlgorithmEvent The {@link PropertyProcessedAlgorithmEvent} to be added to this history.
+	 * @param propertyProcessedAlgorithmEvent The {@link IPropertyProcessedAlgorithmEvent} to be added to this history.
 	 */
-	public void addEvent(final PropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent) {
+	public void addEvent(final IPropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent) {
 		AlgorithmEventHistoryEntry entry = this.generateHistoryEntry(propertyProcessedAlgorithmEvent);
 		this.entries.add(entry);
 		this.logger.debug("Added entry {} for algorithm event {} to history at position {}.", entry, propertyProcessedAlgorithmEvent, this.entries.size() - 1);
 	}
 
-	private AlgorithmEventHistoryEntry generateHistoryEntry(final PropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent) {
+	private AlgorithmEventHistoryEntry generateHistoryEntry(final IPropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent) {
 		return new AlgorithmEventHistoryEntry(propertyProcessedAlgorithmEvent, this.getCurrentReceptionTime());
 	}
 

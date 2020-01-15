@@ -1,6 +1,6 @@
 package ai.libs.jaicore.math.gradientdescent;
 
-import ai.libs.jaicore.math.linearalgebra.IVector;
+import org.api4.java.common.math.IVector;
 
 /**
  * This interface represents a function that is differentiable and thus can be
@@ -9,7 +9,7 @@ import ai.libs.jaicore.math.linearalgebra.IVector;
  * In particular, if a function implements this interface, we assume that the
  * underlying space is convex.
  *
- * @author Helena Graf, Mirko Jürgens
+ * @author Helena Graf, Mirko Jï¿½rgens
  *
  */
 public interface IGradientDescendableFunction {

@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.Random;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
+
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public class RandomTreeGraphGenerator implements IGraphGenerator<List<Integer>, Integer> {
 
@@ -27,21 +28,21 @@ public class RandomTreeGraphGenerator implements IGraphGenerator<List<Integer>, 
 	}
 
 	@Override
-	public SingleRootGenerator<List<Integer>> getRootGenerator() {
+	public ISingleRootGenerator<List<Integer>> getRootGenerator() {
 		return () -> Arrays.asList();
 	}
 
 	@Override
-	public SuccessorGenerator<List<Integer>, Integer> getSuccessorGenerator() {
+	public ISuccessorGenerator<List<Integer>, Integer> getSuccessorGenerator() {
 		return n -> {
-			List<NodeExpansionDescription<List<Integer>, Integer>> l = new ArrayList<>();
+			List<INewNodeDescription<List<Integer>, Integer>> l = new ArrayList<>();
 			if (n.size() == this.d) {
 				return l;
 			}
 			for (int i = 0; i < this.b; i++) {
 				List<Integer> nP = new ArrayList<>(n);
 				nP.add((int)(i * 1.0 * this.maxPerDepth + new Random(this.seed + (i * n.hashCode()) + this.b).nextInt(this.maxPerDepth)) / this.b);
-				l.add(new NodeExpansionDescription<>(nP, i, NodeType.OR));
+				l.add(new NodeExpansionDescription<>(nP, i));
 			}
 			return l;
 		};

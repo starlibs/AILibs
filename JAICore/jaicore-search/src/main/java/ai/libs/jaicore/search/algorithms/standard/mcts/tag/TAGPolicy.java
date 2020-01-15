@@ -9,7 +9,7 @@ import java.util.Queue;
 import java.util.stream.Collectors;
 
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,7 +101,7 @@ public class TAGPolicy<T, A> implements IPathUpdatablePolicy<T, A, Double>, IGra
 	}
 
 	@Override
-	public void updatePath(final IPath<T, A> path, final Double playout, final int playoutLength) {
+	public void updatePath(final ILabeledPath<T, A> path, final Double playout, final int playoutLength) {
 		for (T node : path.getNodes()) {
 			this.visitsPerNode.put(node, this.visitsPerNode.computeIfAbsent(node, n -> 0) + 1);
 

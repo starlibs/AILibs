@@ -1,7 +1,7 @@
 package ai.libs.jaicore.ml.ranking.loss;
 
-import org.api4.java.ai.ml.ranking.dataset.IRanking;
-import org.api4.java.ai.ml.ranking.loss.IRankingLossFunction;
+import org.api4.java.ai.ml.ranking.IRanking;
+import org.api4.java.ai.ml.ranking.loss.IRankingPredictionPerformanceMeasure;
 
 /**
  * Computes the rank correlation measure known as Kendall's tau coefficient, i.e.
@@ -15,11 +15,11 @@ import org.api4.java.ai.ml.ranking.loss.IRankingLossFunction;
  *
  */
 
-public class KendallsTauDyadRankingLoss implements IRankingLossFunction {
-	@Override
-	public double loss(final IRanking<?> actual, final IRanking<?> predicted) {
+public class KendallsTauDyadRankingLoss extends ARankingPredictionPerformanceMeasure implements IRankingPredictionPerformanceMeasure {
 
-		int dyadRankingLength = actual.size();
+	@Override
+	public double loss(final IRanking<?> expected, final IRanking<?> predicted) {
+		int dyadRankingLength = expected.size();
 		if (dyadRankingLength <= 1) {
 			throw new IllegalArgumentException("Dyad rankings must have length greater than 1.");
 		}
@@ -30,14 +30,14 @@ public class KendallsTauDyadRankingLoss implements IRankingLossFunction {
 			Object predDyad = predicted.get(predIndex);
 			int actualIndex = -1;
 			for (int i = 0; i < dyadRankingLength; i++) {
-				if (actual.get(i).equals(predDyad)) {
+				if (expected.get(i).equals(predDyad)) {
 					actualIndex = i;
 					break;
 				}
 			}
 
 			for (int i = predIndex + 1; i < dyadRankingLength; i++) {
-				if (this.isRankingCorrectForIndex(actual, predicted, dyadRankingLength, actualIndex, i)) {
+				if (this.isRankingCorrectForIndex(expected, predicted, dyadRankingLength, actualIndex, i)) {
 					nConc++;
 				} else {
 					nDisc++;
@@ -45,7 +45,6 @@ public class KendallsTauDyadRankingLoss implements IRankingLossFunction {
 
 			}
 		}
-
 		return 2.0 * (nConc - nDisc) / (dyadRankingLength * (dyadRankingLength - 1));
 	}
 

@@ -2,7 +2,7 @@ package ai.libs.jaicore.search.exampleproblems.enhancedttsp;
 
 import java.util.function.Function;
 
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
@@ -11,7 +11,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 import it.unimi.dsi.fastutil.shorts.ShortList;
 
 public class EnhancedTTSPToSimpleGraphSearchReducer
-implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPState, String, Double>, IPath<EnhancedTTSPState, String>> {
+implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPState, String, Double>, ILabeledPath<EnhancedTTSPState, String>> {
 
 	private final Function<Number, Double> linkFunction;
 
@@ -29,7 +29,7 @@ implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithS
 	}
 
 	@Override
-	public ShortList decodeSolution(final IPath<EnhancedTTSPState, String> solution) {
+	public ShortList decodeSolution(final ILabeledPath<EnhancedTTSPState, String> solution) {
 		ShortList tour = solution.getHead().getCurTour();
 		return tour.subList(0, tour.size() - 1); // remove trailing 0
 	}

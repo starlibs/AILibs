@@ -3,11 +3,11 @@ package ai.libs.jaicore.search.problemtransformers;
 import java.util.Random;
 import java.util.function.Predicate;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<N, A, V extends Comparable<V>> extends GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<N, A, V> {
@@ -50,7 +50,7 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTrans
 	}
 
 	@Override
-	public GraphSearchWithSubpathEvaluationsInput<N, A, V> encodeProblem(final IGraphSearchWithPathEvaluationsInput<N, A, V> problem) {
+	public GraphSearchWithSubpathEvaluationsInput<N, A, V> encodeProblem(final GraphSearchWithPathEvaluationsInput<N, A, V> problem) {
 		RandomCompletionBasedNodeEvaluator<N, A, V> rdfsNodeEvaluator = new RandomCompletionBasedNodeEvaluator<>(new Random(this.seed), this.numSamples, this.numSamples * 2, problem.getPathEvaluator(), this.timeoutForSingleCompletionEvaluationInMS,
 				this.timeoutForNodeEvaluationInMS, this.prioritizedNodesInRandomCompletion);
 		if (this.preferredNodeEvaluator != null) {
@@ -58,9 +58,7 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTrans
 		} else {
 			this.setNodeEvaluator(rdfsNodeEvaluator);
 		}
-		System.out.println(this.getNodeEvaluator().getClass().getName());
-		GraphSearchWithSubpathEvaluationsInput<N, A, V> prob = super.encodeProblem(problem);
-		System.out.println(problem.getPathEvaluator().getClass().getName());
-		return prob;
+		return super.encodeProblem(problem);
 	}
+
 }

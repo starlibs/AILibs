@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 	public abstract A getActionBasedOnScores(Map<A, Double> scores);
 
 	@Override
-	public void updatePath(final IPath<N, A> path, final Double score, final int lengthOfActualPlayoutPath) {
+	public void updatePath(final ILabeledPath<N, A> path, final Double score, final int lengthOfActualPlayoutPath) {
 		this.logger.debug("Updating path {} with score {}", path, score);
 		int lastVisits = Integer.MAX_VALUE;
 		for (N node : path.getNodes()) {

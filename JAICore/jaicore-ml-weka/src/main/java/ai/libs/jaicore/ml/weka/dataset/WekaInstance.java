@@ -1,24 +1,43 @@
 package ai.libs.jaicore.ml.weka.dataset;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import static ai.libs.jaicore.ml.weka.dataset.WekaInstancesUtil.transformInstanceToWekaInstance;
+
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
+import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
+import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
 import ai.libs.jaicore.basic.sets.ElementDecorator;
-import ai.libs.jaicore.ml.core.dataset.InstanceSchema;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import weka.core.Attribute;
 import weka.core.Instance;
 
-public class WekaInstance extends ElementDecorator<Instance> implements ILabeledInstance {
+public class WekaInstance extends ElementDecorator<Instance> implements IWekaInstance {
 
 	public WekaInstance(final Instance instance) {
 		super(instance);
+	}
+
+	public WekaInstance(final ILabeledInstanceSchema schema, final ILabeledInstance instance) throws UnsupportedAttributeTypeException {
+		super(transformInstanceToWekaInstance(schema, instance));
+		if (schema.getNumAttributes() != instance.getNumAttributes()) {
+			throw new IllegalStateException("Number of attributes in the instance deviate from those in the scheme.");
+		}
+	}
+
+	@Override
+	public Number getLabel() {
+		boolean isInteger = this.getElement().classAttribute().isNominal();
+		double classValue = this.getElement().classValue();
+		if (isInteger) {
+			int intClassValue = (int)classValue; // do NOT return this value directly. The explicit cast into a new variable is required, because the var remains a double elsewise. Maybe this is a Java bug
+			return intClassValue;
+		}
+		else {
+			return classValue;
+		}
 	}
 
 	@Override
@@ -26,34 +45,54 @@ public class WekaInstance extends ElementDecorator<Instance> implements ILabeled
 		return this.getElement().value(pos);
 	}
 
-	private double getAttributeValue(final Attribute a) {
-		return this.getElement().value(a);
+	@Override
+	public Object[] getAttributes() {
+		return IntStream.range(0, this.getElement().numAttributes()).filter(x -> x != this.getElement().classIndex()).mapToObj(x -> this.getElement().attribute(x)).map(this::transformAttributeValueToData).toArray();
+	}
+
+	private Object transformAttributeValueToData(final Attribute att) {
+		if (att.isNominal() || att.isString() || att.isRelationValued() || att.isDate() || att.isRegular()) {
+			return att.value((int) this.getElement().value(att));
+		} else {
+			return this.getElement().value(att);
+		}
 	}
 
 	@Override
-	public double[] toDoubleVector() {
+	public double[] getPoint() {
 		return this.getElement().toDoubleArray();
 	}
 
-	public InstanceSchema getSchema() {
-		List<IAttribute> attributeTypeList = new LinkedList<>();
-		for (int i = 0; i < this.getElement().numAttributes(); i++) {
-			if (i != this.getElement().classIndex()) {
-				attributeTypeList.add(WekaInstancesUtil.transformWEKAAttributeToAttributeType(this.getElement().attribute(i)));
-			}
+	@Override
+	public double getPointValue(final int pos) {
+		return this.getElement().value(pos);
+	}
+
+	@Override
+	public void removeColumn(final int columnPos) {
+		throw new UnsupportedOperationException("Not yet implemented!");
+	}
+
+	@Override
+	public void setLabel(final Object obj) {
+		if (obj instanceof String) {
+			this.getElement().setClassValue((String) obj);
+		} else if (obj instanceof Double) {
+			this.getElement().setClassValue((Double) obj);
+		} else {
+			throw new IllegalArgumentException("The value for the label must not be of type " + obj.getClass().getName() + ". The only valid types are Double and String.");
 		}
-		IAttribute targetType = WekaInstancesUtil.transformWEKAAttributeToAttributeType(this.getElement().classAttribute());
-		return new InstanceSchema(attributeTypeList, targetType);
 	}
 
 	@Override
-	public int getNumAttributes() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Double getLabel() {
-		return this.getElement().classValue();
+	public void setAttributeValue(final int pos, final Object value) {
+		if (value instanceof String) {
+			this.getElement().setValue(pos, (String) value);
+		} else if (value instanceof Double) {
+			this.getElement().setValue(pos, (Double) value);
+		} else {
+			throw new IllegalArgumentException("The value for the label must not be of type " + value.getClass().getName() + ". The only valid types are Double and String.");
+		}
 	}
 
 	@Override
@@ -75,8 +114,4 @@ public class WekaInstance extends ElementDecorator<Instance> implements ILabeled
 		return WekaUtil.areInstancesEqual(this.getElement(), ((WekaInstance) obj).getElement());
 	}
 
-	@Override
-	public Iterator<Double> iterator() {
-		return Arrays.stream(this.getElement().toDoubleArray()).iterator();
-	}
 }

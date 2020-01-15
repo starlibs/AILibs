@@ -1,10 +1,7 @@
 package ai.libs.jaicore.basic.algorithm;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -13,10 +10,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.TimeOut;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.algorithm.exceptions.ExceptionInAlgorithmIterationException;
@@ -34,12 +30,11 @@ import ai.libs.jaicore.timing.TimedComputation;
 public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable {
 
 	/* Logger variables */
-	private Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
+	protected Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
 	private String loggerName;
 
 	/* Parameters of the algorithm. */
 	private IOwnerBasedAlgorithmConfig config;
-	private TimeOut timeout;
 
 	/* Semantic input to the algorithm. */
 	private final I input;
@@ -55,7 +50,6 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private final Set<Thread> activeThreads = new HashSet<>();
 	private EAlgorithmState state = EAlgorithmState.CREATED;
 	private final EventBus eventBus = new EventBus();
-	private final List<Object> listeners = new ArrayList<>();
 
 	private int timeoutPrecautionOffset = 100; // this offset is substracted from the true remaining time whenever a timer is scheduled to ensure that the timeout is respected
 	private static final int MIN_RUNTIME_FOR_OBSERVED_TASK = 50;
@@ -69,7 +63,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 *            The input for the algorithm.
 	 */
 	protected AAlgorithm(final I input) {
-		this (ConfigFactory.create(IOwnerBasedAlgorithmConfig.class), input);
+		this.input = input;
+		this.config = ConfigFactory.create(IOwnerBasedAlgorithmConfig.class);
 	}
 
 	/**
@@ -86,15 +81,10 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		if (this.config == null) {
 			throw new IllegalArgumentException("Algorithm configuration must not be null!");
 		}
-		this.synchronizeConfig();
-	}
-
-	private void synchronizeConfig() {
-		this.timeout = new TimeOut(this.config.timeout(), TimeUnit.MILLISECONDS);
 	}
 
 	@Override
-	public Iterator<AlgorithmEvent> iterator() {
+	public Iterator<IAlgorithmEvent> iterator() {
 		return this;
 	}
 
@@ -104,7 +94,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	@Override
-	public AlgorithmEvent next() {
+	public IAlgorithmEvent next() {
 		if (!this.hasNext()) {
 			throw new NoSuchElementException();
 		}
@@ -124,11 +114,6 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	@Override
 	public void registerListener(final Object listener) {
 		this.eventBus.register(listener);
-		this.listeners.add(listener);
-	}
-
-	public List<Object> getListeners() {
-		return Collections.unmodifiableList(this.listeners);
 	}
 
 	@Override
@@ -148,14 +133,13 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 	@Override
 	public void setTimeout(final long timeout, final TimeUnit timeUnit) {
-		this.setTimeout(new TimeOut(timeout, timeUnit));
+		this.setTimeout(new Timeout(timeout, timeUnit));
 	}
 
 	@Override
-	public void setTimeout(final TimeOut timeout) {
+	public void setTimeout(final Timeout timeout) {
 		this.logger.info("Setting timeout to {}ms", timeout.milliseconds());
 		this.getConfig().setProperty(IOwnerBasedAlgorithmConfig.K_TIMEOUT, timeout.milliseconds() + "");
-		this.timeout = timeout;
 	}
 
 	public int getTimeoutPrecautionOffset() {
@@ -167,8 +151,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	@Override
-	public TimeOut getTimeout() {
-		return this.timeout;
+	public Timeout getTimeout() {
+		return new Timeout(this.getConfig().timeout(), TimeUnit.MILLISECONDS);
 	}
 
 	public boolean isTimeouted() {
@@ -182,11 +166,11 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		return false;
 	}
 
-	protected TimeOut getRemainingTimeToDeadline() {
+	protected Timeout getRemainingTimeToDeadline() {
 		if (this.deadline < 0) {
-			return new TimeOut(Integer.MAX_VALUE, TimeUnit.SECONDS);
+			return new Timeout(Integer.MAX_VALUE, TimeUnit.SECONDS);
 		}
-		return new TimeOut(this.deadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+		return new Timeout(this.deadline - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
 	}
 
 	public boolean isStopCriterionSatisfied() {
@@ -262,19 +246,19 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			}
 			this.logger.debug("Throwing TimeoutException");
 			throw new AlgorithmTimeoutedException(this.timeOfTimeoutDetection - this.deadline);
-		} else {
-			this.logger.trace("No timeout detected. Remaining time: {}", System.currentTimeMillis() - this.deadline);
 		}
 
 		if (this.isCanceled()) { // for a cancel, we assume that the shutdown has already been triggered by the canceler
-			this.logger.info("Cancel detected for {}.", this.getId());
+			this.logger.info("Cancel detected for {}. Cancel was issued {}ms ago.", this.getId(), (System.currentTimeMillis() - this.canceled));
 			if (Thread.interrupted()) { // reset the flag
 				this.logger.debug("Thread has been interrupted during shutdown. Resetting the flag and not invoking shutdown again.");
 			}
 			this.logger.debug("Throwing AlgorithmExecutionCanceledException.");
 			throw new AlgorithmExecutionCanceledException(System.currentTimeMillis() - this.canceled);
 		}
-		this.logger.debug("No termination condition observed.");
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug("No termination condition observed. Remaining time to timeout is {}", this.getRemainingTimeToDeadline());
+		}
 	}
 
 	protected void checkAndConductTermination() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
@@ -297,7 +281,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 				return;
 			}
 			this.shutdownInitialized = System.currentTimeMillis();
-			this.logger.info("Entering shutdown procedure for {}. Interrupting {} active threads.", this.getId(), this.activeThreads.size());
+			this.logger.info("Entering shutdown procedure for {}. Interrupting {} active threads: {}", this.getId(), this.activeThreads.size(), this.activeThreads);
 		}
 		for (Thread t : this.activeThreads) {
 			this.logger.debug("Triggering interrupt on {} as part of shutdown of {}", t, this.getId());
@@ -400,14 +384,28 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected AlgorithmInitializedEvent activate() {
 		assert this.state == EAlgorithmState.CREATED : "Can only activate an algorithm as long as its state has not been changed from CREATED to something else. It is currently " + this.state;
 		this.activationTime = System.currentTimeMillis();
-		if (this.getTimeout().milliseconds() > 0) {
-			this.deadline = this.activationTime + this.getTimeout().milliseconds();
+		if (this.getTimeout().milliseconds() > 0 && this.deadline < 0) {
+			this.setDeadline();
 		}
 		this.state = EAlgorithmState.ACTIVE;
-		AlgorithmInitializedEvent event = new AlgorithmInitializedEvent(this.getId());
+		AlgorithmInitializedEvent event = new AlgorithmInitializedEvent(this);
 		this.eventBus.post(event);
-		this.logger.trace("Starting algorithm {} with problem {} and config {}", this.getId(), this.input, this.config);
+		this.logger.debug("Starting algorithm {} with problem of type {} and config {}.", this.getId(), this.input.getClass().getName(), this.config);
 		return event;
+	}
+
+	protected void setDeadline() {
+		if (this.deadline >= 0) {
+			throw new IllegalStateException();
+		}
+		if (this.getTimeout().milliseconds() > 0) {
+			this.deadline = System.currentTimeMillis() + this.getTimeout().milliseconds() - this.timeoutPrecautionOffset;
+			this.logger.info("Timeout is {}. Setting deadline to timestamp {}. Remaining time: {}", this.getTimeout(), this.deadline, this.getRemainingTimeToDeadline());
+		}
+		else {
+			this.deadline = System.currentTimeMillis() + 86400 * 1000 * 365;
+			this.logger.info("No timeout defined. Setting deadline to timestamp {}. Remaining time: {}", this.deadline, this.getRemainingTimeToDeadline());
+		}
 	}
 
 	/**
@@ -418,7 +416,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected AlgorithmFinishedEvent terminate() {
 		this.logger.info("Terminating algorithm {}.", this.getId());
 		this.state = EAlgorithmState.INACTIVE;
-		AlgorithmFinishedEvent finishedEvent = new AlgorithmFinishedEvent(this.getId());
+		AlgorithmFinishedEvent finishedEvent = new AlgorithmFinishedEvent(this);
 		this.unregisterThreadAndShutdown();
 		this.eventBus.post(finishedEvent);
 		return finishedEvent;
@@ -431,14 +429,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 *            The event to post on the event bus.
 	 */
 	protected void post(final Object e) {
-		long start = System.currentTimeMillis();
-		if (!this.listeners.isEmpty()) { // Guava event bus is SLOW. It may take 1ms to notice that it does not have any listeners!
-			this.eventBus.post(e);
-		}
-		long delay = System.currentTimeMillis() - start;
-		if (delay > 1) {
-			this.logger.warn("Dispatching event {} took {}ms", e, delay);
-		}
+		this.eventBus.post(e);
 	}
 
 	@Override
@@ -454,7 +445,6 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 */
 	public void setConfig(final IOwnerBasedAlgorithmConfig config) {
 		this.config = config;
-		this.synchronizeConfig(); // for the local copies of the distinct values
 	}
 
 	@Override
@@ -475,7 +465,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	protected <T> T computeTimeoutAware(final Callable<T> r, final String reasonToLogOnTimeout, final boolean shutdownOnStoppingCriterionSatisfied)
-			throws InterruptedException, ExecutionException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+			throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		this.logger.debug("Received request to execute {} with awareness of timeout {}. Currently active threads: {}. Currently active tasks in global timer: {}", r, this.getTimeout(), this.activeThreads,
 				GlobalTimer.getInstance().getActiveTasks());
 
@@ -494,7 +484,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			} catch (AlgorithmExecutionCanceledException e) { // these exceptions should just be forwarded
 				throw e;
 			} catch (Exception e) {
-				throw new ExecutionException("The algorithm has failed due to an exception of a Callable.", e);
+				throw new AlgorithmException("The algorithm has failed due to an exception of a Callable.", e);
 			}
 		}
 
@@ -524,6 +514,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			this.resolveShutdownInterruptOnCurrentThread();
 			this.checkTermination(shutdownOnStoppingCriterionSatisfied);
 			throw new IllegalStateException("A stopping criterion must have been true (probably cancel), but checkTermination did not throw an exception!"); // this line should never be reached
+		} catch (ExecutionException e) {
+			throw new AlgorithmException("The algorithm has failed due to an exception of Callable " + r + " with timeout log message " + reasonToLogOnTimeout, e);
 		}
 	}
 }

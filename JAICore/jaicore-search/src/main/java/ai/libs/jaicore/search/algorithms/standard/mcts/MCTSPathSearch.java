@@ -8,25 +8,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.common.event.IEventEmitter;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.RootGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.IRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,6 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.basic.IRandomizable;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
-import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.graph.LabeledGraph;
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
@@ -52,7 +51,7 @@ import ai.libs.jaicore.search.model.other.SearchGraphPath;
  *
  * @author Felix Mohr
  */
-public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> implements IPolicy<N, A, V> {
+public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> implements IPolicy<N, A, V> {
 
 	private static final String NODESTATE_ROLLOUT = "or_rollout";
 
@@ -61,16 +60,16 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 
 	/* graph structure */
 	protected final IGraphGenerator<N, A> graphGenerator;
-	protected final RootGenerator<N> rootGenerator;
-	protected final SuccessorGenerator<N, A> successorGenerator;
-	protected final PathGoalTester<N, A> goalTester;
+	protected final IRootGenerator<N> rootGenerator;
+	protected final ISuccessorGenerator<N, A> successorGenerator;
+	protected final IPathGoalTester<N, A> goalTester;
 	protected final boolean useLazySuccessorGeneration;
 	protected final Map<N, LazySuccessorGenerator<N, A>> lazySuccessorGenerators;
 
 	protected final IPathUpdatablePolicy<N, A, V> treePolicy;
 	protected final IPolicy<N, A, V> defaultPolicy;
-	protected final IObjectEvaluator<IPath<N, A>, V> playoutSimulator;
-	private final Map<IPath<N, A>, V> scoreCache = new HashMap<>();
+	protected final IObjectEvaluator<ILabeledPath<N, A>, V> playoutSimulator;
+	private final Map<ILabeledPath<N, A>, V> scoreCache = new HashMap<>();
 
 	private final N root;
 	// private final Collection<N> nodesExplicitlyAdded = new HashSet<>();
@@ -82,7 +81,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 	private final V penaltyForFailedEvaluation;
 
 	private int numberOfPlayouts = 0;
-	private IPath<N, A> enforcedPrefixPath = null;
+	private ILabeledPath<N, A> enforcedPrefixPath = null;
 	private boolean treePolicyReachedLeafs = false;
 	private final Random random;
 	private boolean logDoublePathsAsWarnings = false;
@@ -92,7 +91,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = this.graphGenerator.getRootGenerator();
 		this.successorGenerator = this.graphGenerator.getSuccessorGenerator();
-		PathGoalTester<N, A> tmpGoalTester = problem.getGoalTester();
+		IPathGoalTester<N, A> tmpGoalTester = problem.getGoalTester();
 		this.goalTester = tmpGoalTester;
 
 		this.random = ((IRandomizable)defaultPolicy).getRandom();
@@ -100,7 +99,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 		this.defaultPolicy = defaultPolicy;
 		this.playoutSimulator = problem.getPathEvaluator();
 		this.exploredGraph = new LabeledGraph<>();
-		this.root = ((SingleRootGenerator<N>) this.rootGenerator).getRoot();
+		this.root = ((ISingleRootGenerator<N>) this.rootGenerator).getRoot();
 		this.unexpandedNodes.add(this.root);
 		this.exploredGraph.addItem(this.root);
 		this.penaltyForFailedEvaluation = penaltyForFailedEvaluation;
@@ -118,7 +117,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 			((IEventEmitter) treePolicy).registerListener(new Object() {
 
 				@Subscribe
-				public void receiveEvent(final AlgorithmEvent e) {
+				public void receiveEvent(final IAlgorithmEvent e) {
 					MCTSPathSearch.this.post(e); // forward the event
 				}
 			});
@@ -143,7 +142,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 	 * @throws AlgorithmException
 	 * @throws ActionPredictionFailedException
 	 */
-	private IPath<N, A> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException, ActionPredictionFailedException {
+	private ILabeledPath<N, A> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException, ActionPredictionFailedException {
 		long startPlayout = System.currentTimeMillis();
 		this.numberOfPlayouts++;
 		this.logger.debug("Computing a new playout ... (#{}). Best seen score up to now has been {}.", this.numberOfPlayouts, this.getBestSeenSolution() != null ? this.getBestSeenSolution().getScore() : null);
@@ -168,7 +167,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 		} else {
 			pathNodes.add(current);
 		}
-		IPath<N, A> path = new SearchGraphPath<>(pathNodes, pathActions);
+		ILabeledPath<N, A> path = new SearchGraphPath<>(pathNodes, pathActions);
 
 		N next;
 		Collection<N> childrenOfCurrent = this.unexpandedNodes.contains(current) ? null : this.exploredGraph.getSuccessors(current);
@@ -251,7 +250,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 				this.propagateFullyKnownNodes(path.getHead());
 				return new SearchGraphPath<>(pathNodes, pathActions);
 			}
-			this.post(new NodeTypeSwitchEvent<N>(this.getId(), next, NODESTATE_ROLLOUT));
+			this.post(new NodeTypeSwitchEvent<N>(this, next, NODESTATE_ROLLOUT));
 			level++;
 		}
 
@@ -304,7 +303,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 			assert this.unexpandedNodes.contains(current);
 			assert this.exploredGraph.hasItem(current);
 			this.visitedNodes.add(current);
-			this.post(new NodeTypeSwitchEvent<N>(this.getId(), current, NODESTATE_ROLLOUT));
+			this.post(new NodeTypeSwitchEvent<N>(this, current, NODESTATE_ROLLOUT));
 			assert this.exploredGraph.hasEdge(pathNodes.get(pathNodes.size() - 1), current) : "Exploration graph does not have the edge " + pathNodes.get(pathNodes.size() - 1) + " -> " + current + ".\nSuccessors of first are: "
 			+ this.exploredGraph.getSuccessors(pathNodes.get(pathNodes.size() - 1)).stream().map(n -> "\n\t\t" + n).collect(Collectors.joining()) + ".\nPredecessors of second are: "
 			+ this.exploredGraph.getPredecessors(current).stream().map(n -> "\n\t\t" + n).collect(Collectors.joining());
@@ -342,18 +341,18 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 
 			/* instead of using the default policy, we only generate one successor right away (which SHOULD be random but is not here) */
 			try {
-				NodeExpansionDescription<N, A> ed;
+				INewNodeDescription<N, A> ed;
 				if (this.successorGenerator instanceof LazySuccessorGenerator) {
 					ed = ((LazySuccessorGenerator<N,A>)this.successorGenerator).getRandomSuccessor(current, this.random);
 				}
 				else {
 					ed = SetUtil.getRandomElement(this.successorGenerator.generateSuccessors(current), this.random.nextLong());
 				}
-				A chosenAction = ed.getAction();
+				A chosenAction = ed.getArcLabel();
 				current = ed.getTo();
 
 				if (!this.goalTester.isGoal(path)) {
-					this.post(new NodeTypeSwitchEvent<>(this.getId(), current, NODESTATE_ROLLOUT));
+					this.post(new NodeTypeSwitchEvent<>(this, current, NODESTATE_ROLLOUT));
 				}
 				pathNodes.add(current);
 				pathActions.add(chosenAction);
@@ -370,7 +369,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 		return path;
 	}
 
-	private void closePath(final IPath<N, A> path) {
+	private void closePath(final ILabeledPath<N, A> path) {
 		//		int n = path.getNumberOfNodes();
 		//		for (int i = n - 2; i > 0; i--) { // don't color the root and the leaf!
 		//			N node = path.getNodes().get(i);
@@ -415,25 +414,21 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 			this.logger.trace("Situation {} has never been analyzed before, expanding the graph at the respective point.", node);
 			this.unexpandedNodes.remove(node);
 		}
-		Collection<NodeExpansionDescription<N, A>> availableActions;
-		try {
-			availableActions = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node), "Successor generation", true);
-		} catch (ExecutionException e) {
-			throw new AlgorithmException("Could not compute available actions.", e.getCause());
-		}
+		Collection<INewNodeDescription<N, A>> availableActions;
+		availableActions = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node), "Successor generation", true);
 		long successorGenerationRuntime = System.currentTimeMillis() - startExpansion;
 		if (successorGenerationRuntime > 5) {
 			this.logger.warn("The successor generation runtime was {}ms for {} nodes.", successorGenerationRuntime, availableActions.size());
 		}
 
-		assert availableActions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toList()).size() == availableActions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toSet())
-				.size() : "The actions under this node don't have unique names. Action names: \n\t" + availableActions.stream().map(d -> d.getAction().toString()).collect(Collectors.joining("\n\t"));
+		assert availableActions.stream().map(INewNodeDescription::getArcLabel).collect(Collectors.toList()).size() == availableActions.stream().map(INewNodeDescription::getArcLabel).collect(Collectors.toSet())
+				.size() : "The actions under this node don't have unique names. Action names: \n\t" + availableActions.stream().map(d -> d.getArcLabel().toString()).collect(Collectors.joining("\n\t"));
 				Map<A, N> successorStates = new HashMap<>();
 				long startAttachment = System.currentTimeMillis();
 				int i = 0;
-				for (NodeExpansionDescription<N, A> d : availableActions) {
+				for (INewNodeDescription<N, A> d : availableActions) {
 					N to = d.getTo();
-					A action = d.getAction();
+					A action = d.getArcLabel();
 					if ((i++) % 10 == 0) {
 						this.checkAndConductTermination();
 					}
@@ -468,7 +463,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 		}
 	}
 
-	private void checkThatPathIsSolution(final IPath<N, A> path) {
+	private void checkThatPathIsSolution(final ILabeledPath<N, A> path) {
 		N current = this.exploredGraph.getRoot();
 		List<N> pathNodes = path.getNodes();
 		assert current.equals(pathNodes.get(0)) : "The root of the path does not match the root of the graph!";
@@ -482,10 +477,10 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
 		case CREATED:
-			this.post(new GraphInitializedEvent<N>(this.getId(), this.root));
+			this.post(new GraphInitializedEvent<N>(this, this.root));
 			this.logger.info("Starting MCTS with node class {}", this.root.getClass().getName());
 			return this.activate();
 
@@ -501,14 +496,14 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 
 					/* if the whole graph has been expanded and paths must not be visited more than once, terminate */
 					if (this.unexpandedNodes.isEmpty()) {
-						AlgorithmEvent finishEvent = this.terminate();
+						IAlgorithmEvent finishEvent = this.terminate();
 						this.logger.info("Finishing MCTS as all nodes have been expanded; the search graph has been exhausted.");
 						return finishEvent;
 					}
 
 					/* if the tree policy has touched a leaf node, quit */
 					else if (this.fullyExploredNodes.contains(this.root)) {
-						AlgorithmEvent finishEvent = this.terminate();
+						IAlgorithmEvent finishEvent = this.terminate();
 						this.logger.info("Finishing MCTS as all nodes have been expanded; the search graph has been exhausted.");
 						return finishEvent;
 					}
@@ -516,8 +511,8 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 					/* otherwise, compute a playout and, if the path is a solution, compute its score and update the path */
 					else {
 						this.logger.debug("There are {} known unexpanded nodes. Starting computation of next playout path.", this.unexpandedNodes.size());
-						IPath<N, A> path = this.getPlayout();
-						IPath<N, A> subPathToLatestRegistered = this.getSubPathUpToDeepestRegisteredNode(path); // we back-propagate the observations only to nodes contained in the current model for the tree-policy
+						ILabeledPath<N, A> path = this.getPlayout();
+						ILabeledPath<N, A> subPathToLatestRegistered = this.getSubPathUpToDeepestRegisteredNode(path); // we back-propagate the observations only to nodes contained in the current model for the tree-policy
 						assert path != null : "The playout must never be null!";
 						assert this.exploredGraph.hasPath(path.getNodes()) : "Invalid playout, path not contained in explored graph!";
 						if (!this.scoreCache.containsKey(path)) {
@@ -527,7 +522,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 								boolean isSolutionPlayout = this.goalTester.isGoal(path);
 								this.logger.info("Determined playout score {}. Is goal: {}. Now updating the path of tree policy {}.", playoutScore, isSolutionPlayout, this.treePolicy);
 								this.scoreCache.put(path, playoutScore);
-								this.post(new RolloutEvent<>(this.getId(), path.getNodes(), this.scoreCache.get(path)));
+								this.post(new RolloutEvent<>(this, path.getNodes(), this.scoreCache.get(path)));
 								this.treePolicy.updatePath(subPathToLatestRegistered, playoutScore, path.getNumberOfNodes());
 								if (isSolutionPlayout) {
 									return this.registerSolution(new EvaluatedSearchGraphPath<>(path.getNodes(), path.getArcs(), playoutScore));
@@ -538,8 +533,8 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 								throw e; // if we get here (no exception for timeout or cancel has been thrown in check), we really have been interrupted
 							} catch (ObjectEvaluationFailedException e) {
 								this.scoreCache.put(path, this.penaltyForFailedEvaluation);
-								this.post(new RolloutEvent<>(this.getId(), path.getNodes(), this.scoreCache.get(path)));
-								this.post(new NodeTypeSwitchEvent<>(this.getId(), path.getHead(), "or_ffail"));
+								this.post(new RolloutEvent<>(this, path.getNodes(), this.scoreCache.get(path)));
+								this.post(new NodeTypeSwitchEvent<>(this, path.getHead(), "or_ffail"));
 								this.treePolicy.updatePath(subPathToLatestRegistered, this.penaltyForFailedEvaluation, path.getNumberOfNodes());
 								this.logger.warn("Could not evaluate playout {}", e);
 							} finally {
@@ -559,7 +554,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 							}
 							this.treePolicy.updatePath(subPathToLatestRegistered, playoutScore, path.getNumberOfNodes());
 							this.closePath(path); // visualize that path rollout has been completed
-							this.post(new RolloutEvent<>(this.getId(), path.getNodes(), this.scoreCache.get(path)));
+							this.post(new RolloutEvent<>(this, path.getNodes(), this.scoreCache.get(path)));
 						}
 					}
 
@@ -581,7 +576,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 		}
 	}
 
-	public IPath<N, A> getSubPathUpToDeepestRegisteredNode(final IPath<N, A> path) {
+	public ILabeledPath<N, A> getSubPathUpToDeepestRegisteredNode(final ILabeledPath<N, A> path) {
 		SearchGraphPath<N, A> subPath = new SearchGraphPath<>(path);
 		while (!this.exploredGraph.hasItem(subPath.getHead())) {
 			subPath = subPath.getPathToParentOfHead();
@@ -639,7 +634,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 		return this.defaultPolicy;
 	}
 
-	public void enforcePrefixPathOnAllRollouts(final IPath<N, A> path) {
+	public void enforcePrefixPathOnAllRollouts(final ILabeledPath<N, A> path) {
 		if (!path.getRoot().equals(this.root)) {
 			throw new IllegalArgumentException("Illegal prefix, since root does not coincide with algorithm root. Proposed root is: " + path.getRoot());
 		}

@@ -1,7 +1,11 @@
 package ai.libs.jaicore.ml.ranking.loss;
 
-import org.api4.java.ai.ml.ranking.dataset.IRanking;
-import org.api4.java.ai.ml.ranking.loss.IRankingLossFunction;
+import java.util.List;
+import java.util.OptionalDouble;
+import java.util.stream.IntStream;
+
+import org.api4.java.ai.ml.ranking.IRanking;
+import org.api4.java.ai.ml.ranking.loss.IRankingPredictionPerformanceMeasure;
 
 /**
  * Calculates the kendalls-tau loss only for the top k dyads.
@@ -12,7 +16,7 @@ import org.api4.java.ai.ml.ranking.loss.IRankingLossFunction;
  * @author mwever
  *
  */
-public class KendallsTauOfTopK implements IRankingLossFunction {
+public class KendallsTauOfTopK extends ARankingPredictionPerformanceMeasure implements IRankingPredictionPerformanceMeasure {
 	private int k;
 
 	private double p;
@@ -20,6 +24,15 @@ public class KendallsTauOfTopK implements IRankingLossFunction {
 	public KendallsTauOfTopK(final int k, final double p) {
 		this.k = k;
 		this.p = p;
+	}
+
+	@Override
+	public double loss(final List<? extends IRanking<?>> expected, final List<? extends IRanking<?>> actual) {
+		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.loss(expected.get(0), actual.get(0))).average();
+		if (res.isPresent()) {
+			return res.getAsDouble();
+		}
+		throw new IllegalStateException("Could not aggregate kendalls tau of top k");
 	}
 
 	@Override

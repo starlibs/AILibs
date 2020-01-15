@@ -11,7 +11,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.KmeansSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class KmeansSamplingFactory<I extends ILabeledInstance & Clusterable, D extends ILabeledDataset<I>> implements IRerunnableSamplingAlgorithmFactory<I, D, KmeansSampling<I, D>> {
+public class KmeansSamplingFactory<I extends ILabeledInstance & Clusterable, D extends ILabeledDataset<I>> extends ASampleAlgorithmFactory<D, KmeansSampling<I, D>> implements IRerunnableSamplingAlgorithmFactory<D, KmeansSampling<I, D>> {
 
 	private KmeansSampling<I, D> previousRun;
 	private int k = -1;

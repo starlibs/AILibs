@@ -1,0 +1,76 @@
+dependencies {
+	compile project(":JAICore:jaicore-ml")
+	compile project(":JAICore:jaicore-ml-weka")
+
+	compile ("$api4AIml")
+	
+	// meka dependencies
+	
+	compile("$meka") {
+			exclude group: 'log4j'
+			exclude group: 'org.slf4j'
+	}
+
+	/* dependencies to test sources of other projects */
+	testCompile project(path :':JAICore:jaicore-basic', configuration:'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-ml', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-planning', configuration: 'testArtifacts')
+}
+
+configurations.all {
+    exclude module: 'weka-dev'
+}
+
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+      		}	
+      		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+      		}
+
+      		pom.project {
+        		name 'JAICore-ML-MEKA'
+        		packaging 'jar'
+        		// optionally artifactId can be defined here 
+        		description 'This project provides utils to deal with machine learning tasks. Especially it gives support to work with standard ML libraries in Java.'
+        		url 'https://libs.ai'
+
+        		scm {
+          			connection 'scm:git:https://github.com/fmohr/AILibs.git'
+          			developerConnection 'scm:git:https://github.com/fmohr/AILibs.git'
+          			url 'https://github.com/fmohr/AILibs'
+        		}
+
+        		licenses {
+          			license {
+            			name 'GPLv3'
+            			url 'https://www.gnu.org/licenses/gpl-3.0.en.html'
+          			}
+        		}
+
+        		developers {
+          			developer {
+            			id 'fmohr'
+            			name 'Felix Mohr'
+            			email 'felix.mohr@upb.de'
+          			}
+          			developer {
+          				id 'mwever'    
+          			    name 'Marcel Wever'
+          			    email 'marcel.wever@upb.de'
+          			}
+          			developer {
+          			    id 'ahetzer'
+          			    name 'Alexander Hetzer'
+          			    email 'alexander.hetzer@upb.de'
+          			}
+        		}
+      		}
+    	}
+  	}
+}

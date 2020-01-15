@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ public class SPUCBPolicy<N, A> extends UCBPolicy<N, A> implements ILoggingCustom
 	}
 
 	@Override
-	public void updatePath(final IPath<N, A> path, final Double score, final int pathLength) {
+	public void updatePath(final ILabeledPath<N, A> path, final Double score, final int pathLength) {
 		super.updatePath(path, score, pathLength); // careful! the visits stats has already been updated here!
 		for (N node : path.getNodes()) {
 			NodeLabel nl = this.getLabelOfNode(node);

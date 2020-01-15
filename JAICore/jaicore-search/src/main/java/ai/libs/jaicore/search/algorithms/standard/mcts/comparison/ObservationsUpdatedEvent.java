@@ -2,7 +2,9 @@ package ai.libs.jaicore.search.algorithms.standard.mcts.comparison;
 
 import java.util.Collection;
 
-import org.api4.java.algorithm.events.AAlgorithmEvent;
+import org.api4.java.algorithm.IAlgorithm;
+
+import ai.libs.jaicore.basic.algorithm.AAlgorithmEvent;
 
 public class ObservationsUpdatedEvent<N> extends AAlgorithmEvent {
 
@@ -17,8 +19,8 @@ public class ObservationsUpdatedEvent<N> extends AAlgorithmEvent {
 	private final double pRightScaled;
 	private final int visits;
 
-	public ObservationsUpdatedEvent(final String algorithmId, final N node, final int visits, final Collection<Double> scoresLeft, final Collection<Double> scoresRight, final int winsLeft, final int winsRights, final double pLeft, final double pRight, final double pLeftScaled, final double pRightScaled) {
-		super(algorithmId);
+	public ObservationsUpdatedEvent(final IAlgorithm<?, ?> algorithm, final N node, final int visits, final Collection<Double> scoresLeft, final Collection<Double> scoresRight, final int winsLeft, final int winsRights, final double pLeft, final double pRight, final double pLeftScaled, final double pRightScaled) {
+		super(algorithm);
 		this.visits = visits;
 		this.node = node;
 		this.winsLeft = winsLeft;

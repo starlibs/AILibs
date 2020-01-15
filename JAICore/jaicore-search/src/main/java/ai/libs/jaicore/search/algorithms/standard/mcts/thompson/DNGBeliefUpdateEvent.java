@@ -1,6 +1,8 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts.thompson;
 
-import org.api4.java.algorithm.events.AAlgorithmEvent;
+import org.api4.java.algorithm.IAlgorithm;
+
+import ai.libs.jaicore.basic.algorithm.AAlgorithmEvent;
 
 public class DNGBeliefUpdateEvent<N> extends AAlgorithmEvent {
 
@@ -10,8 +12,8 @@ public class DNGBeliefUpdateEvent<N> extends AAlgorithmEvent {
 	private final double beta;
 	private final double lambda;
 
-	public DNGBeliefUpdateEvent(final String algorithmId, final N node, final double mu, final double alpha, final double beta, final double lambda) {
-		super(algorithmId);
+	public DNGBeliefUpdateEvent(final IAlgorithm<?, ?> algorithm, final N node, final double mu, final double alpha, final double beta, final double lambda) {
+		super(algorithm);
 		this.node = node;
 		this.mu = mu;
 		this.alpha = alpha;

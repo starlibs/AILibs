@@ -5,9 +5,9 @@ import java.util.Map;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingDataset;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
+import org.api4.java.common.math.IVector;
 
 import ai.libs.jaicore.math.gradientdescent.IGradientDescendableFunction;
-import ai.libs.jaicore.math.linearalgebra.IVector;
 
 /**
  * An interface for a differentiable function in the context of feature

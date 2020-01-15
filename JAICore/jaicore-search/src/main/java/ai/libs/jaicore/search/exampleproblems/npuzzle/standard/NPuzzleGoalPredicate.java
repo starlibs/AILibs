@@ -1,10 +1,10 @@
 package ai.libs.jaicore.search.exampleproblems.npuzzle.standard;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 
 import ai.libs.jaicore.problems.npuzzle.NPuzzleState;
 
-public class NPuzzleGoalPredicate implements NodeGoalTester<NPuzzleState, String> {
+public class NPuzzleGoalPredicate implements INodeGoalTester<NPuzzleState, String> {
 
 	private final int dimension;
 

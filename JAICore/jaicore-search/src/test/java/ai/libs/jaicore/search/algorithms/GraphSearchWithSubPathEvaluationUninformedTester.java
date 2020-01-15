@@ -1,6 +1,6 @@
 package ai.libs.jaicore.search.algorithms;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearch;
+import org.api4.java.ai.graphsearch.problem.IPathSearch;
 
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
@@ -9,7 +9,7 @@ public abstract class GraphSearchWithSubPathEvaluationUninformedTester extends G
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public final <N, A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(final GraphSearchInput<N, A> problem) {
+	public final <N, A> IPathSearch<?, ?, N, A> getSearchAlgorithm(final GraphSearchInput<N, A> problem) {
 		if (problem instanceof GraphSearchWithSubpathEvaluationsInput) {
 			return this.getSearchAlgorithm((GraphSearchWithSubpathEvaluationsInput<N, A, Double>)problem);
 		}
@@ -18,5 +18,5 @@ public abstract class GraphSearchWithSubPathEvaluationUninformedTester extends G
 		}
 	}
 
-	public abstract <N, A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(GraphSearchWithSubpathEvaluationsInput<N, A, Double> problem);
+	public abstract <N, A> IPathSearch<?, ?, N, A> getSearchAlgorithm(GraphSearchWithSubpathEvaluationsInput<N, A, Double> problem);
 }

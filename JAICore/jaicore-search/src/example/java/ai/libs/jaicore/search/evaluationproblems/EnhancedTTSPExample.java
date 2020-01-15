@@ -7,11 +7,19 @@ import java.util.stream.Collectors;
 
 import org.api4.java.ai.graphsearch.problem.IPathInORGraphSearch;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+<<<<<<< HEAD
 import org.api4.java.algorithm.events.SolutionCandidateFoundEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.datastructure.graph.IPath;
+=======
+import org.api4.java.algorithm.events.result.ISolutionCandidateFoundEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.datastructure.graph.ILabeledPath;
+>>>>>>> refs/heads/dev
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,13 +33,22 @@ import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.UCTPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.random.RandomSearch;
 import ai.libs.jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
+<<<<<<< HEAD
 import ai.libs.jaicore.search.exampleproblems.enhancedttsp.EnhancedTTSPGraphGenerator;
 import ai.libs.jaicore.search.exampleproblems.enhancedttsp.EnhancedTTSPSolutionPredicate;
 import ai.libs.jaicore.search.exampleproblems.enhancedttsp.EnhancedTTSPToGraphSearchReducer;
+=======
+>>>>>>> refs/heads/dev
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+<<<<<<< HEAD
+=======
+import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPGraphGenerator;
+import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPSolutionPredicate;
+import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPToGraphSearchReducer;
+>>>>>>> refs/heads/dev
 
 public class EnhancedTTSPExample {
 
@@ -81,7 +98,11 @@ public class EnhancedTTSPExample {
 	private class AStarNodeEvaluator implements IPathEvaluator<EnhancedTTSPNode, String, Double> {
 
 		@Override
+<<<<<<< HEAD
 		public Double evaluate(final IPath<EnhancedTTSPNode, String> node) {
+=======
+		public Double evaluate(final ILabeledPath<EnhancedTTSPNode, String> node) {
+>>>>>>> refs/heads/dev
 
 			double g = node.getHead().getTime();
 			double h = 0;
@@ -135,7 +156,7 @@ public class EnhancedTTSPExample {
 		/* run search */
 		SearchGraphPath<EnhancedTTSPNode, String> bestSolution = null;
 		double bestValue = Double.MAX_VALUE;
-		SolutionCandidateFoundEvent<? extends SearchGraphPath<EnhancedTTSPNode, String>> solution;
+		ISolutionCandidateFoundEvent<? extends SearchGraphPath<EnhancedTTSPNode, String>> solution;
 		while (!Thread.currentThread().isInterrupted() && (solution = search.nextSolutionCandidateEvent()) != null) {
 			double value = solution.getTimestamp();
 			if (value < bestValue) {

@@ -3,7 +3,7 @@ package ai.libs.jaicore.search.gui.plugins.mcts.rolloutboxplots;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 
 import ai.libs.jaicore.graphvisualizer.events.gui.GUIEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
@@ -34,7 +34,7 @@ public class SearchRolloutBoxplotPluginController extends ASimpleMVCPluginContro
 	}
 
 	@Override
-	public void handleAlgorithmEventInternally(final PropertyProcessedAlgorithmEvent algorithmEvent) {
+	public void handleAlgorithmEventInternally(final IPropertyProcessedAlgorithmEvent algorithmEvent) {
 		if (algorithmEvent.correspondsToEventOfClass(RolloutEvent.class)) {
 
 			RolloutInfo rolloutInfo = (RolloutInfo) algorithmEvent.getProperty(RolloutInfoAlgorithmEventPropertyComputer.ROLLOUT_SCORE_PROPERTY_NAME);

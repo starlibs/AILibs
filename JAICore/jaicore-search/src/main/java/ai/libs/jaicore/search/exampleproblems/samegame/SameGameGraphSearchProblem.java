@@ -1,13 +1,13 @@
 package ai.libs.jaicore.search.exampleproblems.samegame;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 
 import ai.libs.jaicore.problems.samegame.SameGameCell;
 import ai.libs.jaicore.problems.samegame.SameGameState;
 
-public class SameGameGraphSearchProblem implements IGraphSearchWithPathEvaluationsInput<SameGameNode, SameGameCell, Double> {
+public class SameGameGraphSearchProblem implements IPathSearchWithPathEvaluationsInput<SameGameNode, SameGameCell, Double> {
 
 	private static final SameGameGoalPredicate GP = new SameGameGoalPredicate();
 
@@ -37,7 +37,7 @@ public class SameGameGraphSearchProblem implements IGraphSearchWithPathEvaluatio
 	}
 
 	@Override
-	public PathGoalTester<SameGameNode, SameGameCell> getGoalTester() {
+	public IPathGoalTester<SameGameNode, SameGameCell> getGoalTester() {
 		return GP;
 	}
 

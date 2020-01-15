@@ -1,23 +1,21 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory.casecontrol;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.distribution.EnumeratedIntegerDistribution;
-import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationDataset;
-import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPrediction;
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassifier;
+import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.exception.DatasetCreationException;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.exceptions.AlgorithmException;
-import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
+import ai.libs.jaicore.basic.sets.Pair;
 
 /**
  * The idea behind this Sampling method is to weight instances depended on the
@@ -34,94 +32,72 @@ import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
  * @param <I>
  */
 
-public class ClassifierWeightedSampling<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends CaseControlLikeSampling<I, D> {
+public class ClassifierWeightedSampling<D extends ILabeledDataset<? extends ILabeledInstance>> extends PilotEstimateSampling<D> {
 
 	private Logger logger = LoggerFactory.getLogger(ClassifierWeightedSampling.class);
 
-	private ISingleLabelClassifier pilotEstimator;
-	private EnumeratedIntegerDistribution finalDistribution;
-	private double addForRightClassification;
-	private double baseValue;
-
-	public ClassifierWeightedSampling(final ISingleLabelClassifier pilotEstimator, final Random rand, final ISingleLabelClassificationDataset dataset, final D input) {
-		super(input);
+	public ClassifierWeightedSampling(final IClassifier pilotEstimator, final Random rand, final D dataset) {
+		super(dataset, pilotEstimator);
 		this.rand = rand;
-		this.pilotEstimator = pilotEstimator;
-		try {
-			this.pilotEstimator.fit(dataset);
-		} catch (Exception e) {
-			this.logger.error("Cannot build pilot estimator", e);
-		}
-		double mid = this.getMean(dataset);
-		// base probability to be chosen
-		this.baseValue = 10 * mid + 1; // arbitrary value, there most likely be better one
-		this.addForRightClassification = this.baseValue + 2 * mid; // like this.baseValue
 	}
 
-	@SuppressWarnings("unchecked")
+	private double getMean(final ILabeledDataset<?> instances) {
+		double sum = 0.0;
+		for (ILabeledInstance instance : instances) {
+			try {
+				sum += this.getPilotEstimator().predict(instance).getProbabilityOfLabel(instance.getLabel());
+			} catch (Exception e) {
+				this.logger.error("Unexpected error in pilot estimator", e);
+			}
+		}
+		return sum / instances.size();
+	}
+
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		switch (this.getState()) {
-		case CREATED:
-			try {
-				this.sample = (D) this.getInput().createEmptyCopy();
-				D sampleCopy = (D) this.getInput().createEmptyCopy();
-				for (I instance : this.getInput()) {
-					sampleCopy.add(instance);
-				}
-				this.finalDistribution = this.calculateFinalInstanceBoundariesWithDiscaring(((WekaInstances) sampleCopy).getList(), this.pilotEstimator);
-				this.finalDistribution.reseedRandomGenerator(this.rand.nextLong());
-			} catch (DatasetCreationException e) {
-				throw new AlgorithmException("Could not create a copy of the dataset.", e);
-			}
-			return this.activate();
-		case ACTIVE:
-			I choosenInstance;
-			if (this.sample.size() < this.sampleSize) {
-				do {
-					choosenInstance = this.getInput().get(this.finalDistribution.sample());
-				} while (this.sample.contains(choosenInstance));
-				this.sample.add(choosenInstance);
-				return new SampleElementAddedEvent(this.getId());
-			} else {
-				return this.terminate();
-			}
-		case INACTIVE:
-			this.doInactiveStep();
-			break;
-		default:
-			throw new IllegalStateException("Unknown algorithm state " + this.getState());
-		}
-		return null;
-	}
+	public List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(final D dataset, final IClassifier pilot) {
 
-	private EnumeratedIntegerDistribution calculateFinalInstanceBoundariesWithDiscaring(final ISingleLabelClassificationDataset instances, final ISingleLabelClassifier pilotEstimator) {
-		double[] weights = new double[instances.size()];
-		for (int i = 0; i < instances.size(); i++) {
+		/* compute mean value and base values the instances must have */
+		double mid = this.getMean(dataset);
+		double baseValue = 10 * mid + 1; // arbitrary value, there most likely be better one
+		double addForRightClassification = baseValue + 2 * mid; // like baseValue
+
+		/* determine probability for each index to be chosen */
+		double[] weights = new double[dataset.size()];
+		for (int i = 0; i < weights.length; i++) {
 			try {
-				ISingleLabelClassificationPrediction prediction = this.pilotEstimator.predict(instances.get(i));
-				if (prediction.getLabelWithHighestProbability().equals(instances.get(i).getLabel())) {
-					weights[i] = this.addForRightClassification - prediction.getProbabilityOfLabel(instances.get(i).getLabel());
+				IPrediction prediction = pilot.predict(dataset.get(i));
+				if (prediction.getLabelWithHighestProbability() == dataset.get(i).getLabel()) {
+					weights[i] = addForRightClassification - prediction.getProbabilityOfLabel(dataset.get(i).getLabel());
 				} else {
-					weights[i] = this.baseValue + prediction.getProbabilityOfLabel(prediction.getLabelWithHighestProbability());
+					weights[i] = baseValue + prediction.getProbabilityOfLabel(prediction.getLabelWithHighestProbability());
 				}
 			} catch (Exception e) {
 				weights[i] = 0;
 			}
 		}
 		int[] indices = IntStream.range(0, this.getInput().size()).toArray();
-		return new EnumeratedIntegerDistribution(indices, weights);
-	}
+		EnumeratedIntegerDistribution finalDistribution = new EnumeratedIntegerDistribution(indices, weights);
+		finalDistribution.reseedRandomGenerator(this.rand.nextLong());
 
-	private double getMean(final ISingleLabelClassificationDataset instances) {
-		double sum = 0.0;
-		for (ISingleLabelClassificationInstance instance : instances) {
-			try {
-				sum += this.pilotEstimator.predict(instance).getProbabilityOfLabel(instance.getLabel());
-			} catch (Exception e) {
-				this.logger.error("Unexpected error in pilot estimator", e);
-			}
+		/* now draw <number of samples> many indices whose threshold will be set to 1 */
+		int n = this.getSampleSize();
+		Set<Integer> consideredIndices = new HashSet<>();
+		for (int i = 0; i < n; i++) {
+			int index;
+			do {
+				index = finalDistribution.sample();
+			} while (consideredIndices.contains(index));
+			consideredIndices.add(index);
 		}
-		return sum / instances.size();
+
+		/* now create the list of pairs */
+		List<Pair<ILabeledInstance, Double>> thresholds = new ArrayList<>();
+		int m = dataset.size();
+		for (int i = 0; i < m; i++) {
+			ILabeledInstance inst = dataset.get(i);
+			double threshold = consideredIndices.contains(i) ? 1 : 0;
+			thresholds.add(new Pair<>(inst, threshold));
+		}
+		return thresholds;
 	}
 }

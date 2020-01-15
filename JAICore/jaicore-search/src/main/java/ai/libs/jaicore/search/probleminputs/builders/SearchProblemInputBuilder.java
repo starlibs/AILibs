@@ -5,25 +5,23 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.RootGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.IRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
-public abstract class SearchProblemInputBuilder<N, A, I extends GraphSearchInput<N, A>, B extends SearchProblemInputBuilder<N, A, I, B>> {
+public abstract class SearchProblemInputBuilder<N, A, I extends IPathSearchInput<N, A>, B extends SearchProblemInputBuilder<N, A, I, B>> {
 
-	private RootGenerator<N> rootGenerator;
-	private SuccessorGenerator<N, A> successorGenerator;
-	private PathGoalTester<N, A> goalTester;
-	private IPath<N, A> prefixPath; // the path from the original root
-
-	protected abstract B self(); // for the recursive generics
+	private IRootGenerator<N> rootGenerator;
+	private ISuccessorGenerator<N, A> successorGenerator;
+	private IPathGoalTester<N, A> goalTester;
+	private ILabeledPath<N, A> prefixPath; // the path from the original root
 
 	public B withGraphGenerator(final IGraphGenerator<N, A> graphGenerator) {
 		this.rootGenerator = graphGenerator.getRootGenerator();
@@ -35,18 +33,18 @@ public abstract class SearchProblemInputBuilder<N, A, I extends GraphSearchInput
 		return new IGraphGenerator<N, A>() {
 
 			@Override
-			public RootGenerator<N> getRootGenerator() {
+			public IRootGenerator<N> getRootGenerator() {
 				return SearchProblemInputBuilder.this.rootGenerator;
 			}
 
 			@Override
-			public SuccessorGenerator<N, A> getSuccessorGenerator() {
+			public ISuccessorGenerator<N, A> getSuccessorGenerator() {
 				return SearchProblemInputBuilder.this.successorGenerator;
 			}
 		};
 	}
 
-	public B fromProblem(final GraphSearchInput<N, A> problem) {
+	public B fromProblem(final IPathSearchInput<N, A> problem) {
 		this.withGraphGenerator(problem.getGraphGenerator());
 		this.withGoalTester(problem.getGoalTester());
 		return this.self();
@@ -57,7 +55,7 @@ public abstract class SearchProblemInputBuilder<N, A, I extends GraphSearchInput
 		return this.self();
 	}
 
-	public void withSuccessorGenerator(final SuccessorGenerator<N, A> successorGenerator) {
+	public void withSuccessorGenerator(final ISuccessorGenerator<N, A> successorGenerator) {
 		this.successorGenerator = successorGenerator;
 	}
 
@@ -81,13 +79,13 @@ public abstract class SearchProblemInputBuilder<N, A, I extends GraphSearchInput
 		N current = roots.iterator().next();
 		prefixNodes.add(current);
 		for (int child : indicesOfSuccessorsFromCurrentRoot) {
-			NodeExpansionDescription<N, A> ned = this.successorGenerator.generateSuccessors(current).get(child);
+			INewNodeDescription<N, A> ned = this.successorGenerator.generateSuccessors(current).get(child);
 			current = ned.getTo();
-			prefixArcs.add(ned.getAction());
+			prefixArcs.add(ned.getArcLabel());
 			prefixNodes.add(current);
 		}
 		this.prefixPath = new SearchGraphPath<>(prefixNodes, prefixArcs);
-		this.rootGenerator = new SingleRootGenerator<N>() {
+		this.rootGenerator = new ISingleRootGenerator<N>() {
 
 			@Override
 			public N getRoot() {
@@ -97,18 +95,20 @@ public abstract class SearchProblemInputBuilder<N, A, I extends GraphSearchInput
 		return this.self();
 	}
 
-	public IPath<N, A> getPrefixPath() {
+	public ILabeledPath<N, A> getPrefixPath() {
 		return this.prefixPath;
 	}
 
-	public B withGoalTester(final PathGoalTester<N, A> goalTester) {
+	public B withGoalTester(final IPathGoalTester<N, A> goalTester) {
 		this.goalTester = goalTester;
 		return this.self();
 	}
 
-	public PathGoalTester<N, A> getGoalTester() {
+	public IPathGoalTester<N, A> getGoalTester() {
 		return this.goalTester;
 	}
 
 	public abstract I build();
+
+	protected abstract B self();
 }

@@ -1,8 +1,8 @@
 package ai.libs.jaicore.search.algorithms.parallel.parallelexploration.distributed.clustertest;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 
-public class ClusterTestGoalTester implements NodeGoalTester<TestNode, String> {
+public class ClusterTestGoalTester implements INodeGoalTester<TestNode, String> {
 
 	private final int target;
 

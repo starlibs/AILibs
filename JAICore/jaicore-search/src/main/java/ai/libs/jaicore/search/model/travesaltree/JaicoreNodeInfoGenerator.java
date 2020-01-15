@@ -7,6 +7,7 @@ import java.util.Map;
 import org.checkerframework.checker.units.qual.A;
 
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.ENodeAnnotation;
 
 public class JaicoreNodeInfoGenerator<N, V extends Comparable<V>> implements NodeInfoGenerator<BackPointerPath<N, A, V>> {
 
@@ -26,13 +27,14 @@ public class JaicoreNodeInfoGenerator<N, V extends Comparable<V>> implements Nod
 		StringBuilder sb = new StringBuilder();
 
 		Map<String, Object> annotations = node.getAnnotations();
+
 		sb.append("<h2>Annotation</h2><table><tr><th>Key</th><th>Value</th></tr>");
 		for (String key : annotations.keySet()) {
 			sb.append("<tr><td>" + key + "</td><td>" + annotations.get(key) + "</td></tr>");
 		}
 		sb.append("</table>");
 		sb.append("<h2>F-Value</h2>");
-		sb.append(node.getScore());
+		sb.append(annotations.get(ENodeAnnotation.F_ERROR.toString()) + "");
 		if (annotations.containsKey("fRPSamples")) {
 			sb.append(" (based on " + annotations.get("fRPSamples") + " samples)");
 		}

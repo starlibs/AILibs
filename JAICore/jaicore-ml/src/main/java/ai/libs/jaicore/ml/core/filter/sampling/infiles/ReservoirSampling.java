@@ -6,11 +6,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 
-import ai.libs.jaicore.ml.core.dataset.ArffUtilities;
 import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
 
 /**
@@ -35,7 +34,7 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException()
+	public IAlgorithmEvent nextWithException()
 			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		switch (this.getState()) {
 		case CREATED:
@@ -68,7 +67,7 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 						}
 					}
 					this.streamedDatapoints++;
-					return new SampleElementAddedEvent(this.getId());
+					return new SampleElementAddedEvent(this);
 				} catch (IOException e) {
 					throw new AlgorithmException("Was not able to read datapoint line from input file", e);
 				}
@@ -97,6 +96,8 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 
 	@Override
 	protected void cleanUp() {
+
+		/* no clean up activities necessary */
 	}
 
 }

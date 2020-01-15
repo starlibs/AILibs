@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.common.math.IMetric;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,16 +18,16 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePa
 public class GraphBasedDistantSuccessorGenerator<N, A> implements DistantSuccessorGenerator<N>, ILoggingCustomizable {
 
 	private static final int MAX_ATTEMPTS = 10;
-	private final SuccessorGenerator<N, A> succesorGenerator;
-	private final NodeGoalTester<N, A> goalTester;
+	private final ISuccessorGenerator<N, A> succesorGenerator;
+	private final INodeGoalTester<N, A> goalTester;
 	private final Random random;
 
 	private Logger logger = LoggerFactory.getLogger(GraphBasedDistantSuccessorGenerator.class);
 
-	public GraphBasedDistantSuccessorGenerator(final IGraphSearchInput<N, A> graphSearchInput, final int seed) {
+	public GraphBasedDistantSuccessorGenerator(final IPathSearchInput<N, A> graphSearchInput, final int seed) {
 		super();
 		this.succesorGenerator = graphSearchInput.getGraphGenerator().getSuccessorGenerator();
-		this.goalTester = (NodeGoalTester<N, A>)graphSearchInput.getGoalTester();
+		this.goalTester = (INodeGoalTester<N, A>)graphSearchInput.getGoalTester();
 		this.random = new Random(seed);
 	}
 
@@ -48,7 +48,7 @@ public class GraphBasedDistantSuccessorGenerator<N, A> implements DistantSuccess
 					throw new InterruptedException("Successor generation has been interrupted.");
 				}
 				assert !this.goalTester.isGoal(candidatePoint) : "Node must not be a goal node!";
-				List<NodeExpansionDescription<N, A>> localSuccessors = this.succesorGenerator.generateSuccessors(candidatePoint);
+				List<INewNodeDescription<N, A>> localSuccessors = this.succesorGenerator.generateSuccessors(candidatePoint);
 				if (localSuccessors.isEmpty()) {
 					this.logger.warn("List of local successors is empty for node {}! This may be due to a dead-end in the search graph.", candidatePoint);
 					deadEnd = true;

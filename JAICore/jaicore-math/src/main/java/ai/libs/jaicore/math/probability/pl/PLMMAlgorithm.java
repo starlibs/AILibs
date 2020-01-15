@@ -2,7 +2,7 @@ package ai.libs.jaicore.math.probability.pl;
 
 import java.util.List;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -41,6 +41,10 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 	private final int numObjects;
 	private final IntList winVector;
 	private DoubleList skillVector;
+
+	public PLMMAlgorithm(final PLInferenceProblem input) {
+		this(input, null, null);
+	}
 
 	public PLMMAlgorithm(final PLInferenceProblem input, final IOwnerBasedAlgorithmConfig config) {
 		this(input, null, config);
@@ -81,7 +85,7 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		DoubleList lastSkillVector = null;
 		double epsilon = 0.00001;
 		//		double currentPerf = Double.MAX_VALUE * -1;

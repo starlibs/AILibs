@@ -5,9 +5,9 @@ import java.util.Map;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingDataset;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
+import org.api4.java.common.math.IVector;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.IVector;
 
 /**
  * Represents the derivate of the negative log likelihood function in the
@@ -61,7 +61,7 @@ public class DyadRankingFeatureTransformNegativeLogLikelihoodDerivative implemen
 		double firstSum = 0d;
 		for (int smallN = 0; smallN < largeN; smallN++) {
 			IDyadRankingInstance instance = this.dataset.get(smallN);
-			int mN = instance.getNumAttributes();
+			int mN = instance.getNumberOfRankedElements();
 			for (int m = 0; m < mN - 1; m++) {
 				double innerDenumerator = 0d;
 				double innerNumerator = 0d;

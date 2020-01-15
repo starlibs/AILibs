@@ -8,12 +8,12 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.NodeType;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 
 import ai.libs.jaicore.problems.samegame.SameGameCell;
 import ai.libs.jaicore.problems.samegame.SameGameState;
 import ai.libs.jaicore.search.core.interfaces.LazySuccessorGenerator;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public class SameGameLazySuccessorGenerator implements LazySuccessorGenerator<SameGameNode, SameGameCell> {
 
@@ -50,9 +50,9 @@ public class SameGameLazySuccessorGenerator implements LazySuccessorGenerator<Sa
 	// }
 	//
 	@Override
-	public List<NodeExpansionDescription<SameGameNode, SameGameCell>> generateSuccessors(final SameGameNode node) throws InterruptedException {
-		List<NodeExpansionDescription<SameGameNode, SameGameCell>> succ = new ArrayList<>();
-		Iterator<NodeExpansionDescription<SameGameNode, SameGameCell>> it = this.getSuccessorIterator(node);
+	public List<INewNodeDescription<SameGameNode, SameGameCell>> generateSuccessors(final SameGameNode node) throws InterruptedException {
+		List<INewNodeDescription<SameGameNode, SameGameCell>> succ = new ArrayList<>();
+		Iterator<INewNodeDescription<SameGameNode, SameGameCell>> it = this.getSuccessorIterator(node);
 		while (it.hasNext()) {
 			succ.add(it.next());
 		}
@@ -60,9 +60,9 @@ public class SameGameLazySuccessorGenerator implements LazySuccessorGenerator<Sa
 	}
 
 	@Override
-	public Iterator<NodeExpansionDescription<SameGameNode, SameGameCell>> getSuccessorIterator(final SameGameNode n) {
+	public Iterator<INewNodeDescription<SameGameNode, SameGameCell>> getSuccessorIterator(final SameGameNode n) {
 
-		return new Iterator<NodeExpansionDescription<SameGameNode, SameGameCell>>() {
+		return new Iterator<INewNodeDescription<SameGameNode, SameGameCell>>() {
 
 			private final List<SameGameCell> unselectedCells;
 			private final Random random = new Random();
@@ -96,7 +96,7 @@ public class SameGameLazySuccessorGenerator implements LazySuccessorGenerator<Sa
 				if (!n.isKeepInMemory()) {
 					n.eraseGenes();
 				}
-				return new NodeExpansionDescription<>(node, nextCell, NodeType.OR);
+				return new NodeExpansionDescription<>(node, nextCell);
 			}
 		};
 	}
@@ -123,6 +123,6 @@ public class SameGameLazySuccessorGenerator implements LazySuccessorGenerator<Sa
 		if (!node.isKeepInMemory()) {
 			node.eraseGenes();
 		}
-		return new NodeExpansionDescription<>(succ, cell, NodeType.OR);
+		return new NodeExpansionDescription<>(succ, cell);
 	}
 }

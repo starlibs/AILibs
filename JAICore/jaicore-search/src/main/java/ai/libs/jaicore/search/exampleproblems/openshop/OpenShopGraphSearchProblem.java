@@ -1,7 +1,7 @@
 package ai.libs.jaicore.search.exampleproblems.openshop;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
@@ -9,7 +9,7 @@ import ai.libs.jaicore.problems.scheduling.openshop.OpenShopProblem;
 import ai.libs.jaicore.problems.scheduling.openshop.Operation;
 import ai.libs.jaicore.problems.scheduling.openshop.Schedule;
 
-public class OpenShopGraphSearchProblem implements IGraphSearchWithPathEvaluationsInput<OpenShopState, String, Double> {
+public class OpenShopGraphSearchProblem implements IPathSearchWithPathEvaluationsInput<OpenShopState, String, Double> {
 	private final OpenShopProblem problem;
 	private final OpenShopGraphGenerator gg;
 	private final OpenShopGoalPredicate gp = new OpenShopGoalPredicate();
@@ -26,7 +26,7 @@ public class OpenShopGraphSearchProblem implements IGraphSearchWithPathEvaluatio
 	}
 
 	@Override
-	public PathGoalTester<OpenShopState, String> getGoalTester() {
+	public IPathGoalTester<OpenShopState, String> getGoalTester() {
 		return this.gp;
 	}
 

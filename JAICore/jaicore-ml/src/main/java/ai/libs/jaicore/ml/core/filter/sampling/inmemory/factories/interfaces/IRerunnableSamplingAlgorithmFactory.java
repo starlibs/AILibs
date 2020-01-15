@@ -1,7 +1,6 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces;
 
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.dataset.IDataset;
 
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 
@@ -13,7 +12,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
  * @param <I> Type of the dataset instances.
  * @param <A> Type of the sampling algorithm that will be created.
  */
-public interface IRerunnableSamplingAlgorithmFactory<I extends ILabeledInstance, D extends ILabeledDataset<I>, A extends ASamplingAlgorithm<I, D>> extends ISamplingAlgorithmFactory<I, D, A> {
+public interface IRerunnableSamplingAlgorithmFactory<D extends IDataset<?>, A extends ASamplingAlgorithm<D>> extends ISamplingAlgorithmFactory<D, A> {
 
 	/**
 	 * Set the previous run of the sampling algorithm, if one occurred, can be set

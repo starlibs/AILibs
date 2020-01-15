@@ -1,6 +1,8 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts.thompson;
 
-import org.api4.java.algorithm.events.AAlgorithmEvent;
+import org.api4.java.algorithm.IAlgorithm;
+
+import ai.libs.jaicore.basic.algorithm.AAlgorithmEvent;
 
 public class DNGQSampleEvent<N, A> extends AAlgorithmEvent {
 	private final N node;
@@ -8,8 +10,8 @@ public class DNGQSampleEvent<N, A> extends AAlgorithmEvent {
 	private final A action;
 	private final double score;
 
-	public DNGQSampleEvent(final String algorithmId, final N node, final N child, final A action, final double score) {
-		super(algorithmId);
+	public DNGQSampleEvent(final IAlgorithm<?, ?> algorithm, final N node, final N child, final A action, final double score) {
+		super(algorithm);
 		this.node = node;
 		this.child = child;
 		this.action = action;

@@ -1,8 +1,8 @@
 package ai.libs.jaicore.search.exampleproblems.nqueens;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 
-public class NQueensGoalPredicate implements NodeGoalTester<QueenNode, String> {
+public class NQueensGoalPredicate implements INodeGoalTester<QueenNode, String> {
 
 	private final int dimension;
 

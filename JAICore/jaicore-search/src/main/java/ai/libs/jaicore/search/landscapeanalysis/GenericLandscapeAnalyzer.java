@@ -4,23 +4,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
-import org.api4.java.datastructure.graph.IPath;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.ILabeledPath;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
 public class GenericLandscapeAnalyzer<N, A> {
-	private final IGraphSearchWithPathEvaluationsInput<N, A, Double> problem;
+	private final IPathSearchWithPathEvaluationsInput<N, A, Double> problem;
 	private final N root;
-	private final SuccessorGenerator<N, A> successorGenerator;
-	private final PathGoalTester<N, A> goalTester;
+	private final ISuccessorGenerator<N, A> successorGenerator;
+	private final IPathGoalTester<N, A> goalTester;
 	private double min = Double.MAX_VALUE;
 
-	public GenericLandscapeAnalyzer(final IGraphSearchWithPathEvaluationsInput<N, A, Double> problem) {
+	public GenericLandscapeAnalyzer(final IPathSearchWithPathEvaluationsInput<N, A, Double> problem) {
 		super();
 		this.problem = problem;
 		this.root = problem.getGraphGenerator().getRootGenerator().getRoots().iterator().next();
@@ -38,16 +38,16 @@ public class GenericLandscapeAnalyzer<N, A> {
 		N current = this.root;
 		nodes.add(current);
 		for (int child : decisions) {
-			NodeExpansionDescription<N, A> ned = this.successorGenerator.generateSuccessors(current).get(child);
+			INewNodeDescription<N, A> ned = this.successorGenerator.generateSuccessors(current).get(child);
 			current = ned.getTo();
 			nodes.add(current);
-			arcs.add(ned.getAction());
+			arcs.add(ned.getArcLabel());
 		}
-		IPath<N,A> path = new SearchGraphPath<>(nodes, arcs);
+		ILabeledPath<N,A> path = new SearchGraphPath<>(nodes, arcs);
 		return this.getValues(path, probeSize, technique);
 	}
 
-	public double[] getValues(final IPath<N, A> path, final Number probeSize, final LandscapeAnalysisCompletionTechnique technique) throws InterruptedException, PathEvaluationException {
+	public double[] getValues(final ILabeledPath<N, A> path, final Number probeSize, final LandscapeAnalysisCompletionTechnique technique) throws InterruptedException, PathEvaluationException {
 		List<Double> values = this.probeUnderPath(path, probeSize, technique);
 		int n = values.size();
 		double[] valuesAsArray = new double[n];
@@ -57,7 +57,7 @@ public class GenericLandscapeAnalyzer<N, A> {
 		return valuesAsArray;
 	}
 
-	private List<Double> probeUnderPath(final IPath<N, A> path, final Number limit, final LandscapeAnalysisCompletionTechnique technique) throws InterruptedException, PathEvaluationException {
+	private List<Double> probeUnderPath(final ILabeledPath<N, A> path, final Number limit, final LandscapeAnalysisCompletionTechnique technique) throws InterruptedException, PathEvaluationException {
 		N node = path.getHead();
 		int cLimit = limit.intValue();
 		List<Double> scoresUnderChildren = new ArrayList<>(cLimit);
@@ -69,7 +69,7 @@ public class GenericLandscapeAnalyzer<N, A> {
 			scoresUnderChildren.add(score);
 			return scoresUnderChildren;
 		}
-		List<NodeExpansionDescription<N, A>> successors = this.successorGenerator.generateSuccessors(node);
+		List<INewNodeDescription<N, A>> successors = this.successorGenerator.generateSuccessors(node);
 		int n = successors.size();
 
 		/* if we cannot delve into all successors, order them by the defined technique */
@@ -95,41 +95,41 @@ public class GenericLandscapeAnalyzer<N, A> {
 			if (limitForThisChild <= 0) {
 				return scoresUnderChildren;
 			}
-			IPath<N, A> newPath = new SearchGraphPath<>(path, successors.get(child).getTo(), successors.get(child).getAction());
+			ILabeledPath<N, A> newPath = new SearchGraphPath<>(path, successors.get(child).getTo(), successors.get(child).getArcLabel());
 			scoresUnderChildren.addAll(this.probeUnderPath(newPath, limitForThisChild, technique));
 		}
 		return scoresUnderChildren;
 	}
 
 	public List<List<double[]>> getIterativeProbeValuesAlongRandomPath(final Number probSizePerLevelAndChild) throws PathEvaluationException, InterruptedException {
-		IPath<N, A> currentPath = new SearchGraphPath<>(this.root);
+		ILabeledPath<N, A> currentPath = new SearchGraphPath<>(this.root);
 		while (!this.goalTester.isGoal(currentPath)) {
-			List<NodeExpansionDescription<N, A>> nedList = this.problem.getGraphGenerator().getSuccessorGenerator().generateSuccessors(currentPath.getHead());
+			List<INewNodeDescription<N, A>> nedList = this.problem.getGraphGenerator().getSuccessorGenerator().generateSuccessors(currentPath.getHead());
 			Collections.shuffle(nedList);
-			currentPath = new SearchGraphPath<>(currentPath, nedList.get(0).getTo(), nedList.get(0).getAction());
+			currentPath = new SearchGraphPath<>(currentPath, nedList.get(0).getTo(), nedList.get(0).getArcLabel());
 		}
 		System.out.println("Drew path " + currentPath.getArcs() + ": " + currentPath.getHead());
 		return this.getIterativeProbeValues(currentPath, probSizePerLevelAndChild);
 	}
 
-	public List<List<double[]>> getIterativeProbeValues(final IPath<N, A> path, final Number probSizePerLevelAndChild) throws PathEvaluationException, InterruptedException {
+	public List<List<double[]>> getIterativeProbeValues(final ILabeledPath<N, A> path, final Number probSizePerLevelAndChild) throws PathEvaluationException, InterruptedException {
 		List<List<double[]>> iterativeProbes = new ArrayList<>();
 		for (int depth = 0; depth < path.getNumberOfNodes() - 1; depth++) {
 			System.out.println("Probing on level " + depth);
 
 			/* compute sub-path of the relevant depth */
-			IPath<N, A> subPath = path;
+			ILabeledPath<N, A> subPath = path;
 			while (subPath.getNumberOfNodes() > depth + 1) {
 				subPath = subPath.getPathToParentOfHead();
 			}
 
 			/* compute successors in that depth */
-			List<NodeExpansionDescription<N, A>> nedList = this.problem.getGraphGenerator().getSuccessorGenerator().generateSuccessors(subPath.getHead());
+			List<INewNodeDescription<N, A>> nedList = this.problem.getGraphGenerator().getSuccessorGenerator().generateSuccessors(subPath.getHead());
 
 			/* sample under each of the nodes */
 			List<double[]> probesOnLevel = new ArrayList<>(nedList.size());
-			for (NodeExpansionDescription<N, A> ned : nedList) {
-				IPath<N, A> extendedPath = new SearchGraphPath<>(subPath, ned.getTo(), ned.getAction());
+			for (INewNodeDescription<N, A> ned : nedList) {
+				ILabeledPath<N, A> extendedPath = new SearchGraphPath<>(subPath, ned.getTo(), ned.getArcLabel());
 				double[] landscape = this.getValues(extendedPath, probSizePerLevelAndChild, LandscapeAnalysisCompletionTechnique.RANDOM);
 				probesOnLevel.add(landscape);
 			}

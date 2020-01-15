@@ -1,17 +1,12 @@
 package ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.ScoredSolutionCandidateFoundEvent;
-import org.api4.java.common.control.ILoggingCustomizable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.events.result.IScoredSolutionCandidateFoundEvent;
 
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyComputationFailedException;
 
-public class ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer implements AlgorithmEventPropertyComputer, ILoggingCustomizable {
-
-	private Logger logger = LoggerFactory.getLogger(ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer.class);
+public class ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer implements AlgorithmEventPropertyComputer {
 
 	public static final String SCORED_SOLUTION_CANDIDATE_INFO_PROPERTY_NAME = "scored_solution_candidate_info";
 
@@ -26,9 +21,9 @@ public class ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer implement
 	}
 
 	@Override
-	public Object computeAlgorithmEventProperty(final AlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
-		if (algorithmEvent instanceof ScoredSolutionCandidateFoundEvent) {
-			ScoredSolutionCandidateFoundEvent<?, ?> solutionCandidateFoundEvent = (ScoredSolutionCandidateFoundEvent<?, ?>) algorithmEvent;
+	public Object computeAlgorithmEventProperty(final IAlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
+		if (algorithmEvent instanceof IScoredSolutionCandidateFoundEvent) {
+			IScoredSolutionCandidateFoundEvent<?, ?> solutionCandidateFoundEvent = (IScoredSolutionCandidateFoundEvent<?, ?>) algorithmEvent;
 			String solutionCandidateRepresentation = this.getStringRepresentationOfSolutionCandidate(solutionCandidateFoundEvent.getSolutionCandidate());
 			String score = solutionCandidateFoundEvent.getScore().toString();
 			return new ScoredSolutionCandidateInfo(solutionCandidateRepresentation, score);
@@ -46,16 +41,6 @@ public class ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer implement
 	@Override
 	public String getPropertyName() {
 		return SCORED_SOLUTION_CANDIDATE_INFO_PROPERTY_NAME;
-	}
-
-	@Override
-	public String getLoggerName() {
-		return this.logger.getName();
-	}
-
-	@Override
-	public void setLoggerName(final String name) {
-		this.logger = LoggerFactory.getLogger(name);
 	}
 
 }

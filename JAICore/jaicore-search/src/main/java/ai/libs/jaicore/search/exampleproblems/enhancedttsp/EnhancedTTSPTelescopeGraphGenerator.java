@@ -6,18 +6,18 @@ import java.util.List;
 import org.apache.commons.math3.util.FastMath;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPBinaryTelescopeNode;
-import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPState;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPBinaryTelescopeNode.EnhancedTTSPBinaryTelescopeDestinationDecisionNode;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPBinaryTelescopeNode.EnhancedTTSPBinaryTelescopeDeterminedDestinationNode;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPState;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 
 public class EnhancedTTSPTelescopeGraphGenerator implements IGraphGenerator<EnhancedTTSPBinaryTelescopeNode, String>, ILoggingCustomizable {
@@ -37,19 +37,19 @@ public class EnhancedTTSPTelescopeGraphGenerator implements IGraphGenerator<Enha
 	}
 
 	@Override
-	public SingleRootGenerator<EnhancedTTSPBinaryTelescopeNode> getRootGenerator() {
+	public ISingleRootGenerator<EnhancedTTSPBinaryTelescopeNode> getRootGenerator() {
 		return () -> new EnhancedTTSPBinaryTelescopeDeterminedDestinationNode(null, this.problem.getInitalState());
 	}
 
 	@Override
-	public SuccessorGenerator<EnhancedTTSPBinaryTelescopeNode, String> getSuccessorGenerator() {
-		return new SuccessorGenerator<EnhancedTTSPBinaryTelescopeNode, String>() {
+	public ISuccessorGenerator<EnhancedTTSPBinaryTelescopeNode, String> getSuccessorGenerator() {
+		return new ISuccessorGenerator<EnhancedTTSPBinaryTelescopeNode, String>() {
 
 			@Override
-			public List<NodeExpansionDescription<EnhancedTTSPBinaryTelescopeNode, String>> generateSuccessors(final EnhancedTTSPBinaryTelescopeNode node) throws InterruptedException {
+			public List<INewNodeDescription<EnhancedTTSPBinaryTelescopeNode, String>> generateSuccessors(final EnhancedTTSPBinaryTelescopeNode node) throws InterruptedException {
 				long start = System.currentTimeMillis();
 				EnhancedTTSPTelescopeGraphGenerator.this.logger.info("Computing successors of node {}", node);
-				List<NodeExpansionDescription<EnhancedTTSPBinaryTelescopeNode, String>> l = new ArrayList<>();
+				List<INewNodeDescription<EnhancedTTSPBinaryTelescopeNode, String>> l = new ArrayList<>();
 				if (node.getCurTour().size() >= EnhancedTTSPTelescopeGraphGenerator.this.problem.getPossibleDestinations().size()) {
 					EnhancedTTSPTelescopeGraphGenerator.this.logger.warn("Cannot generate successors of a node in which we are in pos {} and in which have already visited everything!", node.getCurLocation());
 					return l;
@@ -132,8 +132,8 @@ public class EnhancedTTSPTelescopeGraphGenerator implements IGraphGenerator<Enha
 				else {
 					rightChild = new EnhancedTTSPBinaryTelescopeDestinationDecisionNode(node, true);
 				}
-				l.add(new NodeExpansionDescription<>(leftChild, "l", NodeType.OR));
-				l.add(new NodeExpansionDescription<>(rightChild, "r", NodeType.OR));
+				l.add(new NodeExpansionDescription<>(leftChild, "l"));
+				l.add(new NodeExpansionDescription<>(rightChild, "r"));
 				long walltime = System.currentTimeMillis() - start;
 				if (walltime > 10) {
 					EnhancedTTSPTelescopeGraphGenerator.this.logger.warn("Successor generation took {}ms", walltime);

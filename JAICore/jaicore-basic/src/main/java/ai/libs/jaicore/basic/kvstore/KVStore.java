@@ -17,11 +17,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.api4.java.datastructure.kvstore.IKVFilter;
+import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
 
@@ -121,10 +120,13 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 			return null;
 		} else if (value instanceof Integer) {
 			return (Integer) value;
+		}
+		else if (value instanceof Long) {
+			return Integer.valueOf(value.toString());
 		} else if (value instanceof String) {
 			return Integer.valueOf((String) value);
 		} else {
-			throw new IllegalStateException("Tried to get non-integer value as integer from KVStore.");
+			throw new IllegalStateException("Tried to get non-integer value as integer from KVStore. Type of value " + value + " is " + value.getClass().getName());
 		}
 	}
 
@@ -187,7 +189,7 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 	}
 
 	@Override
-	public Object getAsObject(final String key, final Class<?> objectClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	public <T> T getAsObject(final String key, final Class<T> objectClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		return objectClass.getConstructor().newInstance(this.get(key));
 	}
 
@@ -249,11 +251,6 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 		} else {
 			throw new IllegalStateException("Cannot return value as a file if it is not of that type.");
 		}
-	}
-
-	@Override
-	public JsonNode getAsJson(final String key) throws IOException {
-		return new ObjectMapper().readTree(this.getAsString(key));
 	}
 
 	/**

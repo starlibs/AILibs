@@ -2,18 +2,18 @@ package ai.libs.jaicore.search.exampleproblems.randomtrees;
 
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
-public class RandomTreeSearchProblem implements IGraphSearchWithPathEvaluationsInput<List<Integer>, Integer, Double> {
+public class RandomTreeSearchProblem implements IPathSearchWithPathEvaluationsInput<List<Integer>, Integer, Double> {
 
 	private final int b;
 	private final int d;
 	private final long seed;
 	private final IGraphGenerator<List<Integer>, Integer> gg;
-	private final PathGoalTester<List<Integer>, Integer> gt;
+	private final IPathGoalTester<List<Integer>, Integer> gt;
 	private final IPathEvaluator<List<Integer>, Integer, Double> se;
 	private final boolean scoresPerEdge;
 
@@ -34,7 +34,7 @@ public class RandomTreeSearchProblem implements IGraphSearchWithPathEvaluationsI
 	}
 
 	@Override
-	public PathGoalTester<List<Integer>, Integer> getGoalTester() {
+	public IPathGoalTester<List<Integer>, Integer> getGoalTester() {
 		return this.gt;
 	}
 

@@ -4,10 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.events.serializable.DefaultPropertyProcessedAlgorithmEvent;
-import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
-import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,15 +17,15 @@ import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPr
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyComputationFailedException;
 
 /**
- * An {@link AlgorithmEventHistoryRecorder} is responsible for recording {@link AlgorithmEvent}s and storing them in the form of {@link PropertyProcessedAlgorithmEvent}s. For doing so it requires a list of
- * {@link AlgorithmEventPropertyComputer}s which can extract information from {@link AlgorithmEvent}s which in turn is stored in the {@link PropertyProcessedAlgorithmEvent}s.
+ * An {@link AlgorithmEventHistoryRecorder} is responsible for recording {@link IAlgorithmEvent}s and storing them in the form of {@link IPropertyProcessedAlgorithmEvent}s. For doing so it requires a list of
+ * {@link AlgorithmEventPropertyComputer}s which can extract information from {@link IAlgorithmEvent}s which in turn is stored in the {@link IPropertyProcessedAlgorithmEvent}s.
  *
  * @author atornede
  *
  */
-public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener, ILoggingCustomizable {
+public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
 
-	private Logger logger = LoggerFactory.getLogger(AlgorithmEventHistoryRecorder.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AlgorithmEventHistoryRecorder.class);
 
 	private AlgorithmEventHistory algorithmEventHistory;
 
@@ -35,35 +34,37 @@ public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener, IL
 	/**
 	 * Creates a new {@link AlgorithmEventHistoryRecorder} with the given {@link AlgorithmEventPropertyComputer}s.
 	 *
-	 * @param eventPropertyComputers A list of {@link AlgorithmEventPropertyComputer}s which can extract information from {@link AlgorithmEvent}s which in turn is stored in the {@link PropertyProcessedAlgorithmEvent}s.
+	 * @param eventPropertyComputers A list of {@link AlgorithmEventPropertyComputer}s which can extract information from {@link IAlgorithmEvent}s which in turn is stored in the {@link IPropertyProcessedAlgorithmEvent}s.
 	 */
 	public AlgorithmEventHistoryRecorder(final List<AlgorithmEventPropertyComputer> eventPropertyComputers) {
 		this.algorithmEventHistory = new AlgorithmEventHistory();
 		this.eventPropertyComputers = eventPropertyComputers;
 	}
 
+	public void addPropertyComputer(final AlgorithmEventPropertyComputer computer) {
+		this.eventPropertyComputers.add(computer);
+	}
+
 	@Subscribe
 	@Override
-	public void handleAlgorithmEvent(final AlgorithmEvent algorithmEvent) {
-		this.logger.info("Receiving AlgorithmEvent {}", algorithmEvent);
+	public void handleAlgorithmEvent(final IAlgorithmEvent algorithmEvent) {
 		synchronized (this) {
-			this.logger.debug("Converting AlgorithmEvent {}", algorithmEvent);
-			PropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent = this.convertAlgorithmEventToPropertyProcessedAlgorithmEvent(algorithmEvent);
+			IPropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent = this.convertAlgorithmEventToPropertyProcessedAlgorithmEvent(algorithmEvent);
 			this.algorithmEventHistory.addEvent(propertyProcessedAlgorithmEvent);
 		}
 	}
 
-	private PropertyProcessedAlgorithmEvent convertAlgorithmEventToPropertyProcessedAlgorithmEvent(final AlgorithmEvent algorithmEvent) {
+	private IPropertyProcessedAlgorithmEvent convertAlgorithmEventToPropertyProcessedAlgorithmEvent(final IAlgorithmEvent algorithmEvent) {
 		Map<String, Object> properties = new HashMap<>();
+
 		for (AlgorithmEventPropertyComputer algorithmEventPropertyComputer : this.eventPropertyComputers) {
 			try {
 				Object computedProperty = algorithmEventPropertyComputer.computeAlgorithmEventProperty(algorithmEvent);
-				this.logger.trace("Computer {} converted event to {}", algorithmEventPropertyComputer, computedProperty);
 				if (computedProperty != null) {
 					properties.put(algorithmEventPropertyComputer.getPropertyName(), computedProperty);
 				}
 			} catch (PropertyComputationFailedException e) {
-				this.logger.error("Could not compute property \"{}\".", algorithmEventPropertyComputer.getPropertyName(), e);
+				LOGGER.error("Could not compute property \"{}\".", algorithmEventPropertyComputer.getPropertyName(), e);
 			}
 		}
 
@@ -77,16 +78,6 @@ public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener, IL
 	 */
 	public AlgorithmEventHistory getHistory() {
 		return this.algorithmEventHistory;
-	}
-
-	@Override
-	public String getLoggerName() {
-		return this.logger.getName();
-	}
-
-	@Override
-	public void setLoggerName(final String name) {
-		this.logger = LoggerFactory.getLogger(name);
 	}
 
 }

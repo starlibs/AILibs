@@ -2,7 +2,7 @@ package ai.libs.jaicore.search.algorithms.standard.mcts;
 
 import java.util.Random;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 
 /**
  * This is the single player UCT variant proposed in
@@ -20,7 +20,7 @@ import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput
  * @author fmohr
  *
  */
-public class SPUCTPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends MCTSPathSearch<I, N, A, Double> {
+public class SPUCTPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends MCTSPathSearch<I, N, A, Double> {
 
 	public SPUCTPathSearch(final I problem, final boolean maximization, final int seed, final double evaluationFailurePenalty, final double explorationC, final double bigD) {
 		super(problem, new SPUCBPolicy<>(maximization, bigD), new UniformRandomPolicy<>(new Random(seed)), evaluationFailurePenalty);

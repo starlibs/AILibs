@@ -9,12 +9,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.graphsearch.problem.PathUnifyingGraphGenerator;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +25,9 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.Method;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.MethodInstance;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
-public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String>, PathUnifyingGraphGenerator<TFDNode, String> {
+public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String> {
 
 	private static Logger logger = LoggerFactory.getLogger(TFDGraphGenerator.class);
 	protected TaskPlannerUtil util = new TaskPlannerUtil(null);
@@ -108,12 +106,12 @@ public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String>, Path
 	}
 
 	@Override
-	public SingleRootGenerator<TFDNode> getRootGenerator() {
+	public ISingleRootGenerator<TFDNode> getRootGenerator() {
 		return () -> new TFDNode(this.problem.getInit(), this.stripTNPrefixes(new TaskPlannerUtil(null).getTaskChainOfTotallyOrderedNetwork(this.problem.getNetwork())));
 	}
 
 	@Override
-	public SuccessorGenerator<TFDNode, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<TFDNode, String> getSuccessorGenerator() {
 		return l -> {
 			Monom state = l.getState();
 			List<Literal> currentlyRemainingTasks = new ArrayList<>(l.getRemainingTasks());
@@ -135,7 +133,7 @@ public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String>, Path
 			successors = successors.stream().map(this::orderRemainingTasksByPriority).collect(Collectors.toList());
 
 			/* derive successor descriptions from the nodes */
-			return successors.stream().map(n -> new NodeExpansionDescription<>(n, n.getAppliedAction() != null ? n.getAppliedAction().getEncoding() : n.getAppliedMethodInstance().getEncoding(), NodeType.OR)).collect(Collectors.toList());
+			return successors.stream().map(n -> new NodeExpansionDescription<>(n, n.getAppliedAction() != null ? n.getAppliedAction().getEncoding() : n.getAppliedMethodInstance().getEncoding())).collect(Collectors.toList());
 		};
 	}
 
@@ -166,7 +164,6 @@ public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String>, Path
 		return new TFDNode(node.getState(), newLiteralList, node.getAppliedMethodInstance(), node.getAppliedAction());
 	}
 
-	@Override
 	public boolean isPathSemanticallySubsumed(final List<TFDNode> path, final List<TFDNode> potentialSuperPath) throws InterruptedException {
 		int n = path.size();
 		for (int i = 0; i < n; i++) {

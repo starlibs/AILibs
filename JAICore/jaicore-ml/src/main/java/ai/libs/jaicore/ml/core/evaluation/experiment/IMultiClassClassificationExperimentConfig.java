@@ -12,7 +12,7 @@ public interface IMultiClassClassificationExperimentConfig extends IExperimentSe
 	public static final String SEEDS = "seeds";
 	public static final String TIMEOUTS_IN_SECONDS = "timeouts";
 	public static final String MEASURES = "measures";
-	public static final String datasetFolder = "datasetfolder";
+	public static final String DATASETFOLDER = "datasetfolder";
 	
 	@Key(DATASETS)
 	public List<String> getDatasets();
@@ -32,6 +32,6 @@ public interface IMultiClassClassificationExperimentConfig extends IExperimentSe
 	@Key(MEASURES)
 	public List<String> getMeasures();
 	
-	@Key(datasetFolder)
+	@Key(DATASETFOLDER)
 	public File getDatasetFolder();
 }

@@ -1,8 +1,8 @@
 package ai.libs.jaicore.search.structure.graphgenerator;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
 /**
  * This is a graph generator that takes another graph generator and generates its sub-graph under a given root node
@@ -24,12 +24,12 @@ public class SubGraphGenerator<N, A> implements IGraphGenerator<N, A> {
 	}
 
 	@Override
-	public SingleRootGenerator<N> getRootGenerator() {
+	public ISingleRootGenerator<N> getRootGenerator() {
 		return () -> this.newRoot;
 	}
 
 	@Override
-	public SuccessorGenerator<N, A> getSuccessorGenerator() {
+	public ISuccessorGenerator<N, A> getSuccessorGenerator() {
 		return this.actualGraphGenerator.getSuccessorGenerator();
 	}
 }

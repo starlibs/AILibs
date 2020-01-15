@@ -2,6 +2,8 @@ package ai.libs.jaicore.math.linearalgebra;
 
 import java.util.Arrays;
 
+import org.api4.java.common.math.IVector;
+
 import ai.libs.jaicore.math.random.RandomGenerator;
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector.Norm;
@@ -9,7 +11,7 @@ import no.uib.cipr.matrix.Vector.Norm;
 /**
  * Dense vector implementation wrapping the MTJ implementation of a dense vector.
  *
- * @author Alexander Hetzer
+ * @author Alexander Tornede
  */
 public class DenseDoubleVector extends AbstractVector {
 
@@ -86,7 +88,10 @@ public class DenseDoubleVector extends AbstractVector {
 
 	@Override
 	public void addVector(final IVector vector) {
-		this.internalVector = this.internalVector.add(vector.toDenseVector().internalVector);
+		if (!(vector instanceof AbstractVector)) {
+			throw new UnsupportedOperationException("Not implemented for non-AbstractVector vectors.");
+		}
+		this.internalVector = this.internalVector.add(((AbstractVector) vector).toDenseVector().internalVector);
 	}
 
 	@Override
@@ -96,7 +101,7 @@ public class DenseDoubleVector extends AbstractVector {
 
 	@Override
 	public void subtractVector(final IVector vector) {
-		this.internalVector = this.internalVector.add(-1, vector.toDenseVector().internalVector);
+		this.internalVector = this.internalVector.add(-1, ((AbstractVector) vector).toDenseVector().internalVector);
 	}
 
 	@Override
@@ -125,7 +130,7 @@ public class DenseDoubleVector extends AbstractVector {
 
 	@Override
 	public double dotProduct(final IVector vector) {
-		return this.internalVector.dot(vector.toDenseVector().internalVector);
+		return this.internalVector.dot(((AbstractVector) vector).toDenseVector().internalVector);
 	}
 
 	@Override

@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N,
 	}
 
 	@Override
-	public void signalNewScore(final IPath<N, A> path, final double newScore) {
+	public void signalNewScore(final ILabeledPath<N, A> path, final double newScore) {
 
 		/* add the observation to all stats on the path */
 		List<N> nodes = path.getNodes();

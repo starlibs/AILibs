@@ -5,15 +5,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearch;
+import org.api4.java.ai.graphsearch.problem.IPathSearch;
 import org.api4.java.algorithm.IAlgorithm;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
-import ai.libs.jaicore.search.exampleproblemtesters.EnhancedTTSPAsGraphSearchSet;
-import ai.libs.jaicore.search.exampleproblemtesters.KnapsackProblemAsGraphSearchSet;
-import ai.libs.jaicore.search.exampleproblemtesters.NQueensProblemAsGraphSearchSet;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPAsGraphSearchSet;
+import ai.libs.jaicore.search.testproblems.knapsack.KnapsackProblemAsGraphSearchSet;
+import ai.libs.jaicore.search.testproblems.nqueens.NQueensProblemAsGraphSearchSet;
 
 public abstract class GeneralGraphSearchAlgorithmTester extends GeneralAlgorithmTester {
 
@@ -22,7 +22,7 @@ public abstract class GeneralGraphSearchAlgorithmTester extends GeneralAlgorithm
 		return this.getSearchAlgorithm((GraphSearchInput<?, ?>) problem);
 	}
 
-	public abstract <N, A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(GraphSearchInput<N, A> problem);
+	public abstract <N, A> IPathSearch<?, ?, N, A> getSearchAlgorithm(GraphSearchInput<N, A> problem);
 
 	// creates the test data
 	@Parameters(name = "problemset = {0}")

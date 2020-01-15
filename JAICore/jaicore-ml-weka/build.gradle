@@ -1,13 +1,23 @@
 dependencies {
-	compile ('org.api4:ai.ml')
 	compile project(":JAICore:jaicore-ml")
-	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	
+	compile ("$api4AIml")
 	
 	// weka dependencies
-	compile ('ai.libs.thirdparty:interruptible-weka:0.1.2') {
+	compile ("$weka") {
 			exclude group: 'log4j'
 			exclude group: 'org.slf4j'
 	}
+	compile ("$wekaRotationForest") {
+		exclude group: 'weka-dev'
+	}
+	compile ("$openmlAPIConnector")
+	
+	/* dependencies to test sources of other projects */
+	testCompile project(path: ':JAICore:jaicore-basic', configuration:'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-ml', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-planning', configuration: 'testArtifacts')
 }
 
 configurations.all {

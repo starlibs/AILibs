@@ -1,27 +1,32 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator.factory;
 
+import java.util.Random;
+
+import org.api4.java.ai.ml.core.IDataConfigurable;
 import org.api4.java.ai.ml.core.dataset.splitter.IDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-
-import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.ISplitBasedClassifierEvaluator;
-import weka.core.Instances;
+import org.api4.java.ai.ml.core.evaluation.IPredictionPerformanceMetricConfigurable;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
+import org.api4.java.common.control.IRandomConfigurable;
 
 /**
  * An abstract factory for configuring Monte Carlo cross-validation based evaluators.
  *
  * @author mwever
+ * @author fmohr
  *
  */
-public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements IClassifierEvaluatorFactory<D> {
+public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends AMonteCarloCrossValidationBasedEvaluatorFactory<F>> implements
+		ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, IRandomConfigurable, IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>, IPredictionPerformanceMetricConfigurable {
 
-	private IDatasetSplitter<I, D> datasetSplitter;
-	private ISplitBasedClassifierEvaluator<Double, I, D> splitBasedEvaluator;
-	private int seed;
-	private int numMCIterations;
-	private Instances data;
+	private IDatasetSplitter<? extends ILabeledDataset<?>> datasetSplitter;
+	protected Random random;
+	protected int numMCIterations;
+	protected ILabeledDataset<?> data;
 	private double trainFoldSize;
 	private int timeoutForSolutionEvaluation;
+	protected IDeterministicPredictionPerformanceMeasure<?, ?> metric;
 
 	/**
 	 * Standard c'tor.
@@ -34,24 +39,8 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends 
 	 * Getter for the dataset splitter.
 	 * @return Returns the dataset spliiter.
 	 */
-	public IDatasetSplitter<I, D> getDatasetSplitter() {
+	public IDatasetSplitter<? extends ILabeledDataset<?>> getDatasetSplitter() {
 		return this.datasetSplitter;
-	}
-
-	/**
-	 * Getter for the evaluator that is used for evaluating each split.
-	 * @return The split evaluator.
-	 */
-	public ISplitBasedClassifierEvaluator<Double, I, D> getSplitBasedEvaluator() {
-		return this.splitBasedEvaluator;
-	}
-
-	/**
-	 * Getter for the random seed.
-	 * @return Seed used for generating randomized dataset splits.
-	 */
-	public int getSeed() {
-		return this.seed;
 	}
 
 	/**
@@ -66,7 +55,8 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends 
 	 * Getter for the dataset which is used for splitting.
 	 * @return The original dataset that is being split.
 	 */
-	public Instances getData() {
+	@Override
+	public ILabeledDataset<?> getData() {
 		return this.data;
 	}
 
@@ -91,29 +81,14 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends 
 	 * @param datasetSplitter The dataset splitter to be used.
 	 * @return The factory object.
 	 */
-	public AMonteCarloCrossValidationBasedEvaluatorFactory<I, D> withDatasetSplitter(final IDatasetSplitter<I, D> datasetSplitter) {
+	public F withDatasetSplitter(final IDatasetSplitter<? extends ILabeledDataset<?>> datasetSplitter) {
 		this.datasetSplitter = datasetSplitter;
-		return this;
+		return this.getSelf();
 	}
 
-	/**
-	 * Configures the evaluator to use the given classifier evaluator.
-	 * @param splitBasedClassifierEvaluator The classifier evaluator to be used.
-	 * @return The factory object.
-	 */
-	public AMonteCarloCrossValidationBasedEvaluatorFactory<I, D> withSplitBasedEvaluator(final ISplitBasedClassifierEvaluator<Double, I, D> splitBasedClassifierEvaluator) {
-		this.splitBasedEvaluator = splitBasedClassifierEvaluator;
-		return this;
-	}
-
-	/**
-	 * Configures the evaluator to use the given random seed.
-	 * @param seed The seed to be used for pseudo-randomization.
-	 * @return The factory object.
-	 */
-	public AMonteCarloCrossValidationBasedEvaluatorFactory<I, D> withSeed(final int seed) {
-		this.seed = seed;
-		return this;
+	public F withRandom(final Random random) {
+		this.random = random;
+		return this.getSelf();
 	}
 
 	/**
@@ -121,9 +96,9 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends 
 	 * @param numMCIterations The number of iterations to run.
 	 * @return The factory object.
 	 */
-	public AMonteCarloCrossValidationBasedEvaluatorFactory<I, D> withNumMCIterations(final int numMCIterations) {
+	public F withNumMCIterations(final int numMCIterations) {
 		this.numMCIterations = numMCIterations;
-		return this;
+		return this.getSelf();
 	}
 
 	/**
@@ -131,9 +106,9 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends 
 	 * @param data The dataset to be split.
 	 * @return The factory object.
 	 */
-	public AMonteCarloCrossValidationBasedEvaluatorFactory<I, D> withData(final Instances data) {
+	public F withData(final ILabeledDataset<?> data) {
 		this.data = data;
-		return this;
+		return this.getSelf();
 	}
 
 	/**
@@ -141,9 +116,9 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends 
 	 * @param trainFoldSize The size of the training fold (0,1).
 	 * @return The factory object.
 	 */
-	public AMonteCarloCrossValidationBasedEvaluatorFactory<I, D> withTrainFoldSize(final double trainFoldSize) {
+	public F withTrainFoldSize(final double trainFoldSize) {
 		this.trainFoldSize = trainFoldSize;
-		return this;
+		return this.getSelf();
 	}
 
 	/**
@@ -151,8 +126,31 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends 
 	 * @param timeoutForSolutionEvaluation The timeout for evaluating a solution.
 	 * @return The factory object.
 	 */
-	public AMonteCarloCrossValidationBasedEvaluatorFactory<I, D> withTimeoutForSolutionEvaluation(final int timeoutForSolutionEvaluation) {
+	public F withTimeoutForSolutionEvaluation(final int timeoutForSolutionEvaluation) {
 		this.timeoutForSolutionEvaluation = timeoutForSolutionEvaluation;
-		return this;
+		return this.getSelf();
+	}
+
+	public abstract F getSelf();
+
+	@Override
+	public void setMeasure(final IDeterministicPredictionPerformanceMeasure<?, ?> measure) {
+		this.metric = measure;
+	}
+
+	@Override
+	public void setData(final ILabeledDataset<? extends ILabeledInstance> data) {
+		this.withData(data);
+	}
+
+	@Override
+	public void setRandom(final Random random) {
+		this.withRandom(random);
+
+	}
+
+	public F withMeasure(final IDeterministicPredictionPerformanceMeasure<?, ?> measure) {
+		this.setMeasure(measure);
+		return this.getSelf();
 	}
 }

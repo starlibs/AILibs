@@ -5,7 +5,7 @@ import java.util.Random;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyUncertaintyAnnotatingPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IUncertaintySource;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPState;
@@ -19,7 +19,7 @@ public class EnhancedTTSPGraphSearchToUncertaintyBasedGraphSearchReducer impleme
 
 	private Random random = new Random(0);
 	private int samples = 3;
-	private IObjectEvaluator<IPath<EnhancedTTSPState, String>, Double> solutionEvaluator = new AgnosticPathEvaluator<>();
+	private IObjectEvaluator<ILabeledPath<EnhancedTTSPState, String>, Double> solutionEvaluator = new AgnosticPathEvaluator<>();
 	private IUncertaintySource<EnhancedTTSPState, String, Double> uncertaintySource = (n, simulationPaths, simulationEvaluations) -> 0.5;
 
 

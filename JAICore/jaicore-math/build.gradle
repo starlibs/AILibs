@@ -1,7 +1,10 @@
 dependencies {
 	compile project(":JAICore:jaicore-basic")
-    compile group: 'de.upb.isys', name: 'mtj', version: '0.0.1'
+	
+	compile("$api4common")
+	compile("$mtj")
 }
+
 uploadArchives {
 	repositories {
 		mavenDeployer {

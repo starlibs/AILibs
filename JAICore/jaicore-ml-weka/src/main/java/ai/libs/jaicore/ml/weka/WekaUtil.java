@@ -25,8 +25,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
+import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
-import org.api4.java.ai.ml.core.exception.DatasetTraceInstructionFailedException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -39,13 +39,12 @@ import com.google.common.collect.Range;
 
 import ai.libs.jaicore.basic.sets.CartesianProductComputationProblem;
 import ai.libs.jaicore.basic.sets.LDSRelationComputer;
-import ai.libs.jaicore.ml.core.dataset.cache.StratifiedSplitSubsetInstruction;
-import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.LabelBasedStratifiedSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.StratifiedSampling;
-import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
-import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
+import weka.attributeSelection.ASEvaluation;
+import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.MultipleClassifiersCombiner;
@@ -71,9 +70,6 @@ public class WekaUtil {
 
 	private static final String MSG_SUM1 = "Portions must sum up to at most 1.";
 	private static final String MSG_DEVIATING_NUMBER_OF_INSTANCES = "The number of instances in the folds does not equal the number of instances in the original dataset";
-
-	private static final String NAME_LABEL = "label";
-	private static final String NAME_INSTANCES = "JAICore-extracted dataset";
 
 	private static boolean debug = false;
 
@@ -248,12 +244,24 @@ public class WekaUtil {
 	}
 
 	public static String getClassifierDescriptor(final Classifier c) {
+		return getDescriptor(c);
+	}
+
+	public static String getPreprocessorDescriptor(final ASSearch c) {
+		return getDescriptor(c);
+	}
+
+	public static String getPreprocessorDescriptor(final ASEvaluation c) {
+		return getDescriptor(c);
+	}
+
+	public static String getDescriptor(final Object o) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(c.getClass().getName());
-		if (c instanceof OptionHandler) {
+		sb.append(o.getClass().getName());
+		if (o instanceof OptionHandler) {
 			sb.append("- [");
 			int i = 0;
-			for (String s : ((OptionHandler) c).getOptions()) {
+			for (String s : ((OptionHandler) o).getOptions()) {
 				if (i++ > 0) {
 					sb.append(", ");
 				}
@@ -386,7 +394,7 @@ public class WekaUtil {
 		return getNumberOfInstancesFromClass(data, cs) / (1f * data.size());
 	}
 
-	public static Collection<Integer>[] getArbitrarySplit(final Instances data, final Random rand, final double... portions) {
+	public static Collection<Integer>[] getArbitrarySplit(final IWekaInstances data, final Random rand, final double... portions) {
 
 		/* check that portions sum up to s.th. smaller than 1 */
 		double sum = 0;
@@ -402,7 +410,7 @@ public class WekaUtil {
 
 		@SuppressWarnings("unchecked")
 		Collection<Integer>[] folds = new ArrayList[portions.length + 1];
-		Instances emptyInstances = new Instances(data);
+		Instances emptyInstances = new Instances(data.getList());
 		emptyInstances.clear();
 
 		/* distribute instances over the folds */
@@ -427,7 +435,7 @@ public class WekaUtil {
 		return folds;
 	}
 
-	public static List<Instances> realizeSplit(final Instances data, final Collection<Integer>[] split) {
+	public static List<IWekaInstances> realizeSplit(final IWekaInstances data, final Collection<Integer>[] split) {
 		return realizeSplitAsCopiedInstances(data, split);
 	}
 
@@ -445,27 +453,14 @@ public class WekaUtil {
 		return folds;
 	}
 
-	public static List<Instances> realizeSplitAsCopiedInstances(final Instances data, final Collection<Integer>[] split) {
+	public static List<IWekaInstances> realizeSplitAsCopiedInstances(final IWekaInstances data, final Collection<Integer>[] split) {
 		List<Instances> folds = new ArrayList<>();
 		for (Collection<Integer> foldIndices : split) {
-			Instances fold = new Instances(data, 0);
-			foldIndices.stream().forEach(i -> fold.add(data.get(i)));
+			Instances fold = new Instances(data.getList(), 0);
+			foldIndices.stream().forEach(i -> fold.add(data.get(i).getElement()));
 			folds.add(fold);
 		}
-		return folds;
-	}
-
-	public static List<Instances> realizeSplitAsSubInstances(final Instances data, final Collection<Integer>[] split) {
-		List<Instances> folds = new ArrayList<>();
-		for (Collection<Integer> foldIndices : split) {
-			int[] indices = new int[foldIndices.size()];
-			int i = 0;
-			for (Integer x : foldIndices) {
-				indices[i++] = x;
-			}
-			folds.add(new SubInstances(data, indices));
-		}
-		return folds;
+		return folds.stream().map(WekaInstances::new).collect(Collectors.toList());
 	}
 
 	public static ArrayNode splitToJsonArray(final Collection<Integer>[] splitDecision) {
@@ -476,72 +471,27 @@ public class WekaUtil {
 	}
 
 	public static List<Instances> getStratifiedSplit(final Instances data, final long seed, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
+		return getStratifiedSplit(new WekaInstances(data), new Random(seed), portionOfFirstFold).stream().map(IWekaInstances::getInstances).collect(Collectors.toList());
+	}
+
+	public static List<IWekaInstances> getStratifiedSplit(final IWekaInstances data, final long seed, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
 		return getStratifiedSplit(data, new Random(seed), portionOfFirstFold);
 	}
 
-	public static List<Instances> getStratifiedSplit(final Instances data, final Random random, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
+	public static List<IWekaInstances> getStratifiedSplit(final IWekaInstances data, final Random random, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
 		try {
 			List<Instances> split = new ArrayList<>();
-			AttributeBasedStratiAmountSelectorAndAssigner<Double, WekaInstance, WekaInstances> stratiBuilder = new AttributeBasedStratiAmountSelectorAndAssigner<>();
-			StratifiedSampling<Double, Double, WekaInstance, WekaInstances> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, random, new WekaInstances(data));
+			StratifiedSampling<IWekaInstances> sampler = new LabelBasedStratifiedSampling<>(random, data);
 			sampler.setSampleSize((int) Math.ceil(portionOfFirstFold * data.size()));
 			split.add(sampler.call().getList());
-			split.add(sampler.getComplement().getList());
+			split.add(sampler.getComplementOfLastSample().getList());
 			if (split.get(0).size() + split.get(1).size() != data.size()) {
 				throw new IllegalStateException("The sum of fold sizes does not correspond to the size of the original dataset!");
 			}
-			return split;
-		} catch (ClassCastException | AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException | ClassNotFoundException | DatasetCreationException e) {
+			return split.stream().map(WekaInstances::new).collect(Collectors.toList());
+		} catch (ClassCastException | AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException | DatasetCreationException e) {
 			throw new SplitFailedException(e);
 		}
-	}
-
-	/**
-	 * Creates a stratified split for a given {@link ReproducibleInstances} Object. The history will be updated to track the split.
-	 *
-	 * @param data
-	 *            - Input data
-	 * @param rand
-	 *            - random used to get a seed, which can be used and saved
-	 * @param portions
-	 *            - ratios to split
-	 * @return a list of {@link ReproducibleInstances}. For each of them the history will be updated to track the split
-	 * @throws InterruptedException
-	 * @throws SplitFailedException
-	 */
-	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final Random rand, final double portions) throws SplitFailedException, InterruptedException {
-		return getStratifiedSplit(data, rand.nextLong(), portions);
-	}
-
-	/**
-	 * Creates a StratifiedSplit for a given {@link ReproducibleInstances} Object. THe History will be updated to track the split.
-	 *
-	 * @param data
-	 *            - Input data
-	 * @param seed
-	 *            - random seed
-	 * @param portions
-	 *            - ratios to split
-	 * @return a List of {@link ReproducibleInstances}. For each of them the history will be updated to track the split
-	 * @throws InterruptedException
-	 * @throws SplitFailedException
-	 */
-	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final long seed, final double portions) throws SplitFailedException, InterruptedException {
-		int n = 2;
-		List<ReproducibleInstances> out = new ArrayList<>(n);
-		for (int i = 0; i < n; i++) {
-			ReproducibleInstances fold;
-			try {
-				fold = new ReproducibleInstances(data).reduceWithInstruction("stratified split", new StratifiedSplitSubsetInstruction(seed, portions), i);
-			} catch (ClassNotFoundException | DatasetTraceInstructionFailedException e) {
-				throw new SplitFailedException(e);
-			}
-			out.add(fold);
-		}
-		if (out.get(0).size() != Math.ceil(portions * data.size())) {
-			throw new IllegalStateException("First fold has " + out.get(0).size() + " instead of " + Math.ceil(portions * data.size()) + " items.");
-		}
-		return out;
 	}
 
 	public static List<File> getDatasetsInFolder(final File folder) throws IOException {
@@ -780,6 +730,27 @@ public class WekaUtil {
 		data.add(instance);
 		Instances filteredInstances = Filter.useFilter(data, filter);
 		return filteredInstances.firstInstance();
+	}
+
+	public static Instances removeAttribute(final Instances data, final int attribute) throws Exception {
+		Remove remove = new Remove();
+		remove.setAttributeIndices("" + (attribute + 1));
+		remove.setInputFormat(data);
+		return Filter.useFilter(data, remove);
+	}
+
+	public static Instances removeAttributes(final Instances data, final Collection<Integer> attributes) throws Exception {
+		Remove remove = new Remove();
+		StringBuilder sb = new StringBuilder();
+		for (int att : attributes) {
+			if (sb.length() != 0) {
+				sb.append(",");
+			}
+			sb.append(att + 1);
+		}
+		remove.setAttributeIndices(sb.toString());
+		remove.setInputFormat(data);
+		return Filter.useFilter(data, remove);
 	}
 
 	public static Instances removeClassAttribute(final Instances data) throws Exception {

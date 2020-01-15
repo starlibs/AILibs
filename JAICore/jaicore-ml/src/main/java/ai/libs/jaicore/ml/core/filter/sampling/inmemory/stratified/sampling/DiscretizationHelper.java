@@ -10,10 +10,11 @@ import java.util.Set;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.apache.commons.math3.geometry.partitioning.Region.Location;
+import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +27,9 @@ import org.slf4j.LoggerFactory;
  * @param <I>
  *            The instance type
  */
-public class DiscretizationHelper<I extends ILabeledInstance, D extends ILabeledDataset<I>> {
+public class DiscretizationHelper implements ILoggingCustomizable {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DiscretizationHelper.class);
+	private Logger logger = LoggerFactory.getLogger(DiscretizationHelper.class);
 
 	public enum DiscretizationStrategy {
 		EQUAL_LENGTH, EQUAL_SIZE
@@ -57,20 +58,21 @@ public class DiscretizationHelper<I extends ILabeledInstance, D extends ILabeled
 	 *            assigned
 	 * @return
 	 */
-	public Map<Integer, AttributeDiscretizationPolicy> createDefaultDiscretizationPolicies(final D dataset, final List<Integer> indices, final Map<Integer, Set<Object>> attributeValues, final DiscretizationStrategy discretizationStrategy,
-			final int numberOfCategories) {
+	public Map<Integer, AttributeDiscretizationPolicy> createDefaultDiscretizationPolicies(final IDataset<?> dataset, final List<Integer> indices, final Map<Integer, Set<Object>> attributeValues,
+			final DiscretizationStrategy discretizationStrategy, final int numberOfCategories) {
 		Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies = new HashMap<>();
 
 		// Only consider numeric attributes
 		Set<Integer> indicesToConsider = this.getNumericIndicesFromDataset(dataset);
 		indicesToConsider.retainAll(indices);
 		for (int index : indicesToConsider) {
+
 			// Get the (distinct) values in sorted order
 			List<Double> numericValues = this.getSortedNumericValues(attributeValues, index);
 
 			// No discretization needed if there are more categories than values
 			if (numericValues.size() <= numberOfCategories) {
-				LOG.info("No discretization policy for attribute {} needed", index);
+				this.logger.info("No discretization policy for attribute {} needed", index);
 				continue;
 			}
 			switch (discretizationStrategy) {
@@ -174,10 +176,12 @@ public class DiscretizationHelper<I extends ILabeledInstance, D extends ILabeled
 	 * @param dataset
 	 * @return
 	 */
-	private Set<Integer> getNumericIndicesFromDataset(final D dataset) {
+	private Set<Integer> getNumericIndicesFromDataset(final IDataset<?> dataset) {
 		Set<Integer> numericAttributes = new HashSet<>();
 		List<IAttribute> attributeTypes = new ArrayList<>(dataset.getListOfAttributes());
-		attributeTypes.add(dataset.getLabelAttribute());
+		if (dataset instanceof ILabeledDataset && ((ILabeledDataset<?>) dataset).getLabelAttribute() instanceof INumericAttribute) {
+			attributeTypes.add(((ILabeledDataset<?>) dataset).getLabelAttribute());
+		}
 		for (int i = 0; i < attributeTypes.size(); i++) {
 			IAttribute attributeType = attributeTypes.get(i);
 			if (attributeType instanceof INumericAttribute) {
@@ -202,7 +206,7 @@ public class DiscretizationHelper<I extends ILabeledInstance, D extends ILabeled
 				double d = (double) value;
 				discretizedValues.add(this.discretize(d, discretizationPolicies.get(index)));
 			}
-			LOG.info("Attribute index {}: Reduced values from {} to {}", index, originalValues.size(), discretizedValues.size());
+			this.logger.info("Attribute index {}: Reduced values from {} to {}", index, originalValues.size(), discretizedValues.size());
 			attributeValues.put(index, discretizedValues);
 		}
 	}
@@ -228,6 +232,16 @@ public class DiscretizationHelper<I extends ILabeledInstance, D extends ILabeled
 		}
 
 		throw new IllegalStateException(String.format("Policy does not cover value %f", value));
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 
 }

@@ -2,7 +2,7 @@ package ai.libs.jaicore.search.exampleproblems.enhancedttsp;
 
 import java.util.function.Function;
 
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
@@ -12,7 +12,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 import it.unimi.dsi.fastutil.shorts.ShortList;
 
 public class EnhancedTTSPToBinaryTelescopeGraphSearchReducer
-implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPBinaryTelescopeNode, String, Double>, IPath<EnhancedTTSPBinaryTelescopeNode, String>> {
+implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPBinaryTelescopeNode, String, Double>, ILabeledPath<EnhancedTTSPBinaryTelescopeNode, String>> {
 
 	private final Function<Number, Double> linkFunction;
 
@@ -33,7 +33,7 @@ implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithS
 	}
 
 	@Override
-	public ShortList decodeSolution(final IPath<EnhancedTTSPBinaryTelescopeNode, String> solution) {
+	public ShortList decodeSolution(final ILabeledPath<EnhancedTTSPBinaryTelescopeNode, String> solution) {
 		return solution.getHead().getCurTour();
 	}
 }

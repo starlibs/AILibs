@@ -3,8 +3,8 @@ package ai.libs.jaicore.ml.ranking.loss;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.api4.java.ai.ml.ranking.dataset.IRanking;
-import org.api4.java.ai.ml.ranking.loss.IRankingLossFunction;
+import org.api4.java.ai.ml.ranking.IRanking;
+import org.api4.java.ai.ml.ranking.loss.IRankingPredictionPerformanceMeasure;
 
 /**
  * Calculates if the top-k dyads of the predicted ranking match the top-k dyads
@@ -14,7 +14,7 @@ import org.api4.java.ai.ml.ranking.loss.IRankingLossFunction;
  * @author mwever
  *
  */
-public class TopKOfPredicted implements IRankingLossFunction {
+public class TopKOfPredicted extends ARankingPredictionPerformanceMeasure implements IRankingPredictionPerformanceMeasure {
 
 	private int k;
 

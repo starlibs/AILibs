@@ -13,10 +13,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.api4.java.algorithm.ISolutionCandidateIterator;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
-import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
-import org.api4.java.algorithm.events.SolutionCandidateFoundEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.events.result.ISolutionCandidateFoundEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -98,7 +96,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		}
 		algorithm.registerListener(new Object() {
 			@Subscribe
-			public void receiveSolution(final SolutionCandidateFoundEvent<Object> solutionEvent) {
+			public void receiveSolution(final ISolutionCandidateFoundEvent<Object> solutionEvent) {
 				Object solution = solutionEvent.getSolutionCandidate();
 				Object solutionToOriginalProblem = SolutionCandidateIteratorTester.this.reduction != null ? SolutionCandidateIteratorTester.this.reduction.decodeSolution(solution) : solution;
 				assertTrue ("Returned solution " + solution + " converted to original solution " + solutionToOriginalProblem + " is not a solution in the original problem according to ground truth.", stillMissingSolutions.contains(solutionToOriginalProblem) || foundSolutions.contains(solutionToOriginalProblem));
@@ -125,10 +123,10 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		boolean terminated = false;
 		final Collection<?> stillMissingSolutions = new ArrayList<>(problem.getValue());
 		final Collection<Object> foundSolutions = new ArrayList<>();
-		Iterator<AlgorithmEvent> iterator = algorithm.iterator();
+		Iterator<IAlgorithmEvent> iterator = algorithm.iterator();
 		assertNotNull("The search algorithm does return NULL as an iterator for itself.", iterator);
 		while (iterator.hasNext()) {
-			AlgorithmEvent e = algorithm.nextWithException();
+			IAlgorithmEvent e = algorithm.nextWithException();
 			assertNotNull("The search iterator has returned NULL even though hasNext suggested that more event should come.", e);
 			if (!initialized) {
 				assertTrue(e instanceof AlgorithmInitializedEvent);
@@ -137,8 +135,8 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 				terminated = true;
 			} else {
 				assertTrue(!terminated);
-				if (e instanceof SolutionCandidateFoundEvent) {
-					Object solution = ((SolutionCandidateFoundEvent<Object>)e).getSolutionCandidate();
+				if (e instanceof ISolutionCandidateFoundEvent) {
+					Object solution = ((ISolutionCandidateFoundEvent<Object>)e).getSolutionCandidate();
 					Object solutionToOriginalProblem = solution;
 					if (SolutionCandidateIteratorTester.this.reduction != null) {
 						solutionToOriginalProblem = SolutionCandidateIteratorTester.this.reduction.decodeSolution(solution);

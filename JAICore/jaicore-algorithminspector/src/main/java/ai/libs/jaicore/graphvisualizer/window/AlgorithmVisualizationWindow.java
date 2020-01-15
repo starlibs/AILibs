@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.common.control.ILoggingCustomizable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 
 import ai.libs.jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
 import ai.libs.jaicore.graphvisualizer.events.recorder.AlgorithmEventHistory;
@@ -19,6 +16,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.IGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ControlBarGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.speedslider.SpeedSliderGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.TimeSliderGUIPlugin;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
@@ -29,20 +27,19 @@ import javafx.stage.Stage;
 /**
  * An {@link AlgorithmVisualizationWindow} can be created to have a visualization of the behavior of an algorithm. We generally differentiate between a live version of an {@link IAlgorithm} run for which an instance of that algorithm and a
  * list of {@link AlgorithmEventPropertyComputer}s is required and an offline run, for which only an {@link AlgorithmEventHistory} is required. In the first case, the property computers are used to extract relevant information which is
- * required by the {@link IGUIPlugin}s (to be displayed) from the underlying {@link AlgorithmEvent}s which are provided by the actual algorithm. When playing a recording, these computers are not required as the data was already computed as
+ * required by the {@link IGUIPlugin}s (to be displayed) from the underlying {@link IAlgorithmEvent}s which are provided by the actual algorithm. When playing a recording, these computers are not required as the data was already computed as
  * is stored as part of the replay in the {@link AlgorithmEventHistory}. Furthermore it requires a main {@link IGUIPlugin} which will
  * be displayed as the main element and optionally an unbounded amount of additional {@link IGUIPlugin} which will be displayed in order to provide additional information.
  *
  * @author atornede
  *
  */
-public class AlgorithmVisualizationWindow implements Runnable, ILoggingCustomizable {
+public class AlgorithmVisualizationWindow implements Runnable {
 
 	private PropertyProcessedAlgorithmEventSource algorithmEventSource;
 	private AlgorithmEventHistoryEntryDeliverer algorithmEventHistoryPuller;
 
 	private AlgorithmEventHistory algorithmEventHistory;
-	private AlgorithmEventHistoryRecorder historyRecorder;
 
 	private List<IGUIPlugin> visualizationPlugins;
 
@@ -59,8 +56,6 @@ public class AlgorithmVisualizationWindow implements Runnable, ILoggingCustomiza
 	private BorderPane topLayout;
 
 	private TabPane pluginTabPane;
-
-	private Logger logger = LoggerFactory.getLogger(AlgorithmVisualizationWindow.class);
 
 	/**
 	 * Creates a new {@link AlgorithmVisualizationWindow} based on the given {@link AlgorithmEventHistory} (i.e. offline version), the main {@link IGUIPlugin} and optionally additional plugins.
@@ -84,17 +79,17 @@ public class AlgorithmVisualizationWindow implements Runnable, ILoggingCustomiza
 	 * used when using a visualization in an online run.
 	 *
 	 * @param algorithm The {@link IAlgorithm} yielding information to be displayed.
-	 * @param algorithmEventPropertyComputers The {@link AlgorithmEventPropertyComputer}s computing all information from the {@link AlgorithmEvent}s provided by the {@link IAlgorithm} which are required by the {@link IGUIPlugin}s which are
+	 * @param algorithmEventPropertyComputers The {@link AlgorithmEventPropertyComputer}s computing all information from the {@link IAlgorithmEvent}s provided by the {@link IAlgorithm} which are required by the {@link IGUIPlugin}s which are
 	 *            registered.
 	 * @param mainPlugin The main {@link IGUIPlugin} which will be displayed as the main information source.
 	 * @param visualizationPlugins A list of additional {@link IGUIPlugin}s displaying side information.
 	 */
 	public AlgorithmVisualizationWindow(final IAlgorithm<?, ?> algorithm, final List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers, final IGUIPlugin mainPlugin, final IGUIPlugin... visualizationPlugins) {
 		this.mainPlugin = mainPlugin;
-		this.historyRecorder = new AlgorithmEventHistoryRecorder(algorithmEventPropertyComputers);
-		algorithm.registerListener(this.historyRecorder);
-		this.algorithmEventHistory = this.historyRecorder.getHistory();
-		this.algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(this.historyRecorder.getHistory());
+		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder(algorithmEventPropertyComputers);
+		algorithm.registerListener(historyRecorder);
+		this.algorithmEventHistory = historyRecorder.getHistory();
+		this.algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(historyRecorder.getHistory());
 		this.algorithmEventSource = this.algorithmEventHistoryPuller;
 		this.initializePlugins(visualizationPlugins);
 		// it is important to register the history puller as a last listener!
@@ -123,6 +118,10 @@ public class AlgorithmVisualizationWindow implements Runnable, ILoggingCustomiza
 			graphVisualizationPlugin.setAlgorithmEventSource(this.algorithmEventSource);
 			graphVisualizationPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
 		}
+	}
+
+	public void show() {
+		Platform.runLater(this);
 	}
 
 	@Override
@@ -203,27 +202,5 @@ public class AlgorithmVisualizationWindow implements Runnable, ILoggingCustomiza
 	 */
 	public AlgorithmEventHistory getAlgorithmEventHistory() {
 		return this.algorithmEventHistory;
-	}
-
-	@Override
-	public String getLoggerName() {
-		return this.logger.getName();
-	}
-
-	@Override
-	public void setLoggerName(final String name) {
-		this.logger = LoggerFactory.getLogger(name);
-		this.algorithmEventHistory.setLoggerName(name + ".history");
-		for (IGUIPlugin plugin : this.visualizationPlugins) {
-			if (plugin instanceof ILoggingCustomizable) {
-				((ILoggingCustomizable) plugin).setLoggerName(name + "." + plugin.getClass().getSimpleName().toLowerCase());
-			}
-			else {
-				this.logger.debug("Plugin {} is not logging customizable.", plugin);
-			}
-		}
-		if (this.historyRecorder != null) {
-			this.historyRecorder.setLoggerName(name + ".recorder");
-		}
 	}
 }

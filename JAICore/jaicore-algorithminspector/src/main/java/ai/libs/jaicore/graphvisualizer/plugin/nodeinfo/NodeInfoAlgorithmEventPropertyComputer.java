@@ -5,10 +5,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
+import ai.libs.jaicore.graphvisualizer.events.graph.NodeInfoAlteredEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeRemovedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
@@ -27,7 +28,7 @@ public class NodeInfoAlgorithmEventPropertyComputer implements AlgorithmEventPro
 	}
 
 	@Override
-	public NodeInfo computeAlgorithmEventProperty(final AlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
+	public NodeInfo computeAlgorithmEventProperty(final IAlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
 		if (algorithmEvent instanceof GraphInitializedEvent) {
 			GraphInitializedEvent<?> graphInitializedEvent = (GraphInitializedEvent<?>) algorithmEvent;
 			Object mainNode = graphInitializedEvent.getRoot();
@@ -39,6 +40,11 @@ public class NodeInfoAlgorithmEventPropertyComputer implements AlgorithmEventPro
 			String parentNodeId = this.getIdOfNode(nodeAddedEvent.getParent());
 			String nodeType = nodeAddedEvent.getType();
 			return new NodeInfo(mainNodeId, Arrays.asList(parentNodeId), null, nodeType);
+		} else if (algorithmEvent instanceof NodeInfoAlteredEvent) {
+			NodeInfoAlteredEvent<?> nodeAddedEvent = (NodeInfoAlteredEvent<?>) algorithmEvent;
+			Object mainNode = nodeAddedEvent.getNode();
+			String mainNodeId = this.getIdOfNode(mainNode);
+			return new NodeInfo(mainNodeId, null, null, null);
 		} else if (algorithmEvent instanceof NodeRemovedEvent) {
 			NodeRemovedEvent<?> nodeRemovedEvent = (NodeRemovedEvent<?>) algorithmEvent;
 			String mainNodeId = this.getIdOfNode(nodeRemovedEvent.getNode());

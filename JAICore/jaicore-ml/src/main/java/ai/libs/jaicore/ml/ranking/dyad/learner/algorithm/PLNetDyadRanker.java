@@ -16,8 +16,8 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.core.learner.IProbabilisticPredictor;
-import org.api4.java.ai.ml.core.learner.algorithm.IPrediction;
-import org.api4.java.ai.ml.ranking.dataset.IRanking;
+import org.api4.java.ai.ml.ranking.IRanking;
+import org.api4.java.ai.ml.ranking.IRankingPredictionBatch;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingDataset;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
@@ -39,11 +39,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.math.linearalgebra.IVector;
-import ai.libs.jaicore.ml.core.evaluation.Prediction;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
+import ai.libs.jaicore.ml.ranking.RankingPredictionBatch;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.ADyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.DenseDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes.Ranking;
 
@@ -61,7 +61,7 @@ import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes.Ran
  * @author Helena Graf, Jonas Hanselle, Michael Braun
  *
  */
-public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, IDyadRankingDataset> implements IPLDyadRanker, IProbabilisticPredictor {
+public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, IDyadRankingDataset, IRanking<IDyad>, IRankingPredictionBatch> implements IPLDyadRanker, IProbabilisticPredictor {
 
 	private static final Logger log = LoggerFactory.getLogger(PLNetDyadRanker.class);
 
@@ -201,7 +201,7 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 	 */
 	public void update(final IDyadRankingInstance instance) throws TrainingException {
 		if (this.plNet == null) {
-			int dyadSize = ((IVector) instance.getLabel().get(0).getInstance()).length() + ((IVector) instance.getLabel().get(0).getAlternative()).length();
+			int dyadSize = instance.getLabel().get(0).getContext().length() + instance.getLabel().get(0).getAlternative().length();
 			this.plNet = this.createNetwork(dyadSize);
 			this.plNet.init();
 		}
@@ -214,11 +214,14 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 		List<INDArray> minibatch = new ArrayList<>(instances.size());
 		for (IDyadRankingInstance instance : instances) {
 			if (this.plNet == null) {
-				int dyadSize = (((IVector) instance.getLabel().get(0).getInstance()).length()) + (((IVector) instance.getLabel().get(0).getAlternative()).length());
+				int dyadSize = (instance.getLabel().get(0).getContext().length()) + (instance.getLabel().get(0).getAlternative().length());
 				this.plNet = this.createNetwork(dyadSize);
 				this.plNet.init();
 			}
-			minibatch.add(instance.toMatrix());
+			if (!(instance instanceof ADyadRankingInstance)) {
+				throw new TrainingException("Can only with with instances of type ADyadRankingInstance.");
+			}
+			minibatch.add(((ADyadRankingInstance) instance).toMatrix());
 		}
 		this.updateWithMinibatch(minibatch);
 	}
@@ -289,8 +292,8 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 	 * @return The dyad in {@link INDArray} row vector form.
 	 */
 	private INDArray dyadToVector(final IDyad dyad) {
-		INDArray instanceOfDyad = Nd4j.create(((IVector) dyad.getInstance()).asArray());
-		INDArray alternativeOfDyad = Nd4j.create(((IVector) dyad.getAlternative()).asArray());
+		INDArray instanceOfDyad = Nd4j.create(dyad.getContext().asArray());
+		INDArray alternativeOfDyad = Nd4j.create(dyad.getAlternative().asArray());
 		return Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
 	}
 
@@ -381,7 +384,7 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 	public IDyadRankingInstance getPairWithLeastCertainty(final IDyadRankingInstance drInstance) {
 
 		if (this.plNet == null) {
-			int dyadSize = (((IVector) drInstance.getLabel().get(0).getInstance()).length()) + (((IVector) drInstance.getLabel().get(0).getAlternative()).length());
+			int dyadSize = (drInstance.getLabel().get(0).getContext().length()) + (drInstance.getLabel().get(0).getAlternative().length());
 			this.plNet = this.createNetwork(dyadSize);
 			this.plNet.init();
 		}
@@ -393,7 +396,7 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 		for (IDyad dyad : drInstance) {
 			INDArray plNetInput = this.dyadToVector(dyad);
 			double plNetOutput = this.plNet.output(plNetInput).getDouble(0);
-			dyadUtilityPairs.add(new Pair<IDyad, Double>(dyad, plNetOutput));
+			dyadUtilityPairs.add(new Pair<>(dyad, plNetOutput));
 		}
 		// sort the instance in descending order of utility values
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
@@ -409,7 +412,7 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 		List<IDyad> leastCertainDyads = new LinkedList<>();
 		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty).getLeft());
 		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty + 1).getLeft());
-		return new DyadRankingInstance(drInstance.getInstanceSchema(), leastCertainDyads);
+		return new DenseDyadRankingInstance(leastCertainDyads);
 	}
 
 	/**
@@ -432,7 +435,7 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 
 	private List<Pair<IDyad, Double>> getDyadUtilityPairsForInstance(final IDyadRankingInstance drInstance) {
 		if (this.plNet == null) {
-			int dyadSize = (((IVector) drInstance.getLabel().get(0).getInstance()).length()) + (((IVector) drInstance.getLabel().get(0).getAlternative()).length());
+			int dyadSize = (drInstance.getLabel().get(0).getContext().length()) + (drInstance.getLabel().get(0).getAlternative().length());
 			this.plNet = this.createNetwork(dyadSize);
 			this.plNet.init();
 		}
@@ -441,7 +444,7 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 		for (IDyad dyad : drInstance) {
 			INDArray plNetInput = this.dyadToVector(dyad);
 			double plNetOutput = this.plNet.output(plNetInput).getDouble(0);
-			dyadUtilityPairs.add(new Pair<IDyad, Double>(dyad, plNetOutput));
+			dyadUtilityPairs.add(new Pair<>(dyad, plNetOutput));
 		}
 		return dyadUtilityPairs;
 	}
@@ -647,13 +650,16 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 
 	@Override
 	public void fit(final IDyadRankingDataset dTrain) throws TrainingException, InterruptedException {
-		this.fit(dTrain.toND4j());
+		if (!(dTrain instanceof DyadRankingDataset)) {
+			throw new TrainingException("Can only with with instances of type DyadRankingDataset.");
+		}
+		this.fit(((DyadRankingDataset) dTrain).toND4j());
 	}
 
 	@Override
-	public IPrediction predict(final IDyadRankingInstance xTest) throws PredictionException, InterruptedException {
+	public IRanking<IDyad> predict(final IDyadRankingInstance xTest) throws PredictionException, InterruptedException {
 		if (this.plNet == null) {
-			int dyadSize = (((IVector) xTest.getLabel().get(0).getInstance()).length()) + (((IVector) xTest.getLabel().get(0).getAlternative()).length());
+			int dyadSize = (xTest.getLabel().get(0).getContext().length()) + (xTest.getLabel().get(0).getAlternative().length());
 			this.plNet = this.createNetwork(dyadSize);
 			this.plNet.init();
 		}
@@ -662,13 +668,13 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 		for (IDyad dyad : xTest) {
 			INDArray plNetInput = this.dyadToVector(dyad);
 			double plNetOutput = this.plNet.output(plNetInput).getDouble(0);
-			dyadUtilityPairs.add(new Pair<IDyad, Double>(dyad, plNetOutput));
+			dyadUtilityPairs.add(new Pair<>(dyad, plNetOutput));
 		}
 		// sort the instance in descending order of utility values
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
 		List<IDyad> ranking = new ArrayList<>();
 		dyadUtilityPairs.stream().map(Pair::getLeft).forEach(ranking::add);
-		return new Prediction(new Ranking<>(ranking));
+		return new Ranking<>(ranking);
 	}
 
 	public double getCertainty(final IDyadRankingInstance queryInstance, final IRanking<IDyad> sizeTwoRanking) {
@@ -679,15 +685,23 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 		for (IDyad dyad : queryInstance) {
 			INDArray plNetInput = this.dyadToVector(dyad);
 			double plNetOutput = this.plNet.output(plNetInput).getDouble(0);
-			dyadUtilityPairs.add(new Pair<IDyad, Double>(dyad, plNetOutput));
+			dyadUtilityPairs.add(new Pair<>(dyad, plNetOutput));
 		}
 		return Math.abs(dyadUtilityPairs.get(0).getRight() - dyadUtilityPairs.get(1).getRight());
 	}
 
 	@Override
 	public double getCertainty(final ILabeledInstance testInstance, final Object label) throws PredictionException, InterruptedException {
-		// TODO Auto-generated method stub
-		return 0;
+		throw new UnsupportedOperationException("Not yet implemented.");
+	}
+
+	@Override
+	public IRankingPredictionBatch predict(IDyadRankingInstance[] dTest) throws PredictionException, InterruptedException {
+		List<IRanking<?>> rankings = new ArrayList<>();
+		for (IDyadRankingInstance instance : dTest) {
+			rankings.add(predict(instance));
+		}
+		return new RankingPredictionBatch(rankings);
 	}
 
 }

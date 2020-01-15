@@ -8,8 +8,11 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
+import ai.libs.jaicore.graph.ReadOnlyPathAccessor;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.ENodeAnnotation;
 
 public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluatedPath<N, A, V> {
 	private final N nodeLabel;
@@ -19,7 +22,7 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 	private final Map<String, Object> annotations = new HashMap<>(); // for nodes effectively examined
 
 	public BackPointerPath(final N point) {
-		this (null, point, null);
+		this(null, point, null);
 	}
 
 	public BackPointerPath(final BackPointerPath<N, A, V> parent, final N point, final A edgeLabelToParent) {
@@ -41,7 +44,7 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 	@SuppressWarnings("unchecked")
 	@Override
 	public V getScore() {
-		return (V) this.annotations.get("f");
+		return (V) this.annotations.get(ENodeAnnotation.F_SCORE.toString());
 	}
 
 	public void setParent(final BackPointerPath<N, A, V> newParent) {
@@ -49,7 +52,7 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 	}
 
 	public void setScore(final V internalLabel) {
-		this.setAnnotation("f", internalLabel);
+		this.setAnnotation(ENodeAnnotation.F_SCORE.toString(), internalLabel);
 	}
 
 	public void setAnnotation(final String annotationName, final Object annotationValue) {
@@ -117,7 +120,8 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("externalLabel", this.nodeLabel);
 		fields.put("goal", this.goal);
-		fields.put("annotations", this.annotations);
+		fields.put(ENodeAnnotation.F_SCORE.name(), this.getScore());
+		fields.put(ENodeAnnotation.F_ERROR.name(), this.annotations.get(ENodeAnnotation.F_ERROR.name()));
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 
@@ -185,5 +189,25 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 	@Override
 	public boolean containsNode(final N node) {
 		return this.nodeLabel.equals(node) || (this.parent != null && this.parent.containsNode(node));
+	}
+
+	@Override
+	public ILabeledPath<N, A> getUnmodifiableAccessor() {
+		return new ReadOnlyPathAccessor<>(this);
+	}
+
+	@Override
+	public N getParentOfHead() {
+		return this.parent.getHead();
+	}
+
+	@Override
+	public void extend(final N newHead, final A arcToNewHead) {
+		throw new UnsupportedOperationException("To assure consistency, back-pointer paths do not support modifications.");
+	}
+
+	@Override
+	public void cutHead() {
+		throw new UnsupportedOperationException("To assure consistency, back-pointer paths do not support modifications.");
 	}
 }

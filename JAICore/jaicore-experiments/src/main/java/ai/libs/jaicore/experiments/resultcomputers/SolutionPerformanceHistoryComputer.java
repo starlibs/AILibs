@@ -2,8 +2,8 @@ package ai.libs.jaicore.experiments.resultcomputers;
 
 import java.util.Map;
 
-import org.api4.java.algorithm.events.AlgorithmEvent;
-import org.api4.java.algorithm.events.ScoredSolutionCandidateFoundEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.events.result.IScoredSolutionCandidateFoundEvent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -22,10 +22,10 @@ public class SolutionPerformanceHistoryComputer implements IEventBasedResultUpda
 	}
 
 	@Override
-	public void processEvent(final AlgorithmEvent e, final Map<String, Object> currentResults) {
-		if (e instanceof ScoredSolutionCandidateFoundEvent) {
+	public void processEvent(final IAlgorithmEvent e, final Map<String, Object> currentResults) {
+		if (e instanceof IScoredSolutionCandidateFoundEvent) {
 			@SuppressWarnings("rawtypes")
-			double score = (double) ((ScoredSolutionCandidateFoundEvent) e).getScore();
+			double score = (double) ((IScoredSolutionCandidateFoundEvent) e).getScore();
 			ArrayNode observation = new ObjectMapper().createArrayNode();
 			observation.insert(0, System.currentTimeMillis() - this.start); // relative time
 			observation.insert(1, MathExt.round(score, 5)); // score

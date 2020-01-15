@@ -2,9 +2,9 @@ package ai.libs.jaicore.search.exampleproblems.randomtrees;
 
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 
-public class RandomTreeGoalTester implements NodeGoalTester<List<Integer>, Integer> {
+public class RandomTreeGoalTester implements INodeGoalTester<List<Integer>, Integer> {
 
 	private final int d;
 

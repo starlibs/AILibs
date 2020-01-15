@@ -1,20 +1,22 @@
 package ai.libs.jaicore.search.exampleproblems.enhancedttsp;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleSuccessorGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.ILazySuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.MappingIterator;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPState;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 
@@ -30,13 +32,13 @@ public class EnhancedTTSPSimpleGraphGenerator implements IGraphGenerator<Enhance
 	}
 
 	@Override
-	public SingleRootGenerator<EnhancedTTSPState> getRootGenerator() {
+	public ISingleRootGenerator<EnhancedTTSPState> getRootGenerator() {
 		return () -> this.problem.getInitalState();
 	}
 
 	@Override
-	public SuccessorGenerator<EnhancedTTSPState, String> getSuccessorGenerator() {
-		return new SingleSuccessorGenerator<EnhancedTTSPState, String>() {
+	public ISuccessorGenerator<EnhancedTTSPState, String> getSuccessorGenerator() {
+		return new ILazySuccessorGenerator<EnhancedTTSPState, String>() {
 
 			private ShortList getPossibleDestinationsThatHaveNotBeenGeneratedYet(final EnhancedTTSPState n) {
 				short curLoc = n.getCurLocation();
@@ -63,8 +65,8 @@ public class EnhancedTTSPSimpleGraphGenerator implements IGraphGenerator<Enhance
 			}
 
 			@Override
-			public List<NodeExpansionDescription<EnhancedTTSPState, String>> generateSuccessors(final EnhancedTTSPState node) throws InterruptedException {
-				List<NodeExpansionDescription<EnhancedTTSPState, String>> l = new ArrayList<>();
+			public List<INewNodeDescription<EnhancedTTSPState, String>> generateSuccessors(final EnhancedTTSPState node) throws InterruptedException {
+				List<INewNodeDescription<EnhancedTTSPState, String>> l = new ArrayList<>();
 				if (node.getCurTour().size() >= EnhancedTTSPSimpleGraphGenerator.this.problem.getPossibleDestinations().size()) {
 					EnhancedTTSPSimpleGraphGenerator.this.logger.warn("Cannot generate successors of a node in which we are in pos {} and in which have already visited everything!", node.getCurLocation());
 					return l;
@@ -83,19 +85,14 @@ public class EnhancedTTSPSimpleGraphGenerator implements IGraphGenerator<Enhance
 				return l;
 			}
 
-			public NodeExpansionDescription<EnhancedTTSPState, String> generateSuccessor(final EnhancedTTSPState n, final short destination) {
-				return new NodeExpansionDescription<>(EnhancedTTSPSimpleGraphGenerator.this.problem.computeSuccessorState(n, destination), n.getCurLocation() + " -> " + destination, NodeType.OR);
+			public INewNodeDescription<EnhancedTTSPState, String> generateSuccessor(final EnhancedTTSPState n, final short destination) {
+				return new NodeExpansionDescription<>(EnhancedTTSPSimpleGraphGenerator.this.problem.computeSuccessorState(n, destination), n.getCurLocation() + " -> " + destination);
 			}
 
 			@Override
-			public NodeExpansionDescription<EnhancedTTSPState, String> generateSuccessor(final EnhancedTTSPState node, final int i) {
+			public Iterator<INewNodeDescription<EnhancedTTSPState, String>> getIterativeGenerator(final EnhancedTTSPState node) {
 				ShortList availableDestinations = this.getPossibleDestinationsThatHaveNotBeenGeneratedYet(node);
-				return this.generateSuccessor(node, availableDestinations.getShort(i % availableDestinations.size()));
-			}
-
-			@Override
-			public boolean allSuccessorsComputed(final EnhancedTTSPState node) {
-				return this.getPossibleDestinationsThatHaveNotBeenGeneratedYet(node).isEmpty();
+				return new MappingIterator<>(availableDestinations.iterator(), s -> this.generateSuccessor(node, s));
 			}
 		};
 	}

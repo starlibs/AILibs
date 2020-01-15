@@ -1,27 +1,28 @@
 package ai.libs.jaicore.search.model.other;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.NoSuchElementException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
-public class SearchGraphPath<N, A> implements IPath<N, A> {
+import ai.libs.jaicore.graph.ReadOnlyPathAccessor;
+
+public class SearchGraphPath<N, A> implements ILabeledPath<N, A> {
 	private final List<N> nodes;
 	private final List<A> edges;
 	private final Map<String, Object> annotations;
 
-	public SearchGraphPath(final IPath<N, A> path) {
+	public SearchGraphPath(final ILabeledPath<N, A> path) {
 		this (path.getNodes(), path.getArcs(), (path instanceof SearchGraphPath) ? ((SearchGraphPath) path).annotations : new HashMap<>());
 	}
 
-	public SearchGraphPath(final IPath<N, A> pathA, final IPath<N, A> pathB, final A link) {
+	public SearchGraphPath(final ILabeledPath<N, A> pathA, final ILabeledPath<N, A> pathB, final A link) {
 		this.nodes = new ArrayList<>();
 		this.nodes.addAll(pathA.getNodes());
 		this.nodes.addAll(pathB.getNodes());
@@ -32,16 +33,18 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 		this.annotations = new HashMap<>();
 	}
 
-	public SearchGraphPath(final IPath<N, A> path, final N attachedNode, final A link) {
-		this (path, new SearchGraphPath<>(attachedNode), link);
+	public SearchGraphPath(final ILabeledPath<N, A> pathA, final N attachedNode, final A link) {
+		this.nodes = new ArrayList<>();
+		this.nodes.addAll(pathA.getNodes());
+		this.nodes.add(attachedNode);
+		this.edges = new ArrayList<>();
+		this.edges.addAll(pathA.getArcs());
+		this.edges.add(link);
+		this.annotations = new HashMap<>();
 	}
 
 	public SearchGraphPath(final N node) {
-		this(Arrays.asList(node), new ArrayList<>(), new HashMap<>());
-	}
-
-	public SearchGraphPath(final List<N> nodes) {
-		this(nodes, nodes.stream().filter(n -> n != nodes.get(0)).map(n -> (A)null).collect(Collectors.toList()), new HashMap<>());
+		this(new ArrayList<>(Collections.singletonList(node)), new ArrayList<>(), new HashMap<>());
 	}
 
 	public SearchGraphPath(final List<N> nodes, final List<A> edges) {
@@ -96,8 +99,7 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 			return false;
 		}
 		SearchGraphPath other = (SearchGraphPath) obj;
-		boolean equals = new EqualsBuilder().append(this.nodes, other.nodes).append(this.edges, other.edges).isEquals();
-		return equals;
+		return new EqualsBuilder().append(this.nodes, other.nodes).append(this.edges, other.edges).isEquals();
 	}
 
 	@Override
@@ -137,7 +139,7 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 	}
 
 	@Override
-	public IPath<N, A> getPathFromChildOfRoot() {
+	public ILabeledPath<N, A> getPathFromChildOfRoot() {
 		return new SearchGraphPath<>(this.nodes.subList(1, this.nodes.size()), this.edges != null ? this.edges.subList(1, this.edges.size()) : null);
 	}
 
@@ -154,5 +156,30 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 	@Override
 	public boolean containsNode(final N node) {
 		return this.nodes.contains(node);
+	}
+
+	@Override
+	public ILabeledPath<N, A> getUnmodifiableAccessor() {
+		return new ReadOnlyPathAccessor<>(this);
+	}
+
+	@Override
+	public N getParentOfHead() {
+		return this.nodes.get(this.nodes.size() - 2);
+	}
+
+	@Override
+	public void extend(final N newHead, final A arcToNewHead) {
+		this.nodes.add(newHead);
+		this.edges.add(arcToNewHead);
+	}
+
+	@Override
+	public void cutHead() {
+		if (this.isPoint()) {
+			throw new NoSuchElementException("The path consists only of one point, which cannot be removed.");
+		}
+		this.nodes.remove(this.nodes.size() - 1);
+		this.edges.remove(this.edges.size() - 1);
 	}
 }

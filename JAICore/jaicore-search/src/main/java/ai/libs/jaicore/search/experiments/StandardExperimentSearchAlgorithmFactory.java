@@ -3,9 +3,9 @@ package ai.libs.jaicore.search.experiments;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearch;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 
 import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
@@ -31,9 +31,9 @@ import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchWithPathEvaluationsInputToGraphSearchWithSubpathEvaluationViaUninformedness;
 
-public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IGraphSearchWithPathEvaluationsInput<N, A, Double>> {
+public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearchWithPathEvaluationsInput<N, A, Double>> {
 
-	public IOptimalPathInORGraphSearch<I, ? extends IEvaluatedPath<N, A, Double>, N, A, Double> getAlgorithm(final Experiment experiment, final IGraphSearchWithPathEvaluationsInput<N, A, Double> input) {
+	public IOptimalPathInORGraphSearch<I, ? extends IEvaluatedPath<N, A, Double>, N, A, Double> getAlgorithm(final Experiment experiment, final IPathSearchWithPathEvaluationsInput<N, A, Double> input) {
 		final int seed = Integer.parseInt(experiment.getValuesOfKeyFields().get(IOwnerBasedRandomConfig.K_SEED));
 		final String algorithm = experiment.getValuesOfKeyFields().get(IAlgorithmNameConfig.K_ALGORITHM_NAME);
 		switch (algorithm) {
@@ -44,7 +44,7 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IGraphSear
 			return optimizer;
 		case "bf-uninformed":
 			GraphSearchWithPathEvaluationsInputToGraphSearchWithSubpathEvaluationViaUninformedness<N, A> reducer = new GraphSearchWithPathEvaluationsInputToGraphSearchWithSubpathEvaluationViaUninformedness<>();
-			IGraphSearchWithPathEvaluationsInput<N, A, Double> reducedProblem = reducer.encodeProblem(input);
+			IPathSearchWithPathEvaluationsInput<N, A, Double> reducedProblem = reducer.encodeProblem(input);
 			return new BestFirst<I, N, A, Double>((I)reducedProblem);
 		case "bf-informed":
 			GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<N, A, Double> reducer2 = new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(n -> null,
@@ -54,12 +54,12 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IGraphSear
 			return new UCTPathSearch<I, N, A>((I)input, false, Math.sqrt(2), seed, 0.0);
 		case "ensemble":
 
-			DNGPolicy<N, A> dng0001 = new DNGPolicy<>((NodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, .001);
-			DNGPolicy<N, A> dng001 = new DNGPolicy<>((NodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, .01);
-			DNGPolicy<N, A> dng01 = new DNGPolicy<>((NodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, .1);
-			DNGPolicy<N, A> dng1 = new DNGPolicy<>((NodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, 1.0);
-			DNGPolicy<N, A> dng10 = new DNGPolicy<>((NodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, 10.0);
-			DNGPolicy<N, A> dng100 = new DNGPolicy<>((NodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, 100.0);
+			DNGPolicy<N, A> dng0001 = new DNGPolicy<>((INodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, .001);
+			DNGPolicy<N, A> dng001 = new DNGPolicy<>((INodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, .01);
+			DNGPolicy<N, A> dng01 = new DNGPolicy<>((INodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, .1);
+			DNGPolicy<N, A> dng1 = new DNGPolicy<>((INodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, 1.0);
+			DNGPolicy<N, A> dng10 = new DNGPolicy<>((INodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, 10.0);
+			DNGPolicy<N, A> dng100 = new DNGPolicy<>((INodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, 100.0);
 			PlackettLucePolicy<N, A> pl = new PlackettLucePolicy<N, A>(new BootstrappingPreferenceKernel<N, A>(d -> d.getMean(), 1), new Random(seed));
 			return new EnsembleMCTSPathSearch<I, N, A>((I)input, Arrays.asList(new UCBPolicy<>(), dng001, dng01, dng1, dng01, dng10, dng100), new Random(seed));
 		case "sp-uct":

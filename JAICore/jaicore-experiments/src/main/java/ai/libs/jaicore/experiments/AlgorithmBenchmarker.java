@@ -8,7 +8,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
@@ -58,11 +58,11 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 			final List<IExperimentTerminationCriterion> terminationCriteria = this.controller.getTerminationCriteria(experimentEntry.getExperiment());
 
 			/* create thread to process events */
-			BlockingQueue<AlgorithmEvent> eventQueue = new LinkedBlockingQueue<>();
+			BlockingQueue<IAlgorithmEvent> eventQueue = new LinkedBlockingQueue<>();
 			this.eventThread = new Thread(() -> {
 
 				while (!Thread.currentThread().isInterrupted()) {
-					AlgorithmEvent e = eventQueue.poll();
+					IAlgorithmEvent e = eventQueue.poll();
 
 					/* update result */
 					final Map<String, Object> results = new HashMap<>();
@@ -86,7 +86,7 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 			algorithm.registerListener(new Object() {
 
 				@Subscribe
-				public void receiveEvent(final AlgorithmEvent e) {
+				public void receiveEvent(final IAlgorithmEvent e) {
 					eventQueue.add(e);
 				}
 			});

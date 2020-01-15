@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
-import org.api4.java.datastructure.graph.implicit.NodeType;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
 import ai.libs.jaicore.problems.scheduling.openshop.Machine;
 import ai.libs.jaicore.problems.scheduling.openshop.OpenShopProblem;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public class OpenShopGraphGenerator implements IGraphGenerator<OpenShopState, String> {
 
@@ -25,14 +25,14 @@ public class OpenShopGraphGenerator implements IGraphGenerator<OpenShopState, St
 	}
 
 	@Override
-	public SingleRootGenerator<OpenShopState> getRootGenerator() {
+	public ISingleRootGenerator<OpenShopState> getRootGenerator() {
 		return () -> new OpenShopOperationSelectionState(this.problem, null, null, this.problem.getOperations().values().stream().map(o -> o.getName()).collect(Collectors.toList()));
 	}
 
 	@Override
-	public SuccessorGenerator<OpenShopState, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<OpenShopState, String> getSuccessorGenerator() {
 		return n -> {
-			List<NodeExpansionDescription<OpenShopState, String>> succ = new ArrayList<>();
+			List<INewNodeDescription<OpenShopState, String>> succ = new ArrayList<>();
 
 			/* for actives schedules, continue as usual */
 			if (n instanceof OpenShopOperationSelectionState) {
@@ -41,7 +41,7 @@ public class OpenShopGraphGenerator implements IGraphGenerator<OpenShopState, St
 
 					/* add successor only if the solution can still be active! */
 					if (!this.pruneInactiveNodes || successor.getSchedule().isActive()) {
-						succ.add(new NodeExpansionDescription<>(successor, opName, NodeType.OR));
+						succ.add(new NodeExpansionDescription<>(successor, opName));
 					}
 				}
 			}
@@ -60,7 +60,7 @@ public class OpenShopGraphGenerator implements IGraphGenerator<OpenShopState, St
 
 					/* add successor only if the solution can still be active! */
 					if (!this.pruneInactiveNodes || successor.getSchedule().isActive()) {
-						succ.add(new NodeExpansionDescription<>(successor, m.getMachineID(), NodeType.OR));
+						succ.add(new NodeExpansionDescription<>(successor, m.getMachineID()));
 					}
 				}
 			}

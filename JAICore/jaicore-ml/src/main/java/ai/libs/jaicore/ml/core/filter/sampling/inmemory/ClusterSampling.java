@@ -8,11 +8,13 @@ import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
 
-public abstract class ClusterSampling<I extends ILabeledInstance & Clusterable, D extends ILabeledDataset<I>> extends ASamplingAlgorithm<I, D> {
+public abstract class ClusterSampling<I extends ILabeledInstance & Clusterable, D extends ILabeledDataset<I>> extends ASamplingAlgorithm<D> {
 
 	protected List<CentroidCluster<I>> clusterResults = null;
 	protected int currentCluster = 0;
@@ -42,11 +44,15 @@ public abstract class ClusterSampling<I extends ILabeledInstance & Clusterable, 
 		this.distanceMeassure = distanceMeassure;
 	}
 
-	public AlgorithmEvent doAlgorithmStep() {
+	public IAlgorithmEvent doAlgorithmStep() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		if (this.currentCluster < this.clusterResults.size()) {
 			CentroidCluster<I> cluster = this.clusterResults.get(this.currentCluster++);
 			boolean same = true;
-			for (int i = 1; i < cluster.getPoints().size(); i++) {
+			int n = cluster.getPoints().size();
+			for (int i = 1; i < n; i++) {
+				if (i % 1000 == 0) {
+					this.checkAndConductTermination();
+				}
 				if (!cluster.getPoints().get(i - 1).getLabel().equals(cluster.getPoints().get(i).getLabel())) {
 					same = false;
 					break;
@@ -69,7 +75,7 @@ public abstract class ClusterSampling<I extends ILabeledInstance & Clusterable, 
 					this.sample.add(cluster.getPoints().get(i));
 				}
 			}
-			return new SampleElementAddedEvent(this.getId());
+			return new SampleElementAddedEvent(this);
 		} else {
 			return this.terminate();
 		}

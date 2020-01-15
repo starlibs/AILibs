@@ -2,6 +2,8 @@ package ai.libs.jaicore.basic.aggregate.string;
 
 import java.util.List;
 
+import org.api4.java.common.aggregate.IStringAggregateFunction;
+
 import ai.libs.jaicore.basic.sets.SetUtil;
 
 /**

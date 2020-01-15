@@ -3,7 +3,7 @@ package ai.libs.jaicore.search.exampleproblems.samegame;
 
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public class SameGameGraphGenerator implements IGraphGenerator<SameGameNode, Sam
 	}
 
 	@Override
-	public SingleRootGenerator<SameGameNode> getRootGenerator() {
+	public ISingleRootGenerator<SameGameNode> getRootGenerator() {
 		return () -> this.rootNode;
 	}
 

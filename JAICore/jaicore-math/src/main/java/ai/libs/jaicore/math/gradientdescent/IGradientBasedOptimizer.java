@@ -1,13 +1,13 @@
 package ai.libs.jaicore.math.gradientdescent;
 
-import ai.libs.jaicore.math.linearalgebra.IVector;
+import org.api4.java.common.math.IVector;
 
 /**
  * Interface for an optimizer that is based on a gradient descent and gets a
  * differentiable function and the derivation of said function to solve an
  * optimization problem.
  *
- * @author Helena Graf, Mirko Jürgens
+ * @author Helena Graf, Mirko Jï¿½rgens
  *
  */
 public interface IGradientBasedOptimizer {
@@ -20,7 +20,7 @@ public interface IGradientBasedOptimizer {
 	 * @param gradient
 	 *            the first order derivate of the function
 	 * @param initialGuess
-	 * 			  the initial guess for the parameters that shall be optimized
+	 *            the initial guess for the parameters that shall be optimized
 	 * @return the optimized vector
 	 */
 	public IVector optimize(IGradientDescendableFunction descendableFunction, IGradientFunction gradient, IVector initialGuess);

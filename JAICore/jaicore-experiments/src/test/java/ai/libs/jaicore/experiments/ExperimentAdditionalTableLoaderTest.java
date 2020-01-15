@@ -5,8 +5,8 @@ import java.sql.SQLException;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.basic.IDatabaseConfig;
-import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.db.IDatabaseConfig;
+import ai.libs.jaicore.db.sql.SQLAdapter;
 
 /**
  * Tests the class {@link ExperimentAdditionalTableLoader}. Integration tests

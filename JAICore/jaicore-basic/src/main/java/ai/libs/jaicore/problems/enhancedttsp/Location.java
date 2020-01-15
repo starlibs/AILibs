@@ -44,14 +44,6 @@ public class Location {
 			return false;
 		}
 		Location other = (Location) obj;
-		if (this.id != other.id) {
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public String toString() {
-		return this.id + " (" + this.x + ", " + this.y + ")";
+		return this.id == other.id;
 	}
 }

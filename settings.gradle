@@ -11,6 +11,7 @@ include ":JAICore:jaicore-logic"
 include ":JAICore:jaicore-math"
 include ":JAICore:jaicore-ml"
 include ":JAICore:jaicore-ml-weka"
+include ":JAICore:jaicore-ml-meka"
 
 include ":JAICore:jaicore-planning"
 include ":JAICore:jaicore-processes"
@@ -18,11 +19,41 @@ include ":JAICore:jaicore-search"
 
 
 // Software-Configuration
-include 'hasco'
-project(":hasco").projectDir = new File(configPrefix,"hasco")
+include 'hasco-core'
+project(":hasco-core").projectDir = new File(configPrefix,"hasco/core")
 
-//include 'mlplan'
-//project(":mlplan").projectDir = new File(configPrefix,"mlplan")
+include 'hasco-fanova'
+project(":hasco-fanova").projectDir = new File(configPrefix,"hasco/extensions/fanova")
+
+include 'hyperopt'
+project(":hyperopt").projectDir = new File(configPrefix,"hyperopt")
+
+include 'mlplan-core'
+project(":mlplan-core").projectDir = new File(configPrefix, "mlplan/core")
+
+include 'mlplan-gui'
+project(":mlplan-gui").projectDir = new File(configPrefix, "mlplan/gui")
+
+include 'mlplan-weka'
+project(":mlplan-weka").projectDir = new File(configPrefix, "mlplan/weka")
+
+include 'mlplan-sklearn'
+project(":mlplan-sklearn").projectDir = new File(configPrefix, "mlplan/sklearn")
+
+include 'mlplan-meka'
+project(":mlplan-meka").projectDir = new File(configPrefix, "mlplan/meka")
+
+include 'mlplan-ext-bigdata'
+project(":mlplan-ext-bigdata").projectDir = new File(configPrefix, "mlplan/extensions/bigdata")
+
+include 'mlplan-ext-reduction'
+project(":mlplan-ext-reduction").projectDir = new File(configPrefix, "mlplan/extensions/reduction")
+
+include 'mlplan-ext-metalearning'
+project(":mlplan-ext-metalearning").projectDir = new File(configPrefix, "mlplan/extensions/metalearning")
+
+include 'mlplan-full'
+project(":mlplan-full").projectDir = new File(configPrefix, "mlplan/full")
 
 //include 'autofe'
 //project(":autofe").projectDir = new File(configPrefix,"autofe")

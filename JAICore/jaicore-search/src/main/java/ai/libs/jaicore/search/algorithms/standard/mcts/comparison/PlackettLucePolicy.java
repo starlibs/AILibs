@@ -10,14 +10,14 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.common.event.IRelaxedEventEmitter;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
-import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.graph.LabeledGraph;
 import ai.libs.jaicore.math.probability.pl.PLInferenceProblem;
 import ai.libs.jaicore.math.probability.pl.PLInferenceProblemEncoder;
@@ -28,7 +28,7 @@ import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
 import ai.libs.jaicore.search.algorithms.standard.mcts.UniformRandomPolicy;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 
-public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILoggingCustomizable, IGraphDependentPolicy<N, A>, IEventEmitter {
+public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILoggingCustomizable, IGraphDependentPolicy<N, A>, IRelaxedEventEmitter {
 
 	private final EventBus eventBus = new EventBus();
 	private Logger logger = LoggerFactory.getLogger(PlackettLucePolicy.class);
@@ -209,7 +209,7 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	}
 
 	@Override
-	public void updatePath(final IPath<N, A> path, final Double playoutScore, final int lengthOfPlayout) {
+	public void updatePath(final ILabeledPath<N, A> path, final Double playoutScore, final int lengthOfPlayout) {
 		this.preferenceKernel.signalNewScore(path, playoutScore);
 		int numNodes = path.getNumberOfNodes();
 		int depth = 0;

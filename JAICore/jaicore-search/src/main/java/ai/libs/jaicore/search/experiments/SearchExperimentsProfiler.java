@@ -5,8 +5,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearch;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ public class SearchExperimentsProfiler {
 	private Logger logger = LoggerFactory.getLogger(SearchExperimentsProfiler.class);
 	private static final String FOLDER_LANDSCAPES = "landscapes";
 
-	private class Toolbox<I extends IGraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> {
+	private class Toolbox<I extends IPathSearchWithPathEvaluationsInput<N, A, Double>, N, A> {
 		private final ISearchExperimentDecoder<N, A, I, IEvaluatedPath<N, A, Double>, IOptimalPathInORGraphSearch<? extends I, ? extends IEvaluatedPath<N, A, Double>, N, A, Double>> decoder;
 		public Toolbox(final ISearchExperimentDecoder<N, A, I, IEvaluatedPath<N, A, Double>, IOptimalPathInORGraphSearch<? extends I, ? extends IEvaluatedPath<N, A, Double>, N, A, Double>> decoder) {
 			super();
@@ -41,7 +41,7 @@ public class SearchExperimentsProfiler {
 	private final Toolbox<?, ?, ?> toolbox;
 	private File workingDirectory;
 
-	public <I extends IGraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> SearchExperimentsProfiler(
+	public <I extends IPathSearchWithPathEvaluationsInput<N, A, Double>, N, A> SearchExperimentsProfiler(
 			final ISearchExperimentDecoder<N, A, I, IEvaluatedPath<N, A, Double>, IOptimalPathInORGraphSearch<? extends I, ? extends IEvaluatedPath<N, A, Double>, N, A, Double>> decoder, final File workingDirectory) {
 		this.toolbox = new Toolbox<>(decoder);
 		this.workingDirectory = workingDirectory;

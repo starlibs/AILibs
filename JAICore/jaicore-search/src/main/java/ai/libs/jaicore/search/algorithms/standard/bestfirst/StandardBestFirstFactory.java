@@ -1,6 +1,8 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import java.util.Objects;
+
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
@@ -16,13 +18,14 @@ public class StandardBestFirstFactory<N, A, V extends Comparable<V>> extends Bes
 	public void setNodeEvaluator(final IPathEvaluator<N, A, V> nodeEvaluator) {
 		GraphSearchWithSubpathEvaluationsInput<N, A, V> problem = this.getInput();
 		IGraphGenerator<N, A> gg = problem != null ? problem.getGraphGenerator() : null;
-		PathGoalTester<N, A> gt = problem != null ? problem.getGoalTester() : null;
+		IPathGoalTester<N, A> gt = problem != null ? problem.getGoalTester() : null;
 		this.setProblemInput(new GraphSearchWithSubpathEvaluationsInput<>(gg, gt, nodeEvaluator));
 	}
 
 	public void setGraphGenerator(final IGraphGenerator<N, A> graphGenerator) {
 		GraphSearchWithSubpathEvaluationsInput<N, A, V> problem = this.getInput();
-		PathGoalTester<N, A> gt = problem != null ? problem.getGoalTester() : null;
+		Objects.requireNonNull(problem);
+		IPathGoalTester<N, A> gt = problem.getGoalTester();
 		IPathEvaluator<N, A, V> evaluator = problem.getNodeEvaluator();
 		this.setProblemInput(new GraphSearchWithSubpathEvaluationsInput<>(graphGenerator, gt, evaluator));
 	}

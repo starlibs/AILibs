@@ -1,9 +1,9 @@
 package ai.libs.jaicore.search.algorithms.standard.rstar;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
-import org.api4.java.datastructure.graph.implicit.RootGenerator;
-import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.IRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
 public class SubPathGraphGenerator<N, A> implements IGraphGenerator<N, A> {
 
@@ -17,12 +17,12 @@ public class SubPathGraphGenerator<N, A> implements IGraphGenerator<N, A> {
 	}
 
 	@Override
-	public RootGenerator<N> getRootGenerator() {
-		return (SingleRootGenerator<N>)(() -> this.from);
+	public IRootGenerator<N> getRootGenerator() {
+		return (ISingleRootGenerator<N>)(() -> this.from);
 	}
 
 	@Override
-	public SuccessorGenerator<N, A> getSuccessorGenerator() {
+	public ISuccessorGenerator<N, A> getSuccessorGenerator() {
 		return this.gg.getSuccessorGenerator();
 	}
 }

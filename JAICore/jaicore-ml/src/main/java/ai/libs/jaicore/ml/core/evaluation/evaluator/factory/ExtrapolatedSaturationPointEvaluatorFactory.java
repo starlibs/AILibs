@@ -1,29 +1,36 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator.factory;
 
 import java.util.List;
+import java.util.Random;
 
+import org.api4.java.ai.ml.core.IDataConfigurable;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.IPredictionPerformanceMetricConfigurable;
+import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
+import org.api4.java.common.control.IRandomConfigurable;
 
 import ai.libs.jaicore.ml.core.evaluation.evaluator.ExtrapolatedSaturationPointEvaluator;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.IClassifierEvaluator;
+import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
-import ai.libs.jaicore.ml.core.timeseries.util.WekaUtil;
-import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-import weka.core.Instances;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 
-public class ExtrapolatedSaturationPointEvaluatorFactory implements IClassifierEvaluatorFactory {
+public class ExtrapolatedSaturationPointEvaluatorFactory
+		implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>>, IRandomConfigurable, IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>, IPredictionPerformanceMetricConfigurable {
 
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledInstance, ILabeledDataset<ILabeledInstance>>> subsamplingAlgorithmFactory;
+	private ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> subsamplingAlgorithmFactory;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
+	private ILabeledDataset<? extends ILabeledInstance> dataset;
+	private Random random;
+	private IDeterministicPredictionPerformanceMeasure<?, ?> metric;
 
-	public ExtrapolatedSaturationPointEvaluatorFactory(final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledInstance, ILabeledDataset<ILabeledInstance>>> subsamplingAlgorithmFactory,
+	public ExtrapolatedSaturationPointEvaluatorFactory(final int[] anchorpoints, final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> subsamplingAlgorithmFactory,
 			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
 		super();
 		this.anchorpoints = anchorpoints;
@@ -33,18 +40,38 @@ public class ExtrapolatedSaturationPointEvaluatorFactory implements IClassifierE
 	}
 
 	@Override
-	public IClassifierEvaluator getIClassifierEvaluator(final Instances dataset, final long seed) throws ClassifierEvaluatorConstructionFailedException {
+	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> getLearnerEvaluator() throws LearnerEvaluatorConstructionFailedException {
 		try {
-			List<Instances> split = WekaUtil.getStratifiedSplit(dataset, seed, 0.7);
-			WekaInstances train = new WekaInstances(split.get(0));
-			WekaInstances test = new WekaInstances(split.get(1));
-			return new ExtrapolatedSaturationPointEvaluator<>(this.anchorpoints, this.subsamplingAlgorithmFactory, train, this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, seed, test);
+			List<ILabeledDataset<?>> split = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<ILabeledDataset<?>>(), .7f, this.random).split(this.dataset);
+			ILabeledDataset<?> train = split.get(0);
+			ILabeledDataset<?> test = split.get(1);
+			return new ExtrapolatedSaturationPointEvaluator(this.anchorpoints, this.subsamplingAlgorithmFactory, train, this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, this.random.nextLong(), test, this.metric);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new ClassifierEvaluatorConstructionFailedException(e);
-		} catch (ClassNotFoundException | SplitFailedException e) {
-			throw new ClassifierEvaluatorConstructionFailedException(e);
+			throw new LearnerEvaluatorConstructionFailedException(e);
+		} catch (SplitFailedException e) {
+			throw new LearnerEvaluatorConstructionFailedException(e);
 		}
+	}
+
+	@Override
+	public void setData(final ILabeledDataset<? extends ILabeledInstance> data) {
+		this.dataset = data;
+	}
+
+	@Override
+	public ILabeledDataset<? extends ILabeledInstance> getData() {
+		return this.dataset;
+	}
+
+	@Override
+	public void setRandom(final Random random) {
+		this.random = random;
+	}
+
+	@Override
+	public void setMeasure(final IDeterministicPredictionPerformanceMeasure<?, ?> measure) {
+		this.metric = measure;
 	}
 
 }

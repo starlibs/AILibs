@@ -7,18 +7,19 @@ import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
-import org.api4.java.ai.ml.core.learner.algorithm.IPrediction;
+import org.api4.java.ai.ml.ranking.IRanking;
+import org.api4.java.ai.ml.ranking.IRankingPredictionBatch;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingDataset;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
+import org.api4.java.common.math.IVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.IVector;
-import ai.libs.jaicore.ml.core.evaluation.Prediction;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
+import ai.libs.jaicore.ml.ranking.RankingPredictionBatch;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IPLDyadRanker;
 import ai.libs.jaicore.ml.ranking.dyad.learner.optimizing.BilinFunction;
 import ai.libs.jaicore.ml.ranking.dyad.learner.optimizing.DyadRankingFeatureTransformNegativeLogLikelihood;
@@ -36,14 +37,14 @@ import edu.stanford.nlp.optimization.QNMinimizer;
  * [1].
  *
  *
- * [1] Schäfer, D. & Hüllermeier, Dyad ranking using Plackett-Luce models based
+ * [1] Schï¿½fer, D. & Hï¿½llermeier, Dyad ranking using Plackett-Luce models based
  * on joint feature representations,
  * https://link.springer.com/article/10.1007%2Fs10994-017-5694-9
  *
  * @author Helena Graf, Mirko JÃ¼rgens
  *
  */
-public class FeatureTransformPLDyadRanker extends ASupervisedLearner<IDyadRankingInstance, IDyadRankingDataset> implements IPLDyadRanker {
+public class FeatureTransformPLDyadRanker extends ASupervisedLearner<IDyadRankingInstance, IDyadRankingDataset, IRanking<IDyad>, IRankingPredictionBatch> implements IPLDyadRanker {
 
 	private static final Logger log = LoggerFactory.getLogger(FeatureTransformPLDyadRanker.class);
 
@@ -103,7 +104,7 @@ public class FeatureTransformPLDyadRanker extends ASupervisedLearner<IDyadRankin
 		double outerProduct = 1.0;
 		for (int smallN = 0; smallN < largeN; smallN++) {
 			IDyadRankingInstance dyadRankingInstance = dataset.get(smallN);
-			int mN = dyadRankingInstance.getNumAttributes();
+			int mN = dyadRankingInstance.getNumberOfRankedElements();
 			double innerProduct = 1.0;
 			for (int m = 0; m < mN; m++) {
 				IDyad dyad = dyadRankingInstance.getLabel().get(m);
@@ -129,8 +130,8 @@ public class FeatureTransformPLDyadRanker extends ASupervisedLearner<IDyadRankin
 		this.negativeLogLikelihood.initialize(dataset, featureTransforms);
 		this.negativeLogLikelihoodDerivative.initialize(dataset, featureTransforms);
 
-		int alternativeLength = ((IVector) dataset.get(0).getLabel().get(0).getAlternative()).length();
-		int instanceLength = ((IVector) dataset.get(0).getLabel().get(0).getInstance()).length();
+		int alternativeLength = dataset.get(0).getLabel().get(0).getAlternative().length();
+		int instanceLength = dataset.get(0).getLabel().get(0).getContext().length();
 		this.w = new DenseDoubleVector(this.featureTransform.getTransformedVectorLength(alternativeLength, instanceLength), 0.3);
 		log.debug("Likelihood of the randomly filled w is {}", this.likelihoodOfParameter(this.w, dataset));
 		BilinFunction fun = new BilinFunction(featureTransforms, dataset, this.featureTransform.getTransformedVectorLength(alternativeLength, instanceLength));
@@ -140,7 +141,7 @@ public class FeatureTransformPLDyadRanker extends ASupervisedLearner<IDyadRankin
 	}
 
 	@Override
-	public IPrediction predict(final IDyadRankingInstance instance) throws PredictionException, InterruptedException {
+	public IRanking<IDyad> predict(final IDyadRankingInstance instance) throws PredictionException, InterruptedException {
 		if (this.w == null) {
 			throw new PredictionException("The Ranker has not been trained yet.");
 		}
@@ -149,9 +150,18 @@ public class FeatureTransformPLDyadRanker extends ASupervisedLearner<IDyadRankin
 
 		for (IDyad d : instance) {
 			double skill = this.computeSkillForDyad(d);
-			skillForDyads.add(new Pair<Double, IDyad>(skill, d));
+			skillForDyads.add(new Pair<>(skill, d));
 		}
-		return new Prediction(new Ranking<>(skillForDyads.stream().sorted((p1, p2) -> Double.compare(p1.getX(), p2.getX())).map(Pair<Double, IDyad>::getY).collect(Collectors.toList())));
+		return new Ranking<>(skillForDyads.stream().sorted((p1, p2) -> Double.compare(p1.getX(), p2.getX())).map(Pair<Double, IDyad>::getY).collect(Collectors.toList()));
+	}
+
+	@Override
+	public IRankingPredictionBatch predict(IDyadRankingInstance[] dTest) throws PredictionException, InterruptedException {
+		List<IRanking<?>> rankings = new ArrayList<>();
+		for (IDyadRankingInstance instance : dTest) {
+			rankings.add(predict(instance));
+		}
+		return new RankingPredictionBatch(rankings);
 	}
 
 }

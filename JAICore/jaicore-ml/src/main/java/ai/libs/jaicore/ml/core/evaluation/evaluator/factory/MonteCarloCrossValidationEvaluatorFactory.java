@@ -1,65 +1,41 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator.factory;
 
-import org.api4.java.ai.ml.core.dataset.splitter.IDatasetSplitter;
+import java.util.Objects;
 
+import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMeasure;
+
+import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
+import ai.libs.jaicore.ml.core.evaluation.AveragingPredictionPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.ISplitBasedClassifierEvaluator;
-import weka.core.Instances;
 
 /**
  * Factory for configuring standard Monte Carlo cross-validation evaluators.
+ * The basic performance measure is always averaged over the different runs.
+ *
  * @author mwever
+ * @author fmohr
  *
  */
-public class MonteCarloCrossValidationEvaluatorFactory extends AMonteCarloCrossValidationBasedEvaluatorFactory {
-
-	/**
-	 * Standard C'tor.
-	 */
-	public MonteCarloCrossValidationEvaluatorFactory() {
-		super();
-	}
+public class MonteCarloCrossValidationEvaluatorFactory extends AMonteCarloCrossValidationBasedEvaluatorFactory<MonteCarloCrossValidationEvaluatorFactory> {
 
 	@Override
-	public MonteCarloCrossValidationEvaluatorFactory withDatasetSplitter(final IDatasetSplitter datasetSplitter) {
-		return (MonteCarloCrossValidationEvaluatorFactory) super.withDatasetSplitter(datasetSplitter);
-	}
-
-	@Override
-	public MonteCarloCrossValidationEvaluatorFactory withSplitBasedEvaluator(final ISplitBasedClassifierEvaluator<Double> splitBasedClassifierEvaluator) {
-		return (MonteCarloCrossValidationEvaluatorFactory) super.withSplitBasedEvaluator(splitBasedClassifierEvaluator);
-	}
-
-	@Override
-	public MonteCarloCrossValidationEvaluatorFactory withSeed(final int seed) {
-		return (MonteCarloCrossValidationEvaluatorFactory) super.withSeed(seed);
-	}
-
-	@Override
-	public MonteCarloCrossValidationEvaluatorFactory withNumMCIterations(final int numMCIterations) {
-		return (MonteCarloCrossValidationEvaluatorFactory) super.withNumMCIterations(numMCIterations);
-	}
-
-	@Override
-	public MonteCarloCrossValidationEvaluatorFactory withData(final Instances data) {
-		return (MonteCarloCrossValidationEvaluatorFactory) super.withData(data);
-	}
-
-	@Override
-	public MonteCarloCrossValidationEvaluatorFactory withTrainFoldSize(final double trainFoldSize) {
-		return (MonteCarloCrossValidationEvaluatorFactory) super.withTrainFoldSize(trainFoldSize);
-	}
-
-	@Override
-	public MonteCarloCrossValidationEvaluatorFactory withTimeoutForSolutionEvaluation(final int timeoutForSolutionEvaluation) {
-		return (MonteCarloCrossValidationEvaluatorFactory) super.withTimeoutForSolutionEvaluation(timeoutForSolutionEvaluation);
-	}
-
-	@Override
-	public MonteCarloCrossValidationEvaluator getIClassifierEvaluator(final Instances dataset, final long seed) {
-		if (this.getSplitBasedEvaluator() == null) {
-			throw new IllegalStateException("Cannot create MCCV, because no splitBasedEvaluator has been set!");
+	public MonteCarloCrossValidationEvaluator getLearnerEvaluator() {
+		if (this.getTrainFoldSize() <= 0 || this.getTrainFoldSize() >= 1) {
+			throw new IllegalStateException("Train fold size is configured to " + this.getTrainFoldSize() + " but must be strictly greater than 0 and strictly smaller than 1.");
 		}
-		return new MonteCarloCrossValidationEvaluator(this.getSplitBasedEvaluator(), this.getDatasetSplitter(), this.getNumMCIterations(), dataset, this.getTrainFoldSize(), seed);
+		Objects.requireNonNull(this.random);
+		Objects.requireNonNull(this.data);
+		Objects.requireNonNull(this.metric);
+		if (this.numMCIterations <= 0) {
+			throw new IllegalStateException("Cannot create MCCV evaluator due to invalid number of repeats " + this.getNumMCIterations() + ". Set number of repeats to a positive value!");
+		}
+		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(this.data);
+		IAggregatedPredictionPerformanceMeasure<?, ?> aggMeasure = new AveragingPredictionPerformanceMeasure<>(this.metric);
+		return new MonteCarloCrossValidationEvaluator(this.data, this.getNumMCIterations(), this.getTrainFoldSize(), this.random, aggMeasure);
+	}
+
+	@Override
+	public MonteCarloCrossValidationEvaluatorFactory getSelf() {
+		return this;
 	}
 }

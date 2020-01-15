@@ -3,13 +3,13 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.jaicore.logging.ToJSONStringUtil;
@@ -50,6 +50,10 @@ public class AlternativeNodeEvaluator<N, A, V extends Comparable<V>> extends Dec
 		return (this.ne1 instanceof IPotentiallySolutionReportingPathEvaluator) && ((IPotentiallySolutionReportingPathEvaluator<?, ?,  ?>) this.ne1).reportsSolutions();
 	}
 
+	public IPathEvaluator<N, A, V> getPrimaryNodeEvaluator() {
+		return this.ne1;
+	}
+
 	@Override
 	public boolean reportsSolutions() {
 		if (super.reportsSolutions()) {
@@ -59,7 +63,7 @@ public class AlternativeNodeEvaluator<N, A, V extends Comparable<V>> extends Dec
 	}
 
 	@Override
-	public void setGenerator(final IGraphGenerator<N, A> generator, final PathGoalTester<N, A> goalTester) {
+	public void setGenerator(final IGraphGenerator<N, A> generator, final IPathGoalTester<N, A> goalTester) {
 		super.setGenerator(generator, goalTester);
 		if (!(this.ne1 instanceof IPotentiallyGraphDependentPathEvaluator)) {
 			return;
@@ -81,7 +85,7 @@ public class AlternativeNodeEvaluator<N, A, V extends Comparable<V>> extends Dec
 	}
 
 	@Override
-	public V evaluate(final IPath<N, A> node) throws PathEvaluationException, InterruptedException {
+	public V evaluate(final ILabeledPath<N, A> node) throws PathEvaluationException, InterruptedException {
 		V f1 = this.ne1.evaluate(node);
 		if (f1 != null) {
 			return f1;

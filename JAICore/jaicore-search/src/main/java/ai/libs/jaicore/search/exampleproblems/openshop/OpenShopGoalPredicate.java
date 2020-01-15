@@ -1,8 +1,8 @@
 package ai.libs.jaicore.search.exampleproblems.openshop;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 
-public class OpenShopGoalPredicate implements NodeGoalTester<OpenShopState, String> {
+public class OpenShopGoalPredicate implements INodeGoalTester<OpenShopState, String> {
 
 	@Override
 	public boolean isGoal(final OpenShopState node) {

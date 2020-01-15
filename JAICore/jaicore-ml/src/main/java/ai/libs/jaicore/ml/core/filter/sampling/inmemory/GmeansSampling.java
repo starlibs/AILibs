@@ -1,14 +1,15 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
-import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
-import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 import ai.libs.jaicore.ml.clustering.learner.GMeans;
+import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
 
 /**
  * Implementation of a sampling method using gmeans-clustering. This algorithm
@@ -21,19 +22,25 @@ import ai.libs.jaicore.ml.clustering.learner.GMeans;
  * @author jnowack
  *
  */
-public class GmeansSampling<I extends ILabeledInstance & Clusterable, D extends ILabeledDataset<I>> extends ClusterSampling<I, D> {
+public class GmeansSampling<I extends IClusterableInstance, D extends ILabeledDataset<I>> extends ClusterSampling<I, D> {
 
 	public GmeansSampling(final long seed, final DistanceMeasure dist, final D input) {
 		super(seed, dist, input);
+		if (input.size() > 1000) {
+			throw new IllegalArgumentException("GMeans does not support datasets with more than 1000 points, because it has quadratic (non-interruptible) runtime.");
+		}
 	}
 
 	public GmeansSampling(final long seed, final D input) {
 		super(seed, input);
+		if (input.size() > 1000) {
+			throw new IllegalArgumentException("GMeans does not support datasets with more than 1000 points, because it has quadratic (non-interruptible) runtime.");
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
+	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
 		switch (this.getState()) {
 		case CREATED:
 			// Initialize variables
@@ -46,20 +53,14 @@ public class GmeansSampling<I extends ILabeledInstance & Clusterable, D extends 
 			if (this.clusterResults == null) {
 				// create cluster
 				GMeans<I> gMeansCluster = new GMeans<>(this.getInput(), this.distanceMeassure, this.seed);
-				this.clusterResults = gMeansCluster.cluster();
+				this.clusterResults = gMeansCluster.cluster(); // this is not interruptible!!
 			}
-
 			return this.activate();
 		case ACTIVE:
-			this.doAlgorithmStep();
-			break;
-		case INACTIVE:
-			this.doInactiveStep();
-			break;
+			return this.doAlgorithmStep();
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
-		return null;
 	}
 
 }

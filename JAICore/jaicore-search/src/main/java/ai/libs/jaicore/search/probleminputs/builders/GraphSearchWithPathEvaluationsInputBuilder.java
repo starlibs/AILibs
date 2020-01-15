@@ -1,11 +1,12 @@
 package ai.libs.jaicore.search.probleminputs.builders;
 
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class GraphSearchWithPathEvaluationsInputBuilder<N, A, V extends Comparable<V>> extends SearchProblemInputBuilder<N, A, GraphSearchWithPathEvaluationsInput<N, A, V>, GraphSearchWithPathEvaluationsInputBuilder<N, A, V>> {
+public class GraphSearchWithPathEvaluationsInputBuilder<N, A, V extends Comparable<V>> extends SearchProblemInputBuilder<N, A, IPathSearchWithPathEvaluationsInput<N, A, V>, GraphSearchWithPathEvaluationsInputBuilder<N, A, V>> {
 
 	private IPathEvaluator<N, A, V> pathEvaluator;
 
@@ -20,7 +21,7 @@ public class GraphSearchWithPathEvaluationsInputBuilder<N, A, V extends Comparab
 
 
 	@Override
-	public GraphSearchWithPathEvaluationsInputBuilder<N, A, V> fromProblem(final GraphSearchInput<N, A> problem) {
+	public GraphSearchWithPathEvaluationsInputBuilder<N, A, V> fromProblem(final IPathSearchInput<N, A> problem) {
 		super.fromProblem(problem);
 		if (problem instanceof GraphSearchWithPathEvaluationsInput) {
 			this.withPathEvaluator(((GraphSearchWithPathEvaluationsInput<N, A, V>) problem).getPathEvaluator());
@@ -38,7 +39,7 @@ public class GraphSearchWithPathEvaluationsInputBuilder<N, A, V extends Comparab
 	}
 
 	@Override
-	public GraphSearchWithPathEvaluationsInput<N, A, V> build() {
+	public IPathSearchWithPathEvaluationsInput<N, A, V> build() {
 		return new GraphSearchWithPathEvaluationsInput<>(this.getGraphGenerator(), this.getGoalTester(), this.pathEvaluator);
 	}
 

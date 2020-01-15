@@ -1,10 +1,13 @@
 package ai.libs.jaicore.ml.ranking.loss;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.OptionalDouble;
+import java.util.stream.IntStream;
 
-import org.api4.java.ai.ml.ranking.dataset.IRanking;
-import org.api4.java.ai.ml.ranking.loss.IRankingLossFunction;
+import org.api4.java.ai.ml.ranking.IRanking;
+import org.api4.java.ai.ml.ranking.loss.IRankingPredictionPerformanceMeasure;
 
 /**
  * The Normalized Discounted Cumulative Gain for ranking.
@@ -13,7 +16,7 @@ import org.api4.java.ai.ml.ranking.loss.IRankingLossFunction;
  * @author mwever
  *
  */
-public class NDCGLoss implements IRankingLossFunction {
+public class NDCGLoss extends ARankingPredictionPerformanceMeasure implements IRankingPredictionPerformanceMeasure {
 
 	/**
 	 * The position up to which to compute the cumulative gain (zero-indexed, exclusive).
@@ -27,6 +30,15 @@ public class NDCGLoss implements IRankingLossFunction {
 	public NDCGLoss(final int l) {
 		super();
 		this.setL(l);
+	}
+
+	@Override
+	public double loss(final List<? extends IRanking<?>> expected, final List<? extends IRanking<?>> actual) {
+		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.loss(expected.get(0), actual.get(0))).average();
+		if (res.isPresent()) {
+			return res.getAsDouble();
+		}
+		throw new IllegalStateException("Could not aggregate kendalls tau of top k");
 	}
 
 	@Override
@@ -49,9 +61,8 @@ public class NDCGLoss implements IRankingLossFunction {
 
 		if (dcg != 0) {
 			return idcg / dcg;
-		} else {
-			return 0;
 		}
+		return 0;
 	}
 
 	private double computeDCG(final IRanking<?> ranking, final Map<Object, Integer> relevance) {

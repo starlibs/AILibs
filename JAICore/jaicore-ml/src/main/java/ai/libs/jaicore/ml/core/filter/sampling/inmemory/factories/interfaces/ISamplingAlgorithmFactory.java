@@ -2,8 +2,7 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.dataset.IDataset;
 
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 
@@ -11,10 +10,9 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
  * Interface for a factory, which creates a sampling algorithm.
  *
  * @author Lukas Brandt
- * @param <I> Type of the dataset instances.
  * @param <A> Type of the sampling algorithm that will be created.
  */
-public interface ISamplingAlgorithmFactory<I extends ILabeledInstance, D extends ILabeledDataset<I>, A extends ASamplingAlgorithm<I, D>> {
+public interface ISamplingAlgorithmFactory<D extends IDataset<?>, A extends ASamplingAlgorithm<D>> {
 
 	/**
 	 * After the necessary config is done, this method returns a fully configured
@@ -26,5 +24,14 @@ public interface ISamplingAlgorithmFactory<I extends ILabeledInstance, D extends
 	 * @return Configured sampling algorithm object.
 	 */
 	public A getAlgorithm(int sampleSize, D inputDataset, Random random);
+
+
+	/**
+	 * After the necessary config is done, this method returns a fully configured
+	 * instance of a sampling algorithm.
+	 *
+	 * Here, it is assumed that random aspects or sample sizes have already been defined before
+	 **/
+	public A getAlgorithm(D inputDataset);
 
 }
