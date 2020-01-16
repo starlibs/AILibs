@@ -40,7 +40,6 @@ import ai.libs.jaicore.db.sql.MySQLQueryBuilder;
 @SuppressWarnings("serial")
 public class RestSqlAdapter implements IDatabaseAdapter {
 
-	private final IRestDatabaseConfig config;
 	private final ISQLQueryBuilder queryBuilder = new MySQLQueryBuilder();
 	private Logger logger = LoggerFactory.getLogger(RestSqlAdapter.class);
 	private final String host;
@@ -51,9 +50,8 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 	private final String updateSuffix;
 
 	public RestSqlAdapter(final IRestDatabaseConfig config) {
-		this.config = config;
-		this.host = (config != null && config.getHost() != null) ? config.getHost() : System.getenv("REST_SQL_HOST");
-		this.token = (config != null && config.getToken() != null) ? config.getToken() : System.getenv("REST_SQL_TOKEN");
+		this.host = config.getHost();
+		this.token = config.getToken();
 		this.querySuffix = config.getQuerySuffix();
 		this.selectSuffix = config.getSelectSuffix();
 		this.updateSuffix = config.getUpdateSuffix();

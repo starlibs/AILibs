@@ -84,7 +84,13 @@ public class Graph<T> implements Serializable {
 	}
 
 	public boolean hasItem(final T item) {
-		return this.successors.containsKey(item);
+		if (this.useForwardPointers) {
+			return this.successors.containsKey(item);
+		}
+		if (this.useBackPointers) {
+			return this.predecessors.containsKey(item);
+		}
+		throw new IllegalStateException("Graph must use forward pointers and/or backward pointers.");
 	}
 
 	public boolean hasEdge(final T from, final T to) {
@@ -105,17 +111,23 @@ public class Graph<T> implements Serializable {
 	}
 
 	public void removeItem(final T item) {
-		this.successors.remove(item);
+		if (this.useForwardPointers) {
+			this.successors.remove(item); // remove successors of this node
+			this.successors.forEach((k, v) -> v.remove(item)); // erase the node from successor lists
+		}
 		if (this.useBackPointers) {
-			for (T predecessor : this.getPredecessors(item)) {
-				this.removeEdge(predecessor, item);
-			}
+			this.predecessors.remove(item); // remove predecessors of this node
+			this.predecessors.forEach((k, v) -> v.remove(item)); // erase the node from predecessor lists
 		}
 	}
 
 	public void addEdge(final T from, final T to) {
-		this.checkNodeExistence(from);
-		this.checkNodeExistence(to);
+		if (!this.hasItem(from)) {
+			this.addItem(from);
+		}
+		if (!this.hasItem(to)) {
+			this.addItem(to);
+		}
 		if (this.useForwardPointers) {
 			this.successors.get(from).add(to);
 		}
@@ -137,6 +149,7 @@ public class Graph<T> implements Serializable {
 		this.checkNodeExistence(to);
 		this.successors.get(from).remove(to);
 		this.predecessors.get(to).remove(from);
+		System.out.println(this.predecessors);
 
 		/* update root if necessary */
 		if (from == this.root) {
@@ -151,16 +164,21 @@ public class Graph<T> implements Serializable {
 		if (!this.useForwardPointers) {
 			throw new UnsupportedOperationException();
 		}
-		this.checkNodeExistence(item);
-		return Collections.unmodifiableSet(this.successors.containsKey(item) ? this.successors.get(item) : new HashSet<>());
+
+		if (!this.successors.containsKey(item)) {
+			throw new IllegalStateException("No predecessor map defined for node " + item);
+		}
+		return Collections.unmodifiableSet(this.successors.get(item));
 	}
 
 	public Set<T> getPredecessors(final T item) {
 		if (!this.useBackPointers) {
 			throw new UnsupportedOperationException();
 		}
-		this.checkNodeExistence(item);
-		return Collections.unmodifiableSet(this.predecessors.containsKey(item) ? this.predecessors.get(item) : new HashSet<>());
+		if (!this.predecessors.containsKey(item)) {
+			throw new IllegalStateException("No predecessor map defined for node " + item);
+		}
+		return Collections.unmodifiableSet(this.predecessors.get(item));
 	}
 
 	private void checkNodeExistence(final T item) {

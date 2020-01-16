@@ -23,6 +23,7 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.common.event.IEventEmitter;
 import org.api4.java.datastructure.graph.ILabeledPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.ILazySuccessorGenerator;
 import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 import org.api4.java.datastructure.graph.implicit.IRootGenerator;
 import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
@@ -40,7 +41,6 @@ import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
-import ai.libs.jaicore.search.core.interfaces.LazySuccessorGenerator;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
@@ -64,7 +64,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 	protected final ISuccessorGenerator<N, A> successorGenerator;
 	protected final IPathGoalTester<N, A> goalTester;
 	protected final boolean useLazySuccessorGeneration;
-	protected final Map<N, LazySuccessorGenerator<N, A>> lazySuccessorGenerators;
+	protected final Map<N, ILazySuccessorGenerator<N, A>> lazySuccessorGenerators;
 
 	protected final IPathUpdatablePolicy<N, A, V> treePolicy;
 	protected final IPolicy<N, A, V> defaultPolicy;
@@ -77,7 +77,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 	private final Collection<N> unexpandedNodes = new HashSet<>();
 	protected final LabeledGraph<N, A> exploredGraph;
 	private final Collection<N> fullyExploredNodes = new HashSet<>(); // set of nodes under which the tree is completely known
-	//	private final Collection<N> deadLeafNodes = new HashSet<>();
+	private final Collection<N> deadLeafNodes = new HashSet<>();
 	private final V penaltyForFailedEvaluation;
 
 	private int numberOfPlayouts = 0;
@@ -105,7 +105,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 		this.penaltyForFailedEvaluation = penaltyForFailedEvaluation;
 
 		/* configure lazy successor generators */
-		this.useLazySuccessorGeneration = this.successorGenerator instanceof LazySuccessorGenerator;
+		this.useLazySuccessorGeneration = this.successorGenerator instanceof ILazySuccessorGenerator;
 		this.lazySuccessorGenerators = this.useLazySuccessorGeneration ? new HashMap<>() : null;
 
 		/* configure the policies */
@@ -190,14 +190,14 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 			List<A> availableActions = new ArrayList<>();
 			Map<A, N> successorStates = new HashMap<>();
 			for (N child : childrenOfCurrent) {
-				//				if (this.deadLeafNodes.contains(child)) {
-				//					this.logger.trace("Ignoring child {}, which is known to be a dead end", child);
-				//					continue;
-				//				} else
-				if (this.fullyExploredNodes.contains(child)) {
-					this.logger.trace("Ignoring child {}, which has been fully explored.", child);
+				if (this.deadLeafNodes.contains(child)) {
+					this.logger.trace("Ignoring child {}, which is known to be a dead end", child);
 					continue;
-				}
+				} else
+					if (this.fullyExploredNodes.contains(child)) {
+						this.logger.trace("Ignoring child {}, which has been fully explored.", child);
+						continue;
+					}
 				A action = this.exploredGraph.getEdgeLabel(current, child);
 				if (action == null) {
 					throw new IllegalStateException("MCTS does not accept NULL edge labels!");
@@ -220,7 +220,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 					this.logger.info("No more action available in root node. Throwing exception.");
 					throw new NoSuchElementException();
 				}
-				//				this.deadLeafNodes.add(current);
+				this.deadLeafNodes.add(current);
 				return this.getPlayout();
 			}
 
@@ -268,7 +268,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 		+ " successors and all of them have been considered in at least one playout. In spite of this, the tree policy has not been used to choose a child, but it should have been used.";
 
 		/* if the current node has at least one child, all child nodes must have been marked as dead ends */
-		//		assert childrenOfCurrent == null || SetUtil.differenceNotEmpty(childrenOfCurrent, this.deadLeafNodes) : "Flag that current node is dead end is set, but there are successors that are not yet marked as dead-ends.";
+		assert childrenOfCurrent == null || SetUtil.differenceNotEmpty(childrenOfCurrent, this.deadLeafNodes) : "Flag that current node is dead end is set, but there are successors that are not yet marked as dead-ends.";
 		this.logger.debug("Determined non-fully-expanded node {} of traversal tree using tree policy. Untried successors are: {}. Now selecting an untried successor.", current,
 				childrenOfCurrent != null ? SetUtil.difference(childrenOfCurrent, this.visitedNodes) : "<not generated>");
 
@@ -283,7 +283,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 			this.logger.trace("Step 2: This is the first time we visit this node, so compute its successors and add them to explicit graph model.");
 			untriedActionsAndTheirSuccessors.putAll(this.expandNode(current, true));
 			if (untriedActionsAndTheirSuccessors.isEmpty()) {
-				System.out.println("FOUND LEAF");
+				this.logger.debug("Found a leaf with the tree policy.");
 			}
 		} else {
 			for (N child : SetUtil.difference(childrenOfCurrent, this.visitedNodes)) {
@@ -312,7 +312,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 			assert this.exploredGraph.hasPath(pathNodes) : "The current path is not in the explored graph after having added the latest edge: " + pathNodes.stream().map(n -> "\n\t" + n).collect(Collectors.joining());
 			this.logger.debug("Selected {} as the untried action with successor state {}. Now completing rest playout from this situation.", chosenAction, current);
 		} else {
-			//			this.deadLeafNodes.add(current);
+			this.deadLeafNodes.add(current);
 			this.logger.debug("Found leaf node {}. Adding to dead end list.", current);
 			return this.getPlayout();
 		}
@@ -322,34 +322,19 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 		 */
 		this.logger.debug("Step 3: Using default policy to create full path under {}.", current);
 		while (!this.goalTester.isGoal(path)) {
-			// assert this.exploredGraph.hasPath(pathNodes) : "The current path is not in the explored graph: " + pathNodes.stream().map(n -> "\n\t\t" + n).collect(Collectors.joining()) + "\nThe missing edge is the one leaving from: \n\t\t"
-			// + pathNodes.stream().filter(n -> !this.exploredGraph.hasEdge(n, pathNodes.get(pathNodes.indexOf(n) + 1))).findFirst().get();
-			// assert this.unexpandedNodes.contains(current);
 			this.checkAndConductTermination();
 
-			//			Map<A, N> actionsAndTheirSuccessorStates = new HashMap<>();
-			//			this.logger.trace("Determining possible moves for {}.", current);
-			//
-			//			actionsAndTheirSuccessorStates.putAll(this.expandNode(current, false));
-			//
-			//			/* if the default policy has led us into a state where we cannot do anything, stop playout */
-			//			if (actionsAndTheirSuccessorStates.isEmpty()) {
-			//				// this.deadLeafNodes.add(current);
-			//				// this.propagateFullyKnownNodes(current);
-			//				return new SearchGraphPath<>(pathNodes, pathActions);
-			//			}
+			Map<A, N> actionsAndTheirSuccessorStates = new HashMap<>();
+			this.logger.trace("Determining possible moves for {}.", current);
+			actionsAndTheirSuccessorStates.putAll(this.expandNode(current, false));
 
-			/* instead of using the default policy, we only generate one successor right away (which SHOULD be random but is not here) */
+			/* if the default policy has led us into a state where we cannot do anything, stop playout */
+			if (actionsAndTheirSuccessorStates.isEmpty()) {
+				return new SearchGraphPath<>(pathNodes, pathActions);
+			}
 			try {
-				INewNodeDescription<N, A> ed;
-				if (this.successorGenerator instanceof LazySuccessorGenerator) {
-					ed = ((LazySuccessorGenerator<N,A>)this.successorGenerator).getRandomSuccessor(current, this.random);
-				}
-				else {
-					ed = SetUtil.getRandomElement(this.successorGenerator.generateSuccessors(current), this.random.nextLong());
-				}
-				A chosenAction = ed.getArcLabel();
-				current = ed.getTo();
+				A chosenAction = SetUtil.getRandomElement(actionsAndTheirSuccessorStates.keySet(), this.random.nextLong());
+				current = actionsAndTheirSuccessorStates.get(chosenAction);
 
 				if (!this.goalTester.isGoal(path)) {
 					this.post(new NodeTypeSwitchEvent<>(this, current, NODESTATE_ROLLOUT));
@@ -359,8 +344,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 				this.logger.debug("Step 3: Default policy chose action {} with successor node {}", chosenAction, current);
 			}
 			catch (NoSuchElementException e) {
-				System.err.println("Node " + current + " does not have any successors even though it is not a goal!");
-				System.exit(1);
+				this.logger.error("Node {} does not have any successors even though it is not a goal!", current);
 			}
 		}
 		this.checkThatPathIsSolution(path);
@@ -514,7 +498,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 						ILabeledPath<N, A> path = this.getPlayout();
 						ILabeledPath<N, A> subPathToLatestRegistered = this.getSubPathUpToDeepestRegisteredNode(path); // we back-propagate the observations only to nodes contained in the current model for the tree-policy
 						assert path != null : "The playout must never be null!";
-						assert this.exploredGraph.hasPath(path.getNodes()) : "Invalid playout, path not contained in explored graph!";
+						assert this.exploredGraph.hasPath(subPathToLatestRegistered.getNodes()) : "Invalid playout, path not contained in explored graph!";
 						if (!this.scoreCache.containsKey(path)) {
 							this.logger.debug("Obtained path {}. Now starting computation of the score for this playout.", path);
 							try {

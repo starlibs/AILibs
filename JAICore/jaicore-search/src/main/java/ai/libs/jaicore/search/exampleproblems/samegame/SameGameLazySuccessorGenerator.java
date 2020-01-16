@@ -8,51 +8,22 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import org.api4.java.common.control.IRandomConfigurable;
+import org.api4.java.datastructure.graph.implicit.ILazySuccessorGenerator;
 import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 
 import ai.libs.jaicore.problems.samegame.SameGameCell;
 import ai.libs.jaicore.problems.samegame.SameGameState;
-import ai.libs.jaicore.search.core.interfaces.LazySuccessorGenerator;
 import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
-public class SameGameLazySuccessorGenerator implements LazySuccessorGenerator<SameGameNode, SameGameCell> {
+public class SameGameLazySuccessorGenerator implements ILazySuccessorGenerator<SameGameNode, SameGameCell>, IRandomConfigurable {
 
-	// List<NodeExpansionDescription<SameGameNode, SameGameCell>> succ = new ArrayList<>();
-	// if (!n.isKeepInMemory()) {
-	// if (n.getState() != null) {
-	// throw new IllegalStateException("The state of the expanded node should not be there (for memory efficiency)!");
-	// }
-	// n.recoverGenes(); // create state again
-	// }
-	// SameGameState state = n.getState();
-	// if (state == null) {
-	// throw new IllegalStateException("Gene recover failed!");
-	// }
-	// int i = 0;
-	// for (Collection<SameGameCell> block : state.getBlocksOfPieces()) {
-	// if (block.size() > 1) {
-	// SameGameCell move = block.iterator().next();
-	// this.logger.debug("Considering move {} representing block {}", move, block);
-	// succ.add(new NodeExpansionDescription<>(new SameGameNode(n, move), move, NodeType.OR));
-	// i++;
-	// }
-	// }
-	// if (succ.size() != i) {
-	// throw new IllegalStateException();
-	// }
-	//
-	// /* erase state again */
-	// if (!n.isKeepInMemory()) {
-	// n.eraseGenes();
-	// if (n.getState() != null) {
-	// throw new IllegalStateException("Erasure failed!");
-	// }
-	// }
-	//
+	private Random random = new Random(0);
+
 	@Override
 	public List<INewNodeDescription<SameGameNode, SameGameCell>> generateSuccessors(final SameGameNode node) throws InterruptedException {
 		List<INewNodeDescription<SameGameNode, SameGameCell>> succ = new ArrayList<>();
-		Iterator<INewNodeDescription<SameGameNode, SameGameCell>> it = this.getSuccessorIterator(node);
+		Iterator<INewNodeDescription<SameGameNode, SameGameCell>> it = this.getIterativeGenerator(node);
 		while (it.hasNext()) {
 			succ.add(it.next());
 		}
@@ -60,7 +31,7 @@ public class SameGameLazySuccessorGenerator implements LazySuccessorGenerator<Sa
 	}
 
 	@Override
-	public Iterator<INewNodeDescription<SameGameNode, SameGameCell>> getSuccessorIterator(final SameGameNode n) {
+	public Iterator<INewNodeDescription<SameGameNode, SameGameCell>> getIterativeGenerator(final SameGameNode n) {
 
 		return new Iterator<INewNodeDescription<SameGameNode, SameGameCell>>() {
 
@@ -101,8 +72,7 @@ public class SameGameLazySuccessorGenerator implements LazySuccessorGenerator<Sa
 		};
 	}
 
-	@Override
-	public NodeExpansionDescription<SameGameNode, SameGameCell> getRandomSuccessor(final SameGameNode node, final Random random) {
+	public INewNodeDescription<SameGameNode, SameGameCell> getRandomSuccessor(final SameGameNode node) {
 		if (node.getState() == null) {
 			node.recoverGenes();
 		}
@@ -112,8 +82,8 @@ public class SameGameLazySuccessorGenerator implements LazySuccessorGenerator<Sa
 		int numRows = state.getNumRows();
 		int numCols = state.getNumCols();
 		do {
-			row = (byte)random.nextInt(numRows);
-			col = (byte)random.nextInt(numCols);
+			row = (byte)this.random.nextInt(numRows);
+			col = (byte)this.random.nextInt(numCols);
 		}
 		while (!state.canCellBeSelected(row, col));
 
@@ -124,5 +94,10 @@ public class SameGameLazySuccessorGenerator implements LazySuccessorGenerator<Sa
 			node.eraseGenes();
 		}
 		return new NodeExpansionDescription<>(succ, cell);
+	}
+
+	@Override
+	public void setRandom(final Random random) {
+		this.random = random;
 	}
 }

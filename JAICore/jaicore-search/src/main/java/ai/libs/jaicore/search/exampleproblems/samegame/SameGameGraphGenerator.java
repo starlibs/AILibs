@@ -3,13 +3,13 @@ package ai.libs.jaicore.search.exampleproblems.samegame;
 
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.ILazySuccessorGenerator;
 import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.problems.samegame.SameGameCell;
 import ai.libs.jaicore.problems.samegame.SameGameState;
-import ai.libs.jaicore.search.core.interfaces.LazySuccessorGenerator;
 
 public class SameGameGraphGenerator implements IGraphGenerator<SameGameNode, SameGameCell>, ILoggingCustomizable {
 
@@ -29,7 +29,7 @@ public class SameGameGraphGenerator implements IGraphGenerator<SameGameNode, Sam
 	}
 
 	@Override
-	public LazySuccessorGenerator<SameGameNode, SameGameCell> getSuccessorGenerator() {
+	public ILazySuccessorGenerator<SameGameNode, SameGameCell> getSuccessorGenerator() {
 		return new SameGameLazySuccessorGenerator();
 	}
 
