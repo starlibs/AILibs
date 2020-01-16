@@ -54,7 +54,7 @@ public class MetaMLPlan extends AbstractClassifier {
 	private String algorithmId = "MetaMLPlan";
 
 	// Search components
-	private transient BestFirstLimitedDiscrepancySearch<TFDNode, String, NodeOrderList> lds;
+	private transient BestFirstLimitedDiscrepancySearch<GraphSearchWithNodeRecommenderInput<TFDNode, String>, TFDNode, String, NodeOrderList> lds;
 	private transient WEKAMetaminer metaMiner;
 	private transient WekaPipelineFactory factory = new WekaPipelineFactory();
 
@@ -90,7 +90,7 @@ public class MetaMLPlan extends AbstractClassifier {
 		this.metaMiner = new WEKAMetaminer(builder.getComponentParameterConfigurations());
 
 		// Get lds
-		BestFirstLimitedDiscrepancySearchFactory<TFDNode, String, NodeOrderList> ldsFactory = new BestFirstLimitedDiscrepancySearchFactory<>();
+		BestFirstLimitedDiscrepancySearchFactory<GraphSearchWithNodeRecommenderInput<TFDNode, String>, TFDNode, String, NodeOrderList> ldsFactory = new BestFirstLimitedDiscrepancySearchFactory<>();
 		IPathSearchInput<TFDNode, String> originalInput = mlPlan.getSearchProblemInputGenerator();
 		GraphSearchWithNodeRecommenderInput<TFDNode, String> problemInput = new GraphSearchWithNodeRecommenderInput<>(new ReducedGraphGenerator<>(originalInput.getGraphGenerator()), originalInput.getGoalTester(),
 				new MetaMinerBasedSorter(this.metaMiner, builder.getComponents()));
