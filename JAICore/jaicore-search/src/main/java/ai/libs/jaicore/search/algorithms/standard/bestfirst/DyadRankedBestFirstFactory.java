@@ -35,7 +35,7 @@ public class DyadRankedBestFirstFactory<N, A, V extends Comparable<V>> extends S
 	public BestFirst<GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V> getAlgorithm() {
 		// Replace graph generator in problem
 		this.setProblemInput(new GraphSearchWithSubpathEvaluationsInput<>(
-				new ReducedGraphGenerator<>(this.getInput().getGraphGenerator()), this.getInput().getGoalTester(), this.getInput().getNodeEvaluator()));
+				new ReducedGraphGenerator<>(this.getInput().getGraphGenerator()), this.getInput().getGoalTester(), this.getInput().getPathEvaluator()));
 
 		// Configure and return best first
 		BestFirst<GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V> bestFirst = super.getAlgorithm();

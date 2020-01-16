@@ -77,7 +77,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<N, A
 		this.rootNodeGenerator = (ISingleRootGenerator<N>) problem.getGraphGenerator().getRootGenerator();
 		this.successorGenerator = problem.getGraphGenerator().getSuccessorGenerator();
 		this.goalTester = problem.getGoalTester();
-		this.nodeEvaluator = problem.getNodeEvaluator();
+		this.nodeEvaluator = problem.getPathEvaluator();
 
 		this.closedList = new PriorityQueue<>(new DefaultNodeComparator<>());
 		this.suspendList = new PriorityQueue<>(new DefaultNodeComparator<>());

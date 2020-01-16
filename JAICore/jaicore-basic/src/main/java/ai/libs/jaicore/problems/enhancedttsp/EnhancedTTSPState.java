@@ -2,6 +2,7 @@ package ai.libs.jaicore.problems.enhancedttsp;
 
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortList;
+import it.unimi.dsi.fastutil.shorts.ShortLists;
 
 public class EnhancedTTSPState {
 	private final EnhancedTTSPState parent;
@@ -38,13 +39,17 @@ public class EnhancedTTSPState {
 		return this.timeTraveledSinceLastLongBreak;
 	}
 
-	public ShortList getCurTour() {
+	private ShortList getCurTourRec() {
 		if (this.parent == null) {
 			return new ShortArrayList(); // the starting location will NOT be part of the tour!
 		}
-		ShortList l = this.parent.getCurTour();
+		ShortList l = this.parent.getCurTourRec();
 		l.add(this.curLocation);
 		return l;
+	}
+
+	public ShortList getCurTour() {
+		return ShortLists.unmodifiable(this.getCurTourRec());
 	}
 
 	@Override

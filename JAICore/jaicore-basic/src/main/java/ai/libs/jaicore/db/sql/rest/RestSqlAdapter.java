@@ -44,6 +44,7 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 	private final ISQLQueryBuilder queryBuilder = new MySQLQueryBuilder();
 	private Logger logger = LoggerFactory.getLogger(RestSqlAdapter.class);
 	private final String host;
+	private final String token;
 	private final String querySuffix;
 	private final String selectSuffix;
 	private final String insertSuffix;
@@ -51,7 +52,8 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 
 	public RestSqlAdapter(final IRestDatabaseConfig config) {
 		this.config = config;
-		this.host = this.config.getHost();
+		this.host = (config != null && config.getHost() != null) ? config.getHost() : System.getenv("REST_SQL_HOST");
+		this.token = (config != null && config.getToken() != null) ? config.getToken() : System.getenv("REST_SQL_TOKEN");
 		this.querySuffix = config.getQuerySuffix();
 		this.selectSuffix = config.getSelectSuffix();
 		this.updateSuffix = config.getUpdateSuffix();
@@ -106,7 +108,7 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			ObjectMapper mapper = new ObjectMapper();
 			ObjectNode root = mapper.createObjectNode();
-			root.set("token", root.textNode(this.config.getToken()));
+			root.set("token", root.textNode(this.token));
 			root.set("query", root.textNode(query));
 			String jsonPayload = mapper.writeValueAsString(root);
 			StringEntity requestEntity = new StringEntity(jsonPayload, ContentType.APPLICATION_JSON);

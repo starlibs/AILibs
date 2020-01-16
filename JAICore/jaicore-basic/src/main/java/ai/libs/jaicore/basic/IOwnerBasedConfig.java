@@ -70,11 +70,15 @@ public interface IOwnerBasedConfig extends Mutable, IConfig {
 	@Override
 	default IOwnerBasedConfig loadPropertiesFromList(final List<String> propertiesList) {
 		for (String line : propertiesList) {
+			line = line.trim();
 			if (!line.contains("=") || line.startsWith("#")) {
 				continue;
 			}
 			String[] split = line.split("=");
-			this.setProperty(split[0].trim(), split[1].trim());
+			if (split.length > 2) {
+				throw new IllegalArgumentException("Property line " + line + " contains more than one \"=\" symbol and cannot be parsed.");
+			}
+			this.setProperty(split[0].trim(), split.length > 1 ? split[1].trim() : null);
 		}
 		return this;
 	}

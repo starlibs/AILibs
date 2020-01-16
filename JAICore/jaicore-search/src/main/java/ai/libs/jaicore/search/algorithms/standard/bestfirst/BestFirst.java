@@ -148,6 +148,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 
 		/* if the node evaluator is graph dependent, communicate the generator to it */
 		this.nodeEvaluator = problem.getPathEvaluator();
+		this.logger.info("Configuring node evaluator of type {}: {}", this.nodeEvaluator.getClass().getName(), this.nodeEvaluator);
 		if (this.nodeEvaluator == null) {
 			throw new IllegalArgumentException("Cannot work with node evaulator that is null");
 		} else if (this.nodeEvaluator instanceof DecoratingNodeEvaluator<?, ?, ?>) {

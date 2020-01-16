@@ -31,7 +31,7 @@ public class BestFirstSearchRuntimeTest {
 	public static Collection<Object[]> data() {
 		List<Object> problemSets = new ArrayList<>();
 		NQueensToGraphSearchReducer nQueensReducer = new NQueensToGraphSearchReducer();
-		for (int i = 7; i <= 10; i++) {
+		for (int i = 2; i <= 10; i++) {
 			problemSets.add(nQueensReducer.encodeProblem(new NQueensProblem(i)));
 		}
 
@@ -60,8 +60,8 @@ public class BestFirstSearchRuntimeTest {
 		int runtime = (int) (System.currentTimeMillis() - start);
 		double expansionsPerSecond = MathExt.round(bf.getExpandedCounter() / (runtime / 1000f), 2);
 		double creationsPerSecond = MathExt.round(bf.getCreatedCounter() / (runtime / 1000f), 2);
-		assertTrue("Only achieved " + expansionsPerSecond + " but 1000 were required.", expansionsPerSecond > 1000);
-		assertTrue(creationsPerSecond > 1000);
+		assertTrue("Only achieved " + expansionsPerSecond + " but 1000 were required. Total runtime was " + runtime + " for " + bf.getExpandedCounter() + " expansions.", runtime < 1000 || (expansionsPerSecond > 1000));
+		assertTrue(runtime < 1000 || creationsPerSecond > 1000);
 		System.out.println("Needed " + runtime + "ms to identify " + bf.getSolutionQueue().size() + " solutions. Expanded " + bf.getExpandedCounter() + "/" + bf.getCreatedCounter() + " created nodes. This corresponds to "
 				+ expansionsPerSecond + " expansions and " + creationsPerSecond + " creations per second.");
 	}

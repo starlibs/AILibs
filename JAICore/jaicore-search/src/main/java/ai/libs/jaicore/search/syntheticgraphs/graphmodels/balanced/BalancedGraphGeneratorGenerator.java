@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.IntStream;
 
@@ -19,32 +20,46 @@ import ai.libs.jaicore.basic.MappingIterator;
 import ai.libs.jaicore.search.model.NodeExpansionDescription;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 
-class BalancedGraphGeneratorGenerator {
+public class BalancedGraphGeneratorGenerator {
 
 	private final int branchingFactor;
 	private final int maxDepth;
 
-	public int getNumberOfLeafsUnderANonTerminalNodeInDepth(final int depthOfRequestedNode, final int assumedDepthOfTree) {
-		return (int)Math.pow(this.branchingFactor, assumedDepthOfTree - depthOfRequestedNode);
+	public static int getNumberOfLeafsUnderANonTerminalNodeInDepth(final int depthOfRequestedNode, final int branchingFactor, final int assumedDepthOfTree) {
+		return (int)Math.pow(branchingFactor, assumedDepthOfTree - depthOfRequestedNode);
 	}
 
-	public BigInteger getNumberOfMaxSubtreesOfMaxLengthUnderNonTerminalNodeInDepth(final int depth, final BigInteger maxNumberOfNodes) {
+	public static BigInteger getNumberOfMaxSubtreesOfMaxLengthUnderNonTerminalNodeInDepth(final int depth, final BigInteger maxNumberOfNodes, final int branchingFactor, final int maxDepth) {
+		if (depth >= maxDepth) {
+			throw new IllegalArgumentException("A node in depth " + depth + " in a graph with max depth " + maxDepth + " cannot be an inner nodee!");
+		}
 
 		/* determine possible height */
 		int height = 0;
 		BigInteger numberOfNodesForHeight = BigInteger.ONE;
-		while (numberOfNodesForHeight.compareTo(maxNumberOfNodes) < 0) {
+		while (numberOfNodesForHeight.compareTo(maxNumberOfNodes) <= 0 && height < maxDepth) {
 			height ++;
-			numberOfNodesForHeight = BigInteger.valueOf(BalancedGraphGeneratorGenerator.this.branchingFactor).pow(height);
+			numberOfNodesForHeight = BigInteger.valueOf(branchingFactor).pow(height);
 		}
 		height --;
-		int missingLayers = BalancedGraphGeneratorGenerator.this.maxDepth - depth;
-		return BigInteger.valueOf(BalancedGraphGeneratorGenerator.this.branchingFactor).pow(missingLayers - height);
+		int missingLayers = maxDepth - depth;
+		return BigInteger.valueOf(branchingFactor).pow(missingLayers - height);
 	}
 
+	public BigInteger getNumberOfMaxSubtreesOfMaxLengthUnderNonTerminalNodeInDepth(final int depth, final BigInteger maxNumberOfNodes) {
+		return getNumberOfMaxSubtreesOfMaxLengthUnderNonTerminalNodeInDepth(depth, maxNumberOfNodes, this.branchingFactor, this.maxDepth);
+	}
+
+
 	public class BalancedTreeNode implements ITransparentTreeNode {
-		int depth;
-		BigInteger idOfNodeOnLayer;
+		final int depth;
+		final BigInteger idOfNodeOnLayer;
+
+		public BalancedTreeNode(final int depth, final BigInteger idOfNodeOnLayer) {
+			super();
+			this.depth = depth;
+			this.idOfNodeOnLayer = idOfNodeOnLayer;
+		}
 
 		@Override
 		public int hashCode() {
@@ -131,7 +146,7 @@ class BalancedGraphGeneratorGenerator {
 
 		@Override
 		public BigInteger getNumberOfSubtreesWithMaxNumberOfNodesPriorToThisNode(final BigInteger maxNumberOfNodes) {
-			throw new UnsupportedOperationException();
+			return this.getNumberOfLeafsPriorToNodeViaDFS().divideAndRemainder(maxNumberOfNodes)[0]; // here we can exploit the special structure of the balanced tree
 		}
 
 		@Override
@@ -141,7 +156,12 @@ class BalancedGraphGeneratorGenerator {
 
 		@Override
 		public BigInteger getNumberOfLeafsPriorToNodeViaDFS() {
-			throw new UnsupportedOperationException();
+			if (this.depth == BalancedGraphGeneratorGenerator.this.maxDepth) {
+				return this.getNumberOfLeftRelativesInSameGeneration();
+			}
+			else {
+				return this.getNumberOfLeftRelativesInSameGeneration().multiply(BigInteger.valueOf(BalancedGraphGeneratorGenerator.getNumberOfLeafsUnderANonTerminalNodeInDepth(this.depth, BalancedGraphGeneratorGenerator.this.branchingFactor, BalancedGraphGeneratorGenerator.this.maxDepth)));
+			}
 		}
 
 		@Override
@@ -170,7 +190,7 @@ class BalancedGraphGeneratorGenerator {
 
 			@Override
 			public ISingleRootGenerator<ITransparentTreeNode> getRootGenerator() {
-				return BalancedTreeNode::new;
+				return () -> new BalancedTreeNode(0, BigInteger.ZERO);
 			}
 
 			@Override
@@ -195,10 +215,10 @@ class BalancedGraphGeneratorGenerator {
 					public NodeExpansionDescription<ITransparentTreeNode, Integer> generateSuccessor(final ITransparentTreeNode node, final int i) {
 						int j = i % BalancedGraphGeneratorGenerator.this.branchingFactor;
 						int d = node.getDepth() + 1;
-						BigInteger offsetForIdOnLayer = BigInteger.valueOf(BalancedGraphGeneratorGenerator.this.branchingFactor).multiply(node.getNumberOfLeftRelativesInSameGeneration());
-						BalancedTreeNode successor = new BalancedTreeNode();
-						successor.depth = d;
-						successor.idOfNodeOnLayer = offsetForIdOnLayer.add(BigInteger.valueOf(j));
+						BigInteger leftRelativesInGenerationOfNode = node.getNumberOfLeftRelativesInSameGeneration();
+						Objects.requireNonNull(leftRelativesInGenerationOfNode);
+						BigInteger offsetForIdOnLayer = BigInteger.valueOf(BalancedGraphGeneratorGenerator.this.branchingFactor).multiply(leftRelativesInGenerationOfNode);
+						BalancedTreeNode successor = new BalancedTreeNode(d, offsetForIdOnLayer.add(BigInteger.valueOf(j)));
 						this.successors.computeIfAbsent(node, n -> new HashSet<>()).add(j);
 						return new NodeExpansionDescription<>(successor, j);
 					}

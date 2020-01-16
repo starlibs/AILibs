@@ -1,4 +1,4 @@
-package ai.libs.jaicore.search.exampleproblemtesters;
+package ai.libs.jaicore.search.testproblems.nqueens;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

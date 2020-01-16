@@ -22,13 +22,15 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDFactory;
+import ai.libs.hasco.variants.forwarddecomposition.twophase.HASCOWithRandomCompletionsConfig;
 import ai.libs.jaicore.basic.FileUtil;
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
+import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
@@ -95,7 +97,6 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 
 	/* The problem input for ML-Plan. */
 	private ILabeledDataset<?> dataset;
-	private double portionOfDataReservedForSelection = 0.3;
 
 	protected AbstractMLPlanBuilder() {
 		super();
@@ -242,7 +243,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 * @return The builder object.
 	 */
 	public B withTimeOut(final Timeout timeout) {
-		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_TIMEOUT, timeout.milliseconds() + "");
+		this.algorithmConfig.setProperty(IOwnerBasedAlgorithmConfig.K_TIMEOUT, timeout.milliseconds() + "");
 		this.update();
 		return this.getSelf();
 	}
@@ -259,7 +260,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 * @return The builder object.
 	 */
 	public B withNodeEvaluationTimeOut(final Timeout timeout) {
-		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, timeout.milliseconds() + "");
+		this.algorithmConfig.setProperty(HASCOWithRandomCompletionsConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, timeout.milliseconds() + "");
 		this.update();
 		return this.getSelf();
 	}
@@ -276,7 +277,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 * @return The builder object.
 	 */
 	public B withCandidateEvaluationTimeOut(final Timeout timeout) {
-		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, timeout.milliseconds() + "");
+		this.algorithmConfig.setProperty(HASCOWithRandomCompletionsConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, timeout.milliseconds() + "");
 		this.update();
 		return this.getSelf();
 	}
@@ -345,13 +346,13 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 * @return The builder object.
 	 */
 	public B withNumCpus(final int numCpus) {
-		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_CPUS, numCpus + "");
+		this.algorithmConfig.setProperty(IOwnerBasedAlgorithmConfig.K_CPUS, numCpus + "");
 		this.update();
 		return this.getSelf();
 	}
 
 	public B withSeed(final long seed) {
-		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_SEED, seed + "");
+		this.algorithmConfig.setProperty(IOwnerBasedRandomConfig.K_SEED, seed + "");
 		this.update();
 		return this.getSelf();
 	}
@@ -363,9 +364,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		return this.factoryForPipelineEvaluationInSelectionPhase;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public HASCOFactory getHASCOFactory() {
+	public HASCOViaFDFactory getHASCOFactory() {
 		return this.hascoFactory;
 	}
 

@@ -4,6 +4,8 @@ import java.math.BigInteger;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.datastructure.graph.ILabeledPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 
@@ -15,6 +17,7 @@ import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
  */
 public class LinearTreasureModel implements ITreasureModel {
 
+	private Logger logger = LoggerFactory.getLogger(LinearTreasureModel.class);
 	private final boolean asc;
 
 	public LinearTreasureModel() {
@@ -35,6 +38,16 @@ public class LinearTreasureModel implements ITreasureModel {
 	@Override
 	public double getMinimumAchievable() {
 		return 0;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 
 }

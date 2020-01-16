@@ -87,8 +87,8 @@ public class RStar<I extends GraphSearchWithNumberBasedAdditivePathEvaluationAnd
 	 */
 	public RStar(final I problem, final double w, final int k, final double delta) {
 		super(problem);
-		this.h = ((GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getNodeEvaluator()).getH();
-		this.hPath = ((GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer<T, A>) this.getInput().getNodeEvaluator()).gethPath();
+		this.h = ((GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getPathEvaluator()).getH();
+		this.hPath = ((GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer<T, A>) this.getInput().getPathEvaluator()).gethPath();
 		this.w = w;
 		this.k = k;
 		this.metricOverStates = this.getInput().getMetricOverStates();
@@ -128,7 +128,7 @@ public class RStar<I extends GraphSearchWithNumberBasedAdditivePathEvaluationAnd
 			throw new IllegalArgumentException("Can only re-evaluate nodes that have a parent!");
 		}
 		IPathSearchInput<T, A> subProblem = new GraphSearchInput<>(new SubPathGraphGenerator<>(this.getInput().getGraphGenerator(), n.getParent().getHead()), c -> c.equals(n.getHead()));
-		AStar<T, A> astar = new AStar<>(new GraphSearchWithNumberBasedAdditivePathEvaluation<>(subProblem, (GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getNodeEvaluator()));
+		AStar<T, A> astar = new AStar<>(new GraphSearchWithNumberBasedAdditivePathEvaluation<>(subProblem, (GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getPathEvaluator()));
 		astar.setLoggerName(this.getLoggerName() + ".astar");
 		astar.setTimeout(new Timeout(this.getRemainingTimeToDeadline().milliseconds(), TimeUnit.MILLISECONDS));
 		this.logger.trace("Invoking AStar with root {} and only goal node {}", n.getParent().getHead(), n.getHead());

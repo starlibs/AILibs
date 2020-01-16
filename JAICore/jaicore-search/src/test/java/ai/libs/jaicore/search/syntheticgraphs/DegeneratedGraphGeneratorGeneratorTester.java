@@ -16,6 +16,7 @@ import java.util.Set;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -23,7 +24,6 @@ import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.degenerated.DegeneratedGraphSearchProblem;
 
@@ -32,6 +32,7 @@ public class DegeneratedGraphGeneratorGeneratorTester {
 
 	private final int branchingFactor;
 	private final int depth;
+	private DegeneratedGraphSearchProblem input;
 
 	public DegeneratedGraphGeneratorGeneratorTester(final int branchingFactor, final int depth) {
 		super();
@@ -59,6 +60,12 @@ public class DegeneratedGraphGeneratorGeneratorTester {
 		return Arrays.asList(data);
 	}
 
+	@Before
+	public void setupTest() {
+		int numDeadEnds = this.branchingFactor / 2;
+		this.input = new DegeneratedGraphSearchProblem(new Random(0), numDeadEnds, this.branchingFactor, this.depth);
+	}
+
 	private int getNumOfNodesInDepth(final int depth) {
 		if (depth == 0) {
 			return 1;
@@ -78,10 +85,29 @@ public class DegeneratedGraphGeneratorGeneratorTester {
 	}
 
 	@Test
+	public void testMetrics() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+		int leafsPerInnerLevel = this.branchingFactor / 2;
+		int offspringsPerInnerLevel = this.branchingFactor - leafsPerInnerLevel;
+		int leafsOnLastLevel = this.branchingFactor;
+
+		for (int islandSize = 1; islandSize <= 3; islandSize ++) {
+			int expectedMaxLeafs = -1;
+			if (islandSize < leafsOnLastLevel) {
+				expectedMaxLeafs = 1;
+			}
+			else if (islandSize < leafsOnLastLevel * offspringsPerInnerLevel + leafsPerInnerLevel) { // try to unify the nodes under the last inner node
+				expectedMaxLeafs = leafsOnLastLevel;
+			}
+			else {
+				return;
+			}
+			assertEquals("Degenerated tree with bf " + this.branchingFactor + " and depth " + this.depth + " and max island size " + islandSize + " should have a maximum of " + expectedMaxLeafs + " leafs per island.", expectedMaxLeafs, this.input.getGraphGenerator().getMaxNumberOfLeafsInEverySubtreeOfMaxLength(BigInteger.valueOf(islandSize)).intValueExact());
+		}
+	}
+
+	@Test
 	public void testNumberOfSolutionPaths() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		int numDeadEnds = this.branchingFactor / 2;
-		GraphSearchInput<ITransparentTreeNode, Integer> input = new DegeneratedGraphSearchProblem(new Random(0), numDeadEnds, this.branchingFactor, this.depth);
-		DepthFirstSearch<ITransparentTreeNode, Integer> dfs = new DepthFirstSearch<>(input);
+		DepthFirstSearch<ITransparentTreeNode, Integer> dfs = new DepthFirstSearch<>(this.input);
 
 		/* compute number of totally expected solutions */
 		int totalSolutionsExpected = this.getNumOfSolutionsInDepth(this.depth);
@@ -90,8 +116,8 @@ public class DegeneratedGraphGeneratorGeneratorTester {
 		while (dfs.hasNext()) {
 			try {
 				SearchGraphPath<ITransparentTreeNode, Integer> path = dfs.nextSolutionCandidate();
-				assertEquals(totalSolutionsExpected, path.getRoot().getNumberOfLeafsUnderNode());
-				assertEquals(1, path.getHead().getNumberOfLeafsUnderNode());
+				assertEquals(totalSolutionsExpected, path.getRoot().getNumberOfLeafsUnderNode().intValue());
+				assertEquals(1, path.getHead().getNumberOfLeafsUnderNode().intValue());
 				solutions++;
 				for (ITransparentTreeNode n : path.getNodes()) {
 					idsPerLayer.computeIfAbsent(n.getDepth(), k -> new HashSet<>()).add(n.getNumberOfLeftRelativesInSameGeneration());
@@ -108,9 +134,6 @@ public class DegeneratedGraphGeneratorGeneratorTester {
 				assertTrue("Id " + i + " is missing in layer of depth " + d + ". Total expected number of nodes: " + expectedNodesInThisLayer + ". Ids: " + idsInLayer, idsInLayer.contains(BigInteger.valueOf(i)));
 			}
 		}
-
-
 		assertEquals(totalSolutionsExpected, solutions);
-
 	}
 }

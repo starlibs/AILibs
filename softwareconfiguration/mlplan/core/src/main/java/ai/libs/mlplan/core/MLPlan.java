@@ -95,6 +95,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(this.getInput());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {

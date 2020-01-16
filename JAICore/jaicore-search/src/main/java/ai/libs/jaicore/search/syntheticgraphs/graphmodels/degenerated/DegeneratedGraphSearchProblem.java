@@ -6,6 +6,7 @@ import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTes
 
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
+import ai.libs.jaicore.search.syntheticgraphs.graphmodels.degenerated.DegeneratedGraphGeneratorGenerator.DegeneratedGraphGenerator;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.degenerated.DegeneratedGraphGeneratorGenerator.TreeNode;
 
 public class DegeneratedGraphSearchProblem extends GraphSearchInput<ITransparentTreeNode, Integer> {
@@ -18,5 +19,10 @@ public class DegeneratedGraphSearchProblem extends GraphSearchInput<ITransparent
 				return !((TreeNode)node).hasChildren;
 			}
 		});
+	}
+
+	@Override
+	public DegeneratedGraphGenerator getGraphGenerator() {
+		return (DegeneratedGraphGenerator)super.getGraphGenerator();
 	}
 }
