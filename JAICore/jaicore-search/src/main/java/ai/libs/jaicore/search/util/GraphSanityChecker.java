@@ -3,7 +3,7 @@ package ai.libs.jaicore.search.util;
 import java.util.List;
 import java.util.Stack;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
@@ -41,7 +41,7 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 			int expanded = 0;
 			Stack<BackPointerPath<N, A, ?>> open = new Stack<>();
 			N root = ((ISingleRootGenerator<N>) this.getGraphGenerator().getRootGenerator()).getRoot();
-			INodeGoalTester<N, A> goalTester = (INodeGoalTester<N, A>) this.getGoalTester();
+			IPathGoalTester<N, A> goalTester = this.getGoalTester();
 			open.push(new BackPointerPath<>(null, root, null));
 			this.post(new GraphInitializedEvent<N>(this, root));
 			while (!open.isEmpty() && expanded < this.maxNodesToExpand) {
@@ -63,7 +63,7 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 						break;
 					}
 					BackPointerPath<N, A, ?> newNode = new BackPointerPath<>(node, successor.getTo(), successor.getArcLabel());
-					newNode.setGoal(goalTester.isGoal(newNode.getHead()));
+					newNode.setGoal(goalTester.isGoal(newNode));
 					open.add(newNode);
 					this.post(new NodeAddedEvent<N>(this, node.getHead(), successor.getTo(), newNode.isGoal() ? "or_solution" : "or_open"));
 				}

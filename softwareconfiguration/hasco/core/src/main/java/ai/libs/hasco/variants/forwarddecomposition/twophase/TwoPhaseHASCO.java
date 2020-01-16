@@ -152,7 +152,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 				this.phase1CancellationTask = new NamedTimerTask() {
 
 					@Override
-					public void run() {
+					public void exec() {
 
 						try {
 							/* check whether the algorithm has been shutdown, then also cancel this task */
@@ -190,7 +190,9 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			} catch (AlgorithmTimeoutedException e) {
 				this.logger.warn("HASCO has timeouted. In fact, time to deadline is {}ms", this.getTimeout().milliseconds() - (System.currentTimeMillis() - this.timeOfStart));
 			} finally {
-				this.phase1CancellationTask.cancel();
+				if (this.phase1CancellationTask != null) {
+					this.phase1CancellationTask.cancel();
+				}
 			}
 			this.secondsSpentInPhase1 = (int) Math.round(System.currentTimeMillis() - this.timeOfStart / 1000.0);
 
@@ -206,7 +208,8 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			IObjectEvaluator<?, Double> selectionBenchmark = this.getInput().getSelectionBenchmark();
 			if (selectionBenchmark != null) {
 				if (this.logger.isInfoEnabled()) {
-					this.logger.info("Entering phase 2. Solutions seen so far had an (internal) error of {}", this.phase1ResultQueue.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
+					this.logger.info("Entering phase 2.");
+					this.logger.debug("Solutions seen so far had the following (internal) errors (one per line): {}", this.phase1ResultQueue.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
 				}
 				this.post(new TwoPhaseHASCOPhaseSwitchEvent(this));
 				if (selectionBenchmark instanceof IInformedObjectEvaluatorExtension) {
@@ -369,9 +372,11 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			if (expectedMaximumRemainingRuntime > remainingTime) {
 				this.logger.warn("Only {}ms remaining. We probably cannot make it in time.", remainingTime);
 			}
-			this.logger.info(
-					"We expect phase 2 to consume {}ms for {} candidates, and post-processing is assumed to take at most {}ms, which is a total remaining runtime of {}ms. {}ms are permitted by timeout. The following pipelines are considered: ",
-					expectedTimeForPhase2, ensembleToSelectFrom.size(), expectedPostprocessingTime, expectedMaximumRemainingRuntime, remainingTime);
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info(
+						"We expect phase 2 to consume {}ms for {} candidates, and post-processing is assumed to take at most {}ms, which is a total remaining runtime of {}ms. {}ms are permitted by timeout. The following candidates are considered (one per line with the internal error of phase 1): {}",
+						expectedTimeForPhase2, ensembleToSelectFrom.size(), expectedPostprocessingTime, expectedMaximumRemainingRuntime, remainingTime, ensembleToSelectFrom.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
+			}
 		} else {
 			ensembleToSelectFrom = this.getSelectionForPhase2();
 		}

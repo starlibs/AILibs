@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -42,6 +43,7 @@ public class SetUtil {
 	public static <T> Collection<T> union(final Collection<T>... set) {
 		Collection<T> union = new HashSet<>();
 		for (int i = 0; i < set.length; i++) {
+			Objects.requireNonNull(set[i]);
 			union.addAll(set[i]);
 		}
 		return union;

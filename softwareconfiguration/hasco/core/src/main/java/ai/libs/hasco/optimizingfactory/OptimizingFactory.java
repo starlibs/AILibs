@@ -3,6 +3,7 @@ package ai.libs.hasco.optimizingfactory;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -57,7 +58,6 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 				this.logger.info("Setting logger of optimizer {} to {}.optAlgo", this.optimizer.getClass().getName(), this.loggerName);
 				this.optimizer.setLoggerName(this.loggerName + ".optAlgo");
 			}
-
 			IAlgorithmEvent initEvent = this.optimizer.next();
 			assert initEvent instanceof AlgorithmInitializedEvent : "The first event emitted by the optimizer has not been its AlgorithmInitializationEvent";
 			return this.activate();
@@ -142,5 +142,12 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 		this.logger.debug("Now canceling the OptimizingFactory itself.");
 		super.cancel();
 		assert this.isCanceled() : "Cancel-flag must be true at end of cancel routine!";
+	}
+
+	@Override
+	public void setTimeout(final Timeout to) {
+		super.setTimeout(to);
+		this.logger.info("Forwarding timeout {} to optimizer.", to);
+		this.optimizer.setTimeout(to);
 	}
 }

@@ -1,8 +1,6 @@
 package ai.libs.jaicore.concurrent;
 
-import java.util.TimerTask;
-
-public abstract class NamedTimerTask extends TimerTask {
+public abstract class NamedTimerTask extends TrackableTimerTask {
 
 	private String descriptor;
 
@@ -25,6 +23,6 @@ public abstract class NamedTimerTask extends TimerTask {
 
 	@Override
 	public String toString() {
-		return "NamedTimerTask: " + this.descriptor;
+		return "NamedTimerTask: " + this.descriptor + ", canceled: " + this.isCanceled();
 	}
 }

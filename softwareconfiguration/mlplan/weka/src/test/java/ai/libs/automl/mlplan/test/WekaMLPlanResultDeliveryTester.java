@@ -32,13 +32,15 @@ public class WekaMLPlanResultDeliveryTester extends AutoMLAlgorithmResultProduct
 			this.logger.info("Creating ML-Plan instance.");
 			MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 			int baseTime = Math.max(5, (int)Math.ceil(1.2 * this.getTrainTimeOfMajorityClassifier(data) / 1000.0));
+			assertTrue("The majority classifier already needs too much time: " + baseTime, baseTime < 60);
 			builder.withNodeEvaluationTimeOut(new Timeout(baseTime * 12, TimeUnit.SECONDS));
 			builder.withCandidateEvaluationTimeOut(new Timeout(baseTime * 6, TimeUnit.SECONDS));
-			builder.withNumCpus(8);
-			builder.withTimeOut(new Timeout(5 * (int)Math.pow(baseTime, 2), TimeUnit.SECONDS));
+			builder.withNumCpus(4);
+			builder.withTimeOut(new Timeout(Math.min(90, 5 * (int)Math.pow(baseTime, 2)), TimeUnit.SECONDS)); // time out at most 90 seconds
 			builder.withTinyWekaSearchSpace();
 			builder.withSeed(1);
-			builder.withPortionOfDataReservedForSelection(.0f);
+			builder.withPortionOfDataReservedForSelection(.3);
+			builder.withMCCVBasedCandidateEvaluationInSearchPhase().withNumMCIterations(3);
 			MLPlan<IWekaClassifier> mlplan = builder.withDataset(data).build();
 			this.logger.info("Done");
 			return mlplan;
