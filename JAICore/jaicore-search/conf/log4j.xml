@@ -64,7 +64,7 @@
 	</logger>
 	
   <logger name="testedalgorithm">
-    <level value="trace" />
+    <level value="warn" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -74,7 +74,7 @@
   </logger>
   
   <logger name="testedalgorithm._orgraphsearch._algorithm">
-    <level value="trace" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.nodeevaluator">
@@ -86,7 +86,7 @@
   </logger>
   
   <logger name="ai.libs.jaicore.basic.algorithm.SolutionCandidateIteratorTester">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="ai.libs.jaicore.interrupt">
@@ -102,11 +102,11 @@
   </logger>
   
   <logger name="ai.libs.jaicore.search.algorithms.standard.bestfirst.RandomCompletionNodeEvaluatorTester">
-    <level value="debug" />
+    <level value="warn" />
   </logger>
   
   <logger name="testednodeevaluator">
-    <level value="trace" />
+    <level value="warn" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />

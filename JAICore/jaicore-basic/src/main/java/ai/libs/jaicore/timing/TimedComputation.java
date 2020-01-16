@@ -31,7 +31,7 @@ public abstract class TimedComputation {
 		GlobalTimer timer = GlobalTimer.getInstance();
 		long start = System.currentTimeMillis();
 		InterruptionTimerTask task = new InterruptionTimerTask("Timeout for timed computation with thread " + Thread.currentThread() + " at timestamp " + start + ": " + reasonToLogOnTimeout);
-		logger.debug("Scheduling timer for interruption in {}ms with reason {}, i.e. timestamp {}. List of active tasks is now: {}", timeoutInMs, start + timeoutInMs, reasonToLogOnTimeout, timer.getActiveTasks());
+		logger.debug("Scheduling timer for interruption in {}ms with reason {}, i.e. timestamp {}.", timeoutInMs, start + timeoutInMs, reasonToLogOnTimeout);
 		timer.schedule(task, timeoutInMs);
 		Interrupter interrupter = Interrupter.get();
 		T output = null;

@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.knowledgebase.ExtractionOfImportantParametersFailedException;
 import ai.libs.hasco.knowledgebase.FANOVAParameterImportanceEstimator;
 import ai.libs.hasco.knowledgebase.PerformanceKnowledgeBase;
 import ai.libs.hasco.model.Component;
@@ -27,7 +28,7 @@ public class FANOVAParameterImportanceEstimatorTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FANOVAParameterImportanceEstimatorTest.class);
 
 	@Test
-	public void testImportanceEstimation() {
+	public void testImportanceEstimation() throws IOException, ExtractionOfImportantParametersFailedException {
 		PerformanceKnowledgeBase pkb = new PerformanceKnowledgeBase();
 		try (BufferedReader reader = Files.newBufferedReader(Paths.get(testFile), StandardCharsets.UTF_8)) {
 			ArffReader arffReader = new ArffReader(reader);
@@ -38,14 +39,9 @@ public class FANOVAParameterImportanceEstimatorTest {
 			pkb.setPerformanceSamples(data, composition, "test");
 			FANOVAParameterImportanceEstimator importanceEstimator = new FANOVAParameterImportanceEstimator("test", 2, 0.08);
 			importanceEstimator.setPerformanceKnowledgeBase(pkb);
-			try {
-				Set<String> importantParams = importanceEstimator.extractImportantParameters(composition, false);
-				LOGGER.info("important parameters: {}", importantParams);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+			Set<String> importantParams = importanceEstimator.extractImportantParameters(composition, false);
+			LOGGER.info("important parameters: {}", importantParams);
+
 		}
 		assertTrue(true);
 	}

@@ -161,7 +161,7 @@
   
   <!-- configuration for ML-Plan Test logging -->
   <logger name="testedalgorithm">
-    <level value="info" />
+    <level value="warn" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -171,51 +171,51 @@
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
-    <level value="debug" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.randomsearch">
-  	<level value="debug" />
+  	<level value="warn" />
   </logger>
   
   <!-- configuration for ML-Plan 4 big data Test logging -->
   <logger name="testedalgorithm.mlplan.optimizingfactory">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco.search">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
-    <level value="info" />
+    <level value="warn" />
   </logger>
 </log4j:configuration>

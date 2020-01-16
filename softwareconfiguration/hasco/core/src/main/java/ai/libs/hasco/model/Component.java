@@ -44,7 +44,7 @@ public class Component {
 
 	/**
 	 * Constructor creating an empty <code>Component</code> with a specific name.
-	 * 
+	 *
 	 * @param name
 	 *            The name of the <code>Component</code>.
 	 */
@@ -56,7 +56,7 @@ public class Component {
 
 	/**
 	 * Constructor for a component giving the provided and required interfaces, the collection of parameters and a list of dependencies.
-	 * 
+	 *
 	 * @param name
 	 *            The name of the <code>Component</code>.
 	 * @param providedInterfaces
@@ -80,7 +80,7 @@ public class Component {
 
 	/**
 	 * Constructor for a component giving the provided and required interfaces, the collection of parameters and a list of dependencies.
-	 * 
+	 *
 	 * @param name
 	 *            The name of the <code>Component</code>.
 	 * @param providedInterfaces
@@ -131,7 +131,7 @@ public class Component {
 
 	/**
 	 * Returns the parameter for a given name.
-	 * 
+	 *
 	 * @param paramName
 	 *            The name of the parameter to be returned.
 	 * @return The parameter for the given name.
@@ -139,7 +139,7 @@ public class Component {
 	public Parameter getParameterWithName(final String paramName) {
 		Optional<Parameter> param = this.parameters.stream().filter(p -> p.getName().equals(paramName)).findFirst();
 		if (!param.isPresent()) {
-			throw new IllegalArgumentException("Component " + this.name + " has no parameter with name \"" + paramName + "\"");
+			throw new IllegalArgumentException("Component " + this.name + " has no parameter with name \"" + paramName + "\". Available parameters: " + this.parameters);
 		}
 		return param.get();
 	}
@@ -153,7 +153,7 @@ public class Component {
 
 	/**
 	 * Adds another provided interface to the collection of provided interfaces.
-	 * 
+	 *
 	 * @param interfaceName
 	 *            The interface to be added to the provided interfaces.
 	 */
@@ -167,7 +167,7 @@ public class Component {
 
 	/**
 	 * Adds an additional required interface with an ID (local identifier) and an interface name (provided interface of another Component) to the required interfaces of this Component.
-	 * 
+	 *
 	 * @param interfaceID
 	 *            The local identifier to reference the specific required interface.
 	 * @param interfaceName
@@ -179,7 +179,7 @@ public class Component {
 
 	/**
 	 * Adds a parameter to the set of parameters iff the parameter or another parameter with the same name does not yet exist.
-	 * 
+	 *
 	 * @param param
 	 *            The parameter to be added.
 	 */
@@ -192,7 +192,7 @@ public class Component {
 
 	/**
 	 * Adds a dependency constraint to the dependencies of this Component.
-	 * 
+	 *
 	 * @param dependency
 	 *            The dependency to be added.
 	 */

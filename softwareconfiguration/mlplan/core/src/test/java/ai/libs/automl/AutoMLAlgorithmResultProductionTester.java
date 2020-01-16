@@ -52,13 +52,15 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 	public static Collection<OpenMLProblemSet[]> data() throws IOException, Exception {
 		List<OpenMLProblemSet> problemSets = new ArrayList<>();
 		problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
+		problemSets.add(new OpenMLProblemSet(273)); // IMDB drama
+		problemSets.add(new OpenMLProblemSet(40594)); // Reuters
 		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
 		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
 		problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
-		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
+		//		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
 		problemSets.add(new OpenMLProblemSet(1457)); // amazon
 		problemSets.add(new OpenMLProblemSet(1501)); // semeion
-		problemSets.add(new OpenMLProblemSet(149)); // CovPokElec
+		//		problemSets.add(new OpenMLProblemSet(149)); // CovP	okElec
 		//		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
 		problemSets.add(new OpenMLProblemSet(4136)); // dexter
 		problemSets.add(new OpenMLProblemSet(4137)); // dorothea
@@ -74,10 +76,10 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 		problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic
 		problemSets.add(new OpenMLProblemSet(1104)); // leukemia
 		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
-		problemSets.add(new OpenMLProblemSet(554)); // mnist
-		problemSets.add(new OpenMLProblemSet(155)); // pokerhand
+		//		problemSets.add(new OpenMLProblemSet(554)); // mnist
+		//		problemSets.add(new OpenMLProblemSet(155)); // pokerhand
 		problemSets.add(new OpenMLProblemSet(40691)); // winequality
-		problemSets.add(new OpenMLProblemSet(41026)); // gisette
+		//		problemSets.add(new OpenMLProblemSet(41026)); // gisette
 		//		problemSets.add(new OpenMLProblemSet(41065)); // mnist-rotate
 		problemSets.add(new OpenMLProblemSet(41066)); // secom
 

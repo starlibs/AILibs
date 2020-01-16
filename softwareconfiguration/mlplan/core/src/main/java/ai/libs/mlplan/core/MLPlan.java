@@ -32,11 +32,13 @@ import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.events.HASCOSolutionEvent;
+import ai.libs.hasco.events.TwoPhaseHASCOPhaseSwitchEvent;
 import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.optimizingfactory.OptimizingFactory;
 import ai.libs.hasco.optimizingfactory.OptimizingFactoryProblem;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
+import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.MathExt;
@@ -51,6 +53,7 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
+import ai.libs.mlplan.core.events.MLPlanPhaseSwitchedEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 
 public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> extends AAlgorithm<ILabeledDataset<?>, L> implements ILoggingCustomizable {
@@ -69,6 +72,8 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 
 	private boolean buildSelectedClasifierOnGivenData = true;
 	private final long seed;
+
+	private long timestampAlgorithmStart;
 
 	protected MLPlan(final IMLPlanBuilder<L, ?> builder, final ILabeledDataset<?> data) { // ML-Plan has a package visible constructor, because it should only be constructed using a builder
 		super(builder.getAlgorithmConfig(), data);
@@ -99,7 +104,10 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
 		case CREATED:
-			this.logger.info("Starting an ML-Plan instance.");
+			this.setTimeoutPrecautionOffset(Math.max(5000, this.getTimeoutPrecautionOffset())); // minimum 5 seconds precaution offset for timeouts
+			this.logger.info("Starting an ML-Plan instance. Timeout precaution is {}ms", this.getTimeoutPrecautionOffset());
+			this.timestampAlgorithmStart = System.currentTimeMillis();
+			this.setDeadline(); // algorithm execution starts NOW, set deadline
 
 			/* check number of CPUs assigned */
 			if (this.getConfig().cpus() < 1) {
@@ -209,7 +217,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info(
 						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tData points used during search: {}\n\tData points used during selection: {}\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
-						this.getInput().hashCode(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000, this.getConfig().timeoutForNodeEvaluation() / 1000,
+						this.getInput().getRelationName(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000, this.getConfig().timeoutForNodeEvaluation() / 1000,
 						this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), dataShownToSearch.size(), dataShownToSelection != null ? dataShownToSelection.size() : 0,
 								classifierEvaluatorForSearch.getBenchmark(), classifierEvaluatorForSelection != null ? classifierEvaluatorForSelection.getBenchmark() : null, this.getConfig().expectedBlowupInSelection(),
 										this.getConfig().expectedBlowupInPostprocessing());
@@ -229,8 +237,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, L, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(this.builder.getLearnerFactory(), problem);
 			HASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> hascoFactory = this.builder.getHASCOFactory();
 			this.twoPhaseHASCOFactory = new TwoPhaseHASCOFactory<>(hascoFactory);
-
-			this.twoPhaseHASCOFactory.setConfig(this.getConfig());
+			this.twoPhaseHASCOFactory.setConfig(this.getConfig().copy(TwoPhaseHASCOConfig.class)); // instantiate 2-Phase-HASCO with a config COPY to not have config changes in 2-Phase-HASCO impacts on the MLPlan configuration
 			this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.twoPhaseHASCOFactory);
 			this.logger.info("Setting logger of {} to {}.optimizingfactory", this.optimizingFactory.getClass().getName(), this.loggerName);
 			this.optimizingFactory.setLoggerName(this.loggerName + ".optimizingfactory");
@@ -240,7 +247,10 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 					if (event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent) {
 						return;
 					}
-					if (event instanceof HASCOSolutionEvent) {
+					if (event instanceof TwoPhaseHASCOPhaseSwitchEvent) {
+						MLPlan.this.post(new MLPlanPhaseSwitchedEvent(MLPlan.this));
+					}
+					else if (event instanceof HASCOSolutionEvent) {
 						@SuppressWarnings("unchecked")
 						HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
 						try {
@@ -271,6 +281,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 				}
 			});
 
+			this.optimizingFactory.setTimeout(this.getRemainingTimeToDeadline());
 			this.logger.info("Initializing the optimization factory.");
 			this.optimizingFactory.init();
 			AlgorithmInitializedEvent event = this.activate();
@@ -298,8 +309,9 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 					throw new AlgorithmException("Training the classifier failed!", e);
 				}
 				long endBuildTime = System.currentTimeMillis();
-				this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms. The chosen classifier is: {}", endBuildTime - startBuildTime,
-						endBuildTime - startOptimizationTime, this.selectedClassifier);
+				this.logger.info(
+						"Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms ({}ms of that on preparation and {}ms on essential optimization). The chosen classifier is: {}",
+						endBuildTime - startBuildTime, endBuildTime - this.timestampAlgorithmStart, startOptimizationTime - this.timestampAlgorithmStart, endBuildTime - startOptimizationTime, this.selectedClassifier);
 			} else {
 				this.logger.info("Selected model has not been built, since model building has been disabled. Total construction time was {}ms.", System.currentTimeMillis() - startOptimizationTime);
 			}

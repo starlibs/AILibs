@@ -85,7 +85,7 @@
   </logger>
   
   <logger name="testedalgorithm">
-    <level value="info" />
+    <level value="warn" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -95,6 +95,6 @@
   </logger>
   
   <logger name="testedalgorithm.assigner">
-    <level value="info" />
+    <level value="warn" />
   </logger>
 </log4j:configuration>
