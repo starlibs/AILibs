@@ -26,7 +26,7 @@ public class BalancedGraphGeneratorGenerator {
 	private final int maxDepth;
 
 	public static int getNumberOfLeafsUnderANonTerminalNodeInDepth(final int depthOfRequestedNode, final int branchingFactor, final int assumedDepthOfTree) {
-		return (int)Math.pow(branchingFactor, assumedDepthOfTree - depthOfRequestedNode);
+		return (int)Math.pow(branchingFactor, assumedDepthOfTree - (double)depthOfRequestedNode);
 	}
 
 	public static BigInteger getNumberOfMaxSubtreesOfMaxLengthUnderNonTerminalNodeInDepth(final int depth, final BigInteger maxNumberOfNodes, final int branchingFactor, final int maxDepth) {
@@ -52,8 +52,8 @@ public class BalancedGraphGeneratorGenerator {
 
 
 	public class BalancedTreeNode implements ITransparentTreeNode {
-		final int depth;
-		final BigInteger idOfNodeOnLayer;
+		protected final int depth;
+		protected final BigInteger idOfNodeOnLayer;
 
 		public BalancedTreeNode(final int depth, final BigInteger idOfNodeOnLayer) {
 			super();

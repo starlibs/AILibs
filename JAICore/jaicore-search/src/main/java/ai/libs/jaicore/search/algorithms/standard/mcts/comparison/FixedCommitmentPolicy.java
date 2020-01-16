@@ -3,7 +3,8 @@ package ai.libs.jaicore.search.algorithms.standard.mcts.comparison;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Function;
+import java.util.Objects;
+import java.util.function.ToDoubleFunction;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.api4.java.datastructure.graph.ILabeledPath;
@@ -15,9 +16,9 @@ public class FixedCommitmentPolicy<N, A> implements IPathUpdatablePolicy<N, A, D
 	private final Map<N, DescriptiveStatistics> observationsPerNode = new HashMap<>();
 
 	private final int k;
-	private final Function<DescriptiveStatistics, Double> metric;
+	private final ToDoubleFunction<DescriptiveStatistics> metric;
 
-	public FixedCommitmentPolicy(final int k, final Function<DescriptiveStatistics, Double> metric) {
+	public FixedCommitmentPolicy(final int k, final ToDoubleFunction<DescriptiveStatistics> metric) {
 		super();
 		this.k = k;
 		this.metric = metric;
@@ -25,8 +26,6 @@ public class FixedCommitmentPolicy<N, A> implements IPathUpdatablePolicy<N, A, D
 
 	@Override
 	public A getAction(final N node, final Map<A, N> actionsWithSuccessors) throws ActionPredictionFailedException {
-
-		long start = System.currentTimeMillis();
 
 		/* determine number of visits of the child with least visits */
 		Entry<A, N> actionAndChildWithLeastVisits = null;
@@ -40,7 +39,7 @@ public class FixedCommitmentPolicy<N, A> implements IPathUpdatablePolicy<N, A, D
 				actionAndChildWithLeastVisits = child;
 				numOfVisitsOfThatChild = numOfVisitsOfThisChild;
 			}
-			double bestScoreOfThisChild = this.metric.apply(observations);
+			double bestScoreOfThisChild = this.metric.applyAsDouble(observations);
 			if (bestScoreOfThisChild < bestChildScore) {
 				bestChildScore = bestScoreOfThisChild;
 				actionAndChildWithBestVisit = child;
@@ -48,6 +47,8 @@ public class FixedCommitmentPolicy<N, A> implements IPathUpdatablePolicy<N, A, D
 		}
 
 		/* now decide */
+		Objects.requireNonNull(actionAndChildWithLeastVisits);
+		Objects.requireNonNull(actionAndChildWithBestVisit);
 		if (numOfVisitsOfThatChild < this.k) {
 			return actionAndChildWithLeastVisits.getKey();
 		} else {

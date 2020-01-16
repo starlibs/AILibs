@@ -41,16 +41,16 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	private final UniformRandomPolicy<N, A, Double> randomPolicy;
 	private LabeledGraph<N, A> graph;
 	private final IGammaFunction gammaShort = new CosLinGammaFunction(3, 4, 20, 2, 2);
-	private final double epsilon = 0.0;
+	private static final double EPSILON = 0.0;
 	private IOwnerBasedAlgorithmConfig config = ConfigFactory.create(IOwnerBasedAlgorithmConfig.class);
 
 	/* configuration of gamma-shape. this depends on the branching factor.
 	 * Note that "per child" does not mean that each child needs so many visits but for k children, the parent needs k * p observations. */
-	private final static int GAMMA_LONG_MAX = 5;
-	private final static int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT = 5;
-	private final static int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_ABS = 2;
-	private final static int GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_ONE = 10;
-	private final static int GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_MAX = 20;
+	private static final int GAMMA_LONG_MAX = 5;
+	private static final int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT = 5;
+	private static final int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_ABS = 2;
+	private static final int GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_ONE = 10;
+	private static final int GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_MAX = 20;
 	public PlackettLucePolicy(final IPreferenceKernel<N, A> preferenceKernel, final Random random) {
 		super();
 		this.preferenceKernel = preferenceKernel;
@@ -90,7 +90,7 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 			}
 
 			/* check whether epsilon forces us to explore */
-			if (this.random.nextDouble() < this.epsilon * (1 - relativeDepth)) {
+			if (this.random.nextDouble() < EPSILON * (1 - relativeDepth)) {
 				return this.randomPolicy.getAction(node, actionsWithSuccessors);
 			}
 
@@ -129,8 +129,6 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 				skills.set(i, skills.getDouble(i) / sum);
 			}
 
-			//			System.out.println(this.getProbabilityOfNode(node) + " (" + visits + ") " + " -> " + gammaValue + " -> " + skills);
-
 			/* compute mass of actually available options */
 			double massOfRemainingOptions = 1;
 			if (actionsWithSuccessors.size() != skills.size()) {
@@ -164,8 +162,12 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 				throw new IllegalStateException("Could not find child among " + actionsWithSuccessors.size() + " successors. Mass of remaining options is " + massOfRemainingOptions + ". Drawn random number is " + randomNumber + ". Sum of skimmed probs is " + sum);
 			}
 			return succ;
-		} catch (AlgorithmTimeoutedException | InterruptedException | AlgorithmExecutionCanceledException | AlgorithmException e) {
+		} catch (AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException e) {
 			throw new ActionPredictionFailedException(e);
+		} catch (InterruptedException e) {
+			this.logger.info("Policy thread has been interrupted. Re-interrupting thread, because no InterruptedException can be thrown here.");
+			Thread.currentThread().interrupt();
+			return null;
 		}
 	}
 
@@ -211,15 +213,11 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	@Override
 	public void updatePath(final ILabeledPath<N, A> path, final Double playoutScore, final int lengthOfPlayout) {
 		this.preferenceKernel.signalNewScore(path, playoutScore);
-		int numNodes = path.getNumberOfNodes();
 		int depth = 0;
 		for (N node : path.getNodes()) {
 			double relativeDepth = depth * 1.0 / lengthOfPlayout;
 			this.numVisits.put(node, this.numVisits.computeIfAbsent(node, n -> 0) + 1);
-			if (!this.deepestRelativeNodeDepthsOfNodes.containsKey(node)) {
-				this.deepestRelativeNodeDepthsOfNodes.put(node, relativeDepth);
-			}
-			else if (this.deepestRelativeNodeDepthsOfNodes.get(node) < relativeDepth) {
+			if (!this.deepestRelativeNodeDepthsOfNodes.containsKey(node) || this.deepestRelativeNodeDepthsOfNodes.get(node) < relativeDepth) {
 				this.deepestRelativeNodeDepthsOfNodes.put(node, relativeDepth);
 			}
 			depth ++;

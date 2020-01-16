@@ -67,11 +67,15 @@ public class ChaoticMeansTreasureModel extends NoisyMeanTreasureModel {
 		if (this.indicesOfIslands.isEmpty()) {
 			try {
 				this.distributeTreasures();
-			} catch (AlgorithmTimeoutedException | InterruptedException | AlgorithmExecutionCanceledException | AlgorithmException e) {
-				e.printStackTrace();
+			} catch (AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException e) {
+				return Double.NaN;
+			}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				return Double.NaN;
 			}
 		}
-		final Random r1 = new Random(this.random.nextInt() + island.intValue()); // this randomness includes the random source of the generator
+		final Random r1 = new Random(this.random.nextInt() + (long)island.intValue()); // this randomness includes the random source of the generator
 		return this.means.computeIfAbsent(island, p -> this.isTreasureIsland(p) ? 1 + r1.nextDouble() * 5 : 20 + r1.nextDouble() * 85);
 	}
 

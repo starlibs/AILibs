@@ -3,6 +3,10 @@ package ai.libs.jaicore.experiments;
 import java.lang.reflect.InvocationTargetException;
 
 import org.api4.java.algorithm.IAlgorithm;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ai.libs.jaicore.logging.LoggerUtil;
 
 /**
  *
@@ -17,6 +21,7 @@ import org.api4.java.algorithm.IAlgorithm;
  */
 public abstract class ExperimentDomain<B extends IExperimentBuilder, I, A extends IAlgorithm<? extends I, ?>> {
 
+	protected Logger logger = LoggerFactory.getLogger("experimentsdomain");
 	private final IExperimentSetConfig config;
 	private final IExperimentDecoder<I, A> decoder;
 
@@ -40,7 +45,7 @@ public abstract class ExperimentDomain<B extends IExperimentBuilder, I, A extend
 		try {
 			return this.getBuilderClass().getConstructor().newInstance();
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-			e.printStackTrace();
+			this.logger.error(LoggerUtil.getExceptionInfo(e));
 			return null;
 		}
 	}

@@ -35,7 +35,6 @@ import it.unimi.dsi.fastutil.shorts.ShortList;
  */
 public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 
-	private boolean optimizePerformance = true;
 	private final List<ShortList> rankings;
 	private final int numRankings;
 	private final int numObjects;
@@ -67,14 +66,6 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 		this.winVector = this.getWinVector();
 	}
 
-	//	private DoubleList getSkillVectorForSkillMap(final Map<Object, Double> skillMap) {
-	//		DoubleList skillVector = new DoubleArrayList();
-	//		for (Object obj : this.objects) {
-	//			skillVector.add((double)skillMap.get(obj));
-	//		}
-	//		return skillVector;
-	//	}
-
 	public static DoubleList getDefaultSkillVector(final int n) {
 		DoubleList skillVector = new DoubleArrayList();
 		double p = 1.0 / n;
@@ -88,8 +79,6 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		DoubleList lastSkillVector = null;
 		double epsilon = 0.00001;
-		//		double currentPerf = Double.MAX_VALUE * -1;
-		double lastPerf = Double.MAX_VALUE * -1;
 		double diffToLast = 0;
 		do {
 			this.skillVector = this.normalizeSkillVector(this.getUpdatedSkillVectorImproved(this.skillVector));
@@ -102,21 +91,6 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 			else {
 				diffToLast = Double.MAX_VALUE;
 			}
-			//			lastPerf = currentPerf;
-			//			currentPerf = this.evaluateLogLikelihood(this.skillVector);
-			//			System.out.println(currentPerf);
-			//			if (lastSkillVector != null) {
-			//				if (currentPerf < this.evaluateLogLikelihood(lastSkillVector)) {
-			//					System.err.println("New value is WORSE than old value!");
-			//
-			//					/* check whether the new skill vector is better in the surrogate */
-			//					double performanceOfNewSkillVectorInSurrogate = this.evaluateMinorant(this.skillVector, lastSkillVector);
-			//					double performanceOfOldSkillVectorInSurrogate = this.evaluateMinorant(lastSkillVector, lastSkillVector);
-			//					if (performanceOfNewSkillVectorInSurrogate < performanceOfOldSkillVectorInSurrogate) {
-			//						System.err.println("New skill vector is NOT better than the old one even on the surrogate.");
-			//					}
-			//				}
-			//			}
 			lastSkillVector = this.skillVector;
 		}
 		while (diffToLast > epsilon);
@@ -144,69 +118,8 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 		return copy;
 	}
 
-	//	private double evaluateLogLikelihood(final DoubleList skillVector) {
-	//		double sum = 0;
-	//		for (int j = 0; j < this.numRankings; j++) {
-	//			ShortList ranking = this.rankings.get(j);
-	//			for (int i = 0; i < this.numObjects; i++) {
-	//				sum += Math.log(this.getSkillOfRankedObject(ranking, i, skillVector)) - Math.log(this.getSumOfSkillsOfItemsInRankingAtLeastAsBadAsThreshold(ranking, i, skillVector));
-	//			}
-	//		}
-	//		return sum;
-	//	}
-
-	//	private double evaluateMinorant(final DoubleList skillVector, final DoubleList parameterSkillVector) {
-	//		double sum = 0;
-	//		for (int j = 0; j < this.numRankings; j++) {
-	//			ShortList ranking = this.rankings.get(j);
-	//			for (int i = 0; i < this.numObjects; i++) {
-	//				sum += Math.log(this.getSkillOfRankedObject(ranking, i, skillVector)) - this.getSumOfSkillsOfItemsInRankingAtLeastAsBadAsThreshold(ranking, i, skillVector) / this.getSumOfSkillsOfItemsInRankingAtLeastAsBadAsThreshold(ranking, i, parameterSkillVector);
-	//			}
-	//		}
-	//		return sum;
-	//	}
-
-	//	private boolean checkMinorization(final DoubleList parameterSkillVector, final Random random) {
-	//		int n = parameterSkillVector.size();
-	//		for (int i = 0; i < 10000; i++) {
-	//			DoubleList mutatedSkillVector = new DoubleArrayList();
-	//			for (int j = 0; j < n; j++) {
-	//				mutatedSkillVector.add(random.nextDouble() * random.nextInt(100));
-	//			}
-	//			double orig = this.evaluateLogLikelihood(mutatedSkillVector);
-	//			double minor = this.evaluateMinorant(mutatedSkillVector, parameterSkillVector);
-	//			if (minor > orig) {
-	//				System.err.println(minor + " > " + orig);
-	//				return false;
-	//			}
-	//		}
-	//		return true;
-	//	}
-
 	private double getSkillOfRankedObject(final ShortList ranking, final int indexOfObjectInRanking, final DoubleList skillVector) {
-		double skill = skillVector.getDouble(ranking.getShort(indexOfObjectInRanking));
-		//		System.out.println("Skill of " + indexOfObjectInRanking + "-th object in " + ranking + " based on vector " + skillVector + ": " + skill);
-		return skill;
-	}
-
-	private DoubleList getUpdatedSkillVector(final DoubleList skillVector) {
-		DoubleList updatedVector = new DoubleArrayList();
-		for (short t = 0; t < this.numObjects; t++) {
-			double denominator = 0;
-			for (int j = 0; j < this.numRankings; j++) {
-				ShortList ranking = this.rankings.get(j);
-				for (int i = 0; i < this.numObjects - 1; i++) {
-					if (this.isObjectRankedAtLeastAsBadAsIndex(ranking, t, i)) {
-						denominator += (1 / this.getSumOfSkillsOfItemsInRankingAtLeastAsBadAsThreshold(ranking, i, skillVector));
-					}
-				}
-			}
-			if (denominator == 0) {
-				throw new IllegalStateException("");
-			}
-			updatedVector.add(this.numRankings / denominator);
-		}
-		return updatedVector;
+		return skillVector.getDouble(ranking.getShort(indexOfObjectInRanking));
 	}
 
 	private DoubleList getUpdatedSkillVectorImproved(final DoubleList skillVector) {
@@ -233,6 +146,7 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 		/* now compute the updated skill values for each t base on the accumulated skills structure */
 		for (short t = 0; t < this.numObjects; t++) {
 			double denominator = 0;
+
 			for (int j = 0; j < this.numRankings; j++) {
 				ShortList ranking = this.rankings.get(j);
 				double[] accumulatedSkillsForThisRanking = accumulatedSkills[j];
@@ -243,25 +157,12 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 					}
 				}
 			}
+			if (denominator == 0) {
+				throw new IllegalStateException("Denominator in PL-model must not be null.");
+			}
 			updatedVector.add(this.winVector.getInt(t) / denominator);
 		}
 		return updatedVector;
-	}
-
-	private double getSumOfSkillsOfItemsInRankingAtLeastAsBadAsThreshold(final ShortList ranking, final int positionThreshold, final DoubleList skillVector) {
-		double sum = 0;
-		for (int s = positionThreshold; s < this.numObjects; s++) {
-			sum += this.getSkillOfRankedObject(ranking, s, skillVector);
-		}
-		return sum;
-	}
-
-	private boolean isObjectRankedAtLeastAsBadAsIndex(final ShortList ranking, final short object, final int positionThreshold) {
-		if (!this.optimizePerformance && !ranking.contains(object)) {
-			throw new IllegalArgumentException("Object " + object + " not contained in ranking " + ranking);
-		}
-		boolean delta = ranking.indexOf(object) >= positionThreshold;
-		return delta;
 	}
 
 	private IntList getWinVector() {

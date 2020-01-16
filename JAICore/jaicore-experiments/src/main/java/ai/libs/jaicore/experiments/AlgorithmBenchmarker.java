@@ -18,6 +18,7 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.experiments.exceptions.ExperimentDecodingException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
+import ai.libs.jaicore.logging.LoggerUtil;
 
 public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCustomizable {
 
@@ -102,7 +103,7 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 					this.logger.info("NO SUCH ELEMENT");
 					/* this just may happen */
 				} catch (Exception e) {
-					e.printStackTrace();
+					this.logger.error(LoggerUtil.getExceptionInfo(e));
 				}});
 			t.start();
 			t.join();

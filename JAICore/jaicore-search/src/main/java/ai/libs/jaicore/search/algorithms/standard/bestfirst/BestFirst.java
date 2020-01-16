@@ -84,7 +84,7 @@ import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
  */
 public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> {
 
-	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
+	private Logger bfLogger = LoggerFactory.getLogger(BestFirst.class);
 	private String loggerName;
 
 	private static final String SPACER = "\n\t\t";
@@ -148,17 +148,16 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 
 		/* if the node evaluator is graph dependent, communicate the generator to it */
 		this.nodeEvaluator = problem.getPathEvaluator();
-		this.logger.info("Configuring node evaluator of type {}: {}", this.nodeEvaluator.getClass().getName(), this.nodeEvaluator);
 		if (this.nodeEvaluator == null) {
 			throw new IllegalArgumentException("Cannot work with node evaulator that is null");
 		} else if (this.nodeEvaluator instanceof DecoratingNodeEvaluator<?, ?, ?>) {
 			DecoratingNodeEvaluator<N, A, V> castedEvaluator = (DecoratingNodeEvaluator<N, A, V>) this.nodeEvaluator;
 			if (castedEvaluator.requiresGraphGenerator()) {
-				this.logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", castedEvaluator);
+				this.bfLogger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", castedEvaluator);
 				castedEvaluator.setGenerator(this.graphGenerator, this.pathGoalTester);
 			}
 			if (castedEvaluator.reportsSolutions()) {
-				this.logger.info("{} is a solution reporter. Register the search algo in its event bus", castedEvaluator);
+				this.bfLogger.info("{} is a solution reporter. Register the search algo in its event bus", castedEvaluator);
 				castedEvaluator.registerSolutionListener(this);
 				this.solutionReportingNodeEvaluator = true;
 			} else {
@@ -166,13 +165,13 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 			}
 		} else {
 			if (this.nodeEvaluator instanceof IPotentiallyGraphDependentPathEvaluator) {
-				this.logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", this.nodeEvaluator);
+				this.bfLogger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", this.nodeEvaluator);
 				((IPotentiallyGraphDependentPathEvaluator<N, A, V>) this.nodeEvaluator).setGenerator(this.graphGenerator, this.pathGoalTester);
 			}
 
 			/* if the node evaluator is a solution reporter, register in his event bus */
 			if (this.nodeEvaluator instanceof IPotentiallySolutionReportingPathEvaluator) {
-				this.logger.info("{} is a solution reporter. Register the search algo in its event bus", this.nodeEvaluator);
+				this.bfLogger.info("{} is a solution reporter. Register the search algo in its event bus", this.nodeEvaluator);
 				((IPotentiallySolutionReportingPathEvaluator<N, A, V>) this.nodeEvaluator).registerSolutionListener(this);
 				this.solutionReportingNodeEvaluator = true;
 			} else {
@@ -230,7 +229,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 
 		@Override
 		public void run() {
-			BestFirst.this.logger.debug("Start node creation.");
+			BestFirst.this.bfLogger.debug("Start node creation.");
 			long start = System.currentTimeMillis();
 			try {
 				if (BestFirst.this.isStopCriterionSatisfied()) {
@@ -259,23 +258,23 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 					}
 				} catch (InterruptedException e) {
 					if (!BestFirst.this.isShutdownInitialized()) {
-						BestFirst.this.logger.warn("Leaving node building routine due to interrupt. This leaves the search inconsistent; the node should be attached again!");
+						BestFirst.this.bfLogger.warn("Leaving node building routine due to interrupt. This leaves the search inconsistent; the node should be attached again!");
 					}
-					BestFirst.this.logger.debug("Worker has been interrupted, exiting.");
+					BestFirst.this.bfLogger.debug("Worker has been interrupted, exiting.");
 					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this, newNode, ENodeAnnotation.F_ERROR.toString(), e));
 					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this, newNode, ENodeType.OR_PRUNED.toString()));
 					BestFirst.this.post(new NodeInfoAlteredEvent<>(BestFirst.this, newNode));
 					Thread.currentThread().interrupt();
 					return;
 				} catch (TimeoutException e) {
-					BestFirst.this.logger.debug("Node evaluation of {} has timed out.", newNode.hashCode());
+					BestFirst.this.bfLogger.debug("Node evaluation of {} has timed out.", newNode.hashCode());
 					newNode.setAnnotation(ENodeAnnotation.F_ERROR.toString(), e);
 					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this, newNode, ENodeAnnotation.F_ERROR.toString(), e));
 					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this, newNode, ENodeType.OR_TIMEDOUT.toString()));
 					BestFirst.this.post(new NodeInfoAlteredEvent<>(BestFirst.this, newNode));
 					return;
 				} catch (Exception e) {
-					BestFirst.this.logger.debug("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
+					BestFirst.this.bfLogger.debug("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
 					newNode.setAnnotation(ENodeAnnotation.F_ERROR.toString(), e);
 					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this, newNode, ENodeAnnotation.F_ERROR.toString(), e));
 					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this, newNode, ENodeType.OR_PRUNED.toString()));
@@ -352,7 +351,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 								if (newNode.getScore() == null) {
 									throw new IllegalArgumentException("Cannot insert nodes with value NULL into OPEN!");
 								}
-								BestFirst.this.logger.debug("Inserting successor {} of {} to OPEN. F-Value is {}", newNode.hashCode(), this.expandedNodeInternal, newNode.getScore());
+								BestFirst.this.bfLogger.debug("Inserting successor {} of {} to OPEN. F-Value is {}", newNode.hashCode(), this.expandedNodeInternal, newNode.getScore());
 								BestFirst.this.open.add(newNode);
 							} finally {
 								BestFirst.this.openLock.unlock();
@@ -377,31 +376,31 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 				}
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt(); // interrupt myself. This is for the case that the main thread executes this part
-				BestFirst.this.logger.info("Node builder has been interrupted, finishing execution.");
+				BestFirst.this.bfLogger.info("Node builder has been interrupted, finishing execution.");
 			} catch (Exception e) {
-				BestFirst.this.logger.error("An unexpected exception occurred while building nodes", e);
+				BestFirst.this.bfLogger.error("An unexpected exception occurred while building nodes", e);
 			} finally {
 
 				/*
 				 * free resources if this is computed by helper threads and notify the listeners
 				 */
 				assert !Thread.holdsLock(BestFirst.this.openLock) : "Node Builder must not hold a lock on OPEN when locking the active jobs counter";
-				BestFirst.this.logger.debug("Trying to decrement active jobs by one.");
-				BestFirst.this.logger.trace("Waiting for activeJobsCounterlock to become free.");
+				BestFirst.this.bfLogger.debug("Trying to decrement active jobs by one.");
+				BestFirst.this.bfLogger.trace("Waiting for activeJobsCounterlock to become free.");
 				BestFirst.this.activeJobsCounterLock.lock(); // cannot be interruptible without opening more cases
-				BestFirst.this.logger.trace("Acquired activeJobsCounterLock for decrement.");
+				BestFirst.this.bfLogger.trace("Acquired activeJobsCounterLock for decrement.");
 				try {
 					if (BestFirst.this.pool != null) {
 						BestFirst.this.activeJobs.decrementAndGet();
-						BestFirst.this.logger.trace("Decremented job counter.");
+						BestFirst.this.bfLogger.trace("Decremented job counter.");
 					}
 				} finally {
 					BestFirst.this.numberOfActiveJobsHasChanged.signalAll();
 					BestFirst.this.activeJobsCounterLock.unlock();
-					BestFirst.this.logger.trace("Released activeJobsCounterLock after decrement.");
+					BestFirst.this.bfLogger.trace("Released activeJobsCounterLock after decrement.");
 				}
 				this.communicateJobFinished();
-				BestFirst.this.logger.debug("Builder exits. Build process took {}ms. Interrupt-flag is {}", System.currentTimeMillis() - start, Thread.currentThread().isInterrupted());
+				BestFirst.this.bfLogger.debug("Builder exits. Build process took {}ms. Interrupt-flag is {}", System.currentTimeMillis() - start, Thread.currentThread().isInterrupted());
 			}
 		}
 	}
@@ -445,7 +444,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 			this.post(new GraphInitializedEvent<BackPointerPath<N, A, V>>(this, newNode));
 		} else {
 			this.post(new NodeAddedEvent<BackPointerPath<N, A, V>>(this, parent, newNode, (newNode.isGoal() ? ENodeType.OR_SOLUTION.toString() : ENodeType.OR_CREATED.toString())));
-			this.logger.debug("Sent message for creation of node {} as a successor of {}", newNode.hashCode(), parent.hashCode());
+			this.bfLogger.debug("Sent message for creation of node {} as a successor of {}", newNode.hashCode(), parent.hashCode());
 		}
 		return newNode;
 	}
@@ -453,16 +452,16 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 	protected void labelNode(final BackPointerPath<N, A, V> node) throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
 
 		/* define timeouter for label computation */
-		this.logger.debug("Computing node label for node with hash code {}", node.hashCode());
+		this.bfLogger.debug("Computing node label for node with hash code {}", node.hashCode());
 		if (this.isStopCriterionSatisfied()) {
-			this.logger.debug("Found stop criterion to be true. Returning control.");
+			this.bfLogger.debug("Found stop criterion to be true. Returning control.");
 			return;
 		}
 		InterruptionTimerTask interruptionTask = null;
 		AtomicBoolean timedout = new AtomicBoolean(false);
 		if (BestFirst.this.timeoutForComputationOfF > 0) {
 			interruptionTask = new InterruptionTimerTask("Timeout for Node-Labeling in " + BestFirst.this, Thread.currentThread(), () -> timedout.set(true));
-			this.logger.debug("Scheduling timeout for f-value computation. Allowed time: {}ms", this.timeoutForComputationOfF);
+			this.bfLogger.debug("Scheduling timeout for f-value computation. Allowed time: {}ms", this.timeoutForComputationOfF);
 			GlobalTimer.getInstance().schedule(interruptionTask, this.timeoutForComputationOfF);
 		}
 
@@ -471,11 +470,11 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 		boolean computationTimedout = false;
 		long startComputation = System.currentTimeMillis();
 		try {
-			this.logger.trace("Calling f-function of node evaluator for {}", node.hashCode());
+			this.bfLogger.trace("Calling f-function of node evaluator for {}", node.hashCode());
 			label = this.computeTimeoutAware(() -> BestFirst.this.nodeEvaluator.evaluate(node), "Node Labeling with " + BestFirst.this.nodeEvaluator, !this.threadsOfPool.contains(Thread.currentThread())); // shutdown algorithm on exception
 			// iff
 			// this is not a worker thread
-			this.logger.trace("Determined f-value of {}", label);
+			this.bfLogger.trace("Determined f-value of {}", label);
 			if (this.isStopCriterionSatisfied()) {
 				return;
 			}
@@ -483,12 +482,12 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 			/* check whether the required time exceeded the timeout */
 			long fTime = System.currentTimeMillis() - startComputation;
 			if (BestFirst.this.timeoutForComputationOfF > 0 && fTime > BestFirst.this.timeoutForComputationOfF + 1000) {
-				BestFirst.this.logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", node, fTime, BestFirst.this.timeoutForComputationOfF);
+				BestFirst.this.bfLogger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", node, fTime, BestFirst.this.timeoutForComputationOfF);
 			}
 		} catch (InterruptedException e) {
-			this.logger.info("Thread {} received interrupt in node evaluation. Timeout flag is {}", Thread.currentThread(), timedout.get());
+			this.bfLogger.info("Thread {} received interrupt in node evaluation. Timeout flag is {}", Thread.currentThread(), timedout.get());
 			if (timedout.get()) {
-				BestFirst.this.logger.debug("Received interrupt during computation of f.");
+				BestFirst.this.bfLogger.debug("Received interrupt during computation of f.");
 				this.post(new NodeTypeSwitchEvent<>(this, node, ENodeType.OR_TIMEDOUT.toString()));
 				node.setAnnotation(ENodeAnnotation.F_ERROR.toString(), "Timeout");
 				computationTimedout = true;
@@ -496,10 +495,10 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 				try {
 					label = BestFirst.this.timeoutNodeEvaluator != null ? BestFirst.this.timeoutNodeEvaluator.evaluate(node) : null;
 				} catch (Exception e2) {
-					this.logger.error("An unexpected exception occurred while labeling node {}", node, e2);
+					this.bfLogger.error("An unexpected exception occurred while labeling node {}", node, e2);
 				}
 			} else {
-				this.logger.info("Received external interrupt. Forwarding this interrupt.");
+				this.bfLogger.info("Received external interrupt. Forwarding this interrupt.");
 				throw e;
 			}
 		}
@@ -510,14 +509,14 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 		/* register time required to compute this node label */
 		long fTime = System.currentTimeMillis() - startComputation;
 		node.setAnnotation(ENodeAnnotation.F_TIME.toString(), fTime);
-		this.logger.debug("Computed label {} for {} in {}ms", label, node.hashCode(), fTime);
+		this.bfLogger.debug("Computed label {} for {} in {}ms", label, node.hashCode(), fTime);
 
 		/* if no label was computed, prune the node and cancel the computation */
 		if (label == null) {
 			if (!computationTimedout) {
-				BestFirst.this.logger.debug("Not inserting node {} since its label is missing!", node.hashCode());
+				BestFirst.this.bfLogger.debug("Not inserting node {} since its label is missing!", node.hashCode());
 			} else {
-				BestFirst.this.logger.debug("Not inserting node {} because computation of f-value timed out.", node.hashCode());
+				BestFirst.this.bfLogger.debug("Not inserting node {} because computation of f-value timed out.", node.hashCode());
 			}
 			if (!node.getAnnotations().containsKey(ENodeAnnotation.F_ERROR.toString())) {
 				node.setAnnotation(ENodeAnnotation.F_ERROR.toString(), "f-computer returned NULL");
@@ -557,7 +556,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 				} catch (AlgorithmException e) {
 					throw new AlgorithmException("Graph initialization failed: Could not compute the label for the root node due to an exception.", e);
 				}
-				this.logger.debug("Labeled root with {}", root.getScore());
+				this.bfLogger.debug("Labeled root with {}", root.getScore());
 				this.checkAndConductTermination();
 				if (root.getScore() == null) {
 					throw new IllegalArgumentException("The node evaluator has assigned NULL to the root node, which impedes an initialization of the search graph. Node evaluator: " + this.nodeEvaluator);
@@ -623,14 +622,14 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 		try {
 			if (this.nodeSelectedForExpansion == null) {
 				this.activeJobsCounterLock.lockInterruptibly();
-				this.logger.trace("Acquired activeJobsCounterLock for read.");
+				this.bfLogger.trace("Acquired activeJobsCounterLock for read.");
 				boolean stopCriterionSatisfied = this.isStopCriterionSatisfied();
 				try {
-					this.logger.debug("No next node has been selected. Choosing the first from OPEN.");
+					this.bfLogger.debug("No next node has been selected. Choosing the first from OPEN.");
 					while (this.open.isEmpty() && this.activeJobs.get() > 0 && !stopCriterionSatisfied) {
-						this.logger.trace("Await condition as open queue is empty and active jobs is {} ...", this.activeJobs.get());
+						this.bfLogger.trace("Await condition as open queue is empty and active jobs is {} ...", this.activeJobs.get());
 						this.numberOfActiveJobsHasChanged.await();
-						this.logger.trace("Got signaled");
+						this.bfLogger.trace("Got signaled");
 						stopCriterionSatisfied = this.isStopCriterionSatisfied();
 					}
 					if (!stopCriterionSatisfied) {
@@ -646,7 +645,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 					}
 				} finally {
 					this.activeJobsCounterLock.unlock();
-					this.logger.trace("Released activeJobsCounterLock after read. Now checking termination.");
+					this.bfLogger.trace("Released activeJobsCounterLock after read. Now checking termination.");
 					this.checkAndConductTermination();
 				}
 			}
@@ -673,23 +672,23 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 			/* Step 2: compute the successors in the underlying graph */
 			this.beforeExpansion(actualNodeSelectedForExpansion);
 			this.post(new NodeTypeSwitchEvent<BackPointerPath<N, A, V>>(this, actualNodeSelectedForExpansion, "or_expanding"));
-			this.logger.debug("Expanding node {} with f-value {}", actualNodeSelectedForExpansion.hashCode(), actualNodeSelectedForExpansion.getScore());
-			this.logger.debug("Start computation of successors");
+			this.bfLogger.debug("Expanding node {} with f-value {}", actualNodeSelectedForExpansion.hashCode(), actualNodeSelectedForExpansion.getScore());
+			this.bfLogger.debug("Start computation of successors");
 			final List<INewNodeDescription<N, A>> successorDescriptions;
 			List<INewNodeDescription<N, A>> tmpSuccessorDescriptions = null;
 			assert !actualNodeSelectedForExpansion.isGoal() : "Goal nodes must not be expanded!";
 			tmpSuccessorDescriptions = this.computeTimeoutAware(() -> {
-				this.logger.trace("Invoking getSuccessors");
+				this.bfLogger.trace("Invoking getSuccessors");
 				return BestFirst.this.successorGenerator.generateSuccessors(actualNodeSelectedForExpansion.getHead());
 			}, "Successor generation", !this.threadsOfPool.contains(Thread.currentThread())); // shutdown algorithm on exception iff this is not one of the worker threads
 			assert tmpSuccessorDescriptions != null : "Successor descriptions must never be null!";
-			if (this.logger.isTraceEnabled()) {
-				this.logger.trace("Received {} successor descriptions for node with hash code {}. The first 1000 of these are \n\t{}", tmpSuccessorDescriptions.size(), actualNodeSelectedForExpansion.getHead(),
+			if (this.bfLogger.isTraceEnabled()) {
+				this.bfLogger.trace("Received {} successor descriptions for node with hash code {}. The first 1000 of these are \n\t{}", tmpSuccessorDescriptions.size(), actualNodeSelectedForExpansion.getHead(),
 						tmpSuccessorDescriptions.stream().limit(1000).map(s -> s.getTo().toString()).collect(Collectors.joining("\n\t")));
 			}
 			successorDescriptions = tmpSuccessorDescriptions;
 			this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
-			this.logger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), actualNodeSelectedForExpansion.hashCode());
+			this.bfLogger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), actualNodeSelectedForExpansion.hashCode());
 			this.post(new SuccessorComputationCompletedEvent<>(this, actualNodeSelectedForExpansion, successorDescriptions));
 
 			/*
@@ -700,18 +699,18 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 			long lastTerminationCheck = System.currentTimeMillis();
 			for (INewNodeDescription<N, A> successorDescription : successorDescriptions) {
 				NodeBuilder nb = new NodeBuilder(todoList, actualNodeSelectedForExpansion, successorDescription);
-				this.logger.trace("Number of additional threads for node attachment is {}", this.additionalThreadsForNodeAttachment);
+				this.bfLogger.trace("Number of additional threads for node attachment is {}", this.additionalThreadsForNodeAttachment);
 				if (this.additionalThreadsForNodeAttachment < 1) {
 					nb.run();
 				} else {
 					this.lockConditionSafeleyWhileExpandingNode(this.activeJobsCounterLock, actualNodeSelectedForExpansion); // acquires the lock and shuts down properly when being interrupted
-					this.logger.trace("Acquired activeJobsCounterLock for increment");
+					this.bfLogger.trace("Acquired activeJobsCounterLock for increment");
 					try {
 						this.activeJobs.incrementAndGet();
 					} finally {
 						this.numberOfActiveJobsHasChanged.signalAll();
 						this.activeJobsCounterLock.unlock();
-						this.logger.trace("Released activeJobsCounterLock after increment");
+						this.bfLogger.trace("Released activeJobsCounterLock after increment");
 					}
 					if (this.isShutdownInitialized()) {
 						break;
@@ -729,7 +728,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 					lastTerminationCheck = System.currentTimeMillis();
 				}
 			}
-			this.logger.debug("Finished expansion of node {} after {}ms. Size of OPEN is now {}. Number of active jobs is {}", actualNodeSelectedForExpansion.hashCode(), System.currentTimeMillis() - startTimeOfExpansion, this.open.size(),
+			this.bfLogger.debug("Finished expansion of node {} after {}ms. Size of OPEN is now {}. Number of active jobs is {}", actualNodeSelectedForExpansion.hashCode(), System.currentTimeMillis() - startTimeOfExpansion, this.open.size(),
 					this.activeJobs.get());
 			this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
 			expansionEvent = new NodeExpansionJobSubmittedEvent<>(this, actualNodeSelectedForExpansion, successorDescriptions);
@@ -753,7 +752,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 		this.checkAndConductTermination();
 		this.openLock.lockInterruptibly();
 		try {
-			this.logger.debug("Step ends. Size of OPEN now {}", this.open.size());
+			this.bfLogger.debug("Step ends. Size of OPEN now {}", this.open.size());
 		} finally {
 			this.openLock.unlock();
 		}
@@ -775,7 +774,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 		try {
 			l.lockInterruptibly();
 		} catch (InterruptedException e) { // if we are interrupted during a wait, we must still conduct a controlled shutdown
-			this.logger.debug("Received an interrupt while waiting for {} to become available.", l);
+			this.bfLogger.debug("Received an interrupt while waiting for {} to become available.", l);
 			Thread.currentThread().interrupt();
 			this.checkTerminationAndUnregisterFromExpand(node);
 		}
@@ -784,7 +783,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 	private void unregisterFromExpand(final BackPointerPath<N, A, V> node) {
 		assert this.expanding.containsKey(node.getHead()) : "Cannot unregister a node that is not being expanded currently";
 		assert this.expanding.get(node.getHead()) == Thread.currentThread() : "Thread " + Thread.currentThread() + " cannot unregister other thread " + this.expanding.get(node.getHead()) + " from expansion map!";
-		this.logger.debug("Removing {} from EXPANDING.", node.hashCode());
+		this.bfLogger.debug("Removing {} from EXPANDING.", node.hashCode());
 		this.expanding.remove(node.getHead());
 	}
 
@@ -808,7 +807,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 
 		/* check that the shutdown is not invoked by one of the workers or an interrupted thread */
 		if (this.threadsOfPool.contains(Thread.currentThread())) {
-			this.logger.error("Worker thread {} must not shutdown the algorithm!", Thread.currentThread());
+			this.bfLogger.error("Worker thread {} must not shutdown the algorithm!", Thread.currentThread());
 		}
 		assert !Thread.currentThread().isInterrupted() : "The thread should not be interrupted when shutdown is called.";
 
@@ -817,10 +816,10 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 		}
 
 		/* set state to inactive */
-		this.logger.info("Invoking shutdown routine ...");
-		this.logger.debug("First conducting general algorithm shutdown routine ...");
+		this.bfLogger.info("Invoking shutdown routine ...");
+		this.bfLogger.debug("First conducting general algorithm shutdown routine ...");
 		super.shutdown();
-		this.logger.debug("General algorithm shutdown routine completed. Now conducting BestFirst-specific shutdown activities.");
+		this.bfLogger.debug("General algorithm shutdown routine completed. Now conducting BestFirst-specific shutdown activities.");
 
 		/* interrupt the expanding threads */
 		synchronized (this.expanding) {
@@ -829,96 +828,96 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 				Thread t = entry.getValue();
 				if (t.equals(Thread.currentThread())) {
 					this.expanding.remove(entry.getKey());
-					this.logger.debug("Removing node {} with thread {} from expansion map, since this thread is realizing the shutdown.", entry.getKey(), t);
+					this.bfLogger.debug("Removing node {} with thread {} from expansion map, since this thread is realizing the shutdown.", entry.getKey(), t);
 				} else {
 					if (!this.hasThreadBeenInterruptedDuringShutdown(t)) {
 						this.interruptThreadAsPartOfShutdown(t);
 						interruptedThreads++;
 					} else {
-						this.logger.debug("Not interrupting thread {} again, since it already has been interrupted during shutdown.", t);
+						this.bfLogger.debug("Not interrupting thread {} again, since it already has been interrupted during shutdown.", t);
 					}
 				}
 			}
-			this.logger.debug("Interrupted {} active expansion threads.", interruptedThreads);
+			this.bfLogger.debug("Interrupted {} active expansion threads.", interruptedThreads);
 		}
 
 		/* cancel ongoing work */
 		if (this.additionalThreadsForNodeAttachment > 0) {
-			this.logger.debug("Shutting down worker pool.");
+			this.bfLogger.debug("Shutting down worker pool.");
 			if (this.pool != null) {
-				this.logger.info("Triggering shutdown of builder thread pool with interrupt");
+				this.bfLogger.info("Triggering shutdown of builder thread pool with interrupt");
 				this.pool.shutdownNow();
 			}
 			try {
-				this.logger.debug("Waiting 3 days for pool shutdown.");
+				this.bfLogger.debug("Waiting 3 days for pool shutdown.");
 				if (this.pool != null) {
 					this.pool.awaitTermination(3, TimeUnit.DAYS);
 				} else {
-					this.logger.error("Apparently, the pool was unexpectedly not set and thus null.");
+					this.bfLogger.error("Apparently, the pool was unexpectedly not set and thus null.");
 				}
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
-				this.logger.warn("Got interrupted during shutdown!", e);
+				this.bfLogger.warn("Got interrupted during shutdown!", e);
 			}
 			if (this.pool != null) {
 				assert this.pool.isTerminated() : "The worker pool has not been shutdown correctly!";
 				if (!this.pool.isTerminated()) {
-					this.logger.error("Worker pool has not been shutdown correctly!");
+					this.bfLogger.error("Worker pool has not been shutdown correctly!");
 				} else {
-					this.logger.info("Worker pool has been shut down.");
+					this.bfLogger.info("Worker pool has been shut down.");
 				}
 			}
-			this.logger.info("Setting number of active jobs to 0.");
-			this.logger.trace("Waiting for activeJobsCounterLock.");
+			this.bfLogger.info("Setting number of active jobs to 0.");
+			this.bfLogger.trace("Waiting for activeJobsCounterLock.");
 			this.activeJobsCounterLock.lock();
 			try {
-				this.logger.trace("Acquired activeJobsCounterLock for setting it to 0");
+				this.bfLogger.trace("Acquired activeJobsCounterLock for setting it to 0");
 				this.activeJobs.set(0);
 				this.numberOfActiveJobsHasChanged.signalAll();
 			} finally {
 				this.activeJobsCounterLock.unlock();
-				this.logger.trace("Released activeJobsCounterLock after reset");
+				this.bfLogger.trace("Released activeJobsCounterLock after reset");
 			}
-			this.logger.debug("Pool shutdown completed.");
+			this.bfLogger.debug("Pool shutdown completed.");
 		} else {
-			this.logger.debug("No additional threads for node attachment have been admitted, so there is no pool to close down.");
+			this.bfLogger.debug("No additional threads for node attachment have been admitted, so there is no pool to close down.");
 		}
 
 		/* cancel node evaluator */
 		if (this.cancelableNodeEvaluator) {
-			this.logger.info("Canceling node evaluator.");
+			this.bfLogger.info("Canceling node evaluator.");
 			((ICancelablePathEvaluator) this.nodeEvaluator).cancelActiveTasks();
 		}
-		this.logger.info("Shutdown completed");
+		this.bfLogger.info("Shutdown completed");
 	}
 
 	@Subscribe
 	public void receiveSolutionCandidateEvent(final EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent) {
 		try {
-			this.logger.info("Received solution with f-value {} and annotations {}", solutionEvent.getSolutionCandidate().getScore(), solutionEvent.getSolutionCandidate().getAnnotations());
+			this.bfLogger.info("Received solution with f-value {} and annotations {}", solutionEvent.getSolutionCandidate().getScore(), solutionEvent.getSolutionCandidate().getAnnotations());
 			this.registerSolution(solutionEvent.getSolutionCandidate()); // unpack this solution and plug it into the registration process
 		} catch (Exception e) {
-			this.logger.error("An unexpected exception occurred while receiving EvaluatedSearchSolutionCandidateFoundEvent.", e);
+			this.bfLogger.error("An unexpected exception occurred while receiving EvaluatedSearchSolutionCandidateFoundEvent.", e);
 		}
 	}
 
 	@Subscribe
 	public void receiveRolloutEvent(final RolloutEvent<N, V> event) {
 		try {
-			this.logger.debug("Received rollout event: {}", event);
+			this.bfLogger.debug("Received rollout event: {}", event);
 			this.post(event);
 		} catch (Exception e) {
-			this.logger.error("An unexpected exception occurred while receiving RolloutEvent", e);
+			this.bfLogger.error("An unexpected exception occurred while receiving RolloutEvent", e);
 		}
 	}
 
 	@Subscribe
 	public void receiveSolutionCandidateAnnotationEvent(final SolutionAnnotationEvent<N, A, V> event) {
 		try {
-			this.logger.debug("Received solution annotation: {}", event);
+			this.bfLogger.debug("Received solution annotation: {}", event);
 			this.post(event);
 		} catch (Exception e) {
-			this.logger.error("An unexpected exception occurred receiveSolutionCandidateAnnotationEvent.", e);
+			this.bfLogger.error("An unexpected exception occurred receiveSolutionCandidateAnnotationEvent.", e);
 		}
 	}
 
@@ -926,14 +925,14 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 	public void receiveNodeAnnotationEvent(final NodeAnnotationEvent<N> event) {
 		try {
 			N nodeExt = event.getNode();
-			this.logger.debug("Received annotation {} with value {} for node {}", event.getAnnotationName(), event.getAnnotationValue(), event.getNode());
+			this.bfLogger.debug("Received annotation {} with value {} for node {}", event.getAnnotationName(), event.getAnnotationValue(), event.getNode());
 			if (!this.ext2int.containsKey(nodeExt)) {
 				throw new IllegalArgumentException("Received annotation for a node I don't know!");
 			}
 			BackPointerPath<N, A, V> nodeInt = this.ext2int.get(nodeExt);
 			nodeInt.setAnnotation(event.getAnnotationName(), event.getAnnotationValue());
 		} catch (Exception e) {
-			this.logger.error("An unexpected exception occurred while receiving node annotation event ", e);
+			this.bfLogger.error("An unexpected exception occurred while receiving node annotation event ", e);
 		}
 	}
 
@@ -983,7 +982,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 		try {
 			this.initGraph();
 		} catch (Exception e) {
-			this.logger.error("An unexpected exception occurred while the graph should be initialized.", e);
+			this.bfLogger.error("An unexpected exception occurred while the graph should be initialized.", e);
 			return;
 		}
 
@@ -1014,13 +1013,13 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 			switch (this.getState()) {
 			case CREATED:
 				AlgorithmInitializedEvent initEvent = this.activate();
-				this.logger.info("Initializing BestFirst search {} with the following configuration:\n\tCPUs: {}\n\tTimeout: {}ms\n\tNode Evaluator: {}", this, this.getConfig().cpus(), this.getConfig().timeout(), this.nodeEvaluator);
+				this.bfLogger.info("Initializing BestFirst search {} with the following configuration:\n\tCPUs: {}\n\tTimeout: {}ms\n\tNode Evaluator: {}", this, this.getConfig().cpus(), this.getConfig().timeout(), this.nodeEvaluator);
 				int additionalCPUs = this.getConfig().cpus() - 1;
 				if (additionalCPUs > 0) {
 					this.parallelizeNodeExpansion(additionalCPUs);
 				}
 				this.initGraph();
-				this.logger.info("Search initialized, returning activation event.");
+				this.bfLogger.info("Search initialized, returning activation event.");
 				return initEvent;
 
 			case ACTIVE:
@@ -1040,35 +1039,35 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 						try {
 							this.activeJobsCounterLock.lockInterruptibly();
 							haveLock = true;
-							this.logger.trace("Acquired activeJobsCounterLock for read");
-							this.logger.debug("The pool is currently busy with {}/{} jobs.", this.activeJobs.get(), this.additionalThreadsForNodeAttachment);
+							this.bfLogger.trace("Acquired activeJobsCounterLock for read");
+							this.bfLogger.debug("The pool is currently busy with {}/{} jobs.", this.activeJobs.get(), this.additionalThreadsForNodeAttachment);
 							if (this.additionalThreadsForNodeAttachment > this.activeJobs.get()) {
 								poolSlotFree = true;
 							}
-							this.logger.trace("Number of active jobs is now {}", this.activeJobs.get());
+							this.bfLogger.trace("Number of active jobs is now {}", this.activeJobs.get());
 							if (!poolSlotFree) {
-								this.logger.trace("Releasing activeJobsCounterLock for a wait.");
+								this.bfLogger.trace("Releasing activeJobsCounterLock for a wait.");
 								try {
 									haveLock = false;
 									this.numberOfActiveJobsHasChanged.await();
 									haveLock = true;
 								} catch (InterruptedException e) { // if we are interrupted during a wait, we must still conduct a controlled shutdown
-									this.logger.debug("Received an interrupt while waiting for number of active jobs to change.");
+									this.bfLogger.debug("Received an interrupt while waiting for number of active jobs to change.");
 									this.activeJobsCounterLock.unlock();
 									Thread.currentThread().interrupt();
 									this.checkAndConductTermination();
 								}
-								this.logger.trace("Re-acquired activeJobsCounterLock after a wait.");
-								this.logger.debug("Number of active jobs has changed. Let's see whether we can enter now ...");
+								this.bfLogger.trace("Re-acquired activeJobsCounterLock after a wait.");
+								this.bfLogger.debug("Number of active jobs has changed. Let's see whether we can enter now ...");
 							}
 						} finally {
 							if (haveLock) {
-								this.logger.trace("Trying to unlock activeJobsCounterLock");
+								this.bfLogger.trace("Trying to unlock activeJobsCounterLock");
 								this.activeJobsCounterLock.unlock();
 								haveLock = false;
-								this.logger.trace("Released activeJobsCounterLock after read.");
+								this.bfLogger.trace("Released activeJobsCounterLock after read.");
 							} else {
-								this.logger.trace("Don't need to give lock free, because we came to the finally-block via an exception.");
+								this.bfLogger.trace("Don't need to give lock free, because we came to the finally-block via an exception.");
 							}
 						}
 					} while (!poolSlotFree);
@@ -1084,7 +1083,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 						if (!this.pendingSolutionFoundEvents.isEmpty()) {
 							event = this.pendingSolutionFoundEvents.poll();
 						} else {
-							this.logger.info("No event was returned and there are no pending solutions. Number of active jobs: {}. Setting state to inactive.", this.activeJobs.get());
+							this.bfLogger.info("No event was returned and there are no pending solutions. Number of active jobs: {}. Setting state to inactive.", this.activeJobs.get());
 							return this.terminate();
 						}
 					}
@@ -1191,7 +1190,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 			this.additionalThreadsForNodeAttachment = Math.min(this.additionalThreadsForNodeAttachment, threadsForAlgorithm - 2);
 		}
 		if (this.additionalThreadsForNodeAttachment < 1) {
-			this.logger.info("Effectively not parallelizing, since only {} threads are allowed by configuration, and 2 are needed for control and maintenance.", threadsForAlgorithm);
+			this.bfLogger.info("Effectively not parallelizing, since only {} threads are allowed by configuration, and 2 are needed for control and maintenance.", threadsForAlgorithm);
 			this.additionalThreadsForNodeAttachment = 0;
 			return;
 		}
@@ -1246,15 +1245,15 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 
 	@Override
 	public void setLoggerName(final String name) {
-		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.bfLogger.info("Switching logger from {} to {}", this.bfLogger.getName(), name);
 		this.loggerName = name;
-		this.logger = LoggerFactory.getLogger(name);
-		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
+		this.bfLogger = LoggerFactory.getLogger(name);
+		this.bfLogger.info("Activated logger {} with name {}", name, this.bfLogger.getName());
 		if (this.nodeEvaluator instanceof ILoggingCustomizable) {
-			this.logger.info("Setting logger of node evaluator {} to {}.nodeevaluator", this.nodeEvaluator, name);
+			this.bfLogger.info("Setting logger of node evaluator {} to {}.nodeevaluator", this.nodeEvaluator, name);
 			((ILoggingCustomizable) this.nodeEvaluator).setLoggerName(name + ".nodeevaluator");
 		} else {
-			this.logger.info("Node evaluator {} does not implement ILoggingCustomizable, so its logger won't be customized.", this.nodeEvaluator);
+			this.bfLogger.info("Node evaluator {} does not implement ILoggingCustomizable, so its logger won't be customized.", this.nodeEvaluator);
 		}
 		super.setLoggerName(this.loggerName + "._orgraphsearch");
 	}

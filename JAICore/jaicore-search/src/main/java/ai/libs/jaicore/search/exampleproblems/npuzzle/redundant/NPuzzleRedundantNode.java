@@ -4,7 +4,7 @@ import ai.libs.jaicore.problems.npuzzle.NPuzzleState;
 
 public class NPuzzleRedundantNode extends NPuzzleState {
 
-	String moves;
+	private String moves;
 
 	/**
 	 * Constructor for a NPuzzleNode which creates a NPuzzleNode with complete

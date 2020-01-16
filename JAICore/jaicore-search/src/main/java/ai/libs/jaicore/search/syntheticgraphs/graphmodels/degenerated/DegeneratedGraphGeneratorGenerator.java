@@ -37,15 +37,14 @@ public class DegeneratedGraphGeneratorGenerator implements ISyntheticGraphGenera
 		/* compute the number of inner nodes (including the given one) */
 		BigInteger innerNodes = BigInteger.ZERO;
 		for (int k = 0; k < remainingDepth; k++) {
-			innerNodes = innerNodes.add(BigInteger.valueOf(DegeneratedGraphGeneratorGenerator.this.branchingFactor - DegeneratedGraphGeneratorGenerator.this.deadEndsPerGeneration).pow(k));
+			innerNodes = innerNodes.add(BigInteger.valueOf((long)DegeneratedGraphGeneratorGenerator.this.branchingFactor - DegeneratedGraphGeneratorGenerator.this.deadEndsPerGeneration).pow(k));
 		}
 
 		/* compute the leafs stemming directly from the inner nodes */
 		BigInteger innerDeadEndSolutions = innerNodes.multiply(BigInteger.valueOf(DegeneratedGraphGeneratorGenerator.this.deadEndsPerGeneration));
-		BigInteger additionalLeafsOnLastLevel = BigInteger.valueOf(DegeneratedGraphGeneratorGenerator.this.branchingFactor - DegeneratedGraphGeneratorGenerator.this.deadEndsPerGeneration).pow(remainingDepth);
+		BigInteger additionalLeafsOnLastLevel = BigInteger.valueOf((long)DegeneratedGraphGeneratorGenerator.this.branchingFactor - DegeneratedGraphGeneratorGenerator.this.deadEndsPerGeneration).pow(remainingDepth);
 
-		BigInteger leafs = innerDeadEndSolutions.add(additionalLeafsOnLastLevel);
-		return leafs;
+		return innerDeadEndSolutions.add(additionalLeafsOnLastLevel);
 	}
 
 	public BigInteger getNumberOfMaxSubtreesOfMaxLengthUnderNonTerminalNodeInDepth(final int depth, final BigInteger maxNumberOfNodes) {
@@ -87,15 +86,15 @@ public class DegeneratedGraphGeneratorGenerator implements ISyntheticGraphGenera
 	}
 
 	public class TreeNode implements ITransparentTreeNode {
-		TreeNode parent;
-		int depth;
-		Set<Integer> indicesOfChildrenWithoutChildren;
-		int idOfNodeAmongChildren;
-		BigInteger idOfNodeOnLayer;
-		int numOfLeftSiblingsThatHaveChildren;
-		BigInteger numOfLeftRelativesThatHaveChildren;
-		BigInteger numberOfLeafsFoundByDFSWhenReachingThisNode;
-		boolean hasChildren;
+		protected TreeNode parent;
+		protected int depth;
+		protected Set<Integer> indicesOfChildrenWithoutChildren;
+		protected int idOfNodeAmongChildren;
+		protected BigInteger idOfNodeOnLayer;
+		protected int numOfLeftSiblingsThatHaveChildren;
+		protected BigInteger numOfLeftRelativesThatHaveChildren;
+		protected BigInteger numberOfLeafsFoundByDFSWhenReachingThisNode;
+		protected boolean hasChildren;
 
 		public TreeNode(final TreeNode parent, final int depth, final BigInteger idOfNodeOnLayer, final int idOfNodeAmongChildren, final BigInteger numOfLeftRelativesThatHaveChildren, final boolean hasChildren, final int numOfLeftSiblingsThatHaveChildren, final BigInteger solutionsPriorToThisNodeViaDFS) {
 			super();
@@ -139,10 +138,7 @@ public class DegeneratedGraphGeneratorGenerator implements ISyntheticGraphGenera
 			if (this.depth != other.depth) {
 				return false;
 			}
-			if (!this.idOfNodeOnLayer.equals(other.idOfNodeOnLayer)) {
-				return false;
-			}
-			return true;
+			return this.idOfNodeOnLayer.equals(other.idOfNodeOnLayer);
 		}
 
 		@Override
@@ -215,7 +211,7 @@ public class DegeneratedGraphGeneratorGenerator implements ISyntheticGraphGenera
 			/* otherwise, sum over the sub-trees of left siblings */
 			BigInteger maxNumberOfSubTreesForNonTerminalsOfThisDepth = DegeneratedGraphGeneratorGenerator.this.getNumberOfMaxSubtreesOfMaxLengthUnderNonTerminalNodeInDepth(this.depth, maxNumberOfNodes);
 			BigInteger subTreesUnderLeftSiblings = maxNumberOfSubTreesForNonTerminalsOfThisDepth.multiply(BigInteger.valueOf(this.numOfLeftSiblingsThatHaveChildren));
-			subTreesUnderLeftSiblings = subTreesUnderLeftSiblings.add(BigInteger.valueOf(this.idOfNodeAmongChildren - this.numOfLeftSiblingsThatHaveChildren));
+			subTreesUnderLeftSiblings = subTreesUnderLeftSiblings.add(BigInteger.valueOf((long)this.idOfNodeAmongChildren - this.numOfLeftSiblingsThatHaveChildren));
 			return numSubtreesInducedByParentLevels.add(subTreesUnderLeftSiblings);
 		}
 
@@ -284,7 +280,7 @@ public class DegeneratedGraphGeneratorGenerator implements ISyntheticGraphGenera
 
 					/* compute offset of ids for successors under this node, and also the number of nodes left of the successor that have children */
 					BigInteger offsetForIdOnLayer =  tNode.numOfLeftRelativesThatHaveChildren.multiply(BigInteger.valueOf(DegeneratedGraphGeneratorGenerator.this.branchingFactor));
-					BigInteger numOfLeftRelativesThatHaveChildren = tNode.numOfLeftRelativesThatHaveChildren.multiply(BigInteger.valueOf(DegeneratedGraphGeneratorGenerator.this.branchingFactor - DegeneratedGraphGeneratorGenerator.this.deadEndsPerGeneration));
+					BigInteger numOfLeftRelativesThatHaveChildren = tNode.numOfLeftRelativesThatHaveChildren.multiply(BigInteger.valueOf((long)DegeneratedGraphGeneratorGenerator.this.branchingFactor - DegeneratedGraphGeneratorGenerator.this.deadEndsPerGeneration));
 					int numOfLeftSiblingsThatHaveChildren = 0;
 					long numOfLeftSiblingsWithoutChildren = 0;
 					for (int k = 0; k < j; k++) {
@@ -326,5 +322,5 @@ public class DegeneratedGraphGeneratorGenerator implements ISyntheticGraphGenera
 	@Override
 	public IGraphGenerator<ITransparentTreeNode, Integer> build() {
 		return new DegeneratedGraphGenerator();
-	};
+	}
 }

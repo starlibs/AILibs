@@ -86,8 +86,12 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			Thread expThread = new Thread(() -> {
 				try {
 					this.conductExperiment(exp);
-				} catch (ExperimentDBInteractionFailedException | ExperimentAlreadyStartedException | InterruptedException e) {
-					e.printStackTrace();
+				} catch (InterruptedException e) {
+					this.logger.info("Experiment interrupted.");
+					Thread.currentThread().interrupt(); // interrupt myself to make Sonar happy
+				}
+				catch (ExperimentDBInteractionFailedException | ExperimentAlreadyStartedException e) {
+					this.logger.error(LoggerUtil.getExceptionInfo(e));
 				}
 			});
 			expThread.start();

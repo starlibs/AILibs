@@ -27,8 +27,8 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 	}
 
 	public class NodeLabel {
-		public double mean;
-		public int visits;
+		protected double mean;
+		protected int visits;
 
 		@Override
 		public String toString() {
@@ -57,7 +57,7 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 			NodeLabel label = this.labels.computeIfAbsent(node, n -> new NodeLabel());
 			label.mean = (label.visits * label.mean + score) / (label.visits + 1);
 			label.visits++;
-			this.logger.trace("Updated label of node {}. Visits now {}, stats contains {} entries with mean {}", node, label.visits, label.mean);
+			this.logger.trace("Updated label of node {}. Visits now {} with mean {}", node, label.visits, label.mean);
 			if (label.visits > lastVisits) {
 				throw new IllegalStateException("Illegal visits stats of child " + label.visits + " compared to parent " + lastVisits + "\nCheck whether the searched graph is really a tree!");
 			}
@@ -94,7 +94,7 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 				throw new IllegalStateException("Score of action " + action + " is NaN, which it must not be!");
 			}
 			scores.put(action, score);
-			assert !(Double.valueOf(score).equals(Double.NaN)) : "The score of action " + action + " is NaN, which cannot be the case. Score mean is " + labelOfChild.mean + ", number of visits is " + labelOfChild.visits;
+			assert !score.isNaN() : "The score of action " + action + " is NaN, which cannot be the case. Score mean is " + labelOfChild.mean + ", number of visits is " + labelOfChild.visits;
 		}
 		A choice = this.getActionBasedOnScores(scores);
 

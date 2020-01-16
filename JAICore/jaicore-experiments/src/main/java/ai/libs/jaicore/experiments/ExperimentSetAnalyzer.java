@@ -22,9 +22,9 @@ import ai.libs.jaicore.basic.StringUtil;
 import ai.libs.jaicore.basic.sets.LDSRelationComputer;
 import ai.libs.jaicore.basic.sets.RelationComputationProblem;
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
 import ai.libs.jaicore.experiments.exceptions.IllegalKeyDescriptorException;
+import ai.libs.jaicore.logging.LoggerUtil;
 
 public class ExperimentSetAnalyzer {
 
@@ -72,7 +72,7 @@ public class ExperimentSetAnalyzer {
 			try {
 				this.numExperimentsTotal *= this.getNumberOfValuesForKey(key);
 			} catch (IllegalKeyDescriptorException e) {
-				e.printStackTrace();
+				this.logger.error(LoggerUtil.getExceptionInfo(e));
 			}
 		}
 	}
@@ -123,7 +123,7 @@ public class ExperimentSetAnalyzer {
 		return true;
 	}
 
-	public List<Map<String, String>> getAllPossibleKeyCombinations() throws IllegalExperimentSetupException, ExperimentDBInteractionFailedException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public List<Map<String, String>> getAllPossibleKeyCombinations() throws IllegalExperimentSetupException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		if (this.possibleKeyCombinations == null) {
 			this.logger.debug("Computing all possible experiments.");
 
@@ -200,7 +200,9 @@ public class ExperimentSetAnalyzer {
 
 	public String getValueForKey(final String key, final int indexOfValue) {
 		List<String> possibleValues = this.valuesForKeyFieldsInConfig.get(key);
-		assert !possibleValues.isEmpty() : "No values specified for key " + key;
+		if (possibleValues.isEmpty()) {
+			throw new IllegalArgumentException("No values specified for key " + key);
+		}
 		if (!possibleValues.get(0).startsWith(PROTOCOL_JAVA)) {
 			return possibleValues.get(indexOfValue);
 		}

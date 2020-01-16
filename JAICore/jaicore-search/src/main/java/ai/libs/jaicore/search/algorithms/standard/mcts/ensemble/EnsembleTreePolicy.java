@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 import org.api4.java.datastructure.graph.ILabeledPath;
@@ -53,8 +54,8 @@ public class EnsembleTreePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 					bestPolicy = policy;
 				}
 			}
+			Objects.requireNonNull(bestPolicy);
 			this.lastPolicy = bestPolicy;
-			//		System.out.println(this.observedScored);
 			return bestPolicy.getAction(node, actionsWithSuccessors);
 		}
 	}
@@ -64,9 +65,6 @@ public class EnsembleTreePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 		for (IPathUpdatablePolicy<N, A, Double> policy : this.treePolicies) {
 			policy.updatePath(path, playoutScore, lengthOfPlayoutPath);
 		}
-		//		if (this.lastPolicy instanceof IPathUpdatablePolicy) {
-		//			((IPathUpdatablePolicy) this.lastPolicy).updatePath(path, playoutScore, lengthOfPlayoutPath);
-		//		}
 		int visits = this.numberOfTimesChosen.computeIfAbsent(this.lastPolicy, p -> 0);
 		this.numberOfTimesChosen.put(this.lastPolicy, visits + 1);
 		this.meansOfObservations.put(this.lastPolicy, (this.meansOfObservations.computeIfAbsent(this.lastPolicy, p -> 0.0) * visits + playoutScore ) / (visits + 1));

@@ -4,11 +4,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.experiments.exceptions.IllegalKeyDescriptorException;
+import ai.libs.jaicore.logging.LoggerUtil;
 
 public abstract class AExperimentBuilder<B extends AExperimentBuilder<B>> implements IExperimentBuilder {
 
+	protected Logger logger = LoggerFactory.getLogger("builder." + this.getClass().getName());
 	private int memory;
 	private int numCPUs;
 	private final Map<String, String> keyMap = new HashMap<>();
@@ -70,7 +75,7 @@ public abstract class AExperimentBuilder<B extends AExperimentBuilder<B>> implem
 			cBuilder.numCPUs = this.numCPUs;
 			return builder;
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-			e.printStackTrace();
+			this.logger.error(LoggerUtil.getExceptionInfo(e));
 			return null;
 		}
 	}

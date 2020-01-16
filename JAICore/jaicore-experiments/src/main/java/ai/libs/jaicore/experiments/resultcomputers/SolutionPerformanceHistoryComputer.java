@@ -12,8 +12,8 @@ import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.experiments.IEventBasedResultUpdater;
 
 public class SolutionPerformanceHistoryComputer implements IEventBasedResultUpdater {
-	ArrayNode observations = new ObjectMapper().createArrayNode();
-	final long start = System.currentTimeMillis();
+	private ArrayNode observations = new ObjectMapper().createArrayNode();
+	private final long start = System.currentTimeMillis();
 
 	private final int saveRate;
 
@@ -32,14 +32,12 @@ public class SolutionPerformanceHistoryComputer implements IEventBasedResultUpda
 			this.observations.add(observation);
 			if (this.observations.size() % this.saveRate == 0) {
 				currentResults.put("history", this.observations);
-				System.out.println("Communicating history with: " + this.observations.size() + " entries.");
 			}
 		}
 	}
 
 	@Override
 	public void finish(final Map<String, Object> currentResults) {
-		System.out.println("Finishing with complete history.");
 		currentResults.put("history", this.observations);
 	}
 }

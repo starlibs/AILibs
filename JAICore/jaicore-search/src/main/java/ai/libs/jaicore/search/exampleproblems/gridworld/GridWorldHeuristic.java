@@ -18,8 +18,8 @@ public class GridWorldHeuristic implements IPathEvaluator<GridWorldNode, Object,
 
 	@Override
 	public Double evaluate(final ILabeledPath<GridWorldNode, Object> node) {
-		int x_ = Math.abs(this.targetX - node.getHead().getX());
-		int y_ = Math.abs(this.targetY - node.getHead().getY());
-		return Double.valueOf(x_ + y_);
+		double x = Math.abs(this.targetX - node.getHead().getX());
+		double y = Math.abs(this.targetY - node.getHead().getY());
+		return Double.valueOf(x + y);
 	}
 }

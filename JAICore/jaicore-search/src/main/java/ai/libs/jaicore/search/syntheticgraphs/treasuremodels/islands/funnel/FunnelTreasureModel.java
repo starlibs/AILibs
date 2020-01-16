@@ -24,21 +24,32 @@ public class FunnelTreasureModel extends AIslandTreasureModel {
 	private final Set<BigInteger> indicesOfIslands = new HashSet<>();
 	private final int seed;
 
-	private final double plateauMinForTreasures = 0.1;
-	private final double plateauMaxForTreasures = 0.15;
-	private final double plateauMinForNonTreasures = .70;
-	private final double plateauMaxForNonTreasures = .95;
-	private final double plateauSizes = 0.5; // portion of the island that is plateau
-	private final double funnelDepth = .1;
+	private final double plateauMinForTreasures;
+	private final double plateauMaxForTreasures;
+	private final double plateauMinForNonTreasures;
+	private final double plateauMaxForNonTreasures;
+	private final double plateauSizes; // portion of the island that is plateau
+	private final double funnelDepth;
 
 	private double minimumAchievable = Double.MAX_VALUE;
 
 	private final Map<BigInteger, Double> plateausOfIslands = new HashMap<>();
 
-	public FunnelTreasureModel(final IIslandModel islandModel, final int numberOfTreasureIslands, final Random random) {
+	public FunnelTreasureModel(final IIslandModel islandModel, final int numberOfTreasureIslands, final int seed, final double plateauMinForTreasures, final double plateauMaxForTreasures, final double plateauMinForNonTreasures, final double plateauMaxForNonTreasures,
+			final double plateauSizes, final double funnelDepth) {
 		super(islandModel);
 		this.numberOfTreasureIslands = numberOfTreasureIslands;
-		this.seed = random.nextInt();
+		this.seed = seed;
+		this.plateauMinForTreasures = plateauMinForTreasures;
+		this.plateauMaxForTreasures = plateauMaxForTreasures;
+		this.plateauMinForNonTreasures = plateauMinForNonTreasures;
+		this.plateauMaxForNonTreasures = plateauMaxForNonTreasures;
+		this.plateauSizes = plateauSizes;
+		this.funnelDepth = funnelDepth;
+	}
+
+	public FunnelTreasureModel(final IIslandModel islandModel, final int numberOfTreasureIslands, final Random random) {
+		this(islandModel, numberOfTreasureIslands, random.nextInt(), 0.1, 0.15, 0.7, 0.95, 0.5, .1);
 	}
 
 	private void distributeTreasures() {
@@ -57,9 +68,6 @@ public class FunnelTreasureModel extends AIslandTreasureModel {
 			this.plateausOfIslands.put(island, plateauOfThisIsland);
 			this.minimumAchievable = Math.min(this.minimumAchievable, plateauOfThisIsland - this.funnelDepth);
 		}
-		System.out.println("Treasures start");
-		this.plateausOfIslands.forEach((i,s) -> System.out.println("\t" + i + ": " + s));
-		System.out.println("Treasures end");
 	}
 
 	@Override
@@ -71,8 +79,7 @@ public class FunnelTreasureModel extends AIslandTreasureModel {
 		BigInteger positionOnIsland = this.getIslandModel().getPositionOnIsland(path).add(BigInteger.ONE);
 		BigInteger island = this.getIslandModel().getIsland(path);
 		if (!this.plateausOfIslands.containsKey(island)) {
-			this.plateausOfIslands.put(island, this.plateauMinForNonTreasures + (this.plateauMaxForNonTreasures - this.plateauMinForNonTreasures) * new Random(path.hashCode() + this.seed).nextDouble());
-			//			System.out.println("\t" + island + ": " + this.plateausOfIslands.get(island));
+			this.plateausOfIslands.put(island, this.plateauMinForNonTreasures + (this.plateauMaxForNonTreasures - this.plateauMinForNonTreasures) * new Random(path.hashCode() + (long)this.seed).nextDouble());
 		}
 		double plateauOfIsland = this.plateausOfIslands.get(island);
 
@@ -95,11 +102,6 @@ public class FunnelTreasureModel extends AIslandTreasureModel {
 			c2 = islandSizeAsDecimal.subtract(islandSizeAsDecimal.multiply(BigDecimal.valueOf(this.plateauSizes / 2.0))).round(new MathContext(1, RoundingMode.CEILING)).add(BigDecimal.ONE);
 			median = islandSizeAsDecimal.add(BigDecimal.ONE).divide(BigDecimal.valueOf(2));
 		}
-		//		System.out.print(c1 + " / " + c2 + " / " + median + " -> " + positionOnIsland + "/" + islandSize + " = ");
-
-		//		System.out.println("[0, " + c1 + ", " + median + ", " + c2 + ", " + islandSizeAsDecimal + "]");
-		//
-		//		System.out.println(positionOnIsland);
 
 		double val;
 		if (positionOnIsland.compareTo(c1.toBigInteger()) <= 0 || positionOnIsland.compareTo(c2.toBigInteger()) > 0) {
@@ -111,7 +113,6 @@ public class FunnelTreasureModel extends AIslandTreasureModel {
 		else {
 			val = new AffineFunction(c2, BigDecimal.valueOf(plateauOfIsland), median, BigDecimal.valueOf(plateauOfIsland).subtract(BigDecimal.valueOf(this.funnelDepth))).apply(positionOnIsland);
 		}
-		//		System.out.println(val);
 		return val;
 	}
 

@@ -32,26 +32,40 @@ public class AbyssTreasureModel extends AIslandTreasureModel {
 	private final Set<BigInteger> indicesOfIslands = new HashSet<>();
 	private final int seed;
 
-	private final double plateauMinForTreasures = 0.1;
-	private final double plateauMaxForTreasures = 0.15;
-	private final double plateauMinForNonTreasures = .20;
-	private final double plateauMaxForNonTreasures = .80;
-	private final double plateauWidths = 0.2; // portion of the island that is plateau
-	private final double moutainWidths = 0.4;
-	private final double mountainHeight = .2;
-	private final double abyssDepth = .1;
+	private final double plateauMinForTreasures;
+	private final double plateauMaxForTreasures;
+	private final double plateauMinForNonTreasures;
+	private final double plateauMaxForNonTreasures;
+	private final double plateauWidths; // portion of the island that is plateau
+	private final double moutainWidths;
+	private final double mountainHeight;
+	private final double abyssDepth;
+
+	public AbyssTreasureModel(final IIslandModel islandModel, final int numberOfTreasureIslands, final int seed, final double plateauMinForTreasures, final double plateauMaxForTreasures, final double plateauMinForNonTreasures, final double plateauMaxForNonTreasures,
+			final double plateauWidths, final double moutainWidths, final double mountainHeight, final double abyssDepth) {
+		super(islandModel);
+		this.numberOfTreasureIslands = numberOfTreasureIslands;
+		this.seed = seed;
+		this.plateauMinForTreasures = plateauMinForTreasures;
+		this.plateauMaxForTreasures = plateauMaxForTreasures;
+		this.plateauMinForNonTreasures = plateauMinForNonTreasures;
+		this.plateauMaxForNonTreasures = plateauMaxForNonTreasures;
+		this.plateauWidths = plateauWidths;
+		this.moutainWidths = moutainWidths;
+		this.mountainHeight = mountainHeight;
+		this.abyssDepth = abyssDepth;
+		if (this.moutainWidths + this.plateauWidths >= 1) {
+			throw new IllegalArgumentException();
+		}
+	}
 
 	private double minimumAchievable = Double.MAX_VALUE;
 
 	private final Map<BigInteger, Double> plateausOfIslands = new HashMap<>();
 
 	public AbyssTreasureModel(final IIslandModel islandModel, final int numberOfTreasureIslands, final Random random) {
-		super(islandModel);
-		this.numberOfTreasureIslands = numberOfTreasureIslands;
-		this.seed = random.nextInt();
-		if (this.moutainWidths + this.plateauWidths >= 1) {
-			throw new IllegalArgumentException();
-		}
+		this(islandModel, numberOfTreasureIslands, random.nextInt(), 0.1, 0.15, .2, .8, .2, .4, .2, .1);
+
 	}
 
 	private void distributeTreasures() {
@@ -70,9 +84,6 @@ public class AbyssTreasureModel extends AIslandTreasureModel {
 			this.plateausOfIslands.put(island, plateauOfThisIsland);
 			this.minimumAchievable = Math.min(this.minimumAchievable, plateauOfThisIsland - this.abyssDepth);
 		}
-		System.out.println("Treasures start");
-		this.plateausOfIslands.forEach((i,s) -> System.out.println("\t" + i + ": " + s));
-		System.out.println("Treasures end");
 	}
 
 	@Override
@@ -84,15 +95,9 @@ public class AbyssTreasureModel extends AIslandTreasureModel {
 		BigInteger positionOnIsland = this.getIslandModel().getPositionOnIsland(path).add(BigInteger.ONE);
 		BigInteger island = this.getIslandModel().getIsland(path);
 		if (!this.plateausOfIslands.containsKey(island)) {
-			this.plateausOfIslands.put(island, this.plateauMinForNonTreasures + (this.plateauMaxForNonTreasures - this.plateauMinForNonTreasures) * new Random(path.hashCode() + this.seed).nextDouble());
-			//			System.out.println("\t" + island + ": " + this.plateausOfIslands.get(island));
+			this.plateausOfIslands.put(island, this.plateauMinForNonTreasures + (this.plateauMaxForNonTreasures - this.plateauMinForNonTreasures) * new Random(path.hashCode() + (long)this.seed).nextDouble());
 		}
 		double plateauOfIsland = this.plateausOfIslands.get(island);
-
-		//		System.out.println(island);
-		//		if (this.indicesOfIslands.contains(island)) {
-		//			System.out.println("TREASURE ISLAND: " + plateauOfIsland);
-		//		}
 
 		/* compute important island positions for distribution */
 		BigInteger islandSize = this.getIslandModel().getSizeOfIsland(path);
@@ -109,7 +114,6 @@ public class AbyssTreasureModel extends AIslandTreasureModel {
 		BigDecimal median;
 		BigDecimal mountainSegment = islandSizeAsDecimal.multiply(BigDecimal.valueOf(this.moutainWidths / 4.0));
 		BigDecimal abyssSegment = islandSizeAsDecimal.multiply(BigDecimal.valueOf((1 - this.moutainWidths - this.plateauWidths) / 2));
-		//		if (islandSize.remainder(BigInteger.valueOf(2)).equals(BigInteger.ZERO)) {
 		k1 = islandSizeAsDecimal.multiply(BigDecimal.valueOf(this.plateauWidths / 2.0)).round(new MathContext(1, RoundingMode.CEILING));
 		p1 = k1.add(mountainSegment);
 		k2 = p1.add(mountainSegment);
@@ -120,12 +124,6 @@ public class AbyssTreasureModel extends AIslandTreasureModel {
 		if (k4.compareTo(islandSizeAsDecimal) >= 0) {
 			throw new IllegalStateException();
 		}
-		//		}
-		//		else {
-		//			c1 = islandSizeAsDecimal.multiply(BigDecimal.valueOf(this.plateauWidths / 2.0)).round(new MathContext(1, RoundingMode.FLOOR));
-		//			c2 = islandSizeAsDecimal.subtract(islandSizeAsDecimal.multiply(BigDecimal.valueOf(this.plateauWidths / 2.0))).round(new MathContext(1, RoundingMode.CEILING)).add(BigDecimal.ONE);
-		//			median = islandSizeAsDecimal.add(BigDecimal.ONE).divide(BigDecimal.valueOf(2));
-		//		}
 
 		double val;
 		BigDecimal absolutePlateauHeight = BigDecimal.valueOf(plateauOfIsland);

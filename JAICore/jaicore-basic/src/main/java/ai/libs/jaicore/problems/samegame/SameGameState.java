@@ -49,7 +49,7 @@ public class SameGameState {
 		byte[][] boardCopy = new byte[this.board.length][this.board[0].length];
 		for (int i = 0; i < this.board.length; i++) {
 			for (int j = 0; j < this.board[i].length; j++) {
-				boardCopy[i][j] = this.board[i][j];
+				boardCopy[i] = Arrays.copyOf(this.board[i], this.board[i].length);
 			}
 		}
 
@@ -98,14 +98,14 @@ public class SameGameState {
 			}
 		}
 
-		short newScore = (short)(this.score + (int)Math.pow(removedPieces.size() - 2, 2));
+		short newScore = (short)(this.score + (int)Math.pow(removedPieces.size() - 2.0, 2));
 		short newNumPieces = (short)(this.numPieces - removedPieces.size());
 		if (!isMovePossible(boardCopy)) {
 			if (newNumPieces == 0) {
 				newScore += 1000;
 			}
 			else {
-				newScore -= Math.pow(newNumPieces-2,2);
+				newScore -= Math.pow(newNumPieces - 2.0,2);
 			}
 		}
 		return new SameGameState(newScore, boardCopy, newNumPieces);
@@ -283,10 +283,7 @@ public class SameGameState {
 		if (col < board[row].length - 1 && board[row][col + 1] == color) {
 			return true;
 		}
-		if (col > 0 && board[row][col - 1] == color) {
-			return true;
-		}
-		return false;
+		return (col > 0 && board[row][col - 1] == color);
 	}
 
 	public Map<Integer, Integer> getNumberOfPiecesPerColor() {
@@ -327,9 +324,6 @@ public class SameGameState {
 		if (!Arrays.deepEquals(this.board, other.board)) {
 			return false;
 		}
-		if (this.score != other.score) {
-			return false;
-		}
-		return true;
+		return this.score == other.score;
 	}
 }

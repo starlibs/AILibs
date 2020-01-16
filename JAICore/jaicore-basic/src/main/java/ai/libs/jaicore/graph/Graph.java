@@ -197,10 +197,7 @@ public class Graph<T> implements Serializable {
 				}
 			}
 		}
-		else if (this.useForwardPointers){
-			if (true) {
-				throw new UnsupportedOperationException("Determining sources without backpointers is inefficient!");
-			}
+		else if (this.useForwardPointers) {
 			sources = new HashSet<>(this.successors.keySet());
 			for (Entry<T, Set<T>> childRelations : this.successors.entrySet()) {
 				sources.removeAll(childRelations.getValue());
@@ -253,12 +250,19 @@ public class Graph<T> implements Serializable {
 		return this.useForwardPointers ? this.successors.isEmpty() : this.predecessors.isEmpty();
 	}
 
+	/**
+	 * Creates a new line for each path in the graph where the prefix common to the previous line is omitted.
+	 * The order is obtained by BFS.
+	 **/
+	public String getLineBasedStringRepresentation() {
+		return this.getLineBasedStringRepresentation(1);
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((this.predecessors == null) ? 0 : this.predecessors.hashCode());
-		result = prime * result + ((this.root == null) ? 0 : this.root.hashCode());
 		result = prime * result + ((this.successors == null) ? 0 : this.successors.hashCode());
 		result = prime * result + (this.useBackPointers ? 1231 : 1237);
 		result = prime * result + (this.useForwardPointers ? 1231 : 1237);
@@ -284,13 +288,6 @@ public class Graph<T> implements Serializable {
 		} else if (!this.predecessors.equals(other.predecessors)) {
 			return false;
 		}
-		if (this.root == null) {
-			if (other.root != null) {
-				return false;
-			}
-		} else if (!this.root.equals(other.root)) {
-			return false;
-		}
 		if (this.successors == null) {
 			if (other.successors != null) {
 				return false;
@@ -305,14 +302,6 @@ public class Graph<T> implements Serializable {
 			return false;
 		}
 		return true;
-	}
-
-	/**
-	 * Creates a new line for each path in the graph where the prefix common to the previous line is omitted.
-	 * The order is obtained by BFS.
-	 **/
-	public String getLineBasedStringRepresentation() {
-		return this.getLineBasedStringRepresentation(1);
 	}
 
 	public String getLineBasedStringRepresentation(final int offset) {
