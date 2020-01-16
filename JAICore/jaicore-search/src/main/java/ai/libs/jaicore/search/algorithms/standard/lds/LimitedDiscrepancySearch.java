@@ -39,33 +39,33 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
  * @author fmohr
  *
  */
-public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<GraphSearchWithNodeRecommenderInput<T, A>, T, A, V> {
+public class LimitedDiscrepancySearch<I extends GraphSearchWithNodeRecommenderInput<N, A>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> {
 
 	/* logging */
 	private Logger logger = LoggerFactory.getLogger(LimitedDiscrepancySearch.class);
 	private String loggerName;
 
 	/* communication */
-	protected TreeNode<T> traversalTree;
-	protected Map<T, A> actionToNode = new HashMap<>();
-	protected Collection<TreeNode<T>> expanded = new HashSet<>();
-	protected Collection<TreeNode<T>> exhausted = new HashSet<>();
+	protected TreeNode<N> traversalTree;
+	protected Map<N, A> actionToNode = new HashMap<>();
+	protected Collection<TreeNode<N>> expanded = new HashSet<>();
+	protected Collection<TreeNode<N>> exhausted = new HashSet<>();
 
 	/* graph construction helpers */
-	protected final ISingleRootGenerator<T> rootGenerator;
-	protected final ISuccessorGenerator<T, A> successorGenerator;
-	protected final IPathGoalTester<T, A> pathGoalTester;
+	protected final ISingleRootGenerator<N> rootGenerator;
+	protected final ISuccessorGenerator<N, A> successorGenerator;
+	protected final IPathGoalTester<N, A> pathGoalTester;
 
 	/* graph traversal helpers */
-	protected final Comparator<T> heuristic;
+	protected final Comparator<N> heuristic;
 
 	/* algorithm state */
 	private int maxK = 0;
 	private int currentK = 0;
 
-	public LimitedDiscrepancySearch(final GraphSearchWithNodeRecommenderInput<T, A> problemInput) {
+	public LimitedDiscrepancySearch(final I problemInput) {
 		super(problemInput);
-		this.rootGenerator = (ISingleRootGenerator<T>) this.getInput().getGraphGenerator().getRootGenerator();
+		this.rootGenerator = (ISingleRootGenerator<N>) this.getInput().getGraphGenerator().getRootGenerator();
 		this.successorGenerator = this.getInput().getGraphGenerator().getSuccessorGenerator();
 		this.pathGoalTester = this.getInput().getGoalTester();
 		this.heuristic = problemInput.getRecommender();
@@ -107,7 +107,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		}
 	}
 
-	private void updateExhaustMap(final TreeNode<T> node) {
+	private void updateExhaustMap(final TreeNode<N> node) {
 		if (node == null) {
 			return;
 		}
@@ -131,15 +131,15 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 	 * @throws AlgorithmTimeoutedException
 	 * @throws AlgorithmException
 	 */
-	private IAlgorithmEvent ldsProbe(final TreeNode<T> node) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	private IAlgorithmEvent ldsProbe(final TreeNode<N> node) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		this.logger.debug("Probing under node {} with k = {}. Exhausted: {}", node.getValue(), this.currentK, this.exhausted.contains(node));
 
 		/* return solution event if this is a solution node */
 		if (this.pathGoalTester.isGoal(this.getPathForGoalCheck(node.getValue()))) {
 			this.updateExhaustMap(node);
-			List<T> path = node.getValuesOnPathFromRoot();
+			List<N> path = node.getValuesOnPathFromRoot();
 			List<A> actions = path.stream().map(n -> this.actionToNode.get(n)).filter(Objects::nonNull).collect(Collectors.toList());
-			EvaluatedSearchGraphPath<T, A, V> solution = new EvaluatedSearchGraphPath<>(path, actions, null);
+			EvaluatedSearchGraphPath<N, A, V> solution = new EvaluatedSearchGraphPath<>(path, actions, null);
 			this.updateBestSeenSolution(solution);
 			this.logger.debug("Found solution {}.", node.getValue());
 			return new ASolutionCandidateFoundEvent<>(this, solution);
@@ -150,22 +150,22 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 			this.expanded.add(node);
 			this.logger.debug("Starting successor generation of {}", node.getValue());
 			long start = System.currentTimeMillis();
-			Collection<INewNodeDescription<T, A>> succ = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node.getValue()), "Successor generation" , true);
+			Collection<INewNodeDescription<N, A>> succ = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node.getValue()), "Successor generation" , true);
 			if (succ == null || succ.isEmpty()) {
 				this.logger.debug("No successors were generated.");
 				return new NoMoreNodesOnLevelEvent(this);
 			}
 			this.logger.debug("Computed {} successors in {}ms. Attaching the nodes to the local model.", succ.size(), System.currentTimeMillis() - start);
-			List<INewNodeDescription<T, A>> prioSucc = succ.stream().sorted((d1, d2) -> this.heuristic.compare(d1.getTo(), d2.getTo())).collect(Collectors.toList());
+			List<INewNodeDescription<N, A>> prioSucc = succ.stream().sorted((d1, d2) -> this.heuristic.compare(d1.getTo(), d2.getTo())).collect(Collectors.toList());
 			this.checkAndConductTermination();
-			List<TreeNode<T>> generatedNodes = new ArrayList<>();
+			List<TreeNode<N>> generatedNodes = new ArrayList<>();
 			long lastCheck = System.currentTimeMillis();
-			for (INewNodeDescription<T, A> successorDescription : prioSucc) {
+			for (INewNodeDescription<N, A> successorDescription : prioSucc) {
 				if (System.currentTimeMillis() - lastCheck > 10) {
 					this.checkAndConductTermination();
 					lastCheck = System.currentTimeMillis();
 				}
-				TreeNode<T> newNode = this.newNode(node, successorDescription.getTo());
+				TreeNode<N> newNode = this.newNode(node, successorDescription.getTo());
 				this.actionToNode.put(successorDescription.getTo(), successorDescription.getArcLabel());
 				generatedNodes.add(newNode);
 			}
@@ -174,7 +174,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		} else {
 			this.logger.info("Not expanding node {} again.", node.getValue());
 		}
-		List<TreeNode<T>> children = node.getChildren();
+		List<TreeNode<N>> children = node.getChildren();
 		if (children.isEmpty()) {
 			return new NoMoreNodesOnLevelEvent(this);
 		}
@@ -195,20 +195,20 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		return this.ldsProbe(children.get(1));
 	}
 
-	protected synchronized TreeNode<T> newNode(final TreeNode<T> parent, final T newNode) {
+	protected synchronized TreeNode<N> newNode(final TreeNode<N> parent, final N newNode) {
 
 		/* attach new node to traversal tree */
-		TreeNode<T> newTree = parent != null ? parent.addChild(newNode) : new TreeNode<>(newNode);
+		TreeNode<N> newTree = parent != null ? parent.addChild(newNode) : new TreeNode<>(newNode);
 
 		/* send events for this new node */
 		if (parent != null) {
 			boolean isGoal = this.pathGoalTester.isGoal(this.getPathForGoalCheck(newNode));
-			this.post(new NodeAddedEvent<TreeNode<T>>(this, parent, newTree, "or_" + (isGoal ? "solution" : "created")));
+			this.post(new NodeAddedEvent<TreeNode<N>>(this, parent, newTree, "or_" + (isGoal ? "solution" : "created")));
 		}
 		return newTree;
 	}
 
-	private ILabeledPath<T, A> getPathForGoalCheck(final T node) {
+	private ILabeledPath<N, A> getPathForGoalCheck(final N node) {
 		return new BackPointerPath<>(null, node, null);
 	}
 

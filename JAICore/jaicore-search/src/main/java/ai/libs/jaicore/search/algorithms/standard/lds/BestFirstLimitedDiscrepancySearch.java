@@ -42,7 +42,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
  * @param <A>
  * @param <V>
  */
-public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<GraphSearchWithNodeRecommenderInput<T, A>, T, A, V> {
+public class BestFirstLimitedDiscrepancySearch<I extends GraphSearchWithNodeRecommenderInput<T, A>, T, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, T, A, V> {
 
 	private Logger logger = LoggerFactory.getLogger(BestFirstLimitedDiscrepancySearch.class);
 	private String loggerName;
@@ -79,7 +79,7 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 		}
 	}
 
-	public BestFirstLimitedDiscrepancySearch(final GraphSearchWithNodeRecommenderInput<T, A> problem) {
+	public BestFirstLimitedDiscrepancySearch(final I problem) {
 		super(problem);
 		OrderListNumberComputer nodeEvaluator = new OrderListNumberComputer(problem.getRecommender());
 		this.bestFirst = new StandardBestFirst<>(new GraphSearchWithSubpathEvaluationsInput<>(problem, nodeEvaluator));

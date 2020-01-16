@@ -52,7 +52,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePa
  * @param <T> a nodes external label i.e. a state of a problem
  * @param <A> action (action space of problem)
  */
-public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, T, A, Double> {
+public class RStar<I extends GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, T, A> extends AOptimalPathInORGraphSearch<I, T, A, Double> {
 
 	/* Open list. */
 	protected PriorityQueue<GammaNode<T, A>> open = new PriorityQueue<>((n1, n2) -> (n1.getScore().compareTo(n2.getScore())));
@@ -85,7 +85,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	 * @param k
 	 * @param delta
 	 */
-	public RStar(final GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A> problem, final double w, final int k, final double delta) {
+	public RStar(final I problem, final double w, final int k, final double delta) {
 		super(problem);
 		this.h = ((GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getNodeEvaluator()).getH();
 		this.hPath = ((GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer<T, A>) this.getInput().getNodeEvaluator()).gethPath();

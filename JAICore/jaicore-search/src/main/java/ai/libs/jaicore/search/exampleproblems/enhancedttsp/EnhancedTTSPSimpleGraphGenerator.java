@@ -17,7 +17,6 @@ import ai.libs.jaicore.basic.MappingIterator;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPState;
 import ai.libs.jaicore.search.model.NodeExpansionDescription;
-import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 
 public class EnhancedTTSPSimpleGraphGenerator implements IGraphGenerator<EnhancedTTSPState, String>, ILoggingCustomizable {
@@ -40,29 +39,7 @@ public class EnhancedTTSPSimpleGraphGenerator implements IGraphGenerator<Enhance
 	public ISuccessorGenerator<EnhancedTTSPState, String> getSuccessorGenerator() {
 		return new ILazySuccessorGenerator<EnhancedTTSPState, String>() {
 
-			private ShortList getPossibleDestinationsThatHaveNotBeenGeneratedYet(final EnhancedTTSPState n) {
-				short curLoc = n.getCurLocation();
-				ShortList possibleDestinationsToGoFromhere = new ShortArrayList();
-				ShortList seenPlaces = n.getCurTour();
-				int k = 0;
-				boolean openPlaces = seenPlaces.size() < EnhancedTTSPSimpleGraphGenerator.this.problem.getPossibleDestinations().size() - 1;
-				assert n.getCurTour().size() < EnhancedTTSPSimpleGraphGenerator.this.problem.getPossibleDestinations().size() : "We have already visited everything!";
-				assert openPlaces || curLoc != 0 : "There are no open places (out of the " + EnhancedTTSPSimpleGraphGenerator.this.problem.getPossibleDestinations().size() + ", " + seenPlaces.size()
-				+ " of which have already been seen) but we are still in the initial position. This smells like a strange TSP.";
-				if (openPlaces) {
-					for (short l : EnhancedTTSPSimpleGraphGenerator.this.problem.getPossibleDestinations()) {
-						if (k++ == 0) {
-							continue;
-						}
-						if (l != curLoc && !seenPlaces.contains(l)) {
-							possibleDestinationsToGoFromhere.add(l);
-						}
-					}
-				} else {
-					possibleDestinationsToGoFromhere.add((short) 0);
-				}
-				return possibleDestinationsToGoFromhere;
-			}
+
 
 			@Override
 			public List<INewNodeDescription<EnhancedTTSPState, String>> generateSuccessors(final EnhancedTTSPState node) throws InterruptedException {
@@ -71,7 +48,7 @@ public class EnhancedTTSPSimpleGraphGenerator implements IGraphGenerator<Enhance
 					EnhancedTTSPSimpleGraphGenerator.this.logger.warn("Cannot generate successors of a node in which we are in pos {} and in which have already visited everything!", node.getCurLocation());
 					return l;
 				}
-				ShortList possibleUntriedDestinations = this.getPossibleDestinationsThatHaveNotBeenGeneratedYet(node);
+				ShortList possibleUntriedDestinations = EnhancedTTSPSimpleGraphGenerator.this.problem.getPossibleRemainingDestinationsInState(node);
 				if (possibleUntriedDestinations.contains(node.getCurLocation())) {
 					throw new IllegalStateException("The list of possible destinations must not contain the current position " + node.getCurLocation() + ".");
 				}
@@ -91,7 +68,7 @@ public class EnhancedTTSPSimpleGraphGenerator implements IGraphGenerator<Enhance
 
 			@Override
 			public Iterator<INewNodeDescription<EnhancedTTSPState, String>> getIterativeGenerator(final EnhancedTTSPState node) {
-				ShortList availableDestinations = this.getPossibleDestinationsThatHaveNotBeenGeneratedYet(node);
+				ShortList availableDestinations = EnhancedTTSPSimpleGraphGenerator.this.problem.getPossibleRemainingDestinationsInState(node);
 				return new MappingIterator<>(availableDestinations.iterator(), s -> this.generateSuccessor(node, s));
 			}
 		};

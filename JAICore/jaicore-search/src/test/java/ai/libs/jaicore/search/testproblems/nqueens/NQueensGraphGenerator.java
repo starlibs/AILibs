@@ -8,6 +8,7 @@ import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
+import ai.libs.jaicore.search.exampleproblems.nqueens.QueenNode;
 import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public class NQueensGraphGenerator implements IGraphGenerator<QueenNode, String> {
