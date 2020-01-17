@@ -61,18 +61,14 @@ public class ActiveDyadRankingGATSPTest {
 	}
 
 	@Before
-	public void init() {
+	public void init() throws FileNotFoundException {
 		// load dataset
 		this.dataset = new DyadRankingDataset();
-		try {
-			this.dataset.deserialize(new FileInputStream(new File(GATSP_DATASET_FILE)));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+		this.dataset.deserialize(new FileInputStream(new File(GATSP_DATASET_FILE)));
 	}
 
 	@Test
-	public void test() {
+	public void test() throws Exception {
 		int seed = 0;
 
 		Collections.shuffle(this.dataset, new Random(seed));
@@ -91,11 +87,8 @@ public class ActiveDyadRankingGATSPTest {
 		poolProvider.setRemoveDyadsWhenQueried(false);
 
 		SimpleKMeans clusterer = new SimpleKMeans();
-		try {
-			clusterer.setNumClusters(5);
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
+		clusterer.setNumClusters(5);
+
 		ConfidenceIntervalClusteringBasedActiveDyadRanker activeRanker = new ConfidenceIntervalClusteringBasedActiveDyadRanker(this.ranker, poolProvider, seed, 5, 5, clusterer);
 
 		List<ActiveDyadRanker> activeRankers = new ArrayList<>();
@@ -105,22 +98,17 @@ public class ActiveDyadRankingGATSPTest {
 		activeRankers.add(new RandomPoolBasedActiveDyadRanker(new PLNetDyadRanker(), new DyadDatasetPoolProvider(trainData), seed, 5));
 
 		for (ActiveDyadRanker curActiveRanker : activeRankers) {
-			try {
-
-				// train the ranker
-				for (int i = 0; i < 10; i++) {
-					curActiveRanker.activelyTrain(1);
-					double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, curActiveRanker.getRanker());
-					double avgKendallTauIS = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), new DyadRankingDataset(poolProvider.getQueriedRankings()), curActiveRanker.getRanker());
-					System.out.println("Current Kendalls Tau: " + avgKendallTau);
-					System.out.println("Current Kendalls Tau IS: " + avgKendallTauIS);
-				}
+			// train the ranker
+			for (int i = 0; i < 10; i++) {
+				curActiveRanker.activelyTrain(1);
 				double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, curActiveRanker.getRanker());
-				Assert.assertTrue(avgKendallTau > 0.0d);
-
-			} catch (Exception e) {
-				e.printStackTrace();
+				double avgKendallTauIS = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), new DyadRankingDataset(poolProvider.getQueriedRankings()), curActiveRanker.getRanker());
+				System.out.println("Current Kendalls Tau: " + avgKendallTau);
+				System.out.println("Current Kendalls Tau IS: " + avgKendallTauIS);
 			}
+			double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, curActiveRanker.getRanker());
+			Assert.assertTrue(avgKendallTau > 0.0d);
+
 			System.out.println("final results: ");
 		}
 	}

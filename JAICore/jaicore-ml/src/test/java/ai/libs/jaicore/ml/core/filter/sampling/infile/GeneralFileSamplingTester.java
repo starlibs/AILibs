@@ -47,7 +47,6 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 		for (int i = 0; i < data.length; i++) {
 			data[i][0] = problemSets.get(i);
 		}
-		System.out.println(data);
 		return Arrays.asList(data);
 	}
 

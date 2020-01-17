@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.extendedtree.synthetic;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -13,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.ExtendedRandomForest;
-import junit.framework.Assert;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -34,7 +34,7 @@ public class ExtendedRandomForestTest {
 	private static final double[][][] l1Upper = new double[dataset_count][noise_count][seedNum];
 
 	@Before
-	public void testTrain() {
+	public void testTrain() throws Exception {
 		for (int dataset_index = 0; dataset_index < dataset_count; dataset_index++) {
 			for (int noise_index = 0; noise_index < noise_count; noise_index++) {
 				String dataset_name = getDatasetNameForIndex(dataset_index, noise_index);
@@ -47,9 +47,6 @@ public class ExtendedRandomForestTest {
 						this.classifier[dataset_index][noise_index][seed].buildClassifier(data);
 					}
 					System.out.println("Finished training. " + datasets[dataset_index] + ", " + noise[noise_index]);
-				} catch (Exception e) {
-					e.printStackTrace();
-					Assert.fail();
 				}
 			}
 		}
@@ -69,9 +66,10 @@ public class ExtendedRandomForestTest {
 
 	/**
 	 * Test the classifier without any cross-validation
+	 * @throws IOException
 	 */
 	@Test
-	public void testPredict() {
+	public void testPredict() throws IOException {
 		for (int dataset_index = 0; dataset_index < dataset_count; dataset_index++) {
 			for (int noise_index = 0; noise_index < noise_count; noise_index++) {
 				for (int seed = 0; seed < seedNum; seed++) {
@@ -104,15 +102,10 @@ public class ExtendedRandomForestTest {
 
 						double l1LossLower = L1Loss(predictedLowers, actualLowers);
 						double l1LossUpper = L1Loss(predictedUppers, actualUppers);
-						// System.out.println("L1 loss for the lower bound is " + l1LossLower);
-						// System.out.println("L1 loss for the upper bound is " + l1LossUpper);
 
 						l1Lower[dataset_index][noise_index][seed] = l1LossLower;
 						l1Upper[dataset_index][noise_index][seed] = l1LossUpper;
 
-					} catch (Exception e) {
-						e.printStackTrace();
-						Assert.fail();
 					}
 				}
 				double avgLower = Arrays.stream(l1Lower[dataset_index][noise_index]).average().getAsDouble();

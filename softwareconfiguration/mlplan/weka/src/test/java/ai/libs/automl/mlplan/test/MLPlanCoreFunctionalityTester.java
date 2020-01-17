@@ -8,6 +8,7 @@ import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.Timeout;
 
 import ai.libs.automl.AutoMLAlgorithmCoreFunctionalityTester;
+import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
@@ -15,7 +16,7 @@ import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 public class MLPlanCoreFunctionalityTester extends AutoMLAlgorithmCoreFunctionalityTester {
 
 	@Override
-	public IAlgorithm<ILabeledDataset<?>, IWekaClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) {
+	public IAlgorithm<ILabeledDataset<?>, IWekaClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws AlgorithmCreationException {
 		try {
 			MLPlanWekaBuilder builder = new MLPlanWekaBuilder().withTinyWekaSearchSpace();
 			builder.withNodeEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
@@ -28,8 +29,7 @@ public class MLPlanCoreFunctionalityTester extends AutoMLAlgorithmCoreFunctional
 			mlplan.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 			return mlplan;
 		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+			throw new AlgorithmCreationException(e);
 		}
 	}
 }

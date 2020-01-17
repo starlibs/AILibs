@@ -16,7 +16,6 @@ import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
-import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearningCurveExtrapolationEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
@@ -124,7 +123,6 @@ public class MLPlanWekaBuilder extends AbstractMLPlanBuilder<IWekaClassifier, ML
 
 	@Override
 	public MLPlanWekaBuilder withDataset(final ILabeledDataset<?> dataset) {
-		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(dataset);
 		if (!(dataset.getLabelAttribute() instanceof ICategoricalAttribute)) {
 			throw new IllegalArgumentException("MLPlanWeka currently only support categorically labeled data!");
 		}

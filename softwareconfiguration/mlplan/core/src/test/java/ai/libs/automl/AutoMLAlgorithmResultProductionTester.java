@@ -33,6 +33,7 @@ import org.junit.runners.Parameterized.Parameters;
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.interrupt.Interrupter;
@@ -101,14 +102,14 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 	@Parameter(0)
 	public OpenMLProblemSet problemSet;
 
-	public abstract IAlgorithm<ILabeledDataset<?>, ? extends IClassifier> getAutoMLAlgorithm(ILabeledDataset<?> data);
+	public abstract IAlgorithm<ILabeledDataset<?>, ? extends IClassifier> getAutoMLAlgorithm(ILabeledDataset<?> data) throws AlgorithmCreationException;
 
 	public void afterInitHook(final IAlgorithm<ILabeledDataset<?>, ? extends IClassifier> algorithm) {
 
 	}
 
 	@Test
-	public void testThatModelIsTrained() throws DatasetDeserializationFailedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ObjectEvaluationFailedException, SplitFailedException {
+	public void testThatModelIsTrained() throws DatasetDeserializationFailedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ObjectEvaluationFailedException, SplitFailedException, AlgorithmCreationException {
 		try {
 			assertTrue("There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks(), GlobalTimer.getInstance().getActiveTasks().isEmpty());
 			assertFalse("The thread should not be interrupted when calling the AutoML-tool!", Thread.currentThread().isInterrupted());

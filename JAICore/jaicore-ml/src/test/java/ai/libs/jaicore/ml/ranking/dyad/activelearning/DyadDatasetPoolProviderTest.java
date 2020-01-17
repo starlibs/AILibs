@@ -30,13 +30,10 @@ public class DyadDatasetPoolProviderTest {
 	private static final String GATSP_DATASET_FILE = "testrsc/ml/dyadranking/ga-tsp/GATSP-Data.txt";
 
 	@Test
-	public void testPoolProvider() {
+	public void testPoolProvider() throws FileNotFoundException {
 		DyadRankingDataset dataset = new DyadRankingDataset();
-		try {
-			dataset.deserialize(new FileInputStream(new File(GATSP_DATASET_FILE)));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+		dataset.deserialize(new FileInputStream(new File(GATSP_DATASET_FILE)));
+
 		DyadDatasetPoolProvider poolProvider = new DyadDatasetPoolProvider(dataset);
 
 		// get some true rankings

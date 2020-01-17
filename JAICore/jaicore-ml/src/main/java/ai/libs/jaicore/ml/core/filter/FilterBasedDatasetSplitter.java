@@ -89,22 +89,28 @@ public class FilterBasedDatasetSplitter<D extends IDataset<?>> implements IDatas
 			D secondFold = sampler.getComplementOfLastSample();
 			logger.info("Fold creation completed. Adding reconstruction information.");
 			if (data instanceof IReconstructible) {
-				List<Double> portionsAsList = new ArrayList<>();
-				for (double d : relativeFoldSizes) {
-					portionsAsList.add(d);
+				if (!ReconstructionUtil.areInstructionsNonEmptyIfReconstructibilityClaimed(data)) {
+					logger.info("Not making the split reproducible since the original data is not reproducible.");
+					return Arrays.asList(firstFold, secondFold);
 				}
-				List<IReconstructionInstruction> instructions = ((IReconstructible) data).getConstructionPlan().getInstructions();
-				instructions.forEach(((IReconstructible)firstFold)::addInstruction);
-				ReconstructionInstruction rInstForFirstFold = new ReconstructionInstruction(FilterBasedDatasetSplitter.class.getName(), "getFoldOfSplit", new Class<?>[] {IDataset.class, ISamplingAlgorithmFactory.class, long.class, int.class, List.class}, new Object[] {"this", samplerFactory, seed, 0, portionsAsList});
-				((IReconstructible)firstFold).addInstruction(rInstForFirstFold);
-				instructions.forEach(((IReconstructible)secondFold)::addInstruction);
-				ReconstructionInstruction rInstForSecondFold = new ReconstructionInstruction(FilterBasedDatasetSplitter.class.getName(), "getFoldOfSplit", new Class<?>[] {IDataset.class, ISamplingAlgorithmFactory.class, long.class, int.class, List.class}, new Object[] {"this", samplerFactory, seed, 1, portionsAsList});
-				((IReconstructible)secondFold).addInstruction(rInstForSecondFold);
-				ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(firstFold);
-				ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(secondFold);
-				ReconstructionInstruction inst = new ReconstructionInstruction(FilterBasedDatasetSplitter.class.getName(), "getSplit", new Class<?>[] {IDataset.class, ISamplingAlgorithmFactory.class, long.class, List.class}, new Object[] {"this", samplerFactory, seed, Arrays.asList(relativeFoldSizes)});
-				logger.info("Sampling-based split completed, returning two folds of sizes {} and {}.", firstFold.size(), secondFold.size());
-				return new ReproducibleSplit<>(inst, data, firstFold, secondFold);
+				else {
+					List<Double> portionsAsList = new ArrayList<>();
+					for (double d : relativeFoldSizes) {
+						portionsAsList.add(d);
+					}
+					List<IReconstructionInstruction> instructions = ((IReconstructible) data).getConstructionPlan().getInstructions();
+					instructions.forEach(((IReconstructible)firstFold)::addInstruction);
+					ReconstructionInstruction rInstForFirstFold = new ReconstructionInstruction(FilterBasedDatasetSplitter.class.getName(), "getFoldOfSplit", new Class<?>[] {IDataset.class, ISamplingAlgorithmFactory.class, long.class, int.class, List.class}, new Object[] {"this", samplerFactory, seed, 0, portionsAsList});
+					((IReconstructible)firstFold).addInstruction(rInstForFirstFold);
+					instructions.forEach(((IReconstructible)secondFold)::addInstruction);
+					ReconstructionInstruction rInstForSecondFold = new ReconstructionInstruction(FilterBasedDatasetSplitter.class.getName(), "getFoldOfSplit", new Class<?>[] {IDataset.class, ISamplingAlgorithmFactory.class, long.class, int.class, List.class}, new Object[] {"this", samplerFactory, seed, 1, portionsAsList});
+					((IReconstructible)secondFold).addInstruction(rInstForSecondFold);
+					ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(firstFold);
+					ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(secondFold);
+					ReconstructionInstruction inst = new ReconstructionInstruction(FilterBasedDatasetSplitter.class.getName(), "getSplit", new Class<?>[] {IDataset.class, ISamplingAlgorithmFactory.class, long.class, List.class}, new Object[] {"this", samplerFactory, seed, Arrays.asList(relativeFoldSizes)});
+					logger.info("Sampling-based split completed, returning two folds of sizes {} and {}.", firstFold.size(), secondFold.size());
+					return new ReproducibleSplit<>(inst, data, firstFold, secondFold);
+				}
 			}
 			logger.info("Sampling-based split completed, returning two folds of sizes {} and {}.", firstFold.size(), secondFold.size());
 			return Arrays.asList(firstFold, secondFold);

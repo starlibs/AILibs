@@ -8,6 +8,7 @@ import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.Timeout;
 
 import ai.libs.automl.AutoMLAlgorithmResultProductionTester;
+import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SimpleRandomSamplingFactory;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.ipl.InversePowerLawExtrapolationMethod;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
@@ -17,7 +18,7 @@ import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 public class MLPlanWithLearningCurvePredictionResultDeliveryTester extends AutoMLAlgorithmResultProductionTester {
 
 	@Override
-	public IAlgorithm<ILabeledDataset<?>, IWekaClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) {
+	public IAlgorithm<ILabeledDataset<?>, IWekaClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws AlgorithmCreationException {
 		try {
 			this.logger.info("Creating ML-Plan instance.");
 			MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
@@ -31,8 +32,7 @@ public class MLPlanWithLearningCurvePredictionResultDeliveryTester extends AutoM
 			this.logger.info("Done");
 			return mlplan;
 		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+			throw new AlgorithmCreationException(e);
 		}
 	}
 }

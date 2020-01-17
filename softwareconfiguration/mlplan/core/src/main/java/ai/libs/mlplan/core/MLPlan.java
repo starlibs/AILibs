@@ -74,6 +74,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	private final long seed;
 
 	private long timestampAlgorithmStart;
+	private boolean maintainReconstructibility = true;
 
 	protected MLPlan(final IMLPlanBuilder<L, ?> builder, final ILabeledDataset<?> data) { // ML-Plan has a package visible constructor, because it should only be constructed using a builder
 		super(builder.getAlgorithmConfig(), data);
@@ -97,7 +98,15 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			throw new IllegalArgumentException("Cannot run ML-Plan on empty dataset.");
 		}
 		this.seed = this.builder.getAlgorithmConfig().seed();
-		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(this.getInput());
+		if (this.getInput() instanceof IReconstructible) {
+			this.maintainReconstructibility = ReconstructionUtil.areInstructionsNonEmptyIfReconstructibilityClaimed(this.getInput());
+			if (!this.maintainReconstructibility) {
+				this.logger.warn("The dataset claims to be reconstructible, but it does not carry any instructions. ML-Plan will not add reconstruction instructions.");
+			}
+		}
+		else {
+			this.maintainReconstructibility = false;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -116,7 +125,6 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			}
 
 			/* set up exact splits */
-			ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(this.getInput());
 			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
 			ILabeledDataset<?> dataShownToSearch;
 			ILabeledDataset<?> dataShownToSelection;
@@ -163,10 +171,8 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			}
 
 			/* check that reconstructibility is preserved */
-			if (this.getInput() instanceof IReconstructible) {
-				if (((IReconstructible) dataShownToSearch).getConstructionPlan().getInstructions().isEmpty()) {
-					throw new IllegalStateException("Reconstructibility instructions have been lost in search/selection-split!");
-				}
+			if (this.maintainReconstructibility && ((IReconstructible) dataShownToSearch).getConstructionPlan().getInstructions().isEmpty()) {
+				throw new IllegalStateException("Reconstructibility instructions have been lost in search/selection-split!");
 			}
 
 			/* dynamically compute blow-ups */

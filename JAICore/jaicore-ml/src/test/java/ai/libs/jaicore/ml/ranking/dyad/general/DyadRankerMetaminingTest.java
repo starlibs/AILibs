@@ -1,7 +1,6 @@
 package ai.libs.jaicore.ml.ranking.dyad.general;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,19 +61,14 @@ public class DyadRankerMetaminingTest {
 	}
 
 	@Before
-	public void init() {
+	public void init() throws FileNotFoundException {
 		// load dataset
 		this.dataset = new DyadRankingDataset();
-		try {
-			this.dataset.deserialize(new FileInputStream(new File(DATASET_FILE)));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		this.dataset.deserialize(new FileInputStream(new File(DATASET_FILE)));
 	}
 
 	@Test
-	public void test() throws InterruptedException {
+	public void test() throws InterruptedException, TrainingException, PredictionException {
 
 		AbstractDyadScaler scaler = new DyadUnitIntervalScaler();
 		Collections.shuffle(this.dataset, new Random(seed));
@@ -90,23 +84,16 @@ public class DyadRankerMetaminingTest {
 
 		// trainData = randomlyTrimSparseDyadRankingInstances(trainData, 2);
 		// testData = randomlyTrimSparseDyadRankingInstances(testData, 5);
-		try {
 
-			// train the ranker
-			this.ranker.fit(trainData);
-			double avgKendallTau = 0.0d;
-			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, this.ranker);
-			System.out.println("Average Kendall's tau for " + this.ranker.getClass().getSimpleName() + ": " + avgKendallTau);
-			assertTrue(avgKendallTau > 0.5d);
-			IDyadRankingInstance drInstance = testData.get(0);
-			List<Dyad> dyads = new LinkedList<>();
-			// for(int i = 0; i < drInstance.length(); i++) {
-			// dyads.add(drInstance.getDyadAtPosition(i));
-			// }
-		} catch (TrainingException | PredictionException e) {
-			e.printStackTrace();
-			fail("An exception occurred while training resp. predicting");
-		}
+
+		// train the ranker
+		this.ranker.fit(trainData);
+		double avgKendallTau = 0.0d;
+		avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, this.ranker);
+		System.out.println("Average Kendall's tau for " + this.ranker.getClass().getSimpleName() + ": " + avgKendallTau);
+		assertTrue(avgKendallTau > 0.5d);
+		IDyadRankingInstance drInstance = testData.get(0);
+		List<Dyad> dyads = new LinkedList<>();
 
 	}
 

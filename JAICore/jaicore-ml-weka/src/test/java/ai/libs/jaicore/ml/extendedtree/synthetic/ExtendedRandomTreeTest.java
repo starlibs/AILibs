@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.extendedtree.synthetic;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -10,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.ExtendedRandomTree;
-import junit.framework.Assert;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -25,7 +25,7 @@ public class ExtendedRandomTreeTest {
 	private static String testFile = "resources/regression_data/cpu.small.arff_RQPtest.arff";
 
 	@Before
-	public void testTrain() {
+	public void testTrain() throws Exception {
 		try (BufferedReader reader = Files.newBufferedReader(Paths.get(trainFile), StandardCharsets.UTF_8)) {
 			ArffReader arffReader = new ArffReader(reader);
 			Instances data = arffReader.getData();
@@ -34,17 +34,15 @@ public class ExtendedRandomTreeTest {
 			this.classifier = new ExtendedRandomTree();
 			this.classifier.buildClassifier(data);
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			Assert.fail();
 		}
 	}
 
 	/**
 	 * Test the classifier without any cross-validation
+	 * @throws IOException
 	 */
 	@Test
-	public void testPredict() {
+	public void testPredict() throws IOException {
 		try (BufferedReader reader = Files.newBufferedReader(Paths.get(testFile), StandardCharsets.UTF_8)) {
 			ArffReader arffReader = new ArffReader(reader);
 			Instances data = arffReader.getData();
@@ -61,9 +59,6 @@ public class ExtendedRandomTreeTest {
 				System.out.println("Actual interval: " + actualInterval + ", predicted Interval " + predictedInterval);
 			}
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			Assert.fail();
 		}
 	}
 }

@@ -187,7 +187,9 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 * @return The builder object.
 	 */
 	public B withDataset(final ILabeledDataset<?> dataset) {
-		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(dataset);
+		if (!ReconstructionUtil.areInstructionsNonEmptyIfReconstructibilityClaimed(dataset)) {
+			this.logger.warn("The dataset claims to be reconstructible, but it does not carry any instructions.");
+		}
 		this.dataset = dataset;
 		return this.getSelf();
 	}
