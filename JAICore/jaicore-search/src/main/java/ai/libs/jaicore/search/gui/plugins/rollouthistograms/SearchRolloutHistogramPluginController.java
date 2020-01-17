@@ -8,9 +8,6 @@ import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.NodeClickedEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
-import ai.libs.jaicore.search.gui.plugins.mcts.rollouthistograms.RolloutInfo;
-import ai.libs.jaicore.search.gui.plugins.mcts.rollouthistograms.SearchRolloutHistogramPluginModel;
-import ai.libs.jaicore.search.gui.plugins.mcts.rollouthistograms.SearchRolloutHistogramPluginView;
 
 public class SearchRolloutHistogramPluginController extends ASimpleMVCPluginController<SearchRolloutHistogramPluginModel, SearchRolloutHistogramPluginView> {
 

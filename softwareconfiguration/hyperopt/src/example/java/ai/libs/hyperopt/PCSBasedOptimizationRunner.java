@@ -20,8 +20,8 @@ import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredS
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
-import ai.libs.jaicore.search.gui.plugins.mcts.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
+import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;

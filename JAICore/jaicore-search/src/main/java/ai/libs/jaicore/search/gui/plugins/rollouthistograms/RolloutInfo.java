@@ -1,4 +1,4 @@
-package ai.libs.jaicore.search.gui.plugins.mcts.rollouthistograms;
+package ai.libs.jaicore.search.gui.plugins.rollouthistograms;
 
 import java.util.List;
 

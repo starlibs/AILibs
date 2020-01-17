@@ -1,4 +1,4 @@
-package ai.libs.jaicore.search.gui.plugins.mcts.rolloutboxplots;
+package ai.libs.jaicore.search.gui.plugins.rolloutboxplots;
 
 import java.util.List;
 

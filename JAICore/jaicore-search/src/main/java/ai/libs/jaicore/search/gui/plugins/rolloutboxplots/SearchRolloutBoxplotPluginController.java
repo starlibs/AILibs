@@ -1,4 +1,4 @@
-package ai.libs.jaicore.search.gui.plugins.mcts.rolloutboxplots;
+package ai.libs.jaicore.search.gui.plugins.rolloutboxplots;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +11,8 @@ import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.NodeClickedEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
-import ai.libs.jaicore.search.gui.plugins.mcts.rollouthistograms.RolloutInfo;
-import ai.libs.jaicore.search.gui.plugins.mcts.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
+import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfo;
+import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
 
 public class SearchRolloutBoxplotPluginController extends ASimpleMVCPluginController<SearchRolloutBoxplotPluginModel, SearchRolloutBoxplotPluginView> {
 

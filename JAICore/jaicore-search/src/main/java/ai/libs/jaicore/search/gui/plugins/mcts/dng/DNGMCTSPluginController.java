@@ -13,8 +13,8 @@ import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
 import ai.libs.jaicore.search.algorithms.standard.mcts.thompson.DNGBeliefUpdateEvent;
 import ai.libs.jaicore.search.algorithms.standard.mcts.thompson.DNGQSampleEvent;
-import ai.libs.jaicore.search.gui.plugins.mcts.rollouthistograms.RolloutInfo;
-import ai.libs.jaicore.search.gui.plugins.mcts.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
+import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfo;
+import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
 
 public class DNGMCTSPluginController extends ASimpleMVCPluginController<DNGMCTSPluginModel, DNGMCTSPluginView> {
 

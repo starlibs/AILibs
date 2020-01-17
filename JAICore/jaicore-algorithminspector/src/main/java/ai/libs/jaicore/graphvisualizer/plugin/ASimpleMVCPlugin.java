@@ -84,15 +84,9 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
-		if (this.model instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) this.model).setLoggerName(name + ".model");
-		}
-		if (this.view instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) this.view).setLoggerName(name + ".view");
-		}
-		if (this.controller instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) this.controller).setLoggerName(name + ".controller");
-		}
+		this.model.setLoggerName(name + ".model");
+		this.view.setLoggerName(name + ".view");
+		this.controller.setLoggerName(name + ".controller");
 	}
 
 	@Override

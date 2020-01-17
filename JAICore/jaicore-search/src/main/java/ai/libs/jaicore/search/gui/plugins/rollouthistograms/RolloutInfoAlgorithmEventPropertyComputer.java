@@ -9,7 +9,6 @@ import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPr
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyComputationFailedException;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
-import ai.libs.jaicore.search.gui.plugins.mcts.rollouthistograms.RolloutInfo;
 
 public class RolloutInfoAlgorithmEventPropertyComputer implements AlgorithmEventPropertyComputer {
 

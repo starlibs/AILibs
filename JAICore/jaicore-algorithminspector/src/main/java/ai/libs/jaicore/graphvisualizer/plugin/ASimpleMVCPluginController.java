@@ -4,6 +4,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,9 +13,10 @@ import ai.libs.jaicore.graphvisualizer.events.gui.GUIEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
-public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel<?, ?>, V extends ASimpleMVCPluginView<?, ?, ?>> extends Thread implements IGUIPluginController {
+public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel<?, ?>, V extends ASimpleMVCPluginView<?, ?, ?>> extends Thread implements IGUIPluginController, ILoggingCustomizable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ASimpleMVCPluginController.class);
+	protected static final Logger STATIC_LOGGER = LoggerFactory.getLogger(ASimpleMVCPluginController.class);
+	protected Logger logger = LoggerFactory.getLogger("gui.control." + this.getClass().getName());
 	private final Queue<IPropertyProcessedAlgorithmEvent> eventQueue;
 
 	private final V view;
@@ -48,7 +50,7 @@ public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel
 				try {
 					this.handleAlgorithmEventInternally(event);
 				} catch (HandleAlgorithmEventException e) {
-					LOGGER.error("An error occurred while handling event {}.", event, e);
+					STATIC_LOGGER.error("An error occurred while handling event {}.", event, e);
 				}
 			}
 		}
@@ -62,5 +64,15 @@ public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel
 			this.getModel().clear();
 			this.getView().clear();
 		}
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }
