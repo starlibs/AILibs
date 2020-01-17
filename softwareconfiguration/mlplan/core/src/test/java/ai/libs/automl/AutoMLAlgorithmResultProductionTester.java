@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,9 +15,14 @@ import java.util.stream.Collectors;
 import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.classification.IClassifierEvaluator;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
+import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
+import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,45 +53,49 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 
 	// creates the test data
 	@Parameters(name = "{0}")
-	public static Collection<OpenMLProblemSet[]> data() throws IOException, Exception {
-		List<OpenMLProblemSet> problemSets = new ArrayList<>();
-		problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
-		problemSets.add(new OpenMLProblemSet(273)); // IMDB drama
-		problemSets.add(new OpenMLProblemSet(40594)); // Reuters
-		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
-		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
-		problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
-		//		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
-		problemSets.add(new OpenMLProblemSet(1457)); // amazon
-		problemSets.add(new OpenMLProblemSet(1501)); // semeion
-		//		problemSets.add(new OpenMLProblemSet(149)); // CovP	okElec
-		//		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
-		problemSets.add(new OpenMLProblemSet(4136)); // dexter
-		problemSets.add(new OpenMLProblemSet(4137)); // dorothea
-		problemSets.add(new OpenMLProblemSet(40668)); // connect-4
-		problemSets.add(new OpenMLProblemSet(1590)); // adult
-		problemSets.add(new OpenMLProblemSet(182)); // satimage
-		problemSets.add(new OpenMLProblemSet(24)); // mushroom
-		problemSets.add(new OpenMLProblemSet(39)); // ecoli
-		problemSets.add(new OpenMLProblemSet(44)); // spambase
-		problemSets.add(new OpenMLProblemSet(60)); // waveform-5000
-		problemSets.add(new OpenMLProblemSet(61)); // iris
-		problemSets.add(new OpenMLProblemSet(9)); // autos
-		problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic
-		problemSets.add(new OpenMLProblemSet(1104)); // leukemia
-		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
-		//		problemSets.add(new OpenMLProblemSet(554)); // mnist
-		//		problemSets.add(new OpenMLProblemSet(155)); // pokerhand
-		problemSets.add(new OpenMLProblemSet(40691)); // winequality
-		//		problemSets.add(new OpenMLProblemSet(41026)); // gisette
-		//		problemSets.add(new OpenMLProblemSet(41065)); // mnist-rotate
-		problemSets.add(new OpenMLProblemSet(41066)); // secom
+	public static Collection<OpenMLProblemSet[]> data() throws DatasetDeserializationFailedException  {
+		try {
+			List<OpenMLProblemSet> problemSets = new ArrayList<>();
+			problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
+			problemSets.add(new OpenMLProblemSet(273)); // IMDB drama
+			problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
+			problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
+			problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
+			//		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
+			problemSets.add(new OpenMLProblemSet(1457)); // amazon
+			problemSets.add(new OpenMLProblemSet(1501)); // semeion
+			//		problemSets.add(new OpenMLProblemSet(149)); // CovP	okElec
+			//		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
+			problemSets.add(new OpenMLProblemSet(4136)); // dexter
+			problemSets.add(new OpenMLProblemSet(4137)); // dorothea
+			problemSets.add(new OpenMLProblemSet(40668)); // connect-4
+			problemSets.add(new OpenMLProblemSet(1590)); // adult
+			problemSets.add(new OpenMLProblemSet(182)); // satimage
+			problemSets.add(new OpenMLProblemSet(24)); // mushroom
+			problemSets.add(new OpenMLProblemSet(39)); // ecoli
+			problemSets.add(new OpenMLProblemSet(44)); // spambase
+			problemSets.add(new OpenMLProblemSet(60)); // waveform-5000
+			problemSets.add(new OpenMLProblemSet(61)); // iris
+			problemSets.add(new OpenMLProblemSet(9)); // autos
+			problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic
+			problemSets.add(new OpenMLProblemSet(1104)); // leukemia
+			problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
+			//		problemSets.add(new OpenMLProblemSet(554)); // mnist
+			//		problemSets.add(new OpenMLProblemSet(155)); // pokerhand
+			problemSets.add(new OpenMLProblemSet(40691)); // winequality
+			//		problemSets.add(new OpenMLProblemSet(41026)); // gisette
+			//		problemSets.add(new OpenMLProblemSet(41065)); // mnist-rotate
+			problemSets.add(new OpenMLProblemSet(41066)); // secom
 
-		OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
-		for (int i = 0; i < data.length; i++) {
-			data[i][0] = problemSets.get(i);
+			OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
+			for (int i = 0; i < data.length; i++) {
+				data[i][0] = problemSets.get(i);
+			}
+			return Arrays.asList(data);
 		}
-		return Arrays.asList(data);
+		catch (Exception e) {
+			throw new DatasetDeserializationFailedException(e);
+		}
 	}
 
 	@Parameter(0)
@@ -100,10 +108,9 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 	}
 
 	@Test
-	public void testThatModelIsTrained() throws Exception {
+	public void testThatModelIsTrained() throws DatasetDeserializationFailedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ObjectEvaluationFailedException, SplitFailedException {
 		try {
 			assertTrue("There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks(), GlobalTimer.getInstance().getActiveTasks().isEmpty());
-			System.gc();
 			assertFalse("The thread should not be interrupted when calling the AutoML-tool!", Thread.currentThread().isInterrupted());
 
 			/* load dataset and get splits */

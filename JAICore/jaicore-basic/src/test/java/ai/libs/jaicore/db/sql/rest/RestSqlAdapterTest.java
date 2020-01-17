@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.aeonbits.owner.ConfigFactory;
-import org.apache.http.client.ClientProtocolException;
 import org.api4.java.datastructure.kvstore.IKVStore;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -23,7 +22,6 @@ public class RestSqlAdapterTest extends Tester {
 	public static final String VAR_DB_HOST = "AILIBS_JAICORE_DB_REST_DB_HOST";
 	public static final String VAR_DB_TOKEN = "AILIBS_JAICORE_DB_REST_DB_TOKEN";
 
-	private static IRestDatabaseConfig config;
 	private static RestSqlAdapter adapter;
 
 	private static final String SELECT_TABLE = "test_select_table";
@@ -32,7 +30,7 @@ public class RestSqlAdapterTest extends Tester {
 
 	@BeforeClass
 	public static void setup() throws IOException {
-		config = ConfigFactory.create(IRestDatabaseConfig.class, FileUtil.readPropertiesFile(new File("testrsc/test.restSqlAdapter.properties")));
+		IRestDatabaseConfig config = ConfigFactory.create(IRestDatabaseConfig.class, FileUtil.readPropertiesFile(new File("testrsc/test.restSqlAdapter.properties")));
 		if (config.getHost() == null || config.getHost().trim().isEmpty()) {
 			String val = System.getenv(VAR_DB_HOST);
 			LOGGER.info("Reading host from environment variable {}. Value: {}", VAR_DB_HOST, val);
@@ -67,7 +65,7 @@ public class RestSqlAdapterTest extends Tester {
 	}
 
 	@Test
-	public void testInsertQuery() throws ClientProtocolException, IOException, SQLException {
+	public void testInsertQuery() throws SQLException {
 		int numEntriesBefore = this.numEntries(DELETE_FROM_INSERT_TABLE);
 		adapter.insert("INSERT INTO " + DELETE_FROM_INSERT_TABLE + " (y) VALUES (2)");
 		int numEntriesAfter = this.numEntries(DELETE_FROM_INSERT_TABLE);
@@ -75,7 +73,7 @@ public class RestSqlAdapterTest extends Tester {
 	}
 
 	@Test
-	public void testRemoveEntryQuery() throws ClientProtocolException, IOException, SQLException {
+	public void testRemoveEntryQuery() throws SQLException {
 		int numEntriesBefore = this.numEntries(DELETE_FROM_INSERT_TABLE);
 		adapter.insert("DELETE FROM " + DELETE_FROM_INSERT_TABLE + " LIMIT 1");
 		int numEntriesAfter = this.numEntries(DELETE_FROM_INSERT_TABLE);
@@ -83,16 +81,16 @@ public class RestSqlAdapterTest extends Tester {
 	}
 
 	@Test
-	public void testCreateAndDropTable() throws ClientProtocolException, IOException, SQLException {
-		System.out.println("Create table...");
+	public void testCreateAndDropTable() throws SQLException {
+		this.logger.info("Create table...");
 		adapter.query("CREATE TABLE " + CREATE_DROP_TABLE + " (a VARCHAR(1))");
-		System.out.println("Insert into table...");
+		this.logger.info("Insert into table...");
 		adapter.insert("INSERT INTO " + CREATE_DROP_TABLE + " (a) VALUES ('x')");
 		assertTrue("Table could not be created correctly", this.numEntries(CREATE_DROP_TABLE) > 0);
 		adapter.query("DROP TABLE " + CREATE_DROP_TABLE);
 	}
 
-	public int numEntries(final String table) throws ClientProtocolException, IOException, SQLException {
+	public int numEntries(final String table) throws SQLException {
 		return adapter.select("SELECT * FROM " + table).size();
 	}
 
