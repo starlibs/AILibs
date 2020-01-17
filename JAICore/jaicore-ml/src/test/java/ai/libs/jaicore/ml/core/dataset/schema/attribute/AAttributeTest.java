@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 import org.junit.Test;
 
 public abstract class AAttributeTest {
@@ -15,6 +16,27 @@ public abstract class AAttributeTest {
 	public abstract Collection<?> getValuesThatMustBeContained();
 
 	public abstract IAttribute getTestedAttribute();
+
+	public abstract Object getExampleObject();
+
+	public abstract IAttributeValue getExampleAttributeValue();
+
+	public abstract String getExampleSerialization();
+
+	@Test
+	public void testObjectSerialization() {
+		assertEquals(this.getExampleSerialization(), this.getTestedAttribute().serializeAttributeValue(this.getExampleObject()));
+	}
+
+	@Test
+	public void testAttributeValueSerialization() {
+		assertEquals(this.getExampleSerialization(), this.getTestedAttribute().serializeAttributeValue(this.getExampleAttributeValue()));
+	}
+
+	@Test
+	public void testDeserialization() {
+		assertEquals(this.getExampleObject(), this.getTestedAttribute().deserializeAttributeValue(this.getExampleSerialization()));
+	}
 
 	@Test
 	public void testNameOfAttribute() {

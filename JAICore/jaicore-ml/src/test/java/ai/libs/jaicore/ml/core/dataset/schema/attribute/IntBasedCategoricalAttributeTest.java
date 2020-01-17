@@ -7,10 +7,11 @@ import java.util.Collection;
 import java.util.List;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class NominalAttributeTest extends AAttributeTest {
+public class IntBasedCategoricalAttributeTest extends AAttributeTest {
 
 	private static final String ATTRIBUTE_NAME = "myNominalAttribute";
 	private static final List<Integer> KEYS = Arrays.asList(0, 1, 2, 3, 4);
@@ -36,6 +37,21 @@ public class NominalAttributeTest extends AAttributeTest {
 	@Override
 	public IAttribute getTestedAttribute() {
 		return attributeToTest;
+	}
+
+	@Override
+	public Object getExampleObject() {
+		return 1;
+	}
+
+	@Override
+	public IAttributeValue getExampleAttributeValue() {
+		return new IntBasedCategoricalAttributeValue(attributeToTest, 1);
+	}
+
+	@Override
+	public String getExampleSerialization() {
+		return "b";
 	}
 
 	@Test

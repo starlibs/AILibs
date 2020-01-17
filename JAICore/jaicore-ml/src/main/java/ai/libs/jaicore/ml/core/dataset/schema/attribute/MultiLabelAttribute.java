@@ -1,13 +1,18 @@
 package ai.libs.jaicore.ml.core.dataset.schema.attribute;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IMultiLabelAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IMultiLabelAttributeValue;
 
+import ai.libs.jaicore.basic.sets.SetUtil;
+
 public class MultiLabelAttribute extends ACollectionOfObjectsAttribute<String> implements IMultiLabelAttribute {
+
+	public static final String MULTI_LABEL_VALUE_SEP = "&";
 
 	/**
 	 *
@@ -23,8 +28,8 @@ public class MultiLabelAttribute extends ACollectionOfObjectsAttribute<String> i
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean isValidValue(final Object value) {
-		if ((value instanceof Set<?> && ((Set<?>) value).iterator().next() instanceof String)) {
-			return this.domain.containsAll((Set<String>) value);
+		if ((value instanceof Collection<?> && ((Collection<?>) value).iterator().next() instanceof String)) {
+			return this.domain.containsAll((Collection<String>) value);
 		} else if (value instanceof IMultiLabelAttributeValue) {
 			return this.domain.containsAll(((IMultiLabelAttributeValue) value).getValue());
 		} else {
@@ -34,7 +39,7 @@ public class MultiLabelAttribute extends ACollectionOfObjectsAttribute<String> i
 
 	@Override
 	public String getStringDescriptionOfDomain() {
-		return "MultiValuedNominalAttribute " + this.getName() + " " + this.domain;
+		return "MultiLabelAttribute " + this.getName() + " " + this.domain;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -72,12 +77,13 @@ public class MultiLabelAttribute extends ACollectionOfObjectsAttribute<String> i
 
 	@Override
 	public String serializeAttributeValue(final Object value) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+		Collection<String> typeInstance = this.getValueAsTypeInstance(value);
+		return SetUtil.implode(typeInstance, MULTI_LABEL_VALUE_SEP);
 	}
 
 	@Override
 	public Object deserializeAttributeValue(final String string) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+		return Arrays.stream(string.split(MULTI_LABEL_VALUE_SEP)).collect(Collectors.toSet());
 	}
 
 	@Override

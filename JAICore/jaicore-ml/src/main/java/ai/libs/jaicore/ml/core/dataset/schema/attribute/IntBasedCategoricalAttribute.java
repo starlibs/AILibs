@@ -1,9 +1,13 @@
 package ai.libs.jaicore.ml.core.dataset.schema.attribute;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttributeValue;
+
+import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class IntBasedCategoricalAttribute extends AAttribute implements ICategoricalAttribute {
 
@@ -59,17 +63,19 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		if (!this.isValidValue(attributeValue)) {
 			throw new IllegalArgumentException("No valid attribute value.");
 		}
-		return this.domain.indexOf(this.getLabelOfAttributeValue(attributeValue)) + 1.0;
+		return this.domain.indexOf(this.getLabelOfAttributeValue(attributeValue));
 	}
 
 	@Override
 	public String decodeValue(final double encodedAttributeValue) {
-		return this.domain.get((int) encodedAttributeValue - 1);
+		return this.domain.get((int) encodedAttributeValue);
 	}
 
 	private String getLabelOfAttributeValue(final Object object) {
 		if (object instanceof ICategoricalAttributeValue) {
 			return this.domain.get(((ICategoricalAttributeValue) object).getValue());
+		} else if (object instanceof Integer) {
+			return this.domain.get((int) object);
 		} else if (object instanceof String) {
 			return (String) object;
 		} else {
@@ -112,10 +118,10 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		if (value == null) {
 			return MISSING_VALUE;
 		}
-		if (!(value instanceof Integer)) {
+		if (!((value instanceof Integer) || (value instanceof IntBasedCategoricalAttributeValue))) {
 			throw new IllegalArgumentException("Can only serialize the integer representation of a category.");
 		}
-		return this.domain.get((Integer) value);
+		return this.getLabelOfAttributeValue(value);
 	}
 
 	@Override
@@ -169,5 +175,13 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 			return false;
 		}
 		return this.numCategories == other.numCategories;
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("domain", this.domain);
+		fields.put("numCategories", this.numCategories);
+		return ToJSONStringUtil.toJSONString(IntBasedCategoricalAttribute.class.getName(), fields);
 	}
 }

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 import org.junit.BeforeClass;
 
 public class NumericAttributeTest extends AAttributeTest {
@@ -30,6 +31,24 @@ public class NumericAttributeTest extends AAttributeTest {
 	@Override
 	public IAttribute getTestedAttribute() {
 		return attributeToTest;
+	}
+
+	@Override
+	public Object getExampleObject() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IAttributeValue getExampleAttributeValue() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getExampleSerialization() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

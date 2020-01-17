@@ -1,7 +1,12 @@
 package ai.libs.jaicore.ml.core.dataset.schema.attribute;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttributeValue;
+
+import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class IntBasedCategoricalAttributeValue implements ICategoricalAttributeValue {
 
@@ -25,6 +30,15 @@ public class IntBasedCategoricalAttributeValue implements ICategoricalAttributeV
 	@Override
 	public ICategoricalAttribute getAttribute() {
 		return this.attribute;
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("attribute", this.attribute);
+		fields.put("value", this.value);
+
+		return ToJSONStringUtil.toJSONString(this.getClass().getName(), fields);
 	}
 
 }
