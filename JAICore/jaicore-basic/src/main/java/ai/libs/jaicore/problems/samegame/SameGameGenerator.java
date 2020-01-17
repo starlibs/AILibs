@@ -13,9 +13,8 @@ public class SameGameGenerator {
 		int i = 0;
 		byte[][] board = new byte[rows][cols];
 		for (int row = rows - 1; row >= 0 && i < maxPieces; row --) {
-			for (int col = 0; col < cols && i < maxPieces; col ++) {
+			for (int col = 0; col < cols && i < maxPieces; col ++, i++) {
 				board[row][col] = (byte)(random.nextInt(numColors) + 1);
-				i++;
 			}
 		}
 		return new SameGameState(board);

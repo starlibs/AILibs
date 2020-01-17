@@ -89,8 +89,6 @@ public class OpenShopTest {
 	@Test
 	public void testProblemBuildship() {
 		OpenShopProblem problem = problemBuilder.fork().withMetric(OpenShopMetric.TOTALFLOWTIME).build();
-		problem.printWorkcenters();
-		problem.printJobs();
 		System.out.println(solution.getAsString());
 		assertEquals(7, problem.getOperations().size());
 		assertEquals(5, problem.getMachines().size());

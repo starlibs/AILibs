@@ -9,7 +9,7 @@ public class CircleLocationGenerator implements ITSPLocationGenerator {
 
 	@Override
 	public List<Location> getLocations(final int n, final double centerX, final double centerY, final double radius, final double minDistance) {
-		return null;
+		throw new UnsupportedOperationException("Not yet implemented.");
 	}
 
 }

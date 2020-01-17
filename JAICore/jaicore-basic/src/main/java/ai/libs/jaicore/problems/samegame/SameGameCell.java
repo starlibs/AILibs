@@ -42,10 +42,7 @@ public class SameGameCell {
 		if (this.col != other.col) {
 			return false;
 		}
-		if (this.row != other.row) {
-			return false;
-		}
-		return true;
+		return this.row == other.row;
 	}
 
 	@Override

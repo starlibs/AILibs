@@ -37,11 +37,11 @@ public class Schedule {
 			/* get times when job can arrive at the machine and time when machine can start to consider the job */
 			Machine m = p.getY();
 			Operation o = p.getX();
-			int timeWhenMachineBecomesAvailableForOperation = machineReadyness.computeIfAbsent(m, machine -> machine.getAvailableDate());
-			int timeWhenJobArrivesAtMachine = jobReadyness.computeIfAbsent(o.getJob(), j -> j.getReleaseDate()); // maybe add travel time here
+			int timeWhenMachineBecomesAvailableForOperation = machineReadyness.computeIfAbsent(m, Machine::getAvailableDate);
+			int timeWhenJobArrivesAtMachine = jobReadyness.computeIfAbsent(o.getJob(), Job::getReleaseDate); // maybe add travel time here
 
 			/* compute required setup time */
-			int actualMachineState = machineStates.computeIfAbsent(m, machine -> machine.getInitialState());
+			int actualMachineState = machineStates.computeIfAbsent(m, Machine::getInitialState);
 			int requiredMachineState = o.getStatus();
 			int setupTime = (actualMachineState == requiredMachineState) ? 0 : m.getWorkcenter().getSetupMatrix()[actualMachineState][requiredMachineState];
 			int timeWhenMachineIsReadyToProcessOperation = timeWhenMachineBecomesAvailableForOperation + setupTime;
@@ -70,7 +70,7 @@ public class Schedule {
 	}
 
 	public List<Operation> getOrderOfOperationsForJob(final Job job) {
-		return this.assignments.stream().map(p -> p.getX()).filter(o -> o.getJob().equals(job)).collect(Collectors.toList());
+		return this.assignments.stream().map(Pair::getX).filter(o -> o.getJob().equals(job)).collect(Collectors.toList());
 	}
 
 	public int getStartTimeOfOperation(final Operation o) {
@@ -90,11 +90,10 @@ public class Schedule {
 	}
 
 	public int getJobFinishTime(final Job job) {
-		return job.getOperations().stream().map(o -> this.getEndTimeOfOperation(o)).max((t1,t2) -> Double.compare(t1, t2)).get();
+		return job.getOperations().stream().map(this::getEndTimeOfOperation).max(Double::compare).get();
 	}
 
 	/**
-	 * @TODO This is from Gonzalo's implementation, but is this really correct? Probably we have to reduce the release time
 	 *
 	 * @param job
 	 * @return
@@ -109,7 +108,7 @@ public class Schedule {
 
 	public String getAsString() {
 		StringBuilder sb = new StringBuilder();
-		List<Workcenter> workcenters = this.assignmentPerMachine.keySet().stream().map(m -> m.getWorkcenter()).collect(Collectors.toSet()).stream().sorted((w1,w2) -> w1.getWorkcenterID().compareTo(w2.getWorkcenterID())).collect(Collectors.toList());
+		List<Workcenter> workcenters = this.assignmentPerMachine.keySet().stream().map(Machine::getWorkcenter).collect(Collectors.toSet()).stream().sorted((w1,w2) -> w1.getWorkcenterID().compareTo(w2.getWorkcenterID())).collect(Collectors.toList());
 		for (Workcenter wc : workcenters) {
 			sb.append("-------------------------------------------------------------------------------------------------\n");
 			sb.append(wc.getWorkcenterID());
@@ -140,7 +139,7 @@ public class Schedule {
 
 	public String getGanttAsString() {
 		StringBuilder sb = new StringBuilder();
-		List<Workcenter> workcenters = this.assignmentPerMachine.keySet().stream().map(m -> m.getWorkcenter()).collect(Collectors.toSet()).stream().sorted((w1,w2) -> w1.getWorkcenterID().compareTo(w2.getWorkcenterID())).collect(Collectors.toList());
+		List<Workcenter> workcenters = this.assignmentPerMachine.keySet().stream().map(Machine::getWorkcenter).collect(Collectors.toSet()).stream().sorted((w1,w2) -> w1.getWorkcenterID().compareTo(w2.getWorkcenterID())).collect(Collectors.toList());
 		for (Workcenter wc : workcenters) {
 			sb.append("-------------------------------------------------------------------------------------------------\n");
 			sb.append(wc.getWorkcenterID());
@@ -153,7 +152,7 @@ public class Schedule {
 					StringBuilder opSB = new StringBuilder();
 					int lastStatus = m.getInitialState();
 					for (Operation o : ops) {
-						System.out.println(lastStatus + " -> " + o.getStatus() + ": " + m.getWorkcenter().getSetupMatrix()[lastStatus][o.getStatus()]);
+						sb.append(lastStatus + " -> " + o.getStatus() + ": " + m.getWorkcenter().getSetupMatrix()[lastStatus][o.getStatus()]);
 
 						boolean needsSetup = m.getWorkcenter().getSetupMatrix()[lastStatus][o.getStatus()] != 0;
 						lastStatus = o.getStatus();
@@ -161,10 +160,10 @@ public class Schedule {
 						int setupEndTime = this.setupEndTimes.get(o);
 						int startTime = this.startTimes.get(o);
 						int endTime = this.endTimes.get(o);
-						System.out.println(o.getName() +" (" + m.getMachineID() + "): " + setupStartTime + ", " + setupEndTime + ", " + startTime  + ", " + endTime);
+						sb.append(o.getName() +" (" + m.getMachineID() + "): " + setupStartTime + ", " + setupEndTime + ", " + startTime  + ", " + endTime);
 
 						/*  */
-						System.out.println(needsSetup);
+						sb.append(needsSetup);
 						if (needsSetup) {
 							while (curTime < setupStartTime) {
 								sb.append(" ");

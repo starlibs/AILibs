@@ -14,7 +14,6 @@ public class SameGameStateChecker {
 					SameGameCell cell = new SameGameCell(row, col);
 					int matchingBlocks = blocks.stream().filter(b -> b.contains(cell)).collect(Collectors.toList()).size();
 					if (matchingBlocks != 1) {
-						System.err.println("Cell " + cell + " with color " + board[row][col] + " occurs in " + matchingBlocks + " blocks!") ;
 						return false;
 					}
 				}

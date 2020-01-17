@@ -1,7 +1,7 @@
 package ai.libs.jaicore.problems.scheduling.openshop;
 
 import java.util.Random;
-import java.util.function.BiFunction;
+import java.util.function.IntBinaryOperator;
 
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
@@ -14,7 +14,7 @@ public class OpenShopProblemGenerator {
 	private AbstractRealDistribution distributionOfMachinesPerWorkcenter = new NormalDistribution(3, 1);
 	private int numJobs = 0;
 	private AbstractRealDistribution distributionOfOperationsPerJob = new NormalDistribution(3, 1);
-	private BiFunction<Integer, Integer, Integer> setupTimeGenerator = (i1, i2) -> Math.abs(i1 - i2);
+	private IntBinaryOperator setupTimeGenerator = (i1, i2) -> Math.abs(i1 - i2);
 	private AbstractRealDistribution distributionOfToolsInWorkcenter = new NormalDistribution(3, 1);
 	private AbstractRealDistribution distributionOfMachineAvailability = new NormalDistribution(5, 3);
 	private AbstractRealDistribution distributionOfJobReleases= new UniformRealDistribution(0, 20);
@@ -53,7 +53,7 @@ public class OpenShopProblemGenerator {
 			int[][] setupMatrix = new int[numTools][numTools];
 			for (int j = 0; j < numTools; j++) {
 				for (int k = 0; k < numTools; k++) {
-					setupMatrix[j][k] = this.setupTimeGenerator.apply(j, k);
+					setupMatrix[j][k] = this.setupTimeGenerator.applyAsInt(j, k);
 				}
 			}
 			String wcName = "WC" + (i + 1);

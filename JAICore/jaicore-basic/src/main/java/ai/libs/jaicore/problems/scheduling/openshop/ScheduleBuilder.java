@@ -50,7 +50,7 @@ public class ScheduleBuilder {
 
 
 	public Schedule build() {
-		Collection<Operation> unassignedOperations = SetUtil.difference(this.assignments.stream().map(p -> p.getX()).collect(Collectors.toSet()), this.problem.getOperations().values());
+		Collection<Operation> unassignedOperations = SetUtil.difference(this.assignments.stream().map(Pair::getX).collect(Collectors.toSet()), this.problem.getOperations().values());
 		if (!unassignedOperations.isEmpty()) {
 			throw new UnsupportedOperationException("Cannot create partial schedules at the moment.");
 		}

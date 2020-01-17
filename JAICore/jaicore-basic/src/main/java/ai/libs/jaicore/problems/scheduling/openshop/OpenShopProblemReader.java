@@ -3,7 +3,9 @@ package ai.libs.jaicore.problems.scheduling.openshop;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import ai.libs.jaicore.basic.FileUtil;
 
@@ -12,6 +14,10 @@ import ai.libs.jaicore.basic.FileUtil;
  *
  */
 public class OpenShopProblemReader {
+
+	private OpenShopProblemReader() {
+		/* avoids instantiation */
+	}
 
 	public static OpenShopProblem getFromJobFileWithoutSetupTimesAndWithOneMachinePerWorkcenter(final File jobFile, final OpenShopMetric metric) throws IOException {
 
@@ -136,16 +142,16 @@ public class OpenShopProblemReader {
 		 * 2nd line is number of work centers
 		 * following lines define the matrix where [i][j] is the process time of the operation i, which is to be realized in work center j
 		 **/
-		List<String> jobFileLines = FileUtil.readFileAsList(jobFile);
-		final int numJobs = Integer.parseInt(jobFileLines.remove(0));
-		final int numWorkcentersHere = Integer.parseInt(jobFileLines.remove(0));
+		Queue<String> jobFileLines = new LinkedList<>(FileUtil.readFileAsList(jobFile));
+		final int numJobs = Integer.parseInt(jobFileLines.poll());
+		final int numWorkcentersHere = Integer.parseInt(jobFileLines.poll());
 		if (numWorkcentersDefinedInBuilder != numWorkcentersHere) {
 			throw new IllegalArgumentException("Number of work centers in setup file is " + numWorkcentersDefinedInBuilder + " but in job description is " + numWorkcentersHere);
 		}
 		int opIndex = 1;
 		for (int i = 0; i < numJobs; i++) {
 			String jobId = "J" + (i + 1);
-			String line = jobFileLines.remove(0);
+			String line = jobFileLines.poll();
 			String[] processTimeParts = line.replace("|", " ").trim().split(" ");
 			if (processTimeParts.length != (numWorkcentersDefinedInBuilder)) { // add one field for the first and last pipe respectively
 				throw new IllegalArgumentException("Ill-defined job specification \"" + line + "\" for " + numWorkcentersDefinedInBuilder + " work centers. Split length is " + processTimeParts.length + ": " + Arrays.toString(processTimeParts));
