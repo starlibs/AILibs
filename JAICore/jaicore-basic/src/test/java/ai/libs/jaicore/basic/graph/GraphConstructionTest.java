@@ -60,13 +60,13 @@ public class GraphConstructionTest {
 	public void testThatNewNodesAreSources() {
 		String node1 = "a";
 		Graph<String> g = new Graph<>();
-		g.getSources().contains(node1);
+		assertTrue(g.getSources().contains(node1));
 	}
 
 	@Test
 	public void testThatNewNodesAreSinks() {
 		String node1 = "a";
 		Graph<String> g = new Graph<>();
-		g.getSinks().contains(node1);
+		assertTrue(g.getSinks().contains(node1));
 	}
 }

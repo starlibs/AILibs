@@ -1,5 +1,7 @@
 package ai.libs.jaicore.math.probability.pl;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,6 +36,6 @@ public class PLTester {
 		PLInferenceProblemEncoder encoder = new PLInferenceProblemEncoder();
 		PLInferenceProblem prob = encoder.encode(rankings);
 		PLMMAlgorithm algo = new PLMMAlgorithm(prob);
-		System.out.println(algo.call());
+		assertNotNull(algo.call());
 	}
 }

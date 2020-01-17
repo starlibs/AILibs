@@ -16,7 +16,7 @@ public class LinearlyScaledFunction implements DoubleFunction<Double> {
 	@Override
 	public Double apply(final double arg0) {
 		double intermediate = this.baseFunction.apply(arg0);
-		return this.mapping.apply(intermediate);
+		return this.mapping.applyAsDouble(intermediate);
 	}
 
 	public AffineFunction getMapping() {

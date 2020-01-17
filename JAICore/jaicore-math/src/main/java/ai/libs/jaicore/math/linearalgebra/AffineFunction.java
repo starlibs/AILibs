@@ -2,9 +2,9 @@ package ai.libs.jaicore.math.linearalgebra;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
-public class AffineFunction implements Function<Number, Double> {
+public class AffineFunction implements ToDoubleFunction<Number> {
 
 	private final double a;
 	private final double b;
@@ -26,7 +26,6 @@ public class AffineFunction implements Function<Number, Double> {
 		}
 		this.a = (y1 - y2) / (x1 - x2);
 		this.b = y1 - this.a * x1;
-		//		System.out.println("Affine function for (" + x1 + ", " + y1 +") and ("+ x2 + ", " + y2 +") is " + this.a + " * x + " + this.b);
 	}
 
 	public double getA() {
@@ -38,7 +37,7 @@ public class AffineFunction implements Function<Number, Double> {
 	}
 
 	@Override
-	public Double apply(final Number t) {
+	public double applyAsDouble(final Number t) {
 		if (t instanceof BigDecimal) {
 			return ((BigDecimal) t).multiply(BigDecimal.valueOf(this.a)).add(BigDecimal.valueOf(this.b)).doubleValue();
 		}

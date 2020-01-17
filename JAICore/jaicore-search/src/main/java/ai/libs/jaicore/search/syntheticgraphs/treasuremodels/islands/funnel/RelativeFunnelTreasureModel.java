@@ -22,11 +22,11 @@ public class RelativeFunnelTreasureModel extends AIslandTreasureModel {
 	private final Set<BigInteger> indicesOfIslands = new HashSet<>();
 	private final int seed;
 
-	private final double plateauMinForTreasures = .8;
-	private final double plateauMaxForTreasures = 1;
-	private final double plateauMinForNonTreasures = .5;
-	private final double plateauMaxForNonTreasures = .8;
-	private final double plateauSizes = 0.8; // portion of the island that is plateau
+	private final double plateauMinForTreasures;
+	private final double plateauMaxForTreasures;
+	private final double plateauMinForNonTreasures;
+	private final double plateauMaxForNonTreasures;
+	private final double plateauSizes;
 
 	private double minimumAchievable = Double.MAX_VALUE;
 
@@ -40,10 +40,20 @@ public class RelativeFunnelTreasureModel extends AIslandTreasureModel {
 		return plateau - this.getDepthOfFunnel(plateau);
 	}
 
-	public RelativeFunnelTreasureModel(final IIslandModel islandModel, final int numberOfTreasureIslands, final Random random) {
+	public RelativeFunnelTreasureModel(final IIslandModel islandModel, final int numberOfTreasureIslands, final int seed, final double plateauMinForTreasures, final double plateauMaxForTreasures, final double plateauMinForNonTreasures, final double plateauMaxForNonTreasures,
+			final double plateauSizes) {
 		super(islandModel);
 		this.numberOfTreasureIslands = numberOfTreasureIslands;
-		this.seed = random.nextInt();
+		this.seed = seed;
+		this.plateauMinForTreasures = plateauMinForTreasures;
+		this.plateauMaxForTreasures = plateauMaxForTreasures;
+		this.plateauMinForNonTreasures = plateauMinForNonTreasures;
+		this.plateauMaxForNonTreasures = plateauMaxForNonTreasures;
+		this.plateauSizes = plateauSizes;
+	}
+
+	public RelativeFunnelTreasureModel(final IIslandModel islandModel, final int numberOfTreasureIslands, final Random random) {
+		this(islandModel, numberOfTreasureIslands, random.nextInt(), .8, 1, .5, .8, .8);
 	}
 
 	private void distributeTreasures() {
@@ -61,9 +71,6 @@ public class RelativeFunnelTreasureModel extends AIslandTreasureModel {
 			this.plateausOfIslands.put(island, plateauOfThisIsland);
 			this.minimumAchievable = Math.min(this.minimumAchievable, this.getMinimumOfFunnel(plateauOfThisIsland));
 		}
-		System.out.println("Treasures start");
-		this.plateausOfIslands.forEach((i, s) -> System.out.println("\t" + i + ": " + s + ". Minimal value here: " + this.getMinimumOfFunnel(s)));
-		System.out.println("Treasures end");
 	}
 
 	@Override
@@ -76,7 +83,6 @@ public class RelativeFunnelTreasureModel extends AIslandTreasureModel {
 		BigInteger island = this.getIslandModel().getIsland(path);
 		if (!this.plateausOfIslands.containsKey(island)) {
 			this.plateausOfIslands.put(island, this.plateauMinForNonTreasures + (this.plateauMaxForNonTreasures - this.plateauMinForNonTreasures) * new Random(path.hashCode() * (long)this.seed).nextDouble());
-			// System.out.println("\t" + island + ": " + this.plateausOfIslands.get(island));
 		}
 		double plateauOfIsland = this.plateausOfIslands.get(island);
 
@@ -100,9 +106,9 @@ public class RelativeFunnelTreasureModel extends AIslandTreasureModel {
 		if (positionOnIsland.compareTo(c1.toBigInteger()) <= 0 || positionOnIsland.compareTo(c2.toBigInteger()) > 0) {
 			val = plateauOfIsland;
 		} else if (positionOnIsland.compareTo(median.toBigInteger()) <= 0) {
-			val = new AffineFunction(c1, BigDecimal.valueOf(plateauOfIsland), median, minimumOfFunnel).apply(positionOnIsland);
+			val = new AffineFunction(c1, BigDecimal.valueOf(plateauOfIsland), median, minimumOfFunnel).applyAsDouble(positionOnIsland);
 		} else {
-			val = new AffineFunction(c2, BigDecimal.valueOf(plateauOfIsland), median, minimumOfFunnel).apply(positionOnIsland);
+			val = new AffineFunction(c2, BigDecimal.valueOf(plateauOfIsland), median, minimumOfFunnel).applyAsDouble(positionOnIsland);
 		}
 		return val;
 	}

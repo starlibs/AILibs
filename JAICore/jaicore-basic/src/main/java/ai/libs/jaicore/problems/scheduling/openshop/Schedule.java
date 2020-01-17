@@ -191,7 +191,6 @@ public class Schedule {
 						int spaceForLabeling = endTime - startTime;
 						int whiteSpace = Math.max(0, spaceForLabeling - o.getName().length());
 						int whiteSpaceLeft = whiteSpace / 2;
-						int whiteSpaceRight = whiteSpace - whiteSpaceLeft;
 						int startLabeling = startTime + whiteSpaceLeft;
 						while(curTime < startLabeling) {
 							sb.append(" ");

@@ -53,9 +53,10 @@ import ai.libs.jaicore.search.model.other.SearchGraphPath;
  */
 public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> implements IPolicy<N, A, V> {
 
+	private static final String MSG_ERROR_CURRENT = "Current does not coincide with the head of the current path!";
 	private static final String NODESTATE_ROLLOUT = "or_rollout";
 
-	private Logger logger = LoggerFactory.getLogger(MCTSPathSearch.class);
+	private Logger mctsLogger = LoggerFactory.getLogger(MCTSPathSearch.class);
 	private String loggerName;
 
 	/* graph structure */
@@ -72,7 +73,6 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 	private final Map<ILabeledPath<N, A>, V> scoreCache = new HashMap<>();
 
 	private final N root;
-	// private final Collection<N> nodesExplicitlyAdded = new HashSet<>();
 	private final Collection<N> visitedNodes = new HashSet<>();
 	private final Collection<N> unexpandedNodes = new HashSet<>();
 	protected final LabeledGraph<N, A> exploredGraph;
@@ -145,7 +145,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 	private ILabeledPath<N, A> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException, ActionPredictionFailedException {
 		long startPlayout = System.currentTimeMillis();
 		this.numberOfPlayouts++;
-		this.logger.debug("Computing a new playout ... (#{}). Best seen score up to now has been {}.", this.numberOfPlayouts, this.getBestSeenSolution() != null ? this.getBestSeenSolution().getScore() : null);
+		this.mctsLogger.debug("Computing a new playout ... (#{}). Best seen score up to now has been {}.", this.numberOfPlayouts, this.getBestSeenSolution() != null ? this.getBestSeenSolution().getScore() : null);
 		N current = this.root;
 		List<N> pathNodes = new ArrayList<>();
 		List<A> pathActions = new ArrayList<>();
@@ -163,7 +163,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 			assert this.exploredGraph.hasPath(this.enforcedPrefixPath.getNodes());
 			assert this.unexpandedNodes.contains(this.enforcedPrefixPath.getHead()) || !this.exploredGraph.getSuccessors(this.enforcedPrefixPath.getHead()).isEmpty();
 			assert this.enforcedPrefixPath.getPathToParentOfHead().getNodes().stream().noneMatch(this.unexpandedNodes::contains);
-			assert current == pathNodes.get(pathNodes.size() - 1) : "Current does not coincide with the head of the current path!";
+			assert current == pathNodes.get(pathNodes.size() - 1) : MSG_ERROR_CURRENT;
 		} else {
 			pathNodes.add(current);
 		}
@@ -174,16 +174,16 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 
 		/* the current path must be in the explored graph */
 		assert this.exploredGraph.hasPath(pathNodes) : "The current path is not in the explored graph: " + pathNodes.stream().map(n -> "\n\t" + n).collect(Collectors.joining());
-		assert current == pathNodes.get(pathNodes.size() - 1) : "Current does not coincide with the head of the current path!";
+		assert current == pathNodes.get(pathNodes.size() - 1) : MSG_ERROR_CURRENT;
 
 		/* Step 1 (Selection): chooses next node with tree policy until a node is reached that has at least one node that has not been part of any playout */
-		this.logger.debug("Step 1: Using tree policy to identify new path to not fully expanded node.");
+		this.mctsLogger.debug("Step 1: Using tree policy to identify new path to not fully expanded node.");
 		int level = 0;
 		while (childrenOfCurrent != null && SetUtil.differenceEmpty(childrenOfCurrent, this.visitedNodes)) {
 			assert this.exploredGraph.hasPath(pathNodes);
-			assert current == pathNodes.get(pathNodes.size() - 1) : "Current does not coincide with the head of the current path!";
+			assert current == pathNodes.get(pathNodes.size() - 1) : MSG_ERROR_CURRENT;
 
-			this.logger.debug("Step 1 (level {}): choose one of the {} successors {} of current node {}", level, childrenOfCurrent.size(), childrenOfCurrent, current);
+			this.mctsLogger.debug("Step 1 (level {}): choose one of the {} successors {} of current node {}", level, childrenOfCurrent.size(), childrenOfCurrent, current);
 
 			/* determine all actions applicable in this node that are not known to lead into a dead-end */
 			this.checkAndConductTermination();
@@ -191,11 +191,11 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 			Map<A, N> successorStates = new HashMap<>();
 			for (N child : childrenOfCurrent) {
 				if (this.deadLeafNodes.contains(child)) {
-					this.logger.trace("Ignoring child {}, which is known to be a dead end", child);
+					this.mctsLogger.trace("Ignoring child {}, which is known to be a dead end", child);
 					continue;
 				} else
 					if (this.fullyExploredNodes.contains(child)) {
-						this.logger.trace("Ignoring child {}, which has been fully explored.", child);
+						this.mctsLogger.trace("Ignoring child {}, which has been fully explored.", child);
 						continue;
 					}
 				A action = this.exploredGraph.getEdgeLabel(current, child);
@@ -215,9 +215,9 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 
 			/* if every applicable action is known to yield a dead-end, mark this node to be a dead-end itself and return */
 			if (availableActions.isEmpty()) {
-				this.logger.debug("Node {} has only dead-end successors and hence is a dead-end itself. Adding it to the list of dead ends.", current);
+				this.mctsLogger.debug("Node {} has only dead-end successors and hence is a dead-end itself. Adding it to the list of dead ends.", current);
 				if (current == this.exploredGraph.getRoot()) {
-					this.logger.info("No more action available in root node. Throwing exception.");
+					this.mctsLogger.info("No more action available in root node. Throwing exception.");
 					throw new NoSuchElementException();
 				}
 				this.deadLeafNodes.add(current);
@@ -228,7 +228,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 			if (availableActions.size() != successorStates.size()) {
 				throw new IllegalStateException("Number of available actions and successor states does not match! " + availableActions.size() + " available actions but " + successorStates.size() + " successor states. Actions: " + availableActions.stream().map(a -> "\n\t\t" + a + (a != null ? a.hashCode() : "")).collect(Collectors.joining()));
 			}
-			this.logger.debug("Now consulting tree policy. We have {} available actions of expanded node {}: {}. Corresponding {} successor states: {}", availableActions.size(), current, availableActions, successorStates.size(), successorStates);
+			this.mctsLogger.debug("Now consulting tree policy. We have {} available actions of expanded node {}: {}. Corresponding {} successor states: {}", availableActions.size(), current, availableActions, successorStates.size(), successorStates);
 			A chosenAction = this.treePolicy.getAction(current, successorStates);
 			if (chosenAction == null) {
 				throw new IllegalStateException("Chosen action must not be null!");
@@ -237,7 +237,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 			if (next == null) {
 				throw new IllegalStateException("Next action must not be null!");
 			}
-			this.logger.debug("Tree policy decides to expand {} taking action {} to {}", current, chosenAction, next);
+			this.mctsLogger.debug("Tree policy decides to expand {} taking action {} to {}", current, chosenAction, next);
 			current = next;
 			childrenOfCurrent = this.unexpandedNodes.contains(current) ? null : this.exploredGraph.getSuccessors(current);
 			pathNodes.add(current);
@@ -245,7 +245,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 
 			/* if the current path is a goal path, return it */
 			if (this.goalTester.isGoal(path)) {
-				this.logger.debug("Constructed complete solution with tree policy within {}ms.", System.currentTimeMillis() - startPlayout);
+				this.mctsLogger.debug("Constructed complete solution with tree policy within {}ms.", System.currentTimeMillis() - startPlayout);
 				this.treePolicyReachedLeafs = true;
 				this.propagateFullyKnownNodes(path.getHead());
 				return new SearchGraphPath<>(pathNodes, pathActions);
@@ -255,7 +255,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 		}
 
 		/* check current pointer */
-		assert current == pathNodes.get(pathNodes.size() - 1) : "Current does not coincide with the head of the current path!";
+		assert current == pathNodes.get(pathNodes.size() - 1) : MSG_ERROR_CURRENT;
 
 		/* the current path must be in the explored graph */
 		assert this.exploredGraph.hasPath(pathNodes) : "The current path is not in the explored graph: " + pathNodes.stream().map(n -> "\n\t" + n).collect(Collectors.joining());
@@ -269,21 +269,21 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 
 		/* if the current node has at least one child, all child nodes must have been marked as dead ends */
 		assert childrenOfCurrent == null || SetUtil.differenceNotEmpty(childrenOfCurrent, this.deadLeafNodes) : "Flag that current node is dead end is set, but there are successors that are not yet marked as dead-ends.";
-		this.logger.debug("Determined non-fully-expanded node {} of traversal tree using tree policy. Untried successors are: {}. Now selecting an untried successor.", current,
+		this.mctsLogger.debug("Determined non-fully-expanded node {} of traversal tree using tree policy. Untried successors are: {}. Now selecting an untried successor.", current,
 				childrenOfCurrent != null ? SetUtil.difference(childrenOfCurrent, this.visitedNodes) : "<not generated>");
 
 		/* Step 2 (Expansion): Use default policy to select one of the unvisited successors of the current node. If necessary, generate the successors first. */
 		this.checkAndConductTermination();
 		assert this.exploredGraph.getSources().size() == 1;
-		assert current == pathNodes.get(pathNodes.size() - 1) : "Current does not coincide with the head of the current path!";
+		assert current == pathNodes.get(pathNodes.size() - 1) : MSG_ERROR_CURRENT;
 
 		/* determine the unvisited child nodes of this node */
 		Map<A, N> untriedActionsAndTheirSuccessors = new HashMap<>();
 		if (this.unexpandedNodes.contains(current)) {
-			this.logger.trace("Step 2: This is the first time we visit this node, so compute its successors and add them to explicit graph model.");
+			this.mctsLogger.trace("Step 2: This is the first time we visit this node, so compute its successors and add them to explicit graph model.");
 			untriedActionsAndTheirSuccessors.putAll(this.expandNode(current, true));
 			if (untriedActionsAndTheirSuccessors.isEmpty()) {
-				this.logger.debug("Found a leaf with the tree policy.");
+				this.mctsLogger.debug("Found a leaf with the tree policy.");
 			}
 		} else {
 			for (N child : SetUtil.difference(childrenOfCurrent, this.visitedNodes)) {
@@ -292,12 +292,12 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 			}
 		}
 		assert this.exploredGraph.getSources().size() == 1;
-		assert current == pathNodes.get(pathNodes.size() - 1) : "Current does not coincide with the head of the current path!";
+		assert current == pathNodes.get(pathNodes.size() - 1) : MSG_ERROR_CURRENT;
 
 		/* choose the node expansion with the default policy */
-		this.logger.debug("Step 2: Using default policy to choose one of the {} untried actions {} of current node {}", untriedActionsAndTheirSuccessors.size(), untriedActionsAndTheirSuccessors.keySet(), current);
+		this.mctsLogger.debug("Step 2: Using default policy to choose one of the {} untried actions {} of current node {}", untriedActionsAndTheirSuccessors.size(), untriedActionsAndTheirSuccessors.keySet(), current);
 		if (!untriedActionsAndTheirSuccessors.isEmpty()) {
-			this.logger.trace("Asking default policy for action to take in node {}", current);
+			this.mctsLogger.trace("Asking default policy for action to take in node {}", current);
 			A chosenAction = this.defaultPolicy.getAction(current, untriedActionsAndTheirSuccessors);
 			current = untriedActionsAndTheirSuccessors.get(chosenAction);
 			assert this.unexpandedNodes.contains(current);
@@ -310,22 +310,22 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 			pathNodes.add(current);
 			pathActions.add(chosenAction);
 			assert this.exploredGraph.hasPath(pathNodes) : "The current path is not in the explored graph after having added the latest edge: " + pathNodes.stream().map(n -> "\n\t" + n).collect(Collectors.joining());
-			this.logger.debug("Selected {} as the untried action with successor state {}. Now completing rest playout from this situation.", chosenAction, current);
+			this.mctsLogger.debug("Selected {} as the untried action with successor state {}. Now completing rest playout from this situation.", chosenAction, current);
 		} else {
 			this.deadLeafNodes.add(current);
-			this.logger.debug("Found leaf node {}. Adding to dead end list.", current);
+			this.mctsLogger.debug("Found leaf node {}. Adding to dead end list.", current);
 			return this.getPlayout();
 		}
 
 		/* Step 3 (Simulation): use default policy to proceed to a goal node. Nodes won't be added to model variable here.
 		 * The invariant of the following loop is that the current node is always the last unexpanded node, and the path variable contains all nodes from root to the current one (including it).
 		 */
-		this.logger.debug("Step 3: Using default policy to create full path under {}.", current);
+		this.mctsLogger.debug("Step 3: Using default policy to create full path under {}.", current);
 		while (!this.goalTester.isGoal(path)) {
 			this.checkAndConductTermination();
 
 			Map<A, N> actionsAndTheirSuccessorStates = new HashMap<>();
-			this.logger.trace("Determining possible moves for {}.", current);
+			this.mctsLogger.trace("Determining possible moves for {}.", current);
 			actionsAndTheirSuccessorStates.putAll(this.expandNode(current, false));
 
 			/* if the default policy has led us into a state where we cannot do anything, stop playout */
@@ -341,24 +341,15 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 				}
 				pathNodes.add(current);
 				pathActions.add(chosenAction);
-				this.logger.debug("Step 3: Default policy chose action {} with successor node {}", chosenAction, current);
+				this.mctsLogger.debug("Step 3: Default policy chose action {} with successor node {}", chosenAction, current);
 			}
 			catch (NoSuchElementException e) {
-				this.logger.error("Node {} does not have any successors even though it is not a goal!", current);
+				this.mctsLogger.error("Node {} does not have any successors even though it is not a goal!", current);
 			}
 		}
 		this.checkThatPathIsSolution(path);
-		this.logger.debug("Drawn playout path after {}ms is: {}.", System.currentTimeMillis() - startPlayout, path);
-		// this.propagateFullyKnownNodes(current);
+		this.mctsLogger.debug("Drawn playout path after {}ms is: {}.", System.currentTimeMillis() - startPlayout, path);
 		return path;
-	}
-
-	private void closePath(final ILabeledPath<N, A> path) {
-		//		int n = path.getNumberOfNodes();
-		//		for (int i = n - 2; i > 0; i--) { // don't color the root and the leaf!
-		//			N node = path.getNodes().get(i);
-		//			//			this.post(new NodeTypeSwitchEvent<N>(this.getId(), node, this.fullyExploredNodes.contains(node) ? "or_exhausted" : "or_closed"));
-		//		}
 	}
 
 	/**
@@ -389,20 +380,20 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 	 */
 	private Map<A, N> expandNode(final N node, final boolean attachChildrenToExploredGraph) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		long startExpansion = System.currentTimeMillis();
-		this.logger.trace("Starting expansion of node {}", node);
+		this.mctsLogger.trace("Starting expansion of node {}", node);
 		this.checkAndConductTermination();
 		if (attachChildrenToExploredGraph) {
 			if (!this.unexpandedNodes.contains(node)) {
 				throw new IllegalArgumentException();
 			}
-			this.logger.trace("Situation {} has never been analyzed before, expanding the graph at the respective point.", node);
+			this.mctsLogger.trace("Situation {} has never been analyzed before, expanding the graph at the respective point.", node);
 			this.unexpandedNodes.remove(node);
 		}
 		Collection<INewNodeDescription<N, A>> availableActions;
 		availableActions = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node), "Successor generation", true);
 		long successorGenerationRuntime = System.currentTimeMillis() - startExpansion;
 		if (successorGenerationRuntime > 5) {
-			this.logger.warn("The successor generation runtime was {}ms for {} nodes.", successorGenerationRuntime, availableActions.size());
+			this.mctsLogger.warn("The successor generation runtime was {}ms for {} nodes.", successorGenerationRuntime, availableActions.size());
 		}
 
 		assert availableActions.stream().map(INewNodeDescription::getArcLabel).collect(Collectors.toList()).size() == availableActions.stream().map(INewNodeDescription::getArcLabel).collect(Collectors.toSet())
@@ -417,19 +408,18 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 						this.checkAndConductTermination();
 					}
 					successorStates.put(action, to);
-					this.logger.trace("Adding edge {} -> {} with label {}", node, to, action);
+					this.mctsLogger.trace("Adding edge {} -> {} with label {}", node, to, action);
 					if (attachChildrenToExploredGraph) {
 						this.exploredGraph.addItem(to);
 						this.unexpandedNodes.add(to);
 						this.exploredGraph.addEdge(node, to, action);
 					}
-					// this.post(new NodeAddedEvent<>(this.getId(), node, to, this.isGoal(to) ? "or_solution" : "or_open"));
 				}
 				long expansionRuntime = System.currentTimeMillis() - startAttachment;
 				if (expansionRuntime > 10) {
-					this.logger.warn("The attachment runtime for {} nodes was {}ms.", availableActions.size(), expansionRuntime);
+					this.mctsLogger.warn("The attachment runtime for {} nodes was {}ms.", availableActions.size(), expansionRuntime);
 				}
-				this.logger.debug("Node expansion finished. Returning {} successor states.", successorStates.size());
+				this.mctsLogger.debug("Node expansion finished. Returning {} successor states.", successorStates.size());
 				return successorStates;
 	}
 
@@ -451,11 +441,6 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 		N current = this.exploredGraph.getRoot();
 		List<N> pathNodes = path.getNodes();
 		assert current.equals(pathNodes.get(0)) : "The root of the path does not match the root of the graph!";
-		//		for (int i = 1; i < pathNodes.size(); i++) {
-		//			assert this.exploredGraph.getSuccessors(current).contains(pathNodes.get(i)) : "Invalid path. The " + i + "-th entry " + pathNodes.get(i) + " of the path " + path + " is not a successor of the " + (i - 1)
-		//			+ "-th node whose successors are " + this.exploredGraph.getSuccessors(current) + "!";
-		//			current = pathNodes.get(i);
-		//		}
 		assert !pathNodes.isEmpty() : "Solution paths cannot be empty!";
 		assert this.goalTester.isGoal(path) : "The head of a solution path must be a goal node, but this is not the case for this path: \n\t" + pathNodes.stream().map(N::toString).collect(Collectors.joining("\n\t"));
 	}
@@ -465,46 +450,40 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 		switch (this.getState()) {
 		case CREATED:
 			this.post(new GraphInitializedEvent<N>(this, this.root));
-			this.logger.info("Starting MCTS with node class {}", this.root.getClass().getName());
+			this.mctsLogger.info("Starting MCTS with node class {}", this.root.getClass().getName());
 			return this.activate();
 
 		case ACTIVE:
 			if (this.playoutSimulator == null) {
 				throw new IllegalStateException("no simulator has been set!");
 			}
-			this.logger.debug("Next algorithm iteration. Number of unexpanded nodes: {}", this.unexpandedNodes.size());
+			this.mctsLogger.debug("Next algorithm iteration. Number of unexpanded nodes: {}", this.unexpandedNodes.size());
 			try {
 				this.registerActiveThread();
 				while (this.getState() == EAlgorithmState.ACTIVE) {
 					this.checkAndConductTermination();
 
 					/* if the whole graph has been expanded and paths must not be visited more than once, terminate */
-					if (this.unexpandedNodes.isEmpty()) {
-						IAlgorithmEvent finishEvent = this.terminate();
-						this.logger.info("Finishing MCTS as all nodes have been expanded; the search graph has been exhausted.");
-						return finishEvent;
-					}
-
 					/* if the tree policy has touched a leaf node, quit */
-					else if (this.fullyExploredNodes.contains(this.root)) {
+					if (this.unexpandedNodes.isEmpty() || this.fullyExploredNodes.contains(this.root)) {
 						IAlgorithmEvent finishEvent = this.terminate();
-						this.logger.info("Finishing MCTS as all nodes have been expanded; the search graph has been exhausted.");
+						this.mctsLogger.info("Finishing MCTS as all nodes have been expanded; the search graph has been exhausted.");
 						return finishEvent;
 					}
 
 					/* otherwise, compute a playout and, if the path is a solution, compute its score and update the path */
 					else {
-						this.logger.debug("There are {} known unexpanded nodes. Starting computation of next playout path.", this.unexpandedNodes.size());
+						this.mctsLogger.debug("There are {} known unexpanded nodes. Starting computation of next playout path.", this.unexpandedNodes.size());
 						ILabeledPath<N, A> path = this.getPlayout();
 						ILabeledPath<N, A> subPathToLatestRegistered = this.getSubPathUpToDeepestRegisteredNode(path); // we back-propagate the observations only to nodes contained in the current model for the tree-policy
 						assert path != null : "The playout must never be null!";
 						assert this.exploredGraph.hasPath(subPathToLatestRegistered.getNodes()) : "Invalid playout, path not contained in explored graph!";
 						if (!this.scoreCache.containsKey(path)) {
-							this.logger.debug("Obtained path {}. Now starting computation of the score for this playout.", path);
+							this.mctsLogger.debug("Obtained path {}. Now starting computation of the score for this playout.", path);
 							try {
 								V playoutScore = this.playoutSimulator.evaluate(path);
 								boolean isSolutionPlayout = this.goalTester.isGoal(path);
-								this.logger.info("Determined playout score {}. Is goal: {}. Now updating the path of tree policy {}.", playoutScore, isSolutionPlayout, this.treePolicy);
+								this.mctsLogger.info("Determined playout score {}. Is goal: {}. Now updating the path of tree policy {}.", playoutScore, isSolutionPlayout, this.treePolicy);
 								this.scoreCache.put(path, playoutScore);
 								this.post(new RolloutEvent<>(this, path.getNodes(), this.scoreCache.get(path)));
 								this.treePolicy.updatePath(subPathToLatestRegistered, playoutScore, path.getNumberOfNodes());
@@ -520,31 +499,25 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 								this.post(new RolloutEvent<>(this, path.getNodes(), this.scoreCache.get(path)));
 								this.post(new NodeTypeSwitchEvent<>(this, path.getHead(), "or_ffail"));
 								this.treePolicy.updatePath(subPathToLatestRegistered, this.penaltyForFailedEvaluation, path.getNumberOfNodes());
-								this.logger.warn("Could not evaluate playout {}", e);
-							} finally {
-								this.closePath(path); // visualize that path rollout has been completed
+								this.mctsLogger.warn("Could not evaluate playout {}", e);
 							}
 						} else {
-							//							if (this.forbidDoublePaths) {
-							//								throw new IllegalStateException("Second time path " + path.getArcs() + " has been generated even though double paths are forbidden!");
-							//							}
 							V playoutScore = this.scoreCache.get(path);
 							String logMessage = "Drawn path {} a repeated time. Looking up the score in the cache {}. This should occur rarely, or the graph is so small that MCTS does not make sense.";
 							if (this.logDoublePathsAsWarnings) {
-								this.logger.warn(logMessage, path, playoutScore);
+								this.mctsLogger.warn(logMessage, path, playoutScore);
 							}
 							else {
-								this.logger.debug(logMessage, path, playoutScore);
+								this.mctsLogger.debug(logMessage, path, playoutScore);
 							}
 							this.treePolicy.updatePath(subPathToLatestRegistered, playoutScore, path.getNumberOfNodes());
-							this.closePath(path); // visualize that path rollout has been completed
 							this.post(new RolloutEvent<>(this, path.getNodes(), this.scoreCache.get(path)));
 						}
 					}
 
 				}
 			} catch (NoSuchElementException e) {
-				this.logger.info("No more playouts exist. Terminating.");
+				this.mctsLogger.info("No more playouts exist. Terminating.");
 				return this.terminate();
 			} catch (ActionPredictionFailedException e) {
 				throw new AlgorithmException("Step failed due to an exception in predicting an action when computing the playout.", e);
@@ -575,34 +548,34 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 
 	@Override
 	public void setLoggerName(final String name) {
-		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.mctsLogger.info("Switching logger from {} to {}", this.mctsLogger.getName(), name);
 		this.loggerName = name;
-		this.logger = LoggerFactory.getLogger(name);
-		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
+		this.mctsLogger = LoggerFactory.getLogger(name);
+		this.mctsLogger.info("Activated logger {} with name {}", name, this.mctsLogger.getName());
 		super.setLoggerName(this.loggerName + "._orgraphsearch");
 
 		/* set logger of graph generator */
 		if (this.graphGenerator instanceof ILoggingCustomizable) {
-			this.logger.info("Setting logger of graph generator to {}.graphgenerator", name);
+			this.mctsLogger.info("Setting logger of graph generator to {}.graphgenerator", name);
 			((ILoggingCustomizable) this.graphGenerator).setLoggerName(name + ".graphgenerator");
 		} else {
-			this.logger.info("Not setting logger of graph generator");
+			this.mctsLogger.info("Not setting logger of graph generator");
 		}
 
 		/* set logger of tree policy */
 		if (this.treePolicy instanceof ILoggingCustomizable) {
-			this.logger.info("Setting logger of tree policy to {}.treepolicy", name);
+			this.mctsLogger.info("Setting logger of tree policy to {}.treepolicy", name);
 			((ILoggingCustomizable) this.treePolicy).setLoggerName(name + ".treepolicy");
 		} else {
-			this.logger.info("Not setting logger of tree policy, because {} is not customizable.", this.treePolicy.getClass().getName());
+			this.mctsLogger.info("Not setting logger of tree policy, because {} is not customizable.", this.treePolicy.getClass().getName());
 		}
 
 		/* set logger of default policy */
 		if (this.defaultPolicy instanceof ILoggingCustomizable) {
-			this.logger.info("Setting logger of default policy to {}.defaultpolicy", name);
+			this.mctsLogger.info("Setting logger of default policy to {}.defaultpolicy", name);
 			((ILoggingCustomizable) this.defaultPolicy).setLoggerName(name + ".defaultpolicy");
 		} else {
-			this.logger.info("Not setting logger of default policy, because {} is not customizable.", this.defaultPolicy.getClass().getName());
+			this.mctsLogger.info("Not setting logger of default policy, because {} is not customizable.", this.defaultPolicy.getClass().getName());
 		}
 	}
 

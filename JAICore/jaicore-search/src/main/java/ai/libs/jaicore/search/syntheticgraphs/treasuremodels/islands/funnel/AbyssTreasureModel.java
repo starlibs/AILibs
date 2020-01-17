@@ -134,22 +134,22 @@ public class AbyssTreasureModel extends AIslandTreasureModel {
 			val = plateauOfIsland;
 		}
 		else if (positionOnIsland.compareTo(p1.toBigInteger()) <= 0) {
-			val = new AffineFunction(k1, BigDecimal.valueOf(plateauOfIsland), p1, absoluteMountainHeight).apply(positionOnIsland);
+			val = new AffineFunction(k1, BigDecimal.valueOf(plateauOfIsland), p1, absoluteMountainHeight).applyAsDouble(positionOnIsland);
 		}
 		else if (positionOnIsland.compareTo(k2.toBigInteger()) <= 0) {
-			val = new AffineFunction(p1, absoluteMountainHeight, k2, absolutePlateauHeight).apply(positionOnIsland);
+			val = new AffineFunction(p1, absoluteMountainHeight, k2, absolutePlateauHeight).applyAsDouble(positionOnIsland);
 		}
 		else if (positionOnIsland.compareTo(median.toBigInteger()) <= 0) {
-			val = new AffineFunction(k2, absolutePlateauHeight, median, absoluteAbyssDepth).apply(positionOnIsland);
+			val = new AffineFunction(k2, absolutePlateauHeight, median, absoluteAbyssDepth).applyAsDouble(positionOnIsland);
 		}
 		else if (positionOnIsland.compareTo(k3.toBigInteger()) <= 0) {
-			val = new AffineFunction(median, absoluteAbyssDepth, k3, absolutePlateauHeight).apply(positionOnIsland);
+			val = new AffineFunction(median, absoluteAbyssDepth, k3, absolutePlateauHeight).applyAsDouble(positionOnIsland);
 		}
 		else if (positionOnIsland.compareTo(p2.toBigInteger()) <= 0) {
-			val = new AffineFunction(k3, absolutePlateauHeight, p2, absoluteMountainHeight).apply(positionOnIsland);
+			val = new AffineFunction(k3, absolutePlateauHeight, p2, absoluteMountainHeight).applyAsDouble(positionOnIsland);
 		}
 		else if (positionOnIsland.compareTo(k4.toBigInteger()) <= 0) {
-			val = new AffineFunction(p2, absoluteMountainHeight, k4, absolutePlateauHeight).apply(positionOnIsland);
+			val = new AffineFunction(p2, absoluteMountainHeight, k4, absolutePlateauHeight).applyAsDouble(positionOnIsland);
 		}
 		else {
 			throw new IllegalStateException("This case should never occur!");

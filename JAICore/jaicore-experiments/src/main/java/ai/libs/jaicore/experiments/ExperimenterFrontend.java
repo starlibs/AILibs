@@ -117,7 +117,7 @@ public class ExperimenterFrontend {
 		this.prepareEvaluator();
 		ExperimentDBEntry experimentEntry = new ExperimentDBEntry(-1, experiment);
 		Map<String, Object> results = new HashMap<>();
-		this.evaluator.evaluate(experimentEntry, r -> results.putAll(r));
+		this.evaluator.evaluate(experimentEntry, results::putAll);
 		Experiment expCopy = new Experiment(experiment);
 		expCopy.setValuesOfResultFields(results);
 		return controller.parseResultMap(expCopy);

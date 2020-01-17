@@ -108,10 +108,10 @@ public class FunnelTreasureModel extends AIslandTreasureModel {
 			val = plateauOfIsland;
 		}
 		else if (positionOnIsland.compareTo(median.toBigInteger()) <= 0) {
-			val = new AffineFunction(c1, BigDecimal.valueOf(plateauOfIsland), median, BigDecimal.valueOf(plateauOfIsland).subtract(BigDecimal.valueOf(this.funnelDepth))).apply(positionOnIsland);
+			val = new AffineFunction(c1, BigDecimal.valueOf(plateauOfIsland), median, BigDecimal.valueOf(plateauOfIsland).subtract(BigDecimal.valueOf(this.funnelDepth))).applyAsDouble(positionOnIsland);
 		}
 		else {
-			val = new AffineFunction(c2, BigDecimal.valueOf(plateauOfIsland), median, BigDecimal.valueOf(plateauOfIsland).subtract(BigDecimal.valueOf(this.funnelDepth))).apply(positionOnIsland);
+			val = new AffineFunction(c2, BigDecimal.valueOf(plateauOfIsland), median, BigDecimal.valueOf(plateauOfIsland).subtract(BigDecimal.valueOf(this.funnelDepth))).applyAsDouble(positionOnIsland);
 		}
 		return val;
 	}

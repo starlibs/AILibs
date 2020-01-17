@@ -3,9 +3,9 @@ package ai.libs.jaicore.search.algorithms.standard.mcts.comparison;
 public class CombinedGammaFunction implements IGammaFunction {
 	private final IGammaFunction shortTermGamma;
 	private final IGammaFunction longTermGamma;
-	private final static double MID_WEIGHT = 0.8;
-	private final static double ZERO_OFFSET = -2;
-	private final static double LONG_TERM_BREAK = .1;
+	private static final double MID_WEIGHT = 0.8;
+	private static final double ZERO_OFFSET = -2;
+	private static final double LONG_TERM_BREAK = .1;
 	private final double slope;
 
 	public CombinedGammaFunction(final IGammaFunction shortTermGamma, final IGammaFunction longTermGamma) {
@@ -23,11 +23,11 @@ public class CombinedGammaFunction implements IGammaFunction {
 	@Override
 	public double getNodeGamma(final int visits, final double nodeProbability, final double relativeDepth) {
 		double longTermWeight = this.getLongTermWeightBasedOnProbability(nodeProbability);
-		double longTermGamma = this.longTermGamma.getNodeGamma(visits, nodeProbability, relativeDepth);
-		if (longTermWeight > LONG_TERM_BREAK && longTermGamma == 0) {
+		double vLongTermGamma = this.longTermGamma.getNodeGamma(visits, nodeProbability, relativeDepth);
+		if (longTermWeight > LONG_TERM_BREAK && vLongTermGamma == 0) {
 			return 0;
 		}
-		return longTermGamma * longTermWeight + this.shortTermGamma.getNodeGamma(visits, nodeProbability, relativeDepth) * (1 - longTermWeight);
+		return vLongTermGamma * longTermWeight + this.shortTermGamma.getNodeGamma(visits, nodeProbability, relativeDepth) * (1 - longTermWeight);
 	}
 
 	public double getLongTermWeightBasedOnProbability(final double nodeProbability) {
