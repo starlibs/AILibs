@@ -20,6 +20,10 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 	public static ILabeledDataset<ILabeledInstance> deserializeDataset(final int openMLId) throws DatasetDeserializationFailedException {
 		try {
 			DataSetDescription dsd = connector.dataGet(openMLId);
+			if (dsd.getDefault_target_attribute().contains(",")) {
+				throw new IllegalArgumentException("The dataset with ID " + openMLId + " cannot be read as it is a multi-target dataset which is currently not supported.");
+			}
+
 			File arffFile = connector.datasetGet(dsd);
 			Dataset ds = (Dataset) (new ArffDatasetAdapter().deserializeDataset(new FileDatasetDescriptor(arffFile), dsd.getDefault_target_attribute()));
 			ds.addInstruction(new ReconstructionInstruction(OpenMLDatasetReader.class.getMethod("deserializeDataset", int.class), openMLId));

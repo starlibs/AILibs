@@ -66,8 +66,9 @@ public class OpenMLDatasetAdapterTest {
 		problemSets.add(register(41064, 58000, 784, 2, true)); // convex
 		problemSets.add(register(41066, 1567, 590, 2, true)); // secom
 		problemSets.add(register(41065, 62000, 784, 10, true)); // mnist rotate
-		problemSets.add(register(273, 1209129, 1001, 2, true)); // IMDB drama
-		problemSets.add(register(40594, 2000, 250, 12, true)); // Reuters
+		problemSets.add(register(273, 120919, 1001, 2, true)); // IMDB drama
+		problemSets.add(register(1156, 275, 10936, 2, true)); // AP_Omentum_Ovary
+//		problemSets.add(register(40594, 2000, 250, 12, true)); // Reuters (multi-label classification dataset; not yet supported)
 
 		OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
 		for (int i = 0; i < data.length; i++) {
@@ -108,8 +109,8 @@ public class OpenMLDatasetAdapterTest {
 		/* create stratified split and test that folds are reproducible */
 		System.out.println("Creating a stratified split.");
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(dataset, 0, .7);
-		ILabeledDataset<?> reproducedFirstFold = (ILabeledDataset<?>)((IReconstructible)split.get(0)).getConstructionPlan().reconstructObject();
-		ILabeledDataset<?> reproducedSecondFold = (ILabeledDataset<?>)((IReconstructible)split.get(1)).getConstructionPlan().reconstructObject();
+		ILabeledDataset<?> reproducedFirstFold = (ILabeledDataset<?>) ((IReconstructible) split.get(0)).getConstructionPlan().reconstructObject();
+		ILabeledDataset<?> reproducedSecondFold = (ILabeledDataset<?>) ((IReconstructible) split.get(1)).getConstructionPlan().reconstructObject();
 		System.out.println("Testing that folds are reconstructible.");
 		this.testReproduction(split.get(0), reproducedFirstFold);
 		this.testReproduction(split.get(1), reproducedSecondFold);
