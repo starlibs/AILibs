@@ -46,7 +46,7 @@ public class MLPlanEvaluationListenerExample {
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 		builder.withNodeEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.SECONDS));
-		builder.withTimeOut(new Timeout(2, TimeUnit.MINUTES));
+		builder.withTimeOut(new Timeout(30, TimeUnit.SECONDS));
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(split.get(0)).build();
 
 		/* register a listener  */

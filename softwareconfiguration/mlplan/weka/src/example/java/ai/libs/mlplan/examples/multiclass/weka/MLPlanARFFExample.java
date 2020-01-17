@@ -38,7 +38,7 @@ public class MLPlanARFFExample {
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 		builder.withNodeEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
-		builder.withTimeOut(new Timeout(3, TimeUnit.MINUTES));
+		builder.withTimeOut(new Timeout(30, TimeUnit.SECONDS));
 		builder.withNumCpus(4);
 
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(split.get(0)).build();
