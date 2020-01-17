@@ -210,7 +210,11 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		if (curLine.trim().startsWith("{") && curLine.trim().endsWith("}")) {
 			curLine = curLine.substring(1, curLine.length() - 1);
 			sparseMode = true;
+			if (curLine.trim().isEmpty()) { // the instance does not mention any explicit values => return an empty map.
+				return new HashMap<>();
+			}
 		}
+
 		String[] lineSplit = curLine.split(",");
 
 		if (lineSplit.length < attributes.size()) {
@@ -279,9 +283,6 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						// parse relation meta data
 						relationMetaData = parseRelation(line);
 						if (columnWithClassIndex >= 0) {
-							if (relationMetaData.containsKey(K_CLASS_INDEX) && (relationMetaData.getAsInt(K_CLASS_INDEX) != columnWithClassIndex)) {
-								throw new IllegalArgumentException("Cannot overwrite the class index, because it is already defined in the relation of the ARFF file.");
-							}
 							relationMetaData.put(K_CLASS_INDEX, columnWithClassIndex);
 						}
 					} else if (line.toLowerCase().startsWith(EArffItem.ATTRIBUTE.getValue())) {
@@ -296,8 +297,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						instanceReadMode = true;
 						if (relationMetaData.containsKey(K_CLASS_INDEX) && relationMetaData.getAsInt(K_CLASS_INDEX) >= 0) {
 							dataset = createDataset(relationMetaData, attributes);
-						}
-						else {
+						} else {
 							LOGGER.warn("Invalid class index in the dataset's meta data ({}): Assuming last column to be the target attribute!", relationMetaData.get(K_CLASS_INDEX));
 							relationMetaData.put(K_CLASS_INDEX, attributes.size() - 1);
 							dataset = createDataset(relationMetaData, attributes);
@@ -351,11 +351,24 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	private static void serializeData(final BufferedWriter bw, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
 		bw.write(EArffItem.DATA.getValue() + "\n");
 		for (ILabeledInstance instance : data) {
-			Object[] atts = instance.getAttributes();
-			bw.write(IntStream.range(0, atts.length).mapToObj(x -> serializeAttributeValue(data.getInstanceSchema().getAttribute(x), atts[x])).collect(Collectors.joining(",")));
-			bw.write(",");
-			bw.write(serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
-			bw.write("\n");
+			if (instance instanceof DenseInstance) {
+				Object[] atts = instance.getAttributes();
+				bw.write(IntStream.range(0, atts.length).mapToObj(x -> serializeAttributeValue(data.getInstanceSchema().getAttribute(x), atts[x])).collect(Collectors.joining(",")));
+				bw.write(",");
+				bw.write(serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
+				bw.write("\n");
+			} else {
+				bw.write("{");
+				bw.write(((SparseInstance) instance).getAttributeMap().entrySet().stream().map(x -> x.getKey() + " " + serializeAttributeValue(data.getInstanceSchema().getAttribute(x.getKey()), x.getValue()))
+						.collect(Collectors.joining(",")));
+				if (instance.isLabelPresent()) {
+					bw.write(",");
+				}
+				bw.write(data.getNumAttributes());
+				bw.write(" ");
+				bw.write(serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
+				bw.write("}\n");
+			}
 		}
 	}
 
