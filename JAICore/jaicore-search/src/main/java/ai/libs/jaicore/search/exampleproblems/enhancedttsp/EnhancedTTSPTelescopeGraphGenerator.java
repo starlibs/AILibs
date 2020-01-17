@@ -155,7 +155,7 @@ public class EnhancedTTSPTelescopeGraphGenerator implements IGraphGenerator<Enha
 	public static long convert(final List<Boolean> bits) {
 		long value = 0L;
 		for (int i = 0; i < bits.size(); ++i) {
-			value += bits.get(i) ? (1L << (bits.size() - i - 1)) : 0L;
+			value += bits.get(i).booleanValue() ? (1L << (bits.size() - i - 1)) : 0L;
 		}
 		return value;
 	}

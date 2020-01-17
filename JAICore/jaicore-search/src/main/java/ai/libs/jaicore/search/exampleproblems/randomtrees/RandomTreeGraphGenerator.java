@@ -29,7 +29,7 @@ public class RandomTreeGraphGenerator implements IGraphGenerator<List<Integer>, 
 
 	@Override
 	public ISingleRootGenerator<List<Integer>> getRootGenerator() {
-		return () -> Arrays.asList();
+		return Arrays::asList;
 	}
 
 	@Override

@@ -12,21 +12,27 @@ import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
 import ai.libs.jaicore.problems.scheduling.openshop.Machine;
 import ai.libs.jaicore.problems.scheduling.openshop.OpenShopProblem;
+import ai.libs.jaicore.problems.scheduling.openshop.Operation;
 import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public class OpenShopGraphGenerator implements IGraphGenerator<OpenShopState, String> {
 
 	private final OpenShopProblem problem;
-	private final boolean pruneInactiveNodes = false;
+	private final boolean pruneInactiveNodes;
 
 	public OpenShopGraphGenerator(final OpenShopProblem problem) {
+		this(problem, false);
+	}
+
+	public OpenShopGraphGenerator(final OpenShopProblem problem, final boolean pruneInactiveNodes) {
 		super();
 		this.problem = problem;
+		this.pruneInactiveNodes = pruneInactiveNodes;
 	}
 
 	@Override
 	public ISingleRootGenerator<OpenShopState> getRootGenerator() {
-		return () -> new OpenShopOperationSelectionState(this.problem, null, null, this.problem.getOperations().values().stream().map(o -> o.getName()).collect(Collectors.toList()));
+		return () -> new OpenShopOperationSelectionState(this.problem, null, null, this.problem.getOperations().values().stream().map(Operation::getName).collect(Collectors.toList()));
 	}
 
 	@Override

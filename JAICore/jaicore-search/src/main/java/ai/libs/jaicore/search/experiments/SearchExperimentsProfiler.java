@@ -9,8 +9,6 @@ import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearch;
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.experiments.Experiment;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDecodingException;
@@ -19,7 +17,6 @@ import ai.libs.jaicore.search.landscapeanalysis.LandscapeAnalysisCompletionTechn
 
 public class SearchExperimentsProfiler {
 
-	private Logger logger = LoggerFactory.getLogger(SearchExperimentsProfiler.class);
 	private static final String FOLDER_LANDSCAPES = "landscapes";
 
 	private class Toolbox<I extends IPathSearchWithPathEvaluationsInput<N, A, Double>, N, A> {

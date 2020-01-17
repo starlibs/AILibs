@@ -1,6 +1,7 @@
 package ai.libs.jaicore.search.exampleproblems.npuzzle.standard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
@@ -121,9 +122,7 @@ public class NPuzzleGraphGenerator implements IGraphGenerator<NPuzzleState, Stri
 		int[][] b = new int[this.dimension][this.dimension];
 		int[][] board = n.getBoard();
 		for (int i = 0; i < this.dimension; i++) {
-			for (int j = 0; j < this.dimension; j++) {
-				b[i][j] = board[i][j];
-			}
+			b[i] = Arrays.copyOf(board[i], board[i].length);
 		}
 		int eX = n.getEmptyX();
 		int eY = n.getEmptyY();

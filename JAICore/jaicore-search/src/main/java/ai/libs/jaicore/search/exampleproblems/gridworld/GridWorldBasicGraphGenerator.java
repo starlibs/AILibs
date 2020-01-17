@@ -1,7 +1,6 @@
 package ai.libs.jaicore.search.exampleproblems.gridworld;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
@@ -13,7 +12,6 @@ import ai.libs.jaicore.problems.gridworld.GridWorldNode;
 import ai.libs.jaicore.problems.gridworld.GridWorldProblem;
 import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
-@SuppressWarnings("serial")
 public class GridWorldBasicGraphGenerator implements IGraphGenerator<GridWorldNode, String> {
 
 	private final GridWorldProblem problem;
@@ -35,38 +33,35 @@ public class GridWorldBasicGraphGenerator implements IGraphGenerator<GridWorldNo
 
 	@Override
 	public ISuccessorGenerator<GridWorldNode, String> getSuccessorGenerator() {
-		return new ISuccessorGenerator<GridWorldNode, String>() {
-			@Override
-			public List<INewNodeDescription<GridWorldNode, String>> generateSuccessors(final GridWorldNode node) {
-				ArrayList<INewNodeDescription<GridWorldNode, String>> succ = new ArrayList<>();
-				for (int a = 4; a <= 9; a++) {
+		return node -> {
+			ArrayList<INewNodeDescription<GridWorldNode, String>> succ = new ArrayList<>();
+			for (int a = 4; a <= 9; a++) {
 
-					// x direction movement
-					int dx = 1;
-					if (a == 2 || a == 7) {
-						dx = 0;
-					}
-					if (a == 1 || a == 4 || a == 6) {
-						dx = -1;
-					}
-
-					// y direction movement
-					int dy = 1;
-					if (a == 4 || a == 5) {
-						dy = 0;
-					}
-					if (a == 1 || a == 2 || a == 3) {
-						dy = -1;
-					}
-
-					int newPosX = node.getX() + dx;
-					int newPosY = node.getY() + dy;
-					if (newPosX < GridWorldBasicGraphGenerator.this.problem.getGrid().length && newPosY < GridWorldBasicGraphGenerator.this.problem.getGrid()[0].length) {
-						succ.add(new NodeExpansionDescription<>(new GridWorldNode(GridWorldBasicGraphGenerator.this.problem, newPosX, newPosY), Integer.toString(a)));
-					}
+				// x direction movement
+				int dx = 1;
+				if (a == 2 || a == 7) {
+					dx = 0;
 				}
-				return succ;
+				if (a == 1 || a == 4 || a == 6) {
+					dx = -1;
+				}
+
+				// y direction movement
+				int dy = 1;
+				if (a == 4 || a == 5) {
+					dy = 0;
+				}
+				if (a == 1 || a == 2 || a == 3) {
+					dy = -1;
+				}
+
+				int newPosX = node.getX() + dx;
+				int newPosY = node.getY() + dy;
+				if (newPosX < GridWorldBasicGraphGenerator.this.problem.getGrid().length && newPosY < GridWorldBasicGraphGenerator.this.problem.getGrid()[0].length) {
+					succ.add(new NodeExpansionDescription<>(new GridWorldNode(GridWorldBasicGraphGenerator.this.problem, newPosX, newPosY), Integer.toString(a)));
+				}
 			}
+			return succ;
 		};
 	}
 }

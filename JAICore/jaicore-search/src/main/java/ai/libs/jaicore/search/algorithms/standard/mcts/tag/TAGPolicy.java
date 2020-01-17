@@ -24,8 +24,8 @@ public class TAGPolicy<T, A> implements IPathUpdatablePolicy<T, A, Double>, IGra
 	private Logger logger = LoggerFactory.getLogger(TAGPolicy.class);
 	private LabeledGraph<T, A> explorationGraph;
 	private double explorationConstant = Math.sqrt(2);
-	private final int s = 10;
-	private final double delta = 0.01; // must be smaller than 1
+	private final int s;
+	private final double delta;
 	private final boolean isMaximize;
 	private final Map<T, PriorityQueue<Double>> statsPerNode = new HashMap<>();
 	private final Map<T, Integer> visitsPerNode = new HashMap<>();
@@ -34,8 +34,16 @@ public class TAGPolicy<T, A> implements IPathUpdatablePolicy<T, A, Double>, IGra
 		this(false);
 	}
 
+	public TAGPolicy(final double explorationConstant, final int s, final double delta, final boolean isMaximize) {
+		super();
+		this.explorationConstant = explorationConstant;
+		this.s = s;
+		this.delta = delta;
+		this.isMaximize = isMaximize;
+	}
+
 	public TAGPolicy(final boolean maximize) {
-		this.isMaximize = maximize;
+		this(Math.sqrt(2), 10, 0.01, maximize);
 	}
 
 	@Override

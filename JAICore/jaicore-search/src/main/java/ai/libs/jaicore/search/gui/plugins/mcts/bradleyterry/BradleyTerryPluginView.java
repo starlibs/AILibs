@@ -3,10 +3,6 @@ package ai.libs.jaicore.search.gui.plugins.mcts.bradleyterry;
 import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.data.statistics.BoxAndWhiskerXYDataset;
-import org.jfree.data.statistics.DefaultBoxAndWhiskerXYDataset;
 
 import ai.libs.jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
@@ -30,9 +26,11 @@ public class BradleyTerryPluginView extends ASimpleMVCPluginView<BradleyTerryPlu
 	private final Button right = new Button("right");
 	private final Button parent = new Button("parent");
 	private WebEngine engine;
-	private final BoxAndWhiskerXYDataset dataset = new DefaultBoxAndWhiskerXYDataset("plot");
-	private final JFreeChart chart = ChartFactory.createBoxAndWhiskerChart(
-			"Box and Whisker Chart", "Time", "Value", this.dataset, true);
+
+	private static final String HTML_TD_OPEN = "<td>";
+	private static final String HTML_TD_CLOSE = "</td>";
+	private static final String HTML_TR_OPEN = "<tr>";
+	private static final String HTML_TR_CLOSE = "</tr>";
 
 	public BradleyTerryPluginView(final BradleyTerryPluginModel model) {
 		super(model, new FlowPane());
@@ -97,47 +95,50 @@ public class BradleyTerryPluginView extends ASimpleMVCPluginView<BradleyTerryPlu
 			/* first row contains number of visits */
 			BradleyTerryUpdate modelOfLeftChild = this.getModel().getBtUpdates().get(this.getLeftChild(update.getNode()));
 			BradleyTerryUpdate modelOfRightChild = this.getModel().getBtUpdates().get(this.getRightChild(update.getNode()));
-			sb.append("<td>");
+			sb.append(HTML_TD_OPEN);
 			sb.append(modelOfLeftChild != null ? modelOfLeftChild.getVisits() : 0);
-			sb.append("</td>");
-			sb.append("<td>");
+			sb.append(HTML_TD_CLOSE);
+			sb.append(HTML_TD_OPEN);
 			sb.append(modelOfRightChild != null ? modelOfRightChild.getVisits() : 0);
-			sb.append("</td>");
+			sb.append(HTML_TD_CLOSE);
 
 			/* second row contains wins */
-			sb.append("</tr><tr>");
-			sb.append("<td>");
+			sb.append(HTML_TR_CLOSE);
+			sb.append(HTML_TR_OPEN);
+			sb.append(HTML_TD_OPEN);
 			sb.append(update.getWinsLeft());
-			sb.append("</td>");
-			sb.append("<td>");
+			sb.append(HTML_TD_CLOSE);
+			sb.append(HTML_TD_OPEN);
 			sb.append(update.getWinsRight());
-			sb.append("</td>");
+			sb.append(HTML_TD_CLOSE);
 
 			/* third row contains probabilities */
-			sb.append("</tr><tr>");
-			sb.append("<td>");
+			sb.append(HTML_TR_CLOSE);
+			sb.append(HTML_TR_OPEN);
+			sb.append(HTML_TD_OPEN);
 			sb.append(update.getpLeftScaled());
 			sb.append(" (");
 			sb.append(update.getpLeft());
 			sb.append(")</td>");
-			sb.append("<td>");
+			sb.append(HTML_TD_OPEN);
 			sb.append(update.getpRightScaled());
 			sb.append(" (");
 			sb.append(update.getpRight());
 			sb.append(")</td>");
 
 			/* fourth row contains stats summary */
-			sb.append("</tr><tr>");
+			sb.append(HTML_TR_CLOSE);
+			sb.append(HTML_TR_OPEN);
 			DescriptiveStatistics leftStats = new DescriptiveStatistics();
-			update.getScoresLeft().forEach(d -> leftStats.addValue(d));
+			update.getScoresLeft().forEach(leftStats::addValue);
 			DescriptiveStatistics rightStats = new DescriptiveStatistics();
-			update.getScoresRight().forEach(d -> rightStats.addValue(d));
-			sb.append("<td>");
+			update.getScoresRight().forEach(rightStats::addValue);
+			sb.append(HTML_TD_OPEN);
 			sb.append(leftStats.toString().replace("\n", "<br />"));
-			sb.append("</td>");
-			sb.append("<td>");
+			sb.append(HTML_TD_CLOSE);
+			sb.append(HTML_TD_OPEN);
 			sb.append(rightStats.toString().replace("\n", "<br />"));
-			sb.append("</td>");
+			sb.append(HTML_TD_CLOSE);
 
 			/* third row contains lists of considers observations */
 			sb.append("</tr><tr>");
@@ -149,14 +150,12 @@ public class BradleyTerryPluginView extends ASimpleMVCPluginView<BradleyTerryPlu
 			sb.append("</ul></td>");
 			sb.append("</tr></table>");
 		}
-		Platform.runLater(() -> {
-			this.engine.loadContent(sb.toString());
-		});
+		Platform.runLater(() -> this.engine.loadContent(sb.toString()));
 	}
 
 	@Override
 	public void clear() {
-
+		/* don't do anything */
 	}
 
 	@Override

@@ -6,15 +6,13 @@ public class CosLinGammaFunction implements IGammaFunction {
 
 	private final double maxGamma;
 	private final int visitsToReachOne;
-	private final int visitsToReachMax;
 	private final int initialMinThreshold;
 	private final int absoluteMinThreshold;
 
-	public CosLinGammaFunction(final double maxGamma, final int visitsToReachOne, final int visitsToReachMax, final int initialMinThreshold, final int absoluteMinThreshold) {
+	public CosLinGammaFunction(final double maxGamma, final int visitsToReachOne, final int initialMinThreshold, final int absoluteMinThreshold) {
 		super();
 		this.maxGamma = maxGamma;
 		this.visitsToReachOne = visitsToReachOne;
-		this.visitsToReachMax = visitsToReachMax;
 		this.initialMinThreshold = initialMinThreshold;
 		this.absoluteMinThreshold = absoluteMinThreshold;
 	}

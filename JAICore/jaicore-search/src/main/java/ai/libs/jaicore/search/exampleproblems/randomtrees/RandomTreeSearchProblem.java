@@ -43,4 +43,31 @@ public class RandomTreeSearchProblem implements IPathSearchWithPathEvaluationsIn
 		return this.se;
 	}
 
+	public int getB() {
+		return this.b;
+	}
+
+	public int getD() {
+		return this.d;
+	}
+
+	public IGraphGenerator<List<Integer>, Integer> getGg() {
+		return this.gg;
+	}
+
+	public IPathGoalTester<List<Integer>, Integer> getGt() {
+		return this.gt;
+	}
+
+	public IPathEvaluator<List<Integer>, Integer, Double> getSe() {
+		return this.se;
+	}
+
+	public boolean isScoresPerEdge() {
+		return this.scoresPerEdge;
+	}
+
+	public long getSeed() {
+		return this.seed;
+	}
 }

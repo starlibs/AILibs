@@ -26,17 +26,26 @@ public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N,
 	private final Map<N, DoubleList> observations = new HashMap<>();
 	private final IBootstrappingParameterComputer bootstrapParameterComputer;
 
-	private final int maxNumSamplesInHistory = 10000; // 100 worked quite well
-	private final int maxNumSamplesInBootstrap = 200; // 20 worked quite well
-	private final int numBootstrapsPerChild = 1; // 20 worked quite well
-	private final Random random = new Random(0);
+	private final int maxNumSamplesInHistory;
+	private final int maxNumSamplesInBootstrap;
+	private final int numBootstrapsPerChild;
+	private final Random random;
 	private final Map<N, List<List<N>>> rankingsForNodes = new HashMap<>();
 	private final int minSamplesToCreateRankings;
 
-	public BootstrappingPreferenceKernel(final IBootstrappingParameterComputer bootstrapParameterComputer, final int minSamplesToCreateRankings) {
+	public BootstrappingPreferenceKernel(final IBootstrappingParameterComputer bootstrapParameterComputer, final int maxNumSamplesInHistory, final int maxNumSamplesInBootstrap, final int numBootstrapsPerChild,
+			final Random random, final int minSamplesToCreateRankings) {
 		super();
 		this.bootstrapParameterComputer = bootstrapParameterComputer;
+		this.maxNumSamplesInHistory = maxNumSamplesInHistory;
+		this.maxNumSamplesInBootstrap = maxNumSamplesInBootstrap;
+		this.numBootstrapsPerChild = numBootstrapsPerChild;
+		this.random = random;
 		this.minSamplesToCreateRankings = minSamplesToCreateRankings;
+	}
+
+	public BootstrappingPreferenceKernel(final IBootstrappingParameterComputer bootstrapParameterComputer, final int minSamplesToCreateRankings) {
+		this (bootstrapParameterComputer, 10000, 200, 1, new Random(0), minSamplesToCreateRankings);
 	}
 
 	@Override
@@ -69,7 +78,7 @@ public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N,
 		Map<N, DoubleList> observationsPerChild = new HashMap<>();
 		for (N child : children) {
 			if (!this.observations.containsKey(child)) {
-				return null;
+				throw new IllegalArgumentException("No observations available, cannot draw ranking.");
 			}
 			observationsPerChild.put(child, this.observations.get(child));
 			this.logger.debug("Considering {} observations of child {}", observationsPerChild.get(child).size(), child);

@@ -23,16 +23,16 @@ public class ParetoNode<T, A, V extends Comparable<V>> {
 
 	@Override
 	public String toString() {
-		String s = "{" + this.node.getHead() + "] dominated by {";
+		StringBuilder sb = new StringBuilder("{" + this.node.getHead() + "] dominated by {");
 		for (ParetoNode<T, A, V> p : this.dominatedBy) {
-			s += p.node.getHead() + ",";
+			sb.append(p.node.getHead() + ",");
 		}
-		s += "} dominates { ";
+		sb.append("} dominates { ");
 		for (ParetoNode<T, A, V> p : this.dominates) {
-			s += p.node.getHead() + ",";
+			sb.append(p.node.getHead() + ",");
 		}
-		s += "}";
-		return s;
+		sb.append("}");
+		return sb.toString();
 	}
 
 	@Override

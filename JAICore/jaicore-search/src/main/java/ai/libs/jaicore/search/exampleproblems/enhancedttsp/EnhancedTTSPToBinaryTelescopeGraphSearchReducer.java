@@ -1,6 +1,6 @@
 package ai.libs.jaicore.search.exampleproblems.enhancedttsp;
 
-import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 import org.api4.java.datastructure.graph.ILabeledPath;
 
@@ -14,13 +14,13 @@ import it.unimi.dsi.fastutil.shorts.ShortList;
 public class EnhancedTTSPToBinaryTelescopeGraphSearchReducer
 implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPBinaryTelescopeNode, String, Double>, ILabeledPath<EnhancedTTSPBinaryTelescopeNode, String>> {
 
-	private final Function<Number, Double> linkFunction;
+	private final ToDoubleFunction<Number> linkFunction;
 
 	public EnhancedTTSPToBinaryTelescopeGraphSearchReducer() {
 		this(x -> (double)x);
 	}
 
-	public EnhancedTTSPToBinaryTelescopeGraphSearchReducer(final Function<Number, Double> linkFunction) {
+	public EnhancedTTSPToBinaryTelescopeGraphSearchReducer(final ToDoubleFunction<Number> linkFunction) {
 		this.linkFunction = linkFunction;
 	}
 
@@ -28,7 +28,7 @@ implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithS
 	public GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPBinaryTelescopeNode, String, Double> encodeProblem(final EnhancedTTSP problem) {
 		return new GraphSearchWithSubpathEvaluationsInput<>(new EnhancedTTSPTelescopeGraphGenerator(problem), new EnhancedTTSPBinaryTelescopeSolutionPredicate(problem), path -> {
 			ShortList tour = this.decodeSolution(path);
-			return this.linkFunction.apply(problem.getSolutionEvaluator().evaluate(tour));
+			return this.linkFunction.applyAsDouble(problem.getSolutionEvaluator().evaluate(tour));
 		});
 	}
 

@@ -5,10 +5,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.data.statistics.BoxAndWhiskerXYDataset;
-import org.jfree.data.statistics.DefaultBoxAndWhiskerXYDataset;
 
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
@@ -33,8 +29,10 @@ public class DNGMCTSPluginView extends ASimpleMVCPluginView<DNGMCTSPluginModel, 
 	private final Button right = new Button("right");
 	private final Button parent = new Button("parent");
 	private WebEngine engine;
-	private final BoxAndWhiskerXYDataset dataset = new DefaultBoxAndWhiskerXYDataset("plot");
-	private final JFreeChart chart = ChartFactory.createBoxAndWhiskerChart("Box and Whisker Chart", "Time", "Value", this.dataset, true);
+
+	private static final String HTML_BR = "<br />";
+	private static final String HTML_H4_OPEN = "<h4>";
+	private static final String HTML_H4_CLOSE = "</h4>";
 
 	public DNGMCTSPluginView(final DNGMCTSPluginModel model) {
 		super(model, new FlowPane());
@@ -94,55 +92,55 @@ public class DNGMCTSPluginView extends ASimpleMVCPluginView<DNGMCTSPluginModel, 
 		String leftChild = this.getLeftChild(currentlySelectedNode);
 		String rightChild = this.getRightChild(currentlySelectedNode);
 		List<DNGBeliefUpdate> muValuesOfLeft = this.getModel().getObservedMuValues().get(leftChild);
-		sb.append("<h4>" + leftChild + " (" + (muValuesOfLeft != null ? muValuesOfLeft.size() : "-1") + ")</h4>");
+		sb.append(HTML_H4_OPEN + leftChild + " (" + (muValuesOfLeft != null ? muValuesOfLeft.size() : "-1") + ")");
+		sb.append(HTML_H4_CLOSE);
 		if (muValuesOfLeft != null) {
 			DNGBeliefUpdate latestUpdate = muValuesOfLeft.get(muValuesOfLeft.size() - 1);
 			DescriptiveStatistics statsOfLeft = this.getModel().getObservationStatisticsOfNode(leftChild);
-			sb.append("Mu: " + latestUpdate.getMu() + "<br />");
-			sb.append("Mu - sampleMean: " + (latestUpdate.getMu() - statsOfLeft.getMean()) + "<br />");
-			sb.append("Alpha: " + latestUpdate.getAlpha() + "<br />");
-			sb.append("Beta: " + latestUpdate.getBeta() + "<br />");
+			sb.append("Mu: " + latestUpdate.getMu() + HTML_BR);
+			sb.append("Mu - sampleMean: " + (latestUpdate.getMu() - statsOfLeft.getMean()) + HTML_BR);
+			sb.append("Alpha: " + latestUpdate.getAlpha() + HTML_BR);
+			sb.append("Beta: " + latestUpdate.getBeta() + HTML_BR);
 			sb.append("Lambda: " + latestUpdate.getLambda());
 		}
 		if (rightChild != null) {
 			List<DNGBeliefUpdate> muValuesOfRight = this.getModel().getObservedMuValues().get(rightChild);
 			DescriptiveStatistics statsOfRight = this.getModel().getObservationStatisticsOfNode(rightChild);
-			sb.append("<h4>" + rightChild + " (" + (muValuesOfRight != null ? muValuesOfRight.size() : "-1") + ")</h4>");
+			sb.append(HTML_H4_OPEN + rightChild + " (" + (muValuesOfRight != null ? muValuesOfRight.size() : "-1") + ")");
+			sb.append(HTML_H4_CLOSE);
 			if (muValuesOfRight != null) {
 				DNGBeliefUpdate latestUpdate = muValuesOfRight.get(muValuesOfRight.size() - 1);
-				sb.append("Mu: " + latestUpdate.getMu() + "<br />");
-				sb.append("Mu - sampleMean: " + (latestUpdate.getMu() - statsOfRight.getMean()) + "<br />");
-				sb.append("Alpha: " + latestUpdate.getAlpha() + "<br />");
-				sb.append("Beta: " + latestUpdate.getBeta() + "<br />");
+				sb.append("Mu: " + latestUpdate.getMu() + HTML_BR);
+				sb.append("Mu - sampleMean: " + (latestUpdate.getMu() - statsOfRight.getMean()) + HTML_BR);
+				sb.append("Alpha: " + latestUpdate.getAlpha() + HTML_BR);
+				sb.append("Beta: " + latestUpdate.getBeta() + HTML_BR);
 				sb.append("Lambda: " + latestUpdate.getLambda());
 			}
 		}
 		sb.append("<h3>Q-Values of Children</h3>");
 		Map<String, List<Double>> qValues = this.getModel().getQValuesOfSelectedNode();
 		if (qValues != null) {
-			{
-				List<Double> scoresOfLeft = qValues.get(leftChild);
-				sb.append("<h4>" + leftChild + " (" + scoresOfLeft.size()  + ")</h4>");
-				sb.append(scoresOfLeft.subList(Math.max(0, scoresOfLeft.size() - 5), scoresOfLeft.size()).stream().map(v -> MathExt.round(v, 4)).collect(Collectors.toList()));
-			}
 
-			{
-				List<Double> scoresOfRight = qValues.get(rightChild);
-				if (scoresOfRight != null) {
-					sb.append("<h4>" + rightChild + " (" + scoresOfRight.size()  + ")</h4>");
-					sb.append(scoresOfRight.subList(Math.max(0, scoresOfRight.size() - 5), scoresOfRight.size()).stream().map(v -> MathExt.round(v, 4)).collect(Collectors.toList()));
-				}
+			List<Double> scoresOfLeft = qValues.get(leftChild);
+			sb.append(HTML_H4_OPEN);
+			sb.append(leftChild + " (" + scoresOfLeft.size()  + ")");
+			sb.append(HTML_H4_CLOSE);
+			sb.append(scoresOfLeft.subList(Math.max(0, scoresOfLeft.size() - 5), scoresOfLeft.size()).stream().map(v -> MathExt.round(v, 4)).collect(Collectors.toList()));
+			List<Double> scoresOfRight = qValues.get(rightChild);
+			if (scoresOfRight != null) {
+				sb.append(HTML_H4_OPEN);
+				sb.append(rightChild + " (" + scoresOfRight.size()  + ")");
+				sb.append(HTML_H4_CLOSE);
+				sb.append(scoresOfRight.subList(Math.max(0, scoresOfRight.size() - 5), scoresOfRight.size()).stream().map(v -> MathExt.round(v, 4)).collect(Collectors.toList()));
 			}
 		}
 
-		Platform.runLater(() -> {
-			this.engine.loadContent(sb.toString());
-		});
+		Platform.runLater(() -> this.engine.loadContent(sb.toString()));
 	}
 
 	@Override
 	public void clear() {
-
+		/* do nothing */
 	}
 
 	@Override

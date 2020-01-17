@@ -1,6 +1,6 @@
 package ai.libs.jaicore.search.exampleproblems.enhancedttsp;
 
-import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 import org.api4.java.datastructure.graph.ILabeledPath;
 
@@ -13,19 +13,19 @@ import it.unimi.dsi.fastutil.shorts.ShortList;
 public class EnhancedTTSPToSimpleGraphSearchReducer
 implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPState, String, Double>, ILabeledPath<EnhancedTTSPState, String>> {
 
-	private final Function<Number, Double> linkFunction;
+	private final ToDoubleFunction<Number> linkFunction;
 
 	public EnhancedTTSPToSimpleGraphSearchReducer() {
 		this(x -> (double)x);
 	}
 
-	public EnhancedTTSPToSimpleGraphSearchReducer(final Function<Number, Double> linkFunction) {
+	public EnhancedTTSPToSimpleGraphSearchReducer(final ToDoubleFunction<Number> linkFunction) {
 		this.linkFunction = linkFunction;
 	}
 
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPState, String, Double> encodeProblem(final EnhancedTTSP problem) {
-		return new GraphSearchWithSubpathEvaluationsInput<>(new EnhancedTTSPSimpleGraphGenerator(problem), new EnhancedTTSPSimpleSolutionPredicate(problem), node -> this.linkFunction.apply(problem.getSolutionEvaluator().evaluate(node.getHead().getCurTour())));
+		return new GraphSearchWithSubpathEvaluationsInput<>(new EnhancedTTSPSimpleGraphGenerator(problem), new EnhancedTTSPSimpleSolutionPredicate(problem), node -> this.linkFunction.applyAsDouble(problem.getSolutionEvaluator().evaluate(node.getHead().getCurTour())));
 	}
 
 	@Override

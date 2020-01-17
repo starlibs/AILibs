@@ -26,9 +26,7 @@ import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public class KnapsackProblemGraphGenerator implements IGraphGenerator<KnapsackConfiguration, String>, ILoggingCustomizable {
 
-	private static final long serialVersionUID = 1L;
-
-	private transient Logger logger = LoggerFactory.getLogger(KnapsackProblemGraphGenerator.class);
+	private Logger logger = LoggerFactory.getLogger(KnapsackProblemGraphGenerator.class);
 	private final KnapsackProblem problem;
 
 	public KnapsackProblemGraphGenerator(final KnapsackProblem problem) {

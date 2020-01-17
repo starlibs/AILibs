@@ -40,7 +40,7 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	private final Random random;
 	private final UniformRandomPolicy<N, A, Double> randomPolicy;
 	private LabeledGraph<N, A> graph;
-	private final IGammaFunction gammaShort = new CosLinGammaFunction(3, 4, 20, 2, 2);
+	private final IGammaFunction gammaShort = new CosLinGammaFunction(3, 4, 2, 2);
 	private static final double EPSILON = 0.0;
 	private IOwnerBasedAlgorithmConfig config = ConfigFactory.create(IOwnerBasedAlgorithmConfig.class);
 
@@ -73,7 +73,7 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 			int visits = this.numVisits.get(node);
 			int numChildren = this.graph.getSuccessors(node).size();
 			this.logger.info("Computing action for node {} with {} successors.", node, numChildren);
-			IGammaFunction gammaFunction = new CombinedGammaFunction(this.gammaShort, new CosLinGammaFunction(GAMMA_LONG_MAX, numChildren * GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_ONE, numChildren * GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_MAX, numChildren * GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT, numChildren * GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_ABS));
+			IGammaFunction gammaFunction = new CombinedGammaFunction(this.gammaShort, new CosLinGammaFunction(GAMMA_LONG_MAX, numChildren * GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_ONE,  numChildren * GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT, numChildren * GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_ABS));
 			double relativeDepth = this.deepestRelativeNodeDepthsOfNodes.get(node);
 			double nodeProbability = this.getProbabilityOfNode(node);
 			double gammaValue = gammaFunction.getNodeGamma(visits, nodeProbability, relativeDepth);

@@ -610,4 +610,8 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 	public int getNumberOfNodesInMemory() {
 		return this.exploredGraph.getItems().size();
 	}
+
+	public boolean hasTreePolicyReachedLeafs() {
+		return this.treePolicyReachedLeafs;
+	}
 }

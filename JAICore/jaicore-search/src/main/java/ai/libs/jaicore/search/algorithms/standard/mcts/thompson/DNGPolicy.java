@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
@@ -49,7 +48,6 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	private final Map<N, Double> beta = new HashMap<>();
 	private final Map<N, Double> mu = new HashMap<>();
 	private final Map<N, Double> lambda = new HashMap<>();
-	private final Map<N, DescriptiveStatistics> statsPerNode = new HashMap<>();
 
 	private final INodeGoalTester<N, A> goalTester;
 	private final IObjectEvaluator<N, Double> leafNodeEvaluator;
