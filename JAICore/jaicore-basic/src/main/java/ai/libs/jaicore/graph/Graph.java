@@ -1,6 +1,5 @@
 package ai.libs.jaicore.graph;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,10 +13,7 @@ import java.util.stream.Collectors;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
 
-public class Graph<T> implements Serializable {
-
-	private static final long serialVersionUID = 3912962578399588845L;
-
+public class Graph<T> {
 	private T root;
 	private final Map<T, Set<T>> successors = new HashMap<>();
 	private final Map<T, Set<T>> predecessors = new HashMap<>();
@@ -100,10 +96,8 @@ public class Graph<T> implements Serializable {
 	public boolean hasPath(final List<T> nodes) {
 		T last = null;
 		for (T current : nodes) {
-			if (last != null) {
-				if (!this.hasEdge(last, current)) {
-					return false;
-				}
+			if (last != null && !this.hasEdge(last, current)) {
+				return false;
 			}
 			last = current;
 		}
@@ -149,7 +143,6 @@ public class Graph<T> implements Serializable {
 		this.checkNodeExistence(to);
 		this.successors.get(from).remove(to);
 		this.predecessors.get(to).remove(from);
-		System.out.println(this.predecessors);
 
 		/* update root if necessary */
 		if (from == this.root) {
@@ -262,8 +255,8 @@ public class Graph<T> implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((this.predecessors == null) ? 0 : this.predecessors.hashCode());
-		result = prime * result + ((this.successors == null) ? 0 : this.successors.hashCode());
+		result = prime * result + this.predecessors.hashCode();
+		result = prime * result + this.successors.hashCode();
 		result = prime * result + (this.useBackPointers ? 1231 : 1237);
 		result = prime * result + (this.useForwardPointers ? 1231 : 1237);
 		return result;
@@ -281,33 +274,22 @@ public class Graph<T> implements Serializable {
 			return false;
 		}
 		Graph other = (Graph) obj;
-		if (this.predecessors == null) {
-			if (other.predecessors != null) {
-				return false;
-			}
-		} else if (!this.predecessors.equals(other.predecessors)) {
+		if (!this.predecessors.equals(other.predecessors)) {
 			return false;
 		}
-		if (this.successors == null) {
-			if (other.successors != null) {
-				return false;
-			}
-		} else if (!this.successors.equals(other.successors)) {
+		if (!this.successors.equals(other.successors)) {
 			return false;
 		}
 		if (this.useBackPointers != other.useBackPointers) {
 			return false;
 		}
-		if (this.useForwardPointers != other.useForwardPointers) {
-			return false;
-		}
-		return true;
+		return this.useForwardPointers == other.useForwardPointers;
 	}
 
 	public String getLineBasedStringRepresentation(final int offset) {
 		StringBuilder sb = new StringBuilder();
-		for (T root : this.getSources()) {
-			sb.append(this.getLineBasedStringRepresentation(root, offset, new ArrayList<>()));
+		for (T source : this.getSources()) {
+			sb.append(this.getLineBasedStringRepresentation(source, offset, new ArrayList<>()));
 		}
 		return sb.toString();
 	}
@@ -325,10 +307,10 @@ public class Graph<T> implements Serializable {
 			sb.append("+----- ");
 		}
 		sb.append(node.toString());
-		Collection<T> successors = this.getSuccessors(node);
-		int n = successors.size();
+		Collection<T> successorsOfThisNode = this.getSuccessors(node);
+		int n = successorsOfThisNode.size();
 		int i = 1;
-		for (T successor : successors) {
+		for (T successor : successorsOfThisNode) {
 			sb.append("\n");
 			List<Boolean> childrenOffsetCopy = new ArrayList<>(childrenOffset);
 			childrenOffsetCopy.add(i++ == n);

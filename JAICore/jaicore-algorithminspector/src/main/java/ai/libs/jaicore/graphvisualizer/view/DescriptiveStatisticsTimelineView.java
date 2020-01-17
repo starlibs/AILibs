@@ -65,9 +65,7 @@ public class DescriptiveStatisticsTimelineView extends LineChart<Number, Number>
 				values.add(new Data<>((i + 1), this.stats.getMean()));
 			}
 			this.logger.info("Adding {} values to chart.", values.size());
-			Platform.runLater(() -> {
-				this.performanceSeries.getData().addAll(values);
-			});
+			Platform.runLater(() -> this.performanceSeries.getData().addAll(values));
 		}
 
 	}

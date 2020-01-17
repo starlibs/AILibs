@@ -27,15 +27,9 @@ public class TimeSliderGUIPluginView implements IGUIPluginView {
 		this.timestepSlider.setShowTickLabels(false);
 		this.timestepSlider.setShowTickMarks(false);
 
-		this.timestepSlider.setOnMouseReleased(event -> {
-			this.handleInputEvent();
-		});
-		this.timestepSlider.setOnKeyPressed(event -> {
-			this.handleInputEvent();
-		});
-		this.timestepSlider.setOnKeyReleased(event -> {
-			this.handleInputEvent();
-		});
+		this.timestepSlider.setOnMouseReleased(event -> this.handleInputEvent());
+		this.timestepSlider.setOnKeyPressed(event -> this.handleInputEvent());
+		this.timestepSlider.setOnKeyReleased(event -> this.handleInputEvent());
 		timestepSliderLayout.getChildren().add(this.timestepSlider);
 
 		Label timestepSliderLabel = new Label("Timestep");

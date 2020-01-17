@@ -107,15 +107,14 @@ public class LabeledGraph<T, L> extends Graph<T> {
 
 	public void addPath(final ILabeledPath<T, L> path) {
 		List<T> nodes = path.getNodes();
-		List<L> labels = path.getArcs();
+		List<L> pathLabels = path.getArcs();
 		int n = nodes.size();
 		T last = null;
 		for (int i = 0; i < n; i++) {
 			T current = nodes.get(i);
 			this.addItem(current);
 			if (last != null) {
-				L label = labels.get(i - 1);
-				System.out.println("Adding label " + label + " for edge " + last + " -> " + current);
+				L label = pathLabels.get(i - 1);
 				this.addEdge(last, current, label);
 			}
 			last = current;

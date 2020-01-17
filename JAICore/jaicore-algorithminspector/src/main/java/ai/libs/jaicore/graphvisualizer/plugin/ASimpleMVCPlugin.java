@@ -32,7 +32,7 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 			Class<M> modelClass = ((Class<M>) Class.forName(this.getClassNameWithoutGenerics(mvcPatternClasses[0].getTypeName())));
 			Class<V> viewClass = ((Class<V>) Class.forName(this.getClassNameWithoutGenerics(mvcPatternClasses[1].getTypeName())));
 			Class<C> controllerClass = ((Class<C>) Class.forName(this.getClassNameWithoutGenerics(mvcPatternClasses[2].getTypeName())));
-			myModel = modelClass.newInstance();
+			myModel = modelClass.getConstructor().newInstance();
 			myView = viewClass.getDeclaredConstructor(modelClass).newInstance(myModel);
 			myController = controllerClass.getDeclaredConstructor(modelClass, viewClass).newInstance(myModel, myView);
 			myController.setDaemon(true);

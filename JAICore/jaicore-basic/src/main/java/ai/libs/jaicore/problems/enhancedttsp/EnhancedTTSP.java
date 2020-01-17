@@ -201,7 +201,9 @@ public class EnhancedTTSP {
 		ShortList seenPlaces = n.getCurTour();
 		int k = 0;
 		boolean openPlaces = seenPlaces.size() < this.getPossibleDestinations().size() - 1;
-		assert n.getCurTour().size() < this.getPossibleDestinations().size() : "We have already visited everything!";
+		if (n.getCurTour().size() >= this.getPossibleDestinations().size()) {
+			throw new IllegalArgumentException("We have already visited everything!");
+		}
 		assert openPlaces || curLoc != 0 : "There are no open places (out of the " + this.getPossibleDestinations().size() + ", " + seenPlaces.size()
 		+ " of which have already been seen) but we are still in the initial position. This smells like a strange TSP.";
 		if (openPlaces) {

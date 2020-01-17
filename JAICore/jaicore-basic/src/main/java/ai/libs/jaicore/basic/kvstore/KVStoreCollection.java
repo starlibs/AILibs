@@ -287,8 +287,8 @@ public class KVStoreCollection extends LinkedList<IKVStore> {
 					List<Double> valueList = valueEntry.getValue().stream().map(x -> Double.valueOf(x.toString())).collect(Collectors.toList());
 					if (groupingMethod == EGroupMethod.AVG_TRIMMED && valueList.size() > 5) {
 						for (int i = 0; i < 2; i++) {
-							double min = valueList.stream().min((d1,d2) -> Double.compare(d1, d2)).get();
-							double max = valueList.stream().max((d1,d2) -> Double.compare(d1, d2)).get();
+							double min = valueList.stream().min(Double::compare).get();
+							double max = valueList.stream().max(Double::compare).get();
 							valueList.remove(min);
 							valueList.remove(max);
 						}
