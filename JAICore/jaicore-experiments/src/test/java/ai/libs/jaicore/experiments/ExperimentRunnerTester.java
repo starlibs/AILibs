@@ -100,8 +100,7 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 				ObjectNode node = (ObjectNode)(new ObjectMapper().readTree(t.get(1)));
 				return Math.abs(node.get("number").asInt() - Integer.valueOf(t.get(0))) == 1;
 			} catch (IOException e) {
-				e.printStackTrace();
-				return false;
+				throw new UnsupportedOperationException(e);
 			}
 		}
 	}
@@ -153,7 +152,7 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 		assertEquals(this.numberOfTotalExperiments, n); // check that all experiments are still there
 		for (ExperimentDBEntry entry : this.handle.getConductedExperiments()) {
 			this.handle.deleteExperiment(entry);
-			assertEquals(n - 1, this.handle.getConductedExperiments().size());
+			assertEquals(n - (long)1, this.handle.getConductedExperiments().size());
 			n--;
 		}
 	}

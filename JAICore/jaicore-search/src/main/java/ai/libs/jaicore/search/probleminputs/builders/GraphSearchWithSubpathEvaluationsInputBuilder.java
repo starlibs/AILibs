@@ -4,7 +4,7 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
-public class GraphSearchWithSubpathEvaluationsInputBuilder<N, A, V extends Comparable<V>> extends SearchProblemInputBuilder<N, A, GraphSearchWithSubpathEvaluationsInput<N, A, V>> {
+public class GraphSearchWithSubpathEvaluationsInputBuilder<N, A, V extends Comparable<V>> extends SearchProblemInputBuilder<N, A, GraphSearchWithSubpathEvaluationsInput<N, A, V>, GraphSearchWithSubpathEvaluationsInputBuilder<N, A, V>> {
 
 	private IPathEvaluator<N, A, V> nodeEvaluator;
 
@@ -28,6 +28,11 @@ public class GraphSearchWithSubpathEvaluationsInputBuilder<N, A, V extends Compa
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<N, A, V> build() {
 		return new GraphSearchWithSubpathEvaluationsInput<>(this.getGraphGenerator(), this.getGoalTester(), this.nodeEvaluator);
+	}
+
+	@Override
+	protected GraphSearchWithSubpathEvaluationsInputBuilder<N, A, V> self() {
+		return this;
 	}
 
 }

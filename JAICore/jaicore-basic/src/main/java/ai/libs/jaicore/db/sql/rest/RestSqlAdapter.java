@@ -40,18 +40,18 @@ import ai.libs.jaicore.db.sql.MySQLQueryBuilder;
 @SuppressWarnings("serial")
 public class RestSqlAdapter implements IDatabaseAdapter {
 
-	private final IRestDatabaseConfig config;
 	private final ISQLQueryBuilder queryBuilder = new MySQLQueryBuilder();
 	private Logger logger = LoggerFactory.getLogger(RestSqlAdapter.class);
 	private final String host;
+	private final String token;
 	private final String querySuffix;
 	private final String selectSuffix;
 	private final String insertSuffix;
 	private final String updateSuffix;
 
 	public RestSqlAdapter(final IRestDatabaseConfig config) {
-		this.config = config;
-		this.host = this.config.getHost();
+		this.host = config.getHost();
+		this.token = config.getToken();
 		this.querySuffix = config.getQuerySuffix();
 		this.selectSuffix = config.getSelectSuffix();
 		this.updateSuffix = config.getUpdateSuffix();
@@ -106,7 +106,7 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			ObjectMapper mapper = new ObjectMapper();
 			ObjectNode root = mapper.createObjectNode();
-			root.set("token", root.textNode(this.config.getToken()));
+			root.set("token", root.textNode(this.token));
 			root.set("query", root.textNode(query));
 			String jsonPayload = mapper.writeValueAsString(root);
 			StringEntity requestEntity = new StringEntity(jsonPayload, ContentType.APPLICATION_JSON);

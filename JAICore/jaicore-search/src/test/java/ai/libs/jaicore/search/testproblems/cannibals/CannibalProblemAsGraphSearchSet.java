@@ -5,6 +5,7 @@ import java.util.List;
 import ai.libs.jaicore.basic.algorithm.ReductionBasedAlgorithmTestProblemSet;
 import ai.libs.jaicore.problems.cannibals.CannibalProblem;
 import ai.libs.jaicore.problemsets.cannibals.CannibalProblemSet;
+import ai.libs.jaicore.search.exampleproblems.cannibals.CannibalProblemToGraphSearchReducer;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 

@@ -27,7 +27,7 @@ public class ResourceUtilTest {
 	 * @throws IOException Thrown if the resource file could not be read.
 	 */
 	@Test
-	public void testReadResourceToString() throws FileNotFoundException, IOException {
+	public void testReadResourceToString() throws IOException {
 		String actualContent = ResourceUtil.readResourceFileToString(RESOURCE_FILE_PATH).trim();
 		assertEquals("The content of the read-in resource does not match the expected content", EXPECTED_CONTENT, actualContent);
 	}
@@ -43,21 +43,19 @@ public class ResourceUtilTest {
 	}
 
 	@Test
-	public void test() {
+	public void test() throws IOException {
 		ResourceFile resFile = ResourceUtil.getResourceAsFile(RESOURCE_FILE_PATH);
 		ResourceFile res2File = new ResourceFile(resFile.getParentFile(), "dummy2.resource");
 		assertEquals(this.readRes(resFile.getPathName()), this.readRes(res2File.getPathName()));
 	}
 
-	private String readRes(final String path) {
+	private String readRes(final String path) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(path)))) {
 			String line;
 			while ((line = br.readLine()) != null) {
 				sb.append(line + "\n");
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		return sb.toString();
 	}

@@ -1,19 +1,19 @@
 package ai.libs.jaicore.graphvisualizer.plugin.nodeinfo;
 
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginView;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import javafx.application.Platform;
-import javafx.scene.Node;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
 /**
- * 
+ *
  * @author hetzer
  *
  * @param <N>
  *            The node class
  */
-public class NodeInfoGUIPluginView implements IGUIPluginView {
+public class NodeInfoGUIPluginView extends ASimpleMVCPluginView<NodeInfoGUIPluginModel, NodeInfoGUIPluginController, FlowPane> {
 
 	private NodeInfoGUIPluginModel model;
 
@@ -21,40 +21,35 @@ public class NodeInfoGUIPluginView implements IGUIPluginView {
 
 	private WebEngine webViewEngine;
 
-	public NodeInfoGUIPluginView(String title) {
-		this.model = new NodeInfoGUIPluginModel(this);
-		this.title = title;
+	public NodeInfoGUIPluginView(final NodeInfoGUIPluginModel model) {
+		super (model, new FlowPane());
+		WebView view = new WebView();
+		FlowPane node = this.getNode();
+		node.getChildren().add(view);
+		this.webViewEngine = view.getEngine();
+		this.webViewEngine.loadContent("<i>No node selected</i>");
 	}
 
-	public NodeInfoGUIPluginView() {
-		this("Node Info View");
-	}
-
-	@Override
-	public Node getNode() {
-		WebView htmlView = new WebView();
-		webViewEngine = htmlView.getEngine();
-
-		webViewEngine.loadContent("<i>No node selected</i>");
-
-		return htmlView;
-	}
 
 	@Override
 	public void update() {
-		String nodeInfoOfCurrentlySelectedNode = model.getNodeInfoForCurrentlySelectedNode();
-		Platform.runLater(() -> {
-			webViewEngine.loadContent(nodeInfoOfCurrentlySelectedNode);
-		});
+		String nodeInfoOfCurrentlySelectedNode = this.model.getNodeInfoForCurrentlySelectedNode();
+		Platform.runLater(() -> this.webViewEngine.loadContent(nodeInfoOfCurrentlySelectedNode));
 	}
 
+	@Override
 	public NodeInfoGUIPluginModel getModel() {
-		return model;
+		return this.model;
 	}
 
 	@Override
 	public String getTitle() {
-		return title;
+		return this.title;
 	}
 
+
+	@Override
+	public void clear() {
+		/* don't do anything */
+	}
 }

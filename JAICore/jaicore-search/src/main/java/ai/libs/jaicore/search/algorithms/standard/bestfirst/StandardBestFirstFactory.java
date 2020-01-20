@@ -26,7 +26,7 @@ public class StandardBestFirstFactory<N, A, V extends Comparable<V>> extends Bes
 		GraphSearchWithSubpathEvaluationsInput<N, A, V> problem = this.getInput();
 		Objects.requireNonNull(problem);
 		IPathGoalTester<N, A> gt = problem.getGoalTester();
-		IPathEvaluator<N, A, V> evaluator = problem.getNodeEvaluator();
+		IPathEvaluator<N, A, V> evaluator = problem.getPathEvaluator();
 		this.setProblemInput(new GraphSearchWithSubpathEvaluationsInput<>(graphGenerator, gt, evaluator));
 	}
 
@@ -35,13 +35,13 @@ public class StandardBestFirstFactory<N, A, V extends Comparable<V>> extends Bes
 		if (this.getInput().getGraphGenerator() == null) {
 			throw new IllegalStateException("Cannot produce BestFirst searches before the graph generator is set in the problem.");
 		}
-		if (this.getInput().getNodeEvaluator() == null) {
+		if (this.getInput().getPathEvaluator() == null) {
 			throw new IllegalStateException("Cannot produce BestFirst searches before the node evaluator is set.");
 		}
 
 		/* determine search problem */
 		GraphSearchWithSubpathEvaluationsInput<N, A, V> problem = this.getInput();
-		this.logger.debug("Created algorithm input with\n\tgraph generator: {}\n\tnode evaluator: {}", problem.getGraphGenerator(), problem.getNodeEvaluator());
+		this.logger.debug("Created algorithm input with\n\tgraph generator: {}\n\tnode evaluator: {}", problem.getGraphGenerator(), problem.getPathEvaluator());
 		BestFirst<GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V> search = new BestFirst<>(problem);
 		search.setTimeoutForComputationOfF(this.getTimeoutForFInMS(), this.getTimeoutEvaluator());
 		if (this.getLoggerName() != null && this.getLoggerName().length() > 0) {

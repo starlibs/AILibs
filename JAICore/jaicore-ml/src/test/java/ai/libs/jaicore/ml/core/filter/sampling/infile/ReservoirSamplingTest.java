@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.api4.java.algorithm.IAlgorithm;
 
+import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.AFileSamplingAlgorithm;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.ArffUtilities;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.ReservoirSampling;
@@ -15,7 +16,7 @@ public class ReservoirSamplingTest extends GeneralFileSamplingTester {
 	private static final long RANDOM_SEED = 1;
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(final Object problem) {
+	public IAlgorithm<?, ?> getAlgorithm(final Object problem) throws AlgorithmCreationException {
 		File input = (File) problem;
 		Random r = new Random(RANDOM_SEED);
 		AFileSamplingAlgorithm algorithm = new ReservoirSampling(r, input);
@@ -27,7 +28,7 @@ public class ReservoirSamplingTest extends GeneralFileSamplingTester {
 				algorithm.setSampleSize(sampleSize);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new AlgorithmCreationException(e);
 		}
 		return algorithm;
 	}

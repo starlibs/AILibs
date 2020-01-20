@@ -30,7 +30,6 @@ public class MLPlanOpenMLExample {
 	public static void main(final String[] args) throws Exception {
 
 		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(30);
-		System.out.println(ds.getNumAttributes());
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 30 seconds */

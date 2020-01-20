@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,8 +23,16 @@ public interface IOwnerBasedConfig extends Mutable, Accessible, IConfig {
 	 */
 	@Override
 	default IOwnerBasedConfig loadPropertiesFromFile(final File file) {
+		return this.loadPropertiesFromFileArray(file);
+	}
+
+	default IOwnerBasedConfig loadPropertiesFromFileArray(final File... files) {
 		try {
-			return this.loadPropertiesFromList(FileUtil.readFileAsList(file));
+			List<String> configLines = new ArrayList<>();
+			for (File f : files) {
+				configLines.addAll(FileUtil.readFileAsList(f));
+			}
+			return this.loadPropertiesFromList(configLines);
 		} catch (IOException e) {
 			throw new PropertiesLoadFailedException("Could not load properties from the given file.", e);
 		}
@@ -63,11 +72,15 @@ public interface IOwnerBasedConfig extends Mutable, Accessible, IConfig {
 	@Override
 	default IOwnerBasedConfig loadPropertiesFromList(final List<String> propertiesList) {
 		for (String line : propertiesList) {
+			line = line.trim();
 			if (!line.contains("=") || line.startsWith("#")) {
 				continue;
 			}
 			String[] split = line.split("=");
-			this.setProperty(split[0].trim(), split[1].trim());
+			if (split.length > 2) {
+				throw new IllegalArgumentException("Property line " + line + " contains more than one \"=\" symbol and cannot be parsed.");
+			}
+			this.setProperty(split[0].trim(), split.length > 1 ? split[1].trim() : null);
 		}
 		return this;
 	}

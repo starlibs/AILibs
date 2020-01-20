@@ -1,6 +1,7 @@
 package ai.libs.jaicore.search.testproblems.nqueens;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.search.exampleproblems.nqueens.QueenNode;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;

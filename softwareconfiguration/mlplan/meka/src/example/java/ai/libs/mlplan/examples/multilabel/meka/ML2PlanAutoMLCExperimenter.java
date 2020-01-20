@@ -149,7 +149,7 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 				// mlplan.getComponentInstanceOfSelectedClassifier().getParameterValue("threshold");
 
 				this.logger.info("Evaluate classifier...");
-//				Result result = Evaluation.evaluateModel(classifier, trainTestSplit.get(0), trainTestSplit.get(1), "PCutL");
+				//				Result result = Evaluation.evaluateModel(classifier, trainTestSplit.get(0), trainTestSplit.get(1), "PCutL");
 				this.logger.info("Done evaluating Classifier.");
 				this.logger.info("Store results in DB...");
 				// HashMap<String, Double> metrics = new HashMap<>();
@@ -165,12 +165,12 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 				this.logger.info("Done with evaluation. Send job result.");
 				Map<String, Object> results = new HashMap<>();
 
-//				double extFitness = new AutoMekaGGPFitness().calculateMeasure(result.allPredictions(), result.allTrueValues());
-//				double extHamming = Metrics.L_Hamming(result.allTrueValues(), result.allPredictions(0.5));
-//				double extAccuracy = Metrics.P_Accuracy(result.allTrueValues(), result.allPredictions(0.5));
-//				double extRank = Metrics.L_RankLoss(result.allTrueValues(), result.allPredictions());
-//				double extJaccard = Metrics.P_JaccardIndex(result.allTrueValues(), result.allPredictions(0.5));
-//				double extInstanceF1 = Metrics.P_FmacroAvgD(result.allTrueValues(), result.allPredictions(0.5));
+				//				double extFitness = new AutoMekaGGPFitness().calculateMeasure(result.allPredictions(), result.allTrueValues());
+				//				double extHamming = Metrics.L_Hamming(result.allTrueValues(), result.allPredictions(0.5));
+				//				double extAccuracy = Metrics.P_Accuracy(result.allTrueValues(), result.allPredictions(0.5));
+				//				double extRank = Metrics.L_RankLoss(result.allTrueValues(), result.allPredictions());
+				//				double extJaccard = Metrics.P_JaccardIndex(result.allTrueValues(), result.allPredictions(0.5));
+				//				double extInstanceF1 = Metrics.P_FmacroAvgD(result.allTrueValues(), result.allPredictions(0.5));
 
 				Stack<ComponentInstance> classifierNameStack = new Stack<>();
 				classifierNameStack.push(mlplan.getComponentInstanceOfSelectedClassifier());
@@ -192,18 +192,17 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 
 				results.put("intValue", mlplan.getInternalValidationErrorOfSelectedClassifier());
 
-//				results.put("extFitness", extFitness);
-//				results.put("extHamming", extHamming);
-//				results.put("extAccuracy", extAccuracy);
-//				results.put("extInstanceF1", extInstanceF1);
-//				results.put("extJaccard", extJaccard);
-//				results.put("extRank", extRank);
+				//				results.put("extFitness", extFitness);
+				//				results.put("extHamming", extHamming);
+				//				results.put("extAccuracy", extAccuracy);
+				//				results.put("extInstanceF1", extInstanceF1);
+				//				results.put("extJaccard", extJaccard);
+				//				results.put("extRank", extRank);
 
 				processor.processResults(results);
 
 				this.logger.info("Evaluation task completed.");
 			} catch (Exception e) {
-				e.printStackTrace();
 				throw new ExperimentEvaluationFailedException(e);
 			} finally {
 				if (mlplan != null) {
@@ -211,7 +210,6 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
 			throw new ExperimentEvaluationFailedException(e);
 		}
 	}

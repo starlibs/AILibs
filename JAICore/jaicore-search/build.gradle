@@ -1,6 +1,10 @@
 dependencies {
 	compile project(":JAICore:jaicore-basic")
 	compile project(":JAICore:jaicore-algorithminspector")
+	compile project(":JAICore:jaicore-math")
+	compile project(":JAICore:jaicore-experiments")
+	
+	compile ("$api4AIgraphsearch")
 	
 	compile ("$api4AIgraphsearch")
 	

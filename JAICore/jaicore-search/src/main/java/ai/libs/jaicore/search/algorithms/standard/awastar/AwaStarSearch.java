@@ -50,34 +50,34 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
  *
  * @author lbrandt2 and fmohr
  *
- * @param <T>
+ * @param <N>
  * @param <A>
  * @param <V>
  */
-public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A, V>, T, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, T, A, V> {
+public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> {
 
 	private Logger logger = LoggerFactory.getLogger(AwaStarSearch.class);
 	private String loggerName;
 
-	private final ISingleRootGenerator<T> rootNodeGenerator;
-	private final ISuccessorGenerator<T, A> successorGenerator;
-	private final IPathGoalTester<T, A> goalTester;
-	private final IPathEvaluator<T, A, V> nodeEvaluator;
-	private final Queue<BackPointerPath<T, A, V>> closedList;
-	private final Queue<BackPointerPath<T, A, V>> suspendList;
-	private final Queue<BackPointerPath<T, A, V>> openList;
+	private final ISingleRootGenerator<N> rootNodeGenerator;
+	private final ISuccessorGenerator<N, A> successorGenerator;
+	private final IPathGoalTester<N, A> goalTester;
+	private final IPathEvaluator<N, A, V> nodeEvaluator;
+	private final Queue<BackPointerPath<N, A, V>> closedList;
+	private final Queue<BackPointerPath<N, A, V>> suspendList;
+	private final Queue<BackPointerPath<N, A, V>> openList;
 	private int currentLevel = -1;
 	private int windowSize;
-	private final List<EvaluatedSearchGraphPath<T, A, V>> unconfirmedSolutions = new ArrayList<>(); // these are solutions emitted on the basis of the node evaluator but whose solutions have not been found in the original graph yet
-	private final List<EvaluatedSearchSolutionCandidateFoundEvent<T, A, V>> unreturnedSolutionEvents = new ArrayList<>();
+	private final List<EvaluatedSearchGraphPath<N, A, V>> unconfirmedSolutions = new ArrayList<>(); // these are solutions emitted on the basis of the node evaluator but whose solutions have not been found in the original graph yet
+	private final List<EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>> unreturnedSolutionEvents = new ArrayList<>();
 
 	@SuppressWarnings("rawtypes")
 	public AwaStarSearch(final I problem) {
 		super(problem);
-		this.rootNodeGenerator = (ISingleRootGenerator<T>) problem.getGraphGenerator().getRootGenerator();
+		this.rootNodeGenerator = (ISingleRootGenerator<N>) problem.getGraphGenerator().getRootGenerator();
 		this.successorGenerator = problem.getGraphGenerator().getSuccessorGenerator();
 		this.goalTester = problem.getGoalTester();
-		this.nodeEvaluator = problem.getNodeEvaluator();
+		this.nodeEvaluator = problem.getPathEvaluator();
 
 		this.closedList = new PriorityQueue<>(new DefaultNodeComparator<>());
 		this.suspendList = new PriorityQueue<>(new DefaultNodeComparator<>());
@@ -95,7 +95,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 				this.logger.info("Not doing anything because there are still unreturned solutions.");
 				return;
 			}
-			BackPointerPath<T, A, V> n = this.openList.peek();
+			BackPointerPath<N, A, V> n = this.openList.peek();
 			this.openList.remove(n);
 			this.closedList.add(n);
 			if (!n.isGoal()) {
@@ -121,11 +121,11 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 
 			/* compute successors of the expanded node */
 			this.logger.debug("Expanding {}. Starting successor generation.", n.getHead());
-			Collection<INewNodeDescription<T, A>> successors = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(n.getHead()), "Successor generation timeouted" , true);
+			Collection<INewNodeDescription<N, A>> successors = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(n.getHead()), "Successor generation timeouted" , true);
 			this.logger.debug("Successor generation finished. Identified {} successors.", successors.size());
-			for (INewNodeDescription<T, A> expansionDescription : successors) {
+			for (INewNodeDescription<N, A> expansionDescription : successors) {
 				this.checkAndConductTermination();
-				BackPointerPath<T, A, V> nPrime = new BackPointerPath<>(n, expansionDescription.getTo(), expansionDescription.getArcLabel());
+				BackPointerPath<N, A, V> nPrime = new BackPointerPath<>(n, expansionDescription.getTo(), expansionDescription.getArcLabel());
 				nPrime.setGoal(this.goalTester.isGoal(nPrime));
 				V nPrimeScore = this.nodeEvaluator.evaluate(nPrime);
 
@@ -137,7 +137,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 
 				/* determine whether this is a goal node */
 				if (nPrime.isGoal()) {
-					EvaluatedSearchGraphPath<T, A, V> solution = new EvaluatedSearchGraphPath<>(nPrime, nPrimeScore);
+					EvaluatedSearchGraphPath<N, A, V> solution = new EvaluatedSearchGraphPath<>(nPrime, nPrimeScore);
 					this.registerNewSolutionCandidate(solution);
 				}
 
@@ -169,13 +169,13 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 	}
 
 	@Subscribe
-	public void receiveSolutionEvent(final EvaluatedSearchSolutionCandidateFoundEvent<T, A, V> solutionEvent) {
+	public void receiveSolutionEvent(final EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent) {
 		this.registerNewSolutionCandidate(solutionEvent.getSolutionCandidate());
 		this.unconfirmedSolutions.add(solutionEvent.getSolutionCandidate());
 	}
 
-	public EvaluatedSearchSolutionCandidateFoundEvent<T, A, V> registerNewSolutionCandidate(final EvaluatedSearchGraphPath<T, A, V> solution) {
-		EvaluatedSearchSolutionCandidateFoundEvent<T, A, V> event = this.registerSolution(solution);
+	public EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> registerNewSolutionCandidate(final EvaluatedSearchGraphPath<N, A, V> solution) {
+		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> event = this.registerSolution(solution);
 		this.unreturnedSolutionEvents.add(event);
 		return event;
 	}
@@ -188,8 +188,8 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 			this.checkAndConductTermination();
 			switch (this.getState()) {
 			case CREATED:
-				T externalRootNode = this.rootNodeGenerator.getRoot();
-				BackPointerPath<T, A, V> rootNode = new BackPointerPath<>(null, externalRootNode, null);
+				N externalRootNode = this.rootNodeGenerator.getRoot();
+				BackPointerPath<N, A, V> rootNode = new BackPointerPath<>(null, externalRootNode, null);
 				this.logger.info("Initializing graph and OPEN with {}.", rootNode);
 				this.openList.add(rootNode);
 				this.post(new GraphInitializedEvent<>(this, rootNode));
@@ -272,7 +272,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 	}
 
 	@Override
-	public IGraphGenerator<T, A> getGraphGenerator() {
+	public IGraphGenerator<N, A> getGraphGenerator() {
 		return this.getInput().getGraphGenerator();
 	}
 

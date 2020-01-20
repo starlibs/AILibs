@@ -6,7 +6,7 @@ import ai.libs.jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic;
 
-public class RStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, EvaluatedSearchGraphPath<T, A, Double>, T, A, Double, RStar<T, A>> {
+public class RStarFactory<I extends GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, T, A> extends StandardORGraphSearchFactory<I, EvaluatedSearchGraphPath<T, A, Double>, T, A, Double, RStar<I, T, A>> {
 
 	private int timeoutForFInMS;
 	private IPathEvaluator<T, A, Double> timeoutEvaluator;
@@ -51,13 +51,13 @@ public class RStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearch
 	}
 
 	@Override
-	public RStar<T, A> getAlgorithm() {
+	public RStar<I, T, A> getAlgorithm() {
 		return this.getAlgorithm(this.getInput());
 	}
 
 	@Override
-	public RStar<T, A> getAlgorithm(final GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A> input) {
-		RStar<T, A> search = new RStar<>(input, this.w, this.k, this.delta);
+	public RStar<I, T, A> getAlgorithm(final I input) {
+		RStar<I, T, A> search = new RStar<>(input, this.w, this.k, this.delta);
 		if (this.loggerName != null && this.loggerName.length() > 0) {
 			search.setLoggerName(this.loggerName);
 		}

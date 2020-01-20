@@ -32,7 +32,7 @@ implements IOptimalPathInORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, 
 		if (this.getInput().getGraphGenerator() == null) {
 			throw new IllegalStateException("Cannot produce BestFirst searches before the graph generator is set in the problem.");
 		}
-		if (this.getInput().getNodeEvaluator() == null) {
+		if (this.getInput().getPathEvaluator() == null) {
 			throw new IllegalStateException("Cannot produce BestFirst searches before the node evaluator is set.");
 		}
 		return this.getAlgorithm(this.getInput());
@@ -61,7 +61,7 @@ implements IOptimalPathInORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, 
 
 	@Override
 	public BestFirst<P, N, A, V> getAlgorithm(final P problem) {
-		if (problem.getNodeEvaluator() == null) {
+		if (problem.getPathEvaluator() == null) {
 			throw new IllegalArgumentException("Cannot create BestFirst algorithm for node evaluator NULL");
 		}
 		BestFirst<P, N, A, V> search = new BestFirst<>(problem);

@@ -39,8 +39,9 @@ public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> 
 		this.pathEvaluator = pathEvaluator;
 	}
 
+	@SuppressWarnings("unchecked")
 	public GraphSearchWithPathEvaluationsInput(final IPathSearchInput<N, A> graphSearchInput, final IObjectEvaluator<ILabeledPath<N, A>, V> pathEvaluator) {
-		this (graphSearchInput, new Evaluator<N, A, V>(pathEvaluator));
+		this (graphSearchInput, pathEvaluator instanceof IPathEvaluator ? (IPathEvaluator<N, A, V>)pathEvaluator : new Evaluator<N, A, V>(pathEvaluator));
 	}
 
 	public GraphSearchWithPathEvaluationsInput(final IGraphGenerator<N, A> graphGenerator, final IPathGoalTester<N, A> goalTester, final IObjectEvaluator<ILabeledPath<N, A>, V> pathEvaluator) {
@@ -67,6 +68,9 @@ public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> 
 
 		public Evaluator(final IObjectEvaluator<ILabeledPath<N, A>, V> pathEvaluator) {
 			super();
+			if (pathEvaluator instanceof IPathEvaluator) {
+				throw new IllegalArgumentException("An object of type " + IPathEvaluator.class.getName() + " should not be wrapped here!");
+			}
 			this.pathEvaluator = pathEvaluator;
 		}
 

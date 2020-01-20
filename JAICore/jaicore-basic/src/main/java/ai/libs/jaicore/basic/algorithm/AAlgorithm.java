@@ -62,8 +62,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 *            The input for the algorithm.
 	 */
 	protected AAlgorithm(final I input) {
-		this.input = input;
-		this.config = ConfigFactory.create(IOwnerBasedAlgorithmConfig.class);
+		this(null, input);
 	}
 
 	/**
@@ -75,11 +74,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 *            The configuration to take as the internal configuration object.
 	 */
 	protected AAlgorithm(final IOwnerBasedAlgorithmConfig config, final I input) {
-		this.config = config;
 		this.input = input;
-		if (this.config == null) {
-			throw new IllegalArgumentException("Algorithm configuration must not be null!");
-		}
+		this.config = (config != null) ? config : ConfigFactory.create(IOwnerBasedAlgorithmConfig.class);
 	}
 
 	@Override

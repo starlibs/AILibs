@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -26,7 +27,6 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSo
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
 import ai.libs.jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
 /**
  *
@@ -35,7 +35,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
  * @param <N>
  * @param <A>
  */
-public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> implements ILoggingCustomizable {
+public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput<N, A>, SearchGraphPath<N, A>, N, A> implements ILoggingCustomizable {
 
 	/* logging */
 	private String loggerName;
@@ -49,7 +49,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 	private Map<N, List<N>> successorsNodes = new HashMap<>();
 	private Map<N, List<A>> successorsEdges = new HashMap<>();
 
-	public DepthFirstSearch(final GraphSearchInput<N, A> problem) {
+	public DepthFirstSearch(final IPathSearchInput<N, A> problem) {
 		super(problem);
 		this.goalTester = (INodeGoalTester<N, A>)problem.getGoalTester();
 	}

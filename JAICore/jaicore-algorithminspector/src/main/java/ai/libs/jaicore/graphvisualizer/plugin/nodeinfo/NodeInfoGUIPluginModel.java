@@ -3,46 +3,51 @@ package ai.libs.jaicore.graphvisualizer.plugin.nodeinfo;
 import java.util.HashMap;
 import java.util.Map;
 
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginModel;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
 /**
- * 
+ *
  * @author hetzer
  *
  * @param <N>
  *            The node type class.
  */
-public class NodeInfoGUIPluginModel implements IGUIPluginModel {
+public class NodeInfoGUIPluginModel extends ASimpleMVCPluginModel<NodeInfoGUIPluginView, NodeInfoGUIPluginController> {
 
 	private NodeInfoGUIPluginView view;
 
 	private Map<String, String> nodeIdToNodeInfoMap;
 	private String currentlySelectedNode;
 
-	public NodeInfoGUIPluginModel(NodeInfoGUIPluginView view) {
+	public NodeInfoGUIPluginModel(final NodeInfoGUIPluginView view) {
 		this.view = view;
-		nodeIdToNodeInfoMap = new HashMap<>();
+		this.nodeIdToNodeInfoMap = new HashMap<>();
 	}
 
-	public void addNodeIdToNodeInfoMapping(String nodeId, String nodeInfo) {
-		nodeIdToNodeInfoMap.put(nodeId, nodeInfo);
+	public void addNodeIdToNodeInfoMapping(final String nodeId, final String nodeInfo) {
+		this.nodeIdToNodeInfoMap.put(nodeId, nodeInfo);
 	}
 
-	public String getNodeInfoForNodeId(String nodeId) {
-		return nodeIdToNodeInfoMap.get(nodeId);
+	public String getNodeInfoForNodeId(final String nodeId) {
+		return this.nodeIdToNodeInfoMap.get(nodeId);
 	}
 
 	public String getCurrentlySelectedNode() {
-		return currentlySelectedNode;
+		return this.currentlySelectedNode;
 	}
 
-	public void setCurrentlySelectedNode(String currentlySelectedNode) {
+	public void setCurrentlySelectedNode(final String currentlySelectedNode) {
 		this.currentlySelectedNode = currentlySelectedNode;
-		view.update();
+		this.view.update();
 	}
 
 	public String getNodeInfoForCurrentlySelectedNode() {
-		return getNodeInfoForNodeId(getCurrentlySelectedNode());
+		return this.getNodeInfoForNodeId(this.getCurrentlySelectedNode());
+	}
+
+	@Override
+	public void clear() {
+		/* ignore this */
 	}
 
 }

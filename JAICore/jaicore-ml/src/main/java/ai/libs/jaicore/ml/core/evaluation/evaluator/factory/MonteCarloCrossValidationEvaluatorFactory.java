@@ -4,7 +4,6 @@ import java.util.Objects;
 
 import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerformanceMeasure;
 
-import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.ml.core.evaluation.AveragingPredictionPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 
@@ -29,7 +28,6 @@ public class MonteCarloCrossValidationEvaluatorFactory extends AMonteCarloCrossV
 		if (this.numMCIterations <= 0) {
 			throw new IllegalStateException("Cannot create MCCV evaluator due to invalid number of repeats " + this.getNumMCIterations() + ". Set number of repeats to a positive value!");
 		}
-		ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(this.data);
 		IAggregatedPredictionPerformanceMeasure<?, ?> aggMeasure = new AveragingPredictionPerformanceMeasure<>(this.metric);
 		return new MonteCarloCrossValidationEvaluator(this.data, this.getNumMCIterations(), this.getTrainFoldSize(), this.random, aggMeasure);
 	}

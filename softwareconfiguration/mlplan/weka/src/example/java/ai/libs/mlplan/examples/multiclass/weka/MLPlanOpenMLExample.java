@@ -41,7 +41,7 @@ public class MLPlanOpenMLExample {
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 		builder.withNodeEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.SECONDS));
-		builder.withTimeOut(new Timeout(2, TimeUnit.MINUTES));
+		builder.withTimeOut(new Timeout(30, TimeUnit.SECONDS));
 		builder.withNumCpus(4);
 		builder.withSeed(1);
 		builder.withMCCVBasedCandidateEvaluationInSearchPhase().withNumMCIterations(12);

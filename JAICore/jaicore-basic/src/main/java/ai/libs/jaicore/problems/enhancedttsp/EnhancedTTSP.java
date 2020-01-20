@@ -107,11 +107,11 @@ public class EnhancedTTSP {
 		return this.possibleDestinations;
 	}
 
-	public EnhancedTTSPNode getInitalState() {
-		return new EnhancedTTSPNode(this.startLocation, new ShortArrayList(), this.hourOfDeparture, 0, 0);
+	public EnhancedTTSPState getInitalState() {
+		return new EnhancedTTSPState(null, this.startLocation, this.hourOfDeparture, 0, 0);
 	}
 
-	public EnhancedTTSPNode computeSuccessorState(final EnhancedTTSPNode n, final short destination) {
+	public EnhancedTTSPState computeSuccessorState(final EnhancedTTSPState n, final short destination) {
 
 		this.logger.info("Generating successor for node {} to go to destination {}", n, destination);
 
@@ -192,10 +192,34 @@ public class EnhancedTTSP {
 
 		ShortList tourToHere = new ShortArrayList(n.getCurTour());
 		tourToHere.add(destination);
-		return new EnhancedTTSPNode(destination, tourToHere, timeOfArrival, timeSinceLastShortBreak, timeSinceLastLongBreak);
+		return new EnhancedTTSPState(n, destination, timeOfArrival, timeSinceLastShortBreak, timeSinceLastLongBreak);
 	}
 
-
+	public ShortList getPossibleRemainingDestinationsInState(final EnhancedTTSPState n) {
+		short curLoc = n.getCurLocation();
+		ShortList possibleDestinationsToGoFromhere = new ShortArrayList();
+		ShortList seenPlaces = n.getCurTour();
+		int k = 0;
+		boolean openPlaces = seenPlaces.size() < this.getPossibleDestinations().size() - 1;
+		if (n.getCurTour().size() >= this.getPossibleDestinations().size()) {
+			throw new IllegalArgumentException("We have already visited everything!");
+		}
+		assert openPlaces || curLoc != 0 : "There are no open places (out of the " + this.getPossibleDestinations().size() + ", " + seenPlaces.size()
+		+ " of which have already been seen) but we are still in the initial position. This smells like a strange TSP.";
+		if (openPlaces) {
+			for (short l : this.getPossibleDestinations()) {
+				if (k++ == 0) {
+					continue;
+				}
+				if (l != curLoc && !seenPlaces.contains(l)) {
+					possibleDestinationsToGoFromhere.add(l);
+				}
+			}
+		} else {
+			possibleDestinationsToGoFromhere.add((short) 0);
+		}
+		return possibleDestinationsToGoFromhere;
+	}
 
 	private double getTimeToNextShortBreak(final double timeSinceLastBreak) {
 		return this.maxConsecutiveDrivingTime - timeSinceLastBreak;

@@ -42,11 +42,8 @@ public class ExtendedM5TreeTest {
 	public void giveData() throws Exception {
 		Instances trainingData = this.params.getTrainingData();
 		ExtendedM5Tree tree = new ExtendedM5Tree();
-		try {
-			tree.buildClassifier(trainingData);
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
+		tree.buildClassifier(trainingData);
+
 		StringBuilder X = new StringBuilder("[");
 		StringBuilder Y = new StringBuilder("[");
 
@@ -71,14 +68,11 @@ public class ExtendedM5TreeTest {
 	}
 
 	// @Test
-	public void testTree() {
+	public void testTree() throws Exception {
 		Instances trainingData = this.params.getTrainingData();
 		ExtendedM5Tree tree = new ExtendedM5Tree();
-		try {
-			tree.buildClassifier(trainingData);
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
+		tree.buildClassifier(trainingData);
+
 
 		Entry<Instance, Interval> e = this.params.getTestData();
 		Interval predicted = tree.predictInterval(e.getKey());

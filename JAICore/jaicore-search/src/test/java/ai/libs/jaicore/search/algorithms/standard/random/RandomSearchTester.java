@@ -3,7 +3,6 @@ package ai.libs.jaicore.search.algorithms.standard.random;
 import org.api4.java.ai.graphsearch.problem.IPathSearch;
 
 import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
-import ai.libs.jaicore.search.algorithms.standard.random.RandomSearch;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
 public class RandomSearchTester extends GraphSearchSolutionIteratorTester {

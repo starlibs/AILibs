@@ -12,13 +12,20 @@ public class ReconstructionUtil {
 	}
 
 	public static void requireNonEmptyInstructionsIfReconstructibilityClaimed(final Object object) {
+		if (!areInstructionsNonEmptyIfReconstructibilityClaimed(object)) {
+			throw new IllegalArgumentException("Object that is declared to be reconstructible does not carry any instructions.");
+		}
+	}
+
+	public static boolean areInstructionsNonEmptyIfReconstructibilityClaimed(final Object object) {
 
 		/* consistency check: check whether object, if reconstructible, already has a construction */
 		if (object instanceof IReconstructible) {
 			List<IReconstructionInstruction> instructions = ((IReconstructible) object).getConstructionPlan().getInstructions();
 			if (instructions == null || instructions.isEmpty()) {
-				throw new IllegalArgumentException("Object that is declared to be reconstructible does not carry any instructions.");
+				return false;
 			}
 		}
+		return true;
 	}
 }

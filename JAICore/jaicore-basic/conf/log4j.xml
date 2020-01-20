@@ -75,6 +75,18 @@
     <level value="debug" />
   </logger>
   
+	
+  <logger name="testers">
+    <level value="debug" />
+    
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+
+  
   <logger name="testedalgorithm">
     <level value="warn" />
     

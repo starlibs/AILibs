@@ -344,6 +344,9 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public boolean updateExperimentConditionally(final ExperimentDBEntry exp, final Map<String, String> conditions, final Map<String, ? extends Object> values) throws ExperimentUpdateFailedException {
+		if (values == null || values.isEmpty()) {
+			throw new IllegalArgumentException("No values provided for experiment update of experiment " + exp);
+		}
 		Collection<String> resultFieldsAsList = Arrays.asList(this.resultFields);
 		Collection<String> writableFields = new ArrayList<>(resultFieldsAsList);
 		writableFields.add(FIELD_HOST);
@@ -451,8 +454,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		StringBuilder queryStringSB = new StringBuilder();
 		queryStringSB.append("SELECT * FROM `");
 		queryStringSB.append(this.tablename);
-		queryStringSB.append("` WHERE experiment_id = " + id);
-
+		queryStringSB.append("` WHERE `experiment_id` = " + id);
 		try {
 			return this.getExperimentsForSQLQuery(queryStringSB.toString()).get(0);
 		} catch (SQLException e) {

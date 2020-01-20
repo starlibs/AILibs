@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import org.api4.java.ai.ml.core.exception.PredictionException;
+import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import org.api4.java.common.math.IVector;
 import org.junit.Before;
@@ -59,21 +61,21 @@ public class DyadRankerGATSPTest {
 	// seed for shuffling the dataset
 	private static final long SEED = 15;
 
-	PLNetDyadRanker ranker;
-	DyadRankingDataset dataset;
+	private PLNetDyadRanker ranker;
+	private DyadRankingDataset dataset;
 
 	public DyadRankerGATSPTest(final PLNetDyadRanker ranker) {
 		this.ranker = ranker;
 	}
 
 	@Before
-	public void init() {
+	public void init() throws IOException {
 		// load dataset
 		this.dataset = loadDatasetFromXXLAndCSV();
 	}
 
 	@Test
-	public void test() {
+	public void test() throws PredictionException, InterruptedException, TrainingException {
 		this.dataset = randomlyTrimSparseDyadRankingInstances(this.dataset, M);
 
 		Collections.shuffle(this.dataset, new Random(SEED));
@@ -91,16 +93,10 @@ public class DyadRankerGATSPTest {
 		scaler.transformInstances(trainData);
 		scaler.transformInstances(testData);
 
-		try {
-
-			// train the ranker
-			this.ranker.fit(trainData);
-			double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, this.ranker);
-			assertTrue(avgKendallTau > 0.5d);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+		// train the ranker
+		this.ranker.fit(trainData);
+		double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, this.ranker);
+		assertTrue(avgKendallTau > 0.5d);
 	}
 
 	/**
@@ -108,8 +104,10 @@ public class DyadRankerGATSPTest {
 	 *
 	 * @return {@link DyadRankingDataset} constructed of the instances and
 	 *         alternatives in the corresponding files
+	 * @throws IOException
+	 * @throws NumberFormatException
 	 */
-	public static DyadRankingDataset loadDatasetFromXXLAndCSV() {
+	public static DyadRankingDataset loadDatasetFromXXLAndCSV() throws IOException {
 
 		DyadRankingDataset dataset = new DyadRankingDataset();
 
@@ -130,8 +128,6 @@ public class DyadRankerGATSPTest {
 				}
 				i++;
 			}
-		} catch (IOException e1) {
-			e1.printStackTrace();
 		}
 
 		List<IVector> alternativeFeatures = new ArrayList<>(100);
@@ -148,11 +144,8 @@ public class DyadRankerGATSPTest {
 				}
 				alternativeFeatures.add(vector);
 			}
-			reader.close();
-
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
+
 
 		// parse XXL file
 		File xxlFile = new File(XXL_FILE);
@@ -205,10 +198,6 @@ public class DyadRankerGATSPTest {
 			for (int i = 0; i < instanceFeatures.size(); i++) {
 				dataset.add(new SparseDyadRankingInstance(instanceFeatures.get(i), alternativesList.get(i)));
 			}
-
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		return dataset;
 	}
@@ -238,7 +227,7 @@ public class DyadRankerGATSPTest {
 			Collections.shuffle(flagVector);
 			List<IVector> trimmedAlternatives = new ArrayList<>(dyadRankingLength);
 			for (int i = 0; i < instance.getNumAttributes(); i++) {
-				if (flagVector.get(i)) {
+				if (flagVector.get(i).booleanValue()) {
 					trimmedAlternatives.add(instance.getLabel().get(i).getAlternative());
 				}
 			}

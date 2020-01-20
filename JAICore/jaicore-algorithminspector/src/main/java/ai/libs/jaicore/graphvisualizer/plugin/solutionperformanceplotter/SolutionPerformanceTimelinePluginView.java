@@ -15,7 +15,7 @@ import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 
 /**
- * 
+ *
  * @author fmohr
  *
  */
@@ -26,32 +26,32 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 	private final Series<Number, Number> performanceSeries;
 	private int nextIndexToDisplay = 0;
 
-	public SolutionPerformanceTimelinePluginView(SolutionPerformanceTimelinePluginModel model) {
+	public SolutionPerformanceTimelinePluginView(final SolutionPerformanceTimelinePluginModel model) {
 		super(model, new LineChart<>(new NumberAxis(), new NumberAxis()));
 
 		// defining the axes
-		getNode().getXAxis().setLabel("elapsed time (s)");
+		this.getNode().getXAxis().setLabel("elapsed time (s)");
 
 		// creating the chart
-		getNode().setTitle(getTitle());
+		this.getNode().setTitle(this.getTitle());
 		// defining a series
-		performanceSeries = new Series<>();
-		getNode().getData().add(performanceSeries);
+		this.performanceSeries = new Series<>();
+		this.getNode().getData().add(this.performanceSeries);
 	}
 
 	@Override
 	public void update() {
 
 		/* compute data to add */
-		List<Pair<Integer, Double>> events = getModel().getTimedPerformances();
+		List<Pair<Integer, Double>> events = this.getModel().getTimedPerformances();
 		List<Data<Number, Number>> values = new ArrayList<>();
-		for (; nextIndexToDisplay < events.size(); nextIndexToDisplay++) {
-			Pair<Integer, Double> entry = events.get(nextIndexToDisplay);
-			values.add(new Data<>(entry.getKey() / 1000, entry.getValue()));
+		for (; this.nextIndexToDisplay < events.size(); this.nextIndexToDisplay++) {
+			Pair<Integer, Double> entry = events.get(this.nextIndexToDisplay);
+			values.add(new Data<>(entry.getKey() / 1000.0, entry.getValue()));
 		}
-		logger.info("Adding {} values to chart.", values.size());
+		this.logger.info("Adding {} values to chart.", values.size());
 		Platform.runLater(() -> {
-			performanceSeries.getData().addAll(values);
+			this.performanceSeries.getData().addAll(values);
 		});
 
 	}
@@ -63,11 +63,11 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 
 	@Override
 	public void clear() {
-		nextIndexToDisplay = 0;
-		performanceSeries.getData().clear();
+		this.nextIndexToDisplay = 0;
+		this.performanceSeries.getData().clear();
 	}
 
 	public int getNextIndexToDisplay() {
-		return nextIndexToDisplay;
+		return this.nextIndexToDisplay;
 	}
 }

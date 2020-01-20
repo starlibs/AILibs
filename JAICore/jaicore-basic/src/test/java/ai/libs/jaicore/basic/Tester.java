@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 public abstract class Tester implements ILoggingCustomizable {
 
+	protected final static Logger LOGGER = LoggerFactory.getLogger("testers");
+
 	protected Logger logger = LoggerFactory.getLogger("testers." + this.getClass().getSimpleName().toLowerCase());
 
 	@Rule

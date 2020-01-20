@@ -1,24 +1,24 @@
 package ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer;
 
-import org.api4.java.ai.graphsearch.problem.IPathSearchFactory;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
+import org.api4.java.ai.graphsearch.problem.IPathSearchFactory;
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 
 import ai.libs.jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class IteratingGraphSearchOptimizerFactory<I extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<I, EvaluatedSearchGraphPath<N, A, V>, N, A, V, IteratingGraphSearchOptimizer<I, N, A, V>>
+public class IteratingGraphSearchOptimizerFactory<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<I, EvaluatedSearchGraphPath<N, A, V>, N, A, V, IteratingGraphSearchOptimizer<I, N, A, V>>
 implements IOptimalPathInORGraphSearchFactory<I, EvaluatedSearchGraphPath<N, A, V>, N, A, V, IteratingGraphSearchOptimizer<I, N, A, V>> {
 
-	private IPathSearchFactory<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A, ?> baseAlgorithmFactory;
+	private IPathSearchFactory<IPathSearchInput<N, A>, SearchGraphPath<N, A>, N, A, ?> baseAlgorithmFactory;
 
 	public IteratingGraphSearchOptimizerFactory() {
 		super();
 	}
 
-	public IteratingGraphSearchOptimizerFactory(final IPathSearchFactory<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A, ?> baseAlgorithmFactory) {
+	public IteratingGraphSearchOptimizerFactory(final IPathSearchFactory<IPathSearchInput<N, A>, SearchGraphPath<N, A>, N, A, ?> baseAlgorithmFactory) {
 		super();
 		this.baseAlgorithmFactory = baseAlgorithmFactory;
 	}
@@ -39,11 +39,11 @@ implements IOptimalPathInORGraphSearchFactory<I, EvaluatedSearchGraphPath<N, A, 
 		return new IteratingGraphSearchOptimizer<>(input, this.baseAlgorithmFactory.getAlgorithm(input));
 	}
 
-	public IPathSearchFactory<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A, ?> getBaseAlgorithmFactory() {
+	public IPathSearchFactory<IPathSearchInput<N, A>, SearchGraphPath<N, A>, N, A, ?> getBaseAlgorithmFactory() {
 		return this.baseAlgorithmFactory;
 	}
 
-	public void setBaseAlgorithmFactory(final IPathSearchFactory<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A, ?> baseAlgorithmFactory) {
+	public void setBaseAlgorithmFactory(final IPathSearchFactory<IPathSearchInput<N, A>, SearchGraphPath<N, A>, N, A, ?> baseAlgorithmFactory) {
 		this.baseAlgorithmFactory = baseAlgorithmFactory;
 	}
 }

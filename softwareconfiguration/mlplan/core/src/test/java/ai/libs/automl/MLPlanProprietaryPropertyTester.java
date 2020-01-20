@@ -65,8 +65,7 @@ public class MLPlanProprietaryPropertyTester {
 						assertEquals(trainDataSizeSelectionPhase, e.getReport().getTrainSet().size());
 						assertEquals(testDataSizeSelectionPhase, e.getReport().getTestSet().size());
 					}
-					catch (Throwable ex) {
-						ex.printStackTrace();
+					catch (Exception ex) {
 						observedFailure.set(true);
 					}
 				}

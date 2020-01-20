@@ -51,5 +51,5 @@ public abstract class AutoMLAlgorithmCoreFunctionalityTester extends GeneralAlgo
 		}
 	}
 
-	public abstract IAlgorithm<? extends ILabeledDataset<?>, ? extends ISupervisedLearner<?, ?>> getAutoMLAlgorithm(ILabeledDataset<?> data);
+	public abstract IAlgorithm<? extends ILabeledDataset<?>, ? extends ISupervisedLearner<?, ?>> getAutoMLAlgorithm(ILabeledDataset<?> data) throws AlgorithmCreationException;
 }

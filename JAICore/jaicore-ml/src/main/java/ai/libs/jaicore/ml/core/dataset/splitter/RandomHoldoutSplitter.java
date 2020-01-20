@@ -126,8 +126,7 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 	}
 
 	private static void addReconstructionInfo(final IDataset<?> data, final IDataset<?> fold, final long seed, final int numFold, final double[] portions) {
-		if (data instanceof IReconstructible) { // make the data in the folds reconstructible
-			ReconstructionUtil.requireNonEmptyInstructionsIfReconstructibilityClaimed(data);
+		if (data instanceof IReconstructible && ReconstructionUtil.areInstructionsNonEmptyIfReconstructibilityClaimed(data)) { // make data reconstructible, but only if the given data is already reconstructible
 			((IReconstructible) data).getConstructionPlan().getInstructions().forEach(((IReconstructible) fold)::addInstruction);
 			((IReconstructible) fold).addInstruction(
 					new ReconstructionInstruction(RandomHoldoutSplitter.class.getName(), "getFoldOfSplit", new Class<?>[] { IDataset.class, long.class, int.class, double[].class }, new Object[] { "this", seed, numFold, portions }));

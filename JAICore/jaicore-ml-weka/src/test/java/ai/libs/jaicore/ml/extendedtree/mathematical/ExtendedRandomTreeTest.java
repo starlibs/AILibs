@@ -39,14 +39,10 @@ public class ExtendedRandomTreeTest {
 	}
 
 	@Test
-	public void testTree() {
+	public void testTree() throws Exception {
 		Instances trainingData = this.params.getTrainingData();
 		ExtendedRandomForest tree = new ExtendedRandomForest();
-		try {
-			tree.buildClassifier(trainingData);
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
+		tree.buildClassifier(trainingData);
 
 		Entry<Instance, Interval> e = this.params.getTestData();
 		Interval predicted = tree.predictInterval(e.getKey());

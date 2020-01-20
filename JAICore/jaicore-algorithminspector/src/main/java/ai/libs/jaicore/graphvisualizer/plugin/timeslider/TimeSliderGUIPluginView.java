@@ -23,23 +23,14 @@ public class TimeSliderGUIPluginView implements IGUIPluginView {
 		VBox timestepSliderLayout = new VBox();
 		timestepSliderLayout.setAlignment(Pos.CENTER);
 
-		timestepSlider = new Slider(0, 1, 0);
-		timestepSlider.setShowTickLabels(true);
-		timestepSlider.setShowTickMarks(true);
-		timestepSlider.setMajorTickUnit(25);
-		timestepSlider.setMinorTickCount(5);
+		this.timestepSlider = new Slider(0, 1, 0);
+		this.timestepSlider.setShowTickLabels(false);
+		this.timestepSlider.setShowTickMarks(false);
 
-		timestepSlider.setOnMouseReleased(event -> {
-			handleInputEvent();
-		});
-		timestepSlider.setOnKeyPressed(event -> {
-			handleInputEvent();
-		});
-		timestepSlider.setOnKeyReleased(event -> {
-			handleInputEvent();
-		});
-
-		timestepSliderLayout.getChildren().add(timestepSlider);
+		this.timestepSlider.setOnMouseReleased(event -> this.handleInputEvent());
+		this.timestepSlider.setOnKeyPressed(event -> this.handleInputEvent());
+		this.timestepSlider.setOnKeyReleased(event -> this.handleInputEvent());
+		timestepSliderLayout.getChildren().add(this.timestepSlider);
 
 		Label timestepSliderLabel = new Label("Timestep");
 		timestepSliderLayout.getChildren().add(timestepSliderLabel);
@@ -47,18 +38,17 @@ public class TimeSliderGUIPluginView implements IGUIPluginView {
 	}
 
 	public synchronized void handleInputEvent() {
-		DefaultGUIEventBus.getInstance().postEvent(new GoToTimeStepEvent((int) timestepSlider.getValue()));
+		DefaultGUIEventBus.getInstance().postEvent(new GoToTimeStepEvent((int) this.timestepSlider.getValue()));
 	}
 
 	@Override
 	public void update() {
-		timestepSlider.setValue(model.getCurrentTimeStep());
-		timestepSlider.setMax(model.getMaximumTimeStep());
-
-		if (model.isPaused() && timestepSlider.isDisabled()) {
-			timestepSlider.setDisable(false);
-		} else if (!model.isPaused() && !timestepSlider.isDisabled()) {
-			timestepSlider.setDisable(true);
+		this.timestepSlider.setValue(this.model.getCurrentTimeStep());
+		this.timestepSlider.setMax(this.model.getMaximumTimeStep());
+		if (this.model.isPaused() && this.timestepSlider.isDisabled()) {
+			this.timestepSlider.setDisable(false);
+		} else if (!this.model.isPaused() && !this.timestepSlider.isDisabled()) {
+			this.timestepSlider.setDisable(true);
 		}
 	}
 
@@ -68,7 +58,7 @@ public class TimeSliderGUIPluginView implements IGUIPluginView {
 	}
 
 	public TimeSliderGUIPluginModel getModel() {
-		return model;
+		return this.model;
 	}
 
 }

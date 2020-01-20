@@ -9,6 +9,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import ai.libs.jaicore.search.exampleproblems.nqueens.QueenNode;
+
 public class QueenNodeTester {
 
 	QueenNode n1;

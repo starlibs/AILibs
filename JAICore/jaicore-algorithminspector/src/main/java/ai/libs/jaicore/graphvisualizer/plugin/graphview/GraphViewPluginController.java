@@ -4,6 +4,9 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
+import org.api4.java.common.control.ILoggingCustomizable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
@@ -17,9 +20,10 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfo;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
-public class GraphViewPluginController implements IGUIPluginController {
+public class GraphViewPluginController implements IGUIPluginController, ILoggingCustomizable {
 
 	private GraphViewPluginModel model;
+	private Logger logger = LoggerFactory.getLogger(GraphViewPluginController.class);
 
 	public GraphViewPluginController(final GraphViewPluginModel model) {
 		this.model = model;
@@ -85,6 +89,16 @@ public class GraphViewPluginController implements IGUIPluginController {
 		} else if (guiEvent instanceof GoToTimeStepEvent) {
 			this.model.reset();
 		}
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 
 }

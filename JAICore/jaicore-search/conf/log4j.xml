@@ -45,6 +45,16 @@
 			<param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
 		</layout>
 	</appender>
+	
+  <logger name="testers">
+    <level value="debug" />
+    
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
 
 	<logger name="ai.libs.jaicore">
 		<level value="warn" />
@@ -63,6 +73,16 @@
 		<level value="info" />
 	</logger>
 	
+	  <logger name="gui">
+    <level value="trace" />
+    
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+	
   <logger name="testedalgorithm">
     <level value="warn" />
     
@@ -73,8 +93,8 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="testedalgorithm._orgraphsearch._algorithm">
-    <level value="warn" />
+  <logger name="testedalgorithm._orgraphsearch">
+    <level value="info" />
   </logger>
   
   <logger name="testedalgorithm.nodeevaluator">
@@ -82,7 +102,7 @@
   </logger>
   
   <logger name="ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="ai.libs.jaicore.basic.algorithm.SolutionCandidateIteratorTester">
@@ -102,7 +122,7 @@
   </logger>
   
   <logger name="ai.libs.jaicore.search.algorithms.standard.bestfirst.RandomCompletionNodeEvaluatorTester">
-    <level value="warn" />
+    <level value="debug" />
   </logger>
   
   <logger name="testednodeevaluator">

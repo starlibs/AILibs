@@ -3,15 +3,16 @@ package ai.libs.jaicore.graphvisualizer.plugin;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.graphvisualizer.events.gui.GUIEventSource;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyProcessedAlgorithmEventSource;
 
-public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V extends ASimpleMVCPluginView<M, C, ?>, C extends ASimpleMVCPluginController<M, V>> implements IGUIPlugin {
+public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V extends ASimpleMVCPluginView<M, C, ?>, C extends ASimpleMVCPluginController<M, V>> implements IGUIPlugin, ILoggingCustomizable {
 
-	private final Logger logger = LoggerFactory.getLogger(ASimpleMVCPlugin.class);
+	private Logger logger = LoggerFactory.getLogger(ASimpleMVCPlugin.class);
 	private final M model;
 	private final V view;
 	private final C controller;
@@ -31,7 +32,7 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 			Class<M> modelClass = ((Class<M>) Class.forName(this.getClassNameWithoutGenerics(mvcPatternClasses[0].getTypeName())));
 			Class<V> viewClass = ((Class<V>) Class.forName(this.getClassNameWithoutGenerics(mvcPatternClasses[1].getTypeName())));
 			Class<C> controllerClass = ((Class<C>) Class.forName(this.getClassNameWithoutGenerics(mvcPatternClasses[2].getTypeName())));
-			myModel = modelClass.newInstance();
+			myModel = modelClass.getConstructor().newInstance();
 			myView = viewClass.getDeclaredConstructor(modelClass).newInstance(myModel);
 			myController = controllerClass.getDeclaredConstructor(modelClass, viewClass).newInstance(myModel, myView);
 			myController.setDaemon(true);
@@ -78,5 +79,18 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 
 	private String getClassNameWithoutGenerics(final String className) {
 		return className.replaceAll("(<.*>)", "");
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
+		this.model.setLoggerName(name + ".model");
+		this.view.setLoggerName(name + ".view");
+		this.controller.setLoggerName(name + ".controller");
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
 	}
 }

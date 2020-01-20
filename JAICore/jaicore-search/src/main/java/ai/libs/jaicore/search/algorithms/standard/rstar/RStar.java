@@ -52,7 +52,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePa
  * @param <T> a nodes external label i.e. a state of a problem
  * @param <A> action (action space of problem)
  */
-public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, T, A, Double> {
+public class RStar<I extends GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, T, A> extends AOptimalPathInORGraphSearch<I, T, A, Double> {
 
 	/* Open list. */
 	protected PriorityQueue<GammaNode<T, A>> open = new PriorityQueue<>((n1, n2) -> (n1.getScore().compareTo(n2.getScore())));
@@ -85,10 +85,10 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	 * @param k
 	 * @param delta
 	 */
-	public RStar(final GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A> problem, final double w, final int k, final double delta) {
+	public RStar(final I problem, final double w, final int k, final double delta) {
 		super(problem);
-		this.h = ((GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getNodeEvaluator()).getH();
-		this.hPath = ((GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer<T, A>) this.getInput().getNodeEvaluator()).gethPath();
+		this.h = ((GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getPathEvaluator()).getH();
+		this.hPath = ((GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer<T, A>) this.getInput().getPathEvaluator()).gethPath();
 		this.w = w;
 		this.k = k;
 		this.metricOverStates = this.getInput().getMetricOverStates();
@@ -128,7 +128,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 			throw new IllegalArgumentException("Can only re-evaluate nodes that have a parent!");
 		}
 		IPathSearchInput<T, A> subProblem = new GraphSearchInput<>(new SubPathGraphGenerator<>(this.getInput().getGraphGenerator(), n.getParent().getHead()), c -> c.equals(n.getHead()));
-		AStar<T, A> astar = new AStar<>(new GraphSearchWithNumberBasedAdditivePathEvaluation<>(subProblem, (GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getNodeEvaluator()));
+		AStar<T, A> astar = new AStar<>(new GraphSearchWithNumberBasedAdditivePathEvaluation<>(subProblem, (GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getPathEvaluator()));
 		astar.setLoggerName(this.getLoggerName() + ".astar");
 		astar.setTimeout(new Timeout(this.getRemainingTimeToDeadline().milliseconds(), TimeUnit.MILLISECONDS));
 		this.logger.trace("Invoking AStar with root {} and only goal node {}", n.getParent().getHead(), n.getHead());
