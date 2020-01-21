@@ -36,14 +36,20 @@ public class BRUEPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double> {
 
 	private final Map<Pair<N, A>, Integer> nCounter = new HashMap<>();
 	private final Map<Pair<N, A>, Double> qHat = new HashMap<>();
-	private final Random random = new Random(0);
-	private final int timeHorizon = 100; // H in the paper
+	private final Random random;
+	private final int timeHorizon; // H in the paper
 	private final boolean maximize;
 	private int n = 0; // iteration of the algorithm
 
-	public BRUEPolicy(final boolean maximize) {
+	public BRUEPolicy(final boolean maximize, final int timeHorizon, final Random random) {
 		super();
 		this.maximize = maximize;
+		this.timeHorizon = timeHorizon;
+		this.random = random;
+	}
+
+	public BRUEPolicy(final boolean maximize) {
+		this(maximize, 1000, new Random(0));
 	}
 
 	@Override
