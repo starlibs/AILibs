@@ -11,6 +11,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 import ai.libs.jaicore.basic.sets.LDSRelationComputer;
 import ai.libs.jaicore.basic.sets.RelationComputationProblem;
+import ai.libs.jaicore.logging.LoggerUtil;
 
 public class DiscreteProbabilityDistributionPrinter {
 	public String getTable(final DiscreteProbabilityDistribution d) {
@@ -54,9 +55,11 @@ public class DiscreteProbabilityDistributionPrinter {
 				sb.append("\n");
 			}
 			return sb.toString();
-		} catch (AlgorithmTimeoutedException | InterruptedException | AlgorithmExecutionCanceledException e) {
-			e.printStackTrace();
-			return "";
+		} catch (AlgorithmTimeoutedException | AlgorithmExecutionCanceledException e) {
+			return LoggerUtil.getExceptionInfo(e);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			return LoggerUtil.getExceptionInfo(e);
 		}
 
 	}

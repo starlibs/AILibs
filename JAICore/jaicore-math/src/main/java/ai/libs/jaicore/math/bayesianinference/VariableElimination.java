@@ -19,7 +19,7 @@ import ai.libs.jaicore.graph.Graph;
 public class VariableElimination extends ABayesianInferenceAlgorithm {
 
 	private class Factor {
-		DiscreteProbabilityDistribution subDistribution;
+		private DiscreteProbabilityDistribution subDistribution;
 
 		public Factor(final DiscreteProbabilityDistribution subDistribution) {
 			super();
@@ -77,7 +77,7 @@ public class VariableElimination extends ABayesianInferenceAlgorithm {
 		return null;
 	}
 
-	private Factor makeFactor(final String var, final Map<String, Boolean> evidence) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
+	private Factor makeFactor(final String var, final Map<String, Boolean> evidence) throws InterruptedException {
 
 		/* determine variables that are inputs for this factor (all non-evident parents and the variable itself if it is not evidence) */
 		Collection<String> inputVariables = SetUtil.difference(this.net.getNet().getPredecessors(var), evidence.keySet());

@@ -41,6 +41,9 @@ public class DiscreteProbabilityDistribution {
 			sum += prob.getValue();
 			assignments.add(prob.getKey());
 		}
+		if (sum == 0) {
+			throw new IllegalStateException("Cannot normalize a distribution with zero mass.");
+		}
 
 		/* compute alpha */
 		double alpha = 1.0 / sum;

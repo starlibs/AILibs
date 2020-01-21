@@ -44,7 +44,7 @@ public class EnumerationBasedBayesianInferenceSolver extends ABayesianInferenceA
 	public double sumProbability(final List<String> hiddenVariables, final int indexOfHiddenVariableToSum, final Map<String, Boolean> partialAssignment) {
 
 		/* if the assignment is complete, calculate the prob from the network */
-		Set<String> event = partialAssignment.keySet().stream().filter(k -> partialAssignment.get(k)).collect(Collectors.toSet());
+		Set<String> event = partialAssignment.keySet().stream().filter(partialAssignment::get).collect(Collectors.toSet());
 		if (indexOfHiddenVariableToSum == hiddenVariables.size()) {
 			double product = 1;
 			for (String var : this.allModelVariables) {

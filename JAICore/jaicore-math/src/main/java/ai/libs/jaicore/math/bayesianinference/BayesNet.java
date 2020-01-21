@@ -6,14 +6,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
-import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.control.ILoggingCustomizable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.graph.Graph;
 
-public class BayesNet {
+public class BayesNet implements ILoggingCustomizable {
 
+	private Logger logger = LoggerFactory.getLogger(BayesNet.class);
 	private Map<String, Map<Set<String>, Double>> map = new HashMap<>();
 
 	private Graph<String> net = new Graph<>();
@@ -40,7 +42,7 @@ public class BayesNet {
 		this.addProbability(node, new HashSet<>(), probability);
 	}
 
-	public boolean isWellDefined() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public boolean isWellDefined() throws InterruptedException {
 		for (String node : this.net.getItems()) {
 			if (!this.isProbabilityTableOfNodeWellDefined(node)) {
 				return false;
@@ -49,13 +51,13 @@ public class BayesNet {
 		return true;
 	}
 
-	public boolean isProbabilityTableOfNodeWellDefined(final String node) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public boolean isProbabilityTableOfNodeWellDefined(final String node) throws InterruptedException {
 
 		/* compute cartesian product of parent values */
 		Collection<String> parents = this.net.getPredecessors(node);
 		if (parents.isEmpty()) {
 			if (!this.map.containsKey(node) || this.map.get(node).size() != 1) {
-				System.err.println(node + " has no probability map associated");
+				this.logger.error("{} has no probability map associated", node);
 				return false;
 			}
 			double prob = this.map.get(node).get(new HashSet<>());
@@ -66,19 +68,19 @@ public class BayesNet {
 
 			/* for each tuple, check whether the probability is defined */
 			if (!this.map.containsKey(node)) {
-				System.err.println(node + " has no probability map associated");
+				this.logger.error("{} has no probability map associated", node);
 				return false;
 			}
 			Map<Set<String>, Double> tableOfNode = this.map.get(node);
 			for (Collection<String> activeParents : powerset) {
 				Set<String> activeParentsAsSet = new HashSet<>(activeParents);
 				if (!tableOfNode.containsKey(activeParentsAsSet)) {
-					System.err.println("Entry " + activeParents + " not contained.");
+					this.logger.error("Entry {} not contained.", activeParents);
 					return false;
 				}
 				double prob = tableOfNode.get(activeParentsAsSet);
 				if (prob < 0 || prob > 1) {
-					System.err.println("Invalid probability " + prob);
+					this.logger.error("Invalid probability {}", prob);
 					return false;
 				}
 			}
@@ -97,5 +99,15 @@ public class BayesNet {
 	public double getProbabilityOfPositiveEvent(final String node, final Set<String> event) {
 		Set<String> relevantSubset = new HashSet<>(SetUtil.intersection(event, this.net.getPredecessors(node)));
 		return this.map.get(node).get(relevantSubset);
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }
