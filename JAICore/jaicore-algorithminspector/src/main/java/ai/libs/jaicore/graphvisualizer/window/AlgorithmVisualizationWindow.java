@@ -123,6 +123,7 @@ public class AlgorithmVisualizationWindow implements Runnable {
 		this.mainPlugin = plugin;
 		this.mainPlugin.setAlgorithmEventSource(this.algorithmEventSource);
 		this.mainPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
+		Platform.runLater(() -> ((SplitPane)this.rootLayout.getCenter()).getItems().add(this.mainPlugin.getView().getNode()));
 		return this;
 	}
 

@@ -1,40 +1,36 @@
 package ai.libs.jaicore.graphvisualizer.plugin.controlbar;
 
 import ai.libs.jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginView;
-import javafx.scene.Node;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
 
-public class ControlBarGUIPluginView implements IGUIPluginView {
-
-	private ControlBarGUIPluginModel model;
+public class ControlBarGUIPluginView extends ASimpleMVCPluginView<ControlBarGUIPluginModel, ControlBarGUIPluginController, ToolBar> {
 
 	private Button startButton;
 
-	public ControlBarGUIPluginView() {
-		this.model = new ControlBarGUIPluginModel(this);
-	}
+	public ControlBarGUIPluginView(final ControlBarGUIPluginModel model) {
+		super(model, new ToolBar());
 
-	@Override
-	public Node getNode() {
-		ToolBar topButtonToolBar = new ToolBar();
+		Platform.runLater(() -> {
 
-		this.startButton = new Button("Play");
-		this.startButton.setOnMouseClicked(event -> this.handleStartButtonClick());
-		topButtonToolBar.getItems().add(this.startButton);
+			ToolBar topButtonToolBar = this.getNode();
+			this.startButton = new Button("Play");
+			this.startButton.setOnMouseClicked(event -> this.handleStartButtonClick());
+			topButtonToolBar.getItems().add(this.startButton);
 
-		Button pauseButton = new Button("Pause");
-		pauseButton.setOnMouseClicked(event -> this.handlePauseButtonClick());
-		topButtonToolBar.getItems().add(pauseButton);
+			Button pauseButton = new Button("Pause");
+			pauseButton.setOnMouseClicked(event -> this.handlePauseButtonClick());
+			topButtonToolBar.getItems().add(pauseButton);
 
-		Button resetButton = new Button("Reset");
-		resetButton.setOnMouseClicked(event -> this.handleResetButtonClick());
-		topButtonToolBar.getItems().add(resetButton);
+			Button resetButton = new Button("Reset");
+			resetButton.setOnMouseClicked(event -> this.handleResetButtonClick());
+			topButtonToolBar.getItems().add(resetButton);
 
-		topButtonToolBar.getItems().add(new Separator());
-		return topButtonToolBar;
+			topButtonToolBar.getItems().add(new Separator());
+		});
 	}
 
 	public void handleStartButtonClick() {
@@ -51,7 +47,7 @@ public class ControlBarGUIPluginView implements IGUIPluginView {
 
 	@Override
 	public void update() {
-		if (this.model.isPaused()) {
+		if (this.getModel().isPaused()) {
 			this.startButton.setText("Resume");
 			this.startButton.setDisable(false);
 		} else {
@@ -65,8 +61,8 @@ public class ControlBarGUIPluginView implements IGUIPluginView {
 		return "Control Bar";
 	}
 
-	public ControlBarGUIPluginModel getModel() {
-		return this.model;
+	@Override
+	public void clear() {
+		/* nothing to do */
 	}
-
 }

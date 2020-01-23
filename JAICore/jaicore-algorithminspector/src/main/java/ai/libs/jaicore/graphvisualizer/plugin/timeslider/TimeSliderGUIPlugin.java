@@ -1,49 +1,24 @@
 package ai.libs.jaicore.graphvisualizer.plugin.timeslider;
 
-import ai.libs.jaicore.graphvisualizer.events.gui.GUIEventSource;
-import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyProcessedAlgorithmEventSource;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPlugin;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginController;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginModel;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginView;
+import java.util.Arrays;
+import java.util.Collection;
 
-public class TimeSliderGUIPlugin implements IGUIPlugin {
+import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPlugin;
 
-	private TimeSliderGUIPluginController controller;
-	private TimeSliderGUIPluginView view;
+public class TimeSliderGUIPlugin extends ASimpleMVCPlugin<TimeSliderGUIPluginModel, TimeSliderGUIPluginView, TimeSliderGUIPluginController>{
 
 	public TimeSliderGUIPlugin() {
-		this.view = new TimeSliderGUIPluginView();
-		this.controller = new TimeSliderGUIPluginController(this.view.getModel());
-	}
-
-	@Override
-	public IGUIPluginController getController() {
-		return this.controller;
-	}
-
-	@Override
-	public IGUIPluginModel getModel() {
-		return this.view.getModel();
-	}
-
-	@Override
-	public IGUIPluginView getView() {
-		return this.view;
-	}
-
-	@Override
-	public void setAlgorithmEventSource(final PropertyProcessedAlgorithmEventSource algorithmEventSource) {
-		algorithmEventSource.registerListener(this.controller);
-	}
-
-	@Override
-	public void setGUIEventSource(final GUIEventSource guiEventSource) {
-		guiEventSource.registerListener(this.controller);
+		super();
 	}
 
 	@Override
 	public void stop() {
-		/* nothing to do here */
+		this.getController().interrupt();
+	}
+
+	@Override
+	public Collection<AlgorithmEventPropertyComputer> getPropertyComputers() {
+		return Arrays.asList();
 	}
 }
