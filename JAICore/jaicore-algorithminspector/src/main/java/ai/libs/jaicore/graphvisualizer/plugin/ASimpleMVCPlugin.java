@@ -2,6 +2,7 @@ package ai.libs.jaicore.graphvisualizer.plugin;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Objects;
 
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
@@ -44,6 +45,9 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 			this.controller = null;
 			return;
 		}
+		Objects.requireNonNull(myController);
+		Objects.requireNonNull(myView);
+		Objects.requireNonNull(myModel);
 		this.model = myModel;
 		this.view = myView;
 		this.controller = myController;
@@ -69,6 +73,7 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 
 	@Override
 	public void setAlgorithmEventSource(final PropertyProcessedAlgorithmEventSource algorithmEventSource) {
+		Objects.requireNonNull(this.controller);
 		algorithmEventSource.registerListener(this.controller);
 	}
 

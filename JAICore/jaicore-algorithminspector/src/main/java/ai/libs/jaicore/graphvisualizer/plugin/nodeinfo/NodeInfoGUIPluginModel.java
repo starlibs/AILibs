@@ -14,13 +14,10 @@ import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
  */
 public class NodeInfoGUIPluginModel extends ASimpleMVCPluginModel<NodeInfoGUIPluginView, NodeInfoGUIPluginController> {
 
-	private NodeInfoGUIPluginView view;
-
 	private Map<String, String> nodeIdToNodeInfoMap;
 	private String currentlySelectedNode;
 
-	public NodeInfoGUIPluginModel(final NodeInfoGUIPluginView view) {
-		this.view = view;
+	public NodeInfoGUIPluginModel() {
 		this.nodeIdToNodeInfoMap = new HashMap<>();
 	}
 
@@ -38,7 +35,7 @@ public class NodeInfoGUIPluginModel extends ASimpleMVCPluginModel<NodeInfoGUIPlu
 
 	public void setCurrentlySelectedNode(final String currentlySelectedNode) {
 		this.currentlySelectedNode = currentlySelectedNode;
-		this.view.update();
+		this.getView().update();
 	}
 
 	public String getNodeInfoForCurrentlySelectedNode() {

@@ -23,11 +23,13 @@ public class NodeInfoGUIPluginView extends ASimpleMVCPluginView<NodeInfoGUIPlugi
 
 	public NodeInfoGUIPluginView(final NodeInfoGUIPluginModel model) {
 		super (model, new FlowPane());
-		WebView view = new WebView();
-		FlowPane node = this.getNode();
-		node.getChildren().add(view);
-		this.webViewEngine = view.getEngine();
-		this.webViewEngine.loadContent("<i>No node selected</i>");
+		Platform.runLater(() -> {
+			WebView view = new WebView();
+			FlowPane node = this.getNode();
+			node.getChildren().add(view);
+			this.webViewEngine = view.getEngine();
+			this.webViewEngine.loadContent("<i>No node selected</i>");
+		});
 	}
 
 

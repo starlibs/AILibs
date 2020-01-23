@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.core.dataset.schema.attribute;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttributeValue;
@@ -34,7 +35,9 @@ public class NumericAttribute extends AAttribute implements INumericAttribute{
 			return ((Long) attributeValue) * 1.0;
 		} else if (attributeValue instanceof Double) {
 			return (Double) attributeValue;
-		} else {
+		} else if (attributeValue instanceof String && NumberUtils.isCreatable((String)attributeValue)) {
+			return NumberUtils.createDouble((String)attributeValue);
+		}else {
 			throw new IllegalArgumentException("No valid attribute value " + attributeValue + " for attribute " + this.getClass().getName());
 		}
 	}
