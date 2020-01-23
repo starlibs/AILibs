@@ -40,8 +40,8 @@ import ai.libs.jaicore.db.sql.MySQLQueryBuilder;
 @SuppressWarnings("serial")
 public class RestSqlAdapter implements IDatabaseAdapter {
 
-	private final ISQLQueryBuilder queryBuilder = new MySQLQueryBuilder();
-	private Logger logger = LoggerFactory.getLogger(RestSqlAdapter.class);
+	private final transient ISQLQueryBuilder queryBuilder = new MySQLQueryBuilder();
+	private transient Logger logger = LoggerFactory.getLogger(RestSqlAdapter.class);
 	private final String host;
 	private final String token;
 	private final String querySuffix;
@@ -65,7 +65,6 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 
 	public List<IKVStore> select(final String query) throws SQLException {
 		this.logger.info("Sending query {}", query);
-		System.out.println(query);
 		JsonNode res = this.executeRESTCall(this.host + this.selectSuffix, query);
 		return KVStoreUtil.readFromJson(res);
 	}
@@ -121,14 +120,14 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 
 	@Override
 	public int update(final String tablename, final Map<String, ? extends Object> valuesToWrite, final Map<String, ? extends Object> where) throws SQLException {
-		StringBuilder queryBuilder = new StringBuilder();
-		queryBuilder.append("UPDATE " + tablename + " SET ");
-		queryBuilder.append(valuesToWrite.entrySet().stream().map(e -> e.getKey() + "='" + e.getValue() + "'").collect(Collectors.joining(",")));
+		StringBuilder queryStringBuilder = new StringBuilder();
+		queryStringBuilder.append("UPDATE " + tablename + " SET ");
+		queryStringBuilder.append(valuesToWrite.entrySet().stream().map(e -> e.getKey() + "='" + e.getValue() + "'").collect(Collectors.joining(",")));
 		if (!where.isEmpty()) {
-			queryBuilder.append(" WHERE ");
-			queryBuilder.append(where.entrySet().stream().map(e -> RestSqlAdapter.whereClauseElement(e.getKey(), e.getValue() != null ? e.getValue().toString() : null)).collect(Collectors.joining(" AND ")));
+			queryStringBuilder.append(" WHERE ");
+			queryStringBuilder.append(where.entrySet().stream().map(e -> RestSqlAdapter.whereClauseElement(e.getKey(), e.getValue() != null ? e.getValue().toString() : null)).collect(Collectors.joining(" AND ")));
 		}
-		return this.update(queryBuilder.toString());
+		return this.update(queryStringBuilder.toString());
 	}
 
 	public static String whereClauseElement(final String key, final String value) {

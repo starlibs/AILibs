@@ -45,6 +45,8 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 			value = ((ICategoricalAttributeValue) attributeValue).getValue();
 		} else if (attributeValue instanceof Integer) {
 			value = (Integer) attributeValue;
+		} else if (this.domain.contains(attributeValue)) {
+			value = this.domain.indexOf(attributeValue);
 		}
 
 		if (value == null) {
@@ -80,9 +82,22 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 	@Override
 	public ICategoricalAttributeValue getAsAttributeValue(final Object object) {
 		if (this.isValidValue(object)) {
-			return new IntBasedCategoricalAttributeValue(this, (int) object);
+			int cObject;
+			if (object instanceof Integer) {
+				cObject = (int)object;
+			}
+			else if (this.domain.contains(object)) {
+				cObject = this.domain.indexOf(object);
+			}
+			else if (object instanceof ICategoricalAttributeValue) {
+				cObject = ((ICategoricalAttributeValue) object).getValue();
+			}
+			else {
+				throw new IllegalStateException("Object should be parseable after the test.");
+			}
+			return new IntBasedCategoricalAttributeValue(this, cObject);
 		} else {
-			return null;
+			throw new IllegalArgumentException(object + " is an invalid value for categorical attribute with domain " + this.getStringDescriptionOfDomain());
 		}
 	}
 
