@@ -1,15 +1,20 @@
 package ai.libs.jaicore.graphvisualizer.plugin.graphview;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.api4.java.common.control.ILoggingCustomizable;
 
 import ai.libs.jaicore.graphvisualizer.events.gui.GUIEventSource;
+import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyProcessedAlgorithmEventSource;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPlugin;
+import ai.libs.jaicore.graphvisualizer.plugin.IComputedGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginController;
 import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginModel;
 import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginView;
+import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
 
-public class GraphViewPlugin implements IGUIPlugin, ILoggingCustomizable {
+public class GraphViewPlugin implements IComputedGUIPlugin, ILoggingCustomizable {
 
 	private GraphViewPluginController controller;
 	private GraphViewPluginView view;
@@ -55,5 +60,15 @@ public class GraphViewPlugin implements IGUIPlugin, ILoggingCustomizable {
 		this.controller.setLoggerName(name + ".controller");
 		this.view.setLoggerName(name + ".view");
 		this.view.getModel().setLoggerName(name + ".model");
+	}
+
+	@Override
+	public void stop() {
+		this.view.stop();
+	}
+
+	@Override
+	public Collection<AlgorithmEventPropertyComputer> getPropertyComputers() {
+		return Arrays.asList(new NodeInfoAlgorithmEventPropertyComputer());
 	}
 }

@@ -84,9 +84,7 @@ public class GraphViewPluginController implements IGUIPluginController, ILogging
 
 	@Override
 	public void handleGUIEvent(final GUIEvent guiEvent) {
-		if (guiEvent instanceof ResetEvent) {
-			this.model.reset();
-		} else if (guiEvent instanceof GoToTimeStepEvent) {
+		if (guiEvent instanceof ResetEvent || guiEvent instanceof GoToTimeStepEvent) {
 			this.model.reset();
 		}
 	}

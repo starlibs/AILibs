@@ -56,4 +56,8 @@ public interface IGUIPlugin {
 	 */
 	public void setGUIEventSource(GUIEventSource guiEventSource);
 
+	/**
+	 * Stops execution of all threads in this plugin (irrevocable).
+	 **/
+	public void stop();
 }

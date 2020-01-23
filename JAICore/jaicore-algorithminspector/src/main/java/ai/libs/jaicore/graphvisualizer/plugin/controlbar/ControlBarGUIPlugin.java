@@ -13,33 +13,37 @@ public class ControlBarGUIPlugin implements IGUIPlugin {
 	private ControlBarGUIPluginView view;
 
 	public ControlBarGUIPlugin() {
-		view = new ControlBarGUIPluginView();
-		controller = new ControlBarGUIPluginController(view.getModel());
+		this.view = new ControlBarGUIPluginView();
+		this.controller = new ControlBarGUIPluginController(this.view.getModel());
 	}
 
 	@Override
 	public IGUIPluginController getController() {
-		return controller;
+		return this.controller;
 	}
 
 	@Override
 	public IGUIPluginModel getModel() {
-		return view.getModel();
+		return this.view.getModel();
 	}
 
 	@Override
 	public IGUIPluginView getView() {
-		return view;
+		return this.view;
 	}
 
 	@Override
-	public void setAlgorithmEventSource(PropertyProcessedAlgorithmEventSource algorithmEventSource) {
-		algorithmEventSource.registerListener(controller);
+	public void setAlgorithmEventSource(final PropertyProcessedAlgorithmEventSource algorithmEventSource) {
+		algorithmEventSource.registerListener(this.controller);
 	}
 
 	@Override
-	public void setGUIEventSource(GUIEventSource guiEventSource) {
-		guiEventSource.registerListener(controller);
+	public void setGUIEventSource(final GUIEventSource guiEventSource) {
+		guiEventSource.registerListener(this.controller);
 	}
 
+	@Override
+	public void stop() {
+		/* nothing to do here */
+	}
 }

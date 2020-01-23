@@ -40,6 +40,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	private static final String ERROR_NOSETUP = "No key fields defined. Setup the handler before using it.";
 	private static final String FIELD_ID = "experiment_id";
 	private static final String FIELD_MEMORY = "memory";
+	private static final String FIELD_MEMORY_MAX = FIELD_MEMORY + "_max";
 	private static final String FIELD_HOST = "host";
 	private static final String FIELD_NUMCPUS = "cpus";
 	private static final String FIELD_TIME = "time";
@@ -135,6 +136,14 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		}
 	}
 
+	protected String getSQLPrefixForKeySelectQuery() {
+		StringBuilder queryStringSB = new StringBuilder();
+		queryStringSB.append("SELECT `" + FIELD_ID + "`, `" + FIELD_MEMORY_MAX + "`, `" + FIELD_NUMCPUS + "`, " + Arrays.stream(this.keyFields).collect(Collectors.joining(", ")) + " FROM `");
+		queryStringSB.append(this.tablename);
+		queryStringSB.append("` ");
+		return queryStringSB.toString();
+	}
+
 	protected String getSQLPrefixForSelectQuery() {
 		StringBuilder queryStringSB = new StringBuilder();
 		queryStringSB.append("SELECT * FROM `");
@@ -188,7 +197,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	@Override
 	public List<ExperimentDBEntry> getOpenExperiments() throws ExperimentDBInteractionFailedException {
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append(this.getSQLPrefixForSelectQuery());
+		queryStringSB.append(this.getSQLPrefixForKeySelectQuery());
 		queryStringSB.append("WHERE time_started IS NULL");
 		try {
 			return this.getExperimentsForSQLQuery(queryStringSB.toString());
@@ -200,7 +209,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	@Override
 	public List<ExperimentDBEntry> getRandomOpenExperiments(final int limit) throws ExperimentDBInteractionFailedException {
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append(this.getSQLPrefixForSelectQuery());
+		queryStringSB.append(this.getSQLPrefixForKeySelectQuery());
 		queryStringSB.append("WHERE time_started IS NULL");
 		queryStringSB.append(" ORDER BY RAND() LIMIT " + limit);
 		try {
@@ -213,7 +222,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	@Override
 	public List<ExperimentDBEntry> getRunningExperiments() throws ExperimentDBInteractionFailedException {
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append(this.getSQLPrefixForSelectQuery());
+		queryStringSB.append(this.getSQLPrefixForKeySelectQuery());
 		queryStringSB.append("WHERE time_started IS NOT NULL AND time_end IS NULL");
 		try {
 			return this.getExperimentsForSQLQuery(queryStringSB.toString());
@@ -262,7 +271,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 				resultValues.put(dbKey, store.getAsString(dbKey));
 			}
 
-			ExperimentDBEntry entry = new ExperimentDBEntry(store.getAsInt(FIELD_ID), new Experiment(store.getAsInt(FIELD_MEMORY + "_max"), store.getAsInt(FIELD_NUMCPUS), keyValues, resultValues));
+			ExperimentDBEntry entry = new ExperimentDBEntry(store.getAsInt(FIELD_ID), new Experiment(store.getAsInt(FIELD_MEMORY_MAX), store.getAsInt(FIELD_NUMCPUS), keyValues, resultValues));
 
 			this.logger.trace("Building {}-th object took {}ms.", ++i, System.currentTimeMillis() - start);
 			experimentEntries.add(entry);
@@ -288,7 +297,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 			}
 
 			Map<String, Object> valuesToInsert = new HashMap<>(experiment.getValuesOfKeyFields());
-			valuesToInsert.put(FIELD_MEMORY + "_max", experiment.getMemoryInMB());
+			valuesToInsert.put(FIELD_MEMORY_MAX, experiment.getMemoryInMB());
 			valuesToInsert.put(FIELD_NUMCPUS, experiment.getNumCPUs());
 			this.logger.debug("Inserting mem: {}, cpus: {}, host: {}, and key fields: {}", experiment.getMemoryInMB(), experiment.getNumCPUs(), valuesToInsert.get(FIELD_HOST), experiment.getValuesOfKeyFields());
 			int id = this.adapter.insert(this.tablename, valuesToInsert)[0];
@@ -306,7 +315,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 		/* derive input for insertion */
 		List<String> keys = new ArrayList<>();
-		keys.add(FIELD_MEMORY + "_max");
+		keys.add(FIELD_MEMORY_MAX);
 		keys.add(FIELD_NUMCPUS);
 		keys.addAll(Arrays.asList(this.keyFields));
 

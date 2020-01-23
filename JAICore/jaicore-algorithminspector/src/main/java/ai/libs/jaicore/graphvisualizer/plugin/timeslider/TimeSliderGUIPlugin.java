@@ -13,33 +13,37 @@ public class TimeSliderGUIPlugin implements IGUIPlugin {
 	private TimeSliderGUIPluginView view;
 
 	public TimeSliderGUIPlugin() {
-		view = new TimeSliderGUIPluginView();
-		controller = new TimeSliderGUIPluginController(view.getModel());
+		this.view = new TimeSliderGUIPluginView();
+		this.controller = new TimeSliderGUIPluginController(this.view.getModel());
 	}
 
 	@Override
 	public IGUIPluginController getController() {
-		return controller;
+		return this.controller;
 	}
 
 	@Override
 	public IGUIPluginModel getModel() {
-		return view.getModel();
+		return this.view.getModel();
 	}
 
 	@Override
 	public IGUIPluginView getView() {
-		return view;
+		return this.view;
 	}
 
 	@Override
-	public void setAlgorithmEventSource(PropertyProcessedAlgorithmEventSource algorithmEventSource) {
-		algorithmEventSource.registerListener(controller);
+	public void setAlgorithmEventSource(final PropertyProcessedAlgorithmEventSource algorithmEventSource) {
+		algorithmEventSource.registerListener(this.controller);
 	}
 
 	@Override
-	public void setGUIEventSource(GUIEventSource guiEventSource) {
-		guiEventSource.registerListener(controller);
+	public void setGUIEventSource(final GUIEventSource guiEventSource) {
+		guiEventSource.registerListener(this.controller);
 	}
 
+	@Override
+	public void stop() {
+		/* nothing to do here */
+	}
 }

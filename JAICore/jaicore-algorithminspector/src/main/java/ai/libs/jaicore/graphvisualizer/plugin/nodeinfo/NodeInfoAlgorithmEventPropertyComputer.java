@@ -1,6 +1,7 @@
 package ai.libs.jaicore.graphvisualizer.plugin.nodeinfo;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,6 +75,16 @@ public class NodeInfoAlgorithmEventPropertyComputer implements AlgorithmEventPro
 
 	public String getIdOfNodeIfExistent(final Object node) {
 		return String.valueOf(this.nodeToIdMap.get(node));
+	}
+
+	@Override
+	public List<AlgorithmEventPropertyComputer> getRequiredPropertyComputers() {
+		return Arrays.asList();
+	}
+
+	@Override
+	public void overwriteRequiredPropertyComputer(final AlgorithmEventPropertyComputer computer) {
+		throw new UnsupportedOperationException(this.getClass().getCanonicalName() + " does not rely on other property computers");
 	}
 
 }

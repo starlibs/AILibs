@@ -1,5 +1,8 @@
 package ai.libs.jaicore.graphvisualizer.plugin.nodeinfo;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
@@ -50,6 +53,16 @@ public class NodeDisplayInfoAlgorithmEventPropertyComputer<N> implements Algorit
 	private String getNodeInfoForNodeIfTypeFits(final N node) {
 		return this.nodeInfoGenerator.generateInfoForNode(node);
 
+	}
+
+	@Override
+	public List<AlgorithmEventPropertyComputer> getRequiredPropertyComputers() {
+		return Arrays.asList();
+	}
+
+	@Override
+	public void overwriteRequiredPropertyComputer(final AlgorithmEventPropertyComputer computer) {
+		throw new UnsupportedOperationException(this.getClass().getCanonicalName() + " has no dependencies to other property computers.");
 	}
 
 }

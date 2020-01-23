@@ -7,10 +7,8 @@ import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
 /**
  *
- * @author hetzer
+ * @author Felix Mohr
  *
- * @param <N>
- *            The node type class.
  */
 public class NodeInfoGUIPluginModel extends ASimpleMVCPluginModel<NodeInfoGUIPluginView, NodeInfoGUIPluginController> {
 

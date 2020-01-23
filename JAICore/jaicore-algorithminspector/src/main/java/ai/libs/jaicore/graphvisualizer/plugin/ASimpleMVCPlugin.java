@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.graphvisualizer.events.gui.GUIEventSource;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyProcessedAlgorithmEventSource;
 
-public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V extends ASimpleMVCPluginView<M, C, ?>, C extends ASimpleMVCPluginController<M, V>> implements IGUIPlugin, ILoggingCustomizable {
+public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V extends ASimpleMVCPluginView<M, C, ?>, C extends ASimpleMVCPluginController<M, V>> implements IComputedGUIPlugin, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(ASimpleMVCPlugin.class);
 	private final M model;
@@ -97,5 +97,11 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 	@Override
 	public String getLoggerName() {
 		return this.logger.getName();
+	}
+
+	@Override
+	public void stop() {
+		this.logger.info("Interrupting controller thread {}", this.controller.getName());
+		this.controller.interrupt();
 	}
 }
