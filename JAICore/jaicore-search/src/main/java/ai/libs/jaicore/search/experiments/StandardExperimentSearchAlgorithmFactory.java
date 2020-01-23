@@ -19,6 +19,7 @@ import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearchFactory;
 import ai.libs.jaicore.search.algorithms.standard.mcts.SPUCTPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.UCBPolicy;
 import ai.libs.jaicore.search.algorithms.standard.mcts.UCTPathSearch;
+import ai.libs.jaicore.search.algorithms.standard.mcts.brue.BRUEPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.FixedCommitmentMCTSPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.PlackettLuceMCTSPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.preferencekernel.BootstrappingPreferenceKernel;
@@ -79,6 +80,8 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearc
 			return new DNGMCTSPathSearch<>((I)input, seed, 0.0, 1.0);
 		case "tag":
 			return new TAGMCTSPathSearch<>((I)input, seed, 0.0);
+		case "brue":
+			return new BRUEPathSearch<>((I)input, seed, 0.0);
 		case "dfs":
 			IteratingGraphSearchOptimizerFactory<I, N, A, Double> dfsFactory = new IteratingGraphSearchOptimizerFactory<>();
 			dfsFactory.setBaseAlgorithmFactory(new DepthFirstSearchFactory<>());
