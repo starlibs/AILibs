@@ -3,6 +3,8 @@ dependencies {
 	
 	compile("$api4common")
 	compile("$mtj")
+	
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }
 
 uploadArchives {
