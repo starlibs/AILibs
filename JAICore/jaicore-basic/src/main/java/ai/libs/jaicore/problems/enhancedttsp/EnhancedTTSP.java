@@ -274,6 +274,27 @@ public class EnhancedTTSP {
 		return this.solutionEvaluator;
 	}
 
+	public double getMinTravelTimeBetweenLocations(final short a, final short b) {
+		return Math.sqrt(Math.pow(this.xCoords.get(a) - this.xCoords.get(b), 2) + Math.pow(this.yCoords.get(a)- this.yCoords.get(b), 2)); // use Euclidean distance as min travel time
+	}
+
+	public double getLongestMinTravelTimeBetweenTwoLocations() {
+		double max = 0;
+		for (short a = 0; a < this.locations.size(); a++) {
+			for (short b = 0; b < a; b ++) {
+				max = Math.max(max, this.getMinTravelTimeBetweenLocations(a, b));
+			}
+		}
+		return max;
+	}
+
+	public double getUpperBoundForAnyTour() {
+		double maxTime = this.getLongestMinTravelTimeBetweenTwoLocations();
+		double totalTimeBoundForTraveling = maxTime * this.locations.size();
+		int longBreaks = (int)Math.floor(totalTimeBoundForTraveling / this.maxDrivingTimeBetweenLongBreaks);
+		return totalTimeBoundForTraveling + longBreaks * this.durationOfLongBreak;
+	}
+
 	@Override
 	public String toString() {
 		return "EnhancedTTSP [startLocation=" + this.startLocation + ", numberOfConsideredHours=" + this.numberOfConsideredHours + ", blockedHours=" + this.blockedHours + ", hourOfDeparture="
