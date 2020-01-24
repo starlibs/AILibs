@@ -37,7 +37,7 @@ import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import ai.libs.mlplan.multilabel.mekamlplan.MLPlanMekaBuilder;
+import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.core.MLUtils;
 import weka.core.Instances;
@@ -94,7 +94,7 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 			// Evaluation: test
 			this.logger.info("Now test...");
 
-			MLPlanMekaBuilder builder = new MLPlanMekaBuilder();
+			ML2PlanMekaBuilder builder = new ML2PlanMekaBuilder();
 			builder.withNodeEvaluationTimeOut(nodeEvalTimeOut);
 			builder.withCandidateEvaluationTimeOut(nodeEvalTimeOut);
 

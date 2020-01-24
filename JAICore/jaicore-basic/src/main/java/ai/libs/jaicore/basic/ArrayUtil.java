@@ -157,4 +157,61 @@ public class ArrayUtil {
 		}
 		return argMin;
 	}
+
+	/**
+	 * Transposes a matrix A and returns A^T.
+	 * @param matrix The given matrix A.
+	 * @return The transposed matrix A^T originating from A.
+	 */
+	public static double[][] transposeMatrix(final double[][] matrix) {
+		double[][] transposed = new double[matrix[0].length][matrix.length];
+		for (int i = 0; i < matrix.length; i++) {
+			for (int j = 0; j < matrix[0].length; j++) {
+				transposed[j][i] = matrix[i][j];
+			}
+		}
+		return transposed;
+	}
+
+	/**
+	 * Transposes a matrix A and returns A^T.
+	 * @param matrix The given matrix A.
+	 * @return The transposed matrix A^T originating from A.
+	 */
+	public static int[][] transposeMatrix(final int[][] matrix) {
+		int[][] transposed = new int[matrix[0].length][matrix.length];
+		for (int i = 0; i < matrix.length; i++) {
+			for (int j = 0; j < matrix[0].length; j++) {
+				transposed[j][i] = matrix[i][j];
+			}
+		}
+		return transposed;
+	}
+
+	public static int[] thresholdDoubleToBinaryArray(final double[] array, final double threshold) {
+		return Arrays.stream(array).mapToInt(x -> x >= threshold ? 1 : 0).toArray();
+	}
+
+	public static int[][] thresholdDoubleToBinaryMatrix(final double[][] matrix, final double threshold) {
+		return thresholdDoubleToBinaryMatrix(matrix, IntStream.range(0, matrix[0].length).mapToDouble(x -> threshold).toArray());
+	}
+
+	public static int[][] thresholdDoubleToBinaryMatrix(final double[][] matrix, final double[] threshold) {
+		int[][] thresholdedMatrix = new int[matrix[0].length][];
+		IntStream.range(0, matrix[0].length).forEach(l -> thresholdedMatrix[l] = ArrayUtil.thresholdDoubleToBinaryArray(ArrayUtil.extractColumn(matrix, l), threshold[l]));
+		return ArrayUtil.transposeMatrix(thresholdedMatrix);
+	}
+
+	public static double[] extractColumn(final double[][] matrix, final int columnIndex) {
+		double[] column = new double[matrix.length];
+		IntStream.range(0, matrix.length).forEach(x -> column[x] = matrix[x][columnIndex]);
+		return column;
+	}
+
+	public static int[] extractColumn(final int[][] matrix, final int columnIndex) {
+		int[] column = new int[matrix.length];
+		IntStream.range(0, matrix.length).forEach(x -> column[x] = matrix[x][columnIndex]);
+		return column;
+	}
+
 }

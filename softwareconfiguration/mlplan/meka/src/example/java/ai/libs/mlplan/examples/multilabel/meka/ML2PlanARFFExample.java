@@ -1,20 +1,24 @@
 package ai.libs.mlplan.examples.multilabel.meka;
 
+import java.io.File;
 import java.io.FileReader;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
 
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
+import ai.libs.jaicore.ml.classification.multilabel.dataset.IMekaInstances;
+import ai.libs.jaicore.ml.classification.multilabel.dataset.MekaInstances;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
-import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
-import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
+import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import ai.libs.mlplan.multilabel.mekamlplan.MLPlanMekaBuilder;
+import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
 import meka.core.MLUtils;
 import weka.core.Instances;
 
@@ -29,24 +33,28 @@ public class ML2PlanARFFExample {
 	private static final boolean ACTIVATE_VISUALIZATION = false;
 
 	public static void main(final String[] args) throws Exception {
-		/* load data for segment dataset and create a train-test-split */
-		Instances data = new Instances(new FileReader("testrsc/flags.arff"));
-		MLUtils.prepareData(data);
-		IWekaInstances dataset = new WekaInstances(data);
+		File datasetFile = new File("../../../../datasets/classification/multi-label/flags.arff");
+		Instances wekaData = new Instances(new FileReader(datasetFile));
+		MLUtils.prepareData(wekaData);
+		IMekaInstances dataset = new MekaInstances(wekaData);
+		List<ILabeledDataset<?>> split = SplitterUtil.getSimpleTrainTestSplit(dataset, new Random(0), .7);
 
-		List<IWekaInstances> split = WekaUtil.realizeSplit(dataset, WekaUtil.getArbitrarySplit(dataset, new Random(42), 0.7));
+		/* initialize mlplan, and let it run for 1 hour */
+		MLPlan<IMekaClassifier> mlplan = new ML2PlanMekaBuilder().withNumCpus(1).withTimeOut(new Timeout(1, TimeUnit.HOURS)).withDataset(split.get(0)).build();
+		mlplan.setLoggerName("ml2plan");
 
-		MLPlanClassifierConfig algoConfig = ConfigFactory.create(MLPlanClassifierConfig.class);
-		algoConfig.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, "0.3");
+		try {
+			long start = System.currentTimeMillis();
+			IMekaClassifier optimizedClassifier = mlplan.call();
+			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
+			System.out.println("Finished build of the classifier. Training time was " + trainTime + "s.");
 
-		MLPlanMekaBuilder builder = new MLPlanMekaBuilder();
-		builder.withAlgorithmConfig(algoConfig);
-		builder.withNodeEvaluationTimeOut(new Timeout(60, TimeUnit.SECONDS));
-		builder.withCandidateEvaluationTimeOut(new Timeout(60, TimeUnit.SECONDS));
-		builder.withNumCpus(4);
-		builder.withTimeOut(new Timeout(150, TimeUnit.SECONDS));
-		MLPlan<IMekaClassifier> ml2plan = builder.withDataset(new WekaInstances(data)).build();
-		ml2plan.setLoggerName("testedalgorithm");
-		ml2plan.call();
+			/* evaluate solution produced by mlplan */
+			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
+			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
+			System.out.println("Error Rate of the solution produced by ML-Plan: " + EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()));
+		} catch (NoSuchElementException e) {
+			System.out.println("Building the classifier failed: " + e.getMessage());
+		}
 	}
 }

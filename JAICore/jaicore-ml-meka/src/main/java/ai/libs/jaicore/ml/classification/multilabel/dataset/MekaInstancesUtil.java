@@ -20,7 +20,6 @@ import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiLabelAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
-import meka.core.MLUtils;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -33,11 +32,6 @@ public class MekaInstancesUtil {
 	}
 
 	public static ILabeledInstanceSchema extractSchema(final Instances dataset) {
-		try {
-			MLUtils.prepareData(dataset);
-		} catch (Exception e) {
-			// nothing to do here because schema extraction is about to fail anyways.
-		}
 		int targetIndex = dataset.classIndex();
 		if (targetIndex < 0) {
 			throw new IllegalArgumentException("Class index of Instances object is not set!");

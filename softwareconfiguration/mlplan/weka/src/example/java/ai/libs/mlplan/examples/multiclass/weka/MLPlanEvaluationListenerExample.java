@@ -51,17 +51,16 @@ public class MLPlanEvaluationListenerExample {
 
 		/* register a listener  */
 		mlplan.registerListener(new Object() {
-
 			@Subscribe
 			public void receiveEvent(final TrainTestSplitEvaluationFailedEvent<?, ?> e) { // this event is fired whenever any pipeline is evaluated successfully
-				IWekaClassifier classifier = ((WekaClassifier)e.getLearner());
+				IWekaClassifier classifier = ((WekaClassifier) e.getLearner());
 				LOGGER.info("Received exception for learner {}: {}", classifier, e.getReport().getException().getClass().getName());
 			}
 
 			@Subscribe
 			public void receiveEvent(final TrainTestSplitEvaluationCompletedEvent<?, ?> e) { // this event is fired whenever any pipeline is evaluated successfully
 				double errorRate = EClassificationPerformanceMeasure.ERRORRATE.loss(e.getReport().getPredictionDiffList());
-				IWekaClassifier classifier = ((WekaClassifier)e.getLearner());
+				IWekaClassifier classifier = ((WekaClassifier) e.getLearner());
 				LOGGER.info("Received single evaluation error rate for learner {} is {}", classifier, errorRate);
 			}
 		});

@@ -7,7 +7,7 @@ import ai.libs.mlplan.core.MLPlan;
 
 public class MLPlan4Meka extends MLPlan<IMekaClassifier> {
 
-	public MLPlan4Meka(final MLPlanMekaBuilder builder, final ILabeledDataset<?> data) {
+	public MLPlan4Meka(final ML2PlanMekaBuilder builder, final ILabeledDataset<?> data) {
 		super(builder, data);
 	}
 
