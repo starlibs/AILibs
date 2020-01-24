@@ -116,14 +116,14 @@ public class AlgorithmVisualizationWindow implements Runnable {
 
 		/* first register property computers if we record the history */
 		if (this.historyRecorder != null && plugin instanceof IComputedGUIPlugin) {
-			this.historyRecorder.addPropertyComputer(((IComputedGUIPlugin)plugin).getPropertyComputers());
+			this.historyRecorder.addPropertyComputer(((IComputedGUIPlugin) plugin).getPropertyComputers());
 		}
 
 		/* now register the plugin itself */
 		this.mainPlugin = plugin;
 		this.mainPlugin.setAlgorithmEventSource(this.algorithmEventSource);
 		this.mainPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
-		Platform.runLater(() -> ((SplitPane)this.rootLayout.getCenter()).getItems().add(this.mainPlugin.getView().getNode()));
+		Platform.runLater(() -> ((SplitPane) this.rootLayout.getCenter()).getItems().add(this.mainPlugin.getView().getNode()));
 		return this;
 	}
 
@@ -132,7 +132,7 @@ public class AlgorithmVisualizationWindow implements Runnable {
 
 			/* first register property computers if we record the history */
 			if (this.historyRecorder != null && plugin instanceof IComputedGUIPlugin) {
-				this.historyRecorder.addPropertyComputer(((IComputedGUIPlugin)plugin).getPropertyComputers());
+				this.historyRecorder.addPropertyComputer(((IComputedGUIPlugin) plugin).getPropertyComputers());
 			}
 
 			/* now register and start the plugin itself */

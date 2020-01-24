@@ -16,7 +16,7 @@ public class NodeInfoGUIPluginView extends ASimpleMVCPluginView<NodeInfoGUIPlugi
 	private WebEngine webViewEngine;
 
 	public NodeInfoGUIPluginView(final NodeInfoGUIPluginModel model) {
-		super (model, new FlowPane());
+		super(model, new FlowPane());
 		Platform.runLater(() -> {
 			WebView view = new WebView();
 			FlowPane node = this.getNode();
@@ -25,7 +25,6 @@ public class NodeInfoGUIPluginView extends ASimpleMVCPluginView<NodeInfoGUIPlugi
 			this.webViewEngine.loadContent("<i>No node selected</i>");
 		});
 	}
-
 
 	@Override
 	public void update() {
@@ -37,7 +36,6 @@ public class NodeInfoGUIPluginView extends ASimpleMVCPluginView<NodeInfoGUIPlugi
 	public String getTitle() {
 		return "Node Information";
 	}
-
 
 	@Override
 	public void clear() {

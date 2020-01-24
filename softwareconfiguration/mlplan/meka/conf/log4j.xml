@@ -111,27 +111,16 @@
   </logger>
   
   <logger name="ml2plan.optimizingfactory.optAlgo.hasco.solutionevaluator">
-    <level value="debug" />
+    <level value="warn" />
   </logger>
   
   <logger name="ml2plan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
-    <level value="trace" />
+    <level value="warn" />
   </logger>
   
-  <logger name="ml2plan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark.splitgen">
-    <level value="debug" />
-  </logger>
-  
-  <logger name="ml2plan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark.executor">
-    <level value="debug" />
-  </logger>
-  
-  <logger name="ml2plan.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary.evaluator.fw.pe.be.be">
-    <level value="debug" />
-  </logger>
   
   <logger name="ai.libs.jaicore.ml.classification.multilabel.learner">
-    <level value="debug" />
+    <level value="info" />
   </logger>
   
   <logger name="ml2plan.optimizingfactory.optAlgo.hasco.search">

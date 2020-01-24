@@ -28,7 +28,7 @@ import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
 import meka.core.MLUtils;
 import weka.core.Instances;
 
-public class MLPlanMekaGraphVisualizationExample {
+public class ML2PlanMekaGraphVisualizationExample {
 	public static void main(final String[] args) throws Exception {
 
 		File datasetFile = new File("../../../../datasets/classification/multi-label/flags.arff");
