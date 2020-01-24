@@ -1,7 +1,7 @@
 package ai.libs.jaicore.graphvisualizer.plugin;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -17,16 +17,18 @@ public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel
 
 	protected static final Logger STATIC_LOGGER = LoggerFactory.getLogger(ASimpleMVCPluginController.class);
 	protected Logger logger = LoggerFactory.getLogger("gui.control." + this.getClass().getName());
-	private final Queue<IPropertyProcessedAlgorithmEvent> eventQueue;
+	private final BlockingQueue<IPropertyProcessedAlgorithmEvent> eventQueue;
 
 	private final V view;
 	private final M model;
 
 	public ASimpleMVCPluginController(final M model, final V view) {
 		super();
+		this.setName(this.getClass().getName());
 		this.model = model;
 		this.view = view;
-		this.eventQueue = new ConcurrentLinkedQueue<>();
+		this.eventQueue = new LinkedBlockingQueue<>();
+		this.setDaemon(true);
 	}
 
 	public M getModel() {
@@ -44,14 +46,16 @@ public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel
 
 	@Override
 	public void run() {
-		while (true) {
-			IPropertyProcessedAlgorithmEvent event = this.eventQueue.poll();
-			if (event != null) {
-				try {
-					this.handleAlgorithmEventInternally(event);
-				} catch (HandleAlgorithmEventException e) {
-					STATIC_LOGGER.error("An error occurred while handling event {}.", event, e);
-				}
+		IPropertyProcessedAlgorithmEvent event = null;
+		while (!Thread.currentThread().isInterrupted()) {
+			try {
+				event = this.eventQueue.take();
+				this.handleAlgorithmEventInternally(event);
+			} catch (InterruptedException e1) {
+				Thread.currentThread().interrupt();
+			}
+			catch (HandleAlgorithmEventException e) {
+				STATIC_LOGGER.error("An error occurred while handling event {}.", event, e);
 			}
 		}
 	}

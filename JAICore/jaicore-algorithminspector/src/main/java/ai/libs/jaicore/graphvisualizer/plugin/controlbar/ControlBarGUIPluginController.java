@@ -4,28 +4,26 @@ import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEv
 
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import ai.libs.jaicore.graphvisualizer.events.gui.GUIEvent;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginController;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
 
-public class ControlBarGUIPluginController implements IGUIPluginController {
+public class ControlBarGUIPluginController extends ASimpleMVCPluginController<ControlBarGUIPluginModel, ControlBarGUIPluginView> {
 
-	private ControlBarGUIPluginModel model;
-
-	public ControlBarGUIPluginController(final ControlBarGUIPluginModel model) {
-		this.model = model;
-	}
-
-	@Override
-	public void handleSerializableAlgorithmEvent(final IPropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
-		// nothing to do here as the control bar does not need to handle any algorithm event
+	public ControlBarGUIPluginController(final ControlBarGUIPluginModel model, final ControlBarGUIPluginView view) {
+		super(model, view);
 	}
 
 	@Override
 	public void handleGUIEvent(final GUIEvent guiEvent) {
 		if (guiEvent instanceof PauseEvent || guiEvent instanceof ResetEvent) {
-			this.model.setPaused();
+			this.getModel().setPaused();
 		} else if (guiEvent instanceof PlayEvent) {
-			this.model.setUnpaused();
+			this.getModel().setUnpaused();
 		}
+	}
+
+	@Override
+	protected void handleAlgorithmEventInternally(final IPropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
+		// nothing to do here as the control bar does not need to handle any algorithm event
 	}
 
 }

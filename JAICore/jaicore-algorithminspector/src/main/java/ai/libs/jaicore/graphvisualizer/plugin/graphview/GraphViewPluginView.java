@@ -19,6 +19,7 @@ public class GraphViewPluginView implements IGUIPluginView, ILoggingCustomizable
 
 	private FxViewer fxViewer;
 	private BorderPane graphParentLayout;
+	private Thread listenerThread;
 
 	public GraphViewPluginView() {
 		this.model = new GraphViewPluginModel(this);
@@ -36,8 +37,9 @@ public class GraphViewPluginView implements IGUIPluginView, ILoggingCustomizable
 		viewerPipe.addViewerListener(graphMouseListener);
 		viewerPipe.addSink(this.model.getGraph());
 
-		Thread listenerThread = new Thread(graphMouseListener);
-		listenerThread.start();
+		this.listenerThread = new Thread(graphMouseListener, "Graph View Plugin");
+		this.listenerThread.setDaemon(true);
+		this.listenerThread.start();
 	}
 
 	@Override
@@ -70,6 +72,10 @@ public class GraphViewPluginView implements IGUIPluginView, ILoggingCustomizable
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
+	}
 
+	public void stop() {
+		this.listenerThread.interrupt();
+		this.fxViewer.close();
 	}
 }

@@ -1,5 +1,6 @@
 package ai.libs.jaicore.search.gui.plugins.rollouthistograms;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,8 +17,8 @@ public class RolloutInfoAlgorithmEventPropertyComputer implements AlgorithmEvent
 
 	private NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer;
 
-	public RolloutInfoAlgorithmEventPropertyComputer(final NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer) {
-		this.nodeInfoAlgorithmEventPropertyComputer = nodeInfoAlgorithmEventPropertyComputer;
+	public RolloutInfoAlgorithmEventPropertyComputer() {
+		this.nodeInfoAlgorithmEventPropertyComputer = new NodeInfoAlgorithmEventPropertyComputer();
 	}
 
 	@Override
@@ -43,4 +44,13 @@ public class RolloutInfoAlgorithmEventPropertyComputer implements AlgorithmEvent
 		return ROLLOUT_SCORE_PROPERTY_NAME;
 	}
 
+	@Override
+	public List<AlgorithmEventPropertyComputer> getRequiredPropertyComputers() {
+		return Arrays.asList(this.nodeInfoAlgorithmEventPropertyComputer);
+	}
+
+	@Override
+	public void overwriteRequiredPropertyComputer(final AlgorithmEventPropertyComputer computer) {
+		this.nodeInfoAlgorithmEventPropertyComputer = (NodeInfoAlgorithmEventPropertyComputer)computer;
+	}
 }

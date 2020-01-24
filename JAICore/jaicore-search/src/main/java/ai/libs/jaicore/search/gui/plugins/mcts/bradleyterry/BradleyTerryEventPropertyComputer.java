@@ -1,6 +1,8 @@
 package ai.libs.jaicore.search.gui.plugins.mcts.bradleyterry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 
@@ -33,4 +35,13 @@ public class BradleyTerryEventPropertyComputer implements AlgorithmEventProperty
 		return UPDATE_PROPERTY_NAME;
 	}
 
+	@Override
+	public List<AlgorithmEventPropertyComputer> getRequiredPropertyComputers() {
+		return Arrays.asList(this.nodeInfoAlgorithmEventPropertyComputer);
+	}
+
+	@Override
+	public void overwriteRequiredPropertyComputer(final AlgorithmEventPropertyComputer computer) {
+		this.nodeInfoAlgorithmEventPropertyComputer = (NodeInfoAlgorithmEventPropertyComputer)computer;
+	}
 }

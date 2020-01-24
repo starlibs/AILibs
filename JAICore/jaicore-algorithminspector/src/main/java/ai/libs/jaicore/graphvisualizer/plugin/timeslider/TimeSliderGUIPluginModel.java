@@ -1,62 +1,64 @@
 package ai.libs.jaicore.graphvisualizer.plugin.timeslider;
 
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginModel;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
-public class TimeSliderGUIPluginModel implements IGUIPluginModel {
-
-	private TimeSliderGUIPluginView view;
+public class TimeSliderGUIPluginModel extends ASimpleMVCPluginModel<TimeSliderGUIPluginView, TimeSliderGUIPluginController> {
 
 	private int currentTimeStep;
 	private int maximumTimeStep;
 	private boolean paused;
 
-	public TimeSliderGUIPluginModel(TimeSliderGUIPluginView view) {
-		this.view = view;
-		currentTimeStep = 0;
-		maximumTimeStep = 0;
-		paused = true;
+	public TimeSliderGUIPluginModel() {
+		this.currentTimeStep = 0;
+		this.maximumTimeStep = 0;
+		this.paused = true;
 	}
 
 	public void increaseMaximumTimeStep() {
-		maximumTimeStep++;
-		view.update();
+		this.maximumTimeStep++;
+		this.getView().update();
 	}
 
 	public void reset() {
-		currentTimeStep = 0;
-		maximumTimeStep = 0;
-		view.update();
+		this.currentTimeStep = 0;
+		this.maximumTimeStep = 0;
+		this.getView().update();
 	}
 
 	public int getCurrentTimeStep() {
-		return currentTimeStep;
+		return this.currentTimeStep;
 	}
 
 	public int getMaximumTimeStep() {
-		return maximumTimeStep;
+		return this.maximumTimeStep;
 	}
 
 	public void pause() {
-		paused = true;
-		view.update();
+		this.paused = true;
+		this.getView().update();
 	}
 
 	public void unpause() {
-		paused = false;
-		view.update();
+		this.paused = false;
+		this.getView().update();
 	}
 
 	public void increaseCurrentTimeStep() {
-		currentTimeStep++;
-		view.update();
+		this.currentTimeStep++;
+		this.getView().update();
 	}
 
-	public void setCurrentTimeStep(int currentTimeStep) {
+	public void setCurrentTimeStep(final int currentTimeStep) {
 		this.currentTimeStep = currentTimeStep;
-		view.update();
+		this.getView().update();
 	}
 
 	public boolean isPaused() {
-		return paused;
+		return this.paused;
+	}
+
+	@Override
+	public void clear() {
+		/* do nothing */
 	}
 }

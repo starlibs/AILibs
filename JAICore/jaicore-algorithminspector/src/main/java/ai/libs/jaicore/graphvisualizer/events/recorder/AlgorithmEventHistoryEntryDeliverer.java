@@ -52,6 +52,7 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Prope
 		this.paused = true;
 		this.algorithmEventListeners = ConcurrentHashMap.newKeySet();
 		this.sleepTimeMultiplier = 1;
+		this.setName(this.getClass().getName());
 		this.setDaemon(true);
 		this.logger.info("{} started with thread {}", this.getClass().getSimpleName(), this.getName());
 	}
