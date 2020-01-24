@@ -3,8 +3,10 @@ package ai.libs.jaicore.basic;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.LinkedList;
@@ -43,6 +45,11 @@ public class ResourceUtil {
 	 */
 	public static List<String> readResourceFileToStringList(final String path) throws IOException {
 		List<String> list = new LinkedList<>();
+		InputStream resourceStream = ResourceUtil.class.getClassLoader().getResourceAsStream(path);
+		if (resourceStream == null) {
+			throw new FileNotFoundException("Could not find resource file '" + path + "'");
+		}
+
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(ResourceUtil.class.getClassLoader().getResourceAsStream(path)))) {
 			String line;
 			while ((line = br.readLine()) != null) {

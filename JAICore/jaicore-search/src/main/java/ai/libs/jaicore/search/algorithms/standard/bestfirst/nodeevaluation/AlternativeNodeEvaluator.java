@@ -3,78 +3,94 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 import java.util.HashMap;
 import java.util.Map;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
+import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.ILabeledPath;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+
 import ai.libs.jaicore.logging.ToJSONStringUtil;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.Node;
 
 /**
  * This node evaluator can be used
- * 	a) if there is a prioritized node evaluator that should be used unless it returns NULL
- *  b) to realize dead-end recognition
- *  c) to use different node evaluators in different regions of the search graph
+ * a) if there is a prioritized node evaluator that should be used unless it returns NULL
+ * b) to realize dead-end recognition
+ * c) to use different node evaluators in different regions of the search graph
  *
  * @author fmohr
  *
- * @param <T>
+ * @param <N>
  * @param <V>
  */
-public class AlternativeNodeEvaluator<T, V extends Comparable<V>> extends DecoratingNodeEvaluator<T, V> implements ILoggingCustomizable {
+public class AlternativeNodeEvaluator<N, A, V extends Comparable<V>> extends DecoratingNodeEvaluator<N, A, V> implements ILoggingCustomizable {
 
 	private String loggerName;
-	private final INodeEvaluator<T, V> ne1;
+	private final IPathEvaluator<N, A, V> ne1;
 
-	public AlternativeNodeEvaluator(final INodeEvaluator<T, V> ne1, final INodeEvaluator<T, V> ne2) {
+	public AlternativeNodeEvaluator(final IPathEvaluator<N, A, V> ne1, final IPathEvaluator<N, A, V> ne2) {
 		super(ne2);
-		if (ne1 == null)
+		if (ne1 == null) {
 			throw new IllegalArgumentException("The alternativ evaluator in node evaluator must not be null!");
+		}
 		this.ne1 = ne1;
 	}
 
 	@Override
 	public boolean requiresGraphGenerator() {
-		if (super.requiresGraphGenerator())
+		if (super.requiresGraphGenerator()) {
 			return true;
-		return (ne1 instanceof IPotentiallyGraphDependentNodeEvaluator) && ((IPotentiallyGraphDependentNodeEvaluator<?, ?>)ne1).requiresGraphGenerator();
+		}
+		return (this.ne1 instanceof IPotentiallyGraphDependentPathEvaluator) && ((IPotentiallyGraphDependentPathEvaluator<?, ?, ?>) this.ne1).requiresGraphGenerator();
 	}
-	
+
 	public boolean doesPrimaryNodeEvaluatorReportSolutions() {
-		return (ne1 instanceof IPotentiallySolutionReportingNodeEvaluator) && ((IPotentiallySolutionReportingNodeEvaluator<?, ?>)ne1).reportsSolutions();
+		return (this.ne1 instanceof IPotentiallySolutionReportingPathEvaluator) && ((IPotentiallySolutionReportingPathEvaluator<?, ?,  ?>) this.ne1).reportsSolutions();
 	}
-	
+
+	public IPathEvaluator<N, A, V> getPrimaryNodeEvaluator() {
+		return this.ne1;
+	}
+
 	@Override
 	public boolean reportsSolutions() {
-		if (super.reportsSolutions())
+		if (super.reportsSolutions()) {
 			return true;
-		return doesDecoratedEvaluatorReportSolutions();
-	}
-	
-	public void setGenerator(final GraphGenerator<T, ?> generator) {
-		super.setGenerator(generator);
-		if (!(ne1 instanceof IPotentiallyGraphDependentNodeEvaluator))
-			return;
-		IPotentiallyGraphDependentNodeEvaluator<T, V> castedNE1 = (IPotentiallyGraphDependentNodeEvaluator<T, V>)ne1;
-		if (castedNE1.requiresGraphGenerator()) {
-			castedNE1.setGenerator(generator);
 		}
+		return this.doesDecoratedEvaluatorReportSolutions();
 	}
-	
-	public void registerSolutionListener(final Object listener) {
-		if (super.doesDecoratedEvaluatorReportSolutions())
-			super.registerSolutionListener(listener);
-		if (doesPrimaryNodeEvaluatorReportSolutions()) {
-			((IPotentiallySolutionReportingNodeEvaluator<?, ?>)ne1).registerSolutionListener(listener);
+
+	@Override
+	public void setGenerator(final IGraphGenerator<N, A> generator, final IPathGoalTester<N, A> goalTester) {
+		super.setGenerator(generator, goalTester);
+		if (!(this.ne1 instanceof IPotentiallyGraphDependentPathEvaluator)) {
+			return;
+		}
+		IPotentiallyGraphDependentPathEvaluator<N, A, V> castedNE1 = (IPotentiallyGraphDependentPathEvaluator<N, A, V>) this.ne1;
+		if (castedNE1.requiresGraphGenerator()) {
+			castedNE1.setGenerator(generator, goalTester);
 		}
 	}
 
 	@Override
-	public V f(final Node<T, ?> node) throws NodeEvaluationException, InterruptedException {
-		V f1 = this.ne1.f(node);
+	public void registerSolutionListener(final Object listener) {
+		if (super.doesDecoratedEvaluatorReportSolutions()) {
+			super.registerSolutionListener(listener);
+		}
+		if (this.doesPrimaryNodeEvaluatorReportSolutions()) {
+			((IPotentiallySolutionReportingPathEvaluator<?, ?,  ?>) this.ne1).registerSolutionListener(listener);
+		}
+	}
+
+	@Override
+	public V evaluate(final ILabeledPath<N, A> node) throws PathEvaluationException, InterruptedException {
+		V f1 = this.ne1.evaluate(node);
 		if (f1 != null) {
 			return f1;
 		}
-		return super.f(node);
+		return super.evaluate(node);
 	}
 
 	@Override
@@ -87,11 +103,11 @@ public class AlternativeNodeEvaluator<T, V extends Comparable<V>> extends Decora
 
 	@Override
 	public String getLoggerName() {
-		return loggerName;
+		return this.loggerName;
 	}
 
 	@Override
-	public void setLoggerName(String name) {
+	public void setLoggerName(final String name) {
 		this.loggerName = name;
 		super.setLoggerName(name + "._decorating");
 		if (this.ne1 instanceof ILoggingCustomizable) {

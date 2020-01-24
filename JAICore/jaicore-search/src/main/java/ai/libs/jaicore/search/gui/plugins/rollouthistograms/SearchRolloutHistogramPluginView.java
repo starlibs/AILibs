@@ -9,7 +9,7 @@ import javafx.scene.layout.FlowPane;
  *
  * @author fmohr
  *
- * @param <N>
+ * @param <BalancedTreeNode>
  *            The node class
  */
 public class SearchRolloutHistogramPluginView extends ASimpleMVCPluginView<SearchRolloutHistogramPluginModel, SearchRolloutHistogramPluginController, FlowPane> {

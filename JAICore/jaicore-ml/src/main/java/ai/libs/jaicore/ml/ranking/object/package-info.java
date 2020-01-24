@@ -1,0 +1,7 @@
+
+/**
+ * Object-Ranking package.
+ *
+ * @author mwever
+ */
+package ai.libs.jaicore.ml.ranking.object;

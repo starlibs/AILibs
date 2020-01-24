@@ -2,15 +2,16 @@ package ai.libs.jaicore.search.algorithms.standard.mcts;
 
 import java.util.Random;
 
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 
-public class UCTPathSearch<T,A> extends MCTSPathSearch<T,A,Double> {
+public class UCTPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends MCTSPathSearch<I, N, A, Double> {
 
-	public UCTPathSearch(GraphSearchWithPathEvaluationsInput<T, A, Double> problem, boolean maximization, int seed, double evaluationFailurePenalty, boolean forbidDoublePaths) {
-		super(problem, new UCBPolicy<>(maximization), new UniformRandomPolicy<>(new Random(seed)), evaluationFailurePenalty, forbidDoublePaths);
+	public UCTPathSearch(final I problem, final boolean maximization, final double explorationConstant, final int seed, final double evaluationFailurePenalty) {
+		super(problem, new UCBPolicy<>(maximization), new UniformRandomPolicy<>(new Random((long)seed + UCTPathSearch.class.hashCode())), evaluationFailurePenalty);
+		((UCBPolicy)this.getTreePolicy()).setExplorationConstant(explorationConstant);
 	}
-	
-	public UCTPathSearch(GraphSearchWithPathEvaluationsInput<T, A, Double> problem, int seed, double evaluationFailurePenalty, boolean forbidDoublePaths) {
-		this(problem, false, seed, evaluationFailurePenalty, forbidDoublePaths);
+
+	public UCTPathSearch(final I problem, final double explorationConstant, final int seed, final double evaluationFailurePenalty) {
+		this(problem, false, explorationConstant, seed, evaluationFailurePenalty);
 	}
 }

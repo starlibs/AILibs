@@ -3,7 +3,8 @@ package ai.libs.jaicore.planning.classical.algorithms.strips.forward;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithmFactory;
+import org.api4.java.algorithm.IAlgorithmFactory;
+
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.logic.fol.structure.VariableParam;
@@ -19,7 +20,7 @@ public class STRIPSPlanner<V extends Comparable<V>> extends GraphSearchBasedPlan
 
 	public STRIPSPlanner(final StripsPlanningProblem problem,
 			final AlgorithmicProblemReduction<StripsPlanningProblem, IGraphSearchBasedPlan<StripsForwardPlanningNode, String>, GraphSearchInput<StripsForwardPlanningNode, String>, SearchGraphPath<StripsForwardPlanningNode, String>> problemTransformer,
-			final IAlgorithmFactory<GraphSearchInput<StripsForwardPlanningNode, String>, SearchGraphPath<StripsForwardPlanningNode, String>> baseFactory) {
+			final IAlgorithmFactory<GraphSearchInput<StripsForwardPlanningNode, String>, SearchGraphPath<StripsForwardPlanningNode, String>, ?> baseFactory) {
 		super(problem, problemTransformer, baseFactory);
 	}
 

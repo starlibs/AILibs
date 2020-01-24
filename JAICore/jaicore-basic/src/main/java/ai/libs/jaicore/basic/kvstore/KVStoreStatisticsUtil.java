@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +67,7 @@ public class KVStoreStatisticsUtil {
 		KVStoreCollection grouped = new KVStoreCollection(collection);
 		grouped.group(setting, sampleID);
 
-		TwoLayerKVStoreCollectionPartition partition = new TwoLayerKVStoreCollectionPartition(setting, sampleID, grouped);
+		KVStoreCollectionTwoLayerPartition partition = new KVStoreCollectionTwoLayerPartition(setting, sampleID, grouped);
 
 		for (Entry<String, Map<String, KVStoreCollection>> partitionEntry : partition) {
 			List<IKVStore> competitorList = new LinkedList<>();
@@ -125,7 +126,7 @@ public class KVStoreStatisticsUtil {
 		KVStoreCollection grouped = new KVStoreCollection(collection);
 		grouped.group(setting, sampleID);
 
-		KVStoreCollectionPartition partition = new KVStoreCollectionPartition(setting, collection);
+		KVStoreCollectionOneLayerPartition partition = new KVStoreCollectionOneLayerPartition(setting, collection);
 
 		for (Entry<String, KVStoreCollection> entry : partition) {
 
@@ -174,7 +175,7 @@ public class KVStoreStatisticsUtil {
 		KVStoreCollection groupedCollection = new KVStoreCollection(collection);
 		groupedCollection.group(setting, sampleIDs);
 
-		TwoLayerKVStoreCollectionPartition settingAndSampleWisePartition = new TwoLayerKVStoreCollectionPartition(setting, sampleIDs, groupedCollection);
+		KVStoreCollectionTwoLayerPartition settingAndSampleWisePartition = new KVStoreCollectionTwoLayerPartition(setting, sampleIDs, groupedCollection);
 
 		for (Entry<String, Map<String, KVStoreCollection>> settingToSampleWisePartition : settingAndSampleWisePartition) {
 			/* Description of the ground truth. */
@@ -284,7 +285,7 @@ public class KVStoreStatisticsUtil {
 		final String bestOutput = output + "_best";
 		best(collection, setting, sampleID, sampledValues, bestOutput);
 
-		TwoLayerKVStoreCollectionPartition partition = new TwoLayerKVStoreCollectionPartition(setting, sampleID, collection);
+		KVStoreCollectionTwoLayerPartition partition = new KVStoreCollectionTwoLayerPartition(setting, sampleID, collection);
 
 		for (Entry<String, Map<String, KVStoreCollection>> partitionEntry : partition) {
 			Optional<Entry<String, KVStoreCollection>> best = partitionEntry.getValue().entrySet().stream().filter(x -> x.getValue().get(0).getAsBoolean(bestOutput)).findFirst();
@@ -312,7 +313,7 @@ public class KVStoreStatisticsUtil {
 		KVStoreCollection grouped = new KVStoreCollection(collection);
 		grouped.group(setting, sampleID);
 
-		TwoLayerKVStoreCollectionPartition partition = new TwoLayerKVStoreCollectionPartition(setting, sampleID, grouped);
+		KVStoreCollectionTwoLayerPartition partition = new KVStoreCollectionTwoLayerPartition(setting, sampleID, grouped);
 
 		for (Entry<String, Map<String, KVStoreCollection>> partitionEntry : partition) {
 			KVStoreCollection testCollection = partitionEntry.getValue().get(nameOfTestPopulation);
@@ -379,10 +380,10 @@ public class KVStoreStatisticsUtil {
 	 * @param secondLayerKey The key name that is used to partition the second layer.
 	 * @return A partitioning of the given collection with respect to the first and second layer key.
 	 */
-	private static TwoLayerKVStoreCollectionPartition prepareGroupedTwoLayerPartition(final KVStoreCollection collection, final String firstLayerKey, final String secondLayerKey) {
+	private static KVStoreCollectionTwoLayerPartition prepareGroupedTwoLayerPartition(final KVStoreCollection collection, final String firstLayerKey, final String secondLayerKey) {
 		KVStoreCollection copy = new KVStoreCollection(collection);
 		copy.group(firstLayerKey, secondLayerKey);
-		return new TwoLayerKVStoreCollectionPartition(firstLayerKey, secondLayerKey, copy);
+		return new KVStoreCollectionTwoLayerPartition(firstLayerKey, secondLayerKey, copy);
 	}
 
 	/**

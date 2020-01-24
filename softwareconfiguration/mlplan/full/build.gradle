@@ -1,0 +1,92 @@
+sourceSets {
+    main {
+        resources {
+        	srcDir 'resources'
+    	}
+    }
+}
+
+
+dependencies {
+  	// basic dependencies
+	compile project(':mlplan-core')
+	compile project(':mlplan-gui')
+	compile project(':mlplan-weka')
+	compile project(':mlplan-meka')
+	compile project(':mlplan-sklearn')
+	
+	
+	compile("$cli")
+}
+
+configurations.all {
+    exclude module: 'weka-dev'
+}
+
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+      		}	
+      		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+      		}
+
+      		pom.project {
+        		name 'MLPlan'
+        		packaging 'jar'
+        		// optionally artifactId can be defined here 
+        		description 'This project provides an implementation of the AutoML tool ML-Plan.'
+        		url 'https://libs.ai'
+
+        		scm {
+          			connection 'scm:git:https://github.com/fmohr/AILibs.git'
+          			developerConnection 'scm:git:https://github.com/fmohr/AILibs.git'
+          			url 'https://github.com/fmohr/AILibs'
+        		}
+
+        		licenses {
+          			license {
+            			name 'GPLv3'
+            			url 'https://www.gnu.org/licenses/gpl-3.0.en.html'
+          			}
+        		}
+
+        		developers {
+          			developer {
+            			id 'fmohr'
+            			name 'Felix Mohr'
+            			email 'felix.mohr@upb.de'
+          			}
+          			developer {
+          				id 'mwever'    
+          			    name 'Marcel Wever'
+          			    email 'marcel.wever@upb.de'
+          			}
+          			developer {
+          			    id 'ahetzer'
+          			    name 'Alexander Hetzer'
+          			    email 'alexander.hetzer@upb.de'
+          			}
+        		}
+      		}
+    	}
+  	}
+}
+
+//task mlplanCLIjar(type: Jar) {
+//	zip64 = true
+//    manifest {
+//        attributes 'Main-Class': 'de.upb.crc901.mlplan.cli.MLPlanCLI'
+//    }
+//    destinationDir = file("${projectDir}/cli")
+//    archivesBaseName="mlplancli"
+//    exclude ('META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA')
+//    from sourceSets.main.allSource
+//    from { (configurations.compile)
+//            .collect { it.isDirectory() ? it : zipTree(it) } }
+//    with jar
+//}
+

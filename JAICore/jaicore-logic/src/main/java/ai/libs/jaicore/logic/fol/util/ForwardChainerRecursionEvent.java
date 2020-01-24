@@ -1,6 +1,8 @@
 package ai.libs.jaicore.logic.fol.util;
 
-import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
+import org.api4.java.algorithm.IAlgorithm;
+
+import ai.libs.jaicore.basic.algorithm.AAlgorithmEvent;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 
@@ -8,25 +10,25 @@ public class ForwardChainerRecursionEvent extends AAlgorithmEvent {
 	private Literal local;
 	private Monom remainingConclusion;
 
-	public ForwardChainerRecursionEvent(String algorithmId, Literal local, Monom remainingConclusion) {
-		super(algorithmId);
+	public ForwardChainerRecursionEvent(final IAlgorithm<?, ?> algorithm, final Literal local, final Monom remainingConclusion) {
+		super(algorithm);
 		this.local = local;
 		this.remainingConclusion = remainingConclusion;
 	}
 
 	public Literal getLocal() {
-		return local;
+		return this.local;
 	}
 
-	public void setLocal(Literal local) {
+	public void setLocal(final Literal local) {
 		this.local = local;
 	}
 
 	public Monom getRemainingConclusion() {
-		return remainingConclusion;
+		return this.remainingConclusion;
 	}
 
-	public void setRemainingConclusion(Monom remainingConclusion) {
+	public void setRemainingConclusion(final Monom remainingConclusion) {
 		this.remainingConclusion = remainingConclusion;
 	}
 }

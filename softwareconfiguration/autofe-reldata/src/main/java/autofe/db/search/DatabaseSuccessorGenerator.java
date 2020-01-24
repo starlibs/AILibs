@@ -6,13 +6,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.api4.java.datastructure.graph.implicit.NodeType;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 import autofe.db.model.database.AbstractFeature;
 import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.Attribute;
@@ -26,7 +26,7 @@ import autofe.db.model.relation.BackwardRelationship;
 import autofe.db.model.relation.ForwardRelationship;
 import autofe.db.util.DBUtils;
 
-public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNode, String> {
+public class DatabaseSuccessorGenerator implements ISuccessorGenerator<DatabaseNode, String> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSuccessorGenerator.class);
 

@@ -2,26 +2,26 @@ package ai.libs.jaicore.search.algorithms.standard.uncertainty;
 
 import java.util.PriorityQueue;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyUncertaintyAnnotatingPathEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyUncertaintyAnnotatingNodeEvaluator;
 import ai.libs.jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.BasicClockModelPhaseLengthAdjuster;
 import ai.libs.jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.BasicExplorationCandidateSelector;
 import ai.libs.jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.IPhaseLengthAdjuster;
 import ai.libs.jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.UncertaintyExplorationOpenSelection;
 import ai.libs.jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoSelection;
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
 
 public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>>
-		extends BestFirstFactory<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> {
+extends BestFirstFactory<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UncertaintyORGraphSearchFactory.class);
 
-	private OversearchAvoidanceConfig<N, V> oversearchAvoidanceConfig;
+	private OversearchAvoidanceConfig<N, A,V> oversearchAvoidanceConfig;
 
 	@Override
 	public BestFirst<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> getAlgorithm() {
@@ -35,10 +35,10 @@ public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>>
 		BestFirst<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> search = super.getAlgorithm();
 
 		/* check that node evaluator supports uncertainty */
-		if (!(search.getNodeEvaluator() instanceof IPotentiallyUncertaintyAnnotatingNodeEvaluator)) {
-			throw new UnsupportedOperationException("Cannot create uncertainty based search with node evaluator " + search.getNodeEvaluator().getClass().getName() + ", which does not implement " + IPotentiallyUncertaintyAnnotatingNodeEvaluator.class.getName());
+		if (!(search.getNodeEvaluator() instanceof IPotentiallyUncertaintyAnnotatingPathEvaluator)) {
+			throw new UnsupportedOperationException("Cannot create uncertainty based search with node evaluator " + search.getNodeEvaluator().getClass().getName() + ", which does not implement " + IPotentiallyUncertaintyAnnotatingPathEvaluator.class.getName());
 		}
-		if (!((IPotentiallyUncertaintyAnnotatingNodeEvaluator<?,?>)search.getNodeEvaluator()).annotatesUncertainty()) {
+		if (!((IPotentiallyUncertaintyAnnotatingPathEvaluator<?,?,?>)search.getNodeEvaluator()).annotatesUncertainty()) {
 			throw new UnsupportedOperationException("The given node evaluator supports uncertainty annotation, but it declares that it will not annotate uncertainty. Maybe no uncertainty source has been defined.");
 		}
 
@@ -49,17 +49,17 @@ public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>>
 			break;
 		case TWO_PHASE_SELECTION:
 			if (this.oversearchAvoidanceConfig.getAdjustPhaseLengthsDynamically()) {
-				search.setOpen(new UncertaintyExplorationOpenSelection<N, V>(
+				search.setOpen(new UncertaintyExplorationOpenSelection<N, A, V>(
 						this.oversearchAvoidanceConfig.getTimeout(),
 						this.oversearchAvoidanceConfig.getInterval(),
 						this.oversearchAvoidanceConfig.getExploitationScoreThreshold(),
 						this.oversearchAvoidanceConfig.getExplorationUncertaintyThreshold(),
 						new BasicClockModelPhaseLengthAdjuster(),
 						this.oversearchAvoidanceConfig.getSolutionDistanceMetric(),
-						new BasicExplorationCandidateSelector<N, V>(this.oversearchAvoidanceConfig.getMinimumSolutionDistanceForExploration())
+						new BasicExplorationCandidateSelector<N, A, V>(this.oversearchAvoidanceConfig.getMinimumSolutionDistanceForExploration())
 						));
 			} else {
-				search.setOpen(new UncertaintyExplorationOpenSelection<N, V>(
+				search.setOpen(new UncertaintyExplorationOpenSelection<N, A,V>(
 						this.oversearchAvoidanceConfig.getTimeout(),
 						this.oversearchAvoidanceConfig.getInterval(),
 						this.oversearchAvoidanceConfig.getExploitationScoreThreshold(),
@@ -78,12 +78,12 @@ public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>>
 							}
 						},
 						this.oversearchAvoidanceConfig.getSolutionDistanceMetric(),
-						new BasicExplorationCandidateSelector<N, V>(this.oversearchAvoidanceConfig.getMinimumSolutionDistanceForExploration())
+						new BasicExplorationCandidateSelector<N, A,V>(this.oversearchAvoidanceConfig.getMinimumSolutionDistanceForExploration())
 						));
 			}
 			break;
 		case PARETO_FRONT_SELECTION:
-			PriorityQueue<Node<N, V>> pareto = new PriorityQueue<>(oversearchAvoidanceConfig.getParetoComperator());
+			PriorityQueue<BackPointerPath<N,A, V>> pareto = new PriorityQueue<>(this.oversearchAvoidanceConfig.getParetoComperator());
 			search.setOpen(new ParetoSelection<>(pareto));
 			break;
 		default:
@@ -93,11 +93,11 @@ public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>>
 		return search;
 	}
 
-	public OversearchAvoidanceConfig<N, V> getConfig() {
+	public OversearchAvoidanceConfig<N, A,V> getConfig() {
 		return this.oversearchAvoidanceConfig;
 	}
 
-	public void setConfig(final OversearchAvoidanceConfig<N, V> config) {
+	public void setConfig(final OversearchAvoidanceConfig<N,A, V> config) {
 		this.oversearchAvoidanceConfig = config;
 	}
 }

@@ -20,24 +20,41 @@ public class DefaultProcessListener extends AProcessListener {
 	 */
 	protected final boolean verbose;
 
+	private StringBuilder errorSB;
+	private StringBuilder defaultSB;
+
 	/**
 	 * Constructor to initialize the DefaultProcessListener.
 	 * @param verbose Flag whether standard outputs are forwarded to the logger.
 	 */
 	public DefaultProcessListener(final boolean verbose) {
 		this.verbose = verbose;
+		this.errorSB = new StringBuilder();
+		this.defaultSB = new StringBuilder();
 	}
 
 	@Override
 	public void handleError(final String error) {
-		L.error(">>> {}", error);
+		this.errorSB.append(error + "\n");
+		if (this.verbose) {
+			L.error(">>> {}", error);
+		}
 	}
 
 	@Override
 	public void handleInput(final String input) throws IOException, InterruptedException {
+		this.defaultSB.append(input + "\n");
 		if (this.verbose) {
 			L.info(">>> {}", input);
 		}
+	}
+
+	public String getErrorOutput() {
+		return this.errorSB.toString();
+	}
+
+	public String getDefaultOutput() {
+		return this.defaultSB.toString();
 	}
 
 }

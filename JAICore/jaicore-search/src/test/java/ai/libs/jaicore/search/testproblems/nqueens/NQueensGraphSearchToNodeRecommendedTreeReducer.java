@@ -1,6 +1,7 @@
 package ai.libs.jaicore.search.testproblems.nqueens;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.search.exampleproblems.nqueens.QueenNode;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
@@ -9,7 +10,7 @@ public class NQueensGraphSearchToNodeRecommendedTreeReducer implements Algorithm
 
 	@Override
 	public GraphSearchWithNodeRecommenderInput<QueenNode, String> encodeProblem(final GraphSearchInput<QueenNode, String> problem) {
-		return new GraphSearchWithNodeRecommenderInput<>(problem.getGraphGenerator(), (n1, n2) -> Integer.valueOf(n1.getNumberOfAttackedCells()).compareTo(n2.getNumberOfAttackedCells()));
+		return new GraphSearchWithNodeRecommenderInput<>(problem, (n1, n2) -> Integer.valueOf(n1.getNumberOfAttackedCells()).compareTo(n2.getNumberOfAttackedCells()));
 	}
 
 	@Override

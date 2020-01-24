@@ -1,6 +1,7 @@
 package ai.libs.jaicore.search.core.interfaces;
 
-import ai.libs.jaicore.basic.IObjectEvaluator;
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
 /**

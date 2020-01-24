@@ -5,26 +5,28 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
+
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class TinyDepthFirstSearch<N, A> {
 	private final List<SearchGraphPath<N, A>> solutionPaths = new LinkedList<>();
-	private final SuccessorGenerator<N, A> successorGenerator;
-	private final NodeGoalTester<N> goalTester;
+	private final ISuccessorGenerator<N, A> successorGenerator;
+	private final INodeGoalTester<N, A> goalTester;
 	private final N root;
-	private final Deque<N> path = new LinkedList<>();
+	private final Deque<N> nodes = new LinkedList<>();
+	private final Deque<A> edges = new LinkedList<>();
 
 	public TinyDepthFirstSearch(final GraphSearchInput<N, A> problem) {
 		super();
-		this.root = ((SingleRootGenerator<N>) problem.getGraphGenerator().getRootGenerator()).getRoot();
-		this.goalTester = (NodeGoalTester<N>) problem.getGraphGenerator().getGoalTester();
+		this.root = ((ISingleRootGenerator<N>) problem.getGraphGenerator().getRootGenerator()).getRoot();
+		this.goalTester = (INodeGoalTester<N, A>) problem.getGoalTester();
 		this.successorGenerator = problem.getGraphGenerator().getSuccessorGenerator();
-		this.path.add(this.root);
+		this.nodes.add(this.root);
 	}
 
 	public void run() throws InterruptedException {
@@ -33,17 +35,20 @@ public class TinyDepthFirstSearch<N, A> {
 
 	public void dfs(final N head) throws InterruptedException {
 		if (this.goalTester.isGoal(head)) {
-			this.solutionPaths.add(new SearchGraphPath<>(new ArrayList<>(this.path)));
+			this.solutionPaths.add(new SearchGraphPath<>(new ArrayList<>(this.nodes), new ArrayList<>(this.edges)));
 		}
 		else {
 
 			/* expand node and invoke dfs for each child in order */
-			List<NodeExpansionDescription<N,A>> successors = this.successorGenerator.generateSuccessors(head);
-			for (NodeExpansionDescription<N,A> succ : successors) {
+			List<INewNodeDescription<N,A>> successors = this.successorGenerator.generateSuccessors(head);
+			for (INewNodeDescription<N,A> succ : successors) {
 				N to = succ.getTo();
-				this.path.addFirst(to);
+				A label = succ.getArcLabel();
+				this.nodes.addFirst(to);
+				this.edges.addFirst(label);
 				this.dfs(to);
-				N removed = this.path.removeFirst();
+				N removed = this.nodes.removeFirst();
+				this.edges.removeFirst();
 				assert removed == to : "Expected " + to + " but removed " + removed;
 			}
 		}

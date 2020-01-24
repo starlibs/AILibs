@@ -62,12 +62,7 @@ public class PDDLGraphGeneratorTester {
 					HSP hspComp = new HSP();
 
 					SequentialPlan hspPlan = hspComp.search(enc);
-
-					// assertNotNull(hspPlan);
-
-				} catch (IOException e) {
-					System.out.println("The comparrison with HSP did not work");
-					e.printStackTrace();
+					assertNotNull(hspPlan);
 				}
 			} else
 				fail("problem not solvable");

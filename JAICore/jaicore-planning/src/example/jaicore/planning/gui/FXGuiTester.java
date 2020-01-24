@@ -36,12 +36,6 @@ public class FXGuiTester extends Application {
 	@Override
 	public void start(Stage stage) throws Exception {
 		gui = new FXGui();
-		// bestFirstTest();
-
-		// tooltipTest();
-		//
-		// dataSupplierTest();
-		//
 		bestFTest();
 
 	}
@@ -49,31 +43,12 @@ public class FXGuiTester extends Application {
 	private void bestFirstTest() {
 		GraphGenerator generator = new TestGraphGenerator();
 		BestFirst<TestNode, String> bf = new BestFirst<>(generator, n -> (double) Math.round(Math.random() * 100));
-		// open(bf,"BestFirst");
 
 		Recorder rec = new Recorder(bf);
 
 		gui.open(rec, "Recorder");
 
-		// TooltipSupplier supplier = new TooltipSupplier();
-		// supplier.setGenerator(n->{
-		// Node node =(Node) n;
-		// return String.valueOf(((Node) n).getInternalLabel());
-		// });
-
-		// rec.addDataSupplier(supplier);
-
-		// FXController controller = gui.getControllers().get(gui.getControllers().size()-1);
-		// if(controller != null)
-		// controller.registerSupplier(sup);
-		// bf.registerListener(supplier);
-		try {
-			bf.nextSolution();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+		bf.nextSolution();
 	}
 
 	private void tooltipTest() {
@@ -82,9 +57,7 @@ public class FXGuiTester extends Application {
 		CEOCSTNPlanningProblem problem = StandardProblemFactory.getNestedDichotomyCreationProblem("root", init, true, 0, 0);
 		ForwardDecompositionHTNPlanner planner = new ForwardDecompositionHTNPlanner(problem, 1);
 		ForwardDecompositionHTNPlanner.SolutionIterator plannerRun = planner.iterator();
-		// new SimpleGraphVisualizationWindow<Node<TFDNode,Double>>(plannerRun.getSearch()).getPanel().setTooltipGenerator(new TFDTooltipGenerator<>());
 		Recorder<Node<TFDNode, Double>> recorder = new Recorder<>(plannerRun.getSearch());
-		// recorder.setTooltipGenerator(new TFDTooltipGenerator<>());
 		TooltipSupplier dataSupplier = new TooltipSupplier();
 		dataSupplier.setGenerator(new TFDTooltipGenerator());
 
@@ -96,8 +69,6 @@ public class FXGuiTester extends Application {
 			System.out.println("\t" + solution);
 		}
 		System.out.println("Algorithm has finished.");
-
-		// recorder.addNodeDataSupplier(dataSupplier);
 
 		gui.open(recorder, "TooltipTest");
 		FXController controller = gui.getControllers().get(gui.getControllers().size() - 1);
@@ -114,11 +85,6 @@ public class FXGuiTester extends Application {
 		Recorder rec = new Recorder(bf);
 
 		gui.open(rec, "Recorder");
-
-		// rec.setTooltipGenerator(n->{
-		// Node node = (Node) n;
-		// return String.valueOf(node.getInternalLabel());
-		// });
 
 		TooltipSupplier dataSupplier = new TooltipSupplier();
 
@@ -147,8 +113,6 @@ public class FXGuiTester extends Application {
 		BestFSupplier dataSupplier = new BestFSupplier();
 
 		rec.registerListener(dataSupplier);
-
-		// rec.addGraphDataSupplier(dataSupplier);
 
 		FXController controller = gui.getControllers().get(gui.getControllers().size() - 1);
 		if (controller != null)

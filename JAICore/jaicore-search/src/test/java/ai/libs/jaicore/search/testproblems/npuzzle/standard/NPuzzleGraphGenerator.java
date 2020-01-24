@@ -3,13 +3,13 @@ package ai.libs.jaicore.search.testproblems.npuzzle.standard;
 import java.util.ArrayList;
 import java.util.List;
 
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
-import ai.libs.jaicore.testproblems.npuzzle.NPuzzleState;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
+
+import ai.libs.jaicore.problems.npuzzle.NPuzzleState;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 /**
  * A simple generator for the normal NPuzzleProblem.
@@ -17,7 +17,7 @@ import ai.libs.jaicore.testproblems.npuzzle.NPuzzleState;
  * @author jkoepe
  *
  */
-public class NPuzzleGraphGenerator implements GraphGenerator<NPuzzleState, String> {
+public class NPuzzleGraphGenerator implements IGraphGenerator<NPuzzleState, String> {
 
 	protected int dimension;
 	private NPuzzleState root;
@@ -39,54 +39,33 @@ public class NPuzzleGraphGenerator implements GraphGenerator<NPuzzleState, Strin
 	}
 
 	@Override
-	public SingleRootGenerator<NPuzzleState> getRootGenerator() {
+	public ISingleRootGenerator<NPuzzleState> getRootGenerator() {
 		return () -> this.root;
 	}
 
 	@Override
-	public SuccessorGenerator<NPuzzleState, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<NPuzzleState, String> getSuccessorGenerator() {
 		return n -> {
-			List<NodeExpansionDescription<NPuzzleState, String>> successors = new ArrayList<>();
+			List<INewNodeDescription<NPuzzleState, String>> successors = new ArrayList<>();
 
 			// Possible successors
 			if (n.getEmptyX() > 0) {
-				successors.add(new NodeExpansionDescription<>(this.move(n, "l"), "l", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "l"), "l"));
 			}
 
 			if (n.getEmptyX() < this.dimension - 1) {
-				successors.add(new NodeExpansionDescription<>(this.move(n, "r"), "r", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "r"), "r"));
 			}
 
 			if (n.getEmptyY() > 0) {
-				successors.add(new NodeExpansionDescription<>(this.move(n, "u"), "u", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "u"), "u"));
 			}
 
 			if (n.getEmptyY() < this.dimension - 1) {
-				successors.add(new NodeExpansionDescription<>(this.move(n, "d"), "d", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "d"), "d"));
 			}
 
 			return successors;
-		};
-	}
-
-	@Override
-	public NodeGoalTester<NPuzzleState> getGoalTester() {
-		return n -> {
-			int[][] board = n.getBoard();
-			if (board[this.dimension - 1][this.dimension - 1] != 0) {
-				return false;
-			} else {
-				int sol = 1;
-				for (int i = 0; i < this.dimension; i++) {
-					for (int j = 0; j < this.dimension; j++) {
-						if (i != this.dimension - 1 && j != this.dimension - 1 && board[i][j] != sol) {
-							return false;
-						}
-						sol++;
-					}
-				}
-				return true;
-			}
 		};
 	}
 

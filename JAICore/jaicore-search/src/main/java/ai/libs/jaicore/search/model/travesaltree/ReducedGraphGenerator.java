@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.GoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.RootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.IRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
 /**
  * Graph generator that uses another graph generator as a basis by reducing the
@@ -22,9 +22,9 @@ import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
  * @param <T>
  * @param <A>
  */
-public class ReducedGraphGenerator<T, A> implements GraphGenerator<T, A> {
+public class ReducedGraphGenerator<T, A> implements IGraphGenerator<T, A> {
 
-	private GraphGenerator<T, A> basis;
+	private IGraphGenerator<T, A> basis;
 
 	/**
 	 * Create a new ReducedGraphGenerator that uses the given graph generator as a
@@ -33,20 +33,20 @@ public class ReducedGraphGenerator<T, A> implements GraphGenerator<T, A> {
 	 * @param basis
 	 *            the graph generator to use as a basis
 	 */
-	public ReducedGraphGenerator(final GraphGenerator<T, A> basis) {
+	public ReducedGraphGenerator(final IGraphGenerator<T, A> basis) {
 		this.basis = basis;
 	}
 
 	@Override
-	public RootGenerator<T> getRootGenerator() {
+	public IRootGenerator<T> getRootGenerator() {
 		return this.basis.getRootGenerator();
 	}
 
 	@Override
-	public SuccessorGenerator<T, A> getSuccessorGenerator() {
-		return new SuccessorGenerator<T, A>() {
+	public ISuccessorGenerator<T, A> getSuccessorGenerator() {
+		return new ISuccessorGenerator<T, A>() {
 
-			private SuccessorGenerator<T, A> generator = ReducedGraphGenerator.this.basis.getSuccessorGenerator();
+			private ISuccessorGenerator<T, A> generator = ReducedGraphGenerator.this.basis.getSuccessorGenerator();
 
 			/**
 			 * Expands the node recursively while it only has one successor, until the end
@@ -57,10 +57,10 @@ public class ReducedGraphGenerator<T, A> implements GraphGenerator<T, A> {
 			 * @return The fully refined node
 			 * @throws InterruptedException
 			 */
-			public NodeExpansionDescription<T, A> reduce(final NodeExpansionDescription<T, A> node)
+			public INewNodeDescription<T, A> reduce(final INewNodeDescription<T, A> node)
 					throws InterruptedException {
-				List<NodeExpansionDescription<T, A>> sucessors = this.generator.generateSuccessors(node.getTo());
-				List<NodeExpansionDescription<T, A>> previous = Arrays.asList(node);
+				List<INewNodeDescription<T, A>> sucessors = this.generator.generateSuccessors(node.getTo());
+				List<INewNodeDescription<T, A>> previous = Arrays.asList(node);
 				while (sucessors.size() == 1) {
 					previous = sucessors;
 					sucessors = this.generator.generateSuccessors(sucessors.get(0).getTo());
@@ -69,28 +69,23 @@ public class ReducedGraphGenerator<T, A> implements GraphGenerator<T, A> {
 			}
 
 			@Override
-			public List<NodeExpansionDescription<T, A>> generateSuccessors(final T node) throws InterruptedException {
-				List<NodeExpansionDescription<T, A>> successors = this.generator.generateSuccessors(node);
+			public List<INewNodeDescription<T, A>> generateSuccessors(final T node) throws InterruptedException {
+				List<INewNodeDescription<T, A>> successors = this.generator.generateSuccessors(node);
 				// Skip through nodes with 1 successor to find
 				while (successors.size() == 1) {
-					List<NodeExpansionDescription<T, A>> previous = successors;
+					List<INewNodeDescription<T, A>> previous = successors;
 					successors = this.generator.generateSuccessors(successors.get(0).getTo());
 					if (successors.isEmpty()) {
 						return previous;
 					}
 				}
 
-				List<NodeExpansionDescription<T, A>> reducedSuccessors = new ArrayList<>();
-				for (NodeExpansionDescription<T, A> successor : successors) {
+				List<INewNodeDescription<T, A>> reducedSuccessors = new ArrayList<>();
+				for (INewNodeDescription<T, A> successor : successors) {
 					reducedSuccessors.add(this.reduce(successor));
 				}
 				return reducedSuccessors;
 			}
 		};
-	}
-
-	@Override
-	public GoalTester<T> getGoalTester() {
-		return this.basis.getGoalTester();
 	}
 }

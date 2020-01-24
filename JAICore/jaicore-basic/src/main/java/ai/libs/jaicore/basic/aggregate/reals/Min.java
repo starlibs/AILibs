@@ -2,6 +2,8 @@ package ai.libs.jaicore.basic.aggregate.reals;
 
 import java.util.List;
 
+import org.api4.java.common.aggregate.IRealsAggregateFunction;
+
 /**
  * The aggregation function "Min" aggregates the given values with the minimum operator, thus, returning the minimum of a list of values.
  *

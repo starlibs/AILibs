@@ -6,10 +6,9 @@ import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.junit.Test;
-
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 
 public class MOEAFrameworkAlgorithmTest {
 

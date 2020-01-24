@@ -1,29 +1,28 @@
 package ai.libs.jaicore.graphvisualizer.plugin.speedslider;
 
-import ai.libs.jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
+
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import ai.libs.jaicore.graphvisualizer.events.gui.GUIEvent;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginController;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
 
-public class SpeedSliderGUIPluginController implements IGUIPluginController {
+public class SpeedSliderGUIPluginController extends ASimpleMVCPluginController<SpeedSliderGUIPluginModel, SpeedSliderGUIPluginView> {
 
-	private SpeedSliderGUIPluginModel model;
-
-	public SpeedSliderGUIPluginController(SpeedSliderGUIPluginModel model) {
-		this.model = model;
+	public SpeedSliderGUIPluginController(final SpeedSliderGUIPluginModel model, final SpeedSliderGUIPluginView view) {
+		super (model, view);
 	}
 
 	@Override
-	public void handleSerializableAlgorithmEvent(PropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
-		// no need to handle any algorithm events
-	}
-
-	@Override
-	public void handleGUIEvent(GUIEvent guiEvent) {
+	public void handleGUIEvent(final GUIEvent guiEvent) {
 		if (guiEvent instanceof ChangeSpeedEvent) {
 			ChangeSpeedEvent changeSpeedEvent = (ChangeSpeedEvent) guiEvent;
-			model.setCurrentSpeedPercentage(changeSpeedEvent.getNewSpeedPercentage());
+			this.getModel().setCurrentSpeedPercentage(changeSpeedEvent.getNewSpeedPercentage());
 		}
+	}
+
+	@Override
+	protected void handleAlgorithmEventInternally(final IPropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
+		/* no need to handle any algorithm events */
 	}
 
 }

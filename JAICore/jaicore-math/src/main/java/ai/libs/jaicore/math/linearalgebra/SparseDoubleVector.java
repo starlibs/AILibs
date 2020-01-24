@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import org.api4.java.common.math.IVector;
+
 import ai.libs.jaicore.math.random.RandomGenerator;
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector.Norm;
@@ -13,7 +15,7 @@ import no.uib.cipr.matrix.sparse.SparseVector;
 /**
  * Sparse vector implementation wrapping the MTJ implementation of a sparse vector.
  *
- * @author Alexander Hetzer
+ * @author Alexander Tornede
  */
 public class SparseDoubleVector extends AbstractVector {
 
@@ -131,19 +133,19 @@ public class SparseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public void addVector(final Vector vector) {
+	public void addVector(final IVector vector) {
 		this.setIsChanged();
-		this.internalVector = (SparseVector) this.internalVector.add(vector.toSparseVector().internalVector);
+		this.internalVector = (SparseVector) this.internalVector.add(((AbstractVector) vector).toSparseVector().internalVector);
 	}
 
 	@Override
-	public void subtractVector(final Vector vector) {
+	public void subtractVector(final IVector vector) {
 		this.setIsChanged();
-		this.internalVector = (SparseVector) this.internalVector.add(-1, vector.toSparseVector().internalVector);
+		this.internalVector = (SparseVector) this.internalVector.add(-1, ((AbstractVector) vector).toSparseVector().internalVector);
 	}
 
 	@Override
-	public void multiplyByVectorPairwise(final Vector secondVector) {
+	public void multiplyByVectorPairwise(final IVector secondVector) {
 		this.setIsChanged();
 		SparseVector sparseVector = this.internalVector;
 		int[] indexes = sparseVector.getIndex();
@@ -159,7 +161,7 @@ public class SparseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public void divideByVectorPairwise(final Vector secondVector) {
+	public void divideByVectorPairwise(final IVector secondVector) {
 		this.setIsChanged();
 		SparseVector sparseVector = this.internalVector;
 		int[] indexes = sparseVector.getIndex();
@@ -175,8 +177,8 @@ public class SparseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public double dotProduct(final Vector vector) {
-		return this.internalVector.dot(vector.toSparseVector().internalVector);
+	public double dotProduct(final IVector vector) {
+		return this.internalVector.dot(((AbstractVector) vector).toSparseVector().internalVector);
 	}
 
 	@Override
@@ -204,7 +206,7 @@ public class SparseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public Vector duplicate() {
+	public IVector duplicate() {
 		return new SparseDoubleVector(this.asArray());
 	}
 
@@ -288,7 +290,7 @@ public class SparseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public Vector kroneckerProduct(final double[] vectorAsArray) {
+	public IVector kroneckerProduct(final double[] vectorAsArray) {
 		return new SparseDoubleVector(this.kroneckerProductInternal(vectorAsArray));
 	}
 
@@ -319,7 +321,5 @@ public class SparseDoubleVector extends AbstractVector {
 		}
 		return Arrays.equals(this.asArray(), other.asArray());
 	}
-
-
 
 }

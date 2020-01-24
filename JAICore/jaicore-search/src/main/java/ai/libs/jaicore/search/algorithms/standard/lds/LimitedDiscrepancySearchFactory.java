@@ -4,10 +4,11 @@ import ai.libs.jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
 
-public class LimitedDiscrepancySearchFactory<N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<GraphSearchWithNodeRecommenderInput<N, A>, EvaluatedSearchGraphPath<N, A,V>, N, A, V> {
+public class LimitedDiscrepancySearchFactory<I extends GraphSearchWithNodeRecommenderInput<N, A>, N, A, V extends Comparable<V>>
+extends StandardORGraphSearchFactory<I, EvaluatedSearchGraphPath<N, A, V>, N, A, V, LimitedDiscrepancySearch<I, N, A, V>> {
 
 	@Override
-	public LimitedDiscrepancySearch<N, A, V> getAlgorithm() {
+	public LimitedDiscrepancySearch<I, N, A, V> getAlgorithm() {
 		if (this.getInput() == null) {
 			throw new IllegalArgumentException("Cannot create algorithm; problem input has not been set yet");
 		}
@@ -15,7 +16,7 @@ public class LimitedDiscrepancySearchFactory<N, A, V extends Comparable<V>> exte
 	}
 
 	@Override
-	public LimitedDiscrepancySearch<N,A,V> getAlgorithm(final GraphSearchWithNodeRecommenderInput<N, A> input) {
+	public LimitedDiscrepancySearch<I, N, A, V> getAlgorithm(final I input) {
 		return new LimitedDiscrepancySearch<>(input);
 	}
 }

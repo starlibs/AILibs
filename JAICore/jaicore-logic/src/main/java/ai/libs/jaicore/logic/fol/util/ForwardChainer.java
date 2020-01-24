@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.LiteralParam;
 import ai.libs.jaicore.logic.fol.structure.LiteralSet;
@@ -56,7 +56,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 	 * literals in the conclusion and invoke a new instance of ForwardChainer on the
 	 * rest.
 	 */
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		long start = System.currentTimeMillis();
 		switch (this.getState()) {
 
@@ -137,10 +137,10 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 
 					/* if CWA is activated, we have to recheck whether the negative literals are ok */
 					if (this.getInput().isCwa() && this.doesCWADeductionFail(this.factbase, new LiteralSet(this.cwaRelevantNegativeLiterals, solutionToReturn))) {
-						return new ForwardChainingFailedCWABindingEvent(this.getId());
+						return new ForwardChainingFailedCWABindingEvent(this);
 					}
 					this.logger.info("Computed binding {} for {}-conclusion within {}ms", solutionToReturn, this.conclusion.size(), System.currentTimeMillis() - start);
-					return new NextBindingFoundEvent(this.getId(), solutionToReturn);
+					return new NextBindingFoundEvent(this, solutionToReturn);
 				}
 			}
 
@@ -171,14 +171,14 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 
 			/* if the conclusion has size 1, return the current candidate. Otherwise recurse */
 			if (this.currentGroundRemainingConclusion.isEmpty()) {
-				return new NextBindingFoundEvent(this.getId(), this.currentGroundingOfLocalLiteral);
+				return new NextBindingFoundEvent(this, this.currentGroundingOfLocalLiteral);
 			} else {
 				this.logger.debug("Recurse to {}-conclusion", this.currentGroundRemainingConclusion.size());
 				ForwardChainingProblem subProblem = new ForwardChainingProblem(this.factbase, this.currentGroundRemainingConclusion, this.getInput().isCwa());
 				long startRecursiveCall = System.currentTimeMillis();
 				this.logger.debug("Finished recursion of {}-conclusion. Computation took {}ms", this.currentGroundRemainingConclusion.size(), System.currentTimeMillis() - startRecursiveCall);
 				this.currentlyActiveSubFC = new ForwardChainer(subProblem);
-				return new ForwardChainerRecursionEvent(this.getId(), this.chosenLiteral, this.currentGroundRemainingConclusion);
+				return new ForwardChainerRecursionEvent(this, this.chosenLiteral, this.currentGroundRemainingConclusion);
 			}
 
 		default:
@@ -199,7 +199,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 
 	public NextBindingFoundEvent nextBinding() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		while (this.hasNext()) {
-			AlgorithmEvent e = this.nextWithException();
+			IAlgorithmEvent e = this.nextWithException();
 			if (e instanceof NextBindingFoundEvent) {
 				return (NextBindingFoundEvent) e;
 			}

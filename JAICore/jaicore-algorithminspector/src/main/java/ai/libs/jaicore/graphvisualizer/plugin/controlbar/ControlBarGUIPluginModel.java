@@ -1,28 +1,27 @@
 package ai.libs.jaicore.graphvisualizer.plugin.controlbar;
 
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginModel;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
-public class ControlBarGUIPluginModel implements IGUIPluginModel {
-
-	private ControlBarGUIPluginView view;
+public class ControlBarGUIPluginModel extends ASimpleMVCPluginModel<ControlBarGUIPluginView, ControlBarGUIPluginController> {
 
 	private boolean visualizationPaused;
 
-	public ControlBarGUIPluginModel(ControlBarGUIPluginView view) {
-		this.view = view;
-	}
-
 	public void setPaused() {
-		visualizationPaused = true;
-		view.update();
+		this.visualizationPaused = true;
+		this.getView().update();
 	}
 
 	public void setUnpaused() {
-		visualizationPaused = false;
-		view.update();
+		this.visualizationPaused = false;
+		this.getView().update();
 	}
 
 	public boolean isPaused() {
-		return visualizationPaused;
+		return this.visualizationPaused;
+	}
+
+	@Override
+	public void clear() {
+		/* nothing to do here */
 	}
 }

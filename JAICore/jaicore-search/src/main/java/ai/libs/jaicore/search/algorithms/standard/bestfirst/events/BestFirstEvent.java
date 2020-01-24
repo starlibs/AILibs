@@ -1,11 +1,13 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst.events;
 
-import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
+import org.api4.java.algorithm.IAlgorithm;
+
+import ai.libs.jaicore.basic.algorithm.AAlgorithmEvent;
 
 public class BestFirstEvent extends AAlgorithmEvent {
 
-	public BestFirstEvent(String algorithmId) {
-		super(algorithmId);
+	public BestFirstEvent(final IAlgorithm<?, ?> algorithm) {
+		super(algorithm);
 	}
 
 }

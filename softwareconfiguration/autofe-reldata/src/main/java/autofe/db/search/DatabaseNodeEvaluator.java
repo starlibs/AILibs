@@ -4,23 +4,23 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.function.ToDoubleFunction;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.datastructure.graph.ILabeledPath;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import ai.libs.jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.model.travesaltree.Node;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 import autofe.db.model.database.AbstractFeature;
 import autofe.db.model.database.BackwardFeature;
 import autofe.db.model.database.Database;
@@ -31,7 +31,7 @@ import autofe.db.util.DBUtils;
 import autofe.util.EvaluationUtils;
 import weka.core.Instances;
 
-public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Double> {
+public class DatabaseNodeEvaluator implements IPathEvaluator<DatabaseNode, String, Double> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseNodeEvaluator.class);
 
@@ -68,16 +68,16 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 	}
 
 	@Override
-	public Double f(final Node<DatabaseNode, ?> node) throws InterruptedException, NoSolutionFromRandomCompletionException, DatasetEvaluationFailedException {
-		if (node.getPoint().getSelectedFeatures().isEmpty()) {
+	public Double f(final ILabeledPath<DatabaseNode, String> node) throws InterruptedException, NoSolutionFromRandomCompletionException, DatasetEvaluationFailedException {
+		if (node.getHead().getSelectedFeatures().isEmpty()) {
 			LOGGER.warn("Return default value (0) for empty node");
 			return 0.0;
 		}
-		if (node.getPoint().isFinished()) {
+		if (node.getHead().isFinished()) {
 			LOGGER.warn("Skip random completion for finished node!");
 			Instances instances;
 			try {
-				instances = this.databaseConnector.getInstances(node.getPoint().getSelectedFeatures());
+				instances = this.databaseConnector.getInstances(node.getHead().getSelectedFeatures());
 			} catch (RetrieveInstancesFromDatabaseFailedException e) {
 				throw new DatasetEvaluationFailedException("Could not get instances from database connector.", e);
 			}
@@ -85,38 +85,37 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 			LOGGER.debug("Evaluation result (without random completion) is {}", result);
 			return result;
 		}
-		LOGGER.info("Evaluation node with features : {}", node.getPoint().getSelectedFeatures());
-		int requiredNumberOfFeatures = node.getPoint().getSelectedFeatures().size() + this.randomCompletionPathLength;
+		LOGGER.info("Evaluation node with features : {}", node.getHead().getSelectedFeatures());
+		int requiredNumberOfFeatures = node.getHead().getSelectedFeatures().size() + this.randomCompletionPathLength;
 		LOGGER.debug("Required features : {}", requiredNumberOfFeatures);
 
-		GraphSearchInput<DatabaseNode, String> problem = new GraphSearchInput<>(new GraphGenerator<DatabaseNode, String>() {
+		GraphSearchInput<DatabaseNode, String> problem = new GraphSearchInput<>(new IGraphGenerator<DatabaseNode, String>() {
 			@Override
-			public SingleRootGenerator<DatabaseNode> getRootGenerator() {
-				return node::getPoint;
+			public ISingleRootGenerator<DatabaseNode> getRootGenerator() {
+				return node::getHead;
 			}
 
 			@Override
-			public SuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
+			public ISuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
 				return DatabaseNodeEvaluator.this.generator.getSuccessorGenerator();
 			}
+		}, new INodeGoalTester<DatabaseNode, String>() {
 
 			@Override
-			public NodeGoalTester<DatabaseNode> getGoalTester() {
-				return node -> {
-					if (node.getSelectedFeatures().size() > requiredNumberOfFeatures) {
-						throw new IllegalStateException(String.format("Too many features! Required: %s , Actual: %s", requiredNumberOfFeatures, node.getSelectedFeatures().size()));
-					} else if (node.getSelectedFeatures().size() < requiredNumberOfFeatures) {
-						return false;
-					} else {
-						// Check whether node contains intermediate features
-						for (AbstractFeature feature : node.getSelectedFeatures()) {
-							if (feature instanceof BackwardFeature && DBUtils.isIntermediate(((BackwardFeature) feature).getPath(), DatabaseNodeEvaluator.this.db)) {
-								return false;
-							}
+			public boolean isGoal(final DatabaseNode node) {
+				if (node.getSelectedFeatures().size() > requiredNumberOfFeatures) {
+					throw new IllegalStateException(String.format("Too many features! Required: %s , Actual: %s", requiredNumberOfFeatures, node.getSelectedFeatures().size()));
+				} else if (node.getSelectedFeatures().size() < requiredNumberOfFeatures) {
+					return false;
+				} else {
+					// Check whether node contains intermediate features
+					for (AbstractFeature feature : node.getSelectedFeatures()) {
+						if (feature instanceof BackwardFeature && DBUtils.isIntermediate(((BackwardFeature) feature).getPath(), DatabaseNodeEvaluator.this.db)) {
+							return false;
 						}
-						return true;
 					}
-				};
+					return true;
+				}
 			}
 		});
 

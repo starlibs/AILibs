@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.api4.java.datastructure.graph.ILabeledPath;
+
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 
@@ -89,9 +91,6 @@ public class LabeledGraph<T, L> extends Graph<T> {
 
 	public void addEdge(final T from, final T to, final L label) {
 		super.addEdge(from, to);
-		if (label == null) {
-			throw new IllegalArgumentException("No null-labels allowed!");
-		}
 		this.labels.put(new Edge<>(from, to), label);
 	}
 
@@ -103,6 +102,22 @@ public class LabeledGraph<T, L> extends Graph<T> {
 			for (T t2 : g.getSuccessors(t1)) {
 				this.addEdge(t1, t2, g.getEdgeLabel(t1, t2));
 			}
+		}
+	}
+
+	public void addPath(final ILabeledPath<T, L> path) {
+		List<T> nodes = path.getNodes();
+		List<L> pathLabels = path.getArcs();
+		int n = nodes.size();
+		T last = null;
+		for (int i = 0; i < n; i++) {
+			T current = nodes.get(i);
+			this.addItem(current);
+			if (last != null) {
+				L label = pathLabels.get(i - 1);
+				this.addEdge(last, current, label);
+			}
+			last = current;
 		}
 	}
 

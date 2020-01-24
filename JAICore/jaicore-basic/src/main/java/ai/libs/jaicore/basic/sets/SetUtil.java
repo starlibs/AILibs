@@ -1,5 +1,7 @@
 package ai.libs.jaicore.basic.sets;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -18,8 +21,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
+import org.api4.java.common.attributedobjects.GetPropertyFailedException;
+import org.api4.java.common.attributedobjects.IGetter;
 
-import ai.libs.jaicore.basic.IGetter;
 import ai.libs.jaicore.basic.MathExt;
 
 /**
@@ -39,7 +43,18 @@ public class SetUtil {
 	public static <T> Collection<T> union(final Collection<T>... set) {
 		Collection<T> union = new HashSet<>();
 		for (int i = 0; i < set.length; i++) {
+			Objects.requireNonNull(set[i]);
 			union.addAll(set[i]);
+		}
+		return union;
+	}
+
+	public static <T> List<T> union(final List<T>... lists) {
+		List<T> union = new ArrayList<>();
+		for (int i = 0; i < lists.length; i++) {
+			if (lists[i] != null) {
+				union.addAll(lists[i]);
+			}
 		}
 		return union;
 	}
@@ -394,6 +409,27 @@ public class SetUtil {
 
 		for (S item : a) {
 			if (b == null || !b.contains(item)) {
+				out.add(item);
+			}
+		}
+
+		return out;
+	}
+
+	/**
+	 * Computes the set of elements which are disjoint, i.e., elements from the set (A \cup B) \ (A \cap B)
+	 *
+	 * @param a
+	 *            The set A.
+	 * @param b
+	 *            The set B.
+	 * @return The difference A \ B.
+	 */
+	public static <S, T extends S, U extends S> Collection<S> getDisjointSet(final Collection<T> a, final Collection<U> b) {
+		List<S> out = new ArrayList<>(difference(a, b));
+
+		for (S item : difference(b, a)) {
+			if (!out.contains(item)) {
 				out.add(item);
 			}
 		}
@@ -963,15 +999,15 @@ public class SetUtil {
 		return list;
 	}
 
-	public static <T, U> Map<U, Collection<T>> groupCollectionByAttribute(final Collection<T> collection, final IGetter<T, U> getter) {
+	public static <T, U> Map<U, Collection<T>> groupCollectionByAttribute(final Collection<T> collection, final IGetter<T, U> getter) throws InterruptedException, GetPropertyFailedException {
 		Map<U, Collection<T>> groupedCollection = new HashMap<>();
-		collection.forEach(i -> {
+		for (T i : collection) {
 			U val = getter.getPropertyOf(i);
 			if (!groupedCollection.containsKey(val)) {
 				groupedCollection.put(val, new ArrayList<>());
 			}
 			groupedCollection.get(val).add(i);
-		});
+		}
 		return groupedCollection;
 	}
 
@@ -1032,5 +1068,10 @@ public class SetUtil {
 			return false;
 		}
 		return true;
+	}
+
+	public static Type getGenericClass(final Collection<?> c) {
+		ParameterizedType stringListType = (ParameterizedType) c.getClass().getGenericSuperclass();
+		return stringListType.getActualTypeArguments()[0];
 	}
 }

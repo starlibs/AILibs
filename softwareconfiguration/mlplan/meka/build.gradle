@@ -1,0 +1,8 @@
+dependencies {
+	compile project(':JAICore:jaicore-ml-meka')
+	compile project(':mlplan-weka')
+	
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-ml', configuration: 'testArtifacts')
+}

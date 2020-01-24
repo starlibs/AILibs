@@ -22,7 +22,7 @@ import ai.libs.jaicore.logic.fol.util.LogicUtil;
  * @author Felix Mohr
  */
 @SuppressWarnings("serial")
-public class Literal implements Serializable {
+public class Literal implements Serializable, Comparable<Literal> {
 
 	private static Logger logger = LoggerFactory.getLogger(Literal.class);
 	private String property;
@@ -289,5 +289,10 @@ public class Literal implements Serializable {
 
 	public final boolean isGround() {
 		return !this.hasVariableParams();
+	}
+
+	@Override
+	public int compareTo(final Literal l) {
+		return this.property.compareTo(l.property);
 	}
 }

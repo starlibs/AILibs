@@ -18,10 +18,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.logic.fol.structure.CNFFormula;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;

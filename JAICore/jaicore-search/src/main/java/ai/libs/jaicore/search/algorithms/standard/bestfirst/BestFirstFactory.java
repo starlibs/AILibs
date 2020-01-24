@@ -1,19 +1,19 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst;
 
+import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import ai.libs.jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
-public class BestFirstFactory<P extends GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, V>, N, A, V>
-implements IOptimalPathInORGraphSearchFactory<P, N, A, V> {
+public class BestFirstFactory<P extends GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, V>, N, A, V, BestFirst<P, N, A, V>>
+implements IOptimalPathInORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, V>, N, A, V, BestFirst<P, N, A, V>> {
 
 	private int timeoutForFInMS;
-	private INodeEvaluator<N, V> timeoutEvaluator;
+	private IPathEvaluator<N, A, V> timeoutEvaluator;
 	private Logger logger = LoggerFactory.getLogger(BestFirstFactory.class);
 
 	public BestFirstFactory() {
@@ -32,13 +32,13 @@ implements IOptimalPathInORGraphSearchFactory<P, N, A, V> {
 		if (this.getInput().getGraphGenerator() == null) {
 			throw new IllegalStateException("Cannot produce BestFirst searches before the graph generator is set in the problem.");
 		}
-		if (this.getInput().getNodeEvaluator() == null) {
+		if (this.getInput().getPathEvaluator() == null) {
 			throw new IllegalStateException("Cannot produce BestFirst searches before the node evaluator is set.");
 		}
 		return this.getAlgorithm(this.getInput());
 	}
 
-	public void setTimeoutForFComputation(final int timeoutInMS, final INodeEvaluator<N, V> timeoutEvaluator) {
+	public void setTimeoutForFComputation(final int timeoutInMS, final IPathEvaluator<N, A, V> timeoutEvaluator) {
 		this.timeoutForFInMS = timeoutInMS;
 		this.timeoutEvaluator = timeoutEvaluator;
 	}
@@ -47,7 +47,7 @@ implements IOptimalPathInORGraphSearchFactory<P, N, A, V> {
 		return this.timeoutForFInMS;
 	}
 
-	public INodeEvaluator<N, V> getTimeoutEvaluator() {
+	public IPathEvaluator<N, A, V> getTimeoutEvaluator() {
 		return this.timeoutEvaluator;
 	}
 
@@ -61,7 +61,7 @@ implements IOptimalPathInORGraphSearchFactory<P, N, A, V> {
 
 	@Override
 	public BestFirst<P, N, A, V> getAlgorithm(final P problem) {
-		if (problem.getNodeEvaluator() == null) {
+		if (problem.getPathEvaluator() == null) {
 			throw new IllegalArgumentException("Cannot create BestFirst algorithm for node evaluator NULL");
 		}
 		BestFirst<P, N, A, V> search = new BestFirst<>(problem);

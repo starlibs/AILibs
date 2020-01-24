@@ -1,11 +1,12 @@
 package ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+
 import ai.libs.jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedGraphSearchBasedPlan;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
@@ -20,7 +21,7 @@ AForwardDecompositionReducer<CostSensitiveHTNPlanningProblem<IHTNPlanningProblem
 		this(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<>());
 	}
 
-	public BestFirstForwardDecompositionReducer(final INodeEvaluator<TFDNode, V> nodeEvaluator) {
+	public BestFirstForwardDecompositionReducer(final IPathEvaluator<TFDNode, String, V> nodeEvaluator) {
 		this();
 		this.transformer.setNodeEvaluator(nodeEvaluator);
 	}
@@ -36,7 +37,7 @@ AForwardDecompositionReducer<CostSensitiveHTNPlanningProblem<IHTNPlanningProblem
 		if (this.transformer.getNodeEvaluator() == null) {
 			throw new IllegalStateException("No node evaluator has been set in the transformer!");
 		}
-		return new GraphSearchWithSubpathEvaluationsInput<>(searchInput.getGraphGenerator(), this.transformer.getNodeEvaluator());
+		return new GraphSearchWithSubpathEvaluationsInput<>(searchInput, this.transformer.getNodeEvaluator());
 	}
 
 	@Override

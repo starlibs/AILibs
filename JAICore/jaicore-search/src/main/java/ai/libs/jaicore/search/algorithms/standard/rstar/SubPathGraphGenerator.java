@@ -1,37 +1,28 @@
 package ai.libs.jaicore.search.algorithms.standard.rstar;
 
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.GoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.RootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.IRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
-public class SubPathGraphGenerator<N, A> implements GraphGenerator<N, A> {
+public class SubPathGraphGenerator<N, A> implements IGraphGenerator<N, A> {
 
-	private final GraphGenerator<N, A> gg;
+	private final IGraphGenerator<N, A> gg;
 	private final N from;
-	private final N to;
 
-	public SubPathGraphGenerator(final GraphGenerator<N, A> gg, final N from, final N to) {
+	public SubPathGraphGenerator(final IGraphGenerator<N, A> gg, final N from) {
 		super();
 		this.gg = gg;
 		this.from = from;
-		this.to = to;
 	}
 
 	@Override
-	public RootGenerator<N> getRootGenerator() {
-		return (SingleRootGenerator<N>)(() -> this.from);
+	public IRootGenerator<N> getRootGenerator() {
+		return (ISingleRootGenerator<N>)(() -> this.from);
 	}
 
 	@Override
-	public SuccessorGenerator<N, A> getSuccessorGenerator() {
+	public ISuccessorGenerator<N, A> getSuccessorGenerator() {
 		return this.gg.getSuccessorGenerator();
-	}
-
-	@Override
-	public GoalTester<N> getGoalTester() {
-		return (NodeGoalTester<N>)(n -> n.equals(this.to));
 	}
 }

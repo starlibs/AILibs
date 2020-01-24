@@ -12,7 +12,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
  * 
  * @author fmohr
  *
- * @param <N>
+ * @param <BalancedTreeNode>
  *            The node type class.
  */
 public class SearchRolloutHistogramPluginModel extends ASimpleMVCPluginModel<SearchRolloutHistogramPluginView, SearchRolloutHistogramPluginController> {

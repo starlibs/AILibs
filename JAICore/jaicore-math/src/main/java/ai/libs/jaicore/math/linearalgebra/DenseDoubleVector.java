@@ -2,6 +2,8 @@ package ai.libs.jaicore.math.linearalgebra;
 
 import java.util.Arrays;
 
+import org.api4.java.common.math.IVector;
+
 import ai.libs.jaicore.math.random.RandomGenerator;
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector.Norm;
@@ -9,7 +11,7 @@ import no.uib.cipr.matrix.Vector.Norm;
 /**
  * Dense vector implementation wrapping the MTJ implementation of a dense vector.
  *
- * @author Alexander Hetzer
+ * @author Alexander Tornede
  */
 public class DenseDoubleVector extends AbstractVector {
 
@@ -85,8 +87,11 @@ public class DenseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public void addVector(final Vector vector) {
-		this.internalVector = this.internalVector.add(vector.toDenseVector().internalVector);
+	public void addVector(final IVector vector) {
+		if (!(vector instanceof AbstractVector)) {
+			throw new UnsupportedOperationException("Not implemented for non-AbstractVector vectors.");
+		}
+		this.internalVector = this.internalVector.add(((AbstractVector) vector).toDenseVector().internalVector);
 	}
 
 	@Override
@@ -95,12 +100,12 @@ public class DenseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public void subtractVector(final Vector vector) {
-		this.internalVector = this.internalVector.add(-1, vector.toDenseVector().internalVector);
+	public void subtractVector(final IVector vector) {
+		this.internalVector = this.internalVector.add(-1, ((AbstractVector) vector).toDenseVector().internalVector);
 	}
 
 	@Override
-	public void multiplyByVectorPairwise(final Vector secondVector) {
+	public void multiplyByVectorPairwise(final IVector secondVector) {
 		for (int i = 0; i < this.internalVector.size(); i++) {
 			this.internalVector.set(i, this.internalVector.get(i) * secondVector.getValue(i));
 		}
@@ -112,7 +117,7 @@ public class DenseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public void divideByVectorPairwise(final Vector secondVector) {
+	public void divideByVectorPairwise(final IVector secondVector) {
 		for (int i = 0; i < this.internalVector.size(); i++) {
 			this.internalVector.set(i, this.internalVector.get(i) / secondVector.getValue(i));
 		}
@@ -124,8 +129,8 @@ public class DenseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public double dotProduct(final Vector vector) {
-		return this.internalVector.dot(vector.toDenseVector().internalVector);
+	public double dotProduct(final IVector vector) {
+		return this.internalVector.dot(((AbstractVector) vector).toDenseVector().internalVector);
 	}
 
 	@Override
@@ -168,7 +173,7 @@ public class DenseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public Vector duplicate() {
+	public IVector duplicate() {
 		return new DenseDoubleVector(this.asArray());
 	}
 
@@ -196,7 +201,7 @@ public class DenseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public Vector kroneckerProduct(final double[] vectorAsArray) {
+	public IVector kroneckerProduct(final double[] vectorAsArray) {
 		return new DenseDoubleVector(this.kroneckerProductInternal(vectorAsArray));
 	}
 }

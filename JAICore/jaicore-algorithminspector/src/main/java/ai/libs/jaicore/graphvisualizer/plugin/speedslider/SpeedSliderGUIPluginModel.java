@@ -1,24 +1,26 @@
 package ai.libs.jaicore.graphvisualizer.plugin.speedslider;
 
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginModel;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
-public class SpeedSliderGUIPluginModel implements IGUIPluginModel {
-
-	private SpeedSliderGUIPluginView view;
+public class SpeedSliderGUIPluginModel extends ASimpleMVCPluginModel<SpeedSliderGUIPluginView, SpeedSliderGUIPluginController> {
 
 	private int currentSpeedPercentage;
 
-	public SpeedSliderGUIPluginModel(SpeedSliderGUIPluginView view) {
-		this.view = view;
-		currentSpeedPercentage = 85;
+	public SpeedSliderGUIPluginModel() {
+		this.currentSpeedPercentage = 85;
 	}
 
 	public int getCurrentSpeedPercentage() {
-		return currentSpeedPercentage;
+		return this.currentSpeedPercentage;
 	}
 
-	public void setCurrentSpeedPercentage(int currentSpeedPercentage) {
+	public void setCurrentSpeedPercentage(final int currentSpeedPercentage) {
 		this.currentSpeedPercentage = currentSpeedPercentage;
-		view.update();
+		this.getView().update();
+	}
+
+	@Override
+	public void clear() {
+		/* nothing to do */
 	}
 }

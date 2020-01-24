@@ -1,0 +1,24 @@
+plugins {
+	id 'eclipse-wtp'
+}
+
+sourceSets {
+	main {
+		java {
+			srcDirs 'src/proto/java'
+		}
+	}
+}
+
+dependencies {
+    compile project(':JAICore:jaicore-ml-weka')
+    compile project(':hasco-core')
+    compile project(':mlplan-core')
+    compile project(':mlplan-weka')
+    
+    compile("$grpcAPI")
+    compile("$grpcCore")
+    compile("$grpcStub")
+    compile("$grpcPB")
+    compile("$protoBuf")
+}

@@ -1,15 +1,14 @@
 package autofe.algorithm.hasco.evaluation;
 
-import autofe.algorithm.hasco.filter.meta.FilterPipeline;
-
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.IObjectEvaluator;
-import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.db.sql.SQLAdapter;
+import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 
 public abstract class AbstractHASCOFEObjectEvaluator extends AbstractHASCOFEEvaluator
-		implements IObjectEvaluator<FilterPipeline, Double> {
+implements IObjectEvaluator<FilterPipeline, Double> {
 
 	private Logger logger = LoggerFactory.getLogger(AbstractHASCOFEObjectEvaluator.class);
 
@@ -42,7 +41,7 @@ public abstract class AbstractHASCOFEObjectEvaluator extends AbstractHASCOFEEval
 	}
 
 	protected void storeResult(final FilterPipeline pipe, final Double score, final long timeToCompute) {
-		logger.debug("Currently, the result for the given {} with pipe {} (time to compute: {}) is not stored.", pipe, score, timeToCompute);
+		this.logger.debug("Currently, the result for the given {} with pipe {} (time to compute: {}) is not stored.", pipe, score, timeToCompute);
 	}
 
 }

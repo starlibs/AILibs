@@ -1,13 +1,11 @@
 package ai.libs.jaicore.experiments;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyStartedException;
@@ -15,6 +13,7 @@ import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedExcep
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentUpdateFailedException;
 import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
+import ai.libs.jaicore.logging.LoggerUtil;
 
 /**
  * This class is used to run experiments.
@@ -33,6 +32,10 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	private final int availableMemoryInMB;
 
 	public ExperimentRunner(final IExperimentSetConfig config, final IExperimentSetEvaluator conductor, final IExperimentDatabaseHandle databaseHandle) throws ExperimentDBInteractionFailedException {
+
+		if (databaseHandle == null) {
+			throw new IllegalArgumentException("Cannot create ExperimentRunner without database handle!");
+		}
 
 		/* check data base configuration */
 		this.config = config;
@@ -61,22 +64,42 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		this.logger.info("Starting to run up to {} experiments.", maxNumberOfExperiments);
 
 		int numberOfConductedExperiments = 0;
-		while (!Thread.interrupted() && (maxNumberOfExperiments <= 0 || numberOfConductedExperiments < maxNumberOfExperiments)) {
+		while ((maxNumberOfExperiments <= 0 || numberOfConductedExperiments < maxNumberOfExperiments)) {
 			List<ExperimentDBEntry> openRandomExperiments = this.handle.getRandomOpenExperiments(1);
 			if (openRandomExperiments.isEmpty()) {
 				this.logger.info("No more open experiments found.");
 				break;
 			}
+
+			/* if we WOULD conduct more experiments but are interrupted, throw an exception */
+			if (Thread.interrupted()) {
+				this.logger.info("Experimenter Thread is interrupted, throwing InterruptedException.");
+				throw new InterruptedException();
+			}
+
+			/* get experiment, create experiment thread, run the thread, and wait for its termination
+			 * the dedicated thread is created in order to avoid that interrupts on it cause the main thread
+			 * to be interrupted. */
 			ExperimentDBEntry exp = openRandomExperiments.get(0);
 			this.checkExperimentValidity(exp.getExperiment());
-			this.logger.info("Conduct experiment with key values: {}", exp.getExperiment().getValuesOfKeyFields());
-			try {
-				this.conductExperiment(exp);
-				numberOfConductedExperiments++;
-			} catch (ExperimentAlreadyStartedException e) {
-				this.logger.warn("Experiment was conducted in the meanwhile.");
-			}
+			this.logger.info("Conduct experiment #{} with key values: {}", numberOfConductedExperiments + 1, exp.getExperiment().getValuesOfKeyFields());
+			Thread expThread = new Thread(() -> {
+				try {
+					this.conductExperiment(exp);
+				} catch (InterruptedException e) {
+					this.logger.info("Experiment interrupted.");
+					Thread.currentThread().interrupt(); // interrupt myself to make Sonar happy
+				}
+				catch (ExperimentDBInteractionFailedException | ExperimentAlreadyStartedException e) {
+					this.logger.error(LoggerUtil.getExceptionInfo(e));
+				}
+			});
+			expThread.start();
+			expThread.join();
+			numberOfConductedExperiments++;
+			this.logger.info("Finished experiment #{} with key values {}", numberOfConductedExperiments, exp.getExperiment().getValuesOfKeyFields());
 		}
+
 		this.logger.info("Successfully finished {} experiments.", numberOfConductedExperiments);
 	}
 
@@ -134,7 +157,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 
 		} catch (ExperimentEvaluationFailedException e) {
 			error = e.getCause();
-			this.logger.error("Experiment failed due to {}. Message: {}. Stack trace: {}", error.getClass().getName(), error.getMessage(), Arrays.asList(error.getStackTrace()).stream().map(s -> "\n\t" + s).collect(Collectors.toList()));
+			this.logger.error("Experiment failed due to {}. Message: {}. Detail info: {}", error.getClass().getName(), error.getMessage(), LoggerUtil.getExceptionInfo(error));
 		}
 		this.handle.finishExperiment(expEntry, error);
 	}

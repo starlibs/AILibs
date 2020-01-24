@@ -5,6 +5,10 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.moeaframework.core.Algorithm;
 import org.moeaframework.core.Initialization;
 import org.moeaframework.core.NondominatedSortingPopulation;
@@ -21,11 +25,7 @@ import org.moeaframework.util.TypedProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.ea.algorithm.AEvolutionaryAlgorithm;
 import ai.libs.jaicore.ea.algorithm.moea.moeaframework.event.MOEAFrameworkAlgorithmResultEvent;
 import ai.libs.jaicore.ea.algorithm.moea.moeaframework.util.MOEAFrameworkUtil;
@@ -43,7 +43,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm<Population> {
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		this.checkAndConductTermination();
 
 		this.logger.info("{} step1: {}", this.getClass().getName(), this.getState());
@@ -68,7 +68,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm<Population> {
 				this.algorithm.step();
 				return super.activate();
 			} catch (Exception e) {
-				throw new AlgorithmException(e, "Could not create the algorithm.");
+				throw new AlgorithmException("Could not create the algorithm.", e);
 			}
 		case ACTIVE:
 			this.logger.info("{} step3", this.getClass().getName());
@@ -80,7 +80,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm<Population> {
 				this.numberOfGenerationsWOChange = 0;
 			}
 
-			return new MOEAFrameworkAlgorithmResultEvent(this.getId(), this.getCurrentResult());
+			return new MOEAFrameworkAlgorithmResultEvent(this, this.getCurrentResult());
 		default:
 		case INACTIVE:
 			throw new AlgorithmException("The current algorithm state is >inactive<.");
@@ -98,7 +98,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm<Population> {
 		try {
 			population = this.getPopulation();
 		} catch (IllegalAccessException | InvocationTargetException e) {
-			throw new AlgorithmException(e, "Could not get the result!");
+			throw new AlgorithmException("Could not get the result!", e);
 		}
 
 		return new MOEAFrameworkAlgorithmResult(this.algorithm.getResult(), population);

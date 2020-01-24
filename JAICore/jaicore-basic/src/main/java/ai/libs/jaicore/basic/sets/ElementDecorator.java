@@ -1,6 +1,8 @@
 package ai.libs.jaicore.basic.sets;
 
-public class ElementDecorator<E> {
+import org.api4.java.common.attributedobjects.IElementDecorator;
+
+public class ElementDecorator<E> implements IElementDecorator<E> {
 	private final E element;
 
 	public ElementDecorator(final E element) {
@@ -8,6 +10,7 @@ public class ElementDecorator<E> {
 		this.element = element;
 	}
 
+	@Override
 	public E getElement() {
 		return this.element;
 	}
@@ -16,7 +19,7 @@ public class ElementDecorator<E> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((this.element == null) ? 0 : this.element.hashCode());
+		result = prime * result + ((this.getElement() == null) ? 0 : this.getElement().hashCode());
 		return result;
 	}
 
@@ -31,12 +34,12 @@ public class ElementDecorator<E> {
 		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
-		ElementDecorator other = (ElementDecorator) obj;
+		IElementDecorator<?> other = (IElementDecorator<?>) obj;
 		if (this.element == null) {
-			if (other.element != null) {
+			if (other.getElement() != null) {
 				return false;
 			}
-		} else if (!this.element.equals(other.element)) {
+		} else if (!this.element.equals(other.getElement())) {
 			return false;
 		}
 		return true;

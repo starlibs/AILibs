@@ -55,8 +55,13 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester">
+  <logger name="testers">
    <level value="trace" />
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
   </logger>
   
   <logger name="ai.libs.jaicore.graphvisualizer">
@@ -64,24 +69,32 @@
   </logger>
   
   <logger name="ai.libs.jaicore.ml">
-    <level value="debug" />
+    <level value="warn" />
+  </logger>
+  
+  <logger name="ai.libs.jaicore.ml.core.filter.sampling.inmemory.GeneralSamplingTester">
+  	<level value="debug" />
   </logger>
   
   <logger name="ai.libs.jaicore.interrupt">
-    <level value="debug" />
+    <level value="warn" />
   </logger>
   
   <logger name="ai.libs.jaicore.timing">
-    <level value="debug" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm">
-    <level value="debug" />
+    <level value="warn" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
     <appender-ref ref="errFileAppender" />
     <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="testedalgorithm.assigner">
+    <level value="warn" />
   </logger>
 </log4j:configuration>

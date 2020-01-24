@@ -15,6 +15,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.algorithm.IAlgorithmConfig;
+import org.api4.java.algorithm.Timeout;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
@@ -30,23 +41,12 @@ import ai.libs.hasco.optimizingfactory.OptimizingFactory;
 import ai.libs.hasco.optimizingfactory.OptimizingFactoryProblem;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.hasco.serialization.UnresolvableRequiredInterfaceException;
-import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.basic.IObjectEvaluator;
-import ai.libs.jaicore.basic.TimeOut;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
-import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEObjectEvaluator;
@@ -108,7 +108,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 	}
 
 	@Override
-	public AlgorithmEvent next() {
+	public IAlgorithmEvent next() {
 		try {
 			return this.nextWithException();
 		} catch (Exception e) {
@@ -117,7 +117,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public IAlgorithmEvent nextWithException() throws AlgorithmException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		switch (this.state) {
 		case CREATED:
 			return this.setupSearch();
@@ -128,7 +128,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		}
 	}
 
-	private AlgorithmEvent setupSearch() throws AlgorithmException, InterruptedException {
+	private IAlgorithmEvent setupSearch() throws AlgorithmException, InterruptedException {
 
 		/* check whether data has been set */
 		if (this.data == null) {
@@ -141,14 +141,13 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		}
 
 		/* Subsample dataset to reduce computational effort. */
-		logger.info("Subsampling with ratio {} and {} min instances. Num original instances and attributes: {} / {}...",
-				this.config.subsamplingRatio(), this.config.minInstances(), this.data.getInstances().numInstances(),
+		logger.info("Subsampling with ratio {} and {} min instances. Num original instances and attributes: {} / {}...", this.config.subsamplingRatio(), this.config.minInstances(), this.data.getInstances().numInstances(),
 				this.data.getInstances().numAttributes());
 		DataSet dataForFE;
 		try {
 			dataForFE = DataSetUtils.subsample(this.data, this.config.subsamplingRatio(), this.config.minInstances(), new Random(this.config.randomSeed()));
 		} catch (SplitFailedException e1) {
-			throw new AlgorithmException(e1, "Could not create sample.");
+			throw new AlgorithmException("Could not create sample.", e1);
 		}
 		logger.info("Finished subsampling.");
 
@@ -168,20 +167,17 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		try {
 			problem = new RefinementConfiguredSoftwareConfigurationProblem<>(this.componentFile, "FilterPipeline", wrappedBenchmark);
 		} catch (UnresolvableRequiredInterfaceException | IOException e) {
-			throw new AlgorithmException(e, "Couldn't create the problem.");
+			throw new AlgorithmException("Couldn't create the problem.", e);
 		}
 
 		/* configure and start optimizing factory */
-		OptimizingFactoryProblem<RefinementConfiguredSoftwareConfigurationProblem<Double>, FilterPipeline, Double> optimizingFactoryProblem =
-				new OptimizingFactoryProblem<>(this.factory, problem);
+		OptimizingFactoryProblem<RefinementConfiguredSoftwareConfigurationProblem<Double>, FilterPipeline, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(this.factory, problem);
 		OnePhaseHASCOFactory hascoFactory = new OnePhaseHASCOFactory(this.config);
 		hascoFactory.withAlgorithmConfig(this.config);
 		hascoFactory.setProblemInput(problem);
 
-		hascoFactory.setSearchProblemTransformer(
-				new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(nodeEvaluator,
-						null, this.config.randomSeed(), this.config.numberOfRandomCompletions(),
-						this.config.timeoutForCandidateEvaluation(), this.config.timeoutForNodeEvaluation()));
+		hascoFactory.setSearchProblemTransformer(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(nodeEvaluator, null, this.config.randomSeed(), this.config.numberOfRandomCompletions(),
+				this.config.timeoutForCandidateEvaluation(), this.config.timeoutForNodeEvaluation()));
 
 		this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, hascoFactory);
 		this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
@@ -195,15 +191,14 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		return new AlgorithmInitializedEvent(this.getId());
 	}
 
-	private AlgorithmEvent search() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	private IAlgorithmEvent search() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		/* train the classifier returned by the optimizing factory */
 		long startOptimizationTime = System.currentTimeMillis();
 		this.selectedPipeline = this.optimizingFactory.call();
 		this.internalValidationErrorOfSelectedClassifier = this.optimizingFactory.getPerformanceOfObject();
 		long startBuildTime = System.currentTimeMillis();
 		long endBuildTime = System.currentTimeMillis();
-		logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms",
-				endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
+		logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms", endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
 		this.state = EAlgorithmState.INACTIVE;
 		return new AlgorithmFinishedEvent(this.getId());
 	}
@@ -236,25 +231,25 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 	}
 
 	@Override
-	public void setTimeout(final TimeOut timeout) {
+	public void setTimeout(final Timeout timeout) {
 		this.config.setProperty(HASCOFeatureEngineeringConfig.K_TIMEOUT, String.valueOf((int) (timeout.milliseconds())));
 	}
 
 	@Override
-	public TimeOut getTimeout() {
-		return new TimeOut(this.config.timeout(), TimeUnit.MILLISECONDS);
+	public Timeout getTimeout() {
+		return new Timeout(this.config.timeout(), TimeUnit.MILLISECONDS);
 	}
 
 	@Override
-	public Iterator<AlgorithmEvent> iterator() {
-		return new Iterator<AlgorithmEvent>() {
+	public Iterator<IAlgorithmEvent> iterator() {
+		return new Iterator<IAlgorithmEvent>() {
 			@Override
 			public boolean hasNext() {
 				return HASCOFeatureEngineering.this.hasNext();
 			}
 
 			@Override
-			public AlgorithmEvent next() {
+			public IAlgorithmEvent next() {
 				try {
 					return HASCOFeatureEngineering.this.nextWithException();
 				} catch (Exception e) {
@@ -310,7 +305,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		throw new UnsupportedOperationException();
 	}
 
-	public GraphGenerator<TFDNode, String> getGraphGenerator() {
+	public IGraphGenerator<TFDNode, String> getGraphGenerator() {
 		if (this.state == EAlgorithmState.CREATED) {
 			this.init();
 		}
@@ -319,7 +314,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 	}
 
 	public AlgorithmInitializedEvent init() {
-		AlgorithmEvent e = null;
+		IAlgorithmEvent e = null;
 		while (this.hasNext()) {
 			e = this.next();
 			if (e instanceof AlgorithmInitializedEvent) {
@@ -392,7 +387,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		this.config.setProperty(HASCOFeatureEngineeringConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, String.valueOf(timeoutInS * 1000));
 	}
 
-	protected INodeEvaluator<TFDNode, Double> getSemanticNodeEvaluator(final Instances data) {
+	protected IPathEvaluator<TFDNode, String, Double> getSemanticNodeEvaluator(final Instances data) {
 		return new WekaPipelineValidityCheckingNodeEvaluator(this.components, data);
 	}
 
@@ -415,7 +410,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 
 	@Override
 	public void setTimeout(final long timeout, final TimeUnit timeUnit) {
-		this.setTimeout(new TimeOut(timeout, timeUnit));
+		this.setTimeout(new Timeout(timeout, timeUnit));
 	}
 
 	@Override

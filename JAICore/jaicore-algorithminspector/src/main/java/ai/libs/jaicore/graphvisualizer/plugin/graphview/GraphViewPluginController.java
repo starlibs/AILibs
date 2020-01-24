@@ -3,7 +3,11 @@ package ai.libs.jaicore.graphvisualizer.plugin.graphview;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
-import ai.libs.jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
+import org.api4.java.common.control.ILoggingCustomizable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeRemovedEvent;
@@ -16,74 +20,83 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfo;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
-public class GraphViewPluginController implements IGUIPluginController {
+public class GraphViewPluginController implements IGUIPluginController, ILoggingCustomizable {
 
 	private GraphViewPluginModel model;
+	private Logger logger = LoggerFactory.getLogger(GraphViewPluginController.class);
 
-	public GraphViewPluginController(GraphViewPluginModel model) {
+	public GraphViewPluginController(final GraphViewPluginModel model) {
 		this.model = model;
 	}
 
 	@Override
-	public void handleSerializableAlgorithmEvent(PropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
+	public void handleSerializableAlgorithmEvent(final IPropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
 		try {
-			if (correspondsToGraphInitializedEvent(algorithmEvent)) {
-				handleGraphInitializedEvent(algorithmEvent);
-			} else if (correspondsToNodeAddedEvent(algorithmEvent)) {
-				handleNodeAddedEvent(algorithmEvent);
-			} else if (correspondsToNodeRemovedEvent(algorithmEvent)) {
-				handleNodeRemovedEvent(algorithmEvent);
-			} else if (correspondsToNodeTypSwitchEvent(algorithmEvent)) {
-				handleNodeTypeSwitchEvent(algorithmEvent);
+			if (this.correspondsToGraphInitializedEvent(algorithmEvent)) {
+				this.handleGraphInitializedEvent(algorithmEvent);
+			} else if (this.correspondsToNodeAddedEvent(algorithmEvent)) {
+				this.handleNodeAddedEvent(algorithmEvent);
+			} else if (this.correspondsToNodeRemovedEvent(algorithmEvent)) {
+				this.handleNodeRemovedEvent(algorithmEvent);
+			} else if (this.correspondsToNodeTypSwitchEvent(algorithmEvent)) {
+				this.handleNodeTypeSwitchEvent(algorithmEvent);
 			}
 		} catch (ViewGraphManipulationException exception) {
 			throw new HandleAlgorithmEventException("Encountered a problem while handling graph event " + algorithmEvent + " .", exception);
 		}
 	}
 
-	private boolean correspondsToNodeTypSwitchEvent(PropertyProcessedAlgorithmEvent algorithmEvent) {
+	private boolean correspondsToNodeTypSwitchEvent(final IPropertyProcessedAlgorithmEvent algorithmEvent) {
 		return algorithmEvent.getEventName().equalsIgnoreCase(NodeTypeSwitchEvent.class.getSimpleName());
 	}
 
-	private boolean correspondsToNodeRemovedEvent(PropertyProcessedAlgorithmEvent algorithmEvent) {
+	private boolean correspondsToNodeRemovedEvent(final IPropertyProcessedAlgorithmEvent algorithmEvent) {
 		return algorithmEvent.getEventName().equalsIgnoreCase(NodeRemovedEvent.class.getSimpleName());
 	}
 
-	private boolean correspondsToNodeAddedEvent(PropertyProcessedAlgorithmEvent algorithmEvent) {
+	private boolean correspondsToNodeAddedEvent(final IPropertyProcessedAlgorithmEvent algorithmEvent) {
 		return algorithmEvent.getEventName().equalsIgnoreCase(NodeAddedEvent.class.getSimpleName());
 	}
 
-	private boolean correspondsToGraphInitializedEvent(PropertyProcessedAlgorithmEvent algorithmEvent) {
+	private boolean correspondsToGraphInitializedEvent(final IPropertyProcessedAlgorithmEvent algorithmEvent) {
 		return algorithmEvent.getEventName().equalsIgnoreCase(GraphInitializedEvent.class.getSimpleName());
 	}
 
-	private void handleGraphInitializedEvent(PropertyProcessedAlgorithmEvent graphInitializedEvent) throws ViewGraphManipulationException {
+	private void handleGraphInitializedEvent(final IPropertyProcessedAlgorithmEvent graphInitializedEvent) throws ViewGraphManipulationException {
 		NodeInfo nodeInfo = graphInitializedEvent.getProperty(NodeInfoAlgorithmEventPropertyComputer.NODE_INFO_PROPERTY_NAME, NodeInfo.class);
-		model.addNode(nodeInfo.getMainNodeId(), Collections.emptyList(), "root");
+		this.model.addNode(nodeInfo.getMainNodeId(), Collections.emptyList(), "root");
 	}
 
-	private void handleNodeAddedEvent(PropertyProcessedAlgorithmEvent nodeReachedEvent) throws ViewGraphManipulationException {
+	private void handleNodeAddedEvent(final IPropertyProcessedAlgorithmEvent nodeReachedEvent) throws ViewGraphManipulationException {
 		NodeInfo nodeInfo = nodeReachedEvent.getProperty(NodeInfoAlgorithmEventPropertyComputer.NODE_INFO_PROPERTY_NAME, NodeInfo.class);
-		model.addNode(nodeInfo.getMainNodeId(), nodeInfo.getParentNodeIds().stream().map(s -> (Object) s).collect(Collectors.toList()), nodeInfo.getNodeType());
+		this.model.addNode(nodeInfo.getMainNodeId(), nodeInfo.getParentNodeIds().stream().map(s -> (Object) s).collect(Collectors.toList()), nodeInfo.getNodeType());
 	}
 
-	private void handleNodeTypeSwitchEvent(PropertyProcessedAlgorithmEvent nodeTypeSwitchEvent) throws ViewGraphManipulationException {
+	private void handleNodeTypeSwitchEvent(final IPropertyProcessedAlgorithmEvent nodeTypeSwitchEvent) throws ViewGraphManipulationException {
 		NodeInfo nodeInfo = nodeTypeSwitchEvent.getProperty(NodeInfoAlgorithmEventPropertyComputer.NODE_INFO_PROPERTY_NAME, NodeInfo.class);
-		model.switchNodeType(nodeInfo.getMainNodeId(), nodeInfo.getNodeType());
+		this.model.switchNodeType(nodeInfo.getMainNodeId(), nodeInfo.getNodeType());
 	}
 
-	private void handleNodeRemovedEvent(PropertyProcessedAlgorithmEvent nodeRemovedEvent) throws ViewGraphManipulationException {
+	private void handleNodeRemovedEvent(final IPropertyProcessedAlgorithmEvent nodeRemovedEvent) throws ViewGraphManipulationException {
 		NodeInfo nodeInfo = nodeRemovedEvent.getProperty(NodeInfoAlgorithmEventPropertyComputer.NODE_INFO_PROPERTY_NAME, NodeInfo.class);
-		model.removeNode(nodeInfo.getMainNodeId());
+		this.model.removeNode(nodeInfo.getMainNodeId());
 	}
 
 	@Override
-	public void handleGUIEvent(GUIEvent guiEvent) {
-		if (guiEvent instanceof ResetEvent) {
-			model.reset();
-		} else if (guiEvent instanceof GoToTimeStepEvent) {
-			model.reset();
+	public void handleGUIEvent(final GUIEvent guiEvent) {
+		if (guiEvent instanceof ResetEvent || guiEvent instanceof GoToTimeStepEvent) {
+			this.model.reset();
 		}
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 
 }

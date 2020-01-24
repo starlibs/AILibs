@@ -1,37 +1,33 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.logging.ToJSONStringUtil;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class StandardBestFirstFactory<N, A, V extends Comparable<V>> extends BestFirstFactory<GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V> implements ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(StandardBestFirstFactory.class);
-	private INodeEvaluator<N, V> preferredNodeEvaluator;
 
-	public void setNodeEvaluator(final INodeEvaluator<N, V> nodeEvaluator) {
-		this.setProblemInput(new GraphSearchWithSubpathEvaluationsInput<>(this.getInput() != null ? this.getInput().getGraphGenerator() : null, nodeEvaluator));
+	public void setNodeEvaluator(final IPathEvaluator<N, A, V> nodeEvaluator) {
+		GraphSearchWithSubpathEvaluationsInput<N, A, V> problem = this.getInput();
+		IGraphGenerator<N, A> gg = problem != null ? problem.getGraphGenerator() : null;
+		IPathGoalTester<N, A> gt = problem != null ? problem.getGoalTester() : null;
+		this.setProblemInput(new GraphSearchWithSubpathEvaluationsInput<>(gg, gt, nodeEvaluator));
 	}
 
-	public void setGraphGenerator(final GraphGenerator<N, A> graphGenerator) {
-		this.setProblemInput(new GraphSearchWithSubpathEvaluationsInput<>(graphGenerator, this.getInput() != null ? this.getInput().getNodeEvaluator() : null));
-	}
-
-	public INodeEvaluator<N, V> getPreferredNodeEvaluator() {
-		return this.preferredNodeEvaluator;
-	}
-
-	public void setPreferredNodeEvaluator(final INodeEvaluator<N, V> preferredNodeEvaluator) {
-		this.preferredNodeEvaluator = preferredNodeEvaluator;
+	public void setGraphGenerator(final IGraphGenerator<N, A> graphGenerator) {
+		GraphSearchWithSubpathEvaluationsInput<N, A, V> problem = this.getInput();
+		Objects.requireNonNull(problem);
+		IPathGoalTester<N, A> gt = problem.getGoalTester();
+		IPathEvaluator<N, A, V> evaluator = problem.getPathEvaluator();
+		this.setProblemInput(new GraphSearchWithSubpathEvaluationsInput<>(graphGenerator, gt, evaluator));
 	}
 
 	@Override
@@ -39,16 +35,13 @@ public class StandardBestFirstFactory<N, A, V extends Comparable<V>> extends Bes
 		if (this.getInput().getGraphGenerator() == null) {
 			throw new IllegalStateException("Cannot produce BestFirst searches before the graph generator is set in the problem.");
 		}
-		if (this.getInput().getNodeEvaluator() == null) {
+		if (this.getInput().getPathEvaluator() == null) {
 			throw new IllegalStateException("Cannot produce BestFirst searches before the node evaluator is set.");
 		}
 
 		/* determine search problem */
 		GraphSearchWithSubpathEvaluationsInput<N, A, V> problem = this.getInput();
-		if (this.preferredNodeEvaluator != null) {
-			problem = new GraphSearchWithSubpathEvaluationsInput<N, A, V>(problem.getGraphGenerator(), new AlternativeNodeEvaluator<>(this.preferredNodeEvaluator, problem.getNodeEvaluator()));
-		}
-		logger.debug("Created algorithm input with\n\tgraph generator: {}\n\tnode evaluator: {}", problem.getGraphGenerator(), problem.getNodeEvaluator());
+		this.logger.debug("Created algorithm input with\n\tgraph generator: {}\n\tnode evaluator: {}", problem.getGraphGenerator(), problem.getPathEvaluator());
 		BestFirst<GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V> search = new BestFirst<>(problem);
 		search.setTimeoutForComputationOfF(this.getTimeoutForFInMS(), this.getTimeoutEvaluator());
 		if (this.getLoggerName() != null && this.getLoggerName().length() > 0) {
@@ -58,20 +51,12 @@ public class StandardBestFirstFactory<N, A, V extends Comparable<V>> extends Bes
 	}
 
 	@Override
-	public String toString() {
-		Map<String, Object> fields = new HashMap<>();
-		fields.put("preferredNodeEvaluator", this.preferredNodeEvaluator);
-		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
-	}
-	
-
-	@Override
 	public String getLoggerName() {
-		return logger.getName();
+		return this.logger.getName();
 	}
 
 	@Override
-	public void setLoggerName(String name) {
-		logger = LoggerFactory.getLogger(name);
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }

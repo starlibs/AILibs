@@ -3,18 +3,22 @@ package ai.libs.jaicore.search.testproblems.enhancedttsp;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Random;
+
 import org.junit.Test;
 
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSP;
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPGenerator;
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPGenerator;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPState;
+import ai.libs.jaicore.problems.enhancedttsp.locationgenerator.RandomLocationGenerator;
 
 public class EnhancedTTSPGraphSearchTester {
 
 	@Test
 	public void testUnmodifiabilityOfLists() {
-		EnhancedTTSP tsp = new EnhancedTTSPGenerator().generate(5, 5);
-		EnhancedTTSPNode n = tsp.getInitalState();
+		int seed = 0;
+		EnhancedTTSP tsp = new EnhancedTTSPGenerator(new RandomLocationGenerator(new Random(seed))).generate(5, 5, seed);
+		EnhancedTTSPState n = tsp.getInitalState();
 		boolean exceptionSeen = false;
 		try {
 			int hashCode1 = n.hashCode();

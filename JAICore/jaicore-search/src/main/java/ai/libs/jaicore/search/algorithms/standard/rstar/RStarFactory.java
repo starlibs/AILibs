@@ -1,14 +1,15 @@
 package ai.libs.jaicore.search.algorithms.standard.rstar;
 
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+
 import ai.libs.jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic;
 
-public class RStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, EvaluatedSearchGraphPath<T, A, Double>, T, A, Double> {
+public class RStarFactory<I extends GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, T, A> extends StandardORGraphSearchFactory<I, EvaluatedSearchGraphPath<T, A, Double>, T, A, Double, RStar<I, T, A>> {
 
 	private int timeoutForFInMS;
-	private INodeEvaluator<T, Double> timeoutEvaluator;
+	private IPathEvaluator<T, A, Double> timeoutEvaluator;
 	private String loggerName;
 	private double w = 1.0;
 	private int k = 3;
@@ -50,20 +51,20 @@ public class RStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearch
 	}
 
 	@Override
-	public RStar<T, A> getAlgorithm() {
+	public RStar<I, T, A> getAlgorithm() {
 		return this.getAlgorithm(this.getInput());
 	}
 
 	@Override
-	public RStar<T, A> getAlgorithm(final GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A> input) {
-		RStar<T, A> search = new RStar<>(input, this.w, this.k, this.delta);
+	public RStar<I, T, A> getAlgorithm(final I input) {
+		RStar<I, T, A> search = new RStar<>(input, this.w, this.k, this.delta);
 		if (this.loggerName != null && this.loggerName.length() > 0) {
 			search.setLoggerName(this.loggerName);
 		}
 		return search;
 	}
 
-	public void setTimeoutForFComputation(final int timeoutInMS, final INodeEvaluator<T, Double> timeoutEvaluator) {
+	public void setTimeoutForFComputation(final int timeoutInMS, final IPathEvaluator<T, A, Double> timeoutEvaluator) {
 		this.timeoutForFInMS = timeoutInMS;
 		this.timeoutEvaluator = timeoutEvaluator;
 	}
@@ -72,7 +73,7 @@ public class RStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearch
 		return this.timeoutForFInMS;
 	}
 
-	public INodeEvaluator<T, Double> getTimeoutEvaluator() {
+	public IPathEvaluator<T, A, Double> getTimeoutEvaluator() {
 		return this.timeoutEvaluator;
 	}
 

@@ -5,10 +5,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
 
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.algorithm.ISolutionCandidateIterator;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.events.result.ISolutionCandidateFoundEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 
 /**
  * A template for algorithms that iterate over solution candidates. By default,
@@ -25,23 +29,23 @@ public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> 
 		super(input);
 	}
 
-	protected ASolutionCandidateIterator(final IAlgorithmConfig config,final I input) {
+	protected ASolutionCandidateIterator(final IOwnerBasedAlgorithmConfig config,final I input) {
 		super(config, input);
 	}
 
 	@Override
 	public O nextSolutionCandidate() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
-		SolutionCandidateFoundEvent<O> event = this.nextSolutionCandidateEvent();
+		ISolutionCandidateFoundEvent<O> event = this.nextSolutionCandidateEvent();
 		return event.getSolutionCandidate();
 	}
 
 	@Override
-	public SolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	public ISolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		while (this.hasNext()) {
-			AlgorithmEvent event = this.nextWithException();
-			if (event instanceof SolutionCandidateFoundEvent) {
+			IAlgorithmEvent event = this.nextWithException();
+			if (event instanceof ISolutionCandidateFoundEvent) {
 				@SuppressWarnings("unchecked")
-				SolutionCandidateFoundEvent<O> castedEvent = (SolutionCandidateFoundEvent<O>) event;
+				ISolutionCandidateFoundEvent<O> castedEvent = (ISolutionCandidateFoundEvent<O>) event;
 				return castedEvent;
 			}
 		}

@@ -1,5 +1,7 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
+
 /**
  * Use this exception if the node evaluation was rejected on purpose.
  * 
@@ -7,7 +9,7 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions;
  *
  */
 @SuppressWarnings("serial")
-public class ControlledNodeEvaluationException extends NodeEvaluationException {
+public class ControlledNodeEvaluationException extends PathEvaluationException {
 	
 	public ControlledNodeEvaluationException(String message) {
 		super(message);

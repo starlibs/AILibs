@@ -1,9 +1,16 @@
 dependencies {
 	compile project(":JAICore:jaicore-basic")
 	compile project(":JAICore:jaicore-algorithminspector")
+	compile project(":JAICore:jaicore-math")
+	compile project(":JAICore:jaicore-experiments")
+	
+	compile ("$api4AIgraphsearch")
+	
+	compile ("$api4AIgraphsearch")
 	
 	compile group: 'org.knowm.xchart', name: 'xchart', version: '3.5.2' // currently only used for the ParetoFronVisualization
-  testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	
+  	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }
 
 uploadArchives {

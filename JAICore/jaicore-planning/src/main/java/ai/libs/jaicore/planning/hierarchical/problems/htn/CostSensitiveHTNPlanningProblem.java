@@ -3,7 +3,8 @@ package ai.libs.jaicore.planning.hierarchical.problems.htn;
 import java.util.HashMap;
 import java.util.Map;
 
-import ai.libs.jaicore.basic.IObjectEvaluator;
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.logic.fol.structure.CNFFormula;
 import ai.libs.jaicore.logic.fol.structure.Monom;

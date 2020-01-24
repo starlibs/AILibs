@@ -10,7 +10,7 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninfor
 
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<N, A, Double> encodeProblem(final GraphSearchInput<N, A> problem) {
-		return new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), n -> 0.0);
+		return new GraphSearchWithSubpathEvaluationsInput<>(problem, n -> 0.0);
 	}
 
 	@Override

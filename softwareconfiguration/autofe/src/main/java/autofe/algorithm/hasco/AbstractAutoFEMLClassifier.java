@@ -1,9 +1,9 @@
 package autofe.algorithm.hasco;
 
+import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import ai.libs.jaicore.basic.SQLAdapter;
-import ai.libs.jaicore.ml.core.exception.PredictionException;
+import ai.libs.jaicore.db.sql.SQLAdapter;
 import autofe.util.DataSet;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -20,7 +20,7 @@ public abstract class AbstractAutoFEMLClassifier implements IFEMLClassifier {
 	protected String evalTable;
 
 	public SQLAdapter getAdapter() {
-		return adapter;
+		return this.adapter;
 	}
 
 	public void setAdapter(final SQLAdapter adapter) {
@@ -28,7 +28,7 @@ public abstract class AbstractAutoFEMLClassifier implements IFEMLClassifier {
 	}
 
 	public int getExperimentID() {
-		return experimentID;
+		return this.experimentID;
 	}
 
 	public void setExperimentID(final int experimentID) {
@@ -36,7 +36,7 @@ public abstract class AbstractAutoFEMLClassifier implements IFEMLClassifier {
 	}
 
 	public String getEvalTable() {
-		return evalTable;
+		return this.evalTable;
 	}
 
 	public void setEvalTable(final String evalTable) {
@@ -48,26 +48,25 @@ public abstract class AbstractAutoFEMLClassifier implements IFEMLClassifier {
 	}
 
 	public AutoFEWekaPipeline getSelectedPipeline() {
-		return selectedPipeline;
+		return this.selectedPipeline;
 	}
 
 	@Override
 	public void buildClassifier(final Instances data) {
-		throw new UnsupportedOperationException(
-				"This operation is not supported as the features have already been engineered.");
+		throw new UnsupportedOperationException("This operation is not supported as the features have already been engineered.");
 	}
 
 	@Override
 	public double classifyInstance(final Instance instance) throws PredictionException {
-		if (selectedPipeline == null) {
+		if (this.selectedPipeline == null) {
 			throw new IllegalArgumentException(CLF_UNINITIALIZED_MESSAGE);
 		}
-		return selectedPipeline.classifyInstance(instance);
+		return this.selectedPipeline.classifyInstance(instance);
 	}
 
 	@Override
 	public double[] distributionForInstance(final Instance arg0) throws PredictionException {
-		if (selectedPipeline == null) {
+		if (this.selectedPipeline == null) {
 			throw new PredictionException(CLF_UNINITIALIZED_MESSAGE);
 		}
 		return new double[] {};
@@ -75,43 +74,43 @@ public abstract class AbstractAutoFEMLClassifier implements IFEMLClassifier {
 
 	@Override
 	public Capabilities getCapabilities() {
-		if (selectedPipeline == null) {
+		if (this.selectedPipeline == null) {
 			return null;
 		} else {
-			return selectedPipeline.getCapabilities();
+			return this.selectedPipeline.getCapabilities();
 		}
 	}
 
 	@Override
 	public double classifyInstance(final INDArray instance, final Instances refInstances) throws PredictionException {
-		if (selectedPipeline == null) {
+		if (this.selectedPipeline == null) {
 			throw new IllegalArgumentException(CLF_UNINITIALIZED_MESSAGE);
 		}
-		return selectedPipeline.classifyInstance(instance, refInstances);
+		return this.selectedPipeline.classifyInstance(instance, refInstances);
 	}
 
 	@Override
 	public double[] distributionForInstance(final INDArray instance, final Instances refInstances) throws PredictionException {
-		if (selectedPipeline == null) {
+		if (this.selectedPipeline == null) {
 			throw new IllegalArgumentException(CLF_UNINITIALIZED_MESSAGE);
 		}
-		return selectedPipeline.distributionForInstance(instance, refInstances);
+		return this.selectedPipeline.distributionForInstance(instance, refInstances);
 	}
 
 	@Override
 	public Instances transformData(final DataSet data) throws InterruptedException {
-		if (selectedPipeline == null) {
+		if (this.selectedPipeline == null) {
 			throw new IllegalArgumentException(CLF_UNINITIALIZED_MESSAGE);
 		}
-		return selectedPipeline.transformData(data);
+		return this.selectedPipeline.transformData(data);
 	}
 
 	@Override
 	public Instance transformData(final INDArray instance, final Instances refInstances) throws InterruptedException {
-		if (selectedPipeline == null) {
+		if (this.selectedPipeline == null) {
 			throw new IllegalArgumentException(CLF_UNINITIALIZED_MESSAGE);
 		}
-		return selectedPipeline.transformData(instance, refInstances);
+		return this.selectedPipeline.transformData(instance, refInstances);
 	}
 
 	public void setSQLAdapter(final SQLAdapter adapter, final int experimentID, final String evalTable) {

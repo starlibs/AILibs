@@ -1,46 +1,45 @@
 package ai.libs.jaicore.graphvisualizer.plugin.timeslider;
 
-import ai.libs.jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
+
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import ai.libs.jaicore.graphvisualizer.events.gui.GUIEvent;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginController;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
 import ai.libs.jaicore.graphvisualizer.plugin.controlbar.PauseEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.controlbar.PlayEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 
-public class TimeSliderGUIPluginController implements IGUIPluginController {
-
-	private TimeSliderGUIPluginModel model;
+public class TimeSliderGUIPluginController extends ASimpleMVCPluginController<TimeSliderGUIPluginModel, TimeSliderGUIPluginView> {
 
 	private int amountOfEventsToIgnore;
 
-	public TimeSliderGUIPluginController(TimeSliderGUIPluginModel model) {
-		this.model = model;
+	public TimeSliderGUIPluginController(final TimeSliderGUIPluginModel model, final TimeSliderGUIPluginView view) {
+		super (model, view);
 		this.amountOfEventsToIgnore = 0;
 	}
 
 	@Override
-	public void handleSerializableAlgorithmEvent(PropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
-		if (amountOfEventsToIgnore <= 0) {
-			model.increaseCurrentTimeStep();
-			model.increaseMaximumTimeStep();
-		} else {
-			amountOfEventsToIgnore--;
+	public void handleGUIEvent(final GUIEvent guiEvent) {
+		if (guiEvent instanceof ResetEvent) {
+			this.getModel().reset();
+		} else if (guiEvent instanceof PauseEvent) {
+			this.getModel().pause();
+		} else if (guiEvent instanceof PlayEvent) {
+			this.getModel().unpause();
+		} else if (guiEvent instanceof GoToTimeStepEvent) {
+			int newTimeStep = ((GoToTimeStepEvent) guiEvent).getNewTimeStep();
+			this.amountOfEventsToIgnore = newTimeStep;
+			this.getModel().setCurrentTimeStep(newTimeStep);
 		}
 	}
 
 	@Override
-	public void handleGUIEvent(GUIEvent guiEvent) {
-		if (guiEvent instanceof ResetEvent) {
-			model.reset();
-		} else if (guiEvent instanceof PauseEvent) {
-			model.pause();
-		} else if (guiEvent instanceof PlayEvent) {
-			model.unpause();
-		} else if (guiEvent instanceof GoToTimeStepEvent) {
-			int newTimeStep = ((GoToTimeStepEvent) guiEvent).getNewTimeStep();
-			amountOfEventsToIgnore = newTimeStep;
-			model.setCurrentTimeStep(newTimeStep);
+	protected void handleAlgorithmEventInternally(final IPropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
+		if (this.amountOfEventsToIgnore <= 0) {
+			this.getModel().increaseCurrentTimeStep();
+			this.getModel().increaseMaximumTimeStep();
+		} else {
+			this.amountOfEventsToIgnore--;
 		}
 	}
 

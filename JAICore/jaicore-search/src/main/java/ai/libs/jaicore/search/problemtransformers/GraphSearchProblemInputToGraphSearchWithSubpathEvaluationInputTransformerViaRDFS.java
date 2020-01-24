@@ -3,22 +3,23 @@ package ai.libs.jaicore.search.problemtransformers;
 import java.util.Random;
 import java.util.function.Predicate;
 
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<N, A, V extends Comparable<V>> extends GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<N, A, V> {
 
-	private final INodeEvaluator<N, V> preferredNodeEvaluator;
+	private final IPathEvaluator<N, A,V> preferredNodeEvaluator;
 	private final Predicate<N> prioritizedNodesInRandomCompletion;
-	private final int seed;
+	private final long seed;
 	private final int numSamples;
 	private final int timeoutForSingleCompletionEvaluationInMS;
 	private final int timeoutForNodeEvaluationInMS;
 
-	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS(final INodeEvaluator<N, V> preferredNodeEvaluator, final Predicate<N> preferredNodeEvaluatorForRandomCompletion, final int seed,
+	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS(final IPathEvaluator<N, A,V> preferredNodeEvaluator, final Predicate<N> preferredNodeEvaluatorForRandomCompletion, final long seed,
 			final int numSamples, final int timeoutForSingleCompletionEvaluationInMS, final int timeoutForNodeEvaluationInMS) {
 		super();
 		if (numSamples <= 0) {
@@ -32,7 +33,7 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTrans
 		this.timeoutForNodeEvaluationInMS = timeoutForNodeEvaluationInMS;
 	}
 
-	public INodeEvaluator<N, V> getPreferredNodeEvaluator() {
+	public IPathEvaluator<N, A,V> getPreferredNodeEvaluator() {
 		return this.preferredNodeEvaluator;
 	}
 
@@ -40,7 +41,7 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTrans
 		return this.prioritizedNodesInRandomCompletion;
 	}
 
-	public int getSeed() {
+	public long getSeed() {
 		return this.seed;
 	}
 
@@ -49,7 +50,7 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTrans
 	}
 
 	@Override
-	public GraphSearchWithSubpathEvaluationsInput<N, A, V> encodeProblem(final GraphSearchWithPathEvaluationsInput<N, A, V> problem) {
+	public GraphSearchWithSubpathEvaluationsInput<N, A, V> encodeProblem(final IPathSearchWithPathEvaluationsInput<N, A, V> problem) {
 		RandomCompletionBasedNodeEvaluator<N, A, V> rdfsNodeEvaluator = new RandomCompletionBasedNodeEvaluator<>(new Random(this.seed), this.numSamples, this.numSamples * 2, problem.getPathEvaluator(), this.timeoutForSingleCompletionEvaluationInMS,
 				this.timeoutForNodeEvaluationInMS, this.prioritizedNodesInRandomCompletion);
 		if (this.preferredNodeEvaluator != null) {

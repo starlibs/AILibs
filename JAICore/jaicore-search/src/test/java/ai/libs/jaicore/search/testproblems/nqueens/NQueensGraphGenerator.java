@@ -3,15 +3,15 @@ package ai.libs.jaicore.search.testproblems.nqueens;
 import java.util.ArrayList;
 import java.util.List;
 
-import ai.libs.jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
-@SuppressWarnings("serial")
-public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNode, String> {
+import ai.libs.jaicore.search.exampleproblems.nqueens.QueenNode;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
+
+public class NQueensGraphGenerator implements IGraphGenerator<QueenNode, String> {
 
 	private final int dimension;
 	private int countSinceLastSleep = 0;
@@ -21,14 +21,14 @@ public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNo
 	}
 
 	@Override
-	public SingleRootGenerator<QueenNode> getRootGenerator() {
+	public ISingleRootGenerator<QueenNode> getRootGenerator() {
 		return () -> new QueenNode(this.dimension);
 	}
 
 	@Override
-	public SuccessorGenerator<QueenNode, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<QueenNode, String> getSuccessorGenerator() {
 		return n -> {
-			List<NodeExpansionDescription<QueenNode, String>> l = new ArrayList<>();
+			List<INewNodeDescription<QueenNode, String>> l = new ArrayList<>();
 			int currentRow = n.getPositions().size();
 			for (int i = 0; i < this.dimension; i++, this.countSinceLastSleep ++) {
 				if (this.countSinceLastSleep % 100 == 0) {
@@ -38,15 +38,10 @@ public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNo
 					throw new InterruptedException("Successor generation has been interrupted.");
 				}
 				if (!n.attack(currentRow, i)) {
-					l.add(new NodeExpansionDescription<>(new QueenNode(n, i), "" + i, NodeType.OR));
+					l.add(new NodeExpansionDescription<>(new QueenNode(n, i), "" + i));
 				}
 			}
 			return l;
 		};
-	}
-
-	@Override
-	public NodeGoalTester<QueenNode> getGoalTester() {
-		return n -> n.getNumberOfQueens() == this.dimension;
 	}
 }

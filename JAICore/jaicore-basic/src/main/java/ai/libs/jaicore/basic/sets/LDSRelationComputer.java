@@ -9,16 +9,16 @@ import java.util.Queue;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
+import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 
 /**
  * This algorithms allows to compute an ordered Cartesian product. It is ordered
@@ -110,7 +110,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		this.logger.debug("Conducting next algorithm step.");
 		switch (this.getState()) {
 		case CREATED:
@@ -185,7 +185,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 			List<T> tuple = new ArrayList<>(this.currentTuple);
 			assert this.currentTuple.size() == this.numSets : "Tuple " + this.currentTuple + " should contain " + this.numSets + " elements but has " + this.currentTuple.size();
 			this.logger.debug("Computed tuple {}", tuple);
-			return new TupleOfCartesianProductFoundEvent<>(this.getId(), tuple);
+			return new TupleOfCartesianProductFoundEvent<>(this, tuple);
 
 		default:
 			throw new IllegalStateException();
@@ -196,7 +196,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 	@SuppressWarnings("unchecked")
 	public List<T> nextTuple() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		while (this.hasNext()) {
-			AlgorithmEvent e = this.nextWithException();
+			IAlgorithmEvent e = this.nextWithException();
 			if (e instanceof AlgorithmFinishedEvent) {
 				throw new NoSuchElementException();
 			} else if (e instanceof TupleOfCartesianProductFoundEvent) {

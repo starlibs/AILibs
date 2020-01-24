@@ -1,10 +1,11 @@
 package ai.libs.jaicore.search.algorithms.standard.random;
 
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
+
 import ai.libs.jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
-public class RandomSearchFactory<N, A> extends StandardORGraphSearchFactory<GraphSearchInput<N, A>, SearchGraphPath<N, A>,N, A, Double> {
+public class RandomSearchFactory<N, A> extends StandardORGraphSearchFactory<IPathSearchInput<N, A>, SearchGraphPath<N, A>,N, A, Double, RandomSearch<N, A>> {
 
 	private String loggerName;
 	private int seed;
@@ -22,7 +23,7 @@ public class RandomSearchFactory<N, A> extends StandardORGraphSearchFactory<Grap
 	}
 
 	@Override
-	public RandomSearch<N, A> getAlgorithm(final GraphSearchInput<N, A> input) {
+	public RandomSearch<N, A> getAlgorithm(final IPathSearchInput<N, A> input) {
 		return new RandomSearch<>(input, this.seed);
 	}
 

@@ -3,10 +3,10 @@ package ai.libs.jaicore.timing;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.interrupt.InterruptionTimerTask;
@@ -31,7 +31,7 @@ public abstract class TimedComputation {
 		GlobalTimer timer = GlobalTimer.getInstance();
 		long start = System.currentTimeMillis();
 		InterruptionTimerTask task = new InterruptionTimerTask("Timeout for timed computation with thread " + Thread.currentThread() + " at timestamp " + start + ": " + reasonToLogOnTimeout);
-		logger.debug("Scheduling timer for interruption in {}ms, i.e. timestamp {}. List of active tasks is now: {}", timeoutInMs, start + timeoutInMs, timer.getActiveTasks());
+		logger.debug("Scheduling timer for interruption in {}ms with reason {}, i.e. timestamp {}.", timeoutInMs, start + timeoutInMs, reasonToLogOnTimeout);
 		timer.schedule(task, timeoutInMs);
 		Interrupter interrupter = Interrupter.get();
 		T output = null;
@@ -54,9 +54,9 @@ public abstract class TimedComputation {
 		int runtime = (int) (System.currentTimeMillis() - start);
 		int delay = runtime - (int) timeoutInMs;
 		if (caughtException != null) {
-			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed exception: {}", runtime, delay, caughtException.getClass().getName());
+			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed exception: {}. Thread interrupt flag is {}.", runtime, delay, caughtException.getClass().getName(), Thread.currentThread().isInterrupted());
 		} else {
-			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed regular output return value: {}", runtime, delay, output);
+			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed regular output return value: {}. Thread interrupt flag is {}.", runtime, delay, output, Thread.currentThread().isInterrupted());
 		}
 
 		/* now make sure that

@@ -1,0 +1,9 @@
+@relation 'numeric-only-with-class-index-flag: -C 0 -I 2'
+
+@attribute class numeric
+@attribute att0 numeric
+@attribute att1 numeric
+
+@data
+0,1,2
+0.4,0.5,0.5

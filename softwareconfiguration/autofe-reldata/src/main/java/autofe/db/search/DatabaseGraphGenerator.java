@@ -1,15 +1,14 @@
 package autofe.db.search;
 
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 import autofe.db.model.database.Database;
 
-public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, String> {
+public class DatabaseGraphGenerator implements IGraphGenerator<DatabaseNode, String> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseGraphGenerator.class);
 	private Database database;
@@ -20,7 +19,7 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 	}
 
 	@Override
-	public SingleRootGenerator<DatabaseNode> getRootGenerator() {
+	public ISingleRootGenerator<DatabaseNode> getRootGenerator() {
 		return () -> {
 			try {
 				return new DatabaseNode();
@@ -32,20 +31,8 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 	}
 
 	@Override
-	public SuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
+	public ISuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
 		return new DatabaseSuccessorGenerator(this.database);
-	}
-
-	@Override
-	public NodeGoalTester<DatabaseNode> getGoalTester() {
-		return node -> {
-			try {
-				return node.isFinished();
-			} catch (Exception e) {
-				LOGGER.error("Could not determine whether the node is finished.", e);
-				return false;
-			}
-		};
 	}
 
 	public Database getDatabase() {

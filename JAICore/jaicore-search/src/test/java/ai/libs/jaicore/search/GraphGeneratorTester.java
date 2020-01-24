@@ -7,18 +7,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.graph.LabeledGraph;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public abstract class GraphGeneratorTester<N, A> {
 
-	public abstract List<Pair<GraphGenerator<N, A>,Integer>> getGraphGenerators() throws Exception;
+	public abstract List<Pair<IGraphGenerator<N, A>,Integer>> getGraphGenerators() throws Exception;
 
 	private class Node {
 		N point;
@@ -32,10 +32,10 @@ public abstract class GraphGeneratorTester<N, A> {
 
 	@Test
 	public void testIdempotency() throws Exception {
-		for (Pair<GraphGenerator<N, A>, Integer> pair : this.getGraphGenerators()) {
-			GraphGenerator<N, A> g = pair.getX();
+		for (Pair<IGraphGenerator<N, A>, Integer> pair : this.getGraphGenerators()) {
+			IGraphGenerator<N, A> g = pair.getX();
 			int maxN = pair.getY();
-			SuccessorGenerator<N, A> s = g.getSuccessorGenerator();
+			ISuccessorGenerator<N, A> s = g.getSuccessorGenerator();
 
 			int n1 = 0;
 			int n2 = 0;
@@ -45,7 +45,7 @@ public abstract class GraphGeneratorTester<N, A> {
 			int maxDepth;
 
 			/* run bfs from left */
-			N root1 = ((SingleRootGenerator<N>) g.getRootGenerator()).getRoot();
+			N root1 = ((ISingleRootGenerator<N>) g.getRootGenerator()).getRoot();
 			open.clear();
 			open.add(new Node(root1, 0));
 			g1.addItem(root1);
@@ -56,19 +56,19 @@ public abstract class GraphGeneratorTester<N, A> {
 				if (expandedNode.depth > maxDepth) {
 					break;
 				}
-				List<NodeExpansionDescription<N, A>> successors = s.generateSuccessors(expandedNode.point);
+				List<INewNodeDescription<N, A>> successors = s.generateSuccessors(expandedNode.point);
 				if (maxDepth == Integer.MAX_VALUE && n1 >= maxN) {
 					maxDepth = expandedNode.depth;
 				}
 				successors.forEach(nd -> {
 					open.add(new Node(nd.getTo(), expandedNode.depth + 1));
 					g1.addItem(nd.getTo());
-					g1.addEdge(expandedNode.point, nd.getTo(), nd.getAction());
+					g1.addEdge(expandedNode.point, nd.getTo(), nd.getArcLabel());
 				});
 			}
 
 			/* run bfs from right */
-			N root2 = ((SingleRootGenerator<N>) g.getRootGenerator()).getRoot();
+			N root2 = ((ISingleRootGenerator<N>) g.getRootGenerator()).getRoot();
 			open.clear();
 			open.add(new Node(root2, 0));
 			g2.addItem(root2);
@@ -79,7 +79,7 @@ public abstract class GraphGeneratorTester<N, A> {
 				if (expandedNode.depth > maxDepth) {
 					break;
 				}
-				List<NodeExpansionDescription<N, A>> successors = s.generateSuccessors(expandedNode.point);
+				List<INewNodeDescription<N, A>> successors = s.generateSuccessors(expandedNode.point);
 				Collections.reverse(successors);
 				if (maxDepth == Integer.MAX_VALUE && n2 >= maxN) {
 					maxDepth = expandedNode.depth;
@@ -87,7 +87,7 @@ public abstract class GraphGeneratorTester<N, A> {
 				successors.forEach(nd -> {
 					open.add(new Node(nd.getTo(), expandedNode.depth + 1));
 					g2.addItem(nd.getTo());
-					g2.addEdge(expandedNode.point, nd.getTo(), nd.getAction());
+					g2.addEdge(expandedNode.point, nd.getTo(), nd.getArcLabel());
 				});
 			}
 

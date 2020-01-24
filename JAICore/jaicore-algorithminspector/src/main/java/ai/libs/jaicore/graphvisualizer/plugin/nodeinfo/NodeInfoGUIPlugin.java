@@ -1,49 +1,22 @@
 package ai.libs.jaicore.graphvisualizer.plugin.nodeinfo;
 
-import ai.libs.jaicore.graphvisualizer.events.gui.GUIEventSource;
-import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyProcessedAlgorithmEventSource;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPlugin;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginController;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginModel;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginView;
+import java.util.Arrays;
+import java.util.Collection;
 
-public class NodeInfoGUIPlugin implements IGUIPlugin {
+import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPlugin;
 
-	private NodeInfoGUIPluginController controller;
-	private NodeInfoGUIPluginView view;
+public class NodeInfoGUIPlugin extends ASimpleMVCPlugin<NodeInfoGUIPluginModel, NodeInfoGUIPluginView, NodeInfoGUIPluginController> {
 
-	public NodeInfoGUIPlugin(String viewTitle) {
-		view = new NodeInfoGUIPluginView(viewTitle);
-		controller = new NodeInfoGUIPluginController(view.getModel());
+	private final NodeInfoGenerator<?> infoGenerator;
 
-	}
-
-	public NodeInfoGUIPlugin() {
-		this("Node Info View");
+	public NodeInfoGUIPlugin(final NodeInfoGenerator<?> infoGenerator) {
+		super();
+		this.infoGenerator = infoGenerator;
 	}
 
 	@Override
-	public IGUIPluginController getController() {
-		return controller;
-	}
-
-	@Override
-	public IGUIPluginModel getModel() {
-		return view.getModel();
-	}
-
-	@Override
-	public IGUIPluginView getView() {
-		return view;
-	}
-
-	@Override
-	public void setAlgorithmEventSource(PropertyProcessedAlgorithmEventSource graphEventSource) {
-		graphEventSource.registerListener(controller);
-	}
-
-	@Override
-	public void setGUIEventSource(GUIEventSource guiEventSource) {
-		guiEventSource.registerListener(controller);
+	public Collection<AlgorithmEventPropertyComputer> getPropertyComputers() {
+		return Arrays.asList(new NodeDisplayInfoAlgorithmEventPropertyComputer<>(this.infoGenerator));
 	}
 }

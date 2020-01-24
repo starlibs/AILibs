@@ -1,25 +1,26 @@
 package ai.libs.jaicore.search.testproblems.enhancedttsp;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.ILazySuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
+import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSP;
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
+import ai.libs.jaicore.basic.MappingIterator;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPState;
+import ai.libs.jaicore.search.model.NodeExpansionDescription;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 
-public class EnhancedTTSPGraphGenerator implements GraphGenerator<EnhancedTTSPNode, String>, ILoggingCustomizable {
+public class EnhancedTTSPGraphGenerator implements IGraphGenerator<EnhancedTTSPState, String>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(EnhancedTTSPGraphGenerator.class);
 
@@ -31,15 +32,15 @@ public class EnhancedTTSPGraphGenerator implements GraphGenerator<EnhancedTTSPNo
 	}
 
 	@Override
-	public SingleRootGenerator<EnhancedTTSPNode> getRootGenerator() {
+	public ISingleRootGenerator<EnhancedTTSPState> getRootGenerator() {
 		return () -> this.problem.getInitalState();
 	}
 
 	@Override
-	public SuccessorGenerator<EnhancedTTSPNode, String> getSuccessorGenerator() {
-		return new SingleSuccessorGenerator<EnhancedTTSPNode, String>() {
+	public ISuccessorGenerator<EnhancedTTSPState, String> getSuccessorGenerator() {
+		return new ILazySuccessorGenerator<EnhancedTTSPState, String>() {
 
-			private ShortList getPossibleDestinationsThatHaveNotBeenGeneratedYet(final EnhancedTTSPNode n) {
+			private ShortList getPossibleDestinationsThatHaveNotBeenGeneratedYet(final EnhancedTTSPState n) {
 				short curLoc = n.getCurLocation();
 				ShortList possibleDestinationsToGoFromhere = new ShortArrayList();
 				ShortList seenPlaces = n.getCurTour();
@@ -64,12 +65,10 @@ public class EnhancedTTSPGraphGenerator implements GraphGenerator<EnhancedTTSPNo
 			}
 
 			@Override
-			public List<NodeExpansionDescription<EnhancedTTSPNode, String>> generateSuccessors(final EnhancedTTSPNode node) throws InterruptedException {
-				List<NodeExpansionDescription<EnhancedTTSPNode, String>> l = new ArrayList<>();
+			public List<INewNodeDescription<EnhancedTTSPState, String>> generateSuccessors(final EnhancedTTSPState node) throws InterruptedException {
+				List<INewNodeDescription<EnhancedTTSPState, String>> l = new ArrayList<>();
 				if (node.getCurTour().size() >= EnhancedTTSPGraphGenerator.this.problem.getPossibleDestinations().size()) {
-					EnhancedTTSPGraphGenerator.this.logger.warn("Cannot generate successors of a node in which we are in pos " + node.getCurLocation() + " and in which have already visited everything! " + (EnhancedTTSPGraphGenerator.this.getGoalTester().isGoal(node)
-							? "The goal tester detects this as a goal, but the method is invoked nevertheless. Maybe the algorithm that uses this graph generator does not properly check the goal node property. Another possibility is that a goal check DIFFERENT from this one is used"
-									: "The goal tester does not detect this as a goal node!"));
+					EnhancedTTSPGraphGenerator.this.logger.warn("Cannot generate successors of a node in which we are in pos {} and in which have already visited everything!", node.getCurLocation());
 					return l;
 				}
 				ShortList possibleUntriedDestinations = this.getPossibleDestinationsThatHaveNotBeenGeneratedYet(node);
@@ -86,27 +85,15 @@ public class EnhancedTTSPGraphGenerator implements GraphGenerator<EnhancedTTSPNo
 				return l;
 			}
 
-			public NodeExpansionDescription<EnhancedTTSPNode, String> generateSuccessor(final EnhancedTTSPNode n, final short destination) {
-				return new NodeExpansionDescription<>(EnhancedTTSPGraphGenerator.this.problem.computeSuccessorState(n, destination), n.getCurLocation() + " -> " + destination, NodeType.OR);
+			public NodeExpansionDescription<EnhancedTTSPState, String> generateSuccessor(final EnhancedTTSPState n, final short destination) {
+				return new NodeExpansionDescription<>(EnhancedTTSPGraphGenerator.this.problem.computeSuccessorState(n, destination), n.getCurLocation() + " -> " + destination);
 			}
 
 			@Override
-			public NodeExpansionDescription<EnhancedTTSPNode, String> generateSuccessor(final EnhancedTTSPNode node, final int i) {
+			public Iterator<INewNodeDescription<EnhancedTTSPState, String>> getIterativeGenerator(final EnhancedTTSPState node) {
 				ShortList availableDestinations = this.getPossibleDestinationsThatHaveNotBeenGeneratedYet(node);
-				return this.generateSuccessor(node, availableDestinations.getShort(i % availableDestinations.size()));
+				return new MappingIterator<>(availableDestinations.iterator(), s -> this.generateSuccessor(node, s));
 			}
-
-			@Override
-			public boolean allSuccessorsComputed(final EnhancedTTSPNode node) {
-				return this.getPossibleDestinationsThatHaveNotBeenGeneratedYet(node).isEmpty();
-			}
-		};
-	}
-
-	@Override
-	public NodeGoalTester<EnhancedTTSPNode> getGoalTester() {
-		return n -> {
-			return n.getCurTour().size() >= this.problem.getPossibleDestinations().size() && n.getCurLocation() == this.problem.getStartLocation();
 		};
 	}
 

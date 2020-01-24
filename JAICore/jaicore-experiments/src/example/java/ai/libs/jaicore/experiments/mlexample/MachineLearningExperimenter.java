@@ -7,12 +7,12 @@ import java.util.Random;
 
 import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.IDatabaseConfig;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import ai.libs.jaicore.db.IDatabaseConfig;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
 import ai.libs.jaicore.experiments.ExperimentDatabasePreparer;
 import ai.libs.jaicore.experiments.ExperimentRunner;

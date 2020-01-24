@@ -2,47 +2,59 @@ package ai.libs.jaicore.search.model.other;
 
 import java.util.List;
 
-import ai.libs.jaicore.basic.ScoredItem;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
+import org.api4.java.datastructure.graph.ILabeledPath;
 
-public class EvaluatedSearchGraphPath<N, A, V extends Comparable<V>> extends SearchGraphPath<N, A> implements ScoredItem<V> {
+public class EvaluatedSearchGraphPath<N, A, V extends Comparable<V>> extends SearchGraphPath<N, A> implements IEvaluatedPath<N, A, V> {
 	private final V score;
 
-	public EvaluatedSearchGraphPath(List<N> nodes, List<A> edges, V score) {
+	public EvaluatedSearchGraphPath(final ILabeledPath<N, A> path, final V score) {
+		super(path);
+		this.score = score;
+	}
+
+	public EvaluatedSearchGraphPath(final List<N> nodes, final List<A> edges, final V score) {
 		super(nodes, edges);
 		this.score = score;
 	}
 
+	@Override
 	public V getScore() {
-		return score;
+		return this.score;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((score == null) ? 0 : score.hashCode());
+		result = prime * result + ((this.score == null) ? 0 : this.score.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (!super.equals(obj))
+		}
+		if (!super.equals(obj)) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		EvaluatedSearchGraphPath other = (EvaluatedSearchGraphPath) obj;
-		if (score == null) {
-			if (other.score != null)
+		if (this.score == null) {
+			if (other.score != null) {
 				return false;
-		} else if (!score.equals(other.score))
+			}
+		} else if (!this.score.equals(other.score)) {
 			return false;
+		}
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "EvaluatedSearchGraphPath [score=" + score + "]";
+		return "EvaluatedSearchGraphPath [score=" + this.score + "]";
 	}
 }

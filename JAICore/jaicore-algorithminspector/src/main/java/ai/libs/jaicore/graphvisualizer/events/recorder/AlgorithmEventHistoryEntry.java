@@ -1,16 +1,16 @@
 package ai.libs.jaicore.graphvisualizer.events.recorder;
 
-import ai.libs.jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 
 /**
- * {@link AlgorithmEventHistoryEntry}s are used to store {@link PropertyProcessedAlgorithmEvent}s in an {@link AlgorithmEventHistory} combined with additional meta information.
- * 
+ * {@link AlgorithmEventHistoryEntry}s are used to store {@link IPropertyProcessedAlgorithmEvent}s in an {@link AlgorithmEventHistory} combined with additional meta information.
+ *
  * @author atornede
  *
  */
 public class AlgorithmEventHistoryEntry {
 
-	private PropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent;
+	private IPropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent;
 	private long timeEventWasReceived;
 
 	@SuppressWarnings("unused")
@@ -19,63 +19,63 @@ public class AlgorithmEventHistoryEntry {
 	}
 
 	/**
-	 * Creates a new {@link AlgorithmEventHistoryEntry} storing the given {@link PropertyProcessedAlgorithmEvent} and the time at which the event was received.
-	 * 
-	 * @param algorithmEvent The {@link PropertyProcessedAlgorithmEvent} to be stored.
+	 * Creates a new {@link AlgorithmEventHistoryEntry} storing the given {@link IPropertyProcessedAlgorithmEvent} and the time at which the event was received.
+	 *
+	 * @param algorithmEvent The {@link IPropertyProcessedAlgorithmEvent} to be stored.
 	 * @param timeEventWasReceived The time at which the event was received.
 	 */
-	public AlgorithmEventHistoryEntry(PropertyProcessedAlgorithmEvent algorithmEvent, long timeEventWasReceived) {
+	public AlgorithmEventHistoryEntry(final IPropertyProcessedAlgorithmEvent algorithmEvent, final long timeEventWasReceived) {
 		this.propertyProcessedAlgorithmEvent = algorithmEvent;
 		this.timeEventWasReceived = timeEventWasReceived;
 	}
 
 	/**
-	 * Returns the {@link PropertyProcessedAlgorithmEvent} stored as part of this entry.
-	 * 
-	 * @return The {@link PropertyProcessedAlgorithmEvent} stored as part of this entry.
+	 * Returns the {@link IPropertyProcessedAlgorithmEvent} stored as part of this entry.
+	 *
+	 * @return The {@link IPropertyProcessedAlgorithmEvent} stored as part of this entry.
 	 */
-	public PropertyProcessedAlgorithmEvent getAlgorithmEvent() {
-		return propertyProcessedAlgorithmEvent;
+	public IPropertyProcessedAlgorithmEvent getAlgorithmEvent() {
+		return this.propertyProcessedAlgorithmEvent;
 	}
 
 	/**
 	 * Returns the time at which this event was received.
-	 * 
+	 *
 	 * @return The time at which this event was received.
 	 */
 	public long getTimeEventWasReceived() {
-		return timeEventWasReceived;
+		return this.timeEventWasReceived;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((propertyProcessedAlgorithmEvent == null) ? 0 : propertyProcessedAlgorithmEvent.hashCode());
-		result = prime * result + (int) (timeEventWasReceived ^ (timeEventWasReceived >>> 32));
+		result = prime * result + ((this.propertyProcessedAlgorithmEvent == null) ? 0 : this.propertyProcessedAlgorithmEvent.hashCode());
+		result = prime * result + (int) (this.timeEventWasReceived ^ (this.timeEventWasReceived >>> 32));
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
 		AlgorithmEventHistoryEntry other = (AlgorithmEventHistoryEntry) obj;
-		if (propertyProcessedAlgorithmEvent == null) {
+		if (this.propertyProcessedAlgorithmEvent == null) {
 			if (other.propertyProcessedAlgorithmEvent != null) {
 				return false;
 			}
-		} else if (!propertyProcessedAlgorithmEvent.equals(other.propertyProcessedAlgorithmEvent)) {
+		} else if (!this.propertyProcessedAlgorithmEvent.equals(other.propertyProcessedAlgorithmEvent)) {
 			return false;
 		}
-		if (timeEventWasReceived != other.timeEventWasReceived) {
+		if (this.timeEventWasReceived != other.timeEventWasReceived) {
 			return false;
 		}
 		return true;
@@ -83,7 +83,7 @@ public class AlgorithmEventHistoryEntry {
 
 	@Override
 	public String toString() {
-		return "<" + propertyProcessedAlgorithmEvent + ", t=" + timeEventWasReceived + ">";
+		return "<" + this.propertyProcessedAlgorithmEvent + ", t=" + this.timeEventWasReceived + ">";
 	}
 
 }

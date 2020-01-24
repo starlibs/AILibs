@@ -2,21 +2,20 @@ package ai.libs.jaicore.search.algorithms.standard.uncertainty.paretosearch;
 
 import java.util.HashSet;
 
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
 /**
  * Internal representation of nodes to maintain pareto front.
  */
-public class ParetoNode<T, V extends Comparable<V>> {
+public class ParetoNode<T, A, V extends Comparable<V>> {
 
-	private final Node<T, V> node;
+	private final BackPointerPath<T, A, V> node;
 
 	/* Number of creation of this pareto node. */
-	private final HashSet<ParetoNode<T,V>> dominates;
-	private final HashSet<ParetoNode<T,V>> dominatedBy;
+	private final HashSet<ParetoNode<T, A, V>> dominates;
+	private final HashSet<ParetoNode<T, A, V>> dominatedBy;
 
-
-	public ParetoNode(final Node<T, V> node) {
+	public ParetoNode(final BackPointerPath<T, A, V> node) {
 		this.node = node;
 		this.dominates = new HashSet<>();
 		this.dominatedBy = new HashSet<>();
@@ -24,16 +23,16 @@ public class ParetoNode<T, V extends Comparable<V>> {
 
 	@Override
 	public String toString() {
-		String s = "{" + this.node.getPoint() + "] dominated by {";
-		for (ParetoNode<T,V> p : this.dominatedBy) {
-			s += p.node.getPoint() + ",";
+		StringBuilder sb = new StringBuilder("{" + this.node.getHead() + "] dominated by {");
+		for (ParetoNode<T, A, V> p : this.dominatedBy) {
+			sb.append(p.node.getHead() + ",");
 		}
-		s += "} dominates { ";
-		for (ParetoNode<T,V> p : this.dominates) {
-			s += p.node.getPoint() + ",";
+		sb.append("} dominates { ");
+		for (ParetoNode<T, A, V> p : this.dominates) {
+			sb.append(p.node.getHead() + ",");
 		}
-		s += "}";
-		return s;
+		sb.append("}");
+		return sb.toString();
 	}
 
 	@Override

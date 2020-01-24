@@ -2,10 +2,11 @@ package ai.libs.jaicore.basic.sets;
 
 import java.util.List;
 
-import ai.libs.jaicore.basic.algorithm.AAlgorithmFactory;
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
+import org.api4.java.algorithm.IAlgorithm;
 
-public class LDSRelationComputerFactory<T> extends AAlgorithmFactory<RelationComputationProblem<T>, List<List<T>>> {
+import ai.libs.jaicore.basic.algorithm.AAlgorithmFactory;
+
+public class LDSRelationComputerFactory<T> extends AAlgorithmFactory<RelationComputationProblem<T>, List<List<T>>, IAlgorithm<RelationComputationProblem<T>, List<List<T>>>> {
 
 	@Override
 	public IAlgorithm<RelationComputationProblem<T>, List<List<T>>> getAlgorithm() {

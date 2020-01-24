@@ -12,6 +12,13 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import org.api4.java.algorithm.ISolutionCandidateIterator;
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.events.result.ISolutionCandidateFoundEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -19,15 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.ISolutionCandidateIterator;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import ai.libs.jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 
 public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTester {
@@ -83,7 +81,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		for (Entry<I, Collection<O>> originalProblemWithSolutions : problemsWithSolutions.entrySet()) {
 			Object problem = originalProblemWithSolutions.getKey();
 			Object reducedProblem = this.reduction.encodeProblem(problem);
-			originalProblemsForReducedProblems.put(reducedProblem, problem);
+			this.originalProblemsForReducedProblems.put(reducedProblem, problem);
 			this.logger.debug("Converting {} to {}", problem, reducedProblem);
 			this.reducedProblemsWithOriginalSolutions.put(reducedProblem, originalProblemWithSolutions.getValue());
 		}
@@ -98,7 +96,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		}
 		algorithm.registerListener(new Object() {
 			@Subscribe
-			public void receiveSolution(final SolutionCandidateFoundEvent<Object> solutionEvent) {
+			public void receiveSolution(final ISolutionCandidateFoundEvent<Object> solutionEvent) {
 				Object solution = solutionEvent.getSolutionCandidate();
 				Object solutionToOriginalProblem = SolutionCandidateIteratorTester.this.reduction != null ? SolutionCandidateIteratorTester.this.reduction.decodeSolution(solution) : solution;
 				assertTrue ("Returned solution " + solution + " converted to original solution " + solutionToOriginalProblem + " is not a solution in the original problem according to ground truth.", stillMissingSolutions.contains(solutionToOriginalProblem) || foundSolutions.contains(solutionToOriginalProblem));
@@ -125,10 +123,10 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		boolean terminated = false;
 		final Collection<?> stillMissingSolutions = new ArrayList<>(problem.getValue());
 		final Collection<Object> foundSolutions = new ArrayList<>();
-		Iterator<AlgorithmEvent> iterator = algorithm.iterator();
+		Iterator<IAlgorithmEvent> iterator = algorithm.iterator();
 		assertNotNull("The search algorithm does return NULL as an iterator for itself.", iterator);
 		while (iterator.hasNext()) {
-			AlgorithmEvent e = algorithm.nextWithException();
+			IAlgorithmEvent e = algorithm.nextWithException();
 			assertNotNull("The search iterator has returned NULL even though hasNext suggested that more event should come.", e);
 			if (!initialized) {
 				assertTrue(e instanceof AlgorithmInitializedEvent);
@@ -137,8 +135,8 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 				terminated = true;
 			} else {
 				assertTrue(!terminated);
-				if (e instanceof SolutionCandidateFoundEvent) {
-					Object solution = ((SolutionCandidateFoundEvent<Object>)e).getSolutionCandidate();
+				if (e instanceof ISolutionCandidateFoundEvent) {
+					Object solution = ((ISolutionCandidateFoundEvent<Object>)e).getSolutionCandidate();
 					Object solutionToOriginalProblem = solution;
 					if (SolutionCandidateIteratorTester.this.reduction != null) {
 						solutionToOriginalProblem = SolutionCandidateIteratorTester.this.reduction.decodeSolution(solution);
@@ -160,7 +158,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		for (Entry<Object, Collection<?>> problem : this.reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
 			algorithm.setNumCPUs(1);
-			this.logger.info("Calling {} to solve problem {}, which as {} solutions.", algorithm.getId(), originalProblemsForReducedProblems.get(problem.getKey()), problem.getValue().size());
+			this.logger.info("Calling {} to solve problem {}, which as {} solutions.", algorithm.getId(), this.originalProblemsForReducedProblems.get(problem.getKey()), problem.getValue().size());
 			this.solveProblemViaCall(problem, algorithm);
 		}
 	}
@@ -169,7 +167,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
 		for (Entry<Object, Collection<?>> problem : this.reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
-			this.logger.info("Calling {} to solve problem {}, which as {} solutions.", algorithm.getId(), originalProblemsForReducedProblems.get(problem.getKey()), problem.getValue().size());
+			this.logger.info("Calling {} to solve problem {}, which as {} solutions.", algorithm.getId(), this.originalProblemsForReducedProblems.get(problem.getKey()), problem.getValue().size());
 			algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
 			this.solveProblemViaCall(problem, algorithm);
 		}
@@ -180,7 +178,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		for (Entry<Object, Collection<?>> problem : this.reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
 			algorithm.setNumCPUs(1);
-			this.logger.info("Calling {} to solve problem {}, which as {} solutions.", algorithm.getId(), originalProblemsForReducedProblems.get(problem.getKey()), problem.getValue().size());
+			this.logger.info("Calling {} to solve problem {}, which as {} solutions.", algorithm.getId(), this.originalProblemsForReducedProblems.get(problem.getKey()), problem.getValue().size());
 			this.solveProblemViaIterator(problem, algorithm);
 		}
 	}
@@ -190,7 +188,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		for (Entry<Object, Collection<?>> problem : this.reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
 			algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
-			this.logger.info("Calling {} to solve problem {}, which as {} solutions.", algorithm.getId(), originalProblemsForReducedProblems.get(problem.getKey()), problem.getValue().size());
+			this.logger.info("Calling {} to solve problem {}, which as {} solutions.", algorithm.getId(), this.originalProblemsForReducedProblems.get(problem.getKey()), problem.getValue().size());
 			this.solveProblemViaIterator(problem, algorithm);
 		}
 	}
