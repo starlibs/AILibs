@@ -50,7 +50,6 @@ public class GraphMouseListener implements ViewerListener, Runnable {
 	public void run() {
 		while (this.active) {
 			if (Thread.currentThread().isInterrupted()) {
-				System.out.println("GML Run Interrupted");
 				this.active = false;
 				return;
 			}
