@@ -43,7 +43,7 @@ public class GraphMouseListener implements ViewerListener, Runnable {
 
 	@Override
 	public void viewClosed(final String id) {
-		this.active = false;
+		// this.active = false; // This is not good here. This directly closes the listener and thus the pump thread.
 	}
 
 	@Override

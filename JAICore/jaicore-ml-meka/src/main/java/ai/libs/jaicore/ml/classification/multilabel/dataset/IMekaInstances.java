@@ -16,4 +16,7 @@ public interface IMekaInstances extends ILabeledDataset<IMekaInstance> {
 	@Override
 	public IMekaInstances createEmptyCopy() throws DatasetCreationException, InterruptedException;
 
+	@Override
+	public IMekaInstances createCopy() throws DatasetCreationException, InterruptedException;
+
 }

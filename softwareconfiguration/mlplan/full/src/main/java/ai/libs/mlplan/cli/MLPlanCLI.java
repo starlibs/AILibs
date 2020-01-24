@@ -43,7 +43,7 @@ import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
-import ai.libs.mlplan.multilabel.mekamlplan.MLPlanMekaBuilder;
+import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.core.MLUtils;
 import meka.core.Metrics;
@@ -205,7 +205,7 @@ public class MLPlanCLI {
 				builder = new MLPlanSKLearnBuilder().withUnlimitedLengthPipelineSearchSpace();
 				break;
 			case "meka":
-				builder = new MLPlanMekaBuilder();
+				builder = new ML2PlanMekaBuilder();
 				break;
 			default:
 				throw new IllegalArgumentException("Could not identify search space configuration");
@@ -215,7 +215,7 @@ public class MLPlanCLI {
 		}
 
 		if (commandLine.hasOption(multiLabelOption)) {
-			MLPlanMekaBuilder mekaBuilder = (MLPlanMekaBuilder) builder;
+			ML2PlanMekaBuilder mekaBuilder = (ML2PlanMekaBuilder) builder;
 			switch (commandLine.getOptionValue(evaluationMeasureOption)) {
 			case "AUTO_MEKA_GGP_FITNESS":
 				mekaBuilder.withPerformanceMeasure(new AutoMEKAGGPFitnessMeasureLoss());

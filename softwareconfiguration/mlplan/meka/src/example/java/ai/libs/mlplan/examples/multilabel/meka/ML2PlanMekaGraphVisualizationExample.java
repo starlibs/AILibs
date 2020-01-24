@@ -24,18 +24,21 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multilabel.mekamlplan.MLPlanMekaBuilder;
+import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
+import meka.core.MLUtils;
 import weka.core.Instances;
 
-public class MLPlanMekaGraphVisualizationExample {
+public class ML2PlanMekaGraphVisualizationExample {
 	public static void main(final String[] args) throws Exception {
 
 		File datasetFile = new File("../../../../datasets/classification/multi-label/flags.arff");
-		IMekaInstances dataset = new MekaInstances(new Instances(new FileReader(datasetFile)));
+		Instances data = new Instances(new FileReader(datasetFile));
+		MLUtils.prepareData(data);
+		IMekaInstances dataset = new MekaInstances(data);
 		List<ILabeledDataset<?>> split = SplitterUtil.getSimpleTrainTestSplit(dataset, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */
-		MLPlan<IMekaClassifier> mlplan = new MLPlanMekaBuilder().withNumCpus(4).withTimeOut(new Timeout(1, TimeUnit.HOURS)).withDataset(split.get(0)).build();
+		MLPlan<IMekaClassifier> mlplan = new ML2PlanMekaBuilder().withNumCpus(4).withTimeOut(new Timeout(1, TimeUnit.HOURS)).withDataset(split.get(0)).build();
 
 		/* start visualization */
 		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan);
