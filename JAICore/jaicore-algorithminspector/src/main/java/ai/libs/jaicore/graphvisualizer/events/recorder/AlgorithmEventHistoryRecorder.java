@@ -1,5 +1,8 @@
 package ai.libs.jaicore.graphvisualizer.events.recorder;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +32,11 @@ public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
 
 	private AlgorithmEventHistory algorithmEventHistory;
 
-	private List<AlgorithmEventPropertyComputer> eventPropertyComputers;
+	private final List<AlgorithmEventPropertyComputer> eventPropertyComputers = new ArrayList<>();
+
+	public AlgorithmEventHistoryRecorder() {
+		this.algorithmEventHistory = new AlgorithmEventHistory();
+	}
 
 	/**
 	 * Creates a new {@link AlgorithmEventHistoryRecorder} with the given {@link AlgorithmEventPropertyComputer}s.
@@ -37,12 +44,43 @@ public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
 	 * @param eventPropertyComputers A list of {@link AlgorithmEventPropertyComputer}s which can extract information from {@link IAlgorithmEvent}s which in turn is stored in the {@link IPropertyProcessedAlgorithmEvent}s.
 	 */
 	public AlgorithmEventHistoryRecorder(final List<AlgorithmEventPropertyComputer> eventPropertyComputers) {
-		this.algorithmEventHistory = new AlgorithmEventHistory();
-		this.eventPropertyComputers = eventPropertyComputers;
+		this();
+		this.eventPropertyComputers.addAll(eventPropertyComputers);
 	}
 
-	public void addPropertyComputer(final AlgorithmEventPropertyComputer computer) {
-		this.eventPropertyComputers.add(computer);
+	public boolean hasPropertyComputerInstalled(final AlgorithmEventPropertyComputer propertyComputer) {
+		return this.eventPropertyComputers.stream().anyMatch(pc -> pc.getClass().equals(propertyComputer.getClass()));
+	}
+
+	public AlgorithmEventPropertyComputer getInstalledCopyOfPropertyComputer(final AlgorithmEventPropertyComputer propertyComputer) {
+		return this.eventPropertyComputers.stream().filter(pc -> pc.getClass().equals(propertyComputer.getClass())).findAny().get();
+	}
+
+	public void addPropertyComputer(final Collection<AlgorithmEventPropertyComputer> computers) {
+		for (AlgorithmEventPropertyComputer computer : computers) {
+			if (this.hasPropertyComputerInstalled(computer)) {
+				LOGGER.info("Not adding a second instance of property computer {}. One is already installed. Make sure that they are not computing semantically different things.", computer.getClass().getName());
+			}
+			else {
+
+				/* first extend property computer graph if necessary or overwrite the required property computers bythe existing ones */
+				for (AlgorithmEventPropertyComputer requiredComputer : computer.getRequiredPropertyComputers()) {
+					if (this.hasPropertyComputerInstalled(requiredComputer)) {
+						computer.overwriteRequiredPropertyComputer(this.getInstalledCopyOfPropertyComputer(requiredComputer));
+					}
+					else {
+						this.addPropertyComputer(requiredComputer);
+					}
+				}
+
+				/* check required other computers and if they have already been installed */
+				this.eventPropertyComputers.add(computer);
+			}
+		}
+	}
+
+	public void addPropertyComputer(final AlgorithmEventPropertyComputer... computer) {
+		Collections.addAll(this.eventPropertyComputers, computer);
 	}
 
 	@Subscribe

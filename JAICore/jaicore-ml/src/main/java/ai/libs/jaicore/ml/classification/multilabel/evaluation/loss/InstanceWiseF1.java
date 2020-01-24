@@ -43,8 +43,9 @@ public class InstanceWiseF1 extends AThresholdBasedMultiLabelClassificationMeasu
 		OptionalDouble res = IntStream.range(0, expectedMatrix.length)
 				.mapToDouble(x -> baseMeasure.score(Arrays.stream(expectedMatrix[x]).mapToObj(Integer::valueOf).collect(Collectors.toList()), Arrays.stream(actualMatrix[x]).mapToObj(Integer::valueOf).collect(Collectors.toList())))
 				.average();
+
 		if (!res.isPresent()) {
-			throw new IllegalStateException("Could not determine average label-wise f measure.");
+			throw new IllegalStateException("Could not determine average instance-wise f measure.");
 		} else {
 			return res.getAsDouble();
 		}

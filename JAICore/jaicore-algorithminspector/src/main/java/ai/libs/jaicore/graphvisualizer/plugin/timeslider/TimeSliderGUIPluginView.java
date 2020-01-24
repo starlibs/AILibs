@@ -1,40 +1,35 @@
 package ai.libs.jaicore.graphvisualizer.plugin.timeslider;
 
 import ai.libs.jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginView;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.VBox;
 
-public class TimeSliderGUIPluginView implements IGUIPluginView {
-
-	private TimeSliderGUIPluginModel model;
+public class TimeSliderGUIPluginView extends ASimpleMVCPluginView<TimeSliderGUIPluginModel, TimeSliderGUIPluginController, VBox> {
 
 	private Slider timestepSlider;
 
-	public TimeSliderGUIPluginView() {
-		this.model = new TimeSliderGUIPluginModel(this);
-	}
+	public TimeSliderGUIPluginView(final TimeSliderGUIPluginModel model) {
+		super (model, new VBox());
+		Platform.runLater(() -> {
+			VBox timestepSliderLayout = this.getNode();
+			timestepSliderLayout.setAlignment(Pos.CENTER);
 
-	@Override
-	public Node getNode() {
-		VBox timestepSliderLayout = new VBox();
-		timestepSliderLayout.setAlignment(Pos.CENTER);
+			this.timestepSlider = new Slider(0, 1, 0);
+			this.timestepSlider.setShowTickLabels(false);
+			this.timestepSlider.setShowTickMarks(false);
 
-		this.timestepSlider = new Slider(0, 1, 0);
-		this.timestepSlider.setShowTickLabels(false);
-		this.timestepSlider.setShowTickMarks(false);
+			this.timestepSlider.setOnMouseReleased(event -> this.handleInputEvent());
+			this.timestepSlider.setOnKeyPressed(event -> this.handleInputEvent());
+			this.timestepSlider.setOnKeyReleased(event -> this.handleInputEvent());
+			timestepSliderLayout.getChildren().add(this.timestepSlider);
 
-		this.timestepSlider.setOnMouseReleased(event -> this.handleInputEvent());
-		this.timestepSlider.setOnKeyPressed(event -> this.handleInputEvent());
-		this.timestepSlider.setOnKeyReleased(event -> this.handleInputEvent());
-		timestepSliderLayout.getChildren().add(this.timestepSlider);
-
-		Label timestepSliderLabel = new Label("Timestep");
-		timestepSliderLayout.getChildren().add(timestepSliderLabel);
-		return timestepSliderLayout;
+			Label timestepSliderLabel = new Label("Timestep");
+			timestepSliderLayout.getChildren().add(timestepSliderLabel);
+		});
 	}
 
 	public synchronized void handleInputEvent() {
@@ -43,11 +38,12 @@ public class TimeSliderGUIPluginView implements IGUIPluginView {
 
 	@Override
 	public void update() {
-		this.timestepSlider.setValue(this.model.getCurrentTimeStep());
-		this.timestepSlider.setMax(this.model.getMaximumTimeStep());
-		if (this.model.isPaused() && this.timestepSlider.isDisabled()) {
+		TimeSliderGUIPluginModel model = this.getModel();
+		this.timestepSlider.setValue(model.getCurrentTimeStep());
+		this.timestepSlider.setMax(model.getMaximumTimeStep());
+		if (model.isPaused() && this.timestepSlider.isDisabled()) {
 			this.timestepSlider.setDisable(false);
-		} else if (!this.model.isPaused() && !this.timestepSlider.isDisabled()) {
+		} else if (!model.isPaused() && !this.timestepSlider.isDisabled()) {
 			this.timestepSlider.setDisable(true);
 		}
 	}
@@ -57,8 +53,8 @@ public class TimeSliderGUIPluginView implements IGUIPluginView {
 		return "Time Slider";
 	}
 
-	public TimeSliderGUIPluginModel getModel() {
-		return this.model;
+	@Override
+	public void clear() {
+		/* nothing to do */
 	}
-
 }

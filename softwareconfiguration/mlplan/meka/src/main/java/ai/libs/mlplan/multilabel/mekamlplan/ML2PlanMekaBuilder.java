@@ -27,7 +27,7 @@ import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.core.PreferenceBasedNodeEvaluator;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 
-public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IMekaClassifier, MLPlanMekaBuilder> {
+public class ML2PlanMekaBuilder extends AbstractMLPlanBuilder<IMekaClassifier, ML2PlanMekaBuilder> {
 
 	private static final File DEF_SEARCH_SPACE_CONFIG = FileUtil.getExistingFileWithHighestPriority(ML2PlanMekaPathConfig.RES_SSC, ML2PlanMekaPathConfig.FS_SSC);
 	private static final File DEF_PREFERRED_COMPONENTS = FileUtil.getExistingFileWithHighestPriority(ML2PlanMekaPathConfig.RES_PREFC, ML2PlanMekaPathConfig.FS_PREFC);
@@ -45,9 +45,9 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IMekaClassifier, ML
 	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS)
 			.withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE).withMeasure(DEFAULT_PERFORMANCE_MEASURE);
 
-	private Logger logger = LoggerFactory.getLogger(MLPlanMekaBuilder.class);
+	private Logger logger = LoggerFactory.getLogger(ML2PlanMekaBuilder.class);
 
-	public MLPlanMekaBuilder() throws IOException {
+	public ML2PlanMekaBuilder() throws IOException {
 		super();
 		this.withSearchSpaceConfigFile(DEF_SEARCH_SPACE_CONFIG);
 		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, DEF_PREFERRED_COMPONENT_NAME_PREFIX);
@@ -63,7 +63,7 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IMekaClassifier, ML
 	 * Configures ML-Plan with the configuration as compared to AutoMEKA_GGP and GA-Auto-MLC.
 	 * @return The builder object.
 	 */
-	public MLPlanMekaBuilder withAutoMEKADefaultConfiguration() {
+	public ML2PlanMekaBuilder withAutoMEKADefaultConfiguration() {
 		this.withPerformanceMeasure(new AutoMEKAGGPFitnessMeasureLoss());
 		return this;
 	}
@@ -76,7 +76,7 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IMekaClassifier, ML
 	 * @return The builder object.
 	 * @throws IOException Thrown if a problem occurs while trying to read the file containing the priority list.
 	 */
-	public MLPlanMekaBuilder withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
+	public ML2PlanMekaBuilder withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
 		List<String> ordering;
 		if (preferredComponentsFile instanceof ResourceFile) {
@@ -95,7 +95,7 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IMekaClassifier, ML
 	 * @param lossFunction The loss function to be used.
 	 * @return The builder object.
 	 */
-	public MLPlanMekaBuilder withPerformanceMeasure(final IMultiLabelClassificationPredictionPerformanceMeasure measure) {
+	public ML2PlanMekaBuilder withPerformanceMeasure(final IMultiLabelClassificationPredictionPerformanceMeasure measure) {
 		List<ISupervisedLearnerEvaluatorFactory> phaseList = Arrays.asList(this.getSearchEvaluatorFactory(), this.getSelectionEvaluatorFactory());
 		for (ISupervisedLearnerEvaluatorFactory factory : phaseList) {
 			if (factory instanceof MonteCarloCrossValidationEvaluatorFactory) {
@@ -106,7 +106,7 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder<IMekaClassifier, ML
 	}
 
 	@Override
-	public MLPlanMekaBuilder getSelf() {
+	public ML2PlanMekaBuilder getSelf() {
 		return this;
 	}
 

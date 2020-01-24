@@ -3,10 +3,10 @@ package ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.events.result.IScoredSolutionCandidateFoundEvent;
 
-import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
+import ai.libs.jaicore.graphvisualizer.events.recorder.AIndependentAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyComputationFailedException;
 
-public class ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer implements AlgorithmEventPropertyComputer {
+public class ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer extends AIndependentAlgorithmEventPropertyComputer {
 
 	public static final String SCORED_SOLUTION_CANDIDATE_INFO_PROPERTY_NAME = "scored_solution_candidate_info";
 

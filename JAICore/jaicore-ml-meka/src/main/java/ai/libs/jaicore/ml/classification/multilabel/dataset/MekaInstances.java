@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
@@ -23,7 +22,7 @@ import org.api4.java.common.reconstruction.IReconstructionPlan;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionPlan;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -51,8 +50,10 @@ public class MekaInstances implements IMekaInstances, IListDecorator<Instances, 
 
 	public MekaInstances(final ILabeledDataset<? extends ILabeledInstance> dataset) {
 		this.schema = dataset.getInstanceSchema();
-		if (dataset instanceof MekaInstances) {
+		if (dataset instanceof IMekaInstances) {
 			this.dataset = new Instances(((MekaInstances) dataset).dataset);
+		} else if (dataset instanceof IWekaInstances) {
+			this.dataset = new Instances(((IWekaInstances) dataset).getInstances());
 		} else {
 			try {
 				this.dataset = MekaInstancesUtil.datasetToWekaInstances(dataset);
@@ -62,7 +63,7 @@ public class MekaInstances implements IMekaInstances, IListDecorator<Instances, 
 		}
 		if (this.dataset.numAttributes() != dataset.getNumAttributes() + this.dataset.classIndex()) {
 			throw new IllegalStateException("Number of attributes in the MekaInstances do not coincide. We have " + this.dataset.numAttributes() + " while given dataset had " + dataset.getNumAttributes()
-			+ ". There should be a difference of " + this.dataset.classIndex() + ", because WEKA counts the labels as an attribute each.");
+					+ ". There should be a difference of " + this.dataset.classIndex() + ", because WEKA counts the labels as an attribute each.");
 		}
 		this.reconstructionInstructions = (dataset instanceof IReconstructible) ? ((ReconstructionPlan) ((IReconstructible) dataset).getConstructionPlan()).getInstructions() : null;
 	}
@@ -112,7 +113,7 @@ public class MekaInstances implements IMekaInstances, IListDecorator<Instances, 
 		return true;
 	}
 
-	public int getFrequency(final IWekaInstance instance) {
+	public int getFrequency(final IMekaInstance instance) {
 		return (int) this.stream().filter(instance::equals).count();
 	}
 
@@ -146,7 +147,7 @@ public class MekaInstances implements IMekaInstances, IListDecorator<Instances, 
 	}
 
 	@Override
-	public IDataset<IMekaInstance> createCopy() throws DatasetCreationException, InterruptedException {
+	public IMekaInstances createCopy() throws DatasetCreationException, InterruptedException {
 		return new MekaInstances(this);
 	}
 

@@ -8,21 +8,15 @@ import javafx.scene.web.WebView;
 
 /**
  *
- * @author hetzer
+ * @author Felix Mohr
  *
- * @param <N>
- *            The node class
  */
 public class NodeInfoGUIPluginView extends ASimpleMVCPluginView<NodeInfoGUIPluginModel, NodeInfoGUIPluginController, FlowPane> {
-
-	private NodeInfoGUIPluginModel model;
-
-	private String title;
 
 	private WebEngine webViewEngine;
 
 	public NodeInfoGUIPluginView(final NodeInfoGUIPluginModel model) {
-		super (model, new FlowPane());
+		super(model, new FlowPane());
 		Platform.runLater(() -> {
 			WebView view = new WebView();
 			FlowPane node = this.getNode();
@@ -32,23 +26,16 @@ public class NodeInfoGUIPluginView extends ASimpleMVCPluginView<NodeInfoGUIPlugi
 		});
 	}
 
-
 	@Override
 	public void update() {
-		String nodeInfoOfCurrentlySelectedNode = this.model.getNodeInfoForCurrentlySelectedNode();
+		String nodeInfoOfCurrentlySelectedNode = this.getModel().getNodeInfoForCurrentlySelectedNode();
 		Platform.runLater(() -> this.webViewEngine.loadContent(nodeInfoOfCurrentlySelectedNode));
 	}
 
 	@Override
-	public NodeInfoGUIPluginModel getModel() {
-		return this.model;
-	}
-
-	@Override
 	public String getTitle() {
-		return this.title;
+		return "Node Information";
 	}
-
 
 	@Override
 	public void clear() {

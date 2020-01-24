@@ -12,11 +12,13 @@ import ai.libs.jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryEntr
 import ai.libs.jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryRecorder;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyProcessedAlgorithmEventSource;
+import ai.libs.jaicore.graphvisualizer.plugin.IComputedGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.IGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ControlBarGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.speedslider.SpeedSliderGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.TimeSliderGUIPlugin;
 import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
@@ -37,11 +39,12 @@ import javafx.stage.Stage;
 public class AlgorithmVisualizationWindow implements Runnable {
 
 	private PropertyProcessedAlgorithmEventSource algorithmEventSource;
+	private final AlgorithmEventHistoryRecorder historyRecorder;
 	private AlgorithmEventHistoryEntryDeliverer algorithmEventHistoryPuller;
 
 	private AlgorithmEventHistory algorithmEventHistory;
 
-	private List<IGUIPlugin> visualizationPlugins;
+	private final List<IGUIPlugin> visualizationPlugins = new ArrayList<>();
 
 	private IGUIPlugin mainPlugin;
 	private TimeSliderGUIPlugin timeSliderGUIPlugin;
@@ -57,6 +60,30 @@ public class AlgorithmVisualizationWindow implements Runnable {
 
 	private TabPane pluginTabPane;
 
+	private AlgorithmVisualizationWindow() {
+		this.historyRecorder = new AlgorithmEventHistoryRecorder();
+		this.setup(this.historyRecorder.getHistory());
+	}
+
+	private AlgorithmVisualizationWindow(final AlgorithmEventHistory history) {
+		this.historyRecorder = null;
+		this.setup(history);
+	}
+
+	private void setup(final AlgorithmEventHistory algorithmEventHistory) {
+		new JFXPanel(); // dummy to initialize JavaFX if this has not happened before
+
+		/* define event sources */
+		this.algorithmEventHistory = algorithmEventHistory;
+		this.algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(algorithmEventHistory);
+		this.algorithmEventSource = this.algorithmEventHistoryPuller;
+
+		/* initialize controls and launch the window */
+		this.initializeControls();
+		DefaultGUIEventBus.getInstance().registerListener(this.algorithmEventHistoryPuller);
+		Platform.runLater(this);
+	}
+
 	/**
 	 * Creates a new {@link AlgorithmVisualizationWindow} based on the given {@link AlgorithmEventHistory} (i.e. offline version), the main {@link IGUIPlugin} and optionally additional plugins.
 	 *
@@ -65,13 +92,9 @@ public class AlgorithmVisualizationWindow implements Runnable {
 	 * @param visualizationPlugins A list of additional {@link IGUIPlugin}s displaying side information.
 	 */
 	public AlgorithmVisualizationWindow(final AlgorithmEventHistory algorithmEventHistory, final IGUIPlugin mainPlugin, final IGUIPlugin... visualizationPlugins) {
-		this.mainPlugin = mainPlugin;
-		this.algorithmEventHistory = algorithmEventHistory;
-		this.algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(algorithmEventHistory);
-		this.algorithmEventSource = this.algorithmEventHistoryPuller;
-		this.initializePlugins(visualizationPlugins);
-		// it is important to register the history puller as a last listener!
-		DefaultGUIEventBus.getInstance().registerListener(this.algorithmEventHistoryPuller);
+		this(algorithmEventHistory);
+		this.withMainPlugin(mainPlugin);
+		this.withPlugin(visualizationPlugins);
 	}
 
 	/**
@@ -84,22 +107,44 @@ public class AlgorithmVisualizationWindow implements Runnable {
 	 * @param mainPlugin The main {@link IGUIPlugin} which will be displayed as the main information source.
 	 * @param visualizationPlugins A list of additional {@link IGUIPlugin}s displaying side information.
 	 */
-	public AlgorithmVisualizationWindow(final IAlgorithm<?, ?> algorithm, final List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers, final IGUIPlugin mainPlugin, final IGUIPlugin... visualizationPlugins) {
-		this.mainPlugin = mainPlugin;
-		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder(algorithmEventPropertyComputers);
-		algorithm.registerListener(historyRecorder);
-		this.algorithmEventHistory = historyRecorder.getHistory();
-		this.algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(historyRecorder.getHistory());
-		this.algorithmEventSource = this.algorithmEventHistoryPuller;
-		this.initializePlugins(visualizationPlugins);
-		// it is important to register the history puller as a last listener!
-		DefaultGUIEventBus.getInstance().registerListener(this.algorithmEventHistoryPuller);
+	public AlgorithmVisualizationWindow(final IAlgorithm<?, ?> algorithm) {
+		this();
+		algorithm.registerListener(this.historyRecorder);
 	}
 
-	private void initializePlugins(final IGUIPlugin... visualizationPlugins) {
+	public AlgorithmVisualizationWindow withMainPlugin(final IGUIPlugin plugin) {
+
+		/* first register property computers if we record the history */
+		if (this.historyRecorder != null && plugin instanceof IComputedGUIPlugin) {
+			this.historyRecorder.addPropertyComputer(((IComputedGUIPlugin) plugin).getPropertyComputers());
+		}
+
+		/* now register the plugin itself */
+		this.mainPlugin = plugin;
 		this.mainPlugin.setAlgorithmEventSource(this.algorithmEventSource);
 		this.mainPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
+		Platform.runLater(() -> ((SplitPane) this.rootLayout.getCenter()).getItems().add(this.mainPlugin.getView().getNode()));
+		return this;
+	}
 
+	public AlgorithmVisualizationWindow withPlugin(final IGUIPlugin... pluginArray) {
+		for (IGUIPlugin plugin : pluginArray) {
+
+			/* first register property computers if we record the history */
+			if (this.historyRecorder != null && plugin instanceof IComputedGUIPlugin) {
+				this.historyRecorder.addPropertyComputer(((IComputedGUIPlugin) plugin).getPropertyComputers());
+			}
+
+			/* now register and start the plugin itself */
+			this.visualizationPlugins.add(plugin);
+			plugin.setAlgorithmEventSource(this.algorithmEventSource);
+			plugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
+			this.addPluginToTabList(plugin);
+		}
+		return this;
+	}
+
+	private void initializeControls() {
 		this.timeSliderGUIPlugin = new TimeSliderGUIPlugin();
 		this.timeSliderGUIPlugin.setAlgorithmEventSource(this.algorithmEventSource);
 		this.timeSliderGUIPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
@@ -111,17 +156,6 @@ public class AlgorithmVisualizationWindow implements Runnable {
 		this.speedSliderGUIPlugin = new SpeedSliderGUIPlugin();
 		this.speedSliderGUIPlugin.setAlgorithmEventSource(this.algorithmEventSource);
 		this.speedSliderGUIPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
-
-		this.visualizationPlugins = new ArrayList<>(visualizationPlugins.length);
-		for (IGUIPlugin graphVisualizationPlugin : visualizationPlugins) {
-			this.visualizationPlugins.add(graphVisualizationPlugin);
-			graphVisualizationPlugin.setAlgorithmEventSource(this.algorithmEventSource);
-			graphVisualizationPlugin.setGUIEventSource(DefaultGUIEventBus.getInstance());
-		}
-	}
-
-	public void show() {
-		Platform.runLater(this);
 	}
 
 	@Override
@@ -144,6 +178,12 @@ public class AlgorithmVisualizationWindow implements Runnable {
 		this.stage.setTitle(this.title);
 		this.stage.setMaximized(true);
 		this.stage.show();
+		this.stage.setOnCloseRequest(e -> {
+			this.mainPlugin.stop();
+			this.visualizationPlugins.forEach(IGUIPlugin::stop);
+			this.algorithmEventHistoryPuller.interrupt();
+			Platform.runLater(Platform::exit);
+		});
 
 		this.algorithmEventHistoryPuller.start();
 	}
@@ -169,7 +209,9 @@ public class AlgorithmVisualizationWindow implements Runnable {
 
 		this.pluginTabPane = new TabPane();
 		centerSplitLayout.getItems().add(this.pluginTabPane);
-		centerSplitLayout.getItems().add(this.mainPlugin.getView().getNode());
+		if (this.mainPlugin != null) {
+			centerSplitLayout.getItems().add(this.mainPlugin.getView().getNode());
+		}
 
 		this.rootLayout.setCenter(centerSplitLayout);
 	}
@@ -180,9 +222,13 @@ public class AlgorithmVisualizationWindow implements Runnable {
 
 	private void initializePluginTabs() {
 		for (IGUIPlugin plugin : this.visualizationPlugins) {
-			Tab pluginTab = new Tab(plugin.getView().getTitle(), plugin.getView().getNode());
-			this.pluginTabPane.getTabs().add(pluginTab);
+			this.addPluginToTabList(plugin);
 		}
+	}
+
+	private void addPluginToTabList(final IGUIPlugin plugin) {
+		Tab pluginTab = new Tab(plugin.getView().getTitle(), plugin.getView().getNode());
+		this.pluginTabPane.getTabs().add(pluginTab);
 	}
 
 	/**

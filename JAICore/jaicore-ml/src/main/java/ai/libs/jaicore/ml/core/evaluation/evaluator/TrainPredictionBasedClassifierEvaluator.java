@@ -58,21 +58,21 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 				ILearnerRunReport report;
 				try {
 					report = this.executor.execute(learner, folds.get(0), folds.get(1));
-					this.logger.trace("Obtained report. Training times was {}ms, testing time {}ms. Ground truth vector: {}, prediction vector: {}", report.getTrainEndTime() - report.getTrainStartTime(), report.getTestEndTime() - report.getTestStartTime(), report.getPredictionDiffList().getGroundTruthAsList(), report.getPredictionDiffList().getPredictionsAsList());
-				}
-				catch (LearnerExecutionInterruptedException e) {
+					this.logger.trace("Obtained report. Training times was {}ms, testing time {}ms. Ground truth vector: {}, prediction vector: {}", report.getTrainEndTime() - report.getTrainStartTime(),
+							report.getTestEndTime() - report.getTestStartTime(), report.getPredictionDiffList().getGroundTruthAsList(), report.getPredictionDiffList().getPredictionsAsList());
+				} catch (LearnerExecutionInterruptedException e) {
 					this.logger.info("Received interrupt of training in iteration #{} after a total evaluation time of {}ms. Sending an event over the bus and forwarding the exception.", i + 1, System.currentTimeMillis() - evaluationStart);
 					ILabeledDataset<?> train = folds.get(0);
 					ILabeledDataset<?> test = folds.get(1);
-					ILearnerRunReport failReport = new LearnerRunReport(train, test, e.getTrainTimeStart(),  e.getTrainTimeEnd(),  e.getTestTimeStart(), e.getTestTimeEnd(), e);
+					ILearnerRunReport failReport = new LearnerRunReport(train, test, e.getTrainTimeStart(), e.getTrainTimeEnd(), e.getTestTimeStart(), e.getTestTimeEnd(), e);
 					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent<>(learner, failReport));
 					throw e;
-				}
-				catch (LearnerExecutionFailedException e) { // cannot be merged with the above clause, because then the only common supertype is "Exception", which does not have these methods
-					this.logger.info("Catching {} in iteration #{} after a total evaluation time of {}ms. Sending an event over the bus and forwarding the exception.", e.getClass().getName(), i + 1, System.currentTimeMillis() - evaluationStart);
+				} catch (LearnerExecutionFailedException e) { // cannot be merged with the above clause, because then the only common supertype is "Exception", which does not have these methods
+					this.logger.info("Catching {} in iteration #{} after a total evaluation time of {}ms. Sending an event over the bus and forwarding the exception.", e.getClass().getName(), i + 1,
+							System.currentTimeMillis() - evaluationStart);
 					ILabeledDataset<?> train = folds.get(0);
 					ILabeledDataset<?> test = folds.get(1);
-					ILearnerRunReport failReport = new LearnerRunReport(train, test, e.getTrainTimeStart(),  e.getTrainTimeEnd(),  e.getTestTimeStart(), e.getTestTimeEnd(), e);
+					ILearnerRunReport failReport = new LearnerRunReport(train, test, e.getTrainTimeStart(), e.getTrainTimeEnd(), e.getTestTimeStart(), e.getTestTimeEnd(), e);
 					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent<>(learner, failReport));
 					throw e;
 				}
@@ -88,19 +88,22 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 					int mistakes = 0;
 					for (int j = 0; j < m; j++) {
 						if (!pr.get(j).equals(gt.get(j))) {
-							mistakes ++;
+							mistakes++;
 						}
 					}
 					if (m - mistakes == 0) {
-						this.logger.warn("0 correct predictions seems suspicious. Here are the vectors: \n\tGround truth: {}\n\tPredictions: {}", report.getPredictionDiffList().getGroundTruthAsList(), report.getPredictionDiffList().getPredictionsAsList());
+						this.logger.warn("0 correct predictions seems suspicious. Here are the vectors: \n\tGround truth: {}\n\tPredictions: {}", report.getPredictionDiffList().getGroundTruthAsList(),
+								report.getPredictionDiffList().getPredictionsAsList());
 					}
-					this.logger.debug("Execution completed. Classifier predicted {}/{} test instances correctly.", (m-mistakes), m);
+					this.logger.debug("Execution completed. Classifier predicted {}/{} test instances correctly.", (m - mistakes), m);
 				}
 			}
+			this.logger.debug("Compute metric ({}) for the diff of predictions and ground truth.", this.metric.getClass().getName());
 			double score = this.metric.loss(reports.stream().map(ILearnerRunReport::getPredictionDiffList).collect(Collectors.toList()));
 			this.logger.info("Computed value for metric {} of {} executions. Metric value is: {}", this.metric, n, score);
 			return score;
 		} catch (LearnerExecutionFailedException | SplitFailedException e) {
+			this.logger.debug("Failed to evaluate the classifier {}.", e);
 			throw new ObjectEvaluationFailedException(e);
 		}
 	}
@@ -120,8 +123,7 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 		if (this.splitGenerator instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) this.splitGenerator).setLoggerName(name + ".splitgen");
 			this.logger.info("Setting logger of split generator {} to {}.splitgen", this.splitGenerator.getClass().getName(), name);
-		}
-		else {
+		} else {
 			this.logger.info("Split generator {} is not configurable for logging, so not configuring it.", this.splitGenerator.getClass().getName());
 		}
 		this.executor.setLoggerName(name + ".executor");

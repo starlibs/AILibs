@@ -13,43 +13,47 @@ public class GraphMouseListener implements ViewerListener, Runnable {
 	private GraphViewPluginModel viewModel;
 	private ViewerPipe viewerPipe;
 
-	public GraphMouseListener(GraphViewPluginModel viewModel, ViewerPipe viewerPipe) {
+	public GraphMouseListener(final GraphViewPluginModel viewModel, final ViewerPipe viewerPipe) {
 		this.viewModel = viewModel;
 		this.viewerPipe = viewerPipe;
 		this.active = true;
 	}
 
 	@Override
-	public void buttonPushed(String id) {
-		Node viewGraphNode = viewModel.getGraph().getNode(id);
-		String searchGraphNode = viewModel.getSearchGraphNodeMappedToViewGraphNode(viewGraphNode);
+	public void buttonPushed(final String id) {
+		Node viewGraphNode = this.viewModel.getGraph().getNode(id);
+		String searchGraphNode = this.viewModel.getSearchGraphNodeMappedToViewGraphNode(viewGraphNode);
 		DefaultGUIEventBus.getInstance().postEvent(new NodeClickedEvent(viewGraphNode, searchGraphNode));
 	}
 
 	@Override
-	public void buttonReleased(String id) {
+	public void buttonReleased(final String id) {
 		// nothing to do here
 	}
 
 	@Override
-	public void mouseLeft(String id) {
+	public void mouseLeft(final String id) {
 		// nothing to do here
 	}
 
 	@Override
-	public void mouseOver(String id) {
+	public void mouseOver(final String id) {
 		// nothing to do here
 	}
 
 	@Override
-	public void viewClosed(String id) {
-		active = false;
+	public void viewClosed(final String id) {
+		// this.active = false; // This is not good here. This directly closes the listener and thus the pump thread.
 	}
 
 	@Override
 	public void run() {
-		while (active) {
-			viewerPipe.pump();
+		while (this.active) {
+			if (Thread.currentThread().isInterrupted()) {
+				this.active = false;
+				return;
+			}
+			this.viewerPipe.pump();
 		}
 	}
 

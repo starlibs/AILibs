@@ -1,45 +1,25 @@
 package ai.libs.jaicore.graphvisualizer.plugin.controlbar;
 
-import ai.libs.jaicore.graphvisualizer.events.gui.GUIEventSource;
-import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyProcessedAlgorithmEventSource;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPlugin;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginController;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginModel;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginView;
+import java.util.Arrays;
+import java.util.Collection;
 
-public class ControlBarGUIPlugin implements IGUIPlugin {
+import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPlugin;
 
-	private ControlBarGUIPluginController controller;
-	private ControlBarGUIPluginView view;
+public class ControlBarGUIPlugin extends ASimpleMVCPlugin<ControlBarGUIPluginModel, ControlBarGUIPluginView, ControlBarGUIPluginController> {
+
 
 	public ControlBarGUIPlugin() {
-		view = new ControlBarGUIPluginView();
-		controller = new ControlBarGUIPluginController(view.getModel());
+		super();
 	}
 
 	@Override
-	public IGUIPluginController getController() {
-		return controller;
+	public void stop() {
+		this.getController().interrupt();
 	}
 
 	@Override
-	public IGUIPluginModel getModel() {
-		return view.getModel();
+	public Collection<AlgorithmEventPropertyComputer> getPropertyComputers() {
+		return Arrays.asList(); // no computers required
 	}
-
-	@Override
-	public IGUIPluginView getView() {
-		return view;
-	}
-
-	@Override
-	public void setAlgorithmEventSource(PropertyProcessedAlgorithmEventSource algorithmEventSource) {
-		algorithmEventSource.registerListener(controller);
-	}
-
-	@Override
-	public void setGUIEventSource(GUIEventSource guiEventSource) {
-		guiEventSource.registerListener(controller);
-	}
-
 }

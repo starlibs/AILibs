@@ -13,6 +13,7 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.UnparametrizedComponentInstance;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfo;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TreeItem;
@@ -85,7 +86,8 @@ public class HASCOModelStatisticsComponentSelector extends TreeItem<HASCOModelSt
 			String nameOfNewComponent = uci.getComponentName();
 			for (int i = 0; i <= n; i++) {
 				if (i == n || items.get(i).compareTo(nameOfNewComponent) >= 0) {
-					items.add(i, nameOfNewComponent);
+					final int index = i;
+					Platform.runLater(() -> items.add(index, nameOfNewComponent));
 					break;
 				}
 			}
