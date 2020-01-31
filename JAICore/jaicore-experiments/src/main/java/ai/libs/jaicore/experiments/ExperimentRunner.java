@@ -30,6 +30,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	private final IExperimentSetEvaluator conductor;
 	private final IExperimentDatabaseHandle handle;
 	private final int availableMemoryInMB;
+	private boolean doMemoryCheck = true;
 
 	public ExperimentRunner(final IExperimentSetConfig config, final IExperimentSetEvaluator conductor, final IExperimentDatabaseHandle databaseHandle) throws ExperimentDBInteractionFailedException {
 
@@ -44,7 +45,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		this.logger.debug("Created ExperimentRunner. Now updating its configuration from the database.");
 		this.logger.info("Successfully created and initialized ExperimentRunner.");
 		this.handle.setup(config);
-		this.availableMemoryInMB = (int)(Runtime.getRuntime().maxMemory() / 1024 / 1024);
+		this.availableMemoryInMB = (int) (Runtime.getRuntime().maxMemory() / 1024 / 1024);
 	}
 
 	/**
@@ -89,8 +90,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 				} catch (InterruptedException e) {
 					this.logger.info("Experiment interrupted.");
 					Thread.currentThread().interrupt(); // interrupt myself to make Sonar happy
-				}
-				catch (ExperimentDBInteractionFailedException | ExperimentAlreadyStartedException e) {
+				} catch (ExperimentDBInteractionFailedException | ExperimentAlreadyStartedException e) {
 					this.logger.error(LoggerUtil.getExceptionInfo(e));
 				}
 			});
@@ -139,12 +139,16 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		}
 		Throwable error = null;
 		try {
-			double memoryDeviation = Math.abs(expEntry.getExperiment().getMemoryInMB() - this.availableMemoryInMB) * 1f / expEntry.getExperiment().getMemoryInMB();
-			if (memoryDeviation > MAX_MEM_DEVIATION) {
-				throw new IllegalStateException("Cannot conduct experiment " + expEntry.getExperiment() + ", because the available memory is " + this.availableMemoryInMB + " where declared is " + expEntry.getExperiment().getMemoryInMB() + ". Deviation: " + memoryDeviation);
-			}
-			if (expEntry.getExperiment().getNumCPUs() > Runtime.getRuntime().availableProcessors()) {
-				throw new IllegalStateException("Cannot conduct experiment " + expEntry.getExperiment() + ", because only " + Runtime.getRuntime().availableProcessors() + " CPU cores are available where declared is " + expEntry.getExperiment().getNumCPUs());
+			if (this.doMemoryCheck) {
+				double memoryDeviation = Math.abs(expEntry.getExperiment().getMemoryInMB() - this.availableMemoryInMB) * 1f / expEntry.getExperiment().getMemoryInMB();
+				if (memoryDeviation > MAX_MEM_DEVIATION) {
+					throw new IllegalStateException("Cannot conduct experiment " + expEntry.getExperiment() + ", because the available memory is " + this.availableMemoryInMB + " where declared is " + expEntry.getExperiment().getMemoryInMB()
+							+ ". Deviation: " + memoryDeviation);
+				}
+				if (expEntry.getExperiment().getNumCPUs() > Runtime.getRuntime().availableProcessors()) {
+					throw new IllegalStateException(
+							"Cannot conduct experiment " + expEntry.getExperiment() + ", because only " + Runtime.getRuntime().availableProcessors() + " CPU cores are available where declared is " + expEntry.getExperiment().getNumCPUs());
+				}
 			}
 			this.handle.startExperiment(expEntry);
 			this.conductor.evaluate(expEntry, m -> {
@@ -179,5 +183,9 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		if (this.handle instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) this.handle).setLoggerName(name + ".handle");
 		}
+	}
+
+	public void setDoMemoryCheck(final boolean doMemoryCheck) {
+		this.doMemoryCheck = doMemoryCheck;
 	}
 }

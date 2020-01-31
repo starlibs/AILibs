@@ -232,4 +232,11 @@ public class ArrayUtil {
 		return column;
 	}
 
+	public static void add(final double[] sum, final double[] summand) {
+		if (sum.length != summand.length) {
+			throw new IllegalArgumentException("The array must be of the same length.");
+		}
+		IntStream.range(0, sum.length).forEach(x -> sum[x] += summand[x]);
+	}
+
 }

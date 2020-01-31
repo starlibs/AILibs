@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.classification.multilabel.learner.homer;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 public class HOMERLeaf extends HOMERNode {
 
@@ -11,7 +12,18 @@ public class HOMERLeaf extends HOMERNode {
 		this.label = label;
 	}
 
-	public Collection<Integer> getLabel() {
+	@Override
+	public List<HOMERNode> getChildren() {
+		return Arrays.asList(this);
+	}
+
+	@Override
+	public boolean isLeaf() {
+		return true;
+	}
+
+	@Override
+	public Collection<Integer> getLabels() {
 		return Arrays.asList(this.label);
 	}
 
