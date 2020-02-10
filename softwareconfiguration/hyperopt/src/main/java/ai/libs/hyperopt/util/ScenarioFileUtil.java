@@ -1,4 +1,4 @@
-package ai.libs.hyperopt;
+package ai.libs.hyperopt.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,10 +18,6 @@ import ai.libs.jaicore.basic.FileUtil;
  */
 public class ScenarioFileUtil {
 	private static Logger logger = LoggerFactory.getLogger(ScenarioFileUtil.class);
-
-	private ScenarioFileUtil() {
-		/* avoid instantiation */
-	}
 
 	public static void updateMultipleParams(final String filePath, final Map<String, String> newParams) {
 		Map<String, String> params = readAsKeyValuePairs(filePath);

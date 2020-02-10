@@ -1,4 +1,4 @@
-package ai.libs.hyperopt;
+package ai.libs.hyperopt.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,20 +11,21 @@ import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.Solutio
 
 public class PCSBasedOptimizationSolutionCandidateRepresenter implements SolutionCandidateRepresenter {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(PCSBasedOptimizationSolutionCandidateRepresenter.class);
-
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(PCSBasedOptimizationSolutionCandidateRepresenter.class);
+	
 	private ComponentInstanceSerializer componentInstanceSerializer;
 
 	public PCSBasedOptimizationSolutionCandidateRepresenter() {
-		this.componentInstanceSerializer = new ComponentInstanceSerializer();
+		componentInstanceSerializer = new ComponentInstanceSerializer();
 	}
 
 	@Override
-	public String getStringRepresentationOfSolutionCandidate(final Object solutionCandidate) {
+	public String getStringRepresentationOfSolutionCandidate(Object solutionCandidate) {
 		if (solutionCandidate instanceof HASCOSolutionCandidate) {
 			HASCOSolutionCandidate<?> hascoSolutionCandidate = (HASCOSolutionCandidate<?>) solutionCandidate;
 			try {
-				return this.componentInstanceSerializer.serializeComponentInstance(hascoSolutionCandidate.getComponentInstance());
+				return componentInstanceSerializer.serializeComponentInstance(hascoSolutionCandidate.getComponentInstance());
 			} catch (JsonProcessingException e) {
 				LOGGER.error("Cannot compute String representation of solution candidate {} using {}.", solutionCandidate, ComponentInstanceSerializer.class.getSimpleName(), e);
 			}

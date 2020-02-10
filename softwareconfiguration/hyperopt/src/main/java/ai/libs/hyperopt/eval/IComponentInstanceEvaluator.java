@@ -1,4 +1,4 @@
-package ai.libs.hyperopt;
+package ai.libs.hyperopt.eval;
 
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 

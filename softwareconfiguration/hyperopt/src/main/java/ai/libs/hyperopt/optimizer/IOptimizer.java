@@ -1,7 +1,5 @@
 package ai.libs.hyperopt.optimizer;
 
-import ai.libs.hyperopt.OptimizationException;
-
 /**
  *
  * @author kadirayk
@@ -9,6 +7,6 @@ import ai.libs.hyperopt.OptimizationException;
  */
 public interface IOptimizer {
 
-	public void optimize(String componentName) throws OptimizationException;
+	public void optimize() throws OptimizationException;
 
 }

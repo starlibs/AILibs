@@ -1,4 +1,4 @@
-package ai.libs.hyperopt;
+package ai.libs.hyperopt.example.automl.weka;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 
 import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hyperopt.eval.IComponentInstanceEvaluator;
+import ai.libs.hyperopt.event.PCSBasedOptimizationEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.AlgorithmEventListener;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.weka.WekaUtil;

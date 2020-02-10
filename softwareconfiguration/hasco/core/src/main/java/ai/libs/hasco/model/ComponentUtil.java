@@ -2,11 +2,13 @@ package ai.libs.hasco.model;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -264,5 +266,22 @@ public class ComponentUtil {
 		stats.put("nOtherParameters", otherParams);
 
 		return stats;
+	}
+
+	/**
+	 * Returns a collection of components that is relevant to resolve all recursive dependency when the request concerns a component with the provided required interface.
+	 * @param components A collection of component to search for relevant components.
+	 * @param requiredInterface The requested required interface.
+	 * @return The collection of affected components when requesting the given required interface.
+	 */
+	public static Collection<Component> getAffectedComponents(final Collection<Component> components, final String requiredInterface) {
+		Collection<Component> affectedComponents = new HashSet<>(ComponentUtil.getComponentsProvidingInterface(components, requiredInterface));
+		if (affectedComponents.isEmpty()) {
+			throw new IllegalArgumentException("Could not resolve the requiredInterface " + requiredInterface);
+		}
+		Set<Component> recursiveResolvedComps = new HashSet<>();
+		affectedComponents.forEach(x -> x.getRequiredInterfaces().values().stream().map(interfaceName -> getAffectedComponents(components, interfaceName)).forEach(recursiveResolvedComps::addAll));
+		affectedComponents.addAll(recursiveResolvedComps);
+		return affectedComponents;
 	}
 }
