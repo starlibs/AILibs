@@ -102,12 +102,14 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		sqlMainTable.append("`" + FIELD_TIME + "_started` TIMESTAMP NULL,");
 
 		/* add columns for result fields */
+		List<String> fieldsForWhichToIgnoreTime = this.config.getFieldsForWhichToIgnoreTime();
+		List<String> fieldsForWhichToIgnoreMemory = this.config.getFieldsForWhichToIgnoreMemory();
 		for (String result : this.resultFields) {
 			sqlMainTable.append("`" + result + "` VARCHAR(500) NULL,");
-			if (this.config.getFieldsForWhichToIgnoreTime() == null || !this.config.getFieldsForWhichToIgnoreTime().contains(result)) {
+			if (this.config.getFieldsForWhichToIgnoreTime() == null || fieldsForWhichToIgnoreTime.stream().noneMatch(result::matches)) {
 				sqlMainTable.append("`" + result + "_" + FIELD_TIME + "` TIMESTAMP NULL,");
 			}
-			if (this.config.getFieldsForWhichToIgnoreMemory() == null || !this.config.getFieldsForWhichToIgnoreMemory().contains(result)) {
+			if (this.config.getFieldsForWhichToIgnoreMemory() == null || fieldsForWhichToIgnoreMemory.stream().noneMatch(result::matches)) {
 				sqlMainTable.append("`" + result + "_" + FIELD_MEMORY + "` int(6) NULL,");
 			}
 		}
@@ -122,6 +124,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public void setup(final IExperimentSetConfig config) throws ExperimentDBInteractionFailedException {
+		this.logger.info("Setting up the experiment table {}", this.tablename);
 		this.config = config;
 		this.keyFields = config.getKeyFields().toArray(new String[] {}); // redundant to increase performance
 		this.resultFields = config.getResultFields().toArray(new String[] {}); // redundant to increase performance
@@ -129,7 +132,11 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		/* creates basic table creation statement */
 		String createTableQuery = this.getSetupCreateTableQuery();
 		try {
-			this.adapter.update(createTableQuery, new String[] {});
+			this.logger.debug("Sending table creation query: {}", createTableQuery);
+			int rows = this.adapter.update(createTableQuery, new String[] {});
+			if (rows == 0) {
+				throw new SQLException("Could not create the table. However, no explanation is available. Try to manually create it and check the response. The query is:\n" + createTableQuery);
+			}
 		} catch (SQLException e) {
 			this.logger.error("An SQL exception occured with the following query: {}", createTableQuery);
 			throw new ExperimentDBInteractionFailedException(e);

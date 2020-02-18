@@ -30,6 +30,8 @@ import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -60,6 +62,7 @@ import weka.core.OptionHandler;
 import weka.core.json.JSONInstances;
 import weka.core.json.JSONNode;
 import weka.filters.Filter;
+import weka.filters.supervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Remove;
 
 public class WekaUtil {
@@ -824,5 +827,29 @@ public class WekaUtil {
 
 	public static void setDebug(final boolean debug) {
 		WekaUtil.debug = debug;
+	}
+
+	/**
+	 * Binarizes nominal features and returns an ND4J matrix
+	 *
+	 * @param inst
+	 * @return
+	 * @throws Exception
+	 */
+	public static INDArray instances2matrix(final Instances inst) throws Exception {
+		Filter n2b = new NominalToBinary();
+		n2b.setInputFormat(inst);
+		Instances reduced = Filter.useFilter(inst, n2b);
+
+		/* create ndarray */
+		double[][] matrix = new double[reduced.numAttributes() - 1][reduced.size()];
+		int index = 0;
+		for (int i = 0; i < reduced.numAttributes(); i++) {
+			if (i != reduced.classIndex()) {
+				matrix[index] = reduced.attributeToDoubleArray(i);
+				index ++;
+			}
+		}
+		return Nd4j.create(matrix).transpose();
 	}
 }

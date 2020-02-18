@@ -86,7 +86,12 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 			ArrayNode array = (ArrayNode) res;
 			return IntStream.range(0, array.size()).map(i -> array.get(i).asInt()).toArray();
 		} else {
-			throw new IllegalStateException("Cannot parse result for insert query");
+			if (res.get("status").asInt() == 500) {
+				if (res.get("message").textValue().matches("(.*)Duplicate entry(.*) for key(.*)")) {
+					throw new SQLException(res.get("message").textValue());
+				}
+			}
+			throw new IllegalStateException("Cannot parse result for insert query. Result is:\n" + res);
 		}
 	}
 
@@ -202,5 +207,4 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 	public void close() {
 		throw new UnsupportedOperationException();
 	}
-
 }

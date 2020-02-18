@@ -19,6 +19,7 @@ import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
 public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 	private Logger logger = LoggerFactory.getLogger(ExperimentDatabasePreparer.class);
 
+	private final IExperimentSetConfig experimentConfig;
 	private final ExperimentSetAnalyzer configAnalyzer;
 	private final IExperimentDatabaseHandle handle;
 	private final int memoryLimit;
@@ -53,7 +54,7 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 
 		/* synchronize information with the database */
 		this.handle = databaseHandle;
-		this.handle.setup(config);
+		this.experimentConfig = config;
 		this.logger.info("Successfully created and initialized ExperimentDatabasePreparer.");
 	}
 
@@ -69,6 +70,11 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 	 * @throws AlgorithmExecutionCanceledException
 	 */
 	public List<ExperimentDBEntry> synchronizeExperiments() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+
+		/* setup the table */
+		this.logger.info("Creating experiment table if not existent.");
+		this.handle.setup(this.experimentConfig);
+		this.logger.info("Table ready. Now synchronizing experiments.");
 
 		/* get set of all POSSIBLE experiments and all CREATED experiments */
 		List<Map<String, String>> tmpPossibleKeyCombinations = new ArrayList<>(this.configAnalyzer.getAllPossibleKeyCombinations());
