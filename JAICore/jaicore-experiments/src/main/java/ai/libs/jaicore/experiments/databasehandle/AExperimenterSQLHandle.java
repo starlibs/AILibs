@@ -19,12 +19,14 @@ import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.db.IDatabaseAdapter;
 import ai.libs.jaicore.db.IDatabaseConfig;
 import ai.libs.jaicore.db.sql.SQLAdapter;
 import ai.libs.jaicore.experiments.Experiment;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
+import ai.libs.jaicore.experiments.ExperimentSetAnalyzer;
 import ai.libs.jaicore.experiments.IExperimentDatabaseHandle;
 import ai.libs.jaicore.experiments.IExperimentSetConfig;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
@@ -46,6 +48,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	private static final String FIELD_TIME = "time";
 	private static final String FIELD_TIME_START = FIELD_TIME + "_started";
 	private static final String FIELD_TIME_END = FIELD_TIME + "_end";
+	private static final String FIELD_EXCEPTION = "exception";
 	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
 	protected final IDatabaseAdapter adapter;
@@ -53,6 +56,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	private IExperimentSetConfig config;
 
+	private ExperimentSetAnalyzer analyzer;
 	private String[] keyFields;
 	private String[] resultFields;
 
@@ -91,9 +95,11 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		sqlMainTable.append("CREATE TABLE IF NOT EXISTS `" + this.tablename + "` (");
 		sqlMainTable.append("`" + FIELD_ID + "` int(10) NOT NULL AUTO_INCREMENT,");
 		for (String key : this.keyFields) {
-			String shortKey = this.getDatabaseFieldnameForConfigEntry(key);
-			sqlMainTable.append("`" + shortKey + "` VARCHAR(1000) NOT NULL,");
-			keyFieldsSB.append("`" + shortKey + "`,");
+			Pair<String, String> decomposition = this.analyzer.getNameTypeSplitForAttribute(key);
+			String fieldName = decomposition.getX();
+			String fieldType = decomposition.getY();
+			sqlMainTable.append("`" + fieldName + "` " + fieldType + " NOT NULL,");
+			keyFieldsSB.append("`" + fieldName + "`,");
 		}
 		sqlMainTable.append("`" + FIELD_NUMCPUS + "` int(2) NOT NULL,");
 		sqlMainTable.append("`" + FIELD_MEMORY + "_max` int(6) NOT NULL,");
@@ -105,12 +111,15 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		List<String> fieldsForWhichToIgnoreTime = this.config.getFieldsForWhichToIgnoreTime();
 		List<String> fieldsForWhichToIgnoreMemory = this.config.getFieldsForWhichToIgnoreMemory();
 		for (String result : this.resultFields) {
-			sqlMainTable.append("`" + result + "` VARCHAR(500) NULL,");
-			if (this.config.getFieldsForWhichToIgnoreTime() == null || fieldsForWhichToIgnoreTime.stream().noneMatch(result::matches)) {
-				sqlMainTable.append("`" + result + "_" + FIELD_TIME + "` TIMESTAMP NULL,");
+			Pair<String, String> decomposition = this.analyzer.getNameTypeSplitForAttribute(result);
+			String fieldName = decomposition.getX();
+			String fieldType = decomposition.getY();
+			sqlMainTable.append("`" + fieldName + "` " + fieldType + " NULL,");
+			if (this.config.getFieldsForWhichToIgnoreTime() == null || fieldsForWhichToIgnoreTime.stream().noneMatch(fieldName::matches)) {
+				sqlMainTable.append("`" + fieldName + "_" + FIELD_TIME + "` TIMESTAMP NULL,");
 			}
-			if (this.config.getFieldsForWhichToIgnoreMemory() == null || fieldsForWhichToIgnoreMemory.stream().noneMatch(result::matches)) {
-				sqlMainTable.append("`" + result + "_" + FIELD_MEMORY + "` int(6) NULL,");
+			if (this.config.getFieldsForWhichToIgnoreMemory() == null || fieldsForWhichToIgnoreMemory.stream().noneMatch(fieldName::matches)) {
+				sqlMainTable.append("`" + fieldName + "_" + FIELD_MEMORY + "` int(6) NULL,");
 			}
 		}
 
@@ -126,6 +135,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	public void setup(final IExperimentSetConfig config) throws ExperimentDBInteractionFailedException {
 		this.logger.info("Setting up the experiment table {}", this.tablename);
 		this.config = config;
+		this.analyzer = new ExperimentSetAnalyzer(this.config);
 		this.keyFields = config.getKeyFields().toArray(new String[] {}); // redundant to increase performance
 		this.resultFields = config.getResultFields().toArray(new String[] {}); // redundant to increase performance
 
@@ -133,19 +143,20 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		String createTableQuery = this.getSetupCreateTableQuery();
 		try {
 			this.logger.debug("Sending table creation query: {}", createTableQuery);
-			int rows = this.adapter.update(createTableQuery, new String[] {});
-			if (rows == 0) {
-				throw new SQLException("Could not create the table. However, no explanation is available. Try to manually create it and check the response. The query is:\n" + createTableQuery);
-			}
+			this.adapter.update(createTableQuery, new String[] {});
 		} catch (SQLException e) {
 			this.logger.error("An SQL exception occured with the following query: {}", createTableQuery);
 			throw new ExperimentDBInteractionFailedException(e);
 		}
 	}
 
+	private String buildWhereClause(final Map<String, ?> map) {
+		return map.entrySet().stream().map(e -> "`" + e.getKey() + "` = '" + e.getValue().toString() + "'").collect(Collectors.joining(" AND "));
+	}
+
 	protected String getSQLPrefixForKeySelectQuery() {
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append("SELECT `" + FIELD_ID + "`, `" + FIELD_MEMORY_MAX + "`, `" + FIELD_NUMCPUS + "`, " + Arrays.stream(this.keyFields).collect(Collectors.joining(", ")) + " FROM `");
+		queryStringSB.append("SELECT `" + FIELD_ID + "`, `" + FIELD_MEMORY_MAX + "`, `" + FIELD_NUMCPUS + "`, " + Arrays.stream(this.keyFields).map(k -> this.getDatabaseFieldnameForConfigEntry(k)).collect(Collectors.joining(", ")) + " FROM `");
 		queryStringSB.append(this.tablename);
 		queryStringSB.append("` ");
 		return queryStringSB.toString();
@@ -240,9 +251,39 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public List<ExperimentDBEntry> getConductedExperiments() throws ExperimentDBInteractionFailedException {
+		return this.getConductedExperiments(new HashMap<>());
+	}
+
+	@Override
+	public List<ExperimentDBEntry> getConductedExperiments(final Map<String, Object> fieldFilter) throws ExperimentDBInteractionFailedException {
 		StringBuilder queryStringSB = new StringBuilder();
 		queryStringSB.append(this.getSQLPrefixForSelectQuery());
 		queryStringSB.append("WHERE time_started IS NOT NULL");
+		if (!fieldFilter.isEmpty()) {
+			queryStringSB.append(" AND ");
+			queryStringSB.append(this.buildWhereClause(fieldFilter));
+		}
+		try {
+			return this.getExperimentsForSQLQuery(queryStringSB.toString());
+		} catch (SQLException e) {
+			throw new ExperimentDBInteractionFailedException("Given query was:\n" + queryStringSB.toString(), e);
+		}
+	}
+
+	@Override
+	public List<ExperimentDBEntry> getFailedExperiments() throws ExperimentDBInteractionFailedException {
+		return this.getFailedExperiments(new HashMap<>());
+	}
+
+	@Override
+	public List<ExperimentDBEntry> getFailedExperiments(final Map<String, Object> fieldFilter) throws ExperimentDBInteractionFailedException {
+		StringBuilder queryStringSB = new StringBuilder();
+		queryStringSB.append(this.getSQLPrefixForSelectQuery());
+		queryStringSB.append("WHERE exception IS NOT NULL");
+		if (!fieldFilter.isEmpty()) {
+			queryStringSB.append(" AND ");
+			queryStringSB.append(this.buildWhereClause(fieldFilter));
+		}
 		try {
 			return this.getExperimentsForSQLQuery(queryStringSB.toString());
 		} catch (SQLException e) {
@@ -277,8 +318,8 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 				String dbKey = this.getDatabaseFieldnameForConfigEntry(key);
 				resultValues.put(dbKey, store.getAsString(dbKey));
 			}
-
-			ExperimentDBEntry entry = new ExperimentDBEntry(store.getAsInt(FIELD_ID), new Experiment(store.getAsInt(FIELD_MEMORY_MAX), store.getAsInt(FIELD_NUMCPUS), keyValues, resultValues));
+			String error = store.getAsString(FIELD_EXCEPTION);
+			ExperimentDBEntry entry = new ExperimentDBEntry(store.getAsInt(FIELD_ID), new Experiment(store.getAsInt(FIELD_MEMORY_MAX), store.getAsInt(FIELD_NUMCPUS), keyValues, resultValues, error));
 
 			this.logger.trace("Building {}-th object took {}ms.", ++i, System.currentTimeMillis() - start);
 			experimentEntries.add(entry);
@@ -324,15 +365,16 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		List<String> keys = new ArrayList<>();
 		keys.add(FIELD_MEMORY_MAX);
 		keys.add(FIELD_NUMCPUS);
-		keys.addAll(Arrays.asList(this.keyFields));
+		keys.addAll(Arrays.stream(this.keyFields).map(k -> this.getDatabaseFieldnameForConfigEntry(k)).collect(Collectors.toList()));
 
 		List<List<?>> values = new ArrayList<>();
 		for (Experiment exp : experiments) {
 			List<String> datarow = new ArrayList<>(keys.size());
 			datarow.add("" + exp.getMemoryInMB());
 			datarow.add("" + exp.getNumCPUs());
+			Map<String, String> expKeys = exp.getValuesOfKeyFields();
 			for (String key : this.keyFields) {
-				datarow.add(exp.getValuesOfKeyFields().get(key));
+				datarow.add(expKeys.get(this.getDatabaseFieldnameForConfigEntry(key)));
 			}
 			values.add(datarow);
 		}
@@ -363,11 +405,11 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		if (values == null || values.isEmpty()) {
 			throw new IllegalArgumentException("No values provided for experiment update of experiment " + exp);
 		}
-		Collection<String> resultFieldsAsList = Arrays.asList(this.resultFields);
+		Collection<String> resultFieldsAsList = Arrays.stream(this.resultFields).map(k -> this.analyzer.getNameTypeSplitForAttribute(k).getX()).collect(Collectors.toList());
 		Collection<String> writableFields = new ArrayList<>(resultFieldsAsList);
 		writableFields.add(FIELD_HOST);
 		writableFields.add(FIELD_TIME_START);
-		writableFields.add("exception");
+		writableFields.add(FIELD_EXCEPTION);
 		writableFields.add(FIELD_TIME_END);
 		if (!writableFields.containsAll(values.keySet())) {
 			throw new IllegalArgumentException("The value set contains non-result fields: " + SetUtil.difference(values.keySet(), writableFields));
@@ -376,12 +418,14 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		String memoryUsageInMB = String.valueOf((int) Runtime.getRuntime().totalMemory() / 1024 / 1024);
 		Map<String, String> valuesToWrite = new HashMap<>();
 		values.keySet().forEach(k -> valuesToWrite.put(k, values.get(k).toString()));
+		List<String> fieldsForWhichToIgnoreTime = this.config.getFieldsForWhichToIgnoreTime();
+		List<String> fieldsForWhichToIgnoreMemory = this.config.getFieldsForWhichToIgnoreMemory();
 		for (String result : values.keySet()) {
 			if (resultFieldsAsList.contains(result)) {
-				if (this.config.getFieldsForWhichToIgnoreTime() == null || !this.config.getFieldsForWhichToIgnoreTime().contains(result)) {
+				if (this.config.getFieldsForWhichToIgnoreTime() == null || fieldsForWhichToIgnoreTime.stream().noneMatch(result::matches)) {
 					valuesToWrite.put(result + "_" + FIELD_TIME, now);
 				}
-				if (this.config.getFieldsForWhichToIgnoreMemory() == null || !this.config.getFieldsForWhichToIgnoreMemory().contains(result)) {
+				if (this.config.getFieldsForWhichToIgnoreMemory() == null || fieldsForWhichToIgnoreMemory.stream().noneMatch(result::matches)) {
 					valuesToWrite.put(result + "_" + FIELD_MEMORY, memoryUsageInMB);
 				}
 			}
@@ -400,7 +444,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	public void finishExperiment(final ExperimentDBEntry expEntry, final Throwable error) throws ExperimentDBInteractionFailedException {
 		Map<String, Object> valuesToAddAfterRun = new HashMap<>();
 		if (error != null) {
-			valuesToAddAfterRun.put("exception", LoggerUtil.getExceptionInfo(error));
+			valuesToAddAfterRun.put(FIELD_EXCEPTION, LoggerUtil.getExceptionInfo(error));
 		}
 		valuesToAddAfterRun.put(FIELD_TIME_END, new SimpleDateFormat(DATE_FORMAT).format(new Date()));
 		this.updateExperiment(expEntry, valuesToAddAfterRun);
@@ -412,7 +456,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	}
 
 	protected String getDatabaseFieldnameForConfigEntry(final String configKey) {
-		return configKey.replace("\\.", "_");
+		return this.analyzer.getNameTypeSplitForAttribute(configKey).getX().replace("\\.", "_");
 	}
 
 	@Override

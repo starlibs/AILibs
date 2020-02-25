@@ -113,6 +113,7 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 			ObjectNode root = mapper.createObjectNode();
 			root.set("token", root.textNode(this.token));
 			root.set("query", root.textNode(query));
+			this.logger.info("Sending query {}", query);
 			String jsonPayload = mapper.writeValueAsString(root);
 			StringEntity requestEntity = new StringEntity(jsonPayload, ContentType.APPLICATION_JSON);
 			HttpPost post = new HttpPost(URL);
@@ -166,7 +167,20 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 
 	@Override
 	public void createTable(final String tablename, final String nameOfPrimaryField, final Collection<String> fieldnames, final Map<String, String> types, final Collection<String> keys) throws SQLException {
-		throw new UnsupportedOperationException();
+		StringBuilder sqlMainTable = new StringBuilder();
+		StringBuilder keyFieldsSB = new StringBuilder();
+		sqlMainTable.append("CREATE TABLE IF NOT EXISTS `" + tablename + "` (");
+		if (!types.containsKey(nameOfPrimaryField)) {
+			throw new IllegalArgumentException("Type for primary field " + nameOfPrimaryField + " not specified.");
+		}
+		sqlMainTable.append("`" + nameOfPrimaryField + "` " + types.get(nameOfPrimaryField) + " NOT NULL AUTO_INCREMENT,");
+		for (String key : fieldnames) {
+			sqlMainTable.append("`" + key + "` " + types.get(key) + " NULL,");
+			keyFieldsSB.append("`" + key + "`,");
+		}
+		sqlMainTable.append("PRIMARY KEY (`" + nameOfPrimaryField + "`)");
+		sqlMainTable.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
+		this.update(sqlMainTable.toString());
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -19,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.api4.java.common.attributedobjects.GetPropertyFailedException;
@@ -806,7 +808,11 @@ public class SetUtil {
 	}
 
 	public static <T> T getRandomElement(final Collection<T> set, final long seed) {
-		int choice = new Random(seed).nextInt(set.size());
+		return getRandomElement(set, new Random(seed));
+	}
+
+	public static <T> T getRandomElement(final Collection<T> set, final Random random) {
+		int choice = random.nextInt(set.size());
 		if (set instanceof List) {
 			return ((List<T>) set).get(choice);
 		}
@@ -817,6 +823,18 @@ public class SetUtil {
 			}
 		}
 		return null;
+	}
+
+	public static <T> Collection<T> getRandomSubset(final Collection<T> set, final int k, final Random random) {
+		List<T> copy = new ArrayList<>(set);
+		Collections.shuffle(copy, random);
+		return copy.stream().limit(k).collect(Collectors.toList());
+	}
+
+	public static Collection<Integer> getRandomSetOfIntegers(final int maxExclusive, final int k, final Random random) {
+		List<Integer> ints = new ArrayList<>(k);
+		IntStream.range(0, maxExclusive).forEach(ints::add);
+		return getRandomSubset(ints, k, random);
 	}
 
 	public static <T extends Comparable<T>> List<T> mergeSort(final Collection<T> set) {

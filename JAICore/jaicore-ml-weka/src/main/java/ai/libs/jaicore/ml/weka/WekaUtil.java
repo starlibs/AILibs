@@ -192,19 +192,28 @@ public class WekaUtil {
 	 * @throws InterruptedException
 	 * @throws AlgorithmTimeoutedException
 	 */
-	public static Collection<List<String>> getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public static Collection<List<String>> getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection() {
 		Collection<List<String>> preprocessors = new ArrayList<>();
 		List<Collection<String>> sets = new ArrayList<>();
 		sets.add(getSearchers());
 		sets.add(getFeatureEvaluators());
 		CartesianProductComputationProblem<String> problem = new CartesianProductComputationProblem<>(sets);
-		List<List<String>> combinations = new LDSRelationComputer<>(problem).call();
-		for (List<String> combo : combinations) {
-			if (isValidPreprocessorCombination(combo.get(0), combo.get(1))) {
-				preprocessors.add(combo);
+		List<List<String>> combinations;
+		try {
+			combinations = new LDSRelationComputer<>(problem).call();
+			for (List<String> combo : combinations) {
+				if (isValidPreprocessorCombination(combo.get(0), combo.get(1))) {
+					preprocessors.add(combo);
+				}
 			}
+			return preprocessors;
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new UnsupportedOperationException("Have been interrupted meanwhile. This should usually not happen, we do not want to treat interrupts here.");
 		}
-		return preprocessors;
+		catch (AlgorithmTimeoutedException |  AlgorithmExecutionCanceledException e) {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	/**
