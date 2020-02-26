@@ -27,6 +27,8 @@ import ai.libs.jaicore.search.algorithms.standard.mcts.ensemble.EnsembleMCTSPath
 import ai.libs.jaicore.search.algorithms.standard.mcts.tag.TAGMCTSPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.thompson.DNGMCTSPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.thompson.DNGPolicy;
+import ai.libs.jaicore.search.algorithms.standard.mcts.uuct.UUCTPathSearch;
+import ai.libs.jaicore.search.algorithms.standard.mcts.uuct.VaR;
 import ai.libs.jaicore.search.algorithms.standard.random.RandomSearchFactory;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
@@ -54,6 +56,8 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearc
 			return new BestFirst<>((I)reducer2.encodeProblem(input));
 		case "uct":
 			return new UCTPathSearch<>((I)input, false, Math.sqrt(2), seed, 0.0);
+		case "uuct":
+			return new UUCTPathSearch<>((I)input, new VaR(0.05), seed, 0.0);
 		case "ensemble":
 
 			DNGPolicy<N, A> dng001 = new DNGPolicy<>((INodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, .01);
