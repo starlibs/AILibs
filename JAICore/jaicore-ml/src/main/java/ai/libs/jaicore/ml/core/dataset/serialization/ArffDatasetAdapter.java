@@ -41,6 +41,7 @@ import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.StringAttribute;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffAttributeType;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffItem;
+import ai.libs.jaicore.ml.pdm.dataset.SensorTimeSeriesAttribute;
 
 public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<ILabeledInstance>> {
 
@@ -182,22 +183,29 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 
 		switch (attType) {
-		case NUMERIC:
-		case REAL:
-		case INTEGER:
-			return new NumericAttribute(name);
-		case STRING:
-			return new StringAttribute(name);
-		case NOMINAL:
-			if (values != null) {
-				return new IntBasedCategoricalAttribute(name,
-						Arrays.stream(values).map(String::trim).map(x -> (((x.startsWith("'") && x.endsWith("'")) || x.startsWith("\"") && x.endsWith("\"")) ? x.substring(1, x.length() - 1) : x)).collect(Collectors.toList()));
-			} else {
-				throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
-			}
-		default:
-			throw new UnsupportedAttributeTypeException("Can not deal with attribute type " + type);
-		}
+         case NUMERIC:
+         case REAL:
+         case INTEGER:
+            return new NumericAttribute(name);
+         case STRING:
+            return new StringAttribute(name);
+         case TIMESERIES:
+            return new SensorTimeSeriesAttribute(name);
+         case NOMINAL:
+            if (values != null) {
+               return new IntBasedCategoricalAttribute(name,
+                     Arrays.stream(values).map(String::trim)
+                           .map(x -> (((x.startsWith("'") && x.endsWith("'")) || x.startsWith("\"") && x.endsWith("\""))
+                                 ? x.substring(1, x.length() - 1)
+                                 : x))
+                           .collect(Collectors.toList()));
+            } else {
+               throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
+            }
+
+         default:
+            throw new UnsupportedAttributeTypeException("Can not deal with attribute type " + type);
+      }
 	}
 
 	protected static Object parseInstance(final boolean sparseData, final List<IAttribute> attributes, final int targetIndex, final String line) {
