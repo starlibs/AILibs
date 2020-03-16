@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.model.NumericParameterDomain;
+import ai.libs.hasco.model.Parameter;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
@@ -74,9 +76,8 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 					case "B": // suppose that this defines a base classifier
 						Classifier baseClassifier = this.getComponentInstantiation(reqI.getValue()).getClassifier();
 						if (c instanceof Stacking) {
-							((Stacking) c).setClassifiers(new Classifier[] {baseClassifier});
-						}
-						else {
+							((Stacking) c).setClassifiers(new Classifier[] { baseClassifier });
+						} else {
 							this.logger.error("Unsupported option B for classifier {}", c.getClass().getName());
 						}
 						break;
@@ -113,11 +114,21 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 				continue;
 			}
 
-			if (!parameterValues.getValue().equals("false")) {
-				parameters.add("-" + parameterValues.getKey());
+			Parameter param = ci.getComponent().getParameterWithName(parameterValues.getKey());
+			boolean isDefault = false;
+			if (param.getDefaultDomain() instanceof NumericParameterDomain && ((NumericParameterDomain) param.getDefaultDomain()).isInteger() && param.getDefaultValue().toString().contains(".")) {
+				isDefault = ((int) Double.parseDouble(param.getDefaultValue().toString())) == ((int) Double.parseDouble(parameterValues.getValue()));
+			} else {
+				isDefault = param.getDefaultValue().toString().equals(parameterValues.getValue());
 			}
-			if (parameterValues.getValue() != null && !parameterValues.getValue().equals("") && !parameterValues.getValue().equals("true") && !parameterValues.getValue().equals("false")) {
-				parameters.add(parameterValues.getValue());
+
+			if (!isDefault) {
+				if (!parameterValues.getValue().equals("false")) {
+					parameters.add("-" + parameterValues.getKey());
+				}
+				if (parameterValues.getValue() != null && !parameterValues.getValue().equals("") && !parameterValues.getValue().equals("true") && !parameterValues.getValue().equals("false")) {
+					parameters.add(parameterValues.getValue());
+				}
 			}
 		}
 
