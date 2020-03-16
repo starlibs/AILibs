@@ -68,7 +68,11 @@ public class ComponentUtil {
 						if ((int) (numDomain.getMax() - numDomain.getMin()) > 0) {
 							parameterValues.put(p.getName(), ((int) (rand.nextInt((int) (numDomain.getMax() - numDomain.getMin())) + numDomain.getMin())) + "");
 						} else {
-							parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
+							if (p.getDefaultValue() instanceof Double) {
+								parameterValues.put(p.getName(), ((int) ((Double) p.getDefaultValue()).doubleValue()) + "");
+							} else {
+								parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
+							}
 						}
 					} else {
 						parameterValues.put(p.getName(), (rand.nextDouble() * (numDomain.getMax() - numDomain.getMin()) + numDomain.getMin()) + "");
