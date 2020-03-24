@@ -18,7 +18,7 @@ public class SensorTimeSeriesAttribute extends AGenericObjectAttribute<SensorTim
    private static final String EMPTY_STRING = "";
    private static final String DATA_POINT_SEPARATOR = " ";
    private static final String SPLIT_MULTIPLE_WHITESPACES = "\\s+";
-   private static final String TIMESTEP_VALUE_SEPARATOR = ":";
+   private static final String TIMESTEP_VALUE_SEPARATOR = "#";
 
    // TODO: add ranges for values (min/max)
 
