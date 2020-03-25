@@ -53,27 +53,29 @@ public class ExperimentSetAnalyzer {
 		//		this.config.reload();
 
 		/* erase laze fields */
-		this.possibleKeyCombinations = null;
-		this.valueGeneratorsPerKey.clear();
+		synchronized (this.config) {
+			this.possibleKeyCombinations = null;
+			this.valueGeneratorsPerKey.clear();
 
-		/* update key fields */
-		this.keyFields = Collections.unmodifiableList(this.config.getKeyFields().stream().map(k -> this.getNameTypeSplitForAttribute(k).getX()).collect(Collectors.toList()));
+			/* update key fields */
+			this.keyFields = Collections.unmodifiableList(this.config.getKeyFields().stream().map(k -> this.getNameTypeSplitForAttribute(k).getX()).collect(Collectors.toList()));
 
-		/* create map of possible values for each key field */
-		this.numExperimentsTotal = 1;
-		this.valuesForKeyFieldsInConfig = new HashMap<>();
-		for (String key: this.keyFields) {
-			String propertyVals = this.config.removeProperty(key);
-			if (propertyVals == null) {
-				throw new IllegalArgumentException("Invalid experiment set configuration! No property values defined for key field \"" + key + "\"");
-			}
-			List<String> vals = Arrays.asList(StringUtil.explode(propertyVals, ",")).stream().map(String::trim).collect(Collectors.toList());
-			this.config.setProperty(key, propertyVals);
-			this.valuesForKeyFieldsInConfig.put(key, vals);
-			try {
-				this.numExperimentsTotal *= this.getNumberOfValuesForKey(key);
-			} catch (IllegalKeyDescriptorException e) {
-				this.logger.error(LoggerUtil.getExceptionInfo(e));
+			/* create map of possible values for each key field */
+			this.numExperimentsTotal = 1;
+			this.valuesForKeyFieldsInConfig = new HashMap<>();
+			for (String key: this.keyFields) {
+				String propertyVals = this.config.removeProperty(key);
+				if (propertyVals == null) {
+					throw new IllegalArgumentException("Invalid experiment set configuration! No property values defined for key field \"" + key + "\"");
+				}
+				List<String> vals = Arrays.asList(StringUtil.explode(propertyVals, ",")).stream().map(String::trim).collect(Collectors.toList());
+				this.config.setProperty(key, propertyVals);
+				this.valuesForKeyFieldsInConfig.put(key, vals);
+				try {
+					this.numExperimentsTotal *= this.getNumberOfValuesForKey(key);
+				} catch (IllegalKeyDescriptorException e) {
+					this.logger.error(LoggerUtil.getExceptionInfo(e));
+				}
 			}
 		}
 	}

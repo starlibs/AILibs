@@ -117,8 +117,11 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 			String jsonPayload = mapper.writeValueAsString(root);
 			StringEntity requestEntity = new StringEntity(jsonPayload, ContentType.APPLICATION_JSON);
 			HttpPost post = new HttpPost(URL);
+			post.setHeader("Content-Type", "application/json");
 			post.setEntity(requestEntity);
+			this.logger.info("Waiting for response.");
 			CloseableHttpResponse response = client.execute(post);
+			this.logger.info("Received response. Now processing the result.");
 			return mapper.readTree(response.getEntity().getContent());
 		} catch (UnsupportedOperationException | IOException e) {
 			throw new SQLException(e);
@@ -219,6 +222,6 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 
 	@Override
 	public void close() {
-		throw new UnsupportedOperationException();
+		/* nothing to do */
 	}
 }

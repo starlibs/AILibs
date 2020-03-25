@@ -501,6 +501,10 @@ public class SetUtil {
 		return product;
 	}
 
+	public static <T> Collection<List<T>> cartesianProduct(final List<? extends Collection<T>> listOfSets) {
+		return cartesianProductReq(new ArrayList<>(listOfSets));
+	}
+
 	/**
 	 * @param a
 	 *            The set A.
@@ -508,7 +512,7 @@ public class SetUtil {
 	 *            The set B.
 	 * @return The Cartesian product A x B.
 	 */
-	public static <T> Collection<List<T>> cartesianProduct(final List<? extends Collection<T>> listOfSets) {
+	private static <T> Collection<List<T>> cartesianProductReq(final List<? extends Collection<T>> listOfSets) {
 
 		/* compute expected number of items of the result */
 		int expectedSize = 1;

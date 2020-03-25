@@ -161,7 +161,9 @@ public class SQLAdapter implements IDatabaseAdapter {
 				connectionProps.put("user", this.user);
 				connectionProps.put("password", this.password);
 				String connectionString = "jdbc:" + this.driver + "://" + this.host + "/" + this.database + ((this.ssl) ? "?verifyServerCertificate=false&requireSSL=true&useSSL=true" : "");
+				this.logger.info("Connecting to {}", connectionString);
 				this.connect = DriverManager.getConnection(connectionString, connectionProps);
+				this.logger.info("Connection established.");
 				return;
 			} catch (SQLException e) {
 				tries++;
@@ -381,6 +383,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 	@Override
 	public int[] insertMultiple(final String table, final List<String> keys, final List<List<? extends Object>> datarows, final int chunkSize) throws SQLException {
 		int n = datarows.size();
+		this.checkConnection();
 		List<Integer> ids = new ArrayList<>(n);
 		try (Statement stmt = this.connect.createStatement()) {
 			for (int i = 0; i < Math.ceil(n * 1.0 / chunkSize); i++) {
@@ -436,6 +439,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 	@Override
 	public int update(final String sql, final List<? extends Object> values) throws SQLException {
 		this.checkConnection();
+		this.logger.debug("Executing update query: {} with values {}", sql, values);
 		try (PreparedStatement stmt = this.connect.prepareStatement(sql)) {
 			for (int i = 1; i <= values.size(); i++) {
 				stmt.setString(i, values.get(i - 1).toString());
@@ -604,7 +608,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 		sqlMainTable.append("CREATE TABLE IF NOT EXISTS `" + tablename + "` (");
 		sqlMainTable.append("`" + nameOfPrimaryField + "` " + types.get(nameOfPrimaryField) + " NOT NULL AUTO_INCREMENT,");
 		for (String key : fieldnames) {
-			sqlMainTable.append("`" + key + "` " + types.get(key) + " NOT NULL,");
+			sqlMainTable.append("`" + key + "` " + types.get(key) + (types.get(key).contains("NULL") ? "" : " NOT NULL") + ",");
 			keyFieldsSB.append("`" + key + "`,");
 		}
 		sqlMainTable.append("PRIMARY KEY (`" + nameOfPrimaryField + "`)");
@@ -612,6 +616,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 
 		/* prepare statement */
 		try (Statement stmt = this.connect.createStatement()) {
+			this.logger.info("Executing query: {}", sqlMainTable);
 			stmt.execute(sqlMainTable.toString());
 		}
 	}

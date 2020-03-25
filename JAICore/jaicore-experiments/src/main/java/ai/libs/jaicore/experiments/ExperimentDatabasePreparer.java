@@ -117,4 +117,11 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 		}
 	}
 
+	public ExperimentSetAnalyzer getConfigAnalyzer() {
+		return this.configAnalyzer;
+	}
+
+	public IExperimentDatabaseHandle getHandle() {
+		return this.handle;
+	}
 }
