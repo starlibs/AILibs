@@ -1,12 +1,15 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts.uuct;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 
 public class CVaR implements IUCBUtilityFunction {
 
 	private final double alpha;
+	private final boolean maximize = true; // true if we want to minimize the observations
 
 	public CVaR(final double alpha) {
 		super();
@@ -15,11 +18,19 @@ public class CVaR implements IUCBUtilityFunction {
 
 	@Override
 	public double getUtility(final DoubleList observations) {
-		Collections.sort(observations);
-		int threshold = (int)Math.ceil(this.alpha * observations.size());
+		List<Double> inverseList = observations.stream().map(o -> o * -1).collect(Collectors.toList());
+		Collections.sort(inverseList);
+		int threshold = (int)Math.ceil(this.alpha * inverseList.size());
 		double sum = 0;
-		for (int i = 0; i < threshold; i++) {
-			sum += observations.getDouble(i);
+		if (this.maximize) {
+			for (int i = 0; i < threshold; i++) {
+				sum += inverseList.get(i);
+			}
+		}
+		else {
+			for (int i = threshold; i < observations.size(); i++) {
+				sum += inverseList.get(i);
+			}
 		}
 		return sum / threshold;
 	}

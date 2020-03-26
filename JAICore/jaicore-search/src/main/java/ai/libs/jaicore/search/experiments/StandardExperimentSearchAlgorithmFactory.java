@@ -57,7 +57,7 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearc
 		case "uct":
 			return new UCTPathSearch<>((I)input, false, Math.sqrt(2), seed, 0.0);
 		case "uuct":
-			return new UUCTPathSearch<>((I)input, new VaR(0.05), seed, 0.0);
+			return new UUCTPathSearch<>((I)input, new VaR(0.99), seed, 0.0);
 		case "ensemble":
 
 			DNGPolicy<N, A> dng001 = new DNGPolicy<>((INodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, .01);

@@ -1,12 +1,15 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts.uuct;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 
 public class VaR implements IUCBUtilityFunction {
 
 	private final double alpha;
+	private final boolean maximizeObservations = false;
 
 	public VaR(final double alpha) {
 		super();
@@ -18,14 +21,15 @@ public class VaR implements IUCBUtilityFunction {
 		if (observations.isEmpty()) {
 			return Double.MAX_VALUE;
 		}
-		Collections.sort(observations);
-		int threshold = (int)Math.ceil(this.alpha * observations.size());
-		return observations.getDouble(threshold - 1);
+		List<Double> inversedObs = observations.stream().map(o -> o * -1).collect(Collectors.toList());
+		Collections.sort(inversedObs);
+		int threshold = (int)Math.ceil(this.alpha * inversedObs.size());
+		return inversedObs.get(threshold - 1);
 	}
 
 	@Override
 	public double getQ() {
-		return 2;
+		return 1;
 	}
 
 	@Override
