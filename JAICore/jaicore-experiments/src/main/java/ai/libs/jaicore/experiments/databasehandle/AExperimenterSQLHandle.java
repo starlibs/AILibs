@@ -227,9 +227,10 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	@Override
 	public List<ExperimentDBEntry> getRandomOpenExperiments(final int limit) throws ExperimentDBInteractionFailedException {
 		StringBuilder queryStringSB = new StringBuilder();
+		queryStringSB.append("SELECT * FROM ("); // open sub-query
 		queryStringSB.append(this.getSQLPrefixForKeySelectQuery());
-		queryStringSB.append("WHERE time_started IS NULL");
-		queryStringSB.append(" ORDER BY RAND() LIMIT " + limit);
+		queryStringSB.append("WHERE time_started IS NULL LIMIT " + (limit * 100)); // basic pool
+		queryStringSB.append(") as t ORDER BY RAND() LIMIT " + limit); // close sub-query and order results
 		try {
 			return this.getExperimentsForSQLQuery(queryStringSB.toString());
 		} catch (SQLException e) {
@@ -278,7 +279,8 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	@Override
 	public List<ExperimentDBEntry> getFailedExperiments(final Map<String, Object> fieldFilter) throws ExperimentDBInteractionFailedException {
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append(this.getSQLPrefixForSelectQuery());
+		queryStringSB.append("SELECT " + FIELD_ID + ", " + FIELD_MEMORY_MAX + ", " + FIELD_NUMCPUS + ", " + Arrays.stream(this.keyFields).map(k -> this.analyzer.getNameTypeSplitForAttribute(k).getX()).collect(Collectors.joining(", ")) + ", exception");
+		queryStringSB.append(" FROM `" + this.tablename + "`");
 		queryStringSB.append("WHERE exception IS NOT NULL");
 		if (!fieldFilter.isEmpty()) {
 			queryStringSB.append(" AND ");

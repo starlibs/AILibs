@@ -90,6 +90,7 @@ public class WekaUtil {
 		classifiers.add("weka.classifiers.functions.VotedPerceptron");
 		classifiers.add("weka.classifiers.lazy.IBk");
 		classifiers.add("weka.classifiers.lazy.KStar");
+		classifiers.add("weka.classifiers.rules.DecisionTable");
 		classifiers.add("weka.classifiers.rules.JRip");
 		classifiers.add("weka.classifiers.rules.M5Rules");
 		classifiers.add("weka.classifiers.rules.OneR");
