@@ -9,11 +9,13 @@ import it.unimi.dsi.fastutil.doubles.DoubleList;
 public class VaR implements IUCBUtilityFunction {
 
 	private final double alpha;
+	private final double b;
 	private final boolean maximizeObservations = false;
 
-	public VaR(final double alpha) {
+	public VaR(final double alpha, final double b) {
 		super();
 		this.alpha = alpha;
+		this.b = b;
 	}
 
 	@Override
@@ -39,6 +41,7 @@ public class VaR implements IUCBUtilityFunction {
 
 	@Override
 	public double getB() {
-		return 1 / this.alpha * (1 + 3 / Math.min(this.alpha, 1 - this.alpha)); // according to Proposition 4 in the extended version of the paper, setting c* := 1
+		return this.b;
+		//		return 1 / this.alpha * (1 + 3 / Math.min(this.alpha, 1 - this.alpha)); // according to Proposition 4 in the extended version of the paper, setting c* := 1
 	}
 }

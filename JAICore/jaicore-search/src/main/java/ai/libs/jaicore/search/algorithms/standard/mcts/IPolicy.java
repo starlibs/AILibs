@@ -1,8 +1,8 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts;
 
-import java.util.Map;
+import java.util.Collection;
 
-public interface IPolicy<N, A, V extends Comparable<V>> {
+public interface IPolicy<N, A> {
 
-	public A getAction(N node, Map<A, N> actionsWithSuccessors) throws ActionPredictionFailedException;
+	public A getAction(N node, Collection<A> allowedActions) throws ActionPredictionFailedException;
 }

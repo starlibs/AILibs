@@ -40,6 +40,14 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearc
 	public IOptimalPathInORGraphSearch<I, ? extends IEvaluatedPath<N, A, Double>, N, A, Double> getAlgorithm(final Experiment experiment, final IPathSearchWithPathEvaluationsInput<N, A, Double> input) {
 		final int seed = Integer.parseInt(experiment.getValuesOfKeyFields().get(IOwnerBasedRandomConfig.K_SEED));
 		final String algorithm = experiment.getValuesOfKeyFields().get(IAlgorithmNameConfig.K_ALGORITHM_NAME);
+
+		if (algorithm.startsWith("uuct-")) {
+			String[] parts = algorithm.split("-");
+			double alpha = Double.parseDouble(parts[1]);
+			double b = Double.parseDouble(parts[2]);
+			return new UUCTPathSearch<>((I)input, new VaR(alpha, b), seed, 0.0);
+		}
+
 		switch (algorithm) {
 		case "random":
 			IteratingGraphSearchOptimizerFactory<I, N, A, Double> factory = new IteratingGraphSearchOptimizerFactory<>();
@@ -56,8 +64,6 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearc
 			return new BestFirst<>((I)reducer2.encodeProblem(input));
 		case "uct":
 			return new UCTPathSearch<>((I)input, false, Math.sqrt(2), seed, 0.0);
-		case "uuct":
-			return new UUCTPathSearch<>((I)input, new VaR(0.99), seed, 0.0);
 		case "ensemble":
 
 			DNGPolicy<N, A> dng001 = new DNGPolicy<>((INodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, .01);

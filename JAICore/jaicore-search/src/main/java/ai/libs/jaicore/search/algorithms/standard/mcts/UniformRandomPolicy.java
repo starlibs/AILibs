@@ -1,8 +1,8 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -11,11 +11,14 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.IRandomizable;
 
-
-public class UniformRandomPolicy<T, A, V extends Comparable<V>> implements IPolicy<T, A, V>, IRandomizable, ILoggingCustomizable {
+public class UniformRandomPolicy<T, A, V extends Comparable<V>> implements IPolicy<T, A>, IRandomizable, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(UniformRandomPolicy.class);
 	private final Random r;
+
+	public UniformRandomPolicy() {
+		this(new Random());
+	}
 
 	public UniformRandomPolicy(final Random r) {
 		super();
@@ -23,17 +26,27 @@ public class UniformRandomPolicy<T, A, V extends Comparable<V>> implements IPoli
 	}
 
 	@Override
-	public A getAction(final T node, final Map<A,T> actionsWithTheirSuccessors) {
-		this.logger.debug("Deriving action for node {}. Options are: {}", node, actionsWithTheirSuccessors);
+	public A getAction(final T node, final Collection<A> actions) {
+		this.logger.debug("Deriving action for node {}. Options are: {}", node, actions);
 
-		if (actionsWithTheirSuccessors.isEmpty()) {
+		if (actions.isEmpty()) {
 			throw new IllegalArgumentException("Cannot determine action if no actions are given!");
 		}
-		if (actionsWithTheirSuccessors.size() == 1) {
-			return actionsWithTheirSuccessors.keySet().iterator().next();
+		if (actions.size() == 1) {
+			return actions.iterator().next();
 		}
-		List<A> keys = new ArrayList<>(actionsWithTheirSuccessors.keySet());
-		A choice = keys.get(this.r.nextInt(keys.size()));
+		A choice;
+		int chosenIndex = this.r.nextInt(actions.size());
+		if (actions instanceof List) {
+			choice = ((List<A>)actions).get(chosenIndex);
+		}
+		else {
+			Iterator<A> it = actions.iterator();
+			for (int i = 0; i < chosenIndex; i++) {
+				it.next();
+			}
+			choice = it.next();
+		}
 		this.logger.info("Recommending action {}", choice);
 		return choice;
 	}

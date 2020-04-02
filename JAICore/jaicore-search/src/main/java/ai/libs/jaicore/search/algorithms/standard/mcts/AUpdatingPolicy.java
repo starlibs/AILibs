@@ -11,6 +11,8 @@ import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.sets.Pair;
+
 public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILoggingCustomizable {
 
 	private String loggerName;
@@ -36,16 +38,16 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 		}
 	}
 
-	private final Map<N, NodeLabel> labels = new HashMap<>();
+	private final Map<Pair<N, A>, NodeLabel> labels = new HashMap<>();
 
-	public NodeLabel getLabelOfNode(final N node) {
-		if (!this.labels.containsKey(node)) {
-			throw new IllegalArgumentException("No label for node " + node);
+	public NodeLabel getLabelOfNode(final Pair<N, A> nodeActionPair) {
+		if (!this.labels.containsKey(nodeActionPair)) {
+			throw new IllegalArgumentException("No label for node " + nodeActionPair);
 		}
-		return this.labels.get(node);
+		return this.labels.get(nodeActionPair);
 	}
 
-	public abstract double getScore(N node, N child);
+	public abstract double getScore(N node, A action);
 
 	public abstract A getActionBasedOnScores(Map<A, Double> scores);
 
@@ -54,7 +56,8 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 		this.logger.debug("Updating path {} with score {}", path, score);
 		int lastVisits = Integer.MAX_VALUE;
 		for (N node : path.getNodes()) {
-			NodeLabel label = this.labels.computeIfAbsent(node, n -> new NodeLabel());
+			A action = path.getOutArc(node);
+			NodeLabel label = this.labels.computeIfAbsent(new Pair<>(node, action), n -> new NodeLabel());
 			label.mean = (label.visits * label.mean + score) / (label.visits + 1);
 			label.visits++;
 			this.logger.trace("Updated label of node {}. Visits now {} with mean {}", node, label.visits, label.mean);
@@ -67,16 +70,13 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 	}
 
 	@Override
-	public A getAction(final N node, final Map<A, N> actionsWithTheirSuccessors) {
-		Collection<A> possibleActions = actionsWithTheirSuccessors.keySet();
-		this.logger.debug("Deriving action for node {}. The {} options are: {}", node, possibleActions.size(), actionsWithTheirSuccessors);
+	public A getAction(final N node, final Collection<A> possibleActions) {
+		this.logger.debug("Deriving action for node {}. The {} options are: {}", node, possibleActions.size(), possibleActions);
 
 		/* if an applicable action has not been tried, play it to get some initial idea */
-		List<A> actionsThatHaveNotBeenTriedYet = possibleActions.stream().filter(a -> !this.labels.containsKey(actionsWithTheirSuccessors.get(a))).collect(Collectors.toList());
+		List<A> actionsThatHaveNotBeenTriedYet = possibleActions.stream().filter(a -> !this.labels.containsKey(new Pair<>(node, a))).collect(Collectors.toList());
 		if (!actionsThatHaveNotBeenTriedYet.isEmpty()) {
 			A action = actionsThatHaveNotBeenTriedYet.get(0);
-			N child = actionsWithTheirSuccessors.get(action);
-			this.labels.put(child, new NodeLabel());
 			this.logger.info("Dictating action {}, because this was never played before.", action);
 			return action;
 		}
@@ -85,16 +85,15 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 		this.logger.debug("All actions have been tried. Label is: {}", this.labels.get(node));
 		Map<A, Double> scores = new HashMap<>();
 		for (A action : possibleActions) {
-			N child = actionsWithTheirSuccessors.get(action);
-			NodeLabel labelOfChild = this.labels.get(child);
-			assert labelOfChild.visits != 0 : "Visits of node " + child + " cannot be 0 if we already used this action before!";
-			this.logger.trace("Considering action {} whose successor state has stats {} and {} visits", action, labelOfChild.mean, labelOfChild.visits);
-			Double score = this.getScore(node, child);
+			NodeLabel labelOfAction = this.labels.get(new Pair<>(node, action));
+			assert labelOfAction.visits != 0 : "Visits of action " + action + " cannot be 0 if we already used this action before!";
+			this.logger.trace("Considering action {} whose successor state has stats {} and {} visits", action, labelOfAction.mean, labelOfAction.visits);
+			Double score = this.getScore(node, action);
 			if (score.isNaN()) {
 				throw new IllegalStateException("Score of action " + action + " is NaN, which it must not be!");
 			}
 			scores.put(action, score);
-			assert !score.isNaN() : "The score of action " + action + " is NaN, which cannot be the case. Score mean is " + labelOfChild.mean + ", number of visits is " + labelOfChild.visits;
+			assert !score.isNaN() : "The score of action " + action + " is NaN, which cannot be the case. Score mean is " + labelOfAction.mean + ", number of visits is " + labelOfAction.visits;
 		}
 		A choice = this.getActionBasedOnScores(scores);
 

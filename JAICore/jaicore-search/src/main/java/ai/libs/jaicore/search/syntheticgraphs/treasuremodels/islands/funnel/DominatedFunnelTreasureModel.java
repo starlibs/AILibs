@@ -58,7 +58,7 @@ public class DominatedFunnelTreasureModel extends AIslandTreasureModel {
 			this.bestPlateauOfTreasures = Math.min(this.bestPlateauOfTreasures, plateauOfThisIsland);
 		}
 
-		System.out.println("Treasure plateaus: " + this.getInnerPlateauOfTreasureIsland(this.bestPlateauOfTreasures));
+		System.out.println("Treasure plateaus: " + this.getInnerPlateauOfTreasureIsland(this.bestPlateauOfTreasures) + ". Treasure island: " + this.indicesOfTreasureIslands);
 	}
 
 	@Override
