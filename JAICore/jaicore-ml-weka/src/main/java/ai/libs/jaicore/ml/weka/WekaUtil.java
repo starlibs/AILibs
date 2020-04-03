@@ -172,7 +172,7 @@ public class WekaUtil {
 		classifiers.add("weka.classifiers.meta.LogitBoost");
 		classifiers.add("weka.classifiers.meta.MultiClassClassifier");
 		classifiers.add("weka.classifiers.meta.RandomCommittee");
-		classifiers.add("weka.classifiers.meta.RandomSubspace");
+		classifiers.add("weka.classifiers.meta.RandomSubSpace");
 		classifiers.add("weka.classifiers.meta.Stacking");
 		classifiers.add("weka.classifiers.meta.Vote");
 		return classifiers;
@@ -211,8 +211,7 @@ public class WekaUtil {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new UnsupportedOperationException("Have been interrupted meanwhile. This should usually not happen, we do not want to treat interrupts here.");
-		}
-		catch (AlgorithmTimeoutedException |  AlgorithmExecutionCanceledException e) {
+		} catch (AlgorithmTimeoutedException | AlgorithmExecutionCanceledException e) {
 			throw new UnsupportedOperationException();
 		}
 	}
@@ -857,7 +856,7 @@ public class WekaUtil {
 		for (int i = 0; i < reduced.numAttributes(); i++) {
 			if (i != reduced.classIndex()) {
 				matrix[index] = reduced.attributeToDoubleArray(i);
-				index ++;
+				index++;
 			}
 		}
 		return Nd4j.create(matrix).transpose();
