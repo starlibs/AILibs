@@ -183,29 +183,25 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 
 		switch (attType) {
-         case NUMERIC:
-         case REAL:
-         case INTEGER:
-            return new NumericAttribute(name);
-         case STRING:
-            return new StringAttribute(name);
-         case TIMESERIES:
-            return new SensorTimeSeriesAttribute(name);
-         case NOMINAL:
-            if (values != null) {
-               return new IntBasedCategoricalAttribute(name,
-                     Arrays.stream(values).map(String::trim)
-                           .map(x -> (((x.startsWith("'") && x.endsWith("'")) || x.startsWith("\"") && x.endsWith("\""))
-                                 ? x.substring(1, x.length() - 1)
-                                 : x))
-                           .collect(Collectors.toList()));
-            } else {
-               throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
-            }
+		case NUMERIC:
+		case REAL:
+		case INTEGER:
+			return new NumericAttribute(name);
+		case STRING:
+			return new StringAttribute(name);
+		case TIMESERIES:
+			return new SensorTimeSeriesAttribute(name);
+		case NOMINAL:
+			if (values != null) {
+				return new IntBasedCategoricalAttribute(name,
+						Arrays.stream(values).map(String::trim).map(x -> (((x.startsWith("'") && x.endsWith("'")) || x.startsWith("\"") && x.endsWith("\"")) ? x.substring(1, x.length() - 1) : x)).collect(Collectors.toList()));
+			} else {
+				throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
+			}
 
-         default:
-            throw new UnsupportedAttributeTypeException("Can not deal with attribute type " + type);
-      }
+		default:
+			throw new UnsupportedAttributeTypeException("Can not deal with attribute type " + type);
+		}
 	}
 
 	protected static Object parseInstance(final boolean sparseData, final List<IAttribute> attributes, final int targetIndex, final String line) {
@@ -408,6 +404,8 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			sb.append("{'" + ((ICategoricalAttribute) att).getLabels().stream().collect(Collectors.joining("','")) + "'}");
 		} else if (att instanceof INumericAttribute) {
 			sb.append(EArffAttributeType.NUMERIC.getName());
+		} else if (att instanceof SensorTimeSeriesAttribute) {
+			sb.append(EArffAttributeType.TIMESERIES.getName());
 		}
 		return sb.toString();
 	}

@@ -12,6 +12,8 @@ import java.util.Random;
 
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
+import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +26,15 @@ import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
+import ai.libs.jaicore.ml.regression.loss.dataset.RootMeanSquaredError;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
+import ai.libs.mlplan.core.ILearnerFactory;
+import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.PreferenceBasedNodeEvaluator;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 
-public class MLPlanSKLearnBuilder extends AbstractMLPlanBuilder<ScikitLearnWrapper, MLPlanSKLearnBuilder> {
+public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBatch> extends AbstractMLPlanBuilder<ScikitLearnWrapper<P, B>, MLPlanSKLearnBuilder<P, B>> {
 
 	private Logger logger = LoggerFactory.getLogger(MLPlanSKLearnBuilder.class);
 
@@ -44,32 +49,37 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanBuilder<ScikitLearnWrapp
 	private static final String COMMAND_PYTHON = "python";
 	private static final String[] COMMAND_PYTHON_VERSION = { COMMAND_PYTHON, "--version" };
 	private static final String[] COMMAND_PYTHON_EXEC = { COMMAND_PYTHON, "-c" };
+	private static final String[] COMMAND_PYTHON_BASH = { "sh", "-c", "python --version" };
+
 	private static final String PYTHON_MODULE_NOT_FOUND_ERROR_MSG = "ModuleNotFoundError";
 
-	private static final String RES_SKLEARN_SEARCHSPACE_CONFIG = "automl/searchmodels/sklearn/sklearn-mlplan.json";
 	private static final String RES_SKLEARN_UL_SEARCHSPACE_CONFIG = "automl/searchmodels/sklearn/ml-plan-ul.json";
-	private static final String FS_SEARCH_SPACE_CONFIG = "conf/mlplan-sklearn.json";
 
 	private static final String RES_SKLEARN_PREFERRED_COMPONENTS = "automl/searchmodels/sklearn/sklearn-preferenceList.txt";
 	private static final String FS_SKLEARN_PREFERRED_COMPONENTS = "conf/sklearn-preferenceList.txt";
 
 	/* DEFAULT VALUES FOR THE SCIKIT-LEARN SETTING */
-	private static final String DEF_REQUESTED_HASCO_INTERFACE = "AbstractClassifier";
 	private static final String DEF_PREFERRED_COMPONENT_NAME_PREFIX = "resolveAbstractClassifierWith";
 
-	private static final File DEF_SEARCH_SPACE_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_SKLEARN_SEARCHSPACE_CONFIG, FS_SEARCH_SPACE_CONFIG);
+	private static final EMLPlanSkLearnProblemType DEF_PROBLEM_TYPE = EMLPlanSkLearnProblemType.CLASSIFICATION;
 	private static final File DEF_PREFERRED_COMPONENTS = FileUtil.getExistingFileWithHighestPriority(RES_SKLEARN_PREFERRED_COMPONENTS, FS_SKLEARN_PREFERRED_COMPONENTS);
 
 	private static final SKLearnClassifierFactory DEF_CLASSIFIER_FACTORY = new SKLearnClassifierFactory();
 	private static final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> DEF_SEARCH_SELECT_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE,
 			new Random(0));
 	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS)
-			.withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE).withMeasure(DEFAULT_PERFORMANCE_MEASURE);
+			.withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE).withMeasure(new RootMeanSquaredError());
 	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS)
-			.withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE).withMeasure(DEFAULT_PERFORMANCE_MEASURE);
+			.withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE).withMeasure(new RootMeanSquaredError());
+
+	private EMLPlanSkLearnProblemType problemType;
+	private String pathVariable;
+	private String anacondaEnvironment;
+	private final boolean skipSetupCheck;
 
 	/**
 	 * Creates a new ML-Plan Builder for scikit-learn.
+	 *
 	 * @throws IOException Thrown if configuration files cannot be read.
 	 */
 	public MLPlanSKLearnBuilder() throws IOException {
@@ -84,12 +94,11 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanBuilder<ScikitLearnWrapp
 	 */
 	public MLPlanSKLearnBuilder(final boolean skipSetupCheck) throws IOException {
 		super();
-		if (!skipSetupCheck) {
-			this.checkPythonSetup();
-		}
-		this.withSearchSpaceConfigFile(DEF_SEARCH_SPACE_CONFIG);
+		this.skipSetupCheck = skipSetupCheck;
+		this.withProblemType(DEF_PROBLEM_TYPE);
+		this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(DEF_PROBLEM_TYPE.getResourceSearchSpaceConfigFile(), DEF_PROBLEM_TYPE.getFileSystemSearchSpaceConfig()));
 		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, DEF_PREFERRED_COMPONENT_NAME_PREFIX);
-		this.withRequestedInterface(DEF_REQUESTED_HASCO_INTERFACE);
+		this.withRequestedInterface(DEF_PROBLEM_TYPE.getRequestedHascoInterface());
 		this.withClassifierFactory(DEF_CLASSIFIER_FACTORY);
 		this.withSearchPhaseEvaluatorFactory(DEF_SEARCH_PHASE_EVALUATOR);
 		this.withSelectionPhaseEvaluatorFactory(DEF_SELECTION_PHASE_EVALUATOR);
@@ -104,11 +113,12 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanBuilder<ScikitLearnWrapp
 
 	/**
 	 * Configures ML-Plan to use the search space with unlimited length preprocessing pipelines.
+	 *
 	 * @return The builder object.
 	 * @throws IOException Thrown if the search space configuration file cannot be read.
 	 */
-	public MLPlanSKLearnBuilder withUnlimitedLengthPipelineSearchSpace() throws IOException {
-		return this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(RES_SKLEARN_UL_SEARCHSPACE_CONFIG, FS_SEARCH_SPACE_CONFIG));
+	public MLPlanSKLearnBuilder<P, B> withUnlimitedLengthPipelineSearchSpace() throws IOException {
+		return this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(RES_SKLEARN_UL_SEARCHSPACE_CONFIG, DEF_PROBLEM_TYPE.getFileSystemSearchSpaceConfig()));
 	}
 
 	/**
@@ -119,7 +129,7 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanBuilder<ScikitLearnWrapp
 	 * @return The builder object.
 	 * @throws IOException Thrown if a problem occurs while trying to read the file containing the priority list.
 	 */
-	public MLPlanSKLearnBuilder withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
+	public MLPlanSKLearnBuilder<P, B> withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix, final boolean replaceCurrentPreferences) throws IOException {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
 		List<String> ordering;
 		if (preferredComponentsFile instanceof ResourceFile) {
@@ -130,13 +140,76 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanBuilder<ScikitLearnWrapp
 		} else {
 			ordering = FileUtil.readFileAsList(preferredComponentsFile);
 		}
-		return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.getComponents(), ordering, preferableCompnentMethodPrefix));
+		if (replaceCurrentPreferences) {
+			return this.withOnePreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.getComponents(), ordering, preferableCompnentMethodPrefix));
+		} else {
+			return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.getComponents(), ordering, preferableCompnentMethodPrefix));
+		}
+	}
+
+	public MLPlanSKLearnBuilder<P, B> withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
+		return this.withPreferredComponentsFile(preferredComponentsFile, preferableCompnentMethodPrefix, false);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public MLPlanSKLearnBuilder<P, B> withClassifierFactory(final ILearnerFactory<ScikitLearnWrapper<P, B>> classifierFactory) {
+		super.withClassifierFactory(classifierFactory);
+		if (this.problemType != null) {
+			if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
+				((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setProblemType(this.problemType.getBasicProblemType());
+			} else {
+				this.logger.error("Setting classifier factory for the problem type " + this.problemType.name() + " is only supported using SKLearnClassifierFactory.");
+			}
+		}
+		return this.getSelf();
+	}
+
+	@SuppressWarnings("unchecked")
+	public MLPlanSKLearnBuilder<P, B> withProblemType(final EMLPlanSkLearnProblemType problemType) throws IOException {
+		this.problemType = problemType;
+		if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
+			((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setProblemType(this.problemType.getBasicProblemType());
+			this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(problemType.getResourceSearchSpaceConfigFile(), problemType.getFileSystemSearchSpaceConfig()));
+			this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, DEF_PREFERRED_COMPONENT_NAME_PREFIX, true);
+			this.withRequestedInterface(problemType.getRequestedHascoInterface());
+		} else {
+			this.logger.error("Setting problem type only supported by SKLearnClassifierFactory.");
+		}
+		return this.getSelf();
+	}
+
+	@SuppressWarnings("unchecked")
+	public MLPlanSKLearnBuilder<P, B> withPathVariable(final String path) {
+		this.pathVariable = path;
+		if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
+			((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setPathVariable(path);
+		} else {
+			this.logger.error("Setting problem type only supported by SKLearnClassifierFactory.");
+		}
+		return this.getSelf();
+	}
+
+	@SuppressWarnings("unchecked")
+	public MLPlanSKLearnBuilder<P, B> withAnacondaEnvironment(final String env) {
+		this.anacondaEnvironment = env;
+		if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
+			((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setAnacondaEnvironment(this.anacondaEnvironment);
+		} else {
+			this.logger.error("Setting problem type only supported by SKLearnClassifierFactory."); // TODO
+		}
+		return this.getSelf();
 	}
 
 	private void checkPythonSetup() {
 		try {
 			/* Check whether we have python in the $PATH environment variable and whether the required python version is installed. */
-			Process p = new ProcessBuilder().command(COMMAND_PYTHON_VERSION).start();
+			ProcessBuilder processBuilder = new ProcessBuilder();
+			processBuilder.redirectErrorStream(true);
+			if (this.pathVariable != null) {
+				processBuilder.environment().put("PATH", this.pathVariable);
+			}
+			Process p = processBuilder.command(COMMAND_PYTHON_BASH).start();
 			StringBuilder sb = new StringBuilder();
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
 				String line;
@@ -221,8 +294,16 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanBuilder<ScikitLearnWrapp
 	}
 
 	@Override
-	public MLPlanSKLearnBuilder getSelf() {
+	public MLPlanSKLearnBuilder<P, B> getSelf() {
 		return this;
+	}
+
+	@Override
+	public MLPlan<ScikitLearnWrapper<P, B>> build() {
+		if (!this.skipSetupCheck) {
+			this.checkPythonSetup();
+		}
+		return super.build();
 	}
 
 }

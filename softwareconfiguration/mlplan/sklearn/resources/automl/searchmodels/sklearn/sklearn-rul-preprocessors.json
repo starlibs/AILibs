@@ -1,0 +1,80 @@
+{
+  "repository": "sklearn-rul-preprocessors",
+  "components": [
+    {
+      "name": "tsfresh.transformers.FeatureAugmenter",
+      "providedInterface": [
+        "Preprocessor"
+      ],
+      "requiredInterface": [
+        {
+          "id": "default_fc_parameters",
+          "name": "tsfreshFeatureSet"
+        }
+      ],
+      "parameter": [
+        {
+          "name": "disable_progressbar",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True"
+          ]
+        },
+        {
+          "name": "column_id",
+          "default": "instance_id",
+          "type": "cat",
+          "values": [
+            "instance_id"
+          ]
+        },
+        {
+          "name": "column_sort",
+          "default": "timestep",
+          "type": "cat",
+          "values": [
+            "timestep"
+          ]
+        },
+        {
+          "name": "column_kind",
+          "default": "sensor",
+          "type": "cat",
+          "values": [
+            "sensor"
+          ]
+        },
+        {
+          "name": "column_value",
+          "default": "value",
+          "type": "cat",
+          "values": [
+            "value"
+          ]
+        }
+      ]
+    },{
+      "name": "tsfresh.feature_extraction.settings.ComprehensiveFCParameters",
+      "providedInterface": [
+        "tsfreshFeatureSet"
+      ],
+      "requiredInterface": [],
+      "parameter": []
+    },{
+      "name": "tsfresh.feature_extraction.settings.MinimalFCParameters",
+      "providedInterface": [
+        "tsfreshFeatureSet"
+      ],
+      "requiredInterface": [],
+      "parameter": []
+    },{
+      "name": "tsfresh.feature_extraction.settings.EfficientFCParameters",
+      "providedInterface": [
+        "tsfreshFeatureSet"
+      ],
+      "requiredInterface": [],
+      "parameter": []
+    }
+  ]
+}

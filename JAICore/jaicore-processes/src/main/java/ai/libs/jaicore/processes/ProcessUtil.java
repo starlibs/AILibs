@@ -29,6 +29,7 @@ public class ProcessUtil {
 
 	/**
 	 * Retrieves the type of operating system.
+	 * 
 	 * @return Returns the name of the operating system.
 	 */
 	public static OS getOS() {
@@ -44,6 +45,7 @@ public class ProcessUtil {
 
 	/**
 	 * Gets the OS process for the process list.
+	 * 
 	 * @return The process for the process list.
 	 * @throws IOException Thrown if a problem occurred while trying to access the process list process.
 	 */
@@ -54,13 +56,14 @@ public class ProcessUtil {
 			return Runtime.getRuntime().exec(System.getenv("windir") + "\\system32\\" + "tasklist.exe");
 		case LINUX:
 			return Runtime.getRuntime().exec("ps -e -o user,pid,ppid,c,size,cmd");
-		default :
+		default:
 			throw new UnsupportedOperationException("No action defined for OS " + os);
 		}
 	}
 
 	/**
 	 * Gets a list of running java processes.
+	 * 
 	 * @return The list of running Java processes.
 	 * @throws IOException Throwsn if there was an issue accessing the OS's process list.
 	 */
@@ -70,6 +73,7 @@ public class ProcessUtil {
 
 	/**
 	 * Gets the operating system's process id of the given process.
+	 * 
 	 * @param process The process for which the process id shall be looked up.
 	 * @return The process id of the given process.
 	 * @throws ProcessIDNotRetrievableException Thrown if the process id cannot be retrieved.
@@ -77,7 +81,9 @@ public class ProcessUtil {
 	public static int getPID(final Process process) throws ProcessIDNotRetrievableException {
 		Integer pid;
 		try {
-			if (process.getClass().getName().equals("java.lang.UNIXProcess")) {
+			String osName = System.getProperty("os.name").toLowerCase();
+
+			if (process.getClass().getName().equals("java.lang.UNIXProcess") || osName.contains("mac")) {
 				/* get the PID on unix/linux systems */
 				Field f = process.getClass().getDeclaredField("pid");
 				f.setAccessible(true);
@@ -105,6 +111,7 @@ public class ProcessUtil {
 
 	/**
 	 * Kills the process with the given process id.
+	 * 
 	 * @param pid The id of the process which is to be killed.
 	 * @throws IOException Thrown if the system command could not be issued.
 	 */
@@ -119,6 +126,7 @@ public class ProcessUtil {
 
 	/**
 	 * Kills the provided process with a operating system's kill command.
+	 * 
 	 * @param process The process to be killed.
 	 * @throws IOException Thrown if the system command could not be issued.
 	 */

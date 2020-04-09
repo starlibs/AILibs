@@ -1,0 +1,32 @@
+{
+	"repository": "RUL",
+	"include": [
+		"./sklearn-rul-preprocessors.json",
+		"./sklearn-rul-data_cleaner.json",
+		"./sklearn-regressors.json"
+	],
+	"components": [
+		{
+			"name": "sklearn.pipeline.make_pipeline",
+			"providedInterface": [
+				"MLPipeline",
+				"AbstractRegressor"
+			],
+			"requiredInterface": [
+				{
+					"id": "data_cleaner",
+					"name": "DataCleaner"
+				},
+				{
+					"id": "preprocessor",
+					"name": "Preprocessor"
+				},
+				{
+					"id": "regressor",
+					"name": "BasicRegressor"
+				}
+			],
+			"parameter": []
+		}
+	]
+}

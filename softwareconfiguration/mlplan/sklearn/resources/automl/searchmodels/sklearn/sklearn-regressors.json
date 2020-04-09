@@ -1,0 +1,94 @@
+{
+  "repository": "sklearn-regressors",
+  "components": [
+    {
+      "name": "sklearn.tree.DecisionTreeRegressor",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "criterion",
+          "default": "mse",
+          "type": "cat",
+          "values": [
+            "mse",
+            "friedman_mse",
+            "mae"
+          ]
+        },
+        {
+          "name": "max_depth",
+          "type": "int",
+          "default": 6,
+          "min": 1,
+          "max": 11,
+          "minInterval": 1,
+          "refineSplits": 2
+        },
+        {
+          "name": "min_samples_split",
+          "type": "int",
+          "default": 11,
+          "min": 2,
+          "max": 21,
+          "minInterval": 1,
+          "refineSplits": 2
+        },
+        {
+          "name": "min_samples_leaf",
+          "type": "int",
+          "default": 11,
+          "min": 1,
+          "max": 21,
+          "minInterval": 1,
+          "refineSplits": 2
+        }
+      ]
+    },
+    {
+      "name": "sklearn.ensemble.AdaBoostRegressor",
+      "providedInterface": [
+        "BasicRegressor"
+      ],
+      "requiredInterface": [
+        {
+          "id": "base_estimator",
+          "name": "BaseLearner"
+        }
+      ],
+      "parameter": [
+        {
+          "name": "n_estimators",
+          "type": "int",
+          "default": 50,
+          "min": 1,
+          "max": 100,
+          "minInterval": 1,
+          "refineSplits": 2
+        },
+        {
+          "name": "learning_rate",
+          "type": "double",
+          "default": 1.0,
+          "min": 0,
+          "max": 1.0,
+          "minInterval": 1,
+          "refineSplits": 2
+        },
+        {
+          "name": "loss",
+          "type": "cat",
+          "default": "linear",
+          "values": [
+            "linear",
+            "square",
+            "exponential"
+          ]
+        }
+      ]
+    }
+  ]
+}

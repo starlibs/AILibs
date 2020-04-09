@@ -128,6 +128,16 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		return this.getSelf();
 	}
 
+	public B withOnePreferredNodeEvaluator(final IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator) {
+		if (this.factoryPreparedWithData) {
+			throw new IllegalStateException("The method prepareNodeEvaluatorInFactoryWithData has already been called. No changes to the preferred node evaluator possible anymore");
+		}
+
+		this.preferredNodeEvaluator = preferredNodeEvaluator;
+		this.update();
+		return this.getSelf();
+	}
+
 	@SuppressWarnings("unchecked")
 	public B withSearchFactory(@SuppressWarnings("rawtypes") final IOptimalPathInORGraphSearchFactory searchFactory, @SuppressWarnings("rawtypes") final AlgorithmicProblemReduction transformer) {
 		this.hascoFactory.setSearchFactory(searchFactory);

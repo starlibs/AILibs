@@ -10,13 +10,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
-import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassificationPredictionBatch;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
+import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
@@ -34,6 +35,8 @@ import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
+import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
+import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
 
 /**
  * Wraps a Scikit-Learn Python process by utilizing a template to start a classifier in Scikit with the given classifier.
@@ -65,8 +68,8 @@ import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
  * @author wever
  * @author scheiblm
  */
-public class ScikitLearnWrapper extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch>
-implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
+public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B>
+		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 	private static final String PYTHON_FILE_EXT = ".py";
 	private static final String MODEL_DUMP_FILE_EXT = ".pcl";
 	private static final String RESULT_FILE_EXT = ".json";
@@ -75,22 +78,16 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 
 	private static final File TMP_FOLDER = new File("tmp"); // Folder to put the serialized arff files and the scripts in.
 
-	private static final String RES_SCIKIT_TEMPLATE_PATH = "sklearn/scikit_template.twig.py";
-	private static final File SCIKIT_TEMPLATE = new File(ResourceUtil.getResourceAsTempFile(RES_SCIKIT_TEMPLATE_PATH)); // Path to the used python template.
-
 	private static final File MODEL_DUMPS_DIRECTORY = new File(TMP_FOLDER, "model_dumps");
 	private static final boolean VERBOSE = false; // If true the output stream of the python process is printed.
 	private static final boolean DELETE_TEMPORARY_FILES_ON_EXIT = true;
 
+	private File scikitTemplate; // Path to the used python template.
 	private ILabeledDataset<ILabeledInstance> dataset;
 
-	/* The type of problem that is to be solved by the ScikitLearn classifier. */
-	public enum ProblemType {
-		REGRESSION, CLASSIFICATION;
-	}
-
 	/* Problem definition fields */
-	private ProblemType problemType = ProblemType.CLASSIFICATION;
+	private EBasicProblemType problemType;
+	private String pathVariable;
 	private int[] targetColumns = new int[0]; // Defines which of the columns in the arff file represent the target vectors. If not set, the last column is assumed to be the target vector.
 
 	/* Identifying the wrapped sklearn instance. */
@@ -107,6 +104,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	 * The outer list represents the rows whilst the inner list represents the x target values in this row.
 	 */
 	private List<List<Double>> rawLastClassificationResults = null;
+	private String anacondaEnvironment;
 
 	/**
 	 * Starts a new wrapper and creates its underlying script with the given parameters.
@@ -115,9 +113,10 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	 * @param imports Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
 	 * @throws IOException The script could not be created.
 	 */
-	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withoutModelDump) throws IOException {
+	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withoutModelDump, final EBasicProblemType problemType) throws IOException {
 		this.withoutModelDump = withoutModelDump;
 		this.constructInstruction = constructInstruction;
+		this.setProblemType(problemType);
 
 		Map<String, Object> templateValues = this.getTemplateValueMap(constructInstruction, imports);
 		String hashCode = StringUtils.join(constructInstruction, imports).hashCode() + "";
@@ -136,7 +135,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		}
 
 		/* Prepare SKLearn Script template with the placeholder values */
-		JtwigTemplate template = JtwigTemplate.fileTemplate(SCIKIT_TEMPLATE);
+		JtwigTemplate template = JtwigTemplate.fileTemplate(this.scikitTemplate);
 		JtwigModel model = JtwigModel.newModel(templateValues);
 		template.render(model, new FileOutputStream(scriptFile));
 	}
@@ -148,12 +147,12 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	 * @param imports Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
 	 * @throws IOException The script could not be created.
 	 */
-	public ScikitLearnWrapper(final String constructInstruction, final String imports) throws IOException {
-		this(constructInstruction, imports, false);
+	public ScikitLearnWrapper(final String constructInstruction, final String imports, final EBasicProblemType problemType) throws IOException {
+		this(constructInstruction, imports, false, problemType);
 	}
 
-	public ScikitLearnWrapper(final String constructInstruction, final String imports, final File trainedModelPath) throws IOException {
-		this(constructInstruction, imports, false);
+	public ScikitLearnWrapper(final String constructInstruction, final String imports, final File trainedModelPath, final EBasicProblemType problemType) throws IOException {
+		this(constructInstruction, imports, false, problemType);
 		this.modelFile = trainedModelPath;
 	}
 
@@ -185,7 +184,11 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 
 			if (!this.withoutModelDump) {
 				this.modelFile = new File(MODEL_DUMPS_DIRECTORY, this.configurationUID + "_" + arffName + MODEL_DUMP_FILE_EXT);
-				String[] trainCommand = new SKLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff).withOutputFile(this.modelFile).toCommandArray();
+				ScikitLearnWrapper<P, B>.SKLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new SKLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff).withOutputFile(this.modelFile);
+				if (this.anacondaEnvironment != null) {
+					skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
+				}
+				String[] trainCommand = skLearnWrapperCommandBuilder.toCommandArray();
 
 				if (L.isDebugEnabled()) {
 					L.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
@@ -198,11 +201,9 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 					throw new TrainingException(listener.getErrorOutput().split("\\n")[0]);
 				}
 			}
-		}
-		catch (TrainingException e) {
+		} catch (TrainingException e) {
 			throw e;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new TrainingException("An exception occurred while training.", e);
 		}
 	}
@@ -210,7 +211,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	/**
 	 * Dumps given Instances in an arff file if this hash does not already exist.
 	 *
-	 * @param data     Instances to be serialized.
+	 * @param data Instances to be serialized.
 	 * @param fileName Name of the created file.
 	 * @return File object corresponding to the arff file.
 	 * @throws IOException During the serialization of the data as an arff file something went wrong.
@@ -229,13 +230,15 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		return arffOutputFile;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public ISingleLabelClassification predict(final ILabeledInstance instance) throws PredictionException, InterruptedException {
-		return this.predict(new ILabeledInstance[] { instance }).get(0);
+	public P predict(final ILabeledInstance instance) throws PredictionException, InterruptedException {
+		return (P) this.predict(new ILabeledInstance[] { instance }).get(0);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public ISingleLabelClassificationPredictionBatch predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
+	public B predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
 		ILabeledDataset<ILabeledInstance> data;
 		try {
 			data = this.dataset.createEmptyCopy();
@@ -256,7 +259,11 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		outputFile.getParentFile().mkdirs();
 
 		if (!this.withoutModelDump) {
-			String[] testCommand = new SKLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff).withModelFile(this.modelFile).withOutputFile(outputFile).toCommandArray();
+			ScikitLearnWrapper<P, B>.SKLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new SKLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff).withModelFile(this.modelFile).withOutputFile(outputFile);
+			if (this.anacondaEnvironment != null) {
+				skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
+			}
+			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
 
 			if (L.isDebugEnabled()) {
 				L.debug("Run test mode with {}", Arrays.toString(testCommand));
@@ -268,7 +275,11 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 				throw new PredictionException("Could not run scikit-learn classifier.", e);
 			}
 		} else {
-			String[] testCommand = new SKLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff).withTestArffFile(testArff).withOutputFile(outputFile).toCommandArray();
+			ScikitLearnWrapper<P, B>.SKLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new SKLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff).withTestArffFile(testArff).withOutputFile(outputFile);
+			if (this.anacondaEnvironment != null) {
+				skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
+			}
+			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
 			if (L.isDebugEnabled()) {
 				L.debug("Run train test mode with {}", Arrays.toString(testCommand));
 			}
@@ -304,7 +315,13 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		 * The structured results of the last classifyInstances call is accessable over
 		 * getRawLastClassificationResults().
 		 * */
-		return new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification((int) (double) x)).collect(Collectors.toList()));
+		if (this.problemType == EBasicProblemType.CLASSIFICATION) {
+			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification((int) (double) x)).collect(Collectors.toList()));
+		} else if (this.problemType == EBasicProblemType.RUL) {
+			L.info(this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()).toString());
+			return (B) new SingleTargetRegressionPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleTargetRegressionPrediction((double) x)).collect(Collectors.toList()));
+		}
+		throw new PredictionException("Unknown Problem Type.");
 	}
 
 	/**
@@ -312,7 +329,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	 *
 	 * @param importsFolder Folder to be added as a module.
 	 * @param keepNamespace If true, a class must be called by the modules' name plus the class name. This is only important if multiple modules are imported and the classes' names are
-	 *                      ambiguous. Keep in mind that the constructor call for the classifier must be created accordingly.
+	 *            ambiguous. Keep in mind that the constructor call for the classifier must be created accordingly.
 	 * @return String which can be appended to other imports to care for the folder to be added as a module.
 	 * @throws IOException The __init__.py couldn't be created in the given folder (which is necessary to declare it as a module).
 	 */
@@ -355,7 +372,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	 * Returns a map with the values for the script template.
 	 *
 	 * @param constructInstruction String that defines what constructor to call for the classifier and with which parameters to call it.
-	 * @param imports              Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
+	 * @param imports Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
 	 * @return A map to call the template engine with.
 	 */
 	private Map<String, Object> getTemplateValueMap(final String constructInstruction, final String imports) {
@@ -376,8 +393,17 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		return this.rawLastClassificationResults;
 	}
 
-	public void setProblemType(final ProblemType problemType) {
+	public void setProblemType(final EBasicProblemType problemType) {
 		this.problemType = problemType;
+		this.scikitTemplate = new File(ResourceUtil.getResourceAsTempFile(this.problemType.getRessourceScikitTemplate()));
+	}
+
+	public void setPathVariable(final String pathVariable) {
+		this.pathVariable = pathVariable;
+	}
+
+	public void setAnacondaEnvironment(final String env) {
+		this.anacondaEnvironment = env;
 	}
 
 	public void setTargets(final int... targetColumns) {
@@ -414,6 +440,9 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 			L.debug("Starting process {}", call.substring(1, call.length() - 1));
 		}
 		ProcessBuilder processBuilder = new ProcessBuilder(parameters).directory(TMP_FOLDER);
+		if (this.pathVariable != null) {
+			processBuilder.environment().put("PATH", this.pathVariable);
+		}
 		listener.listenTo(processBuilder.start());
 	}
 
@@ -454,13 +483,13 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		private static final String MODE_FLAG = "--mode";
 		private static final String MODEL_FLAG = "--model";
 		private static final String OUTPUT_FLAG = "--output";
-		private static final String REGRESSION_FLAG = "--regression";
 
 		private String arffFile;
 		private String testArffFile;
 		private WrapperExecutionMode mode;
 		private String modelFile;
 		private String outputFile;
+		private String anacondaEnvironment;
 
 		private SKLearnWrapperCommandBuilder() {
 
@@ -509,6 +538,11 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 			return this;
 		}
 
+		private SKLearnWrapperCommandBuilder withAnacondaEnvironment(final String env) {
+			this.anacondaEnvironment = env;
+			return this;
+		}
+
 		private String[] toCommandArray() {
 			Objects.requireNonNull(this.mode);
 			Objects.requireNonNull(this.outputFile);
@@ -521,6 +555,15 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 			}
 
 			List<String> processParameters = new ArrayList<>();
+			if (this.anacondaEnvironment != null) {
+				processParameters.add("source");
+				processParameters.add("~/anaconda3/etc/profile.d/conda.sh");
+				processParameters.add("&&");
+				processParameters.add("conda");
+				processParameters.add("activate");
+				processParameters.add(this.anacondaEnvironment);
+				processParameters.add("&&");
+			}
 			processParameters.add("python");
 			processParameters.add("-u"); // Force python to run stdout and stderr unbuffered.
 			processParameters.add(scriptFile.getAbsolutePath()); // Script to be executed.
@@ -533,9 +576,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 			}
 			processParameters.addAll(Arrays.asList(OUTPUT_FLAG, this.outputFile));
 
-			if (ScikitLearnWrapper.this.problemType == ScikitLearnWrapper.ProblemType.REGRESSION) {
-				processParameters.add(REGRESSION_FLAG);
-			}
+			processParameters.add(ScikitLearnWrapper.this.problemType.getScikitLearnCommandLineFlag());
 
 			if (this.mode == WrapperExecutionMode.TEST) {
 				Objects.requireNonNull(this.modelFile);
@@ -549,7 +590,11 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 				}
 			}
 			/* All additional parameters that the script shall consider. */
-			return processParameters.toArray(new String[] {});
+			StringJoiner stringJoiner = new StringJoiner(" ");
+			for (String parameter : processParameters) {
+				stringJoiner.add(parameter);
+			}
+			return new String[] { "sh", "-c", stringJoiner.toString() };
 		}
 	}
 

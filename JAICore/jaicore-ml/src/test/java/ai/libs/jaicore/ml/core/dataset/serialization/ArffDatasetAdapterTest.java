@@ -33,7 +33,7 @@ import ai.libs.jaicore.ml.pdm.dataset.SensorTimeSeriesAttribute;
 public class ArffDatasetAdapterTest {
 
 	private static final String RELATION_NAME = "probing_nonan_noid";
-   private static final int CLASS_INDEX = 2;
+	private static final int CLASS_INDEX = 2;
 	private static final String RELATION_STRING = "@relation '" + RELATION_NAME + ": -C " + CLASS_INDEX + "'";
 
 	private static final String ATTRIBUTE_NAME = "myAtt";
@@ -42,19 +42,19 @@ public class ArffDatasetAdapterTest {
 			"Cutey", "Davisson", "Dent", "Engineer", "Goonan", "Grove", "Harp", "Hayes", "Janson", "Johnson", "Koenig", "Kolln", "Lawyeraau", "Lee", "Lovitt", "Mahlers2nd", "Mark", "McKee", "Merritt", "Messick", "Mitchell", "Morrison",
 			"Neal", "Nigam", "Peterson", "Power", "Riley", "Robert", "Shea", "Sherwin", "Taylor", "Vernon", "Vision", "Walters", "Wilson");
 	private static final String NOMINAL_ATTRIBUTE_STRING = "@attribute '" + ATTRIBUTE_NAME + "' {" + SetUtil.implode(CATEGORICAL_VALUES, ",") + "}";
-   private static final String SENSOR_TIME_SERIES_ATTRIBUTE_STRING = "@attribute " + ATTRIBUTE_NAME + " timeseries";
+	private static final String SENSOR_TIME_SERIES_ATTRIBUTE_STRING = "@attribute " + ATTRIBUTE_NAME + " timeseries";
 
 	private static final IAttribute TEST_NUM_ATT = new NumericAttribute("numAtt");
 	private static final IAttribute TEST_CAT_ATT = new IntBasedCategoricalAttribute("catAtt", CATEGORICAL_VALUES);
-   private static final IAttribute TEST_STS_ATT = new SensorTimeSeriesAttribute("sensorTimeSeriesAttibute");
+	private static final IAttribute TEST_STS_ATT = new SensorTimeSeriesAttribute("sensorTimeSeriesAttibute");
 
 	private static final double TEST_NUMERIC_VAL = 231.0;
 	private static final int TEST_CATEGORICAL_VAL = (int) TEST_CAT_ATT.deserializeAttributeValue(CATEGORICAL_VALUES.get(1));
-   private static final SensorTimeSeries TEST_STS_VAL = (SensorTimeSeries) TEST_STS_ATT.deserializeAttributeValue("1:0.5 2:0.34 5:93.4");
-   private static final Object[] TEST_INSTANCE = { TEST_NUMERIC_VAL, TEST_STS_VAL, TEST_CATEGORICAL_VAL };
-   private static final Object[] TEST_INSTANCE_WITH_MISSING_NUMERIC_VAL = { null, TEST_STS_VAL, TEST_CATEGORICAL_VAL };
-   private static final Object[] TEST_INSTANCE_WITH_MISSING_CATEGORICAL_VAL = { TEST_NUMERIC_VAL, TEST_STS_VAL, null };
-   private static final List<IAttribute> TEST_ATTRIBUTES = Arrays.asList(TEST_NUM_ATT, TEST_STS_ATT, TEST_CAT_ATT);
+	private static final SensorTimeSeries TEST_STS_VAL = (SensorTimeSeries) TEST_STS_ATT.deserializeAttributeValue("1#0.5 2#0.34 5#93.4");
+	private static final Object[] TEST_INSTANCE = { TEST_NUMERIC_VAL, TEST_STS_VAL, TEST_CATEGORICAL_VAL };
+	private static final Object[] TEST_INSTANCE_WITH_MISSING_NUMERIC_VAL = { null, TEST_STS_VAL, TEST_CATEGORICAL_VAL };
+	private static final Object[] TEST_INSTANCE_WITH_MISSING_CATEGORICAL_VAL = { TEST_NUMERIC_VAL, TEST_STS_VAL, null };
+	private static final List<IAttribute> TEST_ATTRIBUTES = Arrays.asList(TEST_NUM_ATT, TEST_STS_ATT, TEST_CAT_ATT);
 
 	private static String generateDenseInstanceString(final List<IAttribute> attributes, final Object[] instanceArray) {
 		return IntStream.range(0, instanceArray.length).mapToObj(x -> attributes.get(x).serializeAttributeValue(instanceArray[x])).reduce((a, b) -> a + "," + b).get();
@@ -88,13 +88,12 @@ public class ArffDatasetAdapterTest {
 		assertTrue("Extracted list of categories does not contain all ground truth values", CATEGORICAL_VALUES.containsAll(catAtt.getLabels()));
 	}
 
-
-   @Test
-   public void testParseSensorTimeSeriesAttribute() throws UnsupportedAttributeTypeException {
-      IAttribute attribute = ArffDatasetAdapter.parseAttribute(SENSOR_TIME_SERIES_ATTRIBUTE_STRING);
-      assertTrue("Returned attribute is not of type IObjectAttribute", attribute instanceof IObjectAttribute);
-      assertEquals("Name of attribute could not be extracted correctly", ATTRIBUTE_NAME, attribute.getName());
-   }
+	@Test
+	public void testParseSensorTimeSeriesAttribute() throws UnsupportedAttributeTypeException {
+		IAttribute attribute = ArffDatasetAdapter.parseAttribute(SENSOR_TIME_SERIES_ATTRIBUTE_STRING);
+		assertTrue("Returned attribute is not of type IObjectAttribute", attribute instanceof IObjectAttribute);
+		assertEquals("Name of attribute could not be extracted correctly", ATTRIBUTE_NAME, attribute.getName());
+	}
 
 	@Test
 	public void testParseDenseInstance() {
@@ -112,7 +111,7 @@ public class ArffDatasetAdapterTest {
 			}
 		}
 		assertTrue("Numeric attribute is not a Number object but of type " + parsedDenseInstance[0].getClass().getName(), parsedDenseInstance[0] instanceof Number);
-		assertNotNull("No instance label for dense instance " + parsedInstance, ((List<?>)parsedInstance).get(1));
+		assertNotNull("No instance label for dense instance " + parsedInstance, ((List<?>) parsedInstance).get(1));
 	}
 
 	@Test
@@ -159,7 +158,7 @@ public class ArffDatasetAdapterTest {
 		Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
 		assertNull(parsedSparseInstance.get(0));
 		assertNotNull(parsedSparseInstance.get(1));
-      assertNotNull(parsedSparseInstance.get(2));
+		assertNotNull(parsedSparseInstance.get(2));
 	}
 
 	@Test
@@ -169,8 +168,8 @@ public class ArffDatasetAdapterTest {
 		@SuppressWarnings("unchecked")
 		Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
 		assertNotNull(parsedSparseInstance.get(0));
-      assertNotNull(parsedSparseInstance.get(1));
-      assertNull(parsedSparseInstance.get(2));
+		assertNotNull(parsedSparseInstance.get(1));
+		assertNull(parsedSparseInstance.get(2));
 	}
 
 	@Test
