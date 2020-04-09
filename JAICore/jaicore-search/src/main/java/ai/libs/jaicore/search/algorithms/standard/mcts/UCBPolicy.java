@@ -7,8 +7,6 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.sets.Pair;
-
 public class UCBPolicy<T, A> extends AUpdatingPolicy<T, A> implements ILoggingCustomizable {
 
 	private String loggerName;
@@ -41,10 +39,15 @@ public class UCBPolicy<T, A> extends AUpdatingPolicy<T, A> implements ILoggingCu
 
 	@Override
 	public double getScore(final T node, final A action) {
-		NodeLabel stateActionLabel = this.getLabelOfNode(new Pair<>(node, action));
-		double explorationTerm = (this.isMaximize() ? 1 : -1) * this.explorationConstant * Math.sqrt(Math.log(labelOfNode.visits) / labelOfChild.visits);
-		double score = labelOfChild.mean + explorationTerm;
-		this.logger.trace("Computed UCB score {} = {} + {} * {} * sqrt(log({})/{}). That is, exploration term is {}", score, labelOfChild.mean, this.isMaximize() ? 1 : -1, this.explorationConstant, labelOfNode.visits, labelOfChild.visits, explorationTerm);
+		NodeLabel nodeLabel = this.getLabelOfNode(node);
+		if (nodeLabel == null || !nodeLabel.numberOfChoicesPerAction.containsKey(action)) {
+			return (this.isMaximize() ? -1 : 1) * Double.MAX_VALUE;
+		}
+		int timesThisActionHasBeenChosen = nodeLabel.numberOfChoicesPerAction.get(action);
+		double averageScoreForThisAction = nodeLabel.accumulatedRewardsOfAction.get(action) / timesThisActionHasBeenChosen;
+		double explorationTerm = (this.isMaximize() ? 1 : -1) * this.explorationConstant * Math.sqrt(Math.log(nodeLabel.visits) / timesThisActionHasBeenChosen);
+		double score = averageScoreForThisAction + explorationTerm;
+		this.logger.trace("Computed UCB score {} = {} + {} * {} * sqrt(log({})/{}). That is, exploration term is {}", score, averageScoreForThisAction, this.isMaximize() ? 1 : -1, this.explorationConstant, nodeLabel.visits, timesThisActionHasBeenChosen, explorationTerm);
 		return score;
 	}
 

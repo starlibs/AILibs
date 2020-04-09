@@ -26,8 +26,4 @@ public abstract class AMDP<N, A, V extends Comparable<V>> implements IMDP<N, A, 
 	public double getProb(final N state, final A action, final N successor) {
 		return this.getProb(state, action).get(successor);
 	}
-
-	public N drawSuccessorState(final N state, final A action) {
-		return MDPUtils.drawSuccessorState(this, state, action, this.rand);
-	}
 }

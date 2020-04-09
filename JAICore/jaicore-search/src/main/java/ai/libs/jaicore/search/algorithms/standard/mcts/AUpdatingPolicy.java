@@ -11,8 +11,6 @@ import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.sets.Pair;
-
 public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILoggingCustomizable {
 
 	private String loggerName;
@@ -29,42 +27,44 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 	}
 
 	public class NodeLabel {
-		protected double mean;
 		protected int visits;
-
-		@Override
-		public String toString() {
-			return "NodeLabel [mean=" + this.mean + ", visits=" + this.visits + "]";
-		}
+		protected Map<A, Integer> numberOfChoicesPerAction = new HashMap<>();
+		protected Map<A, Double> accumulatedRewardsOfAction = new HashMap<>();
 	}
 
-	private final Map<Pair<N, A>, NodeLabel> labels = new HashMap<>();
+	private final Map<N, NodeLabel> labels = new HashMap<>();
 
-	public NodeLabel getLabelOfNode(final Pair<N, A> nodeActionPair) {
-		if (!this.labels.containsKey(nodeActionPair)) {
-			throw new IllegalArgumentException("No label for node " + nodeActionPair);
+	public NodeLabel getLabelOfNode(final N node) {
+		if (!this.labels.containsKey(node)) {
+			throw new IllegalArgumentException("No label for node " + node);
 		}
-		return this.labels.get(nodeActionPair);
+		return this.labels.get(node);
 	}
 
 	public abstract double getScore(N node, A action);
 
 	public abstract A getActionBasedOnScores(Map<A, Double> scores);
 
+	/**
+	 * Note that this is a transposition-based and hence, only partially path-dependent, update.
+	 * The labels are associated to nodes of the original MDP (states) and not to nodes in the MCTS search tree (paths)!
+	 * This means that, in fact, several paths are (partially) updated simultanously.
+	 * However, on all other paths crossing the nodes on the updated paths, only those situations are updated and not the situations
+	 * in higher nodes of the search tree.
+	 *
+	 */
 	@Override
-	public void updatePath(final ILabeledPath<N, A> path, final Double score, final int lengthOfActualPlayoutPath) {
+	public void updatePath(final ILabeledPath<N, A> path, final Double score) {
 		this.logger.debug("Updating path {} with score {}", path, score);
-		int lastVisits = Integer.MAX_VALUE;
-		for (N node : path.getNodes()) {
+		for (N node : path.getPathToParentOfHead().getNodes()) {
 			A action = path.getOutArc(node);
-			NodeLabel label = this.labels.computeIfAbsent(new Pair<>(node, action), n -> new NodeLabel());
-			label.mean = (label.visits * label.mean + score) / (label.visits + 1);
+			NodeLabel label = this.labels.computeIfAbsent(node, n -> new NodeLabel());
+			double rewardsBefore = label.accumulatedRewardsOfAction.computeIfAbsent(action, a -> 0.0);
+			int numPullsBefore = label.numberOfChoicesPerAction.computeIfAbsent(action, a -> 0);
+			label.accumulatedRewardsOfAction.put(action,  rewardsBefore + score);
+			label.numberOfChoicesPerAction.put(action, numPullsBefore + 1);
 			label.visits++;
-			this.logger.trace("Updated label of node {}. Visits now {} with mean {}", node, label.visits, label.mean);
-			if (label.visits > lastVisits) {
-				throw new IllegalStateException("Illegal visits stats of child " + label.visits + " compared to parent " + lastVisits + "\nCheck whether the searched graph is really a tree!");
-			}
-			lastVisits = label.visits;
+			this.logger.trace("Updated label of node {}. Visits now {}. Cummulative changed from {} to {}. Mean changed from {} to {}", node, label.visits, rewardsBefore, rewardsBefore + score, rewardsBefore / numPullsBefore, (rewardsBefore + score) / (numPullsBefore + 1));
 		}
 		this.logger.debug("Path update completed.");
 	}
@@ -74,7 +74,7 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 		this.logger.debug("Deriving action for node {}. The {} options are: {}", node, possibleActions.size(), possibleActions);
 
 		/* if an applicable action has not been tried, play it to get some initial idea */
-		List<A> actionsThatHaveNotBeenTriedYet = possibleActions.stream().filter(a -> !this.labels.containsKey(new Pair<>(node, a))).collect(Collectors.toList());
+		List<A> actionsThatHaveNotBeenTriedYet = possibleActions.stream().filter(a -> !this.labels.containsKey(node)).collect(Collectors.toList());
 		if (!actionsThatHaveNotBeenTriedYet.isEmpty()) {
 			A action = actionsThatHaveNotBeenTriedYet.get(0);
 			this.logger.info("Dictating action {}, because this was never played before.", action);
@@ -82,18 +82,18 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 		}
 
 		/* otherwise, play best action */
-		this.logger.debug("All actions have been tried. Label is: {}", this.labels.get(node));
+		NodeLabel labelOfNode = this.labels.get(node);
+		this.logger.debug("All actions have been tried. Label is: {}", labelOfNode);
 		Map<A, Double> scores = new HashMap<>();
 		for (A action : possibleActions) {
-			NodeLabel labelOfAction = this.labels.get(new Pair<>(node, action));
-			assert labelOfAction.visits != 0 : "Visits of action " + action + " cannot be 0 if we already used this action before!";
-			this.logger.trace("Considering action {} whose successor state has stats {} and {} visits", action, labelOfAction.mean, labelOfAction.visits);
+			assert labelOfNode.visits != 0 : "Visits of action " + action + " cannot be 0 if we already used this action before!";
+			this.logger.trace("Considering action {}, which has {} visits and cummulative rewards {}.", action, labelOfNode.numberOfChoicesPerAction.get(action), labelOfNode.accumulatedRewardsOfAction.get(action));
 			Double score = this.getScore(node, action);
 			if (score.isNaN()) {
 				throw new IllegalStateException("Score of action " + action + " is NaN, which it must not be!");
 			}
 			scores.put(action, score);
-			assert !score.isNaN() : "The score of action " + action + " is NaN, which cannot be the case. Score mean is " + labelOfAction.mean + ", number of visits is " + labelOfAction.visits;
+			assert !score.isNaN() : "The score of action " + action + " is NaN, which cannot be the case.";
 		}
 		A choice = this.getActionBasedOnScores(scores);
 

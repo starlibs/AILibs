@@ -16,9 +16,10 @@ public class LakeMDP extends AMDP<LakeState, ELakeActions, Double> {
 	private final LakeLayout layout;
 	private final int goalRow;
 	private final int goalCol;
+	private final int timeout = 100;
 
 	public LakeMDP(final LakeLayout layout, final int startRow, final int startCol, final int goalRow, final int goalCol) {
-		super(new LakeState(layout, startRow, startCol));
+		super(new LakeState(layout, startRow, startCol, 0));
 		this.layout = layout;
 		this.goalRow = goalRow;
 		this.goalCol = goalCol;
@@ -26,7 +27,7 @@ public class LakeMDP extends AMDP<LakeState, ELakeActions, Double> {
 
 	@Override
 	public Collection<ELakeActions> getApplicableActions(final LakeState state) {
-		if (state.isInPit() || (state.getRow() == this.goalRow && state.getCol() == this.goalCol)) {
+		if (state.getTime() >= this.timeout || state.isInPit() || (state.getRow() == this.goalRow && state.getCol() == this.goalCol)) {
 			return Arrays.asList();
 		}
 		return POSSIBLE_ACTIONS;
@@ -69,23 +70,23 @@ public class LakeMDP extends AMDP<LakeState, ELakeActions, Double> {
 	}
 
 	public LakeState up(final LakeState s) {
-		return new LakeState(s.getLayout(), Math.max(0, s.getRow() - 1), s.getCol());
+		return new LakeState(s.getLayout(), Math.max(0, s.getRow() - 1), s.getCol(), s.getTime() + 1);
 	}
 
 	public LakeState down(final LakeState s) {
-		return new LakeState(s.getLayout(), Math.min(this.layout.getRows() - 1, s.getRow() + 1), s.getCol());
+		return new LakeState(s.getLayout(), Math.min(this.layout.getRows() - 1, s.getRow() + 1), s.getCol(), s.getTime() + 1);
 	}
 
 	public LakeState left(final LakeState s) {
-		return new LakeState(s.getLayout(), s.getRow(), Math.max(0, s.getCol() - 1));
+		return new LakeState(s.getLayout(), s.getRow(), Math.max(0, s.getCol() - 1), s.getTime() + 1);
 	}
 
 	public LakeState right(final LakeState s) {
-		return new LakeState(s.getLayout(), s.getRow(), Math.min(this.layout.getCols() - 1, s.getCol() + 1));
+		return new LakeState(s.getLayout(), s.getRow(), Math.min(this.layout.getCols() - 1, s.getCol() + 1), s.getTime() + 1);
 	}
 
 	@Override
 	public Double getScore(final LakeState state, final ELakeActions action, final LakeState successor) {
-		return successor.isInPit() ? 100000.0 : 1.0;
+		return successor.isInPit() ? (1 - state.getTime() * 1.0 / this.timeout) : 1.0 / this.timeout; // every move gets more expensive than the previous one
 	}
 }

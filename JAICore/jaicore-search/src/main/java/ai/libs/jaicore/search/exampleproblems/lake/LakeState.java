@@ -4,12 +4,14 @@ public class LakeState {
 	private final LakeLayout layout;
 	private final int row;
 	private final int col;
+	private final int time;
 
-	public LakeState(final LakeLayout layout, final int row, final int col) {
+	public LakeState(final LakeLayout layout, final int row, final int col, final int time) {
 		super();
 		this.layout = layout;
 		this.row = row;
 		this.col = col;
+		this.time = time;
 	}
 
 	public LakeLayout getLayout() {
@@ -22,6 +24,10 @@ public class LakeState {
 
 	public int getCol() {
 		return this.col;
+	}
+
+	public int getTime() {
+		return this.time;
 	}
 
 	public boolean isInPit() {
@@ -65,6 +71,7 @@ public class LakeState {
 		result = prime * result + this.col;
 		result = prime * result + ((this.layout == null) ? 0 : this.layout.hashCode());
 		result = prime * result + this.row;
+		result = prime * result + this.time;
 		return result;
 	}
 
@@ -93,6 +100,14 @@ public class LakeState {
 		if (this.row != other.row) {
 			return false;
 		}
+		if (this.time != other.time) {
+			return false;
+		}
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return this.row + "/" + this.col + "/" + this.time;
 	}
 }

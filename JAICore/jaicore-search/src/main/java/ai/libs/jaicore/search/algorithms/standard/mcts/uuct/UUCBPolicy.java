@@ -1,11 +1,13 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts.uuct;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Random;
 
 import org.api4.java.datastructure.graph.ILabeledPath;
 
+import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.search.algorithms.standard.mcts.ActionPredictionFailedException;
 import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
@@ -17,7 +19,7 @@ public class UUCBPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double> {
 	private final double a;
 	private final double b;
 	private final double q;
-	private final Map<N, DoubleList> observations = new HashMap<>();
+	private final Map<N, Map<A, DoubleList>> observations = new HashMap<>();
 	private int t = 0;
 
 	public UUCBPolicy(final IUCBUtilityFunction utilityFunction) {
@@ -29,14 +31,21 @@ public class UUCBPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double> {
 	}
 
 	@Override
-	public A getAction(final N node, final Map<A, N> actionsWithSuccessors) throws ActionPredictionFailedException {
+	public A getAction(final N node, final Collection<A> possibleActions) throws ActionPredictionFailedException {
 
 		/* compute score of each successor (eq 16 in paper and 15 in extended) */
 		double bestScore = Double.MAX_VALUE * -1;
 		A bestAction = null;
+		Map<A, DoubleList> observationsForActions = this.observations.get(node);
+		if (observationsForActions == null) {
+			return SetUtil.getRandomElement(possibleActions, new Random().nextLong());
+		}
 		//		System.out.println("Compare arms: ");
-		for (Entry<A, N> succ : actionsWithSuccessors.entrySet()) {
-			DoubleList observationsOfChild = this.observations.get(succ.getValue());
+		for (A succ : possibleActions) {
+			DoubleList observationsOfChild = observationsForActions.get(succ);
+			if (observationsOfChild == null) {
+				continue;
+			}
 			double utility = this.utilityFunction.getUtility(observationsOfChild);
 			double phiInverse = this.phiInverse((ALPHA * Math.log(this.t)) / observationsOfChild.size());
 			//			System.out.println("utility of " + succ.getKey() + ": " + utility);
@@ -44,7 +53,7 @@ public class UUCBPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double> {
 			//			System.out.println(score + " vs " + bestScore);
 			if (score > bestScore) {
 				bestScore = score;
-				bestAction = succ.getKey();
+				bestAction = succ;
 			}
 		}
 		return bestAction;
@@ -55,8 +64,31 @@ public class UUCBPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double> {
 	}
 
 	@Override
-	public void updatePath(final ILabeledPath<N, A> path, final Double playoutScore, final int lengthOfPlayoutPath) {
-		path.getNodes().forEach(n -> this.observations.computeIfAbsent(n, node -> new DoubleArrayList()).add((double) playoutScore));
+	public void updatePath(final ILabeledPath<N, A> path, final Double playoutScore) {
+		//		path.getPathToParentOfHead().getNodes().forEach(n -> this.observations.computeIfAbsent(n, node -> new HashMap<>()).computeIfAbsent(path.getOutArc(n), a -> new DoubleArrayList()).add((double) playoutScore));
+		double s = playoutScore;
+		path.getPathToParentOfHead().getNodes().forEach(n -> {
+			DoubleList obs = this.observations.computeIfAbsent(n, node -> new HashMap<>()).computeIfAbsent(path.getOutArc(n), a -> new DoubleArrayList());
+			int size = obs.size();
+			if (size == 0) {
+				obs.add(s);
+			}
+			else if (s <= obs.getDouble(0)) {
+				obs.add(0, s);
+			}
+			else {
+				double last = obs.getDouble(0);
+				double next;
+				for (int i = 1; i < size; i++) {
+					next = obs.getDouble(i);
+					if (playoutScore >= last && playoutScore <= next) {
+						obs.add(i, s);
+						return;
+					}
+					last = next;
+				}
+			}
+		});
 		this.t++;
 	}
 }
