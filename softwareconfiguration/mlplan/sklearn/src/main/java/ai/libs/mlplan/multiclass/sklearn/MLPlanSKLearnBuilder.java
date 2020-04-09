@@ -59,8 +59,6 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 	private static final String FS_SKLEARN_PREFERRED_COMPONENTS = "conf/sklearn-preferenceList.txt";
 
 	/* DEFAULT VALUES FOR THE SCIKIT-LEARN SETTING */
-	private static final String DEF_PREFERRED_COMPONENT_NAME_PREFIX = "resolveAbstractClassifierWith";
-
 	private static final EMLPlanSkLearnProblemType DEF_PROBLEM_TYPE = EMLPlanSkLearnProblemType.CLASSIFICATION;
 	private static final File DEF_PREFERRED_COMPONENTS = FileUtil.getExistingFileWithHighestPriority(RES_SKLEARN_PREFERRED_COMPONENTS, FS_SKLEARN_PREFERRED_COMPONENTS);
 
@@ -97,7 +95,7 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 		this.skipSetupCheck = skipSetupCheck;
 		this.withProblemType(DEF_PROBLEM_TYPE);
 		this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(DEF_PROBLEM_TYPE.getResourceSearchSpaceConfigFile(), DEF_PROBLEM_TYPE.getFileSystemSearchSpaceConfig()));
-		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, DEF_PREFERRED_COMPONENT_NAME_PREFIX);
+		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, DEF_PROBLEM_TYPE.getPreferredComponentName());
 		this.withRequestedInterface(DEF_PROBLEM_TYPE.getRequestedHascoInterface());
 		this.withClassifierFactory(DEF_CLASSIFIER_FACTORY);
 		this.withSearchPhaseEvaluatorFactory(DEF_SEARCH_PHASE_EVALUATOR);
@@ -171,7 +169,7 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 		if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
 			((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setProblemType(this.problemType.getBasicProblemType());
 			this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(problemType.getResourceSearchSpaceConfigFile(), problemType.getFileSystemSearchSpaceConfig()));
-			this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, DEF_PREFERRED_COMPONENT_NAME_PREFIX, true);
+			this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, this.problemType.getPreferredComponentName(), true);
 			this.withRequestedInterface(problemType.getRequestedHascoInterface());
 		} else {
 			this.logger.error("Setting problem type only supported by SKLearnClassifierFactory.");
@@ -185,7 +183,7 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 		if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
 			((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setPathVariable(path);
 		} else {
-			this.logger.error("Setting problem type only supported by SKLearnClassifierFactory.");
+			this.logger.error("Setting path variable only supported by SKLearnClassifierFactory.");
 		}
 		return this.getSelf();
 	}
@@ -196,7 +194,7 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 		if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
 			((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setAnacondaEnvironment(this.anacondaEnvironment);
 		} else {
-			this.logger.error("Setting problem type only supported by SKLearnClassifierFactory."); // TODO
+			this.logger.error("Setting anaconda environment only supported by SKLearnClassifierFactory.");
 		}
 		return this.getSelf();
 	}
