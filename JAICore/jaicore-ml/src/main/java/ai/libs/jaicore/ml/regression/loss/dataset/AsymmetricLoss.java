@@ -9,20 +9,18 @@ public class AsymmetricLoss extends ARegressionMeasure {
 
 	@Override
 	public double loss(final List<? extends Double> expected, final List<? extends Double> actual) {
-
 		List<Double> accuracyList = new ArrayList<>();
-
 		for (int i = 0; i < expected.size(); i++) {
-			Double Err = 100 * ((expected.get(i) - actual.get(i)) / expected.get(i));
-			Double A = 0.0;
-			if (Err <= 0) {
-				A = Math.exp(-Math.log(0.5) * (Err / 5));
+			Double percentageError = 100 * ((expected.get(i) - actual.get(i)) / expected.get(i));
+			Double accuracy = 0.0;
+			if (percentageError <= 0) {
+				accuracy = Math.exp(-Math.log(0.5) * (percentageError / 5));
 			} else {
-				A = Math.exp(Math.log(0.5) * (Err / 20));
+				accuracy = Math.exp(Math.log(0.5) * (percentageError / 20));
 			}
-			accuracyList.add(A);
+			accuracyList.add(accuracy);
 		}
 		return StatisticsUtil.mean(accuracyList);
 	}
-	
+
 }

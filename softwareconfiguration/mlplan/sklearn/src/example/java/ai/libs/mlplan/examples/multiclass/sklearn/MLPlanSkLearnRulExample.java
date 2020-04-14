@@ -13,11 +13,10 @@ import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
-import ai.libs.jaicore.ml.regression.loss.dataset.RootMeanSquaredError;
+import ai.libs.jaicore.ml.regression.loss.ERegressionPerformanceMeasure;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
@@ -30,6 +29,11 @@ public class MLPlanSkLearnRulExample {
 	private static final Logger LOGGER = LoggerFactory.getLogger("example");
 
 	public static void main(final String[] args) throws Exception {
+		runBFS();
+		// runRS();
+	}
+
+	public static void runBFS() throws Exception {
 		long start = System.currentTimeMillis();
 
 		/* load data for segment dataset and create a train-test-split */
@@ -47,7 +51,7 @@ public class MLPlanSkLearnRulExample {
 		builder.withTimeOut(new Timeout(3, TimeUnit.MINUTES));
 		builder.withNumCpus(4);
 
-		((MonteCarloCrossValidationEvaluatorFactory) builder.getLearnerEvaluationFactoryForSearchPhase()).withMeasure(EClassificationPerformanceMeasure.F1_WITH_1_POSITIVE); // TODO
+		((MonteCarloCrossValidationEvaluatorFactory) builder.getLearnerEvaluationFactoryForSearchPhase()).withMeasure(ERegressionPerformanceMeasure.ASYMMETRIC_LOSS); // TODO
 
 		MLPlan<ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch>> mlplan = builder.withDataset(splits.get(0)).build();
 		mlplan.setPortionOfDataForPhase2(0f);
@@ -63,8 +67,8 @@ public class MLPlanSkLearnRulExample {
 
 			/* evaluate solution produced by mlplan */
 			IPredictionBatch batch = optimizedClassifier.predict(splits.get(1));
-			double error = new RootMeanSquaredError().loss(splits.get(1).stream().map(i -> (double) i.getLabel()).collect(Collectors.toList()),
-					batch.getPredictions().stream().map(i -> (double) i.getPrediction()).collect(Collectors.toList()));
+			double error = ERegressionPerformanceMeasure.ASYMMETRIC_LOSS.loss(splits.get(1).stream().map(i -> (double) i.getLabel()).collect(Collectors.toList()),
+					batch.getPredictions().stream().map(i -> (double) i.getPrediction()).collect(Collectors.toList())); // TODO
 			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}", error, mlplan.getInternalValidationErrorOfSelectedClassifier());
 
 		} catch (NoSuchElementException e) {
