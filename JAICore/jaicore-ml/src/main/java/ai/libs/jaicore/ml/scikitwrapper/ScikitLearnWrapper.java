@@ -394,8 +394,10 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	}
 
 	public void setProblemType(final EBasicProblemType problemType) {
-		this.problemType = problemType;
-		this.scikitTemplate = new File(ResourceUtil.getResourceAsTempFile(this.problemType.getRessourceScikitTemplate()));
+		if (this.problemType != problemType) {
+			this.problemType = problemType;
+			this.scikitTemplate = new File(ResourceUtil.getResourceAsTempFile(this.problemType.getRessourceScikitTemplate()));
+		}
 	}
 
 	public void setPathVariable(final String pathVariable) {
