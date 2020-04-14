@@ -49,9 +49,10 @@ public class LakeTest {
 		//		}
 
 		/* now let's use the policy to move around */
+		MDPUtils utils = new MDPUtils();
 		for (int i = 0; i < 10; i++) {
 			System.out.println("RUN " + i);
-			IEvaluatedPath<LakeState, ELakeActions, Double> run = MDPUtils.getRun(mdp, policy, new Random(i), p -> false);
+			IEvaluatedPath<LakeState, ELakeActions, Double> run = utils.getRun(mdp, policy, new Random(i), p -> false);
 			for (LakeState n : run.getPathToParentOfHead().getNodes()) {
 				ELakeActions a = run.getOutArc(n);
 				System.out.println(n.getStringVisualization());

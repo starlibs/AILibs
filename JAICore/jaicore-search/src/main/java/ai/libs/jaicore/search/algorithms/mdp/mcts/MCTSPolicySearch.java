@@ -19,6 +19,7 @@ import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.search.algorithms.standard.mcts.ActionPredictionFailedException;
 import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
 import ai.libs.jaicore.search.algorithms.standard.mcts.IPolicy;
+import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 import ai.libs.jaicore.search.probleminputs.MDPUtils;
@@ -78,7 +79,9 @@ public class MCTSPolicySearch<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPoli
 						untriedActions = new LinkedList<>(this.mdp.getApplicableActions(current));
 						if (untriedActions.isEmpty()) {
 							this.treePolicy.updatePath(path, score);
-							return null;
+							IAlgorithmEvent event = new MCTSIterationCompletedEvent<>(this, this.treePolicy, new EvaluatedSearchGraphPath<>(path, score));
+							this.post(event);
+							return event;
 						}
 						this.untriedActionsOfIncompleteStates.put(current, new LinkedList<>(this.mdp.getApplicableActions(current)));
 					}
@@ -112,15 +115,25 @@ public class MCTSPolicySearch<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPoli
 					/* update tree policy with accumulated score */
 					this.logger.debug("Propagating score {} over the path with actions {} and final state {}.", score, path.getArcs(), path.getHead());
 					this.treePolicy.updatePath(path, score);
+					IAlgorithmEvent event = new MCTSIterationCompletedEvent<>(this, this.treePolicy, new EvaluatedSearchGraphPath<>(path, score));
+					this.post(event);
+					return event;
 				}
 				catch (ActionPredictionFailedException e) {
 					throw new AlgorithmException("Could not create playout!", e);
 				}
-				return null;
 			}
 		default:
 			throw new IllegalStateException("Don't know what to do in state " + this.getState());
 		}
+	}
+
+	public int getIterations() {
+		return this.iterations;
+	}
+
+	public IPathUpdatablePolicy<N, A, Double> getTreePolicy() {
+		return this.treePolicy;
 	}
 
 	@Override
@@ -134,7 +147,9 @@ public class MCTSPolicySearch<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPoli
 	@Override
 	public void setLoggerName(final String name) {
 		super.setLoggerName(name);
-		((ILoggingCustomizable)this.treePolicy).setLoggerName(name + ".tp");
+		if (this.treePolicy instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable)this.treePolicy).setLoggerName(name + ".tp");
+		}
 		this.utils.setLoggerName(name + ".utils");
 	}
 }

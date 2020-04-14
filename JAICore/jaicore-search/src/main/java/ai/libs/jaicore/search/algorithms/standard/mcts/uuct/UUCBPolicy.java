@@ -56,6 +56,9 @@ public class UUCBPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double> {
 				bestAction = succ;
 			}
 		}
+		if (bestAction == null) {
+			return SetUtil.getRandomElement(possibleActions, new Random().nextLong());
+		}
 		return bestAction;
 	}
 

@@ -260,4 +260,22 @@ public class SailingMDP extends AMDP<SailingState, SailingMove, Double> {
 			throw new IllegalStateException();
 		}
 	}
+
+	public int getRows() {
+		return this.rows;
+	}
+
+	public int getCols() {
+		return this.cols;
+	}
+
+	public int getGoalRow() {
+		return this.goalRow;
+	}
+
+	public int getGoalCol() {
+		return this.goalCol;
+	}
+
+
 }

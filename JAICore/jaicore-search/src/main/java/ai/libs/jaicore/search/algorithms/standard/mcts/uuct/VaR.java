@@ -19,7 +19,10 @@ public class VaR implements IUCBUtilityFunction {
 		if (observations.isEmpty()) {
 			return Double.MAX_VALUE;
 		}
-		int threshold = (int)Math.ceil((1 - this.alpha) * observations.size());
+		int threshold = Math.min(observations.size(), (int)Math.ceil((1 - this.alpha) * observations.size()));
+		if (threshold <= 0) {
+			throw new IllegalStateException("Illegal treshold " + threshold + " for " + observations.size() + " observations with alpha = " + this.alpha);
+		}
 		return observations.getDouble(threshold - 1) * -1;
 	}
 

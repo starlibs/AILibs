@@ -62,7 +62,7 @@ public class ExperimenterFrontend {
 		return this;
 	}
 
-	public <B extends IExperimentBuilder, I, A extends IAlgorithm<? extends I,?>> ExperimenterFrontend withAlgorithmExperimentDomain(final ExperimentDomain<B, I, A> domain) {
+	public <B extends IExperimentBuilder, I, A extends IAlgorithm<? extends I,?>> ExperimenterFrontend withDomain(final ExperimentDomain<B, I, A> domain) {
 		this.evaluator = null;
 		this.withExperimentsConfig(domain.getConfig());
 		this.domain = domain;
