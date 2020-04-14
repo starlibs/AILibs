@@ -5,7 +5,7 @@ import ai.libs.jaicore.ml.scikitwrapper.EBasicProblemType;
 public enum EMLPlanSkLearnProblemType {
 
 	CLASSIFICATION(EBasicProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/sklearn-mlplan.json", "conf/mlplan-sklearn.json", "AbstractClassifier"), RUL(EBasicProblemType.RUL, "automl/searchmodels/sklearn/sklearn-rul.json",
-			"conf/rul-sklearn.json", "AbstractRegressor");
+			"conf/sklearn-rul.json", "AbstractRegressor");
 
 	private final EBasicProblemType problemType;
 
