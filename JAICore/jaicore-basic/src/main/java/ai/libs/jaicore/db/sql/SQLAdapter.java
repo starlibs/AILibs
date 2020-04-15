@@ -608,6 +608,9 @@ public class SQLAdapter implements IDatabaseAdapter {
 		sqlMainTable.append("CREATE TABLE IF NOT EXISTS `" + tablename + "` (");
 		sqlMainTable.append("`" + nameOfPrimaryField + "` " + types.get(nameOfPrimaryField) + " NOT NULL AUTO_INCREMENT,");
 		for (String key : fieldnames) {
+			if (!types.containsKey(key)) {
+				throw new IllegalArgumentException("No type information given for field " + key);
+			}
 			sqlMainTable.append("`" + key + "` " + types.get(key) + (types.get(key).contains("NULL") ? "" : " NOT NULL") + ",");
 			keyFieldsSB.append("`" + key + "`,");
 		}
