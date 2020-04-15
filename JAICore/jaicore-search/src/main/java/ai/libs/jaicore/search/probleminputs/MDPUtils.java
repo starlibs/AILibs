@@ -42,18 +42,20 @@ public class MDPUtils implements ILoggingCustomizable {
 		throw new IllegalStateException("Up to here, a state mut have been returned!");
 	}
 
-	public <N, A> IEvaluatedPath<N, A, Double> getRun(final IMDP<N, A, Double> mdp, final IPolicy<N, A> policy, final Random random, final Predicate<ILabeledPath<N, A>> stopCriterion) throws ActionPredictionFailedException {
+	public <N, A> IEvaluatedPath<N, A, Double> getRun(final IMDP<N, A, Double> mdp, final double gamma, final IPolicy<N, A> policy, final Random random, final Predicate<ILabeledPath<N, A>> stopCriterion) throws ActionPredictionFailedException {
 		double score = 0;
 		ILabeledPath<N, A> path = new SearchGraphPath<>(mdp.getInitState());
 		N current = path.getRoot();
 		N nextState;
 		Collection<A> possibleActions = mdp.getApplicableActions(current);
+		double discount = 1;
 		while (!possibleActions.isEmpty() && !stopCriterion.test(path)) {
 			A action = policy.getAction(current, possibleActions);
 			assert possibleActions.contains(action);
 			nextState = this.drawSuccessorState(mdp, current, action, random);
 			this.logger.debug("Choosing action {}. Next state is {} (probability is {})", action, nextState, mdp.getProb(current, action, nextState));
-			score += mdp.getScore(current, action, nextState);
+			score += discount * mdp.getScore(current, action, nextState);
+			discount *= gamma;
 			current = nextState;
 			path.extend(current, action);
 			possibleActions = mdp.getApplicableActions(current);

@@ -46,7 +46,7 @@ public class SailingTest {
 			MDPUtils utils = new MDPUtils();
 
 			for (int seed = 0; seed < 20; seed ++) {
-				MCTSPolicySearch<SailingState, SailingMove> mcts = new MCTSPolicySearch<>(mdp, ucb, new UniformRandomPolicy<>(new Random(seed)), 100000000);
+				MCTSPolicySearch<SailingState, SailingMove> mcts = new MCTSPolicySearch<>(mdp, ucb, new UniformRandomPolicy<>(new Random(seed)), 100000000, 0.95, 0.001);
 				int finishedIterations = 0;
 				mcts.nextWithException(); // activates MCTS
 				long start = System.currentTimeMillis();
@@ -64,7 +64,7 @@ public class SailingTest {
 					//				System.out.println("Policy ready, now evaluating.");
 					DescriptiveStatistics stats = new DescriptiveStatistics();
 					for (int evalRun = 0; evalRun < 20; evalRun ++) {
-						IEvaluatedPath<SailingState, SailingMove, Double> run = utils.getRun(mdp, policy, new Random((1 + evalRun) * (1 + seed)), a -> a.getHead().getRow() == 9 && a.getHead().getCol() == 9);
+						IEvaluatedPath<SailingState, SailingMove, Double> run = utils.getRun(mdp, 0.95, policy, new Random((1 + evalRun) * (1 + seed)), a -> a.getNumberOfNodes() > 100 || a.getHead().getRow() == 9 && a.getHead().getCol() == 9);
 						stats.addValue(run.getScore());
 					}
 					scores.add(stats.getMean());
