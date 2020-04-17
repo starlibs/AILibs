@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -52,7 +54,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	private static final String F_CLASS_INDEX = "C";
 
 	private static final String SEPARATOR_RELATIONNAME = ":";
-	private static final String SEPARATOR_ATTRIBUTE_DESCRIPTION = " ";
+	private static final Pattern REG_EXP_ATTRIBUTE_DESCRIPTION = Pattern.compile("('[^']*'|[^ ]+)\\s+(.*)");
 	private static final String SEPARATOR_DENSE_INSTANCE_VALUES = ",";
 
 	private final boolean sparseMode;
@@ -156,13 +158,20 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 	protected static IAttribute parseAttribute(final String line) throws UnsupportedAttributeTypeException {
 		String attributeDefinitionSplit = line.replaceAll("\\t", " ").substring(EArffItem.ATTRIBUTE.getValue().length() + 1).trim();
-		String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION));
-		if (name.trim().startsWith("'") && !name.trim().endsWith("'")) {
-			int cutIndex = attributeDefinitionSplit.indexOf('\'', name.length());
-			name += attributeDefinitionSplit.substring(name.length(), name.length() + cutIndex + 1);
+		Matcher m = REG_EXP_ATTRIBUTE_DESCRIPTION.matcher(attributeDefinitionSplit);
+		if (!m.find()) {
+			throw new IllegalArgumentException("Cannot parse attribute definition: " + line);
 		}
-
-		String type = attributeDefinitionSplit.substring(name.length() + 1).trim();
+		String name = m.group(1);
+		String type = m.group(2);
+		//		String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION));
+		//		if (name.trim().startsWith("'") && !name.trim().endsWith("'")) {
+		//			int cutIndex = attributeDefinitionSplit.indexOf('\'', name.length());
+		//			name += attributeDefinitionSplit.substring(name.length(), name.length() + cutIndex + 1);
+		//		}
+		//
+		//
+		//		String type = attributeDefinitionSplit.substring(name.length() + 1).trim();
 		name = name.trim();
 		if ((name.startsWith("'") && name.endsWith("'")) || (name.startsWith("\"") && name.endsWith("\""))) {
 			name = name.substring(1, name.length() - 1);
@@ -240,6 +249,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		} else {
 			Map<Integer, Object> parsedSparseInstance = new HashMap<>();
 			for (String sparseValue : lineSplit) {
+				sparseValue = sparseValue.trim(); // remove leading or trailing white spaces.
 				int indexOfFirstSpace = sparseValue.indexOf(' ');
 				int indexOfAttribute = Integer.parseInt(sparseValue.substring(0, indexOfFirstSpace));
 				String attributeValue = sparseValue.substring(indexOfFirstSpace + 1);
@@ -268,15 +278,14 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile, final int columnWithClassIndex) throws DatasetDeserializationFailedException {
+		String line = null;
+		long lineCounter = 1;
 		try (BufferedReader br = Files.newBufferedReader(datasetFile.toPath())) {
 			ILabeledDataset<ILabeledInstance> dataset = null;
 			KVStore relationMetaData = new KVStore();
 			List<IAttribute> attributes = new ArrayList<>();
 
 			boolean instanceReadMode = false;
-			String line;
-			long lineCounter = 1;
-
 			while ((line = br.readLine()) != null) {
 				if (!instanceReadMode) {
 					if (line.toLowerCase().startsWith(EArffItem.RELATION.getValue())) {
@@ -334,7 +343,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 			return dataset;
 		} catch (Exception e) {
-			throw new DatasetDeserializationFailedException("Could not deserialize dataset from ARFF file.", e);
+			throw new DatasetDeserializationFailedException("Could not deserialize dataset from ARFF file. Error occurred on line " + lineCounter + ": " + line, e);
 		}
 	}
 

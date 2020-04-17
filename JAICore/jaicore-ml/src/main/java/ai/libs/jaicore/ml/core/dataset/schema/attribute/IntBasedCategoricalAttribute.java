@@ -40,6 +40,9 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 
 	@Override
 	public boolean isValidValue(final Object attributeValue) {
+		if (attributeValue == null) {
+			return false;
+		}
 		Integer value = null;
 		if (attributeValue instanceof ICategoricalAttributeValue) {
 			value = ((ICategoricalAttributeValue) attributeValue).getValue();
@@ -81,6 +84,9 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 
 	@Override
 	public ICategoricalAttributeValue getAsAttributeValue(final Object object) {
+		if (object == null) {
+			return null;
+		}
 		if (this.isValidValue(object)) {
 			int cObject;
 			if (object instanceof Integer) {

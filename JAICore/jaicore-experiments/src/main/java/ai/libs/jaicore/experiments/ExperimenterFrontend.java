@@ -14,6 +14,7 @@ import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
+import ai.libs.jaicore.experiments.exceptions.ExperimentFailurePredictionException;
 import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
 
 public class ExperimenterFrontend {
@@ -112,7 +113,7 @@ public class ExperimenterFrontend {
 		return this;
 	}
 
-	public <O> O simulateExperiment(final Experiment experiment, final IExperimentRunController<O> controller) throws ExperimentEvaluationFailedException, InterruptedException {
+	public <O> O simulateExperiment(final Experiment experiment, final IExperimentRunController<O> controller) throws ExperimentEvaluationFailedException, InterruptedException, ExperimentFailurePredictionException {
 		this.withController(controller);
 		this.prepareEvaluator();
 		ExperimentDBEntry experimentEntry = new ExperimentDBEntry(-1, experiment);

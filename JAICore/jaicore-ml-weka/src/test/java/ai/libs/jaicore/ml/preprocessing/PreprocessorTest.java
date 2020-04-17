@@ -1,13 +1,12 @@
-package ai.libs.jaicore.ml.classification;
+package ai.libs.jaicore.ml.preprocessing;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassificationPredictionBatch;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.algorithm.IAlgorithm;
@@ -18,19 +17,20 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
-import ai.libs.jaicore.ml.weka.classification.learner.WekaLearningAlgorithm;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
+import ai.libs.jaicore.ml.weka.preprocessing.WekaPreprocessorFitter;
+import weka.attributeSelection.ASEvaluation;
+import weka.attributeSelection.ASSearch;
+import weka.attributeSelection.AttributeSelection;
 
-public class WekaClassifierTest extends GeneralAlgorithmTester {
+public class PreprocessorTest extends GeneralAlgorithmTester {
 
 	// creates the test data
 	@Parameters(name = "{0}")
 	public static Collection<Object[]> data() {
-		List<Object> problemSets = WekaUtil.getBasicLearners().stream().map(WekaClassifierProblemSet::new).collect(Collectors.toList());
+		Collection<List<String>> validCombos = WekaUtil.getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection();
+		List<Object> problemSets = validCombos.stream().map(c -> new WekaPreprocessorProblemSet(c.get(0), c.get(1))).collect(Collectors.toList());
 		Object[][] data = new Object[problemSets.size()][1];
 		for (int i = 0; i < data.length; i++) {
 			data[i][0] = problemSets.get(i);
@@ -41,31 +41,26 @@ public class WekaClassifierTest extends GeneralAlgorithmTester {
 	@Test
 	public void testFit() throws Exception {
 		Pair<String, ILabeledDataset<ILabeledInstance>> ps = (Pair<String, ILabeledDataset<ILabeledInstance>>)this.problemSet.getSimpleProblemInputForGeneralTestPurposes();
-		WekaClassifier classifier = new WekaClassifier(ps.getX(), new String[] {});
-		Classifier oClassifier = AbstractClassifier.forName(ps.getX(), null);
+		String[] parts = ps.getX().split("/");
+		ASSearch search = ASSearch.forName(parts[0], null);
+		ASEvaluation eval = ASEvaluation.forName(parts[1], null);
+		AttributeSelection as = new AttributeSelection();
+		as.setSearch(search);
+		as.setEvaluator(eval);
 
-		/* fit both classifiers */
+		/* fit pre-processor */
 		IWekaInstances dataset = new WekaInstances(ps.getY());
-		classifier.fit(dataset);
-		oClassifier.buildClassifier(dataset.getInstances());
+		as.SelectAttributes(dataset.getInstances());
 
-		/* test that predictions are identical */
-		ISingleLabelClassificationPredictionBatch yHat = classifier.predict(dataset);
-		int n = yHat.size();
-		assertEquals(dataset.size(), n);
-		for (int i = 0; i < n; i++) {
-			assertEquals(oClassifier.classifyInstance(dataset.get(i).getElement()), 1.0 * yHat.get(i).getIntPrediction(), 0.01);
-		}
+		/* test that pre-processor can be applied */
+		as.reduceDimensionality(dataset.getInstances());
+		assertTrue(true);
 	}
 
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(final Object problem) throws AlgorithmCreationException {
 		Pair<String, ILabeledDataset<ILabeledInstance>> cProblem = (Pair<String, ILabeledDataset<ILabeledInstance>>)problem;
-		try {
-			return new WekaLearningAlgorithm(Class.forName(cProblem.getX()), cProblem.getY());
-		} catch (ClassNotFoundException e)  {
-			throw new AlgorithmCreationException(e);
-		}
+		String[] parts = cProblem.getX().split("/");
+		return new WekaPreprocessorFitter(cProblem.getY(), parts[0], parts[1]);
 	}
-
 }

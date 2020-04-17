@@ -98,7 +98,7 @@ public class FilterBasedDatasetSplitter<D extends IDataset<?>> implements IDatas
 					for (double d : relativeFoldSizes) {
 						portionsAsList.add(d);
 					}
-					List<IReconstructionInstruction> instructions = ((IReconstructible) data).getConstructionPlan().getInstructions();
+					List<IReconstructionInstruction> instructions = new ArrayList<>(((IReconstructible) data).getConstructionPlan().getInstructions()); // we create this copy to be safe of concurrent modifications of the instructions
 					instructions.forEach(((IReconstructible)firstFold)::addInstruction);
 					ReconstructionInstruction rInstForFirstFold = new ReconstructionInstruction(FilterBasedDatasetSplitter.class.getName(), "getFoldOfSplit", new Class<?>[] {IDataset.class, ISamplingAlgorithmFactory.class, long.class, int.class, List.class}, new Object[] {"this", samplerFactory, seed, 0, portionsAsList});
 					((IReconstructible)firstFold).addInstruction(rInstForFirstFold);

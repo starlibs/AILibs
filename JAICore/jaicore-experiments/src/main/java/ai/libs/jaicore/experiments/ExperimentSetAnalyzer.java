@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.StringUtil;
 import ai.libs.jaicore.basic.sets.LDSRelationComputer;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.RelationComputationProblem;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
@@ -49,30 +50,32 @@ public class ExperimentSetAnalyzer {
 	public void reloadConfiguration() {
 
 		/* reload configuration */
-		this.config.reload();
+		//		this.config.reload();
 
 		/* erase laze fields */
-		this.possibleKeyCombinations = null;
-		this.valueGeneratorsPerKey.clear();
+		synchronized (this.config) {
+			this.possibleKeyCombinations = null;
+			this.valueGeneratorsPerKey.clear();
 
-		/* update key fields */
-		this.keyFields = Collections.unmodifiableList(new ArrayList<>(this.config.getKeyFields()));
+			/* update key fields */
+			this.keyFields = Collections.unmodifiableList(this.config.getKeyFields().stream().map(k -> this.getNameTypeSplitForAttribute(k).getX()).collect(Collectors.toList()));
 
-		/* create map of possible values for each key field */
-		this.numExperimentsTotal = 1;
-		this.valuesForKeyFieldsInConfig = new HashMap<>();
-		for (String key : this.keyFields) {
-			String propertyVals = this.config.removeProperty(key);
-			if (propertyVals == null) {
-				throw new IllegalArgumentException("Invalid experiment set configuration! No property values defined for key field \"" + key + "\"");
-			}
-			List<String> vals = Arrays.asList(StringUtil.explode(propertyVals, ",")).stream().map(String::trim).collect(Collectors.toList());
-			this.config.setProperty(key, propertyVals);
-			this.valuesForKeyFieldsInConfig.put(key, vals);
-			try {
-				this.numExperimentsTotal *= this.getNumberOfValuesForKey(key);
-			} catch (IllegalKeyDescriptorException e) {
-				this.logger.error(LoggerUtil.getExceptionInfo(e));
+			/* create map of possible values for each key field */
+			this.numExperimentsTotal = 1;
+			this.valuesForKeyFieldsInConfig = new HashMap<>();
+			for (String key: this.keyFields) {
+				String propertyVals = this.config.removeProperty(key);
+				if (propertyVals == null) {
+					throw new IllegalArgumentException("Invalid experiment set configuration! No property values defined for key field \"" + key + "\"");
+				}
+				List<String> vals = Arrays.asList(StringUtil.explode(propertyVals, ",")).stream().map(String::trim).collect(Collectors.toList());
+				this.config.setProperty(key, propertyVals);
+				this.valuesForKeyFieldsInConfig.put(key, vals);
+				try {
+					this.numExperimentsTotal *= this.getNumberOfValuesForKey(key);
+				} catch (IllegalKeyDescriptorException e) {
+					this.logger.error(LoggerUtil.getExceptionInfo(e));
+				}
 			}
 		}
 	}
@@ -250,5 +253,11 @@ public class ExperimentSetAnalyzer {
 		if (!IExperimentKeyGenerator.class.isAssignableFrom(c)) {
 			throw new IllegalKeyDescriptorException("The specified class " + c.getName() + " does not implement the " + IExperimentKeyGenerator.class.getName() + " interface.");
 		}
+	}
+
+	public Pair<String, String> getNameTypeSplitForAttribute(final String name) {
+		String[] parts = name.split(":");
+		String type = parts.length == 2 ? parts[1] : "varchar(500)";
+		return new Pair<>(parts[0], type);
 	}
 }
