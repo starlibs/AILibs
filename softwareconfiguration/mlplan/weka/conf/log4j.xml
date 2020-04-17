@@ -127,7 +127,7 @@
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
-    <level value="warn" />
+    <level value="info" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.treepolicy">
@@ -135,7 +135,7 @@
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary.randomsearch">
-    <level value="warn" />
+    <level value="info" />
   </logger>
   
   <logger name="hasco.core.isValidParameterRangeRefinementPredicate">
