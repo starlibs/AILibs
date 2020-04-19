@@ -17,6 +17,7 @@ import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.regression.loss.ERegressionPerformanceMeasure;
+import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
@@ -50,8 +51,9 @@ public class MLPlanSkLearnRulExample {
 		builder.withCandidateEvaluationTimeOut(new Timeout(45, TimeUnit.SECONDS));
 		builder.withTimeOut(new Timeout(3, TimeUnit.MINUTES));
 		builder.withNumCpus(4);
+		builder.withAnacondaEnvironment("pdm");
 
-		((MonteCarloCrossValidationEvaluatorFactory) builder.getLearnerEvaluationFactoryForSearchPhase()).withMeasure(ERegressionPerformanceMeasure.ASYMMETRIC_LOSS); // TODO
+		((MonteCarloCrossValidationEvaluatorFactory) builder.getLearnerEvaluationFactoryForSearchPhase()).withMeasure(ERulPerformanceMeasure.ASYMMETRIC_LOSS); // TODO
 
 		MLPlan<ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch>> mlplan = builder.withDataset(splits.get(0)).build();
 		mlplan.setPortionOfDataForPhase2(0f);
@@ -67,7 +69,7 @@ public class MLPlanSkLearnRulExample {
 
 			/* evaluate solution produced by mlplan */
 			IPredictionBatch batch = optimizedClassifier.predict(splits.get(1));
-			double error = ERegressionPerformanceMeasure.ASYMMETRIC_LOSS.loss(splits.get(1).stream().map(i -> (double) i.getLabel()).collect(Collectors.toList()),
+			double error = ERulPerformanceMeasure.ASYMMETRIC_LOSS.loss(splits.get(1).stream().map(i -> (double) i.getLabel()).collect(Collectors.toList()),
 					batch.getPredictions().stream().map(i -> (double) i.getPrediction()).collect(Collectors.toList())); // TODO
 			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}", error, mlplan.getInternalValidationErrorOfSelectedClassifier());
 
