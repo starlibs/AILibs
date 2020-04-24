@@ -55,13 +55,6 @@
         }
       ]
     },{
-      "name": "tsfresh.feature_extraction.settings.ComprehensiveFCParameters",
-      "providedInterface": [
-        "tsfreshFeatureSet"
-      ],
-      "requiredInterface": [],
-      "parameter": []
-    },{
       "name": "tsfresh.feature_extraction.settings.MinimalFCParameters",
       "providedInterface": [
         "tsfreshFeatureSet"
@@ -70,6 +63,27 @@
       "parameter": []
     },{
       "name": "tsfresh.feature_extraction.settings.EfficientFCParameters",
+      "providedInterface": [
+        "tsfreshFeatureSet"
+      ],
+      "requiredInterface": [],
+      "parameter": []
+    },{
+      "name": "ComprehensiveFCParameters",
+      "providedInterface": [
+        "tsfreshFeatureSet"
+      ],
+      "requiredInterface": [],
+      "parameter": []
+    },{
+      "name": "LowComputationTimeFCParameters",
+      "providedInterface": [
+        "tsfreshFeatureSet"
+      ],
+      "requiredInterface": [],
+      "parameter": []
+    },{
+      "name": "MidComputationTimeFCParameters",
       "providedInterface": [
         "tsfreshFeatureSet"
       ],

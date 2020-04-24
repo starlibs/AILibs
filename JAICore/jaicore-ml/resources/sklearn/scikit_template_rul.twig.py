@@ -14,9 +14,42 @@ from os.path import join as path_join
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline, make_pipeline
 
+from tsfresh.feature_extraction.settings import ComprehensiveFCParameters
+
 {{imports}}
 
 OUTPUT_FILE = None
+
+class LowComputationTimeFCParameters(dict):
+    def __init__(self):
+        initial_map = ComprehensiveFCParameters()
+        initial_map.pop("sample_entropy")
+        initial_map.pop("change_quantiles")
+        initial_map.pop("approximate_entropy")
+        initial_map.pop("number_cwt_peaks")
+        initial_map.pop("augmented_dickey_fuller")
+        initial_map.pop("quantile")
+        initial_map.pop("agg_linear_trend")
+        initial_map.pop("max_langevin_fixed_point")
+        initial_map.pop("friedrich_coefficients")
+        initial_map.pop("fft_coefficient")
+        initial_map.pop("large_standard_deviation")
+        initial_map.pop("autocorrelation")
+        initial_map.pop("cwt_coefficients")
+        initial_map.pop("percentage_of_reoccurring_values_to_all_values")
+        initial_map.pop("ar_coefficient")
+        initial_map.pop("ratio_beyond_r_sigma")
+        initial_map.pop("number_peaks")
+        initial_map.pop("linear_trend_timewise") #broken
+        super().__init__(initial_map)
+
+class MidComputationTimeFCParameters(dict):
+    def __init__(self):
+        initial_map = ComprehensiveFCParameters()
+        initial_map.pop("sample_entropy")
+        initial_map.pop("change_quantiles")
+        initial_map.pop("linear_trend_timewise")  # broken
+        super().__init__(initial_map)
 
 """
 ArffStructure and parse implemented by Amin Faez.
