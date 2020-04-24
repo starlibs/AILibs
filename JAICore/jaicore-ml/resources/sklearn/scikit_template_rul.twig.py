@@ -404,7 +404,6 @@ def run_test_mode(data):
     prediction = classifier_instance.predict(features)
     serialize_prediction(prediction)
 
-
 def main():
     print("load arff file from ", sys.argv["arff"], sys.argv["rul"])
     data = load_arff_file(sys.argv["arff"], sys.argv["rul"])
@@ -418,9 +417,12 @@ def main():
         testdata = load_arff_file(sys.argv["testarff"], sys.argv["rul"]);
         run_train_test_mode(data, testdata)
 
+def print_pid():
+    print("CURRENT_PID:" + str(os.getpid()))
 
 if __name__ == "__main__":
     parse_args()
+    print_pid()
     OUTPUT_FILE = sys.argv["output"]
     if not sys.argv["regression"] and sys.argv["targets"] and len(sys.argv["targets"]) > 1:
         raise RuntimeError("Multiple targets are not supported for categorical problems.")

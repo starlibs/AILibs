@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import com.google.common.base.Strings;
+
 import ai.libs.jaicore.processes.ProcessUtil;
 
 /**
@@ -14,28 +16,52 @@ import ai.libs.jaicore.processes.ProcessUtil;
  */
 public abstract class AProcessListener implements IProcessListener {
 
+	private boolean listenForPIDFromProcess = false;
+	private int processIDObtainedFromListening = -1;
+
+	public AProcessListener() {
+
+	}
+
+	public AProcessListener(final boolean listenForPIDFromProcess) {
+		this.listenForPIDFromProcess = listenForPIDFromProcess;
+	}
+
 	@Override
 	public void listenTo(final Process process) throws IOException, InterruptedException {
-		try (BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+		try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
 			// While process is alive the output- and error stream is output.
 			while (process.isAlive()) {
 				if (Thread.currentThread().isInterrupted()) {
-					ProcessUtil.killProcess(process);
+					if (this.listenForPIDFromProcess && this.processIDObtainedFromListening > 0) {
+						ProcessUtil.killProcess(this.processIDObtainedFromListening);
+					} else {
+						ProcessUtil.killProcess(process);
+					}
 					throw new InterruptedException("Process execution was interrupted.");
 				}
 				String line;
-				while ((line = input.readLine()) != null) {
+				while (inputReader.ready() && (line = inputReader.readLine()) != null) {
+					this.handleProcessIDLine(line);
 					if (line.contains("import imp") || line.contains("imp module")) {
 						continue;
 					}
 					this.handleInput(line);
 				}
-				while ((line = error.readLine()) != null) {
+				while (errorReader.ready() && (line = errorReader.readLine()) != null) {
 					if (line.contains("import imp") || line.contains("imp module")) {
 						continue;
 					}
 					this.handleError(line);
 				}
+			}
+		}
+	}
+
+	private void handleProcessIDLine(final String line) {
+		if (this.listenForPIDFromProcess && !Strings.isNullOrEmpty(line)) {
+			if (line.startsWith("CURRENT_PID:")) {
+				this.processIDObtainedFromListening = Integer.parseInt(line.replaceAll("CURRENT_PID:", "").strip());
 			}
 		}
 	}

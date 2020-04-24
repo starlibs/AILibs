@@ -37,6 +37,8 @@ import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
+import ai.libs.jaicore.processes.ProcessIDNotRetrievableException;
+import ai.libs.jaicore.processes.ProcessUtil;
 
 /**
  * Wraps a Scikit-Learn Python process by utilizing a template to start a classifier in Scikit with the given classifier.
@@ -79,7 +81,8 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	private static final File TMP_FOLDER = new File("tmp"); // Folder to put the serialized arff files and the scripts in.
 
 	private static final File MODEL_DUMPS_DIRECTORY = new File(TMP_FOLDER, "model_dumps");
-	private static final boolean VERBOSE = false; // If true the output stream of the python process is printed.
+	private static final boolean VERBOSE = true; // If true the output stream of the python process is printed.
+	private static final boolean LISTEN_TO_PID_FROM_PROCESS = true; // If true, the PID is obtained from the python process being started by listening to according output.
 	private static final boolean DELETE_TEMPORARY_FILES_ON_EXIT = true;
 
 	private File scikitTemplate; // Path to the used python template.
@@ -193,11 +196,11 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				if (L.isDebugEnabled()) {
 					L.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
 				}
-				DefaultProcessListener listener = new DefaultProcessListener(VERBOSE);
+				DefaultProcessListener listener = new DefaultProcessListener(VERBOSE, LISTEN_TO_PID_FROM_PROCESS);
 				this.runProcess(trainCommand, listener);
 
 				if (!listener.getErrorOutput().isEmpty()) {
-					L.error("Raise error message");
+					L.error("Raise error message: " + listener.getErrorOutput());
 					throw new TrainingException(listener.getErrorOutput().split("\\n")[0]);
 				}
 			}
@@ -270,7 +273,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			}
 
 			try {
-				this.runProcess(testCommand, new DefaultProcessListener(VERBOSE));
+				this.runProcess(testCommand, new DefaultProcessListener(VERBOSE, LISTEN_TO_PID_FROM_PROCESS));
 			} catch (IOException e) {
 				throw new PredictionException("Could not run scikit-learn classifier.", e);
 			}
@@ -284,7 +287,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				L.debug("Run train test mode with {}", Arrays.toString(testCommand));
 			}
 
-			DefaultProcessListener listener = new DefaultProcessListener(VERBOSE);
+			DefaultProcessListener listener = new DefaultProcessListener(VERBOSE, LISTEN_TO_PID_FROM_PROCESS);
 			try {
 				this.runProcess(testCommand, listener);
 				if (!listener.getErrorOutput().isEmpty()) {
@@ -319,6 +322,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification((int) (double) x)).collect(Collectors.toList()));
 		} else if (this.problemType == EBasicProblemType.RUL) {
 			L.info(this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()).toString());
+			L.debug("#Created construction string: {}", this.constructInstruction);
 			return (B) new SingleTargetRegressionPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleTargetRegressionPrediction((double) x)).collect(Collectors.toList()));
 		}
 		throw new PredictionException("Unknown Problem Type.");
@@ -445,7 +449,12 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		if (this.pathVariable != null) {
 			processBuilder.environment().put("PATH", this.pathVariable);
 		}
-		listener.listenTo(processBuilder.start());
+		Process process = processBuilder.start();
+		try {
+			L.debug("Started process with PID:" + ProcessUtil.getPID(process));
+		} catch (ProcessIDNotRetrievableException e) {
+		}
+		listener.listenTo(process);
 	}
 
 	public double[] distributionForInstance(final ILabeledInstance instance) {
@@ -577,7 +586,6 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				processParameters.addAll(Arrays.asList(TEST_ARFF_FLAG, this.testArffFile));
 			}
 			processParameters.addAll(Arrays.asList(OUTPUT_FLAG, this.outputFile));
-
 			processParameters.add(ScikitLearnWrapper.this.problemType.getScikitLearnCommandLineFlag());
 
 			if (this.mode == WrapperExecutionMode.TEST) {
