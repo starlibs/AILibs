@@ -196,7 +196,7 @@
     <level value="warn" />
   </logger>
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
-    <level value="warn" />
+    <level value="info" />
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.randomsearch">
@@ -204,6 +204,6 @@
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary">
-  	<level value="warn" />
+  	<level value="info" />
   </logger>
 </log4j:configuration>

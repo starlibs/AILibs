@@ -1,5 +1,6 @@
 package ai.libs.hasco.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -135,7 +136,7 @@ public class ComponentUtil {
 	 * @return A collection of component instances of the given root component with all possible algorithm choices.
 	 */
 	public static Collection<ComponentInstance> getAllAlgorithmSelectionInstances(final String requiredInterface, final Collection<Component> components) {
-		Collection<ComponentInstance> instanceList = new LinkedList<>();
+		Collection<ComponentInstance> instanceList = new ArrayList<>();
 		components.stream().filter(x -> x.getProvidedInterfaces().contains(requiredInterface)).map(x -> getAllAlgorithmSelectionInstances(x, components)).forEach(instanceList::addAll);
 		return instanceList;
 	}
@@ -199,9 +200,16 @@ public class ComponentUtil {
 	public static boolean isDefaultConfiguration(final ComponentInstance instance) {
 		for (Parameter p : instance.getParametersThatHaveBeenSetExplicitly()) {
 			if (p.isNumeric()) {
-				List<String> intervalAsList = SetUtil.unserializeList(instance.getParameterValue(p));
 				double defaultValue = Double.parseDouble(p.getDefaultValue().toString());
-				boolean isCompatibleWithDefaultValue = defaultValue >= Double.parseDouble(intervalAsList.get(0)) && defaultValue <= Double.parseDouble(intervalAsList.get(1));
+				String parameterValue = instance.getParameterValue(p);
+
+				boolean isCompatibleWithDefaultValue = false;
+				if (parameterValue.contains("[")) {
+					List<String> intervalAsList = SetUtil.unserializeList(instance.getParameterValue(p));
+					isCompatibleWithDefaultValue = defaultValue >= Double.parseDouble(intervalAsList.get(0)) && defaultValue <= Double.parseDouble(intervalAsList.get(1));
+				} else {
+					isCompatibleWithDefaultValue = Math.abs(defaultValue - Double.parseDouble(parameterValue)) < 1E-8;
+				}
 				if (!isCompatibleWithDefaultValue) {
 					logger.info("{} has value {}, which does not subsume the default value {}", p.getName(), instance.getParameterValue(p), defaultValue);
 					return false;
