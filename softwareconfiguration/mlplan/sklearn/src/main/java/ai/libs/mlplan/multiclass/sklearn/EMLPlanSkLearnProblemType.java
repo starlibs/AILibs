@@ -32,7 +32,7 @@ public enum EMLPlanSkLearnProblemType {
 		return this.fileSystemSearchSpaceConfig;
 	}
 
-	public String getRequestedHascoInterface() {
+	public String getRequestedInterface() {
 		return this.requestedHascoInterface;
 	}
 

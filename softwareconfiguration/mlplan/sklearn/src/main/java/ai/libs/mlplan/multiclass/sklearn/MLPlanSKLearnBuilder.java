@@ -47,7 +47,6 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 	private static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn" };
 
 	private static final String COMMAND_PYTHON = "python";
-	private static final String[] COMMAND_PYTHON_VERSION = { COMMAND_PYTHON, "--version" };
 	private static final String[] COMMAND_PYTHON_EXEC = { COMMAND_PYTHON, "-c" };
 	private static final String[] COMMAND_PYTHON_BASH = { "sh", "-c", "python --version" };
 
@@ -96,7 +95,7 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 		this.withProblemType(DEF_PROBLEM_TYPE);
 		this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(DEF_PROBLEM_TYPE.getResourceSearchSpaceConfigFile(), DEF_PROBLEM_TYPE.getFileSystemSearchSpaceConfig()));
 		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, DEF_PROBLEM_TYPE.getPreferredComponentName());
-		this.withRequestedInterface(DEF_PROBLEM_TYPE.getRequestedHascoInterface());
+		this.withRequestedInterface(DEF_PROBLEM_TYPE.getRequestedInterface());
 		this.withClassifierFactory(DEF_CLASSIFIER_FACTORY);
 		this.withSearchPhaseEvaluatorFactory(DEF_SEARCH_PHASE_EVALUATOR);
 		this.withSelectionPhaseEvaluatorFactory(DEF_SELECTION_PHASE_EVALUATOR);
@@ -151,13 +150,14 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public MLPlanSKLearnBuilder<P, B> withClassifierFactory(final ILearnerFactory<ScikitLearnWrapper<P, B>> classifierFactory) {
-		super.withClassifierFactory(classifierFactory);
+	public MLPlanSKLearnBuilder<P, B> withClassifierFactory(final ILearnerFactory<ScikitLearnWrapper<P, B>> factory) {
+		super.withClassifierFactory(factory);
+		this.logger.info("Setting factory for the problem type " + this.problemType.name() + ": " + factory.getClass().getSimpleName());
 		if (this.problemType != null) {
 			if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
 				((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setProblemType(this.problemType.getBasicProblemType());
 			} else {
-				this.logger.error("Setting classifier factory for the problem type " + this.problemType.name() + " is only supported using SKLearnClassifierFactory.");
+				this.logger.error("Setting factory for the problem type " + this.problemType.name() + " is only supported using " + SKLearnClassifierFactory.class.getSimpleName());
 			}
 		}
 		return this.getSelf();
@@ -166,11 +166,14 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 	@SuppressWarnings("unchecked")
 	public MLPlanSKLearnBuilder<P, B> withProblemType(final EMLPlanSkLearnProblemType problemType) throws IOException {
 		this.problemType = problemType;
+		this.logger.info("Setting problem type: " + this.problemType.name());
 		if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
-			((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setProblemType(this.problemType.getBasicProblemType());
+			SKLearnClassifierFactory<P, B> factory = ((SKLearnClassifierFactory<P, B>) this.getLearnerFactory());
+			factory.setProblemType(this.problemType.getBasicProblemType());
+			this.logger.info("Setting factory for the problem type " + this.problemType.name() + ": " + factory.getClass().getSimpleName());
 			this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(problemType.getResourceSearchSpaceConfigFile(), problemType.getFileSystemSearchSpaceConfig()));
 			this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, this.problemType.getPreferredComponentName(), true);
-			this.withRequestedInterface(problemType.getRequestedHascoInterface());
+			this.withRequestedInterface(problemType.getRequestedInterface());
 		} else {
 			this.logger.error("Setting problem type only supported by SKLearnClassifierFactory.");
 		}

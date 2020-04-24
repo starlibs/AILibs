@@ -143,7 +143,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			this.logger.info("Initialized HASCO with start time {}.", this.timeOfStart);
 			return event;
 
-			/* active is only one step in this model; this could be refined */
+		/* active is only one step in this model; this could be refined */
 		case ACTIVE:
 
 			/* phase 1: gather solutions */
@@ -194,7 +194,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 					this.phase1CancellationTask.cancel();
 				}
 			}
-			this.secondsSpentInPhase1 = (int) Math.round(System.currentTimeMillis() - this.timeOfStart / 1000.0);
+			this.secondsSpentInPhase1 = (int) Math.round((System.currentTimeMillis() - this.timeOfStart) / 1000.0);
 
 			/* if there is no candidate, and the remaining time is very small, throw an AlgorithmTimeoutedException */
 			this.logger.info("HASCO has finished. {} solutions were found.", this.phase1ResultQueue.size());
@@ -220,8 +220,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 
 				/* phase 2: conduct it (select model) */
 				this.selectedHASCOSolution = this.selectModel();
-			}
-			else {
+			} else {
 				this.logger.info("Selection phase is disabled. Returning best result of phase 1.");
 				final Optional<HASCOSolutionCandidate<Double>> bestSolutionOptional = this.phase1ResultQueue.stream().min((s1, s2) -> s1.getScore().compareTo(s2.getScore()));
 				if (!bestSolutionOptional.isPresent()) {
