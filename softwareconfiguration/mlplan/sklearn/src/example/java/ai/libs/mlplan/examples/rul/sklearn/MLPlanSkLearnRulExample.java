@@ -1,4 +1,4 @@
-package ai.libs.mlplan.examples.multiclass.sklearn;
+package ai.libs.mlplan.examples.rul.sklearn;
 
 import java.io.File;
 import java.util.List;
