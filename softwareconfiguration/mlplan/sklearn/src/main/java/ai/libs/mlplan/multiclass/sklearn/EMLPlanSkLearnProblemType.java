@@ -36,8 +36,4 @@ public enum EMLPlanSkLearnProblemType {
 		return this.requestedHascoInterface;
 	}
 
-	public String getPreferredComponentName() {
-		return "resolve" + this.requestedHascoInterface + "With";
-	}
-
 }

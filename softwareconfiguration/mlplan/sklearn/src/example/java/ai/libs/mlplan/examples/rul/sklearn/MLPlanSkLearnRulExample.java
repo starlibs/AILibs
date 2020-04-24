@@ -29,11 +29,6 @@ public class MLPlanSkLearnRulExample {
 	private static final Logger LOGGER = LoggerFactory.getLogger("example");
 
 	public static void main(final String[] args) throws Exception {
-		runBFS();
-		// runRS();
-	}
-
-	public static void runBFS() throws Exception {
 		long start = System.currentTimeMillis();
 
 		/* load data for segment dataset and create a train-test-split */
@@ -53,6 +48,7 @@ public class MLPlanSkLearnRulExample {
 		builder.withAnacondaEnvironment("pdm");
 
 		((MonteCarloCrossValidationEvaluatorFactory) builder.getLearnerEvaluationFactoryForSearchPhase()).withMeasure(ERulPerformanceMeasure.ASYMMETRIC_LOSS); // TODO
+		((MonteCarloCrossValidationEvaluatorFactory) builder.getLearnerEvaluationFactoryForSelectionPhase()).withMeasure(ERulPerformanceMeasure.ASYMMETRIC_LOSS); // TODO
 
 		MLPlan<ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch>> mlplan = builder.withDataset(splits.get(0)).build();
 		mlplan.setPortionOfDataForPhase2(0f);

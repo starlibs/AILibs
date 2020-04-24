@@ -94,7 +94,7 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 		this.skipSetupCheck = skipSetupCheck;
 		this.withProblemType(DEF_PROBLEM_TYPE);
 		this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(DEF_PROBLEM_TYPE.getResourceSearchSpaceConfigFile(), DEF_PROBLEM_TYPE.getFileSystemSearchSpaceConfig()));
-		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, DEF_PROBLEM_TYPE.getPreferredComponentName());
+		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, DEF_PROBLEM_TYPE.getBasicProblemType().getPreferredComponentName());
 		this.withRequestedInterface(DEF_PROBLEM_TYPE.getRequestedInterface());
 		this.withClassifierFactory(DEF_CLASSIFIER_FACTORY);
 		this.withSearchPhaseEvaluatorFactory(DEF_SEARCH_PHASE_EVALUATOR);
@@ -172,7 +172,7 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 			factory.setProblemType(this.problemType.getBasicProblemType());
 			this.logger.info("Setting factory for the problem type " + this.problemType.name() + ": " + factory.getClass().getSimpleName());
 			this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(problemType.getResourceSearchSpaceConfigFile(), problemType.getFileSystemSearchSpaceConfig()));
-			this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, this.problemType.getPreferredComponentName(), true);
+			this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, this.problemType.getBasicProblemType().getPreferredComponentName(), true);
 			this.withRequestedInterface(problemType.getRequestedInterface());
 		} else {
 			this.logger.error("Setting problem type only supported by SKLearnClassifierFactory.");
