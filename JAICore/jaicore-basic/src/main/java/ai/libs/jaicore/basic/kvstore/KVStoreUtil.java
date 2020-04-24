@@ -214,7 +214,16 @@ public class KVStoreUtil {
 	}
 
 	private static KVStore readLine(final String[] columns, final String line, final String separator) {
-		String[] lineSplit = line.split(separator);
+		String[] lineSplit = new String[columns.length];
+		String remainingString = line;
+		int currentI = 0;
+		while (remainingString.contains(separator)) {
+			int nextSepIndex = remainingString.indexOf(separator);
+			lineSplit[currentI++] = remainingString.substring(0, nextSepIndex);
+			remainingString = remainingString.substring(nextSepIndex + 1);
+		}
+		lineSplit[currentI] = remainingString;
+
 		if (lineSplit.length != columns.length) {
 			throw new IllegalArgumentException("Malformed line in csv file: " + "Number of column heads " + columns.length + " Number of columns in line: " + lineSplit.length + " " + line);
 		}

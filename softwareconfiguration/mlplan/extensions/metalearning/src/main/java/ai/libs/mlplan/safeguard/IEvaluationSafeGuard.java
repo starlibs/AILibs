@@ -23,8 +23,9 @@ public interface IEvaluationSafeGuard {
 	 * @param ci The component instance describing the model to predict the induction time for.
 	 * @param metaFeaturesTrain The meta features describing the data inducing a model from.
 	 * @return The time needed for inducing a model.
+	 * @throws Exception
 	 */
-	public double predictInductionTime(final ComponentInstance ci, final double[] metaFeaturesTrain);
+	public double predictInductionTime(final ComponentInstance ci, final double[] metaFeaturesTrain) throws Exception;
 
 	/**
 	 * Predicts the runtime that is required for doing inference with the given model.
@@ -32,8 +33,9 @@ public interface IEvaluationSafeGuard {
 	 * @param ci The component instance describing the model to predict the inference time for.
 	 * @param metaFeaturesTest The meta features describing the data for which inference is to be done.
 	 * @return The time needed for making predictions on the validation set.
+	 * @throws Exception
 	 */
-	public double predictInferenceTime(final ComponentInstance ci, final double[] metaFeaturesTest);
+	public double predictInferenceTime(final ComponentInstance ci, final double[] metaFeaturesTest) throws Exception;
 
 	/**
 	 * @param ci The component instance describing the model to predict the evaluation time for.
@@ -41,7 +43,7 @@ public interface IEvaluationSafeGuard {
 	 * @param metaFeaturesTest The meta features describing the data to do inference for.
 	 * @return The time needed for inducing a model and making predictions.
 	 */
-	default double predictEvaluationTime(final ComponentInstance ci, final double[] metaFeaturesTrain, final double[] metaFeaturesTest) {
+	default double predictEvaluationTime(final ComponentInstance ci, final double[] metaFeaturesTrain, final double[] metaFeaturesTest) throws Exception {
 		return this.predictInductionTime(ci, metaFeaturesTrain) + this.predictInferenceTime(ci, metaFeaturesTest);
 	}
 
@@ -55,20 +57,12 @@ public interface IEvaluationSafeGuard {
 	public void updateWithActualInformation(final ComponentInstance ci, final double inductionTime, final double inferenceTime);
 
 	/**
-	 * Updates the safe guard with current information obtained by measuring the evaluation time of the given component instance on-line.
-	 *
-	 * @param ci The component instance describing the model that was evaluated with the measured evaluation time.
-	 * @param evaluationTime
-	 */
-	public void updateWithActualInformation(final ComponentInstance ci, final double evaluationTime);
-
-	/**
 	 * Computes an array of meta features for the given dataset. The meta features are required to make predictions for models with
 	 * respect to their runtimes for induction and inference.
 	 *
 	 * @param dataset The dataset for which to compute the meta features for.
 	 * @return An array of meta feataures describing the provided dataset.
 	 */
-	public double[] computeMetaFeatures(ILabeledDataset<?> dataset);
+	public double[] computeDatasetMetaFeatures(ILabeledDataset<?> dataset);
 
 }
