@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.regression.loss.ERegressionPerformanceMeasure;
 import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
 
 public class AsymmetricLossTest {
@@ -30,7 +29,7 @@ public class AsymmetricLossTest {
 		Double loss = asymmetricLoss.loss(actual, expected);
 		assertEquals(Double.valueOf(1.0), loss);
 	}
-	
+
 	@Test
 	public void lossWithError() {
 		List<Double> expected = new ArrayList<>();
@@ -44,5 +43,4 @@ public class AsymmetricLossTest {
 		assertEquals(Double.valueOf(0.375), loss);
 	}
 
-	
 }

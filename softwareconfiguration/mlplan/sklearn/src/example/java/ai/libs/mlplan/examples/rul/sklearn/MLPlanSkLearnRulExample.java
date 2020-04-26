@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
-import ai.libs.jaicore.ml.regression.loss.ERegressionPerformanceMeasure;
 import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;

@@ -9,7 +9,7 @@ public class LinearMeanSquaredError extends ARegressionMeasure {
 
 	private double weightA = 1;
 
-	public LinearMeanSquaredError(double weightA) {
+	public LinearMeanSquaredError(final double weightA) {
 		this.weightA = weightA;
 	}
 
@@ -22,7 +22,7 @@ public class LinearMeanSquaredError extends ARegressionMeasure {
 			Double error = 0d;
 			Double d = expected.get(i) - actual.get(i);
 			if (d <= 0) {
-				error = -weightA * d;
+				error = -this.weightA * d;
 			} else {
 				error = mse;
 			}

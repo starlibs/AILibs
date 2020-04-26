@@ -9,7 +9,7 @@ public class QuadraticQuadraticError extends ARegressionMeasure {
 
 	private double weightA = 1d;
 
-	public QuadraticQuadraticError(double weightA) {
+	public QuadraticQuadraticError(final double weightA) {
 		this.weightA = weightA;
 	}
 
@@ -20,9 +20,9 @@ public class QuadraticQuadraticError extends ARegressionMeasure {
 			double d = expected.get(i) - actual.get(i);
 			Double error;
 			if (d <= 0) {
-				error = 2 * weightA * Math.pow(d, 2);
+				error = 2 * this.weightA * Math.pow(d, 2);
 			} else {
-				error = 2 * (weightA + (1 - (2 * weightA))) * Math.pow(d, 2);
+				error = 2 * (this.weightA + (1 - (2 * this.weightA))) * Math.pow(d, 2);
 			}
 			errors.add(error);
 		}

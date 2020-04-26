@@ -9,8 +9,8 @@ public class AsymmetricWeightedAbsoluteError extends ARegressionMeasure {
 
 	private double weightA = 1;
 	private double weightB = 1;
-	
-	public AsymmetricWeightedAbsoluteError(double weightA, double weightB) {
+
+	public AsymmetricWeightedAbsoluteError(final double weightA, final double weightB) {
 		this.weightA = weightA;
 		this.weightB = weightB;
 	}
@@ -21,10 +21,10 @@ public class AsymmetricWeightedAbsoluteError extends ARegressionMeasure {
 		for (int i = 0; i < expected.size(); i++) {
 			double d = expected.get(i) - actual.get(i);
 			Double error = 0d;
-			if(d<=0) {
-				error = -weightA*d;
-			}else {
-				error = weightB*d;
+			if (d <= 0) {
+				error = -this.weightA * d;
+			} else {
+				error = this.weightB * d;
 			}
 			errors.add(error);
 		}
