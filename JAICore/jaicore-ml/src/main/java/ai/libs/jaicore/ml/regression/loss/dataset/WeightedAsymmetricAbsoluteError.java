@@ -5,12 +5,12 @@ import java.util.List;
 
 import ai.libs.jaicore.basic.StatisticsUtil;
 
-public class AsymmetricWeightedAbsoluteError extends ARegressionMeasure {
+public class WeightedAsymmetricAbsoluteError extends ARegressionMeasure {
 
 	private double weightA = 1;
 	private double weightB = 1;
 
-	public AsymmetricWeightedAbsoluteError(final double weightA, final double weightB) {
+	public WeightedAsymmetricAbsoluteError(final double weightA, final double weightB) {
 		this.weightA = weightA;
 		this.weightB = weightB;
 	}
