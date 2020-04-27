@@ -94,7 +94,6 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 		this.skipSetupCheck = skipSetupCheck;
 		this.withProblemType(DEF_PROBLEM_TYPE);
 		this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(DEF_PROBLEM_TYPE.getResourceSearchSpaceConfigFile(), DEF_PROBLEM_TYPE.getFileSystemSearchSpaceConfig()));
-		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, DEF_PROBLEM_TYPE.getBasicProblemType().getPreferredComponentName());
 		this.withRequestedInterface(DEF_PROBLEM_TYPE.getRequestedInterface());
 		this.withClassifierFactory(DEF_CLASSIFIER_FACTORY);
 		this.withSearchPhaseEvaluatorFactory(DEF_SEARCH_PHASE_EVALUATOR);
@@ -292,6 +291,17 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 	private boolean isValidVersion(final int rel, final int maj, final int min) {
 		return ((rel > PYTHON_MINIMUM_REQUIRED_VERSION_REL) || (rel == PYTHON_MINIMUM_REQUIRED_VERSION_REL && maj > PYTHON_MINIMUM_REQUIRED_VERSION_MAJ)
 				|| (rel == PYTHON_MINIMUM_REQUIRED_VERSION_REL && maj == PYTHON_MINIMUM_REQUIRED_VERSION_MAJ && min >= PYTHON_MINIMUM_REQUIRED_VERSION_MIN));
+	}
+
+	@Override
+	public MLPlanSKLearnBuilder<P, B> withSearchSpaceConfigFile(final File searchSpaceConfig) throws IOException {
+		super.withSearchSpaceConfigFile(searchSpaceConfig);
+		if (this.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS) == null) {
+			this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, this.problemType.getBasicProblemType().getPreferredComponentName(), true);
+		} else {
+			this.withPreferredComponentsFile(new File(this.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS)), this.problemType.getBasicProblemType().getPreferredComponentName(), true);
+		}
+		return this.getSelf();
 	}
 
 	@Override
