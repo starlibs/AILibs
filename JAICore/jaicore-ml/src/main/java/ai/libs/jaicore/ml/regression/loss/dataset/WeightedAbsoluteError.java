@@ -7,10 +7,14 @@ import ai.libs.jaicore.basic.StatisticsUtil;
 
 public class WeightedAbsoluteError extends ARegressionMeasure {
 
-	private double weight = 1d;
+	private double weightUnderestimation = 1d;
 
-	public WeightedAbsoluteError(final double weight) {
-		this.weight = weight;
+	public WeightedAbsoluteError() {
+
+	}
+
+	public WeightedAbsoluteError(final double weightUnderestimation) {
+		this.weightUnderestimation = weightUnderestimation;
 	}
 
 	@Override
@@ -20,9 +24,9 @@ public class WeightedAbsoluteError extends ARegressionMeasure {
 			double difference = actual.get(i) - expected.get(i);
 			Double error;
 			if (difference <= 0) {
-				error = -this.weight * difference;
+				error = -this.weightUnderestimation * difference;
 			} else {
-				error = this.weight * difference;
+				error = this.weightUnderestimation * difference;
 			}
 			errors.add(error);
 		}

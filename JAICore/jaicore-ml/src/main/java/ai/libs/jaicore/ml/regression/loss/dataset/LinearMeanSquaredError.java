@@ -7,10 +7,13 @@ import ai.libs.jaicore.basic.StatisticsUtil;
 
 public class LinearMeanSquaredError extends ARegressionMeasure {
 
-	private double weightA = 1;
+	private double weightUnderestimation = 1;
 
-	public LinearMeanSquaredError(final double weightA) {
-		this.weightA = weightA;
+	public LinearMeanSquaredError() {
+	}
+
+	public LinearMeanSquaredError(final double weightUnderestimation) {
+		this.weightUnderestimation = weightUnderestimation;
 	}
 
 	@Override
@@ -22,7 +25,7 @@ public class LinearMeanSquaredError extends ARegressionMeasure {
 			Double difference = actual.get(i) - expected.get(i);
 			Double error;
 			if (difference <= 0) {
-				error = -this.weightA * difference;
+				error = -this.weightUnderestimation * difference;
 			} else {
 				error = mse;
 			}

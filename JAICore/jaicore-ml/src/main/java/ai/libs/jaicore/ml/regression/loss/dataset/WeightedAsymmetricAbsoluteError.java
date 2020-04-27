@@ -7,12 +7,15 @@ import ai.libs.jaicore.basic.StatisticsUtil;
 
 public class WeightedAsymmetricAbsoluteError extends ARegressionMeasure {
 
-	private double weightA = 1;
-	private double weightB = 1;
+	private double weightUnderestimation = 1;
+	private double weightOverestimation = 1;
 
-	public WeightedAsymmetricAbsoluteError(final double weightA, final double weightB) {
-		this.weightA = weightA;
-		this.weightB = weightB;
+	public WeightedAsymmetricAbsoluteError() {
+	}
+
+	public WeightedAsymmetricAbsoluteError(final double weightUnderestimation, final double weightOverestimation) {
+		this.weightUnderestimation = weightUnderestimation;
+		this.weightOverestimation = weightOverestimation;
 	}
 
 	@Override
@@ -22,9 +25,9 @@ public class WeightedAsymmetricAbsoluteError extends ARegressionMeasure {
 			double d = expected.get(i) - actual.get(i);
 			Double error;
 			if (d <= 0) {
-				error = -this.weightA * d;
+				error = -this.weightUnderestimation * d;
 			} else {
-				error = this.weightB * d;
+				error = this.weightOverestimation * d;
 			}
 			errors.add(error);
 		}

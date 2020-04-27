@@ -14,6 +14,6 @@ public class AbsoluteError extends ARegressionMeasure {
 			Double error = Math.abs(expected.get(i) - actual.get(i));
 			errors.add(error);
 		}
-		return StatisticsUtil.mean(errors);
+		return StatisticsUtil.sum(errors);
 	}
 }

@@ -7,10 +7,13 @@ import ai.libs.jaicore.basic.StatisticsUtil;
 
 public class QuadraticQuadraticError extends ARegressionMeasure {
 
-	private double weightA = 1d;
+	private double weightUnderestimation = 1d;
 
-	public QuadraticQuadraticError(final double weightA) {
-		this.weightA = weightA;
+	public QuadraticQuadraticError() {
+	}
+
+	public QuadraticQuadraticError(final double weightUnderestimation) {
+		this.weightUnderestimation = weightUnderestimation;
 	}
 
 	@Override
@@ -20,9 +23,9 @@ public class QuadraticQuadraticError extends ARegressionMeasure {
 			double difference = expected.get(i) - actual.get(i);
 			Double error;
 			if (difference <= 0) {
-				error = 2 * this.weightA * Math.pow(difference, 2);
+				error = 2 * this.weightUnderestimation * Math.pow(difference, 2);
 			} else {
-				error = 2 * (this.weightA + (1 - (2 * this.weightA))) * Math.pow(difference, 2);
+				error = 2 * (this.weightUnderestimation + (1 - (2 * this.weightUnderestimation))) * Math.pow(difference, 2);
 			}
 			errors.add(error);
 		}
