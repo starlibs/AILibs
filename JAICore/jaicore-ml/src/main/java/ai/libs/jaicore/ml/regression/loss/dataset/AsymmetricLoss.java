@@ -12,7 +12,7 @@ public class AsymmetricLoss extends ARegressionMeasure {
 		List<Double> accuracyList = new ArrayList<>();
 		for (int i = 0; i < expected.size(); i++) {
 			Double percentageError = 100 * ((expected.get(i) - actual.get(i)) / expected.get(i));
-			Double accuracy = 0.0;
+			Double accuracy;
 			if (percentageError <= 0) {
 				accuracy = Math.exp(-Math.log(0.5) * (percentageError / 5));
 			} else {

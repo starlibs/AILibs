@@ -20,7 +20,7 @@ public class AsymmetricWeightedAbsoluteError extends ARegressionMeasure {
 		List<Double> errors = new ArrayList<>();
 		for (int i = 0; i < expected.size(); i++) {
 			double d = expected.get(i) - actual.get(i);
-			Double error = 0d;
+			Double error;
 			if (d <= 0) {
 				error = -this.weightA * d;
 			} else {

@@ -19,10 +19,10 @@ public class LinearMeanSquaredError extends ARegressionMeasure {
 		double mse = new MeanSquaredError().loss(expected, actual);
 
 		for (int i = 0; i < expected.size(); i++) {
-			Double error = 0d;
-			Double d = expected.get(i) - actual.get(i);
-			if (d <= 0) {
-				error = -this.weightA * d;
+			Double difference = actual.get(i) - expected.get(i);
+			Double error;
+			if (difference <= 0) {
+				error = -this.weightA * difference;
 			} else {
 				error = mse;
 			}
