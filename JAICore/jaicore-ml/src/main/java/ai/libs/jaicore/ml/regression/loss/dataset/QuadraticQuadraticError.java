@@ -20,7 +20,7 @@ public class QuadraticQuadraticError extends ARegressionMeasure {
 	public double loss(final List<? extends Double> expected, final List<? extends Double> actual) {
 		List<Double> errors = new ArrayList<>();
 		for (int i = 0; i < expected.size(); i++) {
-			double difference = expected.get(i) - actual.get(i);
+			double difference = actual.get(i) - expected.get(i);
 			Double error;
 			if (difference <= 0) {
 				error = 2 * this.weightUnderestimation * Math.pow(difference, 2);
