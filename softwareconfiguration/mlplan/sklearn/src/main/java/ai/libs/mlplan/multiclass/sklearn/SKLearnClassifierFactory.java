@@ -89,16 +89,22 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 		sb.append(className);
 		sb.append("(");
 		if (groundComponent.getComponent().getName().contains("make_pipeline")) {
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor"), importSet));
-			sb.append(",");
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("data_cleaner"), importSet));
-			sb.append(",");
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("regressor"), importSet));
+			if (this.problemType == EBasicProblemType.CLASSIFICATION) {
+				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor"), importSet));
+				sb.append(",");
+				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("classifier"), importSet));
+			} else if (this.problemType == EBasicProblemType.RUL) {
+				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("timeseries_transformer"), importSet));
+				sb.append(",");
+				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("data_cleaner"), importSet));
+				sb.append(",");
+				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("regressor"), importSet));
+			}
 		} else if (groundComponent.getComponent().getName().contains("make_union")) {
 			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("p1"), importSet));
 			sb.append(",");
 			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("p2"), importSet));
-		} else { // TODO adapt for RUL / tsfresh / DataCleaner
+		} else {
 			boolean first = true;
 			for (Entry<String, String> parameterValue : groundComponent.getParameterValues().entrySet()) {
 				if (first) {
