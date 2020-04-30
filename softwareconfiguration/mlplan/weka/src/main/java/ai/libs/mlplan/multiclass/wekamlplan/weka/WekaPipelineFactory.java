@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.model.IParameterDomain;
+import ai.libs.hasco.model.NumericParameterDomain;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
@@ -74,9 +76,8 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 					case "B": // suppose that this defines a base classifier
 						Classifier baseClassifier = this.getComponentInstantiation(reqI.getValue()).getClassifier();
 						if (c instanceof Stacking) {
-							((Stacking) c).setClassifiers(new Classifier[] {baseClassifier});
-						}
-						else {
+							((Stacking) c).setClassifiers(new Classifier[] { baseClassifier });
+						} else {
 							this.logger.error("Unsupported option B for classifier {}", c.getClass().getName());
 						}
 						break;
@@ -116,8 +117,14 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 			if (!parameterValues.getValue().equals("false")) {
 				parameters.add("-" + parameterValues.getKey());
 			}
+
+			IParameterDomain domain = ci.getComponent().getParameterWithName(parameterValues.getKey()).getDefaultDomain();
 			if (parameterValues.getValue() != null && !parameterValues.getValue().equals("") && !parameterValues.getValue().equals("true") && !parameterValues.getValue().equals("false")) {
-				parameters.add(parameterValues.getValue());
+				if (domain instanceof NumericParameterDomain && ((NumericParameterDomain) domain).isInteger()) {
+					parameters.add((int) Double.parseDouble(parameterValues.getValue()) + "");
+				} else {
+					parameters.add(parameterValues.getValue());
+				}
 			}
 		}
 
