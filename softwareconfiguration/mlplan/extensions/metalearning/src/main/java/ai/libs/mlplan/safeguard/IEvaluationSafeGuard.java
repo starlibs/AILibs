@@ -54,6 +54,5 @@ public interface IEvaluationSafeGuard {
 	 * @param inductionTime The induction time measured for the provided component instance.
 	 * @param inferenceTime The inference time measured for the provided component instance.
 	 */
-	public void updateWithActualInformation(final ComponentInstance ci, final double inductionTime, final double inferenceTime);
-
+	public void updateWithActualInformation(final ComponentInstance ci, final ILabeledDataset<?> dTrain, final ILabeledDataset<?> dTest, final double inductionTime, final double inferenceTime);
 }
