@@ -25,7 +25,7 @@ public interface IEvaluationSafeGuard {
 	 * @return The time needed for inducing a model.
 	 * @throws Exception
 	 */
-	public double predictInductionTime(final ComponentInstance ci, final double[] metaFeaturesTrain) throws Exception;
+	public double predictInductionTime(final ComponentInstance ci, final ILabeledDataset<?> dTrain) throws Exception;
 
 	/**
 	 * Predicts the runtime that is required for doing inference with the given model.
@@ -35,7 +35,7 @@ public interface IEvaluationSafeGuard {
 	 * @return The time needed for making predictions on the validation set.
 	 * @throws Exception
 	 */
-	public double predictInferenceTime(final ComponentInstance ci, final double[] metaFeaturesTest) throws Exception;
+	public double predictInferenceTime(final ComponentInstance ci, final ILabeledDataset<?> dTrain, final ILabeledDataset<?> dTest) throws Exception;
 
 	/**
 	 * @param ci The component instance describing the model to predict the evaluation time for.
@@ -43,8 +43,8 @@ public interface IEvaluationSafeGuard {
 	 * @param metaFeaturesTest The meta features describing the data to do inference for.
 	 * @return The time needed for inducing a model and making predictions.
 	 */
-	default double predictEvaluationTime(final ComponentInstance ci, final double[] metaFeaturesTrain, final double[] metaFeaturesTest) throws Exception {
-		return this.predictInductionTime(ci, metaFeaturesTrain) + this.predictInferenceTime(ci, metaFeaturesTest);
+	default double predictEvaluationTime(final ComponentInstance ci, final ILabeledDataset<?> dTrain, final ILabeledDataset<?> dTest) throws Exception {
+		return this.predictInductionTime(ci, dTrain) + this.predictInferenceTime(ci, dTrain, dTest);
 	}
 
 	/**
@@ -55,14 +55,5 @@ public interface IEvaluationSafeGuard {
 	 * @param inferenceTime The inference time measured for the provided component instance.
 	 */
 	public void updateWithActualInformation(final ComponentInstance ci, final double inductionTime, final double inferenceTime);
-
-	/**
-	 * Computes an array of meta features for the given dataset. The meta features are required to make predictions for models with
-	 * respect to their runtimes for induction and inference.
-	 *
-	 * @param dataset The dataset for which to compute the meta features for.
-	 * @return An array of meta feataures describing the provided dataset.
-	 */
-	public double[] computeDatasetMetaFeatures(ILabeledDataset<?> dataset);
 
 }
