@@ -174,7 +174,7 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 			this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, this.problemType.getBasicProblemType().getPreferredComponentName(), true);
 			this.withRequestedInterface(problemType.getRequestedInterface());
 		} else {
-			this.logger.error("Setting problem type only supported by SKLearnClassifierFactory.");
+			this.logger.warn("Setting problem type only supported by SKLearnClassifierFactory.");
 		}
 		return this.getSelf();
 	}
@@ -185,7 +185,7 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 		if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
 			((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setPathVariable(path);
 		} else {
-			this.logger.error("Setting path variable only supported by SKLearnClassifierFactory.");
+			this.logger.warn("Setting path variable only supported by SKLearnClassifierFactory.");
 		}
 		return this.getSelf();
 	}
@@ -196,7 +196,7 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 		if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
 			((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setAnacondaEnvironment(this.anacondaEnvironment);
 		} else {
-			this.logger.error("Setting anaconda environment only supported by SKLearnClassifierFactory.");
+			this.logger.warn("Setting anaconda environment only supported by SKLearnClassifierFactory.");
 		}
 		return this.getSelf();
 	}
