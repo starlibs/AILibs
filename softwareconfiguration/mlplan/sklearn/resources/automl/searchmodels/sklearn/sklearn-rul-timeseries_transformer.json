@@ -1,10 +1,10 @@
 {
-  "repository": "sklearn-rul-preprocessors",
+  "repository": "sklearn-rul-timeseriestransformer",
   "components": [
     {
       "name": "tsfresh.transformers.FeatureAugmenter",
       "providedInterface": [
-        "Preprocessor"
+        "TimeseriesTransformer"
       ],
       "requiredInterface": [
         {
@@ -51,6 +51,14 @@
           "type": "cat",
           "values": [
             "value"
+          ]
+        },
+        {
+          "name": "n_jobs",
+          "default": "1",
+          "type": "cat",
+          "values": [
+            "1"
           ]
         }
       ]

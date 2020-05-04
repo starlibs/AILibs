@@ -1,7 +1,7 @@
 {
 	"repository": "RUL",
 	"include": [
-		"./sklearn-rul-preprocessors.json",
+		"./sklearn-rul-timeseries_transformer.json",
 		"./sklearn-rul-data_cleaner.json",
 		"./sklearn-regressors.json"
 	],
@@ -14,12 +14,12 @@
 			],
 			"requiredInterface": [
 				{
-					"id": "data_cleaner",
-					"name": "DataCleaner"
+					"id": "timeseries_transformer",
+					"name": "TimeseriesTransformer"
 				},
 				{
-					"id": "preprocessor",
-					"name": "Preprocessor"
+					"id": "data_cleaner",
+					"name": "DataCleaner"
 				},
 				{
 					"id": "regressor",
