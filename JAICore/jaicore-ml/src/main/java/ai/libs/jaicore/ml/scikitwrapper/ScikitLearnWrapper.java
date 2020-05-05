@@ -566,8 +566,8 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			}
 
 			List<String> processParameters = new ArrayList<>();
+			String osName = System.getProperty("os.name").toLowerCase();
 			if (this.anacondaEnvironment != null) {
-				String osName = System.getProperty("os.name").toLowerCase();
 				if (this.anacondaEnvironment != null) {
 					if (osName.contains("mac")) {
 						processParameters.add("source");
@@ -614,7 +614,6 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			for (String parameter : processParameters) {
 				stringJoiner.add(parameter);
 			}
-			String osName = System.getProperty("os.name").toLowerCase();
 			if (osName.contains("mac")) {
 				return new String[] { "sh", "-c", stringJoiner.toString() };
 			} else {

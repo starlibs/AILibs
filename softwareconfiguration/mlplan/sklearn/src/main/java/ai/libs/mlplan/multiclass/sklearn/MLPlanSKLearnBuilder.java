@@ -209,7 +209,13 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 			if (this.pathVariable != null) {
 				processBuilder.environment().put("PATH", this.pathVariable);
 			}
-			Process p = processBuilder.command(COMMAND_PYTHON_BASH).start();
+			Process p;
+			String osName = System.getProperty("os.name").toLowerCase();
+			if (osName.contains("mac")) {
+				p = processBuilder.command(COMMAND_PYTHON_BASH).start();
+			} else {
+				p = processBuilder.command(COMMAND_PYTHON_EXEC).start();
+			}
 			StringBuilder sb = new StringBuilder();
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
 				String line;
