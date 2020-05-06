@@ -567,13 +567,23 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 
 			List<String> processParameters = new ArrayList<>();
 			if (this.anacondaEnvironment != null) {
-				processParameters.add("source");
-				processParameters.add("~/anaconda3/etc/profile.d/conda.sh");
-				processParameters.add("&&");
-				processParameters.add("conda");
-				processParameters.add("activate");
-				processParameters.add(this.anacondaEnvironment);
-				processParameters.add("&&");
+				String osName = System.getProperty("os.name").toLowerCase();
+				if (this.anacondaEnvironment != null) {
+					if (osName.contains("mac")) {
+						processParameters.add("source");
+						processParameters.add("~/anaconda3/etc/profile.d/conda.sh");
+						processParameters.add("&&");
+						processParameters.add("conda");
+						processParameters.add("activate");
+						processParameters.add(this.anacondaEnvironment);
+						processParameters.add("&&");
+					} else {
+						processParameters.add("conda");
+						processParameters.add("activate");
+						processParameters.add(this.anacondaEnvironment);
+						processParameters.add("&&");
+					}
+				}
 			}
 			processParameters.add("python");
 			processParameters.add("-u"); // Force python to run stdout and stderr unbuffered.
@@ -604,7 +614,12 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			for (String parameter : processParameters) {
 				stringJoiner.add(parameter);
 			}
-			return new String[] { "sh", "-c", stringJoiner.toString() };
+			String osName = System.getProperty("os.name").toLowerCase();
+			if (osName.contains("mac")) {
+				return new String[] { "sh", "-c", stringJoiner.toString() };
+			} else {
+				return processParameters.toArray(new String[] {});
+			}
 		}
 	}
 
