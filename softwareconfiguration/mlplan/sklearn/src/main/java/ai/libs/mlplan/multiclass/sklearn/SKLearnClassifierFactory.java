@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.CategoricalParameterDomain;
 import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.model.NumericParameterDomain;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.jaicore.ml.scikitwrapper.EBasicProblemType;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
@@ -30,6 +31,7 @@ import ai.libs.mlplan.core.ILearnerFactory;
 public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredictionBatch> implements ILearnerFactory<ScikitLearnWrapper<P, B>>, ILoggingCustomizable {
 
 	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList("True", "False"));
+	private static final List<String> EXCEPTIONS = Arrays.asList("None");
 
 	private Logger logger = LoggerFactory.getLogger(SKLearnClassifierFactory.class);
 	private String loggerName;
@@ -120,19 +122,27 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 
 				sb.append(parameterValue.getKey() + "=");
 				if (param.isNumeric()) {
-					sb.append(parameterValue.getValue());
-				} else if (param.isCategorical() && BOOL_DOMAIN.subsumes(param.getDefaultDomain())) {
-					sb.append(parameterValue.getValue());
-				} else {
-					try {
-						sb.append(Integer.parseInt(parameterValue.getValue()));
-					} catch (Exception e) {
+					if (((NumericParameterDomain) param.getDefaultDomain()).isInteger()) {
+						sb.append((int) Double.parseDouble(parameterValue.getValue()));
+					} else {
+						sb.append(Double.parseDouble(parameterValue.getValue()));
+					}
+				} else if (param.isCategorical()) {
+					if (BOOL_DOMAIN.subsumes(param.getDefaultDomain()) || EXCEPTIONS.contains(parameterValue.getValue())) {
+						sb.append(parameterValue.getValue());
+					} else { // if the categorical parameter contains numeric values, try to parse it as int or as double, and use the value itself if neither works
 						try {
-							sb.append(Double.parseDouble(parameterValue.getValue()));
-						} catch (Exception e1) {
-							sb.append("\"" + parameterValue.getValue() + "\"");
+							sb.append(Integer.parseInt(parameterValue.getValue()));
+						} catch (NumberFormatException e) {
+							try {
+								sb.append(Double.parseDouble(parameterValue.getValue()));
+							} catch (NumberFormatException e1) {
+								sb.append("\"" + parameterValue.getValue() + "\"");
+							}
 						}
 					}
+				} else {
+					throw new UnsupportedOperationException("The given parameter type is unknown for parameter " + param);
 				}
 			}
 
