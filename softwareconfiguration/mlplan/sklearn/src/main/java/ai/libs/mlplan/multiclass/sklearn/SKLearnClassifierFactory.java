@@ -3,6 +3,7 @@ package ai.libs.mlplan.multiclass.sklearn;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -36,6 +37,7 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 	private EBasicProblemType problemType;
 	private String pathVariable;
 	private String anacondaEnvironment;
+	private long seed;
 
 	@Override
 	public ScikitLearnWrapper<P, B> getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
@@ -54,6 +56,7 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 			ScikitLearnWrapper<P, B> wrapper = new ScikitLearnWrapper<>(constructionString, imports.toString(), true, this.problemType);
 			wrapper.setPathVariable(this.pathVariable);
 			wrapper.setAnacondaEnvironment(this.anacondaEnvironment);
+			wrapper.setSeed(this.seed);
 			return wrapper;
 		} catch (IOException e) {
 			this.logger.error("Could not create sklearn wrapper for construction {} and imports {}.", constructInstruction, imports);
@@ -171,6 +174,10 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 
 	public void setAnacondaEnvironment(final String env) {
 		this.anacondaEnvironment = env;
+	}
+
+	public void setSeed(final long seed) {
+		this.seed = seed;
 	}
 
 }

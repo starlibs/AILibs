@@ -368,6 +368,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	public B withSeed(final long seed) {
 		this.algorithmConfig.setProperty(IOwnerBasedRandomConfig.K_SEED, seed + "");
 		this.update();
+		this.logger.error("Seed has been set to {}", seed);
 		return this.getSelf();
 	}
 

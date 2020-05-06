@@ -81,7 +81,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	private static final File TMP_FOLDER = new File("tmp"); // Folder to put the serialized arff files and the scripts in.
 
 	private static final File MODEL_DUMPS_DIRECTORY = new File(TMP_FOLDER, "model_dumps");
-	private static final boolean VERBOSE = true; // If true the output stream of the python process is printed.
+	private static final boolean VERBOSE = false; // If true the output stream of the python process is printed.
 	private static final boolean LISTEN_TO_PID_FROM_PROCESS = true; // If true, the PID is obtained from the python process being started by listening to according output.
 	private static final boolean DELETE_TEMPORARY_FILES_ON_EXIT = true;
 
@@ -108,6 +108,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 */
 	private List<List<Double>> rawLastClassificationResults = null;
 	private String anacondaEnvironment;
+	private long seed;
 
 	/**
 	 * Starts a new wrapper and creates its underlying script with the given parameters.
@@ -191,6 +192,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				if (this.anacondaEnvironment != null) {
 					skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
 				}
+				skLearnWrapperCommandBuilder.withSeed(this.seed);
 				String[] trainCommand = skLearnWrapperCommandBuilder.toCommandArray();
 
 				if (L.isDebugEnabled()) {
@@ -266,6 +268,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			if (this.anacondaEnvironment != null) {
 				skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
 			}
+			skLearnWrapperCommandBuilder.withSeed(this.seed);
 			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
 
 			if (L.isDebugEnabled()) {
@@ -282,6 +285,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			if (this.anacondaEnvironment != null) {
 				skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
 			}
+			skLearnWrapperCommandBuilder.withSeed(this.seed);
 			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
 			if (L.isDebugEnabled()) {
 				L.debug("Run train test mode with {}", Arrays.toString(testCommand));
@@ -412,6 +416,10 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		this.anacondaEnvironment = env;
 	}
 
+	public void setSeed(final long seed) {
+		this.seed = seed;
+	}
+
 	public void setTargets(final int... targetColumns) {
 		this.targetColumns = targetColumns;
 	}
@@ -494,6 +502,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		private static final String MODE_FLAG = "--mode";
 		private static final String MODEL_FLAG = "--model";
 		private static final String OUTPUT_FLAG = "--output";
+		private static final String SEED_FLAG = "--seed";
 
 		private String arffFile;
 		private String testArffFile;
@@ -501,6 +510,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		private String modelFile;
 		private String outputFile;
 		private String anacondaEnvironment;
+		private long seed;
 
 		private SKLearnWrapperCommandBuilder() {
 
@@ -554,6 +564,11 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			return this;
 		}
 
+		private SKLearnWrapperCommandBuilder withSeed(final long seed) {
+			this.seed = seed;
+			return this;
+		}
+
 		private String[] toCommandArray() {
 			Objects.requireNonNull(this.mode);
 			Objects.requireNonNull(this.outputFile);
@@ -597,6 +612,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			}
 			processParameters.addAll(Arrays.asList(OUTPUT_FLAG, this.outputFile));
 			processParameters.add(ScikitLearnWrapper.this.problemType.getScikitLearnCommandLineFlag());
+			processParameters.addAll(Arrays.asList(SEED_FLAG, String.valueOf(this.seed)));
 
 			if (this.mode == WrapperExecutionMode.TEST) {
 				Objects.requireNonNull(this.modelFile);

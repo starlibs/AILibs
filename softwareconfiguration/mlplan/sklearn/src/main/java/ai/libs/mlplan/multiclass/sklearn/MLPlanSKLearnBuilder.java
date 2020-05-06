@@ -72,6 +72,7 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 	private EMLPlanSkLearnProblemType problemType;
 	private String pathVariable;
 	private String anacondaEnvironment;
+	private long seed;
 	private final boolean skipSetupCheck;
 
 	/**
@@ -197,6 +198,21 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 			((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setAnacondaEnvironment(this.anacondaEnvironment);
 		} else {
 			this.logger.warn("Setting anaconda environment only supported by SKLearnClassifierFactory.");
+		}
+		return this.getSelf();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public MLPlanSKLearnBuilder<P, B> withSeed(final long seed) {
+		super.withSeed(seed);
+		this.seed = seed;
+		if (this.getLearnerFactory() != null) {
+			if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
+				((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setSeed(this.seed);
+			} else {
+				this.logger.warn("Setting seed only supported by SKLearnClassifierFactory.");
+			}
 		}
 		return this.getSelf();
 	}
