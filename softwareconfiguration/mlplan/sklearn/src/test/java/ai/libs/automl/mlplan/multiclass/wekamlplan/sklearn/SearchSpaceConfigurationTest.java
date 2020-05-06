@@ -6,8 +6,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +23,10 @@ import ai.libs.hasco.model.ComponentUtil;
 import ai.libs.hasco.model.NumericParameterDomain;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.hasco.serialization.ComponentLoader;
+import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
+import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
@@ -29,35 +37,46 @@ public class SearchSpaceConfigurationTest {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger("SearchSpaceConfigurationTest");
 
+	private static final EMLPlanSkLearnProblemType PROBLEM_TYPE = EMLPlanSkLearnProblemType.RUL;
+	private static final String DATA_FILE = "C:/Users/Kadiray/work_pdm/transformer/dataset-transformer/src/main/resources/data/Artificial/1-sensor/RUL/1sensor_100dense.arff";
+	private static final Random RANDOM = new Random(42);
+
 	@Test
 	public void searchSpaceConfigurationTest() throws Exception {
-		String requestedInterface = EMLPlanSkLearnProblemType.RUL.getRequestedInterface();
-		String searchSpaceConfigFile = EMLPlanSkLearnProblemType.RUL.getResourceSearchSpaceConfigFile();
+		String requestedInterface = PROBLEM_TYPE.getRequestedInterface();
+		String searchSpaceConfigFile = PROBLEM_TYPE.getResourceSearchSpaceConfigFile();
+		ILabeledDataset<ILabeledInstance> dataset = readData(DATA_FILE);
 
 		List<Component> components = new ArrayList<>(new ComponentLoader(new File(searchSpaceConfigFile)).getComponents());
 
 		List<ComponentInstance> allComponentInstances = new ArrayList<>(ComponentUtil.getAllAlgorithmSelectionInstances(requestedInterface, components));
 
+		MonteCarloCrossValidationEvaluator evaluator = new MonteCarloCrossValidationEvaluatorFactory().withData(dataset).withNumMCIterations(1).withTrainFoldSize(0.7).withMeasure(ERulPerformanceMeasure.ASYMMETRIC_LOSS).withRandom(RANDOM)
+				.getLearnerEvaluator();
+
 		SKLearnClassifierFactory<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> factory = new SKLearnClassifierFactory<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch>();
 		factory.setAnacondaEnvironment("pdm");
-		factory.setProblemType(EMLPlanSkLearnProblemType.RUL.getBasicProblemType());
+		factory.setProblemType(PROBLEM_TYPE.getBasicProblemType());
 
 		for (ComponentInstance ciToInstantiate : allComponentInstances) {
 			ComponentInstance componentInstance = instantiateWithDefaultParameters(ciToInstantiate);
-			ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> instantiation = factory.getComponentInstantiation(componentInstance);
+			ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> model = factory.getComponentInstantiation(componentInstance);
+			evaluator.evaluate(model);
 		}
 
 		for (ComponentInstance ciToInstantiate : allComponentInstances) {
 			List<ComponentInstance> instances = instantiateWithCategoricalParameters(ciToInstantiate);
 			for (ComponentInstance instance : instances) {
-				ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> instantiation = factory.getComponentInstantiation(instance);
+				ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> model = factory.getComponentInstantiation(instance);
+				evaluator.evaluate(model);
 			}
 		}
 
 		for (ComponentInstance ciToInstantiate : allComponentInstances) {
 			List<ComponentInstance> instances = instantiateWithNumericParameters(ciToInstantiate);
 			for (ComponentInstance instance : instances) {
-				ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> instantiation = factory.getComponentInstantiation(instance);
+				ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> model = factory.getComponentInstantiation(instance);
+				evaluator.evaluate(model);
 			}
 		}
 
@@ -251,6 +270,13 @@ public class SearchSpaceConfigurationTest {
 		parameterizedInstances.add(new ComponentInstance(component, numericParameterValues, new HashMap<>()));
 
 		return parameterizedInstances;
+	}
+
+	private static ILabeledDataset<ILabeledInstance> readData(final String path) throws DatasetDeserializationFailedException {
+		long start = System.currentTimeMillis();
+		ILabeledDataset<ILabeledInstance> dataset = ArffDatasetAdapter.readDataset(new File(path));
+		LOGGER.info("Data read. Time to create dataset object was {}ms", System.currentTimeMillis() - start);
+		return dataset;
 	}
 
 }
