@@ -103,6 +103,8 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 				sb.append(",");
 				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("data_cleaner"), importSet));
 				sb.append(",");
+				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor"), importSet));
+				sb.append(",");
 				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("regressor"), importSet));
 			}
 		} else if (groundComponent.getComponent().getName().contains("make_union")) {

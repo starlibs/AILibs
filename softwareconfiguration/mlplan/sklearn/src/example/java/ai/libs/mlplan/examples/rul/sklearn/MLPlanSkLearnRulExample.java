@@ -45,7 +45,6 @@ public class MLPlanSkLearnRulExample {
 		builder.withCandidateEvaluationTimeOut(new Timeout(45, TimeUnit.SECONDS));
 		builder.withTimeOut(new Timeout(3, TimeUnit.MINUTES));
 		builder.withNumCpus(4);
-		builder.withAnacondaEnvironment("pdm");
 
 		((MonteCarloCrossValidationEvaluatorFactory) builder.getLearnerEvaluationFactoryForSearchPhase()).withMeasure(ERulPerformanceMeasure.ASYMMETRIC_LOSS); // TODO
 		((MonteCarloCrossValidationEvaluatorFactory) builder.getLearnerEvaluationFactoryForSelectionPhase()).withMeasure(ERulPerformanceMeasure.ASYMMETRIC_LOSS); // TODO

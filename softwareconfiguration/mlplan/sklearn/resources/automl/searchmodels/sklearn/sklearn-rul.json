@@ -3,6 +3,7 @@
 	"include": [
 		"./sklearn-rul-timeseries_transformer.json",
 		"./sklearn-rul-data_cleaner.json",
+		"./sklearn-preprocessors.json",
 		"./sklearn-regressors.json"
 	],
 	"components": [
@@ -20,6 +21,10 @@
 				{
 					"id": "data_cleaner",
 					"name": "DataCleaner"
+				},
+				{
+					"id": "preprocessor",
+					"name": "BasicPreprocessor"
 				},
 				{
 					"id": "regressor",
