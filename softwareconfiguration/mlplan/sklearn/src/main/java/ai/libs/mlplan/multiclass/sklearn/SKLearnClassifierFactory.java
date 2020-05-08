@@ -31,7 +31,7 @@ import ai.libs.mlplan.core.ILearnerFactory;
 public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredictionBatch> implements ILearnerFactory<ScikitLearnWrapper<P, B>>, ILoggingCustomizable {
 
 	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList("True", "False"));
-	private static final List<String> EXCEPTIONS = Arrays.asList("None");
+	private static final List<String> EXCEPTIONS = Arrays.asList("None", "np.inf");
 
 	private Logger logger = LoggerFactory.getLogger(SKLearnClassifierFactory.class);
 	private String loggerName;
