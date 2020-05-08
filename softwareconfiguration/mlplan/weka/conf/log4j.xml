@@ -206,4 +206,13 @@
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary">
   	<level value="info" />
   </logger>
+  
+  <logger name="ai.libs.mlplan.core.PipelineEvaluator">
+  	<level value="debug" />
+  </logger>
+  
+  <logger name="ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory">
+  	<level value="warn" />
+  </logger>
+  
 </log4j:configuration>

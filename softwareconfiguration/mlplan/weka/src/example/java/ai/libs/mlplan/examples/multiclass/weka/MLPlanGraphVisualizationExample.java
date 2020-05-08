@@ -9,6 +9,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
 
+import ai.libs.hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
@@ -30,12 +31,13 @@ public class MLPlanGraphVisualizationExample {
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */
-		MLPlan<IWekaClassifier> mlplan = new MLPlanWekaBuilder().withNumCpus(4).withTimeOut(new Timeout(30, TimeUnit.SECONDS)).withDataset(split.get(0)).build();
+		MLPlanWekaBuilder mlplanBuilder = new MLPlanWekaBuilder().withNumCpus(4).withTimeOut(new Timeout(600, TimeUnit.SECONDS)).withCandidateEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS)).withDataset(split.get(0));
+		MLPlan<IWekaClassifier> mlplan = mlplanBuilder.build();
 
 		/* create visualization */
 		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan);
 		window.withMainPlugin(new GraphViewPlugin());
-		window.withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin());
+		window.withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin(), new NodeInfoGUIPlugin(new TFDNodeAsCIViewInfoGenerator(mlplanBuilder.getComponents())));
 
 		try {
 			long start = System.currentTimeMillis();

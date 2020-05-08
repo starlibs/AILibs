@@ -10,7 +10,7 @@
 	  	    		"name": "AbstractPreprocessor"
 	  	    	}, { 
 	  	    		"id": "classifier",
-	  	    		"name": "BaseClassifier"
+	  	    		"name": "PipelineClassifier"
 	  	    	}
 			],
 	    	"parameter" : [ ]

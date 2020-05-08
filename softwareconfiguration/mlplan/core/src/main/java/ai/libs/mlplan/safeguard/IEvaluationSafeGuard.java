@@ -1,8 +1,10 @@
 package ai.libs.mlplan.safeguard;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.algorithm.Timeout;
 
 import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.mlplan.core.ITimeTrackingLearner;
 
 /**
  * An evaluation safe guard can be used to predict whether an evaluation is likely to succeed or not.
@@ -16,6 +18,15 @@ import ai.libs.hasco.model.ComponentInstance;
  * @author mwever
  */
 public interface IEvaluationSafeGuard {
+
+	/**
+	 * Predicts whether a component instance <code>ci</code> is likely to adhere to the given <code>timeout</code>.
+	 * @parma ci The component instance to make the prediction for.
+	 * @param timeout The timeout posed to the evaluation of the component instance.
+	 * @return Returns true iff the component instance can likely be evaluated within the given timeout.
+	 * @throws Exception
+	 */
+	public boolean predictWillAdhereToTimeout(final ComponentInstance ci, Timeout timeout) throws Exception;
 
 	/**
 	 * Predicts the runtime that is required for inducing a model.
@@ -51,8 +62,7 @@ public interface IEvaluationSafeGuard {
 	 * Updates the safe guard with current information obtained by measuring the induction and inference time of the given component instance on-line.
 	 *
 	 * @param ci The component instance describing the model to update the actual information for.
-	 * @param inductionTime The induction time measured for the provided component instance.
-	 * @param inferenceTime The inference time measured for the provided component instance.
+	 * @param wrappedLearner The learner that has been used to evaluate the component instance. It must be a time tracking learner.
 	 */
-	public void updateWithActualInformation(final ComponentInstance ci, final ILabeledDataset<?> dTrain, final ILabeledDataset<?> dTest, final double inductionTime, final double inferenceTime);
+	public void updateWithActualInformation(final ComponentInstance ci, final ITimeTrackingLearner wrappedLearner);
 }

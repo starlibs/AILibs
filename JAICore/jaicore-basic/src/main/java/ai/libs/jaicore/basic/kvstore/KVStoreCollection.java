@@ -98,6 +98,19 @@ public class KVStoreCollection extends LinkedList<IKVStore> {
 		return selectedCollection;
 	}
 
+	public KVStoreCollection selectContained(final Map<String, Collection<String>> containsSelect, final boolean or) {
+		KVStoreCollection selectedCollection = new KVStoreCollection();
+		for (IKVStore store : this) {
+			long count = containsSelect.entrySet().stream().filter(x -> x.getValue().contains(store.getAsString(x.getKey()))).count();
+			if (or && count > 0) {
+				selectedCollection.add(store);
+			} else if (!or && count == containsSelect.size()) {
+				selectedCollection.add(store);
+			}
+		}
+		return selectedCollection;
+	}
+
 	public KVStoreCollection filter(final String[] filterKeys) {
 		KVStoreCollection filteredCollection = new KVStoreCollection();
 		for (IKVStore store : this) {

@@ -4,6 +4,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -20,6 +21,9 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedObjectEvaluator;
 import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
+import ai.libs.mlplan.safeguard.AlwaysEvaluateSafeGuard;
+import ai.libs.mlplan.safeguard.EvaluationSafeGuardException;
+import ai.libs.mlplan.safeguard.IEvaluationSafeGuard;
 
 /**
  * Evaluator used in the search phase of mlplan.
@@ -33,10 +37,18 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 	private final EventBus eventBus = new EventBus();
 	private final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> learnerFactory;
 	private final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> benchmark;
-	private final int timeoutForEvaluation;
+	private final Timeout timeoutForEvaluation;
 	private Double bestScore = 1.0;
 
-	public PipelineEvaluator(final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> learnerFactory, final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> benchmark, final int timeoutForEvaluation) {
+	private IEvaluationSafeGuard safeGuard;
+
+	public PipelineEvaluator(final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> learnerFactory,
+			final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> benchmark, final Timeout timeoutForEvaluation) {
+		this(learnerFactory, benchmark, timeoutForEvaluation, new AlwaysEvaluateSafeGuard());
+	}
+
+	public PipelineEvaluator(final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> learnerFactory,
+			final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> benchmark, final Timeout timeoutForEvaluation, final IEvaluationSafeGuard safeGuard) {
 		super();
 		this.learnerFactory = learnerFactory;
 		this.benchmark = benchmark;
@@ -44,6 +56,7 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 			((IEventEmitter) benchmark).registerListener(this);
 		}
 		this.timeoutForEvaluation = timeoutForEvaluation;
+		this.safeGuard = safeGuard;
 	}
 
 	@Override
@@ -67,22 +80,46 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 	@Override
 	public Double evaluateSupervised(final ComponentInstance c) throws InterruptedException, ObjectEvaluationFailedException {
 		this.logger.debug("Received request to evaluate component instance {}", c);
+		this.logger.debug("Query evaluation safe guard whether to evaluate this component instance for the given timeout {}.", this.timeoutForEvaluation);
+		try {
+			if (!this.safeGuard.predictWillAdhereToTimeout(c, this.timeoutForEvaluation)) {
+				throw new EvaluationSafeGuardException("Evaluation safe guard prevents evaluation of component instance.", c);
+			}
+		} catch (EvaluationSafeGuardException e) {
+			throw e;
+		} catch (InterruptedException e) {
+			throw e;
+		} catch (Exception e) {
+			this.logger.error("Could not use evaluation safe guard. Continue with business as usual. Here is the stacktrace:", e);
+		}
+
 		try {
 			if (this.benchmark instanceof IInformedObjectEvaluatorExtension) {
 				((IInformedObjectEvaluatorExtension<Double>) this.benchmark).informAboutBestScore(this.bestScore);
 			}
+
+			this.logger.debug("Instantiate learner from component instance.");
 			ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner = this.learnerFactory.getComponentInstantiation(c);
 			this.eventBus.post(new SupervisedLearnerCreatedEvent(c, learner)); // inform listeners about the creation of the classifier
+
+			ITimeTrackingLearner trackableLearner = new TimeTrackingLearnerWrapper(learner);
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, (learner instanceof ScikitLearnWrapper) ? learner.toString() : learner.getClass().getName());
 			}
-			Double score = this.benchmark.evaluate(learner);
+
+			Double score = this.benchmark.evaluate(trackableLearner);
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info("Obtained score {} for classifier {}", score, (learner instanceof ScikitLearnWrapper) ? learner.toString() : learner.getClass().getName());
 			}
+
+			this.safeGuard.updateWithActualInformation(c, trackableLearner);
 			return score;
 		} catch (ComponentInstantiationFailedException e) {
+			this.logger.warn("Component instantiation failed for {}", c, e);
 			throw new ObjectEvaluationFailedException("Evaluation of composition failed as the component instantiation could not be built.", e);
+		} catch (ObjectEvaluationFailedException e) {
+			this.logger.warn("Could not evaluate candidate {} due to exception.", c, e);
+			throw e;
 		}
 	}
 
@@ -92,7 +129,7 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 	}
 
 	@Override
-	public long getTimeout(final ComponentInstance item) {
+	public Timeout getTimeout(final ComponentInstance item) {
 		return this.timeoutForEvaluation;
 	}
 
