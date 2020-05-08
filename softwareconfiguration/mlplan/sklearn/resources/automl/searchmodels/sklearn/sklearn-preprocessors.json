@@ -3,6 +3,14 @@
   "include": [],
   "components": [
     {
+      "name": "NoPreprocessor",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": []
+    },
+    {
       "name": "sklearn.preprocessing.Binarizer",
       "providedInterface": [
         "BasicPreprocessor"

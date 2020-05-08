@@ -23,7 +23,23 @@
 					"name": "DataCleaner"
 				},
 				{
-					"id": "preprocessor",
+					"id": "preprocessor0",
+					"name": "BasicPreprocessor"
+				},
+				{
+					"id": "preprocessor1",
+					"name": "BasicPreprocessor"
+				},
+				{
+					"id": "preprocessor2",
+					"name": "BasicPreprocessor"
+				},
+				{
+					"id": "preprocessor3",
+					"name": "BasicPreprocessor"
+				},
+				{
+					"id": "preprocessor4",
 					"name": "BasicPreprocessor"
 				},
 				{

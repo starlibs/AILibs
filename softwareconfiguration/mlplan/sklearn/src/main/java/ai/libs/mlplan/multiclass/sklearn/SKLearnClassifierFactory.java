@@ -103,11 +103,19 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 				sb.append(",");
 				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("data_cleaner"), importSet));
 				sb.append(",");
-				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor"), importSet));
-				sb.append(",");
+				int i = 0;
+				while (groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor" + i) != null) {
+					if (!groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor" + i).getComponent().getName().equals("NoPreprocessor")) {
+						sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor" + i), importSet));
+						sb.append(",");
+					}
+					i++;
+				}
 				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("regressor"), importSet));
 			}
-		} else if (groundComponent.getComponent().getName().contains("make_union")) {
+		} else if (groundComponent.getComponent().getName().contains("make_union"))
+
+		{
 			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("p1"), importSet));
 			sb.append(",");
 			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("p2"), importSet));
