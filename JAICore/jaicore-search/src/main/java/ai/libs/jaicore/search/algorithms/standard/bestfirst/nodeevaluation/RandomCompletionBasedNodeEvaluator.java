@@ -273,7 +273,7 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 						throw e;
 					} catch (Exception ex) {
 						if (countedExceptions == this.maxSamples) {
-							this.logger.warn("Too many retry attempts, giving up. {} samples were drawn, {} were successful.", drawnSamples, successfulSamples);
+							this.logger.warn("Too many retry attempts, giving up. {} samples were drawn, {} were successful.", drawnSamples, successfulSamples, path.getHead());
 							throw new PathEvaluationException("Error in the evaluation of a node!", ex);
 						} else {
 							countedExceptions++;

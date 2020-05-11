@@ -207,12 +207,9 @@
   	<level value="info" />
   </logger>
   
-  <logger name="ai.libs.mlplan.core.PipelineEvaluator">
+  <logger name="ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator">
   	<level value="debug" />
   </logger>
   
-  <logger name="ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory">
-  	<level value="warn" />
-  </logger>
   
 </log4j:configuration>

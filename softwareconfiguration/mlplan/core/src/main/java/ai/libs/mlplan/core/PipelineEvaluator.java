@@ -102,7 +102,7 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 			ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner = this.learnerFactory.getComponentInstantiation(c);
 			this.eventBus.post(new SupervisedLearnerCreatedEvent(c, learner)); // inform listeners about the creation of the classifier
 
-			ITimeTrackingLearner trackableLearner = new TimeTrackingLearnerWrapper(learner);
+			ITimeTrackingLearner trackableLearner = new TimeTrackingLearnerWrapper(c, learner);
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, (learner instanceof ScikitLearnWrapper) ? learner.toString() : learner.getClass().getName());
 			}
@@ -117,9 +117,6 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 		} catch (ComponentInstantiationFailedException e) {
 			this.logger.warn("Component instantiation failed for {}", c, e);
 			throw new ObjectEvaluationFailedException("Evaluation of composition failed as the component instantiation could not be built.", e);
-		} catch (ObjectEvaluationFailedException e) {
-			this.logger.warn("Could not evaluate candidate {} due to exception.", c, e);
-			throw e;
 		}
 	}
 
@@ -140,6 +137,14 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 
 	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> getBenchmark() {
 		return this.benchmark;
+	}
+
+	public void setSafeGuard(final IEvaluationSafeGuard safeGuard) {
+		if (safeGuard != null) {
+			this.safeGuard = safeGuard;
+		} else {
+			this.safeGuard = new AlwaysEvaluateSafeGuard();
+		}
 	}
 
 	/**

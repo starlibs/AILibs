@@ -43,6 +43,7 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.Alter
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
 
 /**
  * The MLPlanBuilder helps to easily configure and initialize ML-Plan with specific parameter settings.
@@ -92,6 +93,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	private IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter;
 	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factoryForPipelineEvaluationInSearchPhase = null;
 	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factoryForPipelineEvaluationInSelectionPhase = null;
+	private IEvaluationSafeGuardFactory safeGuard = null;
 
 	private Collection<Component> components = new LinkedList<>();
 
@@ -460,6 +462,16 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	@Override
 	public double getPortionOfDataReservedForSelectionPhase() {
 		return this.algorithmConfig.dataPortionForSelection();
+	}
+
+	public B withSafeGuardFactory(final IEvaluationSafeGuardFactory safeGuard) {
+		this.safeGuard = safeGuard;
+		return this.getSelf();
+	}
+
+	@Override
+	public IEvaluationSafeGuardFactory getSafeGuardFactory() {
+		return this.safeGuard;
 	}
 
 	/**

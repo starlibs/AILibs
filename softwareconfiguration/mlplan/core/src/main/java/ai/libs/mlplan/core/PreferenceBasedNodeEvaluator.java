@@ -61,7 +61,7 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 		this.logger.debug("The associated component instance is {}. Constitutes a pipeline? {}", instance, isPipeline ? "yes" : "no");
 		if (instance != null) {
 			if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
-				lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveBaseClassifierWith");
+				lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith("resolvePipelineClassifierWith");
 
 				if (instance.getSatisfactionOfRequiredInterfaces().containsKey("classifier")) {
 					classifierName = instance.getSatisfactionOfRequiredInterfaces().get("classifier").getComponent().getName();
@@ -84,7 +84,7 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 				score = null;
 				if (!this.sentLogMessageForHavingEnteredSecondSubPhase) {
 					double scoreOfParent;
-					if ((scoreOfParent = ((BackPointerPath<TFDNode, String, Double>)n.getPathToParentOfHead()).getScore()) > 1.0e-6) {
+					if ((scoreOfParent = ((BackPointerPath<TFDNode, String, Double>) n.getPathToParentOfHead()).getScore()) > 1.0e-6) {
 						this.sentLogMessageForHavingEnteredSecondSubPhase = true;
 						this.logger.info("Entering phase 1b! Breadth first search ends here, because the search is asking for the f-value of a node whose parent has been truely evaluated with an f-value of {}", scoreOfParent);
 					}

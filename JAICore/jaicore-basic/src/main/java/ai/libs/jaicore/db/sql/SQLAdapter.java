@@ -160,7 +160,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 				Properties connectionProps = new Properties(this.connectionProperties);
 				connectionProps.put("user", this.user);
 				connectionProps.put("password", this.password);
-				String connectionString = "jdbc:" + this.driver + "://" + this.host + "/" + this.database + ((this.ssl) ? "?verifyServerCertificate=false&requireSSL=true&useSSL=true" : "");
+				String connectionString = "jdbc:" + this.driver + "://" + this.host + "/" + this.database + ((this.ssl) ? "?verifyServerCertificate=false&requireSSL=true&useSSL=true" : "?useSSL=false");
 				this.logger.info("Connecting to {}", connectionString);
 				this.connect = DriverManager.getConnection(connectionString, connectionProps);
 				this.logger.info("Connection established.");
@@ -230,7 +230,6 @@ public class SQLAdapter implements IDatabaseAdapter {
 	public List<IKVStore> getRowsOfTable(final String table, final Map<String, String> conditions) throws SQLException {
 		return this.getResultsOfQuery(this.queryBuilder.buildSelectSQLCommand(table, conditions));
 	}
-
 
 	public Iterator<IKVStore> getRowIteratorOfTable(final String table) throws SQLException {
 		return this.getRowIteratorOfTable(table, new HashMap<>());

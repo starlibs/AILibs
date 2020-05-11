@@ -11,9 +11,12 @@ import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
+import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 
 public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, IPrediction, IPredictionBatch> implements ITimeTrackingLearner {
+
+	private ComponentInstance ci;
 
 	private List<Long> fitTimes;
 	private List<Long> batchPredictTimes;
@@ -21,10 +24,12 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 
 	private final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> wrappedSLClassifier;
 
-	public TimeTrackingLearnerWrapper(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> wrappedLearner) {
+	public TimeTrackingLearnerWrapper(final ComponentInstance ci, final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> wrappedLearner) {
+		this.ci = ci;
 		this.wrappedSLClassifier = wrappedLearner;
 		this.fitTimes = new ArrayList<>();
 		this.batchPredictTimes = new ArrayList<>();
+		this.perInstancePredictionTimes = new ArrayList<>();
 	}
 
 	@Override
@@ -65,6 +70,10 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 	@Override
 	public List<Long> getInstancePredictionTimes() {
 		return this.perInstancePredictionTimes;
+	}
+
+	public ComponentInstance getComponentInstance() {
+		return this.ci;
 	}
 
 	class TimeTracker {
