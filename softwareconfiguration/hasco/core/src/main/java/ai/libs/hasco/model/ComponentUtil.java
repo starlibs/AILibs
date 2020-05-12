@@ -1,5 +1,6 @@
 package ai.libs.hasco.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -126,6 +127,41 @@ public class ComponentUtil {
 			ci = componentInstanceWithNoRequiredInterfaces(component, parameterValues);
 		} while (!ComponentInstanceUtil.isValidComponentInstantiation(ci));
 		return ci;
+	}
+
+	public static List<ComponentInstance> categoricalParameterizationsOfComponent(final Component component) {
+		Map<String, String> parameterValues = new HashMap<>();
+		List<ComponentInstance> parameterizedInstances = new ArrayList<>();
+		List<Parameter> categoricalParameters = new ArrayList<>();
+		int maxParameterIndex = 0;
+		for (Parameter p : component.getParameters()) {
+			if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
+				String[] values = ((CategoricalParameterDomain) p.getDefaultDomain()).getValues();
+				if (values.length > maxParameterIndex) {
+					maxParameterIndex = values.length;
+				}
+				categoricalParameters.add(p);
+			} else {
+				parameterValues.put(p.getName(), p.getDefaultValue() + "");
+			}
+		}
+		for (int parameterIndex = 0; parameterIndex < maxParameterIndex; parameterIndex++) {
+			Map<String, String> categoricalParameterValues = new HashMap<>();
+			for (int i = 0; i < categoricalParameters.size(); i++) {
+				String parameterValue = null;
+				String[] values = ((CategoricalParameterDomain) categoricalParameters.get(i).getDefaultDomain()).getValues();
+				if (parameterIndex < values.length) {
+					parameterValue = values[parameterIndex];
+				} else {
+					parameterValue = categoricalParameters.get(i).getDefaultValue() + "";
+				}
+				categoricalParameterValues.put(categoricalParameters.get(i).getName(), parameterValue);
+			}
+			categoricalParameterValues.putAll(parameterValues);
+			parameterizedInstances.add(new ComponentInstance(component, categoricalParameterValues, new HashMap<>()));
+		}
+
+		return parameterizedInstances;
 	}
 
 	private static ComponentInstance componentInstanceWithNoRequiredInterfaces(final Component component, final Map<String, String> parameterValues) {
