@@ -37,6 +37,7 @@ import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
+import ai.libs.jaicore.processes.OS;
 import ai.libs.jaicore.processes.ProcessIDNotRetrievableException;
 import ai.libs.jaicore.processes.ProcessUtil;
 
@@ -82,7 +83,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 
 	private static final File MODEL_DUMPS_DIRECTORY = new File(TMP_FOLDER, "model_dumps");
 	private static final boolean VERBOSE = false; // If true the output stream of the python process is printed.
-	private static final boolean LISTEN_TO_PID_FROM_PROCESS = true; // If true, the PID is obtained from the python process being started by listening to according output.
+	private boolean listenToPidFromProcess; // If true, the PID is obtained from the python process being started by listening to according output.
 	private static final boolean DELETE_TEMPORARY_FILES_ON_EXIT = true;
 
 	private File scikitTemplate; // Path to the used python template.
@@ -118,6 +119,12 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * @throws IOException The script could not be created.
 	 */
 	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withoutModelDump, final EBasicProblemType problemType) throws IOException {
+		if (ProcessUtil.getOS() == OS.MAC || ProcessUtil.getOS() == OS.LINUX) {
+			this.listenToPidFromProcess = true;
+		} else {
+			this.listenToPidFromProcess = false;
+		}
+
 		this.withoutModelDump = withoutModelDump;
 		this.constructInstruction = constructInstruction;
 		this.setProblemType(problemType);
@@ -198,7 +205,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				if (L.isDebugEnabled()) {
 					L.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
 				}
-				DefaultProcessListener listener = new DefaultProcessListener(VERBOSE, LISTEN_TO_PID_FROM_PROCESS);
+				DefaultProcessListener listener = new DefaultProcessListener(VERBOSE, this.listenToPidFromProcess);
 				this.runProcess(trainCommand, listener);
 
 				if (!listener.getErrorOutput().isEmpty()) {
@@ -276,7 +283,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			}
 
 			try {
-				this.runProcess(testCommand, new DefaultProcessListener(VERBOSE, LISTEN_TO_PID_FROM_PROCESS));
+				this.runProcess(testCommand, new DefaultProcessListener(VERBOSE, this.listenToPidFromProcess));
 			} catch (IOException e) {
 				throw new PredictionException("Could not run scikit-learn classifier.", e);
 			}
@@ -291,7 +298,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				L.debug("Run train test mode with {}", Arrays.toString(testCommand));
 			}
 
-			DefaultProcessListener listener = new DefaultProcessListener(VERBOSE, LISTEN_TO_PID_FROM_PROCESS);
+			DefaultProcessListener listener = new DefaultProcessListener(VERBOSE, this.listenToPidFromProcess);
 			try {
 				this.runProcess(testCommand, listener);
 				if (!listener.getErrorOutput().isEmpty()) {
