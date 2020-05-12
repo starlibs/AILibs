@@ -1,8 +1,22 @@
+def warn(*args, **kwargs):
+    pass
+import warnings
+warnings.warn = warn
+
+import os
+os.environ['OMP_NUM_THREADS']='1'
+os.environ['OPENBLAS_NUM_THREADS']='1'
+os.environ['OMP_NUM_THREADS']='1'
+os.environ['OPENBLAS_NUM_THREADS']='1'
+os.environ['MKL_NUM_THREADS']='1'
+os.environ['VECLIB_MAXIMUM_THREADS']='1'
+os.environ['NUMEXPR_NUM_THREADS']='1'
+
 import arff
 import argparse
 import json
 import numpy as np
-import os
+
 import pickle
 import sys
 import warnings
@@ -12,6 +26,7 @@ from scipy.io import arff as scipy_arff
 from os.path import join as path_join
 
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.feature_selection import f_regression
 from sklearn.pipeline import Pipeline, make_pipeline
 
 from tsfresh.feature_extraction.settings import ComprehensiveFCParameters
