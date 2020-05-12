@@ -31,7 +31,7 @@ import ai.libs.mlplan.core.ILearnerFactory;
 public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredictionBatch> implements ILearnerFactory<ScikitLearnWrapper<P, B>>, ILoggingCustomizable {
 
 	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList("True", "False"));
-	private static final List<String> EXCEPTIONS = Arrays.asList("None", "np.inf");
+	private static final List<String> EXCEPTIONS = Arrays.asList("None", "np.inf", "f_regression");
 
 	private Logger logger = LoggerFactory.getLogger(SKLearnClassifierFactory.class);
 	private String loggerName;
@@ -43,7 +43,7 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 
 	@Override
 	public ScikitLearnWrapper<P, B> getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
-		this.logger.info("Parse ground component instance {} to ScikitLearnWrapper object.", groundComponent);
+		this.logger.debug("Parse ground component instance {} to ScikitLearnWrapper object.", groundComponent);
 
 		StringBuilder constructInstruction = new StringBuilder();
 		Set<String> importSet = new HashSet<>();
@@ -52,7 +52,7 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 		importSet.forEach(imports::append);
 
 		String constructionString = constructInstruction.toString();
-		this.logger.debug("Created construction string: {}", constructionString);
+		this.logger.info("Created construction string: {}", constructionString);
 
 		try {
 			ScikitLearnWrapper<P, B> wrapper = new ScikitLearnWrapper<>(constructionString, imports.toString(), true, this.problemType);
