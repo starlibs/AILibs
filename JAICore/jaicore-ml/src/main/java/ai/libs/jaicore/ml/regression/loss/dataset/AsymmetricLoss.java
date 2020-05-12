@@ -19,7 +19,8 @@ public class AsymmetricLoss extends ARegressionMeasure {
 	}
 
 	@Override
-	public double loss(final List<? extends Double> expected, final List<? extends Double> actual) {
+	public double score(final List<? extends Double> expected, final List<? extends Double> actual) {
+		this.checkConsistency(expected, actual);
 		List<Double> accuracyList = new ArrayList<>();
 		for (int i = 0; i < expected.size(); i++) {
 			Double percentageError = 100 * ((expected.get(i) - actual.get(i)) / expected.get(i));
