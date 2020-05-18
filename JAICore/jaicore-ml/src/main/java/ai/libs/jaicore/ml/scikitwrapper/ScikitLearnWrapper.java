@@ -311,7 +311,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				throw new PredictionException("Could not run scikit-learn classifier.", e);
 			}
 		}
-
+		
 		String fileContent = "";
 		try {
 			/* Parse the result */
@@ -591,7 +591,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			String osName = System.getProperty("os.name").toLowerCase();
 			if (this.anacondaEnvironment != null) {
 				if (this.anacondaEnvironment != null) {
-					if (osName.contains("mac")) {
+					if (osName.contains("mac") || osName.contains("linux")) {
 						processParameters.add("source");
 						processParameters.add("~/anaconda3/etc/profile.d/conda.sh");
 						processParameters.add("&&");
@@ -608,7 +608,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				}
 			}
 			processParameters.add("python");
-			processParameters.add("-u"); // Force python to run stdout and stderr unbuffered.
+			//processParameters.add("-u"); // Force python to run stdout and stderr unbuffered.
 			processParameters.add(scriptFile.getAbsolutePath()); // Script to be executed.
 
 			// set mode, output, and arff
@@ -639,7 +639,9 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			}
 			if (osName.contains("mac")) {
 				return new String[] { "sh", "-c", stringJoiner.toString() };
-			} else {
+			} else if(osName.contains("linux")){
+				return new String[] { "/bin/bash", "-c", stringJoiner.toString() };
+			}else {
 				return processParameters.toArray(new String[] {});
 			}
 		}
