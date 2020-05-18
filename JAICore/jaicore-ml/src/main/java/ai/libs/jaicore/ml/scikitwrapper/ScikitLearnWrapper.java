@@ -608,7 +608,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				}
 			}
 			processParameters.add("python");
-			//processParameters.add("-u"); // Force python to run stdout and stderr unbuffered.
+			processParameters.add("-u"); // Force python to run stdout and stderr unbuffered.
 			processParameters.add(scriptFile.getAbsolutePath()); // Script to be executed.
 
 			// set mode, output, and arff
