@@ -67,7 +67,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 
 		int numberOfConductedExperiments = 0;
 		while ((maxNumberOfExperiments <= 0 || numberOfConductedExperiments < maxNumberOfExperiments)) {
-			List<ExperimentDBEntry> openRandomExperiments = this.handle.getRandomOpenExperiments(1);
+			List<ExperimentDBEntry> openRandomExperiments = this.handle.getRandomOpenExperiments(maxNumberOfExperiments);
 			if (openRandomExperiments.isEmpty()) {
 				this.logger.info("No more open experiments found.");
 				break;
