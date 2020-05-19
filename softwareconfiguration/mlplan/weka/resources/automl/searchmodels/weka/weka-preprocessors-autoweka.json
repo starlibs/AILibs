@@ -12,6 +12,10 @@
       "name" : "L",
       "type" : "boolean",
       "default" : "true"
+    }, {
+      "name" : "Z",
+      "type" : "boolean",
+      "default" : "false"
     } ],
     "dependencies" : [ ]
   }, {
@@ -126,15 +130,9 @@
       "refineSplits" : 8,
       "minInterval" : 10
     }, {
-      "name" : "WActivator",
-      "type" : "cat",
-      "default" : "0",
-      "values" : [ "0", "1" ]
-    }, {
       "name" : "W",
-      "type" : "cat",
-      "default" : "REMOVED",
-      "values" : [ "REMOVED" ]
+      "type" : "boolean",
+      "default" : "false"
     }, {
       "name" : "A",
       "type" : "int",
@@ -145,11 +143,8 @@
       "minInterval" : 10
     } ],
     "dependencies" : [ {
-      "pre" : "WActivator in {1}",
-      "post" : "W in {false}"
-    }, {
-      "pre" : "WActivator in {1}",
-      "post" : "A in [1.0,8.0]"
+      "pre" : "W in {false}",
+      "post" : "A in [2.0,2.0]"
     } ]
   }, {
     "name" : "weka.attributeSelection.SymmetricalUncertAttributeEval",
@@ -170,6 +165,20 @@
       "type" : "cat",
       "default" : "1",
       "values": ["0","1","2"]
+    },{
+      "name" : "N",
+      "type" : "cat",
+      "default" : "1",
+      "values": ["1","2","4","10","100","1000"]
+    },{
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values": ["0","1","2","3"]
+    } ,{
+      "name" : "M",
+      "type" : "boolean",
+      "default" : "false"
     } ],
     "dependencies" : [ ]
   }, {

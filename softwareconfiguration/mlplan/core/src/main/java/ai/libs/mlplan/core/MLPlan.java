@@ -56,6 +56,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
 import ai.libs.mlplan.core.events.MLPlanPhaseSwitchedEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.safeguard.IEvaluationSafeGuard;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
 
 public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> extends AAlgorithm<ILabeledDataset<?>, L> implements ILoggingCustomizable {
@@ -216,7 +217,9 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 					IEvaluationSafeGuardFactory safeGuardFactory = this.builder.getSafeGuardFactory();
 					safeGuardFactory.withEvaluator(searchEvaluator);
 					try {
-						classifierEvaluatorForSearch.setSafeGuard(safeGuardFactory.build());
+						IEvaluationSafeGuard safeGuard = safeGuardFactory.build();
+						safeGuard.registerListener(this);
+						classifierEvaluatorForSearch.setSafeGuard(safeGuard);
 					} catch (InterruptedException e) {
 						throw e;
 					} catch (Exception e) {

@@ -10,19 +10,26 @@ import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 
 public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, IPrediction, IPredictionBatch> implements ITimeTrackingLearner {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(TimeTrackingLearnerWrapper.class);
+
+	private final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> wrappedSLClassifier;
 	private ComponentInstance ci;
 
 	private List<Long> fitTimes;
 	private List<Long> batchPredictTimes;
 	private List<Long> perInstancePredictionTimes;
 
-	private final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> wrappedSLClassifier;
+	private Double predictedInductionTime = null;
+	private Double predictedInferenceTime = null;
+	private Double score;
 
 	public TimeTrackingLearnerWrapper(final ComponentInstance ci, final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> wrappedLearner) {
 		this.ci = ci;
@@ -72,6 +79,7 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 		return this.perInstancePredictionTimes;
 	}
 
+	@Override
 	public ComponentInstance getComponentInstance() {
 		return this.ci;
 	}
@@ -88,6 +96,44 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 			return System.currentTimeMillis() - this.startTime;
 		}
 
+	}
+
+	@Override
+	public void setPredictedInductionTime(final String inductionTime) {
+		try {
+			this.predictedInductionTime = Double.parseDouble(inductionTime);
+		} catch (Exception e) {
+			LOGGER.warn("Could not parse double from provided induction time {}.", inductionTime, e);
+		}
+	}
+
+	@Override
+	public void setPredictedInferenceTime(final String inferenceTime) {
+		try {
+			this.predictedInferenceTime = Double.parseDouble(inferenceTime);
+		} catch (Exception e) {
+			LOGGER.warn("Could not parse double from provided inference time {}.", inferenceTime, e);
+		}
+	}
+
+	@Override
+	public Double getPredictedInductionTime() {
+		return this.predictedInductionTime;
+	}
+
+	@Override
+	public Double getPredictedInferenceTime() {
+		return this.predictedInferenceTime;
+	}
+
+	@Override
+	public void setScore(final Double score) {
+		this.score = score;
+	}
+
+	@Override
+	public Double getScore() {
+		return this.score;
 	}
 
 }

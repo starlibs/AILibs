@@ -22,6 +22,8 @@ public class AlwaysEvaluateSafeGuard implements IEvaluationSafeGuard {
 
 	@Override
 	public boolean predictWillAdhereToTimeout(final ComponentInstance ci, final Timeout timeout) throws Exception {
+		ci.putAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME, "0.0");
+		ci.putAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME, "0.0");
 		// always predict that it will adhere to the timeout, no matter what timeout is given.
 		return true;
 	}
@@ -41,6 +43,11 @@ public class AlwaysEvaluateSafeGuard implements IEvaluationSafeGuard {
 	@Override
 	public void updateWithActualInformation(final ComponentInstance ci, final ITimeTrackingLearner learner) {
 		// nothing to remember here
+		return;
+	}
+
+	@Override
+	public void registerListener(final Object listener) {
 		return;
 	}
 }

@@ -37,7 +37,7 @@ public class ComponentUtil {
 	 * @param component The component for which a random parameterization is to be returned.
 	 * @return An instantiation of the component with default parameterization.
 	 */
-	public static ComponentInstance defaultParameterizationOfComponent(final Component component) {
+	public static ComponentInstance getDefaultParameterizationOfComponent(final Component component) {
 		Map<String, String> parameterValues = new HashMap<>();
 		for (Parameter p : component.getParameters()) {
 			parameterValues.put(p.getName(), p.getDefaultValue() + "");
@@ -53,7 +53,7 @@ public class ComponentUtil {
 	 * @param rand The Random instance for making the random decisions.
 	 * @return An instantiation of the component with valid random parameterization.
 	 */
-	public static ComponentInstance randomParameterizationOfComponent(final Component component, final Random rand) {
+	public static ComponentInstance getRandomParameterizationOfComponent(final Component component, final Random rand) {
 		ComponentInstance ci;
 		do {
 			Map<String, String> parameterValues = new HashMap<>();
@@ -67,7 +67,11 @@ public class ComponentUtil {
 						if ((int) (numDomain.getMax() - numDomain.getMin()) > 0) {
 							parameterValues.put(p.getName(), ((int) (rand.nextInt((int) (numDomain.getMax() - numDomain.getMin())) + numDomain.getMin())) + "");
 						} else {
-							parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
+							if (p.getDefaultValue() instanceof Double) {
+								parameterValues.put(p.getName(), ((int) (double) p.getDefaultValue()) + "");
+							} else {
+								parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
+							}
 						}
 					} else {
 						parameterValues.put(p.getName(), (rand.nextDouble() * (numDomain.getMax() - numDomain.getMin()) + numDomain.getMin()) + "");
@@ -104,7 +108,7 @@ public class ComponentUtil {
 	 */
 	public static Collection<ComponentInstance> getAllAlgorithmSelectionInstances(final Component rootComponent, final Collection<Component> components) {
 		Collection<ComponentInstance> instanceList = new LinkedList<>();
-		instanceList.add(ComponentUtil.defaultParameterizationOfComponent(rootComponent));
+		instanceList.add(ComponentUtil.getDefaultParameterizationOfComponent(rootComponent));
 
 		for (Entry<String, String> requiredInterface : rootComponent.getRequiredInterfaces().entrySet()) {
 			List<ComponentInstance> tempList = new LinkedList<>();
@@ -167,9 +171,9 @@ public class ComponentUtil {
 		return numCandidates;
 	}
 
-	public ComponentInstance getRandomParametrization(final ComponentInstance componentInstance, final Random rand) {
-		ComponentInstance randomParametrization = randomParameterizationOfComponent(componentInstance.getComponent(), rand);
-		componentInstance.getSatisfactionOfRequiredInterfaces().entrySet().forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), this.getRandomParametrization(x.getValue(), rand)));
+	public static ComponentInstance getRandomParametrization(final ComponentInstance componentInstance, final Random rand) {
+		ComponentInstance randomParametrization = getRandomParameterizationOfComponent(componentInstance.getComponent(), rand);
+		componentInstance.getSatisfactionOfRequiredInterfaces().entrySet().forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), getRandomParametrization(x.getValue(), rand)));
 		return randomParametrization;
 	}
 

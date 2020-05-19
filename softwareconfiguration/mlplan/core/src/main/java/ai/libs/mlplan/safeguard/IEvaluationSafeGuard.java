@@ -19,6 +19,9 @@ import ai.libs.mlplan.core.ITimeTrackingLearner;
  */
 public interface IEvaluationSafeGuard {
 
+	public static final String ANNOTATION_PREDICTED_INDUCTION_TIME = "predictedInductionTime";
+	public static final String ANNOTATION_PREDICTED_INFERENCE_TIME = "predictedInferenceTime";
+
 	/**
 	 * Predicts whether a component instance <code>ci</code> is likely to adhere to the given <code>timeout</code>.
 	 * @parma ci The component instance to make the prediction for.
@@ -65,4 +68,6 @@ public interface IEvaluationSafeGuard {
 	 * @param wrappedLearner The learner that has been used to evaluate the component instance. It must be a time tracking learner.
 	 */
 	public void updateWithActualInformation(final ComponentInstance ci, final ITimeTrackingLearner wrappedLearner);
+
+	public void registerListener(Object listener);
 }

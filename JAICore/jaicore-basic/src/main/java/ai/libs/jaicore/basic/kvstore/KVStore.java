@@ -291,7 +291,6 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 				}
 			} catch (Exception e) {
 				LOGGER.error("Could not read kv store from string description", e);
-				System.exit(0);
 			}
 		}
 	}
