@@ -118,6 +118,9 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 		this.loggerName = name;
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
+		//		if (this.optimizer instanceof ILoggingCustomizable) {
+		//			this.optimizer.setLoggerName(name + ".optimizer");
+		//		}
 		super.setLoggerName(this.loggerName + "._algorithm");
 	}
 

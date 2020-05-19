@@ -229,7 +229,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 
 				classifierEvaluatorForSelection = dataShownToSelection != null
 						? new PipelineEvaluator(this.builder.getLearnerFactory(), evaluatorFactoryForSelection.getLearnerEvaluator(), new Timeout(this.getConfig().timeoutForCandidateEvaluation(), TimeUnit.MILLISECONDS))
-						: null;
+								: null;
 			} catch (LearnerEvaluatorConstructionFailedException e2) {
 				throw new AlgorithmException("Could not create the pipeline evaluator", e2);
 			}
@@ -244,8 +244,8 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tData points used during search: {}\n\tData points used during selection: {}\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
 						this.getInput().getRelationName(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000, this.getConfig().timeoutForNodeEvaluation() / 1000,
 						this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), dataShownToSearch.size(), dataShownToSelection != null ? dataShownToSelection.size() : 0,
-						classifierEvaluatorForSearch.getBenchmark(), classifierEvaluatorForSelection != null ? classifierEvaluatorForSelection.getBenchmark() : null, this.getConfig().expectedBlowupInSelection(),
-						this.getConfig().expectedBlowupInPostprocessing());
+								classifierEvaluatorForSearch.getBenchmark(), classifierEvaluatorForSelection != null ? classifierEvaluatorForSelection.getBenchmark() : null, this.getConfig().expectedBlowupInSelection(),
+										this.getConfig().expectedBlowupInPostprocessing());
 			}
 
 			/* create 2-phase software configuration problem */
@@ -420,9 +420,12 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 		return this.optimizingFactory;
 	}
 
+	public HASCO<?, ?, ?, ?>  getHASCO() {
+		return ((TwoPhaseHASCO<?, ?, ?>) this.optimizingFactory.getOptimizer()).getHasco();
+	}
+
 	public IAlgorithm<?, ?> getSearch() {
-		HASCO<?, ?, ?, ?> hasco = ((TwoPhaseHASCO<?, ?, ?>) this.optimizingFactory.getOptimizer()).getHasco();
-		return hasco.getSearch();
+		return this.getHASCO().getSearch();
 	}
 
 	@Subscribe

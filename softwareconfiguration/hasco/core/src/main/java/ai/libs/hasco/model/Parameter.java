@@ -23,6 +23,9 @@ public class Parameter {
 		super();
 		this.name = name;
 		this.defaultDomain = defaultDomain;
+		if (!defaultDomain.contains(defaultValue)) {
+			throw new IllegalArgumentException("The domain provided for parameter " + name + " is " + defaultDomain + " and does not contain the assigned default value " + defaultValue);
+		}
 		this.defaultValue = defaultValue;
 	}
 

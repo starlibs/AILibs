@@ -327,7 +327,7 @@
       "name" : "K",
       "type" : "int",
       "default" : "0",
-      "min" : 2,
+      "min" : 0,
       "max" : 32,
       "refineSplits" : 8,
       "minInterval" : 1
@@ -358,8 +358,8 @@
     }, {
       "name" : "depth",
       "type" : "int",
-      "default" : "0",
-      "min" : 2,
+      "default" : 0,
+      "min" : 0,
       "max" : 20,
       "refineSplits" : 8,
       "minInterval" : 1
@@ -397,8 +397,8 @@
     }, {
       "name" : "K",
       "type" : "int",
-      "default" : "0",
-      "min" : 2,
+      "default" : 0,
+      "min" : 0,
       "max" : 32,
       "refineSplits" : 8,
       "minInterval" : 1
@@ -410,8 +410,8 @@
     }, {
       "name" : "depth",
       "type" : "int",
-      "default" : "0",
-      "min" : 2.0,
+      "default" : 0,
+      "min" : 0.0,
       "max" : 20.0,
       "refineSplits" : 8,
       "minInterval" : 1
@@ -479,7 +479,7 @@
     },{
       "name" : "S",
       "type" : "cat",
-      "default" : "GreedyStepwise",
+      "default" : "weka.attributeSelection.GreedyStepwise",
 	  "values": ["weka.attributeSelection.GreedyStepwise", "weka.attributeSelection.BestFirst"]
     }, {
 		"name": "X",
@@ -690,7 +690,7 @@
     }, {
       "name" : "L",
       "type" : "cat",
-      "default" : "1e-03",
+      "default" : "0.001",
       "values": ["0.1","1.0","10.0","0.0001","0.001","0.01","100.0","1e-06","1e-05"]
     }, {
       "name" : "P",
@@ -864,8 +864,8 @@
     }, {
       "name" : "L",
       "type" : "int",
-      "default" : 2.0,
-      "min" : 2.0,
+      "default" : 0,
+      "min" : 0,
       "max" : 20.0,
       "refineSplits" : 8,
       "minInterval" : 1

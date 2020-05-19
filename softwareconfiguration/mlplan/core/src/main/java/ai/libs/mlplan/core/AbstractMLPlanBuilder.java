@@ -26,6 +26,8 @@ import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.hasco.serialization.ComponentLoader;
+import ai.libs.hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
+import ai.libs.hasco.variants.forwarddecomposition.FDAndBestFirstWithRandomCompletionTransformer;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.HASCOWithRandomCompletionsConfig;
 import ai.libs.jaicore.basic.FileUtil;
@@ -41,7 +43,6 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
-import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
 
@@ -80,7 +81,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 
 	@SuppressWarnings("rawtypes")
 	private HASCOViaFDFactory hascoFactory = new HASCOViaFDFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, Double>();
-	private Predicate<TFDNode> priorizingPredicate = null;
+	private Predicate<TFDNode> priorizingPredicate = new DefaultPathPriorizingPredicate<>(); // by default, we prefer paths that lead to default parametrizations
 	private File searchSpaceFile;
 	private String requestedHASCOInterface;
 	private ILearnerFactory<L> learnerFactory;
@@ -449,7 +450,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 
 	@SuppressWarnings("unchecked")
 	private void update() {
-		this.hascoFactory.setSearchProblemTransformer(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<TFDNode, String, Double>(this.preferredNodeEvaluator, this.priorizingPredicate,
+		this.hascoFactory.setSearchProblemTransformer(new FDAndBestFirstWithRandomCompletionTransformer<Double>(this.preferredNodeEvaluator, this.priorizingPredicate,
 				this.algorithmConfig.randomSeed(), this.algorithmConfig.numberOfRandomCompletions(), this.algorithmConfig.timeoutForCandidateEvaluation(), this.algorithmConfig.timeoutForNodeEvaluation()));
 		this.hascoFactory.withAlgorithmConfig(this.getAlgorithmConfig());
 	}

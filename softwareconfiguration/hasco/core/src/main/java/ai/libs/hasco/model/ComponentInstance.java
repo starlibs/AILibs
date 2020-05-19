@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -297,4 +298,18 @@ public class ComponentInstance {
 		return this.annotations.get(key);
 	}
 
+	public boolean isDefaultParametrized() {
+		for (Entry<String, String> paramEntry : this.parameterValues.entrySet()) {
+			Parameter p = this.component.getParameterWithName(paramEntry.getKey());
+			if ((p.isNumeric() && (double)p.getDefaultValue() != Double.parseDouble(paramEntry.getValue())) || (p.isCategorical() && !p.getDefaultValue().toString().equals(paramEntry.getValue()))) {
+				return false;
+			}
+		}
+		for (ComponentInstance ci : this.satisfactionOfRequiredInterfaces.values()) {
+			if (!ci.isDefaultParametrized()) {
+				return false;
+			}
+		}
+		return true;
+	}
 }

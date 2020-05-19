@@ -208,7 +208,11 @@
   </logger>
   
   <logger name="ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator">
-  	<level value="debug" />
+  	<level value="warn" />
+  </logger>
+  
+  <logger name="ai.libs.jaicore.search.algorithms.standard.random">
+  	<level value="warn" />
   </logger>
   
   

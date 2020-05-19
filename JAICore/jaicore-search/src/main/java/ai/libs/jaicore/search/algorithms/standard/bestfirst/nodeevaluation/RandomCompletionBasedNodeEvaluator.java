@@ -58,7 +58,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 import ai.libs.jaicore.timing.TimedComputation;
 
 public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, A, V>
-		implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V>, ICancelablePathEvaluator, IPotentiallyUncertaintyAnnotatingPathEvaluator<T, A, V>, ILoggingCustomizable {
+implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V>, ICancelablePathEvaluator, IPotentiallyUncertaintyAnnotatingPathEvaluator<T, A, V>, ILoggingCustomizable {
 
 	private static final IAlgorithm<?, ?> ALGORITHM = null;
 	private static final boolean LOG_FAILURES_AS_ERRORS = false;
@@ -130,7 +130,7 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
 		this.priorityPredicateForRDFS = priorityPredicateForRDFS;
 
-		this.logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node", timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS);
+		this.logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node. Prioriziting predicate: {}", timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, priorityPredicateForRDFS);
 
 		/* check whether assertions are on */
 		assert this.logAssertionActivation();
