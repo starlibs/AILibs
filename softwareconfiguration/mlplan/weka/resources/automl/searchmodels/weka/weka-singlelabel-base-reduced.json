@@ -206,15 +206,6 @@
 					"default": "false"
 				},
 				{
-					"name": "WActivator",
-					"type": "cat",
-					"default": "0",
-					"values": [
-						"0",
-						"1"
-					]
-				},
-				{
 					"name": "W",
 					"type": "double",
 					"default": "0",
@@ -227,18 +218,32 @@
 					"name": "A",
 					"type": "boolean",
 					"default": "false"
-				}
-			],
-			"dependencies": [
-				{
-					"pre": "WActivator in {0}",
-					"post": "W in {0}"
 				},
 				{
-					"pre": "WActivator in {1}",
-					"post": "W in [0.0,1.0]"
+					"name": "P",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "H",
+					"type": "cat",
+					"default": "50",
+					"values": ["0", "16", "1", "128", "2", "50", "4", "32", "64", "512", "1024", "8", "256"]
+				},
+				{
+					"name": "I",
+					"type": "cat",
+					"default": "0",
+					"values": ["16","0","1","128","2","4","32","64","512","8","1024","256"]
+				},
+				{
+					"name": "M",
+					"type": "cat",
+					"default": "0",
+					"values": ["0", "16", "1", "128", "2", "50", "4", "32", "64", "512", "1024", "8", "256"]
 				}
-			]
+			],
+			"dependencies": []
 		},
 		{
 			"name": "weka.classifiers.bayes.NaiveBayesMultinomial",
@@ -326,7 +331,26 @@
       "max" : 32,
       "refineSplits" : 8,
       "minInterval" : 1
+    },{
+      "name" : "B",
+      "type" : "boolean",
+      "default" : "false"
     }, {
+      "name" : "M",
+      "type" : "cat",
+      "default" : "1",
+      "values": ["16","1","128","2","4","32","64","8"]
+    }, {
+      "name" : "N",
+      "type" : "cat",
+      "default" : "0",
+      "values": ["16","0","128","2","4","32","64","8"]
+    },{
+      "name" : "V",
+      "type" : "cat",
+      "default" : "0.001",
+      "values": ["0.1","1.0","10.0","0.0001","0.001","0.01","100.0","1e-06","1e-05"]
+    },{
       "name" : "depthActivator",
       "type" : "cat",
       "default" : "0",
@@ -408,6 +432,16 @@
       "name" : "U",
       "type" : "boolean",
       "default" : "false"
+    }, {
+      "name" : "B",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+    	"name": "V",
+    	"type": "cat",
+    	"default": "0.001",
+    	"values": ["0.1", "1.0", "10.0", "0.0001", "0.001", "0.01", "100.0", "1e-06", "1e-05"]
+    
     } ],
     "dependencies" : [ {
       "pre" : "featuresActivator in {0}",
@@ -446,13 +480,13 @@
       "name" : "S",
       "type" : "cat",
       "default" : "GreedyStepwise",
-	  "values": ["GreedyStepwise", "BestFirst"]
+	  "values": ["weka.attributeSelection.GreedyStepwise", "weka.attributeSelection.BestFirst"]
     }, {
 		"name": "X",
 		"type": "int",
 		"min": 1,
-		"max": 4,
-		"default": 4,
+		"max": 10,
+		"default": 1,
 		"minInterval": 1,
 		"refineSplits": 4
 	}],
@@ -485,6 +519,12 @@
       "max" : 5.0,
       "refineSplits" : 5,
       "minInterval" : 1
+    },  {
+    	"name": "F",
+    	"type": "cat",
+    	"default": "3",
+    	"values": ["1", "2", "3", "4", "5"]
+    
     } ],
     "dependencies" : [ ]
   },{
@@ -529,6 +569,14 @@
       "name" : "B",
       "type" : "boolean",
       "default" : "false"
+    }, {
+      "name" : "U",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "J",
+      "type" : "boolean",
+      "default" : "false"
     } ],
     "dependencies" : [ {
       "pre" : "R in {false}",
@@ -548,7 +596,11 @@
       "name" : "E",
       "type" : "boolean",
       "default" : "false"
-    }, {
+    },{
+      "name" : "F",
+      "type" : "boolean",
+      "default" : "false"
+    },  {
       "name" : "K",
       "type" : "int",
       "default" : 1.0,
@@ -565,31 +617,11 @@
       "type" : "boolean",
       "default" : "false"
     } ],
-    "dependencies" : [  ]
+    "dependencies" : [ {
+    	"pre": "I in {true}",
+    	"post": "F in {false}"
+    } ]
   }, {
-    "name" : "weka.classifiers.lazy.KStar",
-    "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier" ,"BoostableBaseClassifier", "PipelineClassifier" ],
-    "parameter" : [ {
-      "name" : "B",
-      "type" : "int",
-      "default" : 20.0,
-      "min" : 1.0,
-      "max" : 100.0,
-      "refineSplits" : 8,
-      "minInterval" : 10
-    }, {
-      "name" : "E",
-      "type" : "boolean",
-      "default" : "false"
-    }, {
-      "name" : "M",
-      "type" : "cat",
-      "default" : "a",
-      "values" : [ "a", "d", "m", "n" ]
-    } ],
-    "dependencies" : [ ]
-  },  {
     "name" : "weka.classifiers.functions.MultilayerPerceptron",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier","RandomizableBaseClassifier", "PipelineClassifier" ],
@@ -643,12 +675,9 @@
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "WeightedInstancesHandler", "PipelineClassifier" ],
     "parameter" : [ {
       "name" : "C",
-      "type" : "double",
+      "type" : "cat",
       "default" : 1.0,
-      "min" : 0.5,
-      "max" : 1.5,
-      "refineSplits" : 8,
-      "minInterval" : 10
+	  "values": ["0.1", "1.0", "10.0", "10000.0", "0.0001", "0.001", "0.01", "1000.0", "100.0", "1e-06", "1e-05"]
     }, {
       "name" : "N",
       "type" : "cat",
@@ -658,6 +687,21 @@
       "name" : "M",
       "type" : "boolean",
       "default" : "false"
+    }, {
+      "name" : "L",
+      "type" : "cat",
+      "default" : "1e-03",
+      "values": ["0.1","1.0","10.0","0.0001","0.001","0.01","100.0","1e-06","1e-05"]
+    }, {
+      "name" : "P",
+      "type" : "cat",
+      "default" : "1e-12",
+      "values": ["1e-08","1e-07","1e-09","1e-11","0.0001","1e-10","0.001","1e-13","1e-12","1e-14","1e-06","1e-05"]
+    }, {
+      "name" : "V",
+      "type" : "cat",
+      "default" : "-1",
+      "values": ["-1","1","2","3","4","10","5","6","7","8","9"]
     } ],
     "dependencies" : [ ]
   },{
@@ -812,6 +856,11 @@
       "type" : "cat",
       "default" : "0",
       "values" : [ "0", "1" ]
+    }, {
+      "name" : "N",
+      "type" : "cat",
+      "default" : "3",
+      "values" : ["16","2","3","4","32","64","8"]
     }, {
       "name" : "L",
       "type" : "int",

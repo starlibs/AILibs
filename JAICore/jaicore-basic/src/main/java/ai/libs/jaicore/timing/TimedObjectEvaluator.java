@@ -2,6 +2,7 @@ package ai.libs.jaicore.timing;
 
 import java.util.concurrent.ExecutionException;
 
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
@@ -10,7 +11,7 @@ public abstract class TimedObjectEvaluator<T, V extends Comparable<V>> implement
 
 	public abstract V evaluateSupervised(T item) throws InterruptedException, ObjectEvaluationFailedException;
 
-	public abstract long getTimeout(T item);
+	public abstract Timeout getTimeout(T item);
 
 	public abstract String getMessage(T item);
 

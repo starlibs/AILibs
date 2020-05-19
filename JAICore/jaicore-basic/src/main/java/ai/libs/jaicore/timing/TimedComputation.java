@@ -3,6 +3,7 @@ package ai.libs.jaicore.timing;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +26,14 @@ public abstract class TimedComputation {
 		/* no explicit instantiation allowed */
 	}
 
-	public static <T> T compute(final Callable<T> callable, final long timeoutInMs, final String reasonToLogOnTimeout) throws ExecutionException, AlgorithmTimeoutedException, InterruptedException {
+	public static <T> T compute(final Callable<T> callable, final Timeout timeout, final String reasonToLogOnTimeout) throws ExecutionException, AlgorithmTimeoutedException, InterruptedException {
 
 		/* schedule a timer that will interrupt the current thread and execute the task */
 		GlobalTimer timer = GlobalTimer.getInstance();
 		long start = System.currentTimeMillis();
 		InterruptionTimerTask task = new InterruptionTimerTask("Timeout for timed computation with thread " + Thread.currentThread() + " at timestamp " + start + ": " + reasonToLogOnTimeout);
-		logger.debug("Scheduling timer for interruption in {}ms with reason {}, i.e. timestamp {}.", timeoutInMs, start + timeoutInMs, reasonToLogOnTimeout);
-		timer.schedule(task, timeoutInMs);
+		logger.debug("Scheduling timer for interruption in {}ms with reason {}, i.e. timestamp {}.", timeout.milliseconds(), start + timeout.milliseconds(), reasonToLogOnTimeout);
+		timer.schedule(task, timeout.milliseconds());
 		Interrupter interrupter = Interrupter.get();
 		T output = null;
 		Exception caughtException = null;
@@ -52,11 +53,13 @@ public abstract class TimedComputation {
 		 *
 		 */
 		int runtime = (int) (System.currentTimeMillis() - start);
-		int delay = runtime - (int) timeoutInMs;
+		int delay = runtime - (int) timeout.milliseconds();
 		if (caughtException != null) {
-			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed exception: {}. Thread interrupt flag is {}.", runtime, delay, caughtException.getClass().getName(), Thread.currentThread().isInterrupted());
+			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed exception: {}. Thread interrupt flag is {}.", runtime, delay, caughtException.getClass().getName(),
+					Thread.currentThread().isInterrupted());
 		} else {
-			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed regular output return value: {}. Thread interrupt flag is {}.", runtime, delay, output, Thread.currentThread().isInterrupted());
+			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed regular output return value: {}. Thread interrupt flag is {}.", runtime, delay, output,
+					Thread.currentThread().isInterrupted());
 		}
 
 		/* now make sure that
@@ -103,7 +106,7 @@ public abstract class TimedComputation {
 		}
 
 		/* if no exception has been thrown, return the received output. Maybe the thread is interrupted, but this is then not due to our timeout */
-		logger.debug("Finished timed computation of {} after {}ms where {}ms were allowed. Interrupt-flag is {}", callable, runtime, timeoutInMs, Thread.currentThread().isInterrupted());
+		logger.debug("Finished timed computation of {} after {}ms where {}ms were allowed. Interrupt-flag is {}", callable, runtime, timeout, Thread.currentThread().isInterrupted());
 		return output;
 	}
 }

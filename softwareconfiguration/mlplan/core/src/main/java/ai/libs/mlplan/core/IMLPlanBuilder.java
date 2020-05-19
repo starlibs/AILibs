@@ -13,6 +13,7 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorCons
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
 
 /**
  * The IMLPlanBuilder provides the general interface of an ML-Plan builder independent
@@ -36,14 +37,14 @@ public interface IMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, I
 	 * @return
 	 * @throws LearnerEvaluatorConstructionFailedException
 	 */
-	public ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>  getLearnerEvaluationFactoryForSearchPhase();
+	public ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getLearnerEvaluationFactoryForSearchPhase();
 
 	/**
 	 * This is the factory that will be used to create the pipeline evaluators for evaluation during selection time
 	 * @return
 	 * @throws LearnerEvaluatorConstructionFailedException
 	 */
-	public ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>  getLearnerEvaluationFactoryForSelectionPhase();
+	public ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getLearnerEvaluationFactoryForSelectionPhase();
 
 	public String getRequestedInterface();
 
@@ -54,6 +55,8 @@ public interface IMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, I
 	public HASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> getHASCOFactory();
 
 	public MLPlanClassifierConfig getAlgorithmConfig();
+
+	public IEvaluationSafeGuardFactory getSafeGuardFactory();
 
 	public double getPortionOfDataReservedForSelectionPhase();
 

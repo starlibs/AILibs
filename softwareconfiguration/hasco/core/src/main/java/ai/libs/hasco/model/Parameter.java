@@ -4,22 +4,22 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({"name", "defaultDomain", "defaultValue"})
+@JsonPropertyOrder({ "name", "defaultDomain", "defaultValue" })
 public class Parameter {
 	private final String name;
 	private final IParameterDomain defaultDomain;
 	private final Object defaultValue;
-	
+
 	@SuppressWarnings("unused")
 	private Parameter() {
 		// for serialization purposes
-		name = null;
-		defaultDomain = null;
-		defaultValue = null;
+		this.name = null;
+		this.defaultDomain = null;
+		this.defaultValue = null;
 	}
 
 	@JsonCreator
-	public Parameter(@JsonProperty("name") final String name, @JsonProperty("defaultDomain") final IParameterDomain defaultDomain,@JsonProperty("defaultValue") final Object defaultValue) {
+	public Parameter(@JsonProperty("name") final String name, @JsonProperty("defaultDomain") final IParameterDomain defaultDomain, @JsonProperty("defaultValue") final Object defaultValue) {
 		super();
 		this.name = name;
 		this.defaultDomain = defaultDomain;
@@ -36,6 +36,10 @@ public class Parameter {
 
 	public Object getDefaultValue() {
 		return this.defaultValue;
+	}
+
+	public boolean isDefaultValue(final Object value) {
+		return this.defaultDomain.isEquals(this.defaultValue, value);
 	}
 
 	public boolean isNumeric() {
