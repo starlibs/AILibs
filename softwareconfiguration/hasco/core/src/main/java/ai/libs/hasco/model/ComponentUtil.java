@@ -95,7 +95,7 @@ public class ComponentUtil {
 							parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
 						}
 					} else {
-						parameterValues.put(p.getName(), (int) numDomain.getMin() + "");
+						parameterValues.put(p.getName(), numDomain.getMin() + "");
 					}
 				}
 			}
@@ -120,7 +120,7 @@ public class ComponentUtil {
 							parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
 						}
 					} else {
-						parameterValues.put(p.getName(), (int) numDomain.getMax() + "");
+						parameterValues.put(p.getName(), numDomain.getMax() + "");
 					}
 				}
 			}
