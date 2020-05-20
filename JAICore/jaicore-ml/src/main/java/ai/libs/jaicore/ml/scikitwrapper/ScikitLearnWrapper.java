@@ -82,9 +82,9 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	private static final File TMP_FOLDER = new File("tmp"); // Folder to put the serialized arff files and the scripts in.
 
 	private static final File MODEL_DUMPS_DIRECTORY = new File(TMP_FOLDER, "model_dumps");
-	private static final boolean VERBOSE = false; // If true the output stream of the python process is printed.
+	private static final boolean VERBOSE = true; // If true the output stream of the python process is printed.
 	private boolean listenToPidFromProcess; // If true, the PID is obtained from the python process being started by listening to according output.
-	private static final boolean DELETE_TEMPORARY_FILES_ON_EXIT = true;
+	private static final boolean DELETE_TEMPORARY_FILES_ON_EXIT = false;
 
 	private File scikitTemplate; // Path to the used python template.
 	private ILabeledDataset<ILabeledInstance> dataset;
@@ -302,8 +302,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			try {
 				this.runProcess(testCommand, listener);
 				if (!listener.getErrorOutput().isEmpty()) {
-					String[] message = listener.getErrorOutput().split("\\n");
-					throw new PredictionException(message[message.length - 1].trim());
+					throw new PredictionException(listener.getErrorOutput());
 				}
 			} catch (InterruptedException | PredictionException e) {
 				throw e;
@@ -311,7 +310,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				throw new PredictionException("Could not run scikit-learn classifier.", e);
 			}
 		}
-		
+
 		String fileContent = "";
 		try {
 			/* Parse the result */
@@ -588,24 +587,23 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			}
 
 			List<String> processParameters = new ArrayList<>();
-			String osName = System.getProperty("os.name").toLowerCase();
+			OS os = ProcessUtil.getOS();
 			if (this.anacondaEnvironment != null) {
 				if (this.anacondaEnvironment != null) {
-					if (osName.contains("mac") || osName.contains("linux")) {
+					if (os == OS.MAC) {
 						processParameters.add("source");
 						processParameters.add("~/anaconda3/etc/profile.d/conda.sh");
 						processParameters.add("&&");
-						processParameters.add("conda");
-						processParameters.add("activate");
-						processParameters.add(this.anacondaEnvironment);
-						processParameters.add("&&");
-					} else {
-						processParameters.add("conda");
-						processParameters.add("activate");
-						processParameters.add(this.anacondaEnvironment);
-						processParameters.add("&&");
 					}
+					processParameters.add("conda");
+					processParameters.add("activate");
+					processParameters.add(this.anacondaEnvironment);
+					processParameters.add("&&");
 				}
+			}
+			if (os == OS.LINUX) {
+				processParameters.add("timeout");
+				processParameters.add(1195 + "");
 			}
 			processParameters.add("python");
 			processParameters.add("-u"); // Force python to run stdout and stderr unbuffered.
@@ -637,11 +635,9 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			for (String parameter : processParameters) {
 				stringJoiner.add(parameter);
 			}
-			if (osName.contains("mac")) {
+			if (os == OS.MAC) {
 				return new String[] { "sh", "-c", stringJoiner.toString() };
-			} else if(osName.contains("linux")){
-				return new String[] { "/bin/bash", "-c", stringJoiner.toString() };
-			}else {
+			} else {
 				return processParameters.toArray(new String[] {});
 			}
 		}
