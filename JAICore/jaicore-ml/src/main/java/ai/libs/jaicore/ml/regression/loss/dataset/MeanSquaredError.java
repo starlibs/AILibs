@@ -13,6 +13,7 @@ public class MeanSquaredError extends ARegressionMeasure {
 
 	@Override
 	public double loss(final List<? extends Double> expected, final List<? extends Double> actual) {
+		this.checkConsistency(expected, actual);
 		return StatisticsUtil.mean(IntStream.range(0, expected.size()).mapToObj(x -> Double.valueOf(SQUARED_ERROR_LOSS.loss(expected.get(x), actual.get(x)))).collect(Collectors.toList()));
 	}
 
