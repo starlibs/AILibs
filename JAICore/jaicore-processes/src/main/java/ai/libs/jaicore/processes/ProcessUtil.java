@@ -84,17 +84,14 @@ public class ProcessUtil {
 	public static int getPID(final Process process) throws ProcessIDNotRetrievableException {
 		Integer pid;
 		try {
-			String osName = System.getProperty("os.name").toLowerCase();
-
-			if (process.getClass().getName().equals("java.lang.UNIXProcess") || osName.contains("mac")) {
+			if (getOS() == OS.LINUX || getOS() == OS.MAC) {
 				/* get the PID on unix/linux systems */
 				Field f = process.getClass().getDeclaredField("pid");
 				f.setAccessible(true);
 				pid = f.getInt(process);
 				return pid;
 
-			} else if (process.getClass().getName().equals("java.lang.Win32Process") || process.getClass().getName().equals("java.lang.ProcessImpl")) {
-
+			} else if (getOS() == OS.WIN || process.getClass().getName().equals("java.lang.ProcessImpl")) {
 				/* determine the pid on windows plattforms */
 				Field f = process.getClass().getDeclaredField("handle");
 				f.setAccessible(true);
