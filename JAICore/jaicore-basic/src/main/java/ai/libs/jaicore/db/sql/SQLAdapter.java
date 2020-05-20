@@ -207,7 +207,6 @@ public class SQLAdapter implements IDatabaseAdapter {
 	public synchronized void checkConnection() throws SQLException {
 		int renewAfterSeconds = 5 * 60;
 		if (this.timestampOfLastAction + renewAfterSeconds * 1000 < System.currentTimeMillis()) {
-			System.out.println("Reconnect");
 			this.close();
 			this.connect();
 		}

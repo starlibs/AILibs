@@ -21,6 +21,7 @@ public interface IEvaluationSafeGuard {
 
 	public static final String ANNOTATION_PREDICTED_INDUCTION_TIME = "predictedInductionTime";
 	public static final String ANNOTATION_PREDICTED_INFERENCE_TIME = "predictedInferenceTime";
+	public static final String ANNOTATION_SOURCE = "predictionSource";
 
 	/**
 	 * Predicts whether a component instance <code>ci</code> is likely to adhere to the given <code>timeout</code>.

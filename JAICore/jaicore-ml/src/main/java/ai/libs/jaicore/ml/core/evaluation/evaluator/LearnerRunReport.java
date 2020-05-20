@@ -6,7 +6,6 @@ import java.util.Map;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.IPredictionAndGroundTruthTable;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
-import org.glassfish.jersey.internal.util.ExceptionUtils;
 
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
@@ -105,7 +104,7 @@ public class LearnerRunReport implements ILearnerRunReport {
 		fields.put("trainEndTime", this.trainEndTime);
 		fields.put("testStartTime", this.testStartTime);
 		fields.put("testEndTime", this.testEndTime);
-		fields.put("exception", ExceptionUtils.exceptionStackTraceAsString(this.exception));
+		fields.put("exception", this.exception);
 		if (this.diff != null) {
 			fields.put("diffClass", this.diff.getClass().getName());
 		}

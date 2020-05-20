@@ -298,10 +298,18 @@ public class ComponentInstance {
 		return this.annotations.get(key);
 	}
 
+	public void appendAnnotation(final String key, final String annotation) {
+		if (this.annotations.containsKey(key)) {
+			this.annotations.put(key, this.annotations.get(key) + annotation);
+		} else {
+			this.annotations.put(key, annotation);
+		}
+	}
+
 	public boolean isDefaultParametrized() {
 		for (Entry<String, String> paramEntry : this.parameterValues.entrySet()) {
 			Parameter p = this.component.getParameterWithName(paramEntry.getKey());
-			if ((p.isNumeric() && (double)p.getDefaultValue() != Double.parseDouble(paramEntry.getValue())) || (p.isCategorical() && !p.getDefaultValue().toString().equals(paramEntry.getValue()))) {
+			if ((p.isNumeric() && (double) p.getDefaultValue() != Double.parseDouble(paramEntry.getValue())) || (p.isCategorical() && !p.getDefaultValue().toString().equals(paramEntry.getValue()))) {
 				return false;
 			}
 		}

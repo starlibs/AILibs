@@ -70,12 +70,12 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 	}
 
 	@Override
-	public List<Long> getBatchPredictionTimes() {
+	public List<Long> getBatchPredictionTimesInMS() {
 		return this.batchPredictTimes;
 	}
 
 	@Override
-	public List<Long> getInstancePredictionTimes() {
+	public List<Long> getInstancePredictionTimesInMS() {
 		return this.perInstancePredictionTimes;
 	}
 
@@ -128,6 +128,9 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 
 	@Override
 	public void setScore(final Double score) {
+		if (score == null) {
+			return;
+		}
 		this.score = score;
 	}
 

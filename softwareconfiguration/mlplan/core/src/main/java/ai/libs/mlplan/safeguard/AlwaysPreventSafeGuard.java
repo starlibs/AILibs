@@ -10,8 +10,8 @@ public class AlwaysPreventSafeGuard implements IEvaluationSafeGuard {
 
 	@Override
 	public boolean predictWillAdhereToTimeout(final ComponentInstance ci, final Timeout timeout) throws Exception {
-		ci.putAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME, "-1.0");
-		ci.putAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME, "-1.0");
+		ci.putAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME, Integer.MAX_VALUE + "");
+		ci.putAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME, Integer.MAX_VALUE + "");
 		return false;
 	}
 

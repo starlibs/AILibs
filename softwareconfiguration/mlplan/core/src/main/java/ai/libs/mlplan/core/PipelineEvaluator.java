@@ -110,8 +110,8 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 			this.eventBus.post(new SupervisedLearnerCreatedEvent(c, learner)); // inform listeners about the creation of the classifier
 
 			ITimeTrackingLearner trackableLearner = new TimeTrackingLearnerWrapper(c, learner);
-			trackableLearner.setPredictedInductionTime(c.getAnnotation("predictedInductionTime"));
-			trackableLearner.setPredictedInferenceTime(c.getAnnotation("predictedInferenceTime"));
+			trackableLearner.setPredictedInductionTime(c.getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME));
+			trackableLearner.setPredictedInferenceTime(c.getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME));
 
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, (learner instanceof ScikitLearnWrapper) ? learner.toString() : learner.getClass().getName());

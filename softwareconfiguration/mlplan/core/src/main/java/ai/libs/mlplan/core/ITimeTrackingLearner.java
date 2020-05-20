@@ -12,9 +12,9 @@ public interface ITimeTrackingLearner extends ISupervisedLearner<ILabeledInstanc
 
 	public List<Long> getFitTimes();
 
-	public List<Long> getBatchPredictionTimes();
+	public List<Long> getBatchPredictionTimesInMS();
 
-	public List<Long> getInstancePredictionTimes();
+	public List<Long> getInstancePredictionTimesInMS();
 
 	public ComponentInstance getComponentInstance();
 
