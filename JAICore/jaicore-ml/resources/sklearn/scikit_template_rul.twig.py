@@ -6,11 +6,11 @@ warnings.warn = warn
 import os
 os.environ['OMP_NUM_THREADS']='1'
 os.environ['OPENBLAS_NUM_THREADS']='1'
-os.environ['OMP_NUM_THREADS']='1'
-os.environ['OPENBLAS_NUM_THREADS']='1'
 os.environ['MKL_NUM_THREADS']='1'
 os.environ['VECLIB_MAXIMUM_THREADS']='1'
 os.environ['NUMEXPR_NUM_THREADS']='1'
+
+import resource 
 
 import arff
 import argparse
@@ -471,10 +471,22 @@ def main():
 def print_pid():
     print("CURRENT_PID:" + str(os.getpid()))
 
+
+def limit_memory(maxsize): 
+	soft, hard = resource.getrlimit(resource.RLIMIT_AS) 
+	resource.setrlimit(resource.RLIMIT_AS, (maxsize, hard)) 
+
+def limit_subprocesses(maxsubprocesses): 
+	soft, hard = resource.getrlimit(resource.RLIMIT_NPROC) 
+	resource.setrlimit(resource.RLIMIT_NPROC, (maxsubprocesses, hard)) 
+
+
 if __name__ == "__main__":
     parse_args()
     print_pid()
     OUTPUT_FILE = sys.argv["output"]
     if not sys.argv["regression"] and sys.argv["targets"] and len(sys.argv["targets"]) > 1:
         raise RuntimeError("Multiple targets are not supported for categorical problems.")
+    limit_memory(4294967296) # 4GB RAM
+    #limit_subprocesses(1) # no parallelization of sklearn
     main()
