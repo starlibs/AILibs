@@ -22,6 +22,7 @@ import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
+import org.api4.java.algorithm.Timeout;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 import org.slf4j.Logger;
@@ -110,6 +111,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	private List<List<Double>> rawLastClassificationResults = null;
 	private String anacondaEnvironment;
 	private long seed;
+	private Timeout timeout;
 
 	/**
 	 * Starts a new wrapper and creates its underlying script with the given parameters.
@@ -200,6 +202,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 					skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
 				}
 				skLearnWrapperCommandBuilder.withSeed(this.seed);
+				skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 				String[] trainCommand = skLearnWrapperCommandBuilder.toCommandArray();
 
 				if (L.isDebugEnabled()) {
@@ -276,6 +279,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
 			}
 			skLearnWrapperCommandBuilder.withSeed(this.seed);
+			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
 
 			if (L.isDebugEnabled()) {
@@ -426,6 +430,10 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		this.seed = seed;
 	}
 
+	public void setTimeout(final Timeout timeout) {
+		this.timeout = timeout;
+	}
+
 	public void setTargets(final int... targetColumns) {
 		this.targetColumns = targetColumns;
 	}
@@ -517,6 +525,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		private String outputFile;
 		private String anacondaEnvironment;
 		private long seed;
+		private Timeout timeout;
 
 		private SKLearnWrapperCommandBuilder() {
 
@@ -575,6 +584,11 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			return this;
 		}
 
+		private SKLearnWrapperCommandBuilder withTimeout(final Timeout timeout) {
+			this.timeout = timeout;
+			return this;
+		}
+
 		private String[] toCommandArray() {
 			Objects.requireNonNull(this.mode);
 			Objects.requireNonNull(this.outputFile);
@@ -603,7 +617,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			}
 			if (os == OS.LINUX) {
 				processParameters.add("timeout");
-				processParameters.add(1195 + "");
+				processParameters.add(this.timeout.seconds() - 5 + "");
 			}
 			processParameters.add("python");
 			processParameters.add("-u"); // Force python to run stdout and stderr unbuffered.

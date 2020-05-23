@@ -14,6 +14,7 @@ import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomData
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
+import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +74,7 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 	private String pathVariable;
 	private String anacondaEnvironment;
 	private long seed;
+	private Timeout timeout;
 	private final boolean skipSetupCheck;
 
 	/**
@@ -212,6 +214,21 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 				((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setSeed(this.seed);
 			} else {
 				this.logger.warn("Setting seed only supported by SKLearnClassifierFactory.");
+			}
+		}
+		return this.getSelf();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public MLPlanSKLearnBuilder<P, B> withCandidateEvaluationTimeOut(final Timeout timeout) {
+		super.withCandidateEvaluationTimeOut(timeout);
+		this.timeout = timeout;
+		if (this.getLearnerFactory() != null) {
+			if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
+				((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setTimeout(this.timeout);
+			} else {
+				this.logger.warn("Setting timeout only supported by SKLearnClassifierFactory.");
 			}
 		}
 		return this.getSelf();
