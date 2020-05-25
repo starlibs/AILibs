@@ -297,6 +297,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
 			}
 			skLearnWrapperCommandBuilder.withSeed(this.seed);
+			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
 			if (L.isDebugEnabled()) {
 				L.debug("Run train test mode with {}", Arrays.toString(testCommand));
