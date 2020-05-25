@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 import ai.libs.jaicore.basic.StatisticsUtil;
 import ai.libs.jaicore.ml.regression.loss.instance.SquaredError;
 
-public class MeanSquaredError extends ARegressionMeasure {
+public class MeanSquaredError extends AUnboundedRegressionMeasure {
 
 	private static final SquaredError SQUARED_ERROR_LOSS = new SquaredError();
 

@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 import ai.libs.jaicore.basic.StatisticsUtil;
 import ai.libs.jaicore.ml.regression.loss.instance.AbsoluteError;
 
-public class MeanAbsoluteError extends ARegressionMeasure {
+public class MeanAbsoluteError extends AUnboundedRegressionMeasure {
 
 	private static final AbsoluteError ABSOLUTE_ERROR_LOSS = new AbsoluteError();
 

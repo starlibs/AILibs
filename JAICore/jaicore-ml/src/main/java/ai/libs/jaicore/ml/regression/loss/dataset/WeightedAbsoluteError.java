@@ -5,7 +5,7 @@ import java.util.List;
 
 import ai.libs.jaicore.basic.StatisticsUtil;
 
-public class WeightedAbsoluteError extends ARegressionMeasure {
+public class WeightedAbsoluteError extends AUnboundedRegressionMeasure {
 
 	private double weightUnderestimation = 1d;
 

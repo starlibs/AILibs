@@ -5,7 +5,7 @@ import java.util.List;
 
 import ai.libs.jaicore.basic.StatisticsUtil;
 
-public class QuadraticQuadraticError extends ARegressionMeasure {
+public class QuadraticQuadraticError extends AUnboundedRegressionMeasure {
 
 	private double weightUnderestimation = 1d;
 

@@ -5,7 +5,7 @@ import java.util.List;
 
 import ai.libs.jaicore.basic.StatisticsUtil;
 
-public class MeanSquaredLogarithmicMeanSquaredError extends ARegressionMeasure {
+public class MeanSquaredLogarithmicMeanSquaredError extends AUnboundedRegressionMeasure {
 
 	@Override
 	public double loss(final List<? extends Double> expected, final List<? extends Double> actual) {

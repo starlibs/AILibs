@@ -5,7 +5,7 @@ import java.util.List;
 
 import ai.libs.jaicore.basic.StatisticsUtil;
 
-public class LinearMeanSquaredError extends ARegressionMeasure {
+public class LinearMeanSquaredError extends AUnboundedRegressionMeasure {
 
 	private double weightUnderestimation = 1;
 
