@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 	private String pathVariable;
 	private String anacondaEnvironment;
 	private long seed;
+	private Timeout timeout;
 
 	@Override
 	public ScikitLearnWrapper<P, B> getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
@@ -59,6 +61,7 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 			wrapper.setPathVariable(this.pathVariable);
 			wrapper.setAnacondaEnvironment(this.anacondaEnvironment);
 			wrapper.setSeed(this.seed);
+			wrapper.setTimeout(this.timeout);
 			return wrapper;
 		} catch (IOException e) {
 			this.logger.error("Could not create sklearn wrapper for construction {} and imports {}.", constructInstruction, imports);
@@ -198,6 +201,10 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 
 	public void setSeed(final long seed) {
 		this.seed = seed;
+	}
+
+	public void setTimeout(final Timeout timeout) {
+		this.timeout = timeout;
 	}
 
 }
