@@ -589,17 +589,15 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			List<String> processParameters = new ArrayList<>();
 			OS os = ProcessUtil.getOS();
 			if (this.anacondaEnvironment != null) {
-				if (this.anacondaEnvironment != null) {
-					if (os == OS.MAC) {
-						processParameters.add("source");
-						processParameters.add("~/anaconda3/etc/profile.d/conda.sh");
-						processParameters.add("&&");
-					}
-					processParameters.add("conda");
-					processParameters.add("activate");
-					processParameters.add(this.anacondaEnvironment);
+				if (os == OS.MAC) {
+					processParameters.add("source");
+					processParameters.add("~/anaconda3/etc/profile.d/conda.sh");
 					processParameters.add("&&");
 				}
+				processParameters.add("conda");
+				processParameters.add("activate");
+				processParameters.add(this.anacondaEnvironment);
+				processParameters.add("&&");
 			}
 			if (os == OS.LINUX) {
 				processParameters.add("timeout");
