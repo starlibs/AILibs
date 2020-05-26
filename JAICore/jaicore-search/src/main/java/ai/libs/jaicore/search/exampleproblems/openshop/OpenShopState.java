@@ -3,16 +3,16 @@ package ai.libs.jaicore.search.exampleproblems.openshop;
 import java.util.List;
 
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.problems.scheduling.openshop.Machine;
-import ai.libs.jaicore.problems.scheduling.openshop.OpenShopProblem;
-import ai.libs.jaicore.problems.scheduling.openshop.Operation;
-import ai.libs.jaicore.problems.scheduling.openshop.Schedule;
-import ai.libs.jaicore.problems.scheduling.openshop.ScheduleBuilder;
+import ai.libs.jaicore.problems.scheduling.Machine;
+import ai.libs.jaicore.problems.scheduling.JobSchedulingProblemInput;
+import ai.libs.jaicore.problems.scheduling.Operation;
+import ai.libs.jaicore.problems.scheduling.Schedule;
+import ai.libs.jaicore.problems.scheduling.ScheduleBuilder;
 
 public abstract class OpenShopState {
-	private final OpenShopProblem problem;
+	private final JobSchedulingProblemInput problem;
 
-	public OpenShopState(final OpenShopProblem problem) {
+	public OpenShopState(final JobSchedulingProblemInput problem) {
 		super();
 		this.problem = problem;
 	}

@@ -12,16 +12,16 @@ import java.util.stream.Collectors;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ai.libs.jaicore.problems.scheduling.openshop.Job;
-import ai.libs.jaicore.problems.scheduling.openshop.Machine;
-import ai.libs.jaicore.problems.scheduling.openshop.OpenShopMetric;
-import ai.libs.jaicore.problems.scheduling.openshop.OpenShopProblem;
-import ai.libs.jaicore.problems.scheduling.openshop.OpenShopProblemBuilder;
-import ai.libs.jaicore.problems.scheduling.openshop.Operation;
-import ai.libs.jaicore.problems.scheduling.openshop.Schedule;
-import ai.libs.jaicore.problems.scheduling.openshop.ScheduleBuilder;
+import ai.libs.jaicore.problems.scheduling.IJobSchedulingInput;
+import ai.libs.jaicore.problems.scheduling.Job;
+import ai.libs.jaicore.problems.scheduling.JobSchedulingProblemBuilder;
+import ai.libs.jaicore.problems.scheduling.JobShopMetric;
+import ai.libs.jaicore.problems.scheduling.Machine;
+import ai.libs.jaicore.problems.scheduling.Operation;
+import ai.libs.jaicore.problems.scheduling.Schedule;
+import ai.libs.jaicore.problems.scheduling.ScheduleBuilder;
 
-public class OpenShopTest {
+public class JobSchedulingTest {
 	private static final String W_1 = "W1";
 	private static final String W_2 = "W2";
 	private static final String W_3 = "W3";
@@ -44,7 +44,7 @@ public class OpenShopTest {
 	private static final String O_6 = "O6";
 	private static final String O_7 = "O7";
 
-	private static OpenShopProblemBuilder problemBuilder;
+	private static JobSchedulingProblemBuilder problemBuilder;
 	private static Schedule solution;
 
 	/* define constant ground truths for the drawn solution */
@@ -58,7 +58,7 @@ public class OpenShopTest {
 	@BeforeClass
 	public static void createStandardProblemBuilder() {
 
-		OpenShopProblemBuilder builder = new OpenShopProblemBuilder();
+		JobSchedulingProblemBuilder builder = new JobSchedulingProblemBuilder();
 
 		/* setup work centers */
 		final int[][] setupMatrix1 = new int[][] {{0, 2, 1}, {1, 0, 2}, {2, 1, 0}};
@@ -88,7 +88,7 @@ public class OpenShopTest {
 
 	@Test
 	public void testProblemBuildship() {
-		OpenShopProblem problem = problemBuilder.fork().withMetric(OpenShopMetric.TOTALFLOWTIME).build();
+		IJobSchedulingInput problem = problemBuilder.fork().withMetric(JobShopMetric.TOTALFLOWTIME).build();
 		System.out.println(solution.getAsString());
 		assertEquals(7, problem.getOperations().size());
 		assertEquals(5, problem.getMachines().size());
@@ -96,19 +96,19 @@ public class OpenShopTest {
 		assertEquals(3, problem.getWorkcenters().size());
 	}
 
-	private OpenShopProblem getSingleOperationProblem(final int availability, final int setupTime, final int processTime, final boolean correctState) {
-		OpenShopProblemBuilder pb = new OpenShopProblemBuilder();
+	private IJobSchedulingInput getSingleOperationProblem(final int availability, final int setupTime, final int processTime, final boolean correctState) {
+		JobSchedulingProblemBuilder pb = new JobSchedulingProblemBuilder();
 		pb.withWorkcenter(W_1, new int[][] {{0, setupTime}, {setupTime, 0}}).withMachineForWorkcenter(M_1, W_1, availability, 0);
 		pb.withJob(J_1, 0, 10, 1).withOperationForJob(O_1, J_1, processTime, correctState ? 0 : 1, W_1);
-		pb.withMetric(OpenShopMetric.MAKESPAN);
+		pb.withMetric(JobShopMetric.MAKESPAN);
 		return pb.build();
 	}
 
-	private OpenShopProblem getTwoOperationProblem(final int availability, final int setupTime, final int processTime1, final int processTime2, final boolean correctState) {
-		OpenShopProblemBuilder pb = new OpenShopProblemBuilder();
+	private IJobSchedulingInput getTwoOperationProblem(final int availability, final int setupTime, final int processTime1, final int processTime2, final boolean correctState) {
+		JobSchedulingProblemBuilder pb = new JobSchedulingProblemBuilder();
 		pb.withWorkcenter(W_1, new int[][] {{0, setupTime}, {setupTime, 0}}).withMachineForWorkcenter(M_1, W_1, availability, 0);
 		pb.withJob(J_1, 0, 10, 1).withOperationForJob(O_1, J_1, processTime1, 0, W_1).withOperationForJob(O_2, J_1, processTime2, correctState ? 0 : 1, W_1);
-		pb.withMetric(OpenShopMetric.MAKESPAN);
+		pb.withMetric(JobShopMetric.MAKESPAN);
 		return pb.build();
 	}
 
@@ -116,13 +116,13 @@ public class OpenShopTest {
 	public void testNonActiveScheduleDetection() {
 
 		/* create problem with two work centers (one machine each) and two jobs (with two operations each) */
-		OpenShopProblemBuilder pb = new OpenShopProblemBuilder();
+		JobSchedulingProblemBuilder pb = new JobSchedulingProblemBuilder();
 		pb.withWorkcenter(W_1, new int[][] {{0}}).withMachineForWorkcenter(M_1, W_1, 0, 0);
 		pb.withWorkcenter(W_2, new int[][] {{0}}).withMachineForWorkcenter(M_2, W_2, 0, 0);
 		int processTime = 1;
 		pb.withJob(J_1, 0, 10, 1).withOperationForJob(O_1, J_1, processTime, 0, W_1).withOperationForJob(O_2, J_1, processTime, 0, W_2);
 		pb.withJob(J_2, 0, 10, 1).withOperationForJob(O_3, J_2, processTime, 0, W_1).withOperationForJob(O_4, J_2, processTime, 0, W_2);
-		pb.withMetric(OpenShopMetric.MAKESPAN);
+		pb.withMetric(JobShopMetric.MAKESPAN);
 
 		/* now create a stupid (non-active) allocation */
 		Schedule s = new ScheduleBuilder(pb.build()).assign(O_1, M_1).assign(O_2, M_2).assign(O_4, M_2).assign(O_3, M_1).build();
@@ -148,7 +148,7 @@ public class OpenShopTest {
 	public void testProperComputationOfTimesForProperInitializationIfMachineIsDirectlyAvailable() {
 		int processTime = 2;
 		int setupTime = -1;
-		OpenShopProblem problem = this.getSingleOperationProblem(0, setupTime, processTime, true);
+		IJobSchedulingInput problem = this.getSingleOperationProblem(0, setupTime, processTime, true);
 		Operation o = problem.getOperation(O_1);
 		Schedule schedule = new ScheduleBuilder(problem).assign(o.getName(), M_1).build();
 		assertEquals(0, schedule.getSetupStartTimeOfOperation(o));
@@ -161,7 +161,7 @@ public class OpenShopTest {
 	public void testProperComputationOfTimesForInproperInitializationIfMachineIsDirectlyAvailable() {
 		int processTime = 2;
 		int setupTime = 3;
-		OpenShopProblem problem = this.getSingleOperationProblem(0, setupTime, processTime, false);
+		IJobSchedulingInput problem = this.getSingleOperationProblem(0, setupTime, processTime, false);
 		Operation o = problem.getOperation(O_1);
 		Schedule schedule = new ScheduleBuilder(problem).assign(o.getName(), M_1).build();
 		assertEquals(0, schedule.getSetupStartTimeOfOperation(o));
@@ -175,7 +175,7 @@ public class OpenShopTest {
 		int processTime1 = 2;
 		int processTime2 = 5;
 		int setupTime = 3;
-		OpenShopProblem problem = this.getTwoOperationProblem(0, setupTime, processTime1, processTime2, true);
+		IJobSchedulingInput problem = this.getTwoOperationProblem(0, setupTime, processTime1, processTime2, true);
 		Schedule schedule = new ScheduleBuilder(problem).assign(O_1, M_1).assign(O_2, M_1).build();
 		Operation o = problem.getOperation(O_2);
 		int finishTimeOfFirstJob = schedule.getEndTimeOfOperation(problem.getOperation(O_1));
@@ -191,7 +191,7 @@ public class OpenShopTest {
 		int processTime1 = 2;
 		int processTime2 = 5;
 		int setupTime = 3;
-		OpenShopProblem problem = this.getTwoOperationProblem(0, setupTime, processTime1, processTime2, false);
+		IJobSchedulingInput problem = this.getTwoOperationProblem(0, setupTime, processTime1, processTime2, false);
 		Schedule schedule = new ScheduleBuilder(problem).assign(O_1, M_1).assign(O_2, M_1).build();
 		Operation o = problem.getOperation(O_2);
 		int finishTimeOfFirstJob = schedule.getEndTimeOfOperation(problem.getOperation(O_1));
@@ -207,7 +207,7 @@ public class OpenShopTest {
 		int processTime = 2;
 		int setupTime = -1;
 		int availability = 5;
-		OpenShopProblem problem = this.getSingleOperationProblem(availability, setupTime, processTime, true);
+		IJobSchedulingInput problem = this.getSingleOperationProblem(availability, setupTime, processTime, true);
 		Operation o = problem.getOperation(O_1);
 		Schedule schedule = new ScheduleBuilder(problem).assign(o.getName(), M_1).build();
 		assertEquals(availability, schedule.getSetupStartTimeOfOperation(o));
@@ -221,7 +221,7 @@ public class OpenShopTest {
 		int processTime = 2;
 		int setupTime = 3;
 		int availability = 5;
-		OpenShopProblem problem = this.getSingleOperationProblem(availability, setupTime, processTime, false);
+		IJobSchedulingInput problem = this.getSingleOperationProblem(availability, setupTime, processTime, false);
 		Operation o = problem.getOperation(O_1);
 		Schedule schedule = new ScheduleBuilder(problem).assign(o.getName(), M_1).build();
 		assertEquals(availability, schedule.getSetupStartTimeOfOperation(o));
@@ -236,7 +236,7 @@ public class OpenShopTest {
 		int processTime2 = 5;
 		int setupTime = 3;
 		int availability = 5;
-		OpenShopProblem problem = this.getTwoOperationProblem(availability, setupTime, processTime1, processTime2, true);
+		IJobSchedulingInput problem = this.getTwoOperationProblem(availability, setupTime, processTime1, processTime2, true);
 		Schedule schedule = new ScheduleBuilder(problem).assign(O_1, M_1).assign(O_2, M_1).build();
 		Operation o = problem.getOperation(O_2);
 		int finishTimeOfFirstJob = schedule.getEndTimeOfOperation(problem.getOperation(O_1));
@@ -253,7 +253,7 @@ public class OpenShopTest {
 		int processTime2 = 5;
 		int setupTime = 3;
 		int availability = 5;
-		OpenShopProblem problem = this.getTwoOperationProblem(availability, setupTime, processTime1, processTime2, false);
+		IJobSchedulingInput problem = this.getTwoOperationProblem(availability, setupTime, processTime1, processTime2, false);
 		Schedule schedule = new ScheduleBuilder(problem).assign(O_1, M_1).assign(O_2, M_1).build();
 		Operation o = problem.getOperation(O_2);
 		int finishTimeOfFirstJob = schedule.getEndTimeOfOperation(problem.getOperation(O_1));
@@ -266,49 +266,49 @@ public class OpenShopTest {
 
 	@Test
 	public void testTotalFlowTimeMetric() {
-		OpenShopProblem problem = problemBuilder.fork().withMetric(OpenShopMetric.TOTALFLOWTIME).build();
+		IJobSchedulingInput problem = problemBuilder.fork().withMetric(JobShopMetric.TOTALFLOWTIME).build();
 		double score = problem.getScoreOfSchedule(solution);
 		assertEquals(flowTimeOfJob1 + flowTimeOfJob2 + flowTimeOfJob3, score, 0.01);
 	}
 
 	@Test
 	public void testTotalWeightedFlowTimeMetric() {
-		OpenShopProblem problem = problemBuilder.fork().withMetric(OpenShopMetric.TOTALFLOWTIME_WEIGHTED).build();
+		IJobSchedulingInput problem = problemBuilder.fork().withMetric(JobShopMetric.TOTALFLOWTIME_WEIGHTED).build();
 		double score = problem.getScoreOfSchedule(solution);
 		assertEquals(flowTimeOfJob1 + 2 * flowTimeOfJob2 + 3 * flowTimeOfJob3, score, 0.01);
 	}
 
 	@Test
 	public void testTotalTardinessMetric() {
-		OpenShopProblem problem = problemBuilder.fork().withMetric(OpenShopMetric.TOTALTARDINESS).build();
+		IJobSchedulingInput problem = problemBuilder.fork().withMetric(JobShopMetric.TOTALTARDINESS).build();
 		double score = problem.getScoreOfSchedule(solution);
 		assertEquals(tardinessOfJob1 + tardinessOfJob2 + tardinessOfJob3, score, 0.01);
 	}
 
 	@Test
 	public void testTotalWeightedTardinessMetric() {
-		OpenShopProblem problem = problemBuilder.fork().withMetric(OpenShopMetric.TOTALTARDINESS_WEIGHTED).build();
+		IJobSchedulingInput problem = problemBuilder.fork().withMetric(JobShopMetric.TOTALTARDINESS_WEIGHTED).build();
 		double score = problem.getScoreOfSchedule(solution);
 		assertEquals(tardinessOfJob1 + 2 * tardinessOfJob2 + 3 * tardinessOfJob3, score, 0.01);
 	}
 
 	@Test
 	public void testMaxTardinessMetric() {
-		OpenShopProblem problem = problemBuilder.fork().withMetric(OpenShopMetric.MAXTARDINESS).build();
+		IJobSchedulingInput problem = problemBuilder.fork().withMetric(JobShopMetric.MAXTARDINESS).build();
 		double score = problem.getScoreOfSchedule(solution);
 		assertEquals(Math.max(tardinessOfJob1, Math.max(tardinessOfJob2, tardinessOfJob3)), score, 0.01);
 	}
 
 	@Test
 	public void testNumTardyJobsMetric() {
-		OpenShopProblem problem = problemBuilder.fork().withMetric(OpenShopMetric.NUM_TARDY_JOB).build();
+		IJobSchedulingInput problem = problemBuilder.fork().withMetric(JobShopMetric.NUM_TARDY_JOB).build();
 		double score = problem.getScoreOfSchedule(solution);
 		assertEquals((tardinessOfJob1 > 0 ? 1 : 0) + (tardinessOfJob2 > 0 ? 1 : 0) + (tardinessOfJob3 > 0 ? 1 : 0), score, 0.01);
 	}
 
 	@Test
 	public void testMakeSpanMetric() {
-		OpenShopProblem problem = problemBuilder.fork().withMetric(OpenShopMetric.MAKESPAN).build();
+		IJobSchedulingInput problem = problemBuilder.fork().withMetric(JobShopMetric.MAKESPAN).build();
 		double score = problem.getScoreOfSchedule(solution);
 		assertEquals(28, score, 0.01);
 	}

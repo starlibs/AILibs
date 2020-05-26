@@ -1,4 +1,4 @@
-package ai.libs.jaicore.problems.scheduling.openshop;
+package ai.libs.jaicore.problems.scheduling;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import ai.libs.jaicore.basic.sets.Pair;
+
 /**
  * @author gmejia
  * @author Felix Mohr
@@ -14,81 +15,59 @@ import ai.libs.jaicore.basic.sets.Pair;
  * @version 4.0
  *
  */
-public class Schedule {
+public class Schedule implements ISchedule {
 
 	private final List<Pair<Operation, Machine>> assignments;
 	private final Map<Machine, List<Operation>> assignmentPerMachine = new HashMap<>();
+	private final Map<Job, Integer> arrivalTimes = new HashMap<>();
 	private final Map<Operation, Integer> startTimes = new HashMap<>();
 	private final Map<Operation, Integer> endTimes = new HashMap<>();
 	private final Map<Operation, Integer> setupStartTimes = new HashMap<>();
 	private final Map<Operation, Integer> setupEndTimes = new HashMap<>();
 
-	Schedule(final List<Pair<Operation, Machine>> assignments) {
+	Schedule(final IJobSchedulingInput problemInput, final List<Pair<Operation, Machine>> assignments, final IScheduleComputer schedulingComputer) {
 		super();
 		this.assignments = assignments;
 		this.assignments.forEach(p -> this.assignmentPerMachine.computeIfAbsent(p.getY(), m -> new ArrayList<>()).add(p.getX()));
-
-		/* compute stats for the operations */
-		Map<Job, Integer> jobReadyness = new HashMap<>();
-		Map<Machine, Integer> machineReadyness = new HashMap<>();
-		Map<Machine, Integer> machineStates= new HashMap<>();
-		for (Pair<Operation, Machine> p : assignments) {
-
-			/* get times when job can arrive at the machine and time when machine can start to consider the job */
-			Machine m = p.getY();
-			Operation o = p.getX();
-			int timeWhenMachineBecomesAvailableForOperation = machineReadyness.computeIfAbsent(m, Machine::getAvailableDate);
-			int timeWhenJobArrivesAtMachine = jobReadyness.computeIfAbsent(o.getJob(), Job::getReleaseDate); // maybe add travel time here
-
-			/* compute required setup time */
-			int actualMachineState = machineStates.computeIfAbsent(m, Machine::getInitialState);
-			int requiredMachineState = o.getStatus();
-			int setupTime = (actualMachineState == requiredMachineState) ? 0 : m.getWorkcenter().getSetupMatrix()[actualMachineState][requiredMachineState];
-			int timeWhenMachineIsReadyToProcessOperation = timeWhenMachineBecomesAvailableForOperation + setupTime;
-
-			/* compute and memorize operation stats */
-			int startTime = Math.max(timeWhenMachineIsReadyToProcessOperation, timeWhenJobArrivesAtMachine);
-			int endTime = startTime + o.getProcessTime();
-			this.setupStartTimes.put(o, timeWhenMachineBecomesAvailableForOperation);
-			this.setupEndTimes.put(o, timeWhenMachineIsReadyToProcessOperation);
-			this.startTimes.put(o, startTime);
-			this.endTimes.put(o, endTime);
-
-			/* update machine state and readyness and job readyness */
-			machineReadyness.put(m, endTime);
-			machineStates.put(m, o.getStatus());
-			jobReadyness.put(o.getJob(), endTime);
-		}
+		schedulingComputer.fillTimes(problemInput, assignments, this.arrivalTimes, this.startTimes, this.endTimes, this.setupStartTimes, this.setupEndTimes);
 	}
 
+	@Override
 	public List<Pair<Operation, Machine>> getAssignments() {
 		return this.assignments;
 	}
 
+	@Override
 	public List<Operation> getOperationsAssignedToMachine(final Machine m) {
 		return this.assignmentPerMachine.get(m);
 	}
 
+	@Override
 	public List<Operation> getOrderOfOperationsForJob(final Job job) {
 		return this.assignments.stream().map(Pair::getX).filter(o -> o.getJob().equals(job)).collect(Collectors.toList());
 	}
 
+	@Override
 	public int getStartTimeOfOperation(final Operation o) {
 		return this.startTimes.get(o);
 	}
 
+	@Override
 	public int getEndTimeOfOperation(final Operation o) {
 		return this.endTimes.get(o);
 	}
 
+	@Override
 	public int getSetupStartTimeOfOperation(final Operation o) {
 		return this.setupStartTimes.get(o);
 	}
 
+	@Override
 	public int getSetupEndTimeOfOperation(final Operation o) {
 		return this.setupEndTimes.get(o);
 	}
 
+	@Override
 	public int getJobFinishTime(final Job job) {
 		return job.getOperations().stream().map(this::getEndTimeOfOperation).max(Double::compare).get();
 	}
@@ -98,17 +77,20 @@ public class Schedule {
 	 * @param job
 	 * @return
 	 */
+	@Override
 	public int getJobFlowTime(final Job job) {
-		return this.getJobFinishTime(job) - job.getReleaseDate();
+		return this.getJobFinishTime(job) - this.arrivalTimes.get(job); // the arrival times can be part of the SCHEDULE (being decisions) rather than part of the job definition
 	}
 
+	@Override
 	public int getJobTardiness(final Job job) {
 		return Math.max(0, this.getJobFinishTime(job) - job.getDueDate());
 	}
 
 	public String getAsString() {
 		StringBuilder sb = new StringBuilder();
-		List<Workcenter> workcenters = this.assignmentPerMachine.keySet().stream().map(Machine::getWorkcenter).collect(Collectors.toSet()).stream().sorted((w1,w2) -> w1.getWorkcenterID().compareTo(w2.getWorkcenterID())).collect(Collectors.toList());
+		List<Workcenter> workcenters = this.assignmentPerMachine.keySet().stream().map(Machine::getWorkcenter).collect(Collectors.toSet()).stream().sorted((w1, w2) -> w1.getWorkcenterID().compareTo(w2.getWorkcenterID()))
+				.collect(Collectors.toList());
 		for (Workcenter wc : workcenters) {
 			sb.append("-------------------------------------------------------------------------------------------------\n");
 			sb.append(wc.getWorkcenterID());
@@ -139,7 +121,8 @@ public class Schedule {
 
 	public String getGanttAsString() {
 		StringBuilder sb = new StringBuilder();
-		List<Workcenter> workcenters = this.assignmentPerMachine.keySet().stream().map(Machine::getWorkcenter).collect(Collectors.toSet()).stream().sorted((w1,w2) -> w1.getWorkcenterID().compareTo(w2.getWorkcenterID())).collect(Collectors.toList());
+		List<Workcenter> workcenters = this.assignmentPerMachine.keySet().stream().map(Machine::getWorkcenter).collect(Collectors.toSet()).stream().sorted((w1, w2) -> w1.getWorkcenterID().compareTo(w2.getWorkcenterID()))
+				.collect(Collectors.toList());
 		for (Workcenter wc : workcenters) {
 			sb.append("-------------------------------------------------------------------------------------------------\n");
 			sb.append(wc.getWorkcenterID());
@@ -152,39 +135,42 @@ public class Schedule {
 					StringBuilder opSB = new StringBuilder();
 					int lastStatus = m.getInitialState();
 					for (Operation o : ops) {
-						sb.append(lastStatus + " -> " + o.getStatus() + ": " + m.getWorkcenter().getSetupMatrix()[lastStatus][o.getStatus()]);
+						boolean needsSetup = false;
+						if (m.getWorkcenter().getSetupMatrix() != null) {
+							sb.append(lastStatus + " -> " + o.getStatus() + ": " + m.getWorkcenter().getSetupMatrix()[lastStatus][o.getStatus()]);
+							needsSetup = m.getWorkcenter().getSetupMatrix()[lastStatus][o.getStatus()] != 0;
+						}
 
-						boolean needsSetup = m.getWorkcenter().getSetupMatrix()[lastStatus][o.getStatus()] != 0;
+
 						lastStatus = o.getStatus();
 						int setupStartTime = this.setupStartTimes.get(o);
 						int setupEndTime = this.setupEndTimes.get(o);
 						int startTime = this.startTimes.get(o);
 						int endTime = this.endTimes.get(o);
-						sb.append(o.getName() +" (" + m.getMachineID() + "): " + setupStartTime + ", " + setupEndTime + ", " + startTime  + ", " + endTime);
+						sb.append(o.getName() + " (" + m.getMachineID() + "): " + setupStartTime + ", " + setupEndTime + ", " + startTime + ", " + endTime);
 
 						/*  */
 						sb.append(needsSetup);
 						if (needsSetup) {
 							while (curTime < setupStartTime) {
 								sb.append(" ");
-								curTime ++;
+								curTime++;
 							}
 							sb.append("|");
-							curTime ++;
+							curTime++;
 							while (curTime < setupEndTime) {
 								sb.append("+");
-								curTime ++;
+								curTime++;
 							}
 
 							while (curTime < startTime) {
 								sb.append("?");
-								curTime ++;
+								curTime++;
 							}
-						}
-						else {
+						} else {
 							while (curTime < startTime) {
 								sb.append(" ");
-								curTime ++;
+								curTime++;
 							}
 						}
 						sb.append("|");
@@ -192,15 +178,15 @@ public class Schedule {
 						int whiteSpace = Math.max(0, spaceForLabeling - o.getName().length());
 						int whiteSpaceLeft = whiteSpace / 2;
 						int startLabeling = startTime + whiteSpaceLeft;
-						while(curTime < startLabeling) {
+						while (curTime < startLabeling) {
 							sb.append(" ");
-							curTime ++;
+							curTime++;
 						}
 						sb.append(o.getName());
 						curTime += o.getName().length();
-						while(curTime < endTime) {
+						while (curTime < endTime) {
 							sb.append(" ");
-							curTime ++;
+							curTime++;
 						}
 						if (endTime - startTime > 1) {
 							sb.append("|");
@@ -215,8 +201,7 @@ public class Schedule {
 	}
 
 	/**
-	 * A schedule is active if no operation can be scheduled earlier without any other change.
-	 * This method determines whether the schedule is active.
+	 * A schedule is active if no operation can be scheduled earlier without any other change. This method determines whether the schedule is active.
 	 *
 	 * @return
 	 */
@@ -234,7 +219,8 @@ public class Schedule {
 		/* first condition: there is enough free time inbetween other operations of the JOB earlier */
 		Job j = o.getJob();
 		int requiredTime = o.getProcessTime();
-		List<Operation> otherOpsOfJobStartingEarlier = j.getOperations().stream().filter(op -> this.endTimes.containsKey(op) && this.endTimes.get(op) <= this.startTimes.get(o)).sorted((o1,o2) -> Integer.compare(this.startTimes.get(o1), this.startTimes.get(o2))).collect(Collectors.toList());
+		List<Operation> otherOpsOfJobStartingEarlier = j.getOperations().stream().filter(op -> this.endTimes.containsKey(op) && this.endTimes.get(op) <= this.startTimes.get(o))
+				.sorted((o1, o2) -> Integer.compare(this.startTimes.get(o1), this.startTimes.get(o2))).collect(Collectors.toList());
 
 		/* if this is the first operation in the job, just look if we can allocate it earlier onto some of the machines in the WC */
 		if (otherOpsOfJobStartingEarlier.isEmpty()) {
@@ -272,7 +258,8 @@ public class Schedule {
 	}
 
 	public int getEarliestTimeWhenMachineIsFreeForDurationInInterval(final Machine m, final int start, final int end, final Operation op) {
-		List<Operation> opsOnMachineDuringThatTime = this.getOperationsAssignedToMachine(m).stream().filter(o ->  this.setupStartTimes.get(o) > start && this.setupStartTimes.get(o) < end || this.endTimes.get(o) > start && this.endTimes.get(o) <  end).collect(Collectors.toList());
+		List<Operation> opsOnMachineDuringThatTime = this.getOperationsAssignedToMachine(m).stream()
+				.filter(o -> this.setupStartTimes.get(o) > start && this.setupStartTimes.get(o) < end || this.endTimes.get(o) > start && this.endTimes.get(o) < end).collect(Collectors.toList());
 		int currentOffset = Math.max(start, m.getAvailableDate());
 		for (Operation o : opsOnMachineDuringThatTime) {
 			int requiredSetupTimeIfInsertedHere = m.getWorkcenter().getSetupMatrix()[op.getStatus()][o.getStatus()];
@@ -312,5 +299,15 @@ public class Schedule {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public Machine getMachineToWhichOperationHasBeenAssigned(final Operation o) {
+		for (Pair<Operation, Machine> assignment : this.assignments) {
+			if (assignment.getX().equals(o)) {
+				return assignment.getY();
+			}
+		}
+		return null;
 	}
 }

@@ -1,4 +1,4 @@
-package ai.libs.jaicore.problems.scheduling.openshop;
+package ai.libs.jaicore.problems.scheduling;
 
 /**
  **/
