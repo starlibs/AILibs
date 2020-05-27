@@ -1,5 +1,6 @@
 package ai.libs.hasco.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -36,7 +37,7 @@ public class ComponentUtil {
 	 * @param component The component for which a random parameterization is to be returned.
 	 * @return An instantiation of the component with default parameterization.
 	 */
-	public static ComponentInstance defaultParameterizationOfComponent(final Component component) {
+	public static ComponentInstance getDefaultParameterizationOfComponent(final Component component) {
 		Map<String, String> parameterValues = new HashMap<>();
 		for (Parameter p : component.getParameters()) {
 			parameterValues.put(p.getName(), p.getDefaultValue() + "");
@@ -52,7 +53,7 @@ public class ComponentUtil {
 	 * @param rand The Random instance for making the random decisions.
 	 * @return An instantiation of the component with valid random parameterization.
 	 */
-	public static ComponentInstance randomParameterizationOfComponent(final Component component, final Random rand) {
+	public static ComponentInstance getRandomParameterizationOfComponent(final Component component, final Random rand) {
 		ComponentInstance ci;
 		do {
 			Map<String, String> parameterValues = new HashMap<>();
@@ -66,7 +67,11 @@ public class ComponentUtil {
 						if ((int) (numDomain.getMax() - numDomain.getMin()) > 0) {
 							parameterValues.put(p.getName(), ((int) (rand.nextInt((int) (numDomain.getMax() - numDomain.getMin())) + numDomain.getMin())) + "");
 						} else {
-							parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
+							if (p.getDefaultValue() instanceof Double) {
+								parameterValues.put(p.getName(), ((int) (double) p.getDefaultValue()) + "");
+							} else {
+								parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
+							}
 						}
 					} else {
 						parameterValues.put(p.getName(), (rand.nextDouble() * (numDomain.getMax() - numDomain.getMin()) + numDomain.getMin()) + "");
@@ -103,7 +108,7 @@ public class ComponentUtil {
 	 */
 	public static Collection<ComponentInstance> getAllAlgorithmSelectionInstances(final Component rootComponent, final Collection<Component> components) {
 		Collection<ComponentInstance> instanceList = new LinkedList<>();
-		instanceList.add(ComponentUtil.defaultParameterizationOfComponent(rootComponent));
+		instanceList.add(ComponentUtil.getDefaultParameterizationOfComponent(rootComponent));
 
 		for (Entry<String, String> requiredInterface : rootComponent.getRequiredInterfaces().entrySet()) {
 			List<ComponentInstance> tempList = new LinkedList<>();
@@ -135,7 +140,7 @@ public class ComponentUtil {
 	 * @return A collection of component instances of the given root component with all possible algorithm choices.
 	 */
 	public static Collection<ComponentInstance> getAllAlgorithmSelectionInstances(final String requiredInterface, final Collection<Component> components) {
-		Collection<ComponentInstance> instanceList = new LinkedList<>();
+		Collection<ComponentInstance> instanceList = new ArrayList<>();
 		components.stream().filter(x -> x.getProvidedInterfaces().contains(requiredInterface)).map(x -> getAllAlgorithmSelectionInstances(x, components)).forEach(instanceList::addAll);
 		return instanceList;
 	}
@@ -166,9 +171,9 @@ public class ComponentUtil {
 		return numCandidates;
 	}
 
-	public ComponentInstance getRandomParametrization(final ComponentInstance componentInstance, final Random rand) {
-		ComponentInstance randomParametrization = randomParameterizationOfComponent(componentInstance.getComponent(), rand);
-		componentInstance.getSatisfactionOfRequiredInterfaces().entrySet().forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), this.getRandomParametrization(x.getValue(), rand)));
+	public static ComponentInstance getRandomParametrization(final ComponentInstance componentInstance, final Random rand) {
+		ComponentInstance randomParametrization = getRandomParameterizationOfComponent(componentInstance.getComponent(), rand);
+		componentInstance.getSatisfactionOfRequiredInterfaces().entrySet().forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), getRandomParametrization(x.getValue(), rand)));
 		return randomParametrization;
 	}
 
@@ -199,9 +204,16 @@ public class ComponentUtil {
 	public static boolean isDefaultConfiguration(final ComponentInstance instance) {
 		for (Parameter p : instance.getParametersThatHaveBeenSetExplicitly()) {
 			if (p.isNumeric()) {
-				List<String> intervalAsList = SetUtil.unserializeList(instance.getParameterValue(p));
 				double defaultValue = Double.parseDouble(p.getDefaultValue().toString());
-				boolean isCompatibleWithDefaultValue = defaultValue >= Double.parseDouble(intervalAsList.get(0)) && defaultValue <= Double.parseDouble(intervalAsList.get(1));
+				String parameterValue = instance.getParameterValue(p);
+
+				boolean isCompatibleWithDefaultValue = false;
+				if (parameterValue.contains("[")) {
+					List<String> intervalAsList = SetUtil.unserializeList(instance.getParameterValue(p));
+					isCompatibleWithDefaultValue = defaultValue >= Double.parseDouble(intervalAsList.get(0)) && defaultValue <= Double.parseDouble(intervalAsList.get(1));
+				} else {
+					isCompatibleWithDefaultValue = Math.abs(defaultValue - Double.parseDouble(parameterValue)) < 1E-8;
+				}
 				if (!isCompatibleWithDefaultValue) {
 					logger.info("{} has value {}, which does not subsume the default value {}", p.getName(), instance.getParameterValue(p), defaultValue);
 					return false;
@@ -264,5 +276,14 @@ public class ComponentUtil {
 		stats.put("nOtherParameters", otherParams);
 
 		return stats;
+	}
+
+	public static String getComponentInstanceAsComponentNames(final ComponentInstance instance) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(instance.getComponent().getName());
+		if (!instance.getSatisfactionOfRequiredInterfaces().isEmpty()) {
+			sb.append("{").append(instance.getSatisfactionOfRequiredInterfaces().values().stream().map(x -> getComponentInstanceAsComponentNames(x)).collect(Collectors.joining(","))).append("}");
+		}
+		return sb.toString();
 	}
 }

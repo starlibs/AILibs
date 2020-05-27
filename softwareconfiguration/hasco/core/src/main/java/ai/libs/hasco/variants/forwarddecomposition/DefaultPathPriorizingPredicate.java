@@ -1,11 +1,14 @@
 package ai.libs.hasco.variants.forwarddecomposition;
 
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import ai.libs.hasco.core.HASCO;
+import ai.libs.hasco.core.IHascoAware;
 import ai.libs.hasco.core.Util;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.ComponentUtil;
+import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 
 /**
@@ -16,12 +19,13 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
  * @author fmohr
  *
  */
-public class DefaultPathPriorizingPredicate<N, A> implements Predicate<N> {
+public class DefaultPathPriorizingPredicate<N, A> implements Predicate<N>, IHascoAware {
 
 	private HASCO<?, N, A, ?> hasco;
 
 	@Override
 	public boolean test(final N node) {
+		Objects.requireNonNull(node);
 		if (this.hasco == null) {
 			throw new IllegalStateException("HASCO has not yet been set!");
 		}
@@ -31,18 +35,25 @@ public class DefaultPathPriorizingPredicate<N, A> implements Predicate<N> {
 		if (this.hasco.getInput() == null) {
 			throw new IllegalStateException("HASCO exists, but its problem input has not been defined yet.");
 		}
-		ComponentInstance inst = Util.getSolutionCompositionFromState(this.hasco.getInput().getComponents(), ((TFDNode) node).getState(), false);
+		TFDNode tfd = (TFDNode)node;
+		Monom stateAfterLastAction = tfd.getState();
+
+		/* now check whether the last edge was a method that will necessary induce a certain successor state  */
+
+		ComponentInstance inst = Util.getSolutionCompositionFromState(this.hasco.getInput().getComponents(), stateAfterLastAction, false);
 		if (inst == null) {
 			return true;
 		}
 		return ComponentUtil.isDefaultConfiguration(inst);
 	}
 
-	public HASCO<?, N, A, ?> getHasco() {
-		return this.hasco;
+	@Override
+	public void setHascoReference(final HASCO hasco) {
+		this.hasco = hasco;
 	}
 
-	public void setHasco(final HASCO<?, N, A, ?> hasco) {
-		this.hasco = hasco;
+	@Override
+	public HASCO getHASCOReference() {
+		return this.hasco;
 	}
 }

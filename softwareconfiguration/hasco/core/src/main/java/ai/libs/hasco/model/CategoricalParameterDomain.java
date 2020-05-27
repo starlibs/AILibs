@@ -80,4 +80,9 @@ public class CategoricalParameterDomain implements IParameterDomain {
 	public String toString() {
 		return "CategoricalParameterDomain [values=" + Arrays.toString(this.values) + "]";
 	}
+
+	@Override
+	public boolean isEquals(final Object obj0, final Object obj1) {
+		return new String(obj0 + "").equals(obj1 + "");
+	}
 }

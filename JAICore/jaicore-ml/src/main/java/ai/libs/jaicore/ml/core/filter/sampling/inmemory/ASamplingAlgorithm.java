@@ -55,7 +55,7 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 				throw new AlgorithmException("No dataset or an empty dataset was given as an input.");
 			}
 			if (dataset.size() < ASamplingAlgorithm.this.sampleSize) {
-				throw new AlgorithmException("Specified sample size is bigger than the dataset.");
+				throw new AlgorithmException("Specified sample size is bigger than the dataset. Sample should have size " + ASamplingAlgorithm.this.sampleSize + " but has " + dataset.size());
 			} else if (dataset.size() == ASamplingAlgorithm.this.sampleSize) {
 				ASamplingAlgorithm.this.logger.warn("Sample size and data set size are equal. Returning the original data set");
 				// The dataset size is exactly the specified sample size, so just return the whole dataset.

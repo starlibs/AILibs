@@ -174,7 +174,6 @@ public class IsValidParameterRangeRefinementPredicate implements EvaluablePredic
 			}
 		} catch (Exception e) {
 			this.logger.error("Unexpected exception observed", e);
-			System.exit(1);
 		}
 		return new ArrayList<>();
 	}

@@ -129,7 +129,7 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 	}
 
 	@Test
-	public void test2ThatAllExperimentsAreConducted() throws ExperimentDBInteractionFailedException, InterruptedException {
+	public void test2ThatAllExperimentsAreConductedExactlyOnceUsingParallelization() throws ExperimentDBInteractionFailedException, InterruptedException {
 
 		/* check that running the experiments works */
 		ExperimentRunner runner = new ExperimentRunner(this.config, this, this.handle);

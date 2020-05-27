@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -129,6 +130,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			if (this.hasco == null) {
 				throw new IllegalStateException("Cannot start algorithm before HASCO has been set. Please set HASCO either in constructor or via the setter.");
 			}
+			//			this.setHASCOLoggerNameIfPossible();
 			this.timeOfStart = System.currentTimeMillis();
 			AlgorithmInitializedEvent event = this.activate();
 			this.logger.info(
@@ -138,8 +140,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			DefaultPathPriorizingPredicate<N, A> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
 
 			/* set HASCO objects within the default path prioritizing node evaluator */
-			prioritizingPredicate.setHasco(this.hasco);
-			this.setHASCOLoggerNameIfPossible();
+			prioritizingPredicate.setHascoReference(this.hasco);
 			this.logger.info("Initialized HASCO with start time {}.", this.timeOfStart);
 			return event;
 
@@ -170,9 +171,9 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 								TwoPhaseHASCO.this.logger.info("HASCO canceled successfully after {}ms", (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart) - timeElapsed);
 								this.cancel();
 							}
-						}
-						catch (Exception e) {
-							TwoPhaseHASCO.this.logger.error("Observed {} while checking termination of phase 1. Stack trace is: {}", e.getClass().getName(), Arrays.stream(e.getStackTrace()).map(se -> "\n\t" + se.toString()).collect(Collectors.joining()));
+						} catch (Exception e) {
+							TwoPhaseHASCO.this.logger.error("Observed {} while checking termination of phase 1. Stack trace is: {}", e.getClass().getName(),
+									Arrays.stream(e.getStackTrace()).map(se -> "\n\t" + se.toString()).collect(Collectors.joining()));
 						}
 					}
 				};
@@ -209,9 +210,17 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			if (selectionBenchmark != null) {
 				if (this.logger.isInfoEnabled()) {
 					this.logger.info("Entering phase 2.");
-					this.logger.debug("Solutions seen so far had the following (internal) errors (one per line): {}", this.phase1ResultQueue.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
+					this.logger.debug("Solutions seen so far had the following (internal) errors (one per line): {}",
+							this.phase1ResultQueue.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
 				}
 				this.post(new TwoPhaseHASCOPhaseSwitchEvent(this));
+
+				// Robustness check whether precondition of phase 2 is actually fulfilled.
+				if (this.phase1ResultQueue.isEmpty()) {
+					this.logger.error("Not a single solution found in the first phase. Thus, exit with exception.");
+					throw new AlgorithmException("Not a single solution candidate could be found in the first phase. Please check your search space configuration and search phase benchmark carefully.");
+				}
+
 				if (selectionBenchmark instanceof IInformedObjectEvaluatorExtension) {
 					this.logger.debug("Setting best score for selection phase node evaluator to {}", this.phase1ResultQueue.peek().getScore());
 					((IInformedObjectEvaluatorExtension<Double>) selectionBenchmark).informAboutBestScore(this.phase1ResultQueue.peek().getScore());
@@ -220,8 +229,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 
 				/* phase 2: conduct it (select model) */
 				this.selectedHASCOSolution = this.selectModel();
-			}
-			else {
+			} else {
 				this.logger.info("Selection phase is disabled. Returning best result of phase 1.");
 				final Optional<HASCOSolutionCandidate<Double>> bestSolutionOptional = this.phase1ResultQueue.stream().min((s1, s2) -> s1.getScore().compareTo(s2.getScore()));
 				if (!bestSolutionOptional.isPresent()) {
@@ -375,7 +383,8 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info(
 						"We expect phase 2 to consume {}ms for {} candidates, and post-processing is assumed to take at most {}ms, which is a total remaining runtime of {}ms. {}ms are permitted by timeout. The following candidates are considered (one per line with the internal error of phase 1): {}",
-						expectedTimeForPhase2, ensembleToSelectFrom.size(), expectedPostprocessingTime, expectedMaximumRemainingRuntime, remainingTime, ensembleToSelectFrom.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
+						expectedTimeForPhase2, ensembleToSelectFrom.size(), expectedPostprocessingTime, expectedMaximumRemainingRuntime, remainingTime,
+						ensembleToSelectFrom.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
 			}
 		} else {
 			ensembleToSelectFrom = this.getSelectionForPhase2();
@@ -443,7 +452,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 						this.selectionScoresOfCandidates.put(c, selectionScore);
 						TwoPhaseHASCO.this.logger.info("Obtained evaluation score of {} after {}ms for candidate {} (score assigned by HASCO was {}).", selectionScore, trueEvaluationTime, c.getComponentInstance(), c.getScore());
 						return true;
-					}, timeoutForEvaluation, "Timeout for evaluation of ensemble candidate " + c.getComponentInstance());
+					}, new Timeout(timeoutForEvaluation, TimeUnit.MILLISECONDS), "Timeout for evaluation of ensemble candidate " + c.getComponentInstance());
 				} catch (InterruptedException e) {
 					assert !Thread.currentThread().isInterrupted() : "The interrupted-flag should not be true when an InterruptedException is thrown!";
 					TwoPhaseHASCO.this.logger.info("Selection eval of {} got interrupted after {}ms. Defined timeout was: {}ms", c.getComponentInstance(), (System.currentTimeMillis() - timestampStart), timeoutForEvaluation);
@@ -594,6 +603,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 	}
 
 	private void setHASCOLoggerNameIfPossible() {
+		System.err.println(this.getLoggerName());
 		if (this.hasco == null) {
 			this.logger.info("HASCO object is null, so not setting a logger.");
 			return;
