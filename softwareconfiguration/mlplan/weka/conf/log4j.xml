@@ -127,7 +127,7 @@
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
-    <level value="warn" />
+    <level value="info" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.treepolicy">
@@ -135,7 +135,7 @@
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary.randomsearch">
-    <level value="warn" />
+    <level value="info" />
   </logger>
   
   <logger name="hasco.core.isValidParameterRangeRefinementPredicate">
@@ -196,7 +196,7 @@
     <level value="warn" />
   </logger>
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
-    <level value="warn" />
+    <level value="info" />
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.randomsearch">
@@ -204,6 +204,16 @@
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary">
+  	<level value="info" />
+  </logger>
+  
+  <logger name="ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator">
   	<level value="warn" />
   </logger>
+  
+  <logger name="ai.libs.jaicore.search.algorithms.standard.random">
+  	<level value="warn" />
+  </logger>
+  
+  
 </log4j:configuration>

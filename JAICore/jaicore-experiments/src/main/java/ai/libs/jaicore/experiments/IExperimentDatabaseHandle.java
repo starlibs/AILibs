@@ -56,6 +56,30 @@ public interface IExperimentDatabaseHandle {
 	public List<ExperimentDBEntry> getConductedExperiments() throws ExperimentDBInteractionFailedException;
 
 	/**
+	 * Returns a list of all experiments contained in the database marked as being conducted and with the attribute values specified as in the map.
+	 *
+	 * @return List of all experiments conducted so far
+	 * @throws ExperimentDBInteractionFailedException
+	 */
+	public List<ExperimentDBEntry> getConductedExperiments(Map<String, Object> fieldFilter) throws ExperimentDBInteractionFailedException;
+
+	/**
+	 * Returns a list of all experiments contained in the database marked as being conducted and with an exception.
+	 *
+	 * @return List of all experiments conducted so far
+	 * @throws ExperimentDBInteractionFailedException
+	 */
+	public List<ExperimentDBEntry> getFailedExperiments() throws ExperimentDBInteractionFailedException;
+
+	/**
+	 * Returns a list of all experiments contained in the database marked as being conducted and with an exception and with the attribute values specified as in the map.
+	 *
+	 * @return List of all experiments conducted so far
+	 * @throws ExperimentDBInteractionFailedException
+	 */
+	public List<ExperimentDBEntry> getFailedExperiments(Map<String, Object> fieldFilter) throws ExperimentDBInteractionFailedException;
+
+	/**
 	 * Returns a list of all experiments contained in the database that have not been started yet.
 	 *
 	 * @return List of all experiments conducted so far

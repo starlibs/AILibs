@@ -127,7 +127,11 @@ public class SQLAdapter implements IDatabaseAdapter {
 		this.database = database;
 		this.connectionProperties = connectionProperties;
 
-		Runtime.getRuntime().addShutdownHook(new ShutdownThread(SQLAdapter.this));
+		try {
+//			Runtime.getRuntime().addShutdownHook(new ShutdownThread(SQLAdapter.this));
+		} catch (Exception e) {
+			this.logger.warn("Failed to add shutdown hook for SQLAdapter");
+		}
 	}
 
 	/**
@@ -160,8 +164,10 @@ public class SQLAdapter implements IDatabaseAdapter {
 				Properties connectionProps = new Properties(this.connectionProperties);
 				connectionProps.put("user", this.user);
 				connectionProps.put("password", this.password);
-				String connectionString = "jdbc:" + this.driver + "://" + this.host + "/" + this.database + ((this.ssl) ? "?verifyServerCertificate=false&requireSSL=true&useSSL=true" : "");
+				String connectionString = "jdbc:" + this.driver + "://" + this.host + "/" + this.database + ((this.ssl) ? "?verifyServerCertificate=false&requireSSL=true&useSSL=true" : "?useSSL=false");
+				this.logger.info("Connecting to {}", connectionString);
 				this.connect = DriverManager.getConnection(connectionString, connectionProps);
+				this.logger.info("Connection established.");
 				return;
 			} catch (SQLException e) {
 				tries++;
@@ -177,6 +183,8 @@ public class SQLAdapter implements IDatabaseAdapter {
 			}
 		} while (tries < 3);
 		this.logger.error("Quitting execution as no database connection could be established");
+		System.err.println("Quitting execution as no database connection could be established");
+		System.out.println("Quitting execution as not database connection could be established");
 		System.exit(1);
 	}
 
@@ -228,7 +236,6 @@ public class SQLAdapter implements IDatabaseAdapter {
 	public List<IKVStore> getRowsOfTable(final String table, final Map<String, String> conditions) throws SQLException {
 		return this.getResultsOfQuery(this.queryBuilder.buildSelectSQLCommand(table, conditions));
 	}
-
 
 	public Iterator<IKVStore> getRowIteratorOfTable(final String table) throws SQLException {
 		return this.getRowIteratorOfTable(table, new HashMap<>());
@@ -381,6 +388,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 	@Override
 	public int[] insertMultiple(final String table, final List<String> keys, final List<List<? extends Object>> datarows, final int chunkSize) throws SQLException {
 		int n = datarows.size();
+		this.checkConnection();
 		List<Integer> ids = new ArrayList<>(n);
 		try (Statement stmt = this.connect.createStatement()) {
 			for (int i = 0; i < Math.ceil(n * 1.0 / chunkSize); i++) {
@@ -436,6 +444,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 	@Override
 	public int update(final String sql, final List<? extends Object> values) throws SQLException {
 		this.checkConnection();
+		this.logger.debug("Executing update query: {} with values {}", sql, values);
 		try (PreparedStatement stmt = this.connect.prepareStatement(sql)) {
 			for (int i = 1; i <= values.size(); i++) {
 				stmt.setString(i, values.get(i - 1).toString());
@@ -604,7 +613,10 @@ public class SQLAdapter implements IDatabaseAdapter {
 		sqlMainTable.append("CREATE TABLE IF NOT EXISTS `" + tablename + "` (");
 		sqlMainTable.append("`" + nameOfPrimaryField + "` " + types.get(nameOfPrimaryField) + " NOT NULL AUTO_INCREMENT,");
 		for (String key : fieldnames) {
-			sqlMainTable.append("`" + key + "` " + types.get(key) + " NOT NULL,");
+			if (!types.containsKey(key)) {
+				throw new IllegalArgumentException("No type information given for field " + key);
+			}
+			sqlMainTable.append("`" + key + "` " + types.get(key) + (types.get(key).contains("NULL") ? "" : " NOT NULL") + ",");
 			keyFieldsSB.append("`" + key + "`,");
 		}
 		sqlMainTable.append("PRIMARY KEY (`" + nameOfPrimaryField + "`)");
@@ -612,6 +624,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 
 		/* prepare statement */
 		try (Statement stmt = this.connect.createStatement()) {
+			this.logger.info("Executing query: {}", sqlMainTable);
 			stmt.execute(sqlMainTable.toString());
 		}
 	}
