@@ -15,8 +15,8 @@ import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.search.algorithms.mdp.mcts.ActionPredictionFailedException;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.IPolicy;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.old.ActionPredictionFailedException;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 

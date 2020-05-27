@@ -7,7 +7,7 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.search.algorithms.mdp.mcts.uct.AUpdatingPolicy.NodeLabel;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.NodeLabel;
 
 public class UCBPolicy<T, A> extends AUpdatingPolicy<T, A> implements ILoggingCustomizable {
 
@@ -40,34 +40,34 @@ public class UCBPolicy<T, A> extends AUpdatingPolicy<T, A> implements ILoggingCu
 	}
 
 	public double getEmpiricalMean(final T node, final A action) {
-		NodeLabel nodeLabel = this.getLabelOfNode(node);
-		if (nodeLabel == null || !nodeLabel.numberOfChoicesPerAction.containsKey(action)) {
+		NodeLabel<A> nodeLabel = this.getLabelOfNode(node);
+		if (nodeLabel == null || nodeLabel.getNumPulls(action) == 0) {
 			return (this.isMaximize() ? -1 : 1) * Double.MAX_VALUE;
 		}
-		int timesThisActionHasBeenChosen = nodeLabel.numberOfChoicesPerAction.get(action);
-		return nodeLabel.accumulatedRewardsOfAction.get(action) / timesThisActionHasBeenChosen;
+		int timesThisActionHasBeenChosen = nodeLabel.getNumPulls(action);
+		return nodeLabel.getAccumulatedRewardsOfAction(action) / timesThisActionHasBeenChosen;
 	}
 
 	public double getExplorationTerm(final T node, final A action) {
-		NodeLabel nodeLabel = this.getLabelOfNode(node);
-		if (nodeLabel == null || !nodeLabel.numberOfChoicesPerAction.containsKey(action)) {
+		NodeLabel<A> nodeLabel = this.getLabelOfNode(node);
+		if (nodeLabel == null || nodeLabel.getNumPulls(action) == 0) {
 			return (this.isMaximize() ? -1 : 1) * Double.MAX_VALUE;
 		}
-		int timesThisActionHasBeenChosen = nodeLabel.numberOfChoicesPerAction.get(action);
-		return (this.isMaximize() ? 1 : -1) * this.explorationConstant * Math.sqrt(Math.log(nodeLabel.visits) / timesThisActionHasBeenChosen);
+		int timesThisActionHasBeenChosen = nodeLabel.getNumPulls(action);
+		return (this.isMaximize() ? 1 : -1) * this.explorationConstant * Math.sqrt(Math.log(nodeLabel.getVisits()) / timesThisActionHasBeenChosen);
 	}
 
 	@Override
 	public double getScore(final T node, final A action) {
-		NodeLabel nodeLabel = this.getLabelOfNode(node);
-		if (nodeLabel == null || !nodeLabel.numberOfChoicesPerAction.containsKey(action)) {
+		NodeLabel<A> nodeLabel = this.getLabelOfNode(node);
+		if (nodeLabel == null || nodeLabel.isVirgin(action)) {
 			return (this.isMaximize() ? -1 : 1) * Double.MAX_VALUE;
 		}
-		int timesThisActionHasBeenChosen = nodeLabel.numberOfChoicesPerAction.get(action);
-		double averageScoreForThisAction = nodeLabel.accumulatedRewardsOfAction.get(action) / timesThisActionHasBeenChosen;
-		double explorationTerm = (this.isMaximize() ? 1 : -1) * this.explorationConstant * Math.sqrt(Math.log(nodeLabel.visits) / timesThisActionHasBeenChosen);
+		int timesThisActionHasBeenChosen = nodeLabel.getNumPulls(action);
+		double averageScoreForThisAction = nodeLabel.getAccumulatedRewardsOfAction(action) / timesThisActionHasBeenChosen;
+		double explorationTerm = (this.isMaximize() ? 1 : -1) * this.explorationConstant * Math.sqrt(Math.log(nodeLabel.getVisits())  / timesThisActionHasBeenChosen);
 		double score = averageScoreForThisAction + explorationTerm;
-		this.logger.trace("Computed UCB score {} = {} + {} * {} * sqrt(log({})/{}). That is, exploration term is {}", score, averageScoreForThisAction, this.isMaximize() ? 1 : -1, this.explorationConstant, nodeLabel.visits, timesThisActionHasBeenChosen, explorationTerm);
+		this.logger.trace("Computed UCB score {} = {} + {} * {} * sqrt(log({})/{}). That is, exploration term is {}", score, averageScoreForThisAction, this.isMaximize() ? 1 : -1, this.explorationConstant, nodeLabel.getVisits(), timesThisActionHasBeenChosen, explorationTerm);
 		return score;
 	}
 

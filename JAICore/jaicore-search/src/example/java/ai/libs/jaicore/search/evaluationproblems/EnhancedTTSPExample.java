@@ -21,10 +21,11 @@ import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPGenerator;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPState;
 import ai.libs.jaicore.problems.enhancedttsp.locationgenerator.RandomLocationGenerator;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.old.UCTPathSearch;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.uuct.UUCTFactory;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirstEpsilon;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
 import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearch;
+import ai.libs.jaicore.search.algorithms.standard.mcts.MCTSPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.random.RandomSearch;
 import ai.libs.jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
 import ai.libs.jaicore.search.exampleproblems.enhancedttsp.EnhancedTTSPSimpleGraphGenerator;
@@ -100,7 +101,7 @@ public class EnhancedTTSPExample {
 	}
 
 	public void testMCTS() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
-		this.runAlgorithm("MCTS", new UCTPathSearch<>(new GraphSearchWithPathEvaluationsInput<>(input, n -> ttsp.getSolutionEvaluator().evaluate(reducer.decodeSolution(n))), 2.0, 0, 0.0), false);
+		this.runAlgorithm("MCTS", new MCTSPathSearch<>(new GraphSearchWithPathEvaluationsInput<>(input, n -> ttsp.getSolutionEvaluator().evaluate(reducer.decodeSolution(n))), new UUCTFactory<>()), false);
 	}
 
 	public void testRandomSearch() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {

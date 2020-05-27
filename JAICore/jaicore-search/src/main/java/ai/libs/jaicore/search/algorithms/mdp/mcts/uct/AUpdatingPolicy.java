@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.search.algorithms.mdp.mcts.IPathUpdatablePolicy;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.NodeLabel;
 
 public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILoggingCustomizable {
 
@@ -28,15 +29,9 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 		this.maximize = maximize;
 	}
 
-	public class NodeLabel {
-		protected int visits;
-		protected Map<A, Integer> numberOfChoicesPerAction = new HashMap<>();
-		protected Map<A, Double> accumulatedRewardsOfAction = new HashMap<>();
-	}
+	private final Map<N, NodeLabel<A>> labels = new HashMap<>();
 
-	private final Map<N, NodeLabel> labels = new HashMap<>();
-
-	public NodeLabel getLabelOfNode(final N node) {
+	public NodeLabel<A> getLabelOfNode(final N node) {
 		if (!this.labels.containsKey(node)) {
 			throw new IllegalArgumentException("No label for node " + node);
 		}
@@ -63,13 +58,11 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 		}
 		for (N node : path.getPathToParentOfHead().getNodes()) {
 			A action = path.getOutArc(node);
-			NodeLabel label = this.labels.computeIfAbsent(node, n -> new NodeLabel());
-			double rewardsBefore = label.accumulatedRewardsOfAction.computeIfAbsent(action, a -> 0.0);
-			int numPullsBefore = label.numberOfChoicesPerAction.computeIfAbsent(action, a -> 0);
-			label.accumulatedRewardsOfAction.put(action,  rewardsBefore + score);
-			label.numberOfChoicesPerAction.put(action, numPullsBefore + 1);
-			label.visits++;
-			this.logger.trace("Updated label of node {}. Visits now {}. Cummulative changed from {} to {}. Mean changed from {} to {}", node, label.visits, rewardsBefore, rewardsBefore + score, rewardsBefore / numPullsBefore, (rewardsBefore + score) / (numPullsBefore + 1));
+			NodeLabel<A> label = this.labels.computeIfAbsent(node, n -> new NodeLabel<>());
+			label.addRewardForAction(action,  score);
+			label.addPull(action);
+			label.addVisit();
+			this.logger.trace("Updated label of node {}. Visits now {}. Action pulls of {} now {}. Observed total rewards for this action: {}", node, label.getVisits(), action, label.getNumPulls(action), label.getAccumulatedRewardsOfAction(action));
 		}
 		this.logger.debug("Path update completed.");
 	}
@@ -87,12 +80,12 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 		}
 
 		/* otherwise, play best action */
-		NodeLabel labelOfNode = this.labels.get(node);
+		NodeLabel<A> labelOfNode = this.labels.get(node);
 		this.logger.debug("All actions have been tried. Label is: {}", labelOfNode);
 		Map<A, Double> scores = new HashMap<>();
 		for (A action : possibleActions) {
-			assert labelOfNode.visits != 0 : "Visits of action " + action + " cannot be 0 if we already used this action before!";
-			this.logger.trace("Considering action {}, which has {} visits and cummulative rewards {}.", action, labelOfNode.numberOfChoicesPerAction.get(action), labelOfNode.accumulatedRewardsOfAction.get(action));
+			assert labelOfNode.getVisits() != 0 : "Visits of action " + action + " cannot be 0 if we already used this action before!";
+			this.logger.trace("Considering action {}, which has {} visits and cummulative rewards {}.", action, labelOfNode.getNumPulls(action), labelOfNode.getAccumulatedRewardsOfAction(action));
 			Double score = this.getScore(node, action);
 			if (score.isNaN()) {
 				throw new IllegalStateException("Score of action " + action + " is NaN, which it must not be!");

@@ -11,8 +11,8 @@ import org.junit.Test;
 
 import ai.libs.jaicore.search.algorithms.mdp.mcts.IPathUpdatablePolicy;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.IPolicy;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSPolicySearch;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.old.UniformRandomPolicy;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTS;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.UniformRandomPolicy;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.uct.UCBPolicy;
 import ai.libs.jaicore.search.exampleproblems.sailing.SailingMDP;
 import ai.libs.jaicore.search.exampleproblems.sailing.SailingMove;
@@ -46,7 +46,7 @@ public class SailingTest {
 			MDPUtils utils = new MDPUtils();
 
 			for (int seed = 0; seed < 20; seed ++) {
-				MCTSPolicySearch<SailingState, SailingMove> mcts = new MCTSPolicySearch<>(mdp, ucb, new UniformRandomPolicy<>(new Random(seed)), 100000000, 0.95, 0.001);
+				MCTS<SailingState, SailingMove> mcts = new MCTS<>(mdp, ucb, new UniformRandomPolicy<>(new Random(seed)), 100000000, 0.95, 0.001);
 				int finishedIterations = 0;
 				mcts.nextWithException(); // activates MCTS
 				long start = System.currentTimeMillis();

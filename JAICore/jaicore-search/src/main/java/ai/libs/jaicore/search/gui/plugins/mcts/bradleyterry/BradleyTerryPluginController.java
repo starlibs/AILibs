@@ -10,7 +10,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
 import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.NodeClickedEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.old.comparison.ObservationsUpdatedEvent;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.comparison.ObservationsUpdatedEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfo;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;

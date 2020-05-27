@@ -1,8 +1,8 @@
 package ai.libs.jaicore.search.algorithms.mdp.mcts.thompson;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.ActionPredictionFailedException;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.IPathUpdatablePolicy;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.old.ActionPredictionFailedException;
 
 /**
  * This is a slightly simplified implementation of the algorithm presented in
@@ -67,7 +67,7 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	 * This is the first part of the ELSE branch in the MCTS algorithm of the paper (calling Thompson sampling to choose A).
 	 * The "simulation" part is taken over by the general MCTS routine
 	 */
-	public A getAction(final N node, final Map<A, N> actionsWithSuccessors) throws ActionPredictionFailedException {
+	public A getAction(final N node, final Collection<A> actionsWithSuccessors) throws ActionPredictionFailedException {
 		try {
 			return this.sampleWithThompson(node, actionsWithSuccessors);
 		} catch (ObjectEvaluationFailedException e) {
@@ -86,7 +86,7 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	 * In fact, without inner rewards and without discounting, this just amounts to use the playout score
 	 * for all nodes on the path, which can be done in a simple loop.
 	 */
-	public void updatePath(final ILabeledPath<N, A> path, final Double playoutScore, final int lengthOfPlayoutPath) {
+	public void updatePath(final ILabeledPath<N, A> path, final Double playoutScore) {
 		for (N node : path.getNodes()) {
 			double lambdaOfN = this.lambda.computeIfAbsent(node, n -> this.initLambda);
 			double muOfN = this.mu.computeIfAbsent(node, n -> INIT_MU);
@@ -107,11 +107,11 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	 * @throws InterruptedException
 	 * @throws ObjectEvaluationFailedException
 	 */
-	public A sampleWithThompson(final N state, final Map<A, N> actions) throws ObjectEvaluationFailedException, InterruptedException {
+	public A sampleWithThompson(final N state, final Collection<A> actions) throws ObjectEvaluationFailedException, InterruptedException {
 		A bestAction = null;
 		double bestScore = Double.MAX_VALUE;
-		for (Entry<A, N> actionStatePair : actions.entrySet()) {
-			double score = this.getQValue(state, actionStatePair.getValue());
+		for (A action : actions) {
+			double score = this.getQValue(state, action);
 			this.eventBus.post(new DNGQSampleEvent<N, A>(null, state, actionStatePair.getValue(), actionStatePair.getKey(), score));
 			if (score < bestScore) {
 				bestAction = actionStatePair.getKey();

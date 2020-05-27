@@ -9,8 +9,8 @@ import org.junit.Test;
 
 import ai.libs.jaicore.basic.sets.IntCoordinates;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.IPolicy;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSPolicySearch;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSPolicySearchBuilder;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTS;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSBuilder;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.uct.UCBPolicy;
 import ai.libs.jaicore.search.exampleproblems.taxi.ETaxiAction;
 import ai.libs.jaicore.search.exampleproblems.taxi.TaxiMDP;
@@ -42,7 +42,7 @@ public class TaxiTest {
 		System.out.println(mdp);
 		System.out.println(mdp.getInitState());
 
-		MCTSPolicySearch<TaxiState, ETaxiAction> mcts = new MCTSPolicySearchBuilder<TaxiState, ETaxiAction>().withMDP(mdp).withGamma(.99).withMaxIterations(10000).build();
+		MCTS<TaxiState, ETaxiAction> mcts = new MCTSBuilder<TaxiState, ETaxiAction>().withMDP(mdp).withGamma(.99).withMaxIterations(10000).build();
 		mcts.setLoggerName("testedalgorithm");
 		IPolicy<TaxiState, ETaxiAction> policy = mcts.call();
 		UCBPolicy<TaxiState, ETaxiAction> ucb = (UCBPolicy<TaxiState, ETaxiAction>) policy;

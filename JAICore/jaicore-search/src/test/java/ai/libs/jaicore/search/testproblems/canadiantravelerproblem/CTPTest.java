@@ -11,8 +11,8 @@ import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPGenerator;
 import ai.libs.jaicore.problems.enhancedttsp.Location;
 import ai.libs.jaicore.problems.enhancedttsp.locationgenerator.RandomLocationGenerator;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.IPolicy;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSPolicySearch;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSPolicySearchBuilder;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTS;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSBuilder;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.uct.UCBPolicy;
 import ai.libs.jaicore.search.exampleproblems.canadiantravelerproblem.CTPMDP;
 import ai.libs.jaicore.search.exampleproblems.canadiantravelerproblem.CTPState;
@@ -44,7 +44,7 @@ public class CTPTest {
 		//		}
 
 		UCBPolicy<CTPState, Short> ucb = new UCBPolicy<>(true);
-		MCTSPolicySearch<CTPState, Short> mcts = new MCTSPolicySearchBuilder<CTPState, Short>().withMDP(mdp).withMaxIterations(10).build();
+		MCTS<CTPState, Short> mcts = new MCTSBuilder<CTPState, Short>().withMDP(mdp).withMaxIterations(10).build();
 		mcts.setLoggerName("testedalgorithm");
 		IPolicy<CTPState, Short> policy = mcts.call();
 

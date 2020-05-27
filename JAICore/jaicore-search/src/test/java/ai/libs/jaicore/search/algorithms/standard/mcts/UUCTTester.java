@@ -1,26 +1,15 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts;
 
-import org.api4.java.ai.graphsearch.problem.IPathSearch;
-import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.uuct.UUCTFactory;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.uuct.utility.CVaR;
 
-import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.old.uuct.CVaR;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.old.uuct.UUCTPathSearchFactory;
-import ai.libs.jaicore.search.model.other.AgnosticPathEvaluator;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
-
-public class UUCTTester extends GraphSearchSolutionIteratorTester {
+public class UUCTTester extends MCTSForGraphSearchTester {
 
 	@Override
-	public <N, A> IPathSearch<?, ?, N, A> getSearchAlgorithm(final GraphSearchInput<N, A> problem) {
-		UUCTPathSearchFactory<IPathSearchWithPathEvaluationsInput<N, A, Double>, N, A> factory = new UUCTPathSearchFactory<>();
-		GraphSearchWithPathEvaluationsInput<N, A, Double> newProblem = new GraphSearchWithPathEvaluationsInput<>(problem, new AgnosticPathEvaluator<>());
-		factory.setProblemInput(newProblem);
+	public <N, A> MCTSFactory<N, A> getFactory() {
+		UUCTFactory<N, A> factory = new UUCTFactory<>();
 		factory.setUtility(new CVaR(0.05)); // test with conditional value at risk
-		factory.setEvaluationFailurePenalty(0.0);
-		factory.setForbidDoublePaths(true);
-		return factory.getAlgorithm();
+		return factory;
 	}
-
 }

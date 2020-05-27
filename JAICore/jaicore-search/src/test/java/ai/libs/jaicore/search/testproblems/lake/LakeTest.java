@@ -6,8 +6,8 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluated
 import org.junit.Test;
 
 import ai.libs.jaicore.search.algorithms.mdp.mcts.IPolicy;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSPolicySearch;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.old.UniformRandomPolicy;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTS;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.UniformRandomPolicy;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.uct.UCBPolicy;
 import ai.libs.jaicore.search.exampleproblems.lake.ELakeActions;
 import ai.libs.jaicore.search.exampleproblems.lake.JasminLakeMDP;
@@ -30,7 +30,7 @@ public class LakeTest {
 		//		}
 
 		UCBPolicy<TimedLakeState, ELakeActions> ucb = new UCBPolicy<>(true);
-		MCTSPolicySearch<TimedLakeState, ELakeActions> mcts = new MCTSPolicySearch<>(mdp, ucb, new UniformRandomPolicy<>(), 10000, .99, 0.001);
+		MCTS<TimedLakeState, ELakeActions> mcts = new MCTS<>(mdp, ucb, new UniformRandomPolicy<>(), 10000, .99, 0.001);
 		mcts.setLoggerName("testedalgorithm");
 		IPolicy<TimedLakeState, ELakeActions> policy = mcts.call();
 

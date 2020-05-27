@@ -7,8 +7,8 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluated
 import org.junit.Test;
 
 import ai.libs.jaicore.search.algorithms.mdp.mcts.IPolicy;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSPolicySearch;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSPolicySearchBuilder;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTS;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSBuilder;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.uct.UCBPolicy;
 import ai.libs.jaicore.search.exampleproblems.racetrack.RacetrackAction;
 import ai.libs.jaicore.search.exampleproblems.racetrack.RacetrackMDP;
@@ -33,7 +33,7 @@ public class RacetrackTest {
 		//		}
 
 		UCBPolicy<RacetrackState, RacetrackAction> ucb = new UCBPolicy<>(true);
-		MCTSPolicySearch<RacetrackState, RacetrackAction> mcts = new MCTSPolicySearchBuilder<RacetrackState, RacetrackAction>().withMDP(mdp).withGamma(.99).withMaxIterations(1000000).build();
+		MCTS<RacetrackState, RacetrackAction> mcts = new MCTSBuilder<RacetrackState, RacetrackAction>().withMDP(mdp).withGamma(.99).withMaxIterations(1000000).build();
 		mcts.setLoggerName("testedalgorithm");
 		IPolicy<RacetrackState, RacetrackAction> policy = mcts.call();
 
