@@ -202,7 +202,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		SearchGraphPath<N, A> extendedPath = new SearchGraphPath<>(path, to, label);
 		boolean isGoalNode = this.goalTester.isGoal(extendedPath);
 		if (this.logger.isDebugEnabled()) {
-			this.logger.debug("Added node {} as a successor of {} with edge label {} to the model.", to.hashCode(), from.hashCode(), label);
+			this.logger.debug("Added node {} as a successor of {} with edge label {} to the model. Contained in prioritized: {}", to.hashCode(), from.hashCode(), label, this.prioritizedNodes.contains(to));
 		}
 		this.post(new NodeAddedEvent<>(this, from, to, isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
 		return extendedPath;
@@ -282,9 +282,15 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 			return null;
 		}
 
+		/* maintain two variables for prioritized search */
+		boolean hasCheckedWhetherPrioritizedPathExists = false;
+		boolean chasePrioritizedPath = false;
+
 		/* conduct a random walk from the root to a goal */
 		SearchGraphPath<N, A> cPath = new SearchGraphPath<>(path);
+		int origLength = cPath.getNumberOfNodes();
 		N head = cPath.getHead();
+		int triedStepbacks = 0;
 		synchronized (this.exploredGraph) {
 			while (!this.goalTester.isGoal(cPath)) {
 				this.checkAndConductTermination();
@@ -326,7 +332,35 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 				N lastHead = head;
 				if (!prioritizedSuccessors.isEmpty()) {
 					head = prioritizedSuccessors.iterator().next();
-				} else {
+					this.logger.debug("Following prioritized node {}", head);
+
+					/* we now know that there exist prioritizes paths. That means that we also want to chase them as long as possible */
+					if (!hasCheckedWhetherPrioritizedPathExists) {
+						hasCheckedWhetherPrioritizedPathExists = true;
+						chasePrioritizedPath = true;
+					}
+				}
+
+				/* otherwise, if there is no prioritized successors but there ARE prioritized nodes under this path, step back */
+				else if (chasePrioritizedPath) {
+					if (cPath.getNumberOfNodes() > origLength) {
+						this.logger.debug("The current head is not prioritized, but we know that there are prioritized nodes we could follow. Stepping back! Current head: {}", head);
+						cPath = cPath.getPathToParentOfHead();
+						head = cPath.getHead();
+						triedStepbacks ++;
+						if (triedStepbacks > 50) {
+							chasePrioritizedPath = false;
+						}
+						continue;
+					}
+					else {
+						this.logger.debug("The current head is not prioritized, and we throught that there should be more prioritized nodes. But we have reached the root and hence know that there are none. Hence, we change the flag and now follow unprioritized nodes!");
+						chasePrioritizedPath = false;
+						continue; // this will make the RandomSearch try the same node again (now not chasing prioritized nodes anymore)
+					}
+				}
+
+				else {
 					int n = successors.size();
 					assert n != 0 : "Ended up in a situation where only exhausted nodes can be chosen.";
 					int k = this.random.nextInt(n);

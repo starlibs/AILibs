@@ -10,7 +10,7 @@ import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class BestFirstFactory<P extends GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, V>, N, A, V, BestFirst<P, N, A, V>>
-implements IOptimalPathInORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, V>, N, A, V, BestFirst<P, N, A, V>> {
+		implements IOptimalPathInORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, V>, N, A, V, BestFirst<P, N, A, V>> {
 
 	private int timeoutForFInMS;
 	private IPathEvaluator<N, A, V> timeoutEvaluator;
@@ -71,8 +71,5 @@ implements IOptimalPathInORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, 
 
 	protected void setupAlgorithm(final BestFirst<P, N, A, V> algorithm) {
 		algorithm.setTimeoutForComputationOfF(this.timeoutForFInMS, this.timeoutEvaluator);
-		if (this.getLoggerName() != null && this.getLoggerName().length() > 0) {
-			algorithm.setLoggerName(this.getLoggerName());
-		}
 	}
 }

@@ -30,6 +30,8 @@ import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -60,6 +62,7 @@ import weka.core.OptionHandler;
 import weka.core.json.JSONInstances;
 import weka.core.json.JSONNode;
 import weka.filters.Filter;
+import weka.filters.supervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Remove;
 
 public class WekaUtil {
@@ -87,6 +90,7 @@ public class WekaUtil {
 		classifiers.add("weka.classifiers.functions.VotedPerceptron");
 		classifiers.add("weka.classifiers.lazy.IBk");
 		classifiers.add("weka.classifiers.lazy.KStar");
+		classifiers.add("weka.classifiers.rules.DecisionTable");
 		classifiers.add("weka.classifiers.rules.JRip");
 		classifiers.add("weka.classifiers.rules.M5Rules");
 		classifiers.add("weka.classifiers.rules.OneR");
@@ -168,7 +172,7 @@ public class WekaUtil {
 		classifiers.add("weka.classifiers.meta.LogitBoost");
 		classifiers.add("weka.classifiers.meta.MultiClassClassifier");
 		classifiers.add("weka.classifiers.meta.RandomCommittee");
-		classifiers.add("weka.classifiers.meta.RandomSubspace");
+		classifiers.add("weka.classifiers.meta.RandomSubSpace");
 		classifiers.add("weka.classifiers.meta.Stacking");
 		classifiers.add("weka.classifiers.meta.Vote");
 		return classifiers;
@@ -189,19 +193,27 @@ public class WekaUtil {
 	 * @throws InterruptedException
 	 * @throws AlgorithmTimeoutedException
 	 */
-	public static Collection<List<String>> getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public static Collection<List<String>> getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection() {
 		Collection<List<String>> preprocessors = new ArrayList<>();
 		List<Collection<String>> sets = new ArrayList<>();
 		sets.add(getSearchers());
 		sets.add(getFeatureEvaluators());
 		CartesianProductComputationProblem<String> problem = new CartesianProductComputationProblem<>(sets);
-		List<List<String>> combinations = new LDSRelationComputer<>(problem).call();
-		for (List<String> combo : combinations) {
-			if (isValidPreprocessorCombination(combo.get(0), combo.get(1))) {
-				preprocessors.add(combo);
+		List<List<String>> combinations;
+		try {
+			combinations = new LDSRelationComputer<>(problem).call();
+			for (List<String> combo : combinations) {
+				if (isValidPreprocessorCombination(combo.get(0), combo.get(1))) {
+					preprocessors.add(combo);
+				}
 			}
+			return preprocessors;
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new UnsupportedOperationException("Have been interrupted meanwhile. This should usually not happen, we do not want to treat interrupts here.");
+		} catch (AlgorithmTimeoutedException | AlgorithmExecutionCanceledException e) {
+			throw new UnsupportedOperationException();
 		}
-		return preprocessors;
 	}
 
 	/**
@@ -824,5 +836,29 @@ public class WekaUtil {
 
 	public static void setDebug(final boolean debug) {
 		WekaUtil.debug = debug;
+	}
+
+	/**
+	 * Binarizes nominal features and returns an ND4J matrix
+	 *
+	 * @param inst
+	 * @return
+	 * @throws Exception
+	 */
+	public static INDArray instances2matrix(final Instances inst) throws Exception {
+		Filter n2b = new NominalToBinary();
+		n2b.setInputFormat(inst);
+		Instances reduced = Filter.useFilter(inst, n2b);
+
+		/* create ndarray */
+		double[][] matrix = new double[reduced.numAttributes() - 1][reduced.size()];
+		int index = 0;
+		for (int i = 0; i < reduced.numAttributes(); i++) {
+			if (i != reduced.classIndex()) {
+				matrix[index] = reduced.attributeToDoubleArray(i);
+				index++;
+			}
+		}
+		return Nd4j.create(matrix).transpose();
 	}
 }

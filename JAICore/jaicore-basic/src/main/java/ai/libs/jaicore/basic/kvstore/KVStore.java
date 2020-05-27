@@ -120,11 +120,20 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 			return null;
 		} else if (value instanceof Integer) {
 			return (Integer) value;
-		}
-		else if (value instanceof Long) {
+		} else if (value instanceof Long) {
 			return Integer.valueOf(value.toString());
+		} else if (value instanceof Double) {
+			return ((Double) value).intValue();
 		} else if (value instanceof String) {
-			return Integer.valueOf((String) value);
+			try {
+				return Integer.valueOf((String) value);
+			} catch (NumberFormatException e) {
+				try {
+					return (int) (double) Double.valueOf((String) value);
+				} catch (NumberFormatException e1) {
+					throw new IllegalStateException("Tired of casting this value " + value + " to a number and I give up.");
+				}
+			}
 		} else {
 			throw new IllegalStateException("Tried to get non-integer value as integer from KVStore. Type of value " + value + " is " + value.getClass().getName());
 		}
@@ -140,6 +149,8 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 		} else if (value instanceof String) {
 			return Double.valueOf((String) value);
 		} else if (value instanceof Integer) {
+			return Double.parseDouble(value + "");
+		} else if (value instanceof Long) {
 			return Double.parseDouble(value + "");
 		} else {
 			throw new IllegalStateException("Tried to get non-double value as double from KVStore.");
@@ -280,7 +291,6 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 				}
 			} catch (Exception e) {
 				LOGGER.error("Could not read kv store from string description", e);
-				System.exit(0);
 			}
 		}
 	}

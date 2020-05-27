@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.awaitility.Awaitility;
 import org.junit.Test;
@@ -64,7 +65,7 @@ public class InterruptTest {
 
 			/* test that InterruptException is thrown  */
 			try {
-				TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), 1000, "bb interrupt");
+				TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), new Timeout(1000, TimeUnit.MILLISECONDS), "bb interrupt");
 			} catch (AlgorithmTimeoutedException e) {
 
 				/* this is expected behavior */
@@ -80,7 +81,7 @@ public class InterruptTest {
 		for (int i = 0; i < NUMBER_ITERATIONS_SIMPLE; i++) {
 
 			/* test that InterruptException is thrown  */
-			TimedComputation.compute(new BusyBeaver(100), 1000, "bb interrupt");
+			TimedComputation.compute(new BusyBeaver(100), new Timeout(1000, TimeUnit.MILLISECONDS), "bb interrupt");
 			assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty());
 			Awaitility.await().atLeast(2, TimeUnit.SECONDS);
 			assertTrue(!Thread.interrupted());
@@ -100,7 +101,7 @@ public class InterruptTest {
 
 			/* test that InterruptException is thrown and that no interrupts are open */
 			try {
-				TimedComputation.compute(() -> TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), 2000, "inner interrupt"), 1000, "outer interrupt");
+				TimedComputation.compute(() -> TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), new Timeout(2000, TimeUnit.MILLISECONDS), "inner interrupt"), new Timeout(1000, TimeUnit.MILLISECONDS), "outer interrupt");
 			} catch (AlgorithmTimeoutedException e) {
 
 				/* this is expected behavior */
@@ -129,7 +130,7 @@ public class InterruptTest {
 
 			/* test that InterruptException is thrown and that no interrupts are open */
 			try {
-				TimedComputation.compute(() -> TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), 1000, "inner interrupt"), 2000, "outer interrupt");
+				TimedComputation.compute(() -> TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), new Timeout(1000, TimeUnit.MILLISECONDS), "inner interrupt"), new Timeout(2000, TimeUnit.MILLISECONDS), "outer interrupt");
 			} catch (ExecutionException e) {
 
 				if (!(e.getCause() instanceof AlgorithmTimeoutedException)) {
@@ -165,14 +166,14 @@ public class InterruptTest {
 			/* test that InterruptException is thrown and that no interrupts are open */
 			Exception caughtException = null;
 			try {
-				TimedComputation.compute(() -> TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), 1000, "inner interrupt"), 1000, "outer interrupt");
+				TimedComputation.compute(() -> TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), new Timeout(1000, TimeUnit.MILLISECONDS), "inner interrupt"), new Timeout(1000, TimeUnit.MILLISECONDS), "outer interrupt");
 			} catch (Exception e) {
 				caughtException = e;
 			}
 
 			/* check exception */
 			if (caughtException instanceof ExecutionException && !(caughtException.getCause() instanceof AlgorithmTimeoutedException)) {
-				throw (ExecutionException)caughtException;
+				throw (ExecutionException) caughtException;
 			}
 
 			if (caughtException != null) {
@@ -181,8 +182,7 @@ public class InterruptTest {
 				assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty());
 				assertFalse("There are open interrupts: " + Interrupter.get().getAllUnresolvedInterruptsOfThread(Thread.currentThread()).stream().map(Interrupt::getReasonForInterruption).collect(Collectors.toList()),
 						Interrupter.get().hasCurrentThreadOpenInterrupts());
-			}
-			else {
+			} else {
 				fail("No exception was thrown, but an AlgorithmTimedoutedException should have been thrown!");
 			}
 		}
@@ -197,10 +197,9 @@ public class InterruptTest {
 			InterruptionTimerTask task = new InterruptionTimerTask("outer interrupt");
 			GlobalTimer.getInstance().schedule(task, 1000);
 			try {
-				TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), 1500, "inner interrupt");
+				TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), new Timeout(1500, TimeUnit.MILLISECONDS), "inner interrupt");
 				fail("No exception was thrown, but an AlgorithmTimedoutedException should have been thrown!");
-			}
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
 
 				/* this is expected behavior */
 				while (!task.isFinished()) {
@@ -231,9 +230,8 @@ public class InterruptTest {
 			InterruptionTimerTask task = new InterruptionTimerTask("outer interrupt");
 			GlobalTimer.getInstance().schedule(task, 1500);
 			try {
-				TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), 1000, "inner interrupt");
-			}
-			catch (AlgorithmTimeoutedException e) {
+				TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), new Timeout(1000, TimeUnit.MILLISECONDS), "inner interrupt");
+			} catch (AlgorithmTimeoutedException e) {
 
 				/* check that thread is not interrupted */
 				assertFalse(Thread.interrupted());
@@ -267,7 +265,7 @@ public class InterruptTest {
 			int timeout = 1000;
 			GlobalTimer.getInstance().schedule(task, timeout + Math.round(Math.random())); // increase timeout by 1 ms in the first 10 runs to balance scheduling disadvanates of the outer one
 			try {
-				TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), timeout, "inner interrupt");
+				TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), new Timeout(timeout, TimeUnit.MILLISECONDS), "inner interrupt");
 				fail("Operation should not stop without exception!");
 			} catch (InterruptedException e) {
 				outerEarlier++;
@@ -288,8 +286,7 @@ public class InterruptTest {
 				while (!task.isFinished()) {
 					try {
 						Thread.sleep(100);
-					}
-					catch (InterruptedException ex) {
+					} catch (InterruptedException ex) {
 						Thread.currentThread().interrupt();
 					}
 					if (Thread.interrupted()) {
