@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -16,9 +17,7 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
-import ai.libs.jaicore.search.algorithms.standard.mcts.ActionPredictionFailedException;
-import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
-import ai.libs.jaicore.search.algorithms.standard.mcts.IPolicy;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.old.ActionPredictionFailedException;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.IMDP;
@@ -28,7 +27,6 @@ public class MCTSPolicySearch<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPoli
 
 	private final IMDP<N, A, Double> mdp;
 	private final double gamma;
-	private final double epsilon;
 	private final int maxDepth;
 	private final MDPUtils utils = new MDPUtils();
 	private final IPathUpdatablePolicy<N, A, Double> treePolicy;
@@ -37,6 +35,11 @@ public class MCTSPolicySearch<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPoli
 	private int iterations = 0;
 	private Collection<N> tpReadyStates = new HashSet<>();
 	private Map<N, Queue<A>> untriedActionsOfIncompleteStates = new HashMap<>();
+	private DescriptiveStatistics pathScoreStats = new DescriptiveStatistics();
+	private DescriptiveStatistics pathLengthStats = new DescriptiveStatistics();
+	private int lastProgressReport = 0;
+
+	private ILabeledPath<N, A> enforcedPrefixPath = null;
 
 	public MCTSPolicySearch(final IMDP<N, A, Double> input, final IPathUpdatablePolicy<N, A, Double> treePolicy, final IPolicy<N, A> defaultPolicy, final double maxIterations, final double gamma, final double epsilon) {
 		super(input);
@@ -48,8 +51,7 @@ public class MCTSPolicySearch<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPoli
 		this.defaultPolicy = defaultPolicy;
 		this.maxIterations = maxIterations;
 		this.gamma = gamma;
-		this.epsilon = epsilon;
-		this.maxDepth = (int)Math.ceil(Math.log(epsilon) / Math.log(gamma));
+		this.maxDepth = gamma < 1 ? (int)Math.ceil(Math.log(epsilon) / Math.log(gamma)) : Integer.MAX_VALUE;
 	}
 
 	@Override
@@ -133,8 +135,36 @@ public class MCTSPolicySearch<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPoli
 					}
 
 					/* update tree policy with accumulated score */
-					this.logger.debug("Propagating score {} over the path with actions {} and final state {}.", score, path.getArcs(), path.getHead());
-					this.treePolicy.updatePath(path, score);
+					//					if (score > 0) {
+					//						System.err.println(score);
+					//					}
+					int progress = (int)Math.round(this.iterations * 100.0 / this.maxIterations);
+					//					List<N> nodes = path.getNodes();
+					//					List<A> arcs = path.getArcs();
+					//					for (int i = 0; i < nodes.size(); i++) {
+					//						System.out.println(nodes.get(i));
+					//						if (i < arcs.size()) {
+					//							System.out.println(arcs.get(i));
+					//						}
+					//					}
+					//					System.out.println();
+					//
+					//					System.exit(0);
+					if (progress > this.lastProgressReport && progress % 5 == 0) {
+						this.logger.info("Progress: {}%" , Math.round(this.iterations * 100.0 / this.maxIterations));
+						this.lastProgressReport = progress;
+					}
+					this.pathScoreStats.addValue(score);
+					this.pathLengthStats.addValue(path.getNumberOfNodes());
+					if (this.iterations % 1000 == 0) {
+						//						System.out.println(this.pathScoreStats.getMean());
+						//						this.pathScoreStats.clear();
+						//						System.out.println(path.getNodes());
+					}
+					this.logger.debug("Found leaf node with score {}. Now propagating this score over the path with actions {}. Leaf state is: {}.", score, path.getArcs(), path.getHead());
+					if (!path.isPoint()) {
+						this.treePolicy.updatePath(path, score);
+					}
 					IAlgorithmEvent event = new MCTSIterationCompletedEvent<>(this, this.treePolicy, new EvaluatedSearchGraphPath<>(path, score));
 					this.post(event);
 					return event;
@@ -148,7 +178,7 @@ public class MCTSPolicySearch<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPoli
 		}
 	}
 
-	public int getIterations() {
+	public int getNumberOfRealizedPlayouts() {
 		return this.iterations;
 	}
 
@@ -164,12 +194,47 @@ public class MCTSPolicySearch<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPoli
 		return this.treePolicy;
 	}
 
+	public void enforcePrefixPathOnAllRollouts(final ILabeledPath<N, A> path) {
+		if (!path.getRoot().equals(this.mdp.getInitState())) {
+			throw new IllegalArgumentException("Illegal prefix, since root does not coincide with algorithm root. Proposed root is: " + path.getRoot());
+		}
+		this.enforcedPrefixPath = path;
+		N last = null;
+		for (N node : path.getNodes()) {
+			if (last != null) {
+				this.tpReadyStates.remove(last);
+				this.tpReadyStates.add(node);
+			}
+			last = node;
+		}
+		throw new UnsupportedOperationException("Currently, enforced prefixes are ignored!");
+	}
+
 	@Override
 	public void setLoggerName(final String name) {
 		super.setLoggerName(name);
+
+		/* set logger of tree policy */
 		if (this.treePolicy instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable)this.treePolicy).setLoggerName(name + ".tp");
+			this.logger.info("Setting logger of tree policy to {}.treepolicy", name);
+			((ILoggingCustomizable) this.treePolicy).setLoggerName(name + ".tp");
+		} else {
+			this.logger.info("Not setting logger of tree policy, because {} is not customizable.", this.treePolicy.getClass().getName());
+		}
+
+		/* set logger of default policy */
+		if (this.defaultPolicy instanceof ILoggingCustomizable) {
+			this.logger.info("Setting logger of default policy to {}.defaultpolicy", name);
+			((ILoggingCustomizable) this.defaultPolicy).setLoggerName(name + ".dp");
+		} else {
+			this.logger.info("Not setting logger of default policy, because {} is not customizable.", this.defaultPolicy.getClass().getName());
 		}
 		this.utils.setLoggerName(name + ".utils");
 	}
+
+
+	public boolean hasTreePolicyReachedLeafs() {
+		throw new UnsupportedOperationException("Currently not implemented.");
+	}
+
 }

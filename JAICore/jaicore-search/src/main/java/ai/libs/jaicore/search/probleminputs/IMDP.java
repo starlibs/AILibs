@@ -7,6 +7,8 @@ public interface IMDP<N, A, V extends Comparable<V>> {
 
 	public N getInitState();
 
+	public boolean isMaximizing();
+
 	public Collection<A> getApplicableActions(N state);
 
 	public Map<N, Double> getProb(N state, A action);

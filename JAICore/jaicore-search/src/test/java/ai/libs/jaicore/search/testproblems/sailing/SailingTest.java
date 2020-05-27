@@ -9,11 +9,11 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 import org.junit.Test;
 
+import ai.libs.jaicore.search.algorithms.mdp.mcts.IPathUpdatablePolicy;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.IPolicy;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSPolicySearch;
-import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
-import ai.libs.jaicore.search.algorithms.standard.mcts.IPolicy;
-import ai.libs.jaicore.search.algorithms.standard.mcts.UCBPolicy;
-import ai.libs.jaicore.search.algorithms.standard.mcts.UniformRandomPolicy;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.old.UniformRandomPolicy;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.uct.UCBPolicy;
 import ai.libs.jaicore.search.exampleproblems.sailing.SailingMDP;
 import ai.libs.jaicore.search.exampleproblems.sailing.SailingMove;
 import ai.libs.jaicore.search.exampleproblems.sailing.SailingState;

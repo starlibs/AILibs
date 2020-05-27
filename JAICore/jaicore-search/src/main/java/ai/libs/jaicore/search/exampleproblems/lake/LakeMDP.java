@@ -9,7 +9,7 @@ import java.util.Map;
 
 import ai.libs.jaicore.search.probleminputs.AMDP;
 
-public class LakeMDP extends AMDP<LakeState, ELakeActions, Double> {
+public class LakeMDP extends AMDP<TimedLakeState, ELakeActions, Double> {
 
 	private static final Collection<ELakeActions> POSSIBLE_ACTIONS = Arrays.asList(ELakeActions.values());
 
@@ -17,26 +17,29 @@ public class LakeMDP extends AMDP<LakeState, ELakeActions, Double> {
 	private final int goalRow;
 	private final int goalCol;
 	private final int timeout = 100;
+	private final boolean timed;
 
-	public LakeMDP(final LakeLayout layout, final int startRow, final int startCol, final int goalRow, final int goalCol) {
-		super(new LakeState(layout, startRow, startCol, 0));
+	public LakeMDP(final LakeLayout layout, final int startRow, final int startCol, final int goalRow, final int goalCol, final boolean isTimed) {
+		super(new TimedLakeState(layout, startRow, startCol, 0));
 		this.layout = layout;
 		this.goalRow = goalRow;
 		this.goalCol = goalCol;
+		this.timed = isTimed;
 	}
 
 	@Override
-	public Collection<ELakeActions> getApplicableActions(final LakeState state) {
-		if (state.getTime() >= this.timeout || state.isInPit() || (state.getRow() == this.goalRow && state.getCol() == this.goalCol)) {
+	public Collection<ELakeActions> getApplicableActions(final TimedLakeState state) {
+		if (state.getTime() >= this.timeout || state.isInPit() || this.isGoalState(state)) {
+			//			System.out.println("STOP: " + ((state.getTime() >= this.timeout) + "/" + (state.isInPit()) + "/" + this.isGoalState(state)));
 			return Arrays.asList();
 		}
 		return POSSIBLE_ACTIONS;
 	}
 
 	@Override
-	public Map<LakeState, Double> getProb(final LakeState state, final ELakeActions action) {
-		Map<LakeState, Double> dist = new HashMap<>();
-		List<LakeState> possibleOutcomes = new ArrayList<>(3);
+	public Map<TimedLakeState, Double> getProb(final TimedLakeState state, final ELakeActions action) {
+		Map<TimedLakeState, Double> dist = new HashMap<>();
+		List<TimedLakeState> possibleOutcomes = new ArrayList<>(3);
 		switch (action) {
 		case UP:
 			possibleOutcomes.add(this.left(state));
@@ -63,30 +66,44 @@ public class LakeMDP extends AMDP<LakeState, ELakeActions, Double> {
 		}
 
 		/* compute frequencies for the different outcomes */
-		for (LakeState succ : possibleOutcomes) {
+		for (TimedLakeState succ : possibleOutcomes) {
 			dist.put(succ, dist.computeIfAbsent(succ, s -> 0.0) + 1.0 / 3);
 		}
 		return dist;
 	}
 
-	public LakeState up(final LakeState s) {
-		return new LakeState(s.getLayout(), Math.max(0, s.getRow() - 1), s.getCol(), s.getTime() + 1);
+	public boolean isGoalState(final LakeState s) {
+		return (s.getRow() == this.goalRow && s.getCol() == this.goalCol);
 	}
 
-	public LakeState down(final LakeState s) {
-		return new LakeState(s.getLayout(), Math.min(this.layout.getRows() - 1, s.getRow() + 1), s.getCol(), s.getTime() + 1);
+	public TimedLakeState up(final TimedLakeState s) {
+		return new TimedLakeState(s.getLayout(), Math.max(0, s.getRow() - 1), s.getCol(), this.timed ? s.getTime() + 1 : s.getTime());
 	}
 
-	public LakeState left(final LakeState s) {
-		return new LakeState(s.getLayout(), s.getRow(), Math.max(0, s.getCol() - 1), s.getTime() + 1);
+	public TimedLakeState down(final TimedLakeState s) {
+		return new TimedLakeState(s.getLayout(), Math.min(this.layout.getRows() - 1, s.getRow() + 1), s.getCol(), this.timed ? s.getTime() + 1 : s.getTime());
 	}
 
-	public LakeState right(final LakeState s) {
-		return new LakeState(s.getLayout(), s.getRow(), Math.min(this.layout.getCols() - 1, s.getCol() + 1), s.getTime() + 1);
+	public TimedLakeState left(final TimedLakeState s) {
+		return new TimedLakeState(s.getLayout(), s.getRow(), Math.max(0, s.getCol() - 1), this.timed ? s.getTime() + 1 : s.getTime());
+	}
+
+	public TimedLakeState right(final TimedLakeState s) {
+		return new TimedLakeState(s.getLayout(), s.getRow(), Math.min(this.layout.getCols() - 1, s.getCol() + 1), this.timed ? s.getTime() + 1 : s.getTime());
 	}
 
 	@Override
-	public Double getScore(final LakeState state, final ELakeActions action, final LakeState successor) {
-		return successor.isInPit() ? (1 - state.getTime() * 1.0 / this.timeout) : 1.0 / this.timeout; // every move gets more expensive than the previous one
+	public Double getScore(final TimedLakeState state, final ELakeActions action, final TimedLakeState successor) {
+		if (this.timed) {
+			return successor.isInPit() ? (1 - state.getTime() * 1.0 / this.timeout) : 1.0 / this.timeout; // every move gets more expensive than the previous one
+		}
+		else {
+			return this.isGoalState(successor) ? 1.0 : 0.0;
+		}
+	}
+
+	@Override
+	public boolean isMaximizing() {
+		return !this.timed; // when timed, we try to get to the other side as quick as possible
 	}
 }

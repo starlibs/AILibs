@@ -8,8 +8,8 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyComputationFailedException;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
-import ai.libs.jaicore.search.algorithms.standard.mcts.thompson.DNGBeliefUpdateEvent;
-import ai.libs.jaicore.search.algorithms.standard.mcts.thompson.DNGQSampleEvent;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.thompson.DNGBeliefUpdateEvent;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.thompson.DNGQSampleEvent;
 
 public class DNGEventPropertyComputer implements AlgorithmEventPropertyComputer {
 

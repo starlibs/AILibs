@@ -3,7 +3,6 @@ package ai.libs.jaicore.search.algorithms.mdp.mcts;
 import org.api4.java.algorithm.IAlgorithm;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithmEvent;
-import ai.libs.jaicore.search.algorithms.standard.mcts.IPolicy;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 
 public class MCTSIterationCompletedEvent<N, A, V extends Comparable<V>> extends AAlgorithmEvent {

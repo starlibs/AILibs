@@ -1,10 +1,13 @@
 package ai.libs.jaicore.search.probleminputs;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Stack;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -12,14 +15,31 @@ import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.search.algorithms.standard.mcts.ActionPredictionFailedException;
-import ai.libs.jaicore.search.algorithms.standard.mcts.IPolicy;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.IPolicy;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.old.ActionPredictionFailedException;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
 public class MDPUtils implements ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(MDPUtils.class);
+
+	public <N, A> Collection<N> getStates(final IMDP<N, A, ?> mdp) {
+		Collection<N> states = new HashSet<>();
+		Stack<N> open = new Stack<>();
+		open.add(mdp.getInitState());
+		while (!open.isEmpty()) {
+			N next = open.pop();
+			if (states.contains(next)) {
+				continue;
+			}
+			states.add(next);
+			for (A a : mdp.getApplicableActions(next)) {
+				open.addAll(mdp.getProb(next, a).keySet());
+			}
+		}
+		return states;
+	}
 
 	public <N, A> N drawSuccessorState(final IMDP<N, A, ?> mdp, final N state, final A action) {
 		return this.drawSuccessorState(mdp, state, action, new Random());
@@ -39,7 +59,7 @@ public class MDPUtils implements ILoggingCustomizable {
 				return neighborWithProb.getKey();
 			}
 		}
-		throw new IllegalStateException("Up to here, a state mut have been returned!");
+		throw new IllegalStateException("The accumulated probability of all the " + dist.size() + " successors is only " + s + " instead of 1.\n\tState: " + state + "\n\tAction: " + action + "\nConsidered successor states: " + dist.entrySet().stream().map(e -> "\n\t" + e.toString()).collect(Collectors.joining()));
 	}
 
 	public <N, A> IEvaluatedPath<N, A, Double> getRun(final IMDP<N, A, Double> mdp, final double gamma, final IPolicy<N, A> policy, final Random random, final Predicate<ILabeledPath<N, A>> stopCriterion) throws ActionPredictionFailedException {

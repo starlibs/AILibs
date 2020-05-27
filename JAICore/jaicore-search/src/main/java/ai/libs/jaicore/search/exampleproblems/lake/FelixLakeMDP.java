@@ -9,7 +9,7 @@ public class FelixLakeMDP extends LakeMDP {
 		return pits;
 	}
 
-	public FelixLakeMDP(final int height) {
-		super(new LakeLayout(height, 5, getPits(height)), height - 1, 0, height - 1, 4);
+	public FelixLakeMDP(final int height, final boolean timed) {
+		super(new LakeLayout(height, 5, getPits(height)), height - 1, 0, height - 1, 4, timed);
 	}
 }

@@ -1,6 +1,8 @@
 package ai.libs.jaicore.search.probleminputs;
 
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public abstract class AMDP<N, A, V extends Comparable<V>> implements IMDP<N, A, V> {
 
@@ -24,6 +26,10 @@ public abstract class AMDP<N, A, V extends Comparable<V>> implements IMDP<N, A, 
 
 	@Override
 	public double getProb(final N state, final A action, final N successor) {
-		return this.getProb(state, action).get(successor);
+		Map<N, Double> dist = this.getProb(state, action);
+		if (!dist.containsKey(successor)) {
+			throw new IllegalArgumentException("No probability defined for the following triplet:\n\tFrom state: " + state + "\n\tUsed action: " + action  + "\n\tTo state: " + successor + ".\nDistribution is: " + dist.entrySet().stream().map(e -> "\n\t" + e.toString()).collect(Collectors.joining()));
+		}
+		return dist.get(successor);
 	}
 }

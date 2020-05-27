@@ -4,6 +4,7 @@ import org.api4.java.ai.graphsearch.problem.IPathSearch;
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 
 import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.old.UCTPathSearchFactory;
 import ai.libs.jaicore.search.model.other.AgnosticPathEvaluator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;

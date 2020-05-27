@@ -2,6 +2,7 @@ package ai.libs.jaicore.experiments.resultcomputers;
 
 import java.util.Map;
 
+import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.events.result.IScoredSolutionCandidateFoundEvent;
 
@@ -39,5 +40,10 @@ public class SolutionPerformanceHistoryComputer implements IEventBasedResultUpda
 	@Override
 	public void finish(final Map<String, Object> currentResults) {
 		currentResults.put("history", this.observations);
+	}
+
+	@Override
+	public void setAlgorithm(final IAlgorithm<?, ?> algorithm) {
+		throw new UnsupportedOperationException("Setting the algorithm is currently not allowed.");
 	}
 }

@@ -277,5 +277,8 @@ public class SailingMDP extends AMDP<SailingState, SailingMove, Double> {
 		return this.goalCol;
 	}
 
-
+	@Override
+	public boolean isMaximizing() {
+		return false;
+	}
 }
