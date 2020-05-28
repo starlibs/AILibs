@@ -272,7 +272,8 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 
 	public SearchGraphPath<N, A> nextSolutionUnderSubPath(final ILabeledPath<N, A> path) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		if (this.logger.isInfoEnabled()) {
-			this.logger.info("Looking for next solution under node with hash code {}. Remaining time is {}.", path.getHead().hashCode(), this.getRemainingTimeToDeadline());
+			this.logger.info("Looking for next solution under node with hash code {}. Remaining time is {}. Enable TRACE for concrete node description.", path.getHead().hashCode(), this.getRemainingTimeToDeadline());
+			this.logger.trace("Description of node under which we search: {}", path.getHead());
 		}
 		this.checkAndConductTermination();
 		assert this.exploredGraph.isGraphSane();
