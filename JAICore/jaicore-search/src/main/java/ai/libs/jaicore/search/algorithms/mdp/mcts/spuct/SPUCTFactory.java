@@ -19,7 +19,7 @@ public class SPUCTFactory<N, A> extends MCTSFactory<N, A> {
 
 	@Override
 	public MCTS<N, A> getAlgorithm(final IMDP<N, A, Double> input) {
-		return new SPUCT<>(input, new UniformRandomPolicy<>(this.getRandom()), this.bigD, this.getMaxIterations(), this.getGamma(), this.getEpsilon());
+		return new SPUCT<>(input, new UniformRandomPolicy<>(this.getRandom()), this.bigD, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.isTabooExhaustedNodes());
 	}
 
 }

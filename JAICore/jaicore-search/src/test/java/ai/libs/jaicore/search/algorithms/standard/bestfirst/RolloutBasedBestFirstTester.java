@@ -17,8 +17,6 @@ public class RolloutBasedBestFirstTester extends GraphSearchSolutionIteratorTest
 	public <N,A> IPathSearch<?, ?, N, A> getSearchAlgorithm(final GraphSearchInput<N, A> problem) {
 		IPathEvaluator<N, A, Double> ne = new RandomCompletionBasedNodeEvaluator<>(new Random(0), 3, new AgnosticPathEvaluator<>());
 		GraphSearchWithSubpathEvaluationsInput<N, A, Double> transformed = new GraphSearchWithSubpathEvaluationsInput<>(problem, ne);
-		System.out.println("1: " + ne);
-		System.out.println("2: " + transformed.getPathEvaluator());
 		return new StandardBestFirst<>(transformed);
 	}
 }

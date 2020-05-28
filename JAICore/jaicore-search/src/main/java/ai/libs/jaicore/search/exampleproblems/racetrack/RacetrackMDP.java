@@ -13,9 +13,7 @@ import ai.libs.jaicore.search.probleminputs.AMDP;
 public class RacetrackMDP extends AMDP<RacetrackState, RacetrackAction, Double> {
 
 	private final boolean[][] track; // true for accessible fields and false for others
-	private final boolean[][] start; // true for field on which the player might start; false for others
 	private final boolean[][] goal; // true for goal fields and false for others
-	private final Random random;
 	private final double successRate;
 	private static final List<RacetrackAction> POSSIBLE_ACTIONS;
 	private final boolean stopOnCrash;
@@ -41,21 +39,19 @@ public class RacetrackMDP extends AMDP<RacetrackState, RacetrackAction, Double> 
 		return validStartStates;
 	}
 
-	private static RacetrackState drawInitState(final boolean[][] start) {
+	private static RacetrackState drawInitState(final boolean[][] start, final Random random) {
 		List<RacetrackState> validStartStates = getPossibleInitStates(start);
 		Collections.shuffle(validStartStates);
-		return validStartStates.get(0);
+		return validStartStates.get(random.nextInt(validStartStates.size()));
 	}
 
 	private final List<RacetrackState> possibleInitStates;
 
 	public RacetrackMDP(final boolean[][] track, final boolean[][] start, final boolean[][] goal, final double successRate, final Random random, final boolean stopOnCrash) {
-		super(drawInitState(start));
+		super(drawInitState(start, random));
 		this.track = track;
-		this.start = start;
 		this.goal = goal;
 		this.successRate = successRate;
-		this.random = random;
 		this.possibleInitStates = getPossibleInitStates(start);
 		this.stopOnCrash = stopOnCrash;
 	}
@@ -118,9 +114,6 @@ public class RacetrackMDP extends AMDP<RacetrackState, RacetrackAction, Double> 
 				}
 			}
 		}
-		if (xCur != xEnd || yCur != yEnd) {
-			System.err.println("(" + xStart + ", " + yStart + ") -> (" + xEnd + ", " + yEnd + ") = " + slope + " .... " + xCur + "/" + xEnd + "::" + yCur + "/" + yEnd);
-		}
 		return false;
 	}
 
@@ -142,9 +135,6 @@ public class RacetrackMDP extends AMDP<RacetrackState, RacetrackAction, Double> 
 		/* first consider the case that speed change failed */
 		if (xLazy >= 0 && xLazy < this.track.length && yLazy >= 0 && yLazy < this.track[xLazy].length && this.track[xLazy][yLazy]) {
 			boolean finished = this.hasMatchOnLine(this.goal, xCur, yCur, xLazy, yLazy);
-			if (finished) {
-				System.out.println("FINISHED");
-			}
 			RacetrackState succ = new RacetrackState(xLazy, yLazy, state.gethSpeed(), state.getvSpeed(), false, finished, false);
 			out.put(succ, 1 - this.successRate);
 		}
@@ -152,18 +142,14 @@ public class RacetrackMDP extends AMDP<RacetrackState, RacetrackAction, Double> 
 			double prob = (1 - this.successRate) * 1.0 / this.possibleInitStates.size();
 			for (RacetrackState initState : this.possibleInitStates) {
 				RacetrackState crashState = new RacetrackState(initState.getX(), initState.getY(), 0, 0, false, false, true);
-				out.put(initState, prob);
+				out.put(crashState, prob);
 			}
 		}
 
 		/* now consider the case that the speed change succeeded */
 		if (xAcc >= 0 && xAcc < this.track.length && yAcc >= 0 && yAcc < this.track[xAcc].length && this.track[xAcc][yAcc]) {
 			boolean finished = this.hasMatchOnLine(this.goal, xCur, yCur, xAcc, yAcc);
-			if (finished) {
-				System.out.println("FINISHED");
-			}
 			RacetrackState succ = new RacetrackState(xAcc, yAcc, state.gethSpeed() + action.gethAcceleration(), state.getvSpeed() + action.getvAcceleration(), true, finished, false);
-			//			System.out.println(state + " + " + action + " = " + succ);
 			if (out.containsKey(succ)) {
 				out.put(succ, out.get(succ) + this.successRate);
 			}

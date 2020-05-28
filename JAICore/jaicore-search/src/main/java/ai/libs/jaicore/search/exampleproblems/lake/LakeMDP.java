@@ -16,21 +16,21 @@ public class LakeMDP extends AMDP<TimedLakeState, ELakeActions, Double> {
 	private final LakeLayout layout;
 	private final int goalRow;
 	private final int goalCol;
-	private final int timeout = 100;
+	private final int timeout;
 	private final boolean timed;
 
-	public LakeMDP(final LakeLayout layout, final int startRow, final int startCol, final int goalRow, final int goalCol, final boolean isTimed) {
+	public LakeMDP(final LakeLayout layout, final int startRow, final int startCol, final int goalRow, final int goalCol, final int timeout) {
 		super(new TimedLakeState(layout, startRow, startCol, 0));
 		this.layout = layout;
 		this.goalRow = goalRow;
 		this.goalCol = goalCol;
-		this.timed = isTimed;
+		this.timeout = timeout;
+		this.timed = timeout > 0;
 	}
 
 	@Override
 	public Collection<ELakeActions> getApplicableActions(final TimedLakeState state) {
-		if (state.getTime() >= this.timeout || state.isInPit() || this.isGoalState(state)) {
-			//			System.out.println("STOP: " + ((state.getTime() >= this.timeout) + "/" + (state.isInPit()) + "/" + this.isGoalState(state)));
+		if ((this.timed && state.getTime() >= this.timeout) || state.isInPit() || this.isGoalState(state)) {
 			return Arrays.asList();
 		}
 		return POSSIBLE_ACTIONS;

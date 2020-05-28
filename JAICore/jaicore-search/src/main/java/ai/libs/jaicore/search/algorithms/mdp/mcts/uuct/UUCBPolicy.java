@@ -2,6 +2,7 @@ package ai.libs.jaicore.search.algorithms.mdp.mcts.uuct;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -40,7 +41,6 @@ public class UUCBPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double> {
 		if (observationsForActions == null) {
 			return SetUtil.getRandomElement(possibleActions, new Random().nextLong());
 		}
-		//		System.out.println("Compare arms: ");
 		for (A succ : possibleActions) {
 			DoubleList observationsOfChild = observationsForActions.get(succ);
 			if (observationsOfChild == null) {
@@ -48,9 +48,7 @@ public class UUCBPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double> {
 			}
 			double utility = this.utilityFunction.getUtility(observationsOfChild);
 			double phiInverse = this.phiInverse((ALPHA * Math.log(this.t)) / observationsOfChild.size());
-			//			System.out.println("utility of " + succ.getKey() + ": " + utility);
 			double score = utility + phiInverse;
-			//			System.out.println(score + " vs " + bestScore);
 			if (score > bestScore) {
 				bestScore = score;
 				bestAction = succ;
@@ -67,19 +65,17 @@ public class UUCBPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double> {
 	}
 
 	@Override
-	public void updatePath(final ILabeledPath<N, A> path, final Double playoutScore) {
-		//		path.getPathToParentOfHead().getNodes().forEach(n -> this.observations.computeIfAbsent(n, node -> new HashMap<>()).computeIfAbsent(path.getOutArc(n), a -> new DoubleArrayList()).add((double) playoutScore));
+	public void updatePath(final ILabeledPath<N, A> path, final List<Double> scores) {
+		double playoutScore = scores.stream().reduce((x, y) -> x + y).get(); // we neither discount nor care for the segmentation of the scores
 		double s = playoutScore;
 		path.getPathToParentOfHead().getNodes().forEach(n -> {
-			DoubleList obs = this.observations.computeIfAbsent(n, node -> new HashMap<>()).computeIfAbsent(path.getOutArc(n), a -> new DoubleArrayList());
+			DoubleList obs = this.observations.computeIfAbsent(n, node -> new HashMap<>()).computeIfAbsent(path.getOutArc(n), x -> new DoubleArrayList());
 			int size = obs.size();
 			if (size == 0) {
 				obs.add(s);
-			}
-			else if (s <= obs.getDouble(0)) {
+			} else if (s <= obs.getDouble(0)) {
 				obs.add(0, s);
-			}
-			else {
+			} else {
 				double last = obs.getDouble(0);
 				double next;
 				for (int i = 1; i < size; i++) {

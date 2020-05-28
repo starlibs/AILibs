@@ -35,6 +35,6 @@ public class TAGMCTSFactory<N, A> extends MCTSFactory<N, A> {
 
 	@Override
 	public TAGMCTS<N, A> getAlgorithm(final IMDP<N, A, Double> input) {
-		return new TAGMCTS<>(input, this.explorationConstant, this.s, this.delta, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.getRandom());
+		return new TAGMCTS<>(input, this.explorationConstant, this.s, this.delta, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.getRandom(), this.isTabooExhaustedNodes());
 	}
 }

@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ public class MDPUtils implements ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(MDPUtils.class);
 
-	public <N, A> Collection<N> getStates(final IMDP<N, A, ?> mdp) {
+	public <N, A> Collection<N> getStates(final IMDP<N, A, ?> mdp) throws InterruptedException {
 		Collection<N> states = new HashSet<>();
 		Stack<N> open = new Stack<>();
 		open.add(mdp.getInitState());
@@ -41,12 +42,11 @@ public class MDPUtils implements ILoggingCustomizable {
 		return states;
 	}
 
-	public <N, A> N drawSuccessorState(final IMDP<N, A, ?> mdp, final N state, final A action) {
+	public <N, A> N drawSuccessorState(final IMDP<N, A, ?> mdp, final N state, final A action) throws InterruptedException {
 		return this.drawSuccessorState(mdp, state, action, new Random());
 	}
 
-	public <N, A> N drawSuccessorState(final IMDP<N, A, ?> mdp, final N state, final A action, final Random rand) {
-
+	public <N, A> N drawSuccessorState(final IMDP<N, A, ?> mdp, final N state, final A action, final Random rand) throws InterruptedException {
 		Map<N, Double> dist = mdp.getProb(state, action);
 		if (!mdp.getApplicableActions(state).contains(action)) {
 			throw new IllegalArgumentException("Action " + action + " is not applicable in " + state);
@@ -62,7 +62,7 @@ public class MDPUtils implements ILoggingCustomizable {
 		throw new IllegalStateException("The accumulated probability of all the " + dist.size() + " successors is only " + s + " instead of 1.\n\tState: " + state + "\n\tAction: " + action + "\nConsidered successor states: " + dist.entrySet().stream().map(e -> "\n\t" + e.toString()).collect(Collectors.joining()));
 	}
 
-	public <N, A> IEvaluatedPath<N, A, Double> getRun(final IMDP<N, A, Double> mdp, final double gamma, final IPolicy<N, A> policy, final Random random, final Predicate<ILabeledPath<N, A>> stopCriterion) throws ActionPredictionFailedException {
+	public <N, A> IEvaluatedPath<N, A, Double> getRun(final IMDP<N, A, Double> mdp, final double gamma, final IPolicy<N, A> policy, final Random random, final Predicate<ILabeledPath<N, A>> stopCriterion) throws InterruptedException, ActionPredictionFailedException, ObjectEvaluationFailedException {
 		double score = 0;
 		ILabeledPath<N, A> path = new SearchGraphPath<>(mdp.getInitState());
 		N current = path.getRoot();
@@ -91,5 +91,9 @@ public class MDPUtils implements ILoggingCustomizable {
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
+	}
+
+	public static int getTimeHorizon(final double gamma, final double epsilon) {
+		return gamma < 1 ? (int) Math.ceil(Math.log(epsilon) / Math.log(gamma)) : Integer.MAX_VALUE;
 	}
 }

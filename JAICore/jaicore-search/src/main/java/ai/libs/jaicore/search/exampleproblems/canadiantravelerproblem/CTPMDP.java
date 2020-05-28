@@ -32,14 +32,10 @@ public class CTPMDP extends AMDP<CTPState, Short, Double> {
 	@Override
 	public Collection<Short> getApplicableActions(final CTPState state) {
 		Collection<Short> applicable = new ArrayList<>();
-		//		System.out.println("Get applicable for tour " + state.getCurrentTour());
 		for (short nextPos : this.network.getConnected(state.getPosition())) {
 			if (state.getCurrentTour().contains(nextPos)) { // avoid that a visited position is visited again (except the start 0)
 				if (nextPos != 0 || state.getCurrentTour().size() != this.network.getItems().size()) {
 					continue;
-				}
-				else {
-					System.out.println("Tour complete, returning to 0: " + state.getCurrentTour());
 				}
 			}
 			short first = (short)Math.min(state.getPosition(), nextPos);
@@ -51,20 +47,14 @@ public class CTPMDP extends AMDP<CTPState, Short, Double> {
 			if (edgeKnowledge == ECTPEdgeKnowledge.KNOWN_FREE) {
 				applicable.add(nextPos);
 			}
-			//			else {
-			//				System.out.println(nextPos + " is connected but not free: " + edgeKnowledge + ". Evidence: " + state.getEdgeKnowledge());
-			//			}
 		}
-		//		System.out.println(state.getCurrentTour()+ ": " + applicable);
 		return applicable;
 	}
 
 	@Override
 	/**
 	 *  being now in "action" as the new state, check for each of the places reachable from there whether the roads are blocked */
-	public Map<CTPState, Double> getProb(final CTPState state, final Short action) {
-
-		//		System.out.println("Get prob for " + action + " in state " + state.getCurrentTour());
+	public Map<CTPState, Double> getProb(final CTPState state, final Short action) throws InterruptedException {
 
 		/* there will be one possible successor state for each combination of cases of edges to locations we have NOT VISITED so far */
 		List<Pair<Short, Short>> unknownEdges = new ArrayList<>();
@@ -81,41 +71,31 @@ public class CTPMDP extends AMDP<CTPState, Short, Double> {
 		}
 
 		/* insert one successor for each possible knowledge acquisition and assuming uniform probabilities */
-		//		System.out.println(unknownEdges);
-		try {
-			if (unknownEdges.isEmpty()) { // this happens when we move the last point, because we know whether there is snow from the origin to that point
-				Map<CTPState, Double> out = new HashMap<>();
-				Map<Pair<Short, Short>, ECTPEdgeKnowledge> curKnowledge = state.getEdgeKnowledge();
-				ShortList newTour = new ShortArrayList(state.getCurrentTour());
-				newTour.add((short)action);
-				CTPState succ = new CTPState(newTour, new HashMap<>(curKnowledge));
-				out.put(succ, 1.0); // we can then be sure to reach this state
-				return out;
-			}
-			else {
-				Collection<List<ECTPEdgeKnowledge>> combos = SetUtil.cartesianProduct(Arrays.asList(ECTPEdgeKnowledge.KNOWN_FREE, ECTPEdgeKnowledge.KNOWN_BLOCKED), unknownEdges.size());
-				Map<CTPState, Double> out = new HashMap<>();
-				double prob = 1.0 / combos.size();
-				ShortList newTour = new ShortArrayList(state.getCurrentTour());
-				Map<Pair<Short, Short>, ECTPEdgeKnowledge> curKnowledge = state.getEdgeKnowledge();
-				newTour.add((short)action);
-				for (List<ECTPEdgeKnowledge> combo : combos) {
-					Map<Pair<Short, Short>, ECTPEdgeKnowledge> newKnowledge = new HashMap<>(curKnowledge);
-					for (int i = 0; i < unknownEdges.size(); i++) {
-						newKnowledge.put(unknownEdges.get(i), combo.get(i));
-					}
-					CTPState succ = new CTPState(newTour, newKnowledge);
-					out.put(succ, prob);
+		if (unknownEdges.isEmpty()) { // this happens when we move the last point, because we know whether there is snow from the origin to that point
+			Map<CTPState, Double> out = new HashMap<>();
+			Map<Pair<Short, Short>, ECTPEdgeKnowledge> curKnowledge = state.getEdgeKnowledge();
+			ShortList newTour = new ShortArrayList(state.getCurrentTour());
+			newTour.add((short)action);
+			CTPState succ = new CTPState(newTour, new HashMap<>(curKnowledge));
+			out.put(succ, 1.0); // we can then be sure to reach this state
+			return out;
+		}
+		else {
+			Collection<List<ECTPEdgeKnowledge>> combos = SetUtil.cartesianProduct(Arrays.asList(ECTPEdgeKnowledge.KNOWN_FREE, ECTPEdgeKnowledge.KNOWN_BLOCKED), unknownEdges.size());
+			Map<CTPState, Double> out = new HashMap<>();
+			double prob = 1.0 / combos.size();
+			ShortList newTour = new ShortArrayList(state.getCurrentTour());
+			Map<Pair<Short, Short>, ECTPEdgeKnowledge> curKnowledge = state.getEdgeKnowledge();
+			newTour.add((short)action);
+			for (List<ECTPEdgeKnowledge> combo : combos) {
+				Map<Pair<Short, Short>, ECTPEdgeKnowledge> newKnowledge = new HashMap<>(curKnowledge);
+				for (int i = 0; i < unknownEdges.size(); i++) {
+					newKnowledge.put(unknownEdges.get(i), combo.get(i));
 				}
-				//				for (Entry<CTPState, Double> edge : out.entrySet()) {
-				//					System.out.println(edge.getKey().getEdgeKnowledge() + " : " + edge.getValue());
-				//				}
-				return out;
+				CTPState succ = new CTPState(newTour, newKnowledge);
+				out.put(succ, prob);
 			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			Thread.currentThread().interrupt();
-			return null;
+			return out;
 		}
 	}
 

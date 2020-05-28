@@ -35,41 +35,31 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double> {
 	}
 
 	@Override
-	public Collection<A> getApplicableActions(final N state) {
-		try {
-			return this.succGen.generateSuccessors(state).stream().map(nd -> nd.getArcLabel()).collect(Collectors.toList());
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			return null;
-		}
+	public Collection<A> getApplicableActions(final N state) throws InterruptedException {
+		return this.succGen.generateSuccessors(state).stream().map(nd -> nd.getArcLabel()).collect(Collectors.toList());
 	}
 
 	@Override
-	public Map<N, Double> getProb(final N state, final A action) {
-		try {
-			N succ = this.succGen.generateSuccessors(state).stream().filter(nd -> nd.getArcLabel().equals(action)).findAny().get().getTo();
-			Map<N, Double> out = new HashMap<>();
-			out.put(succ, 1.0);
-			return out;
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			return null;
-		}
-
+	public Map<N, Double> getProb(final N state, final A action) throws InterruptedException {
+		N succ = this.succGen.generateSuccessors(state).stream().filter(nd -> nd.getArcLabel().equals(action)).findAny().get().getTo();
+		Map<N, Double> out = new HashMap<>();
+		out.put(succ, 1.0);
+		return out;
 	}
 
 	@Override
-	public double getProb(final N state, final A action, final N successor) {
+	public double getProb(final N state, final A action, final N successor) throws InterruptedException {
 		return this.getProb(state, action).containsKey(successor) ? 1 : 0.0;
 	}
 
 	@Override
-	public Double getScore(final N state, final A action, final N successor) {
-		try {
-			return this.graph.getPathEvaluator().evaluate(new SearchGraphPath<>(successor)).doubleValue();
-		} catch (PathEvaluationException | InterruptedException e) {
-			return null;
-		}
+	public Double getScore(final N state, final A action, final N successor) throws PathEvaluationException, InterruptedException {
+		return this.graph.getPathEvaluator().evaluate(new SearchGraphPath<>(successor)).doubleValue();
+
 	}
 
+	@Override
+	public boolean isTerminalState(final N state) throws InterruptedException {
+		return this.getApplicableActions(state).isEmpty();
+	}
 }

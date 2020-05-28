@@ -8,7 +8,7 @@ public class JasminLakeMDP extends LakeMDP {
 		{true, false, false, false}
 	};
 
-	public JasminLakeMDP(final boolean timed) {
-		super(new LakeLayout(4, 4, pits), 0, 0, 3, 3, timed);
+	public JasminLakeMDP(final int timeout) {
+		super(new LakeLayout(4, 4, pits), 0, 0, 3, 3, timeout);
 	}
 }

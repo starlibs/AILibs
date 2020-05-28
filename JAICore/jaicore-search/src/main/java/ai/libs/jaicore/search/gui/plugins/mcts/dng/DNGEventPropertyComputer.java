@@ -26,8 +26,7 @@ public class DNGEventPropertyComputer implements AlgorithmEventPropertyComputer 
 		if (algorithmEvent instanceof DNGQSampleEvent) {
 			DNGQSampleEvent<?,?> dngEvent = (DNGQSampleEvent<?,?>) algorithmEvent;
 			String idOfNode = this.nodeInfoAlgorithmEventPropertyComputer.getIdOfNodeIfExistent(dngEvent.getNode());
-			String idOfChild = this.nodeInfoAlgorithmEventPropertyComputer.getIdOfNodeIfExistent(dngEvent.getChild());
-			return new DNGQSample(idOfNode, idOfChild, dngEvent.getScore());
+			return new DNGQSample(idOfNode, dngEvent.getAction().toString(), dngEvent.getScore());
 		}
 		if (algorithmEvent instanceof DNGBeliefUpdateEvent) {
 			DNGBeliefUpdateEvent<?> dngEvent = (DNGBeliefUpdateEvent<?>) algorithmEvent;

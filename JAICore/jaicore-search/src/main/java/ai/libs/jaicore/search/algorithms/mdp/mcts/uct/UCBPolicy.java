@@ -13,18 +13,15 @@ public class UCBPolicy<T, A> extends AUpdatingPolicy<T, A> implements ILoggingCu
 
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(UCBPolicy.class);
-	private double explorationConstant = Math.sqrt(2);
+	private double explorationConstant;
 
-	public UCBPolicy() {
-		super();
-	}
-
-	public UCBPolicy(final double explorationConstant) {
+	public UCBPolicy(final double gamma, final double explorationConstant, final boolean maximize) {
+		super(gamma, maximize);
 		this.explorationConstant = explorationConstant;
 	}
 
-	public UCBPolicy(final boolean maximize) {
-		super(maximize);
+	public UCBPolicy(final double gamma, final boolean maximize) {
+		this(gamma, Math.sqrt(2), maximize);
 	}
 
 	@Override
@@ -65,9 +62,10 @@ public class UCBPolicy<T, A> extends AUpdatingPolicy<T, A> implements ILoggingCu
 		}
 		int timesThisActionHasBeenChosen = nodeLabel.getNumPulls(action);
 		double averageScoreForThisAction = nodeLabel.getAccumulatedRewardsOfAction(action) / timesThisActionHasBeenChosen;
-		double explorationTerm = (this.isMaximize() ? 1 : -1) * this.explorationConstant * Math.sqrt(Math.log(nodeLabel.getVisits())  / timesThisActionHasBeenChosen);
+		double explorationTerm = (this.isMaximize() ? 1 : -1) * this.explorationConstant * Math.sqrt(Math.log(nodeLabel.getVisits()) / timesThisActionHasBeenChosen);
 		double score = averageScoreForThisAction + explorationTerm;
-		this.logger.trace("Computed UCB score {} = {} + {} * {} * sqrt(log({})/{}). That is, exploration term is {}", score, averageScoreForThisAction, this.isMaximize() ? 1 : -1, this.explorationConstant, nodeLabel.getVisits(), timesThisActionHasBeenChosen, explorationTerm);
+		this.logger.trace("Computed UCB score {} = {} + {} * {} * sqrt(log({})/{}). That is, exploration term is {}", score, averageScoreForThisAction, this.isMaximize() ? 1 : -1, this.explorationConstant, nodeLabel.getVisits(),
+				timesThisActionHasBeenChosen, explorationTerm);
 		return score;
 	}
 

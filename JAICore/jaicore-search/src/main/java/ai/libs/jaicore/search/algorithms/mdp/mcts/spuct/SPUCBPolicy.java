@@ -1,6 +1,7 @@
 package ai.libs.jaicore.search.algorithms.mdp.mcts.spuct;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -17,13 +18,12 @@ public class SPUCBPolicy<N, A> extends UCBPolicy<N, A> implements ILoggingCustom
 	private final double bigD;
 	private Map<NodeLabel<A>, Double> squaredObservations = new HashMap<>();
 
-	public SPUCBPolicy(final double bigD) {
-		super();
-		this.bigD = bigD;
+	public SPUCBPolicy(final double gamma, final double bigD) {
+		this(gamma, true, bigD);
 	}
 
-	public SPUCBPolicy(final boolean maximize, final double bigD) {
-		super(maximize);
+	public SPUCBPolicy(final double gamma, final boolean maximize, final double bigD) {
+		super(gamma, maximize);
 		this.bigD = bigD;
 	}
 
@@ -40,11 +40,15 @@ public class SPUCBPolicy<N, A> extends UCBPolicy<N, A> implements ILoggingCustom
 	}
 
 	@Override
-	public void updatePath(final ILabeledPath<N, A> path, final Double score) {
-		super.updatePath(path, score); // careful! the visits stats has already been updated here!
-		for (N node : path.getNodes()) {
-			NodeLabel<A> nl = this.getLabelOfNode(node);
-			this.squaredObservations.put(nl, this.squaredObservations.computeIfAbsent(nl, l -> 0.0) + Math.pow(score, 2));
+	public void updatePath(final ILabeledPath<N, A> path, final List<Double> scores) {
+		super.updatePath(path, scores); // careful! the visits stats has already been updated here!
+		List<N> nodes = path.getNodes();
+		int l = nodes.size();
+		double accumulatedScores = 0;
+		for (int i = l - 2; i >= 0; i--) {
+			NodeLabel<A> nl = this.getLabelOfNode(nodes.get(i));
+			accumulatedScores = scores.get(i) + this.getGamma() * accumulatedScores;
+			this.squaredObservations.put(nl, this.squaredObservations.computeIfAbsent(nl, label -> 0.0) + Math.pow(accumulatedScores, 2));
 		}
 	}
 

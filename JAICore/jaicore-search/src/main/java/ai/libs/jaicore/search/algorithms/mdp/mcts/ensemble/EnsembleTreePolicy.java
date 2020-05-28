@@ -31,7 +31,7 @@ public class EnsembleTreePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	}
 
 	@Override
-	public A getAction(final N node, final Collection<A> actions) throws ActionPredictionFailedException {
+	public A getAction(final N node, final Collection<A> actions) throws ActionPredictionFailedException, InterruptedException {
 		this.calls ++;
 		if (this.rand.nextDouble() < 1.1) {
 			this.lastPolicy = this.treePolicies.get(this.rand.nextInt(this.treePolicies.size()));
@@ -61,12 +61,13 @@ public class EnsembleTreePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	}
 
 	@Override
-	public void updatePath(final ILabeledPath<N, A> path, final Double playoutScore) {
+	public void updatePath(final ILabeledPath<N, A> path, final List<Double> scores) {
 		for (IPathUpdatablePolicy<N, A, Double> policy : this.treePolicies) {
-			policy.updatePath(path, playoutScore);
+			policy.updatePath(path, scores);
 		}
 		int visits = this.numberOfTimesChosen.computeIfAbsent(this.lastPolicy, p -> 0);
 		this.numberOfTimesChosen.put(this.lastPolicy, visits + 1);
+		double playoutScore = scores.stream().reduce((a,b) -> a + b).get(); // we neither discount nor care for the segmentation of the scores
 		this.meansOfObservations.put(this.lastPolicy, (this.meansOfObservations.computeIfAbsent(this.lastPolicy, p -> 0.0) * visits + playoutScore ) / (visits + 1));
 	}
 

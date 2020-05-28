@@ -2,6 +2,7 @@ package ai.libs.jaicore.search.algorithms.mdp.mcts.comparison;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -211,7 +212,8 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	}
 
 	@Override
-	public void updatePath(final ILabeledPath<N, A> path, final Double playoutScore) {
+	public void updatePath(final ILabeledPath<N, A> path, final List<Double> scores) {
+		double playoutScore = scores.stream().reduce((a,b) -> a + b).get(); // we neither discount nor care for the segmentation of the scores
 		this.preferenceKernel.signalNewScore(path, playoutScore);
 		int depth = 0;
 		for (N node : path.getNodes()) {

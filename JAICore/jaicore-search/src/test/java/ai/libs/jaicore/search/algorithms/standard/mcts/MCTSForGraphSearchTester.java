@@ -15,7 +15,9 @@ public abstract class MCTSForGraphSearchTester extends GraphSearchSolutionIterat
 	@Override
 	public <N, A> IPathSearch<?, ?, N, A> getSearchAlgorithm(final GraphSearchInput<N, A> problem) {
 		GraphSearchWithPathEvaluationsInput<N, A, Double> newProblem = new GraphSearchWithPathEvaluationsInput<>(problem, new AgnosticPathEvaluator<>());
-		return new MCTSPathSearch<>(newProblem, this.getFactory());
+		MCTSFactory<N, A> factory = this.getFactory();
+		factory.setTabooExhaustedNodes(true);
+		return new MCTSPathSearch<>(newProblem, factory);
 	}
 
 }

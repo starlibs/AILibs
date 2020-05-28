@@ -4,5 +4,5 @@ import java.util.Collection;
 
 public interface IPolicy<N, A> {
 
-	public A getAction(N node, Collection<A> allowedActions) throws ActionPredictionFailedException;
+	public A getAction(N node, Collection<A> allowedActions) throws ActionPredictionFailedException, InterruptedException;
 }

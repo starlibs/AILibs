@@ -90,16 +90,27 @@ public class BRUEPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double> {
 	}
 
 	@Override
-	public void updatePath(final ILabeledPath<N, A> path, final Double playoutScore) {
+	/**
+	 * BRUE only updates ONE SINGLE state-action pair as described in the last bullet point on p.9.
+	 * This is the state immediately before the switching point.
+	 *
+	 */
+	public void updatePath(final ILabeledPath<N, A> path, final List<Double> scores) {
 
 		/* BRUE only updates the state previous to the switch point. Compute this state */
 		int sigmaN = this.getSwitchingPoint(this.n);
+		if (sigmaN < 0) {
+			throw new IllegalStateException("The switching point index must NOT be negative!");
+		}
 		this.n++;
-		if (sigmaN > path.getNumberOfNodes() - 2) {
+		int l = path.getNumberOfNodes();
+		if (sigmaN > l - 2) { // ignore updates for switching points greather than the actual playout.
 			return;
 		}
-		N node = path.getNodes().get(sigmaN - 1); // where we come from
-		A arc = path.getArcs().get(sigmaN - 1); // the action we take
+		List<N> nodes = path.getNodes();
+		List<A> arcs = path.getArcs();
+		N node = nodes.get(sigmaN - 1); // where we come from
+		A arc = arcs.get(sigmaN - 1); // the action we take
 		Pair<N, A> updatedPair = new Pair<>(node, arc);
 
 		/* update the state */
@@ -108,11 +119,15 @@ public class BRUEPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double> {
 		if (!this.nCounter.containsKey(updatedPair)) {
 			throw new IllegalStateException("No visit stats for updated pair " + updatedPair + " available.");
 		}
-		double newScore = currentScore + (playoutScore - currentScore) / this.nCounter.get(updatedPair);
+		double observedRewardsFromTheUpdatedAction = 0;
+		for (int i = l - 2; i >= sigmaN - 1; i --) {
+			observedRewardsFromTheUpdatedAction += scores.get(i); // BRUE does not use discounting!
+		}
+		double newScore = currentScore + (observedRewardsFromTheUpdatedAction - currentScore) / this.nCounter.get(updatedPair);
 		this.qHat.put(updatedPair, newScore);
 	}
 
 	public int getSwitchingPoint(final int n) {
-		return this.timeHorizon - ((n-1) % this.timeHorizon);
+		return this.timeHorizon - (n % this.timeHorizon); // we start counting n at 0 instead of 1 in order to avoid subtract 1 each time in this computation.
 	}
 }

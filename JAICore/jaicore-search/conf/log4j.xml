@@ -97,6 +97,10 @@
     <level value="warn" />
   </logger>
   
+  <logger name="testedalgorithm.dp">
+    <level value="warn" />
+  </logger>
+  
   <logger name="testedalgorithm.nodeevaluator">
     <level value="warn" />
   </logger>

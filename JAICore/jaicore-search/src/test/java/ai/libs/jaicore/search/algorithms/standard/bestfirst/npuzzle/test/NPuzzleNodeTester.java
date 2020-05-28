@@ -9,9 +9,9 @@ import ai.libs.jaicore.problems.npuzzle.NPuzzleState;
 
 public class NPuzzleNodeTester {
 
-	NPuzzleState n;
-	NPuzzleState n1;
-	NPuzzleState n2;
+	private NPuzzleState n;
+	private NPuzzleState n1;
+	private NPuzzleState n2;
 
 	@Before
 	public void before() {

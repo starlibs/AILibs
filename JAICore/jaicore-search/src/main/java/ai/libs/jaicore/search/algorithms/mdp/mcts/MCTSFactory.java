@@ -11,6 +11,7 @@ public abstract class MCTSFactory<N, A> extends AAlgorithmFactory<IMDP<N, A, Dou
 	private double gamma = 1.0;
 	private double epsilon = 0.0;
 	private Random random = new Random(0);
+	private boolean tabooExhaustedNodes = false;
 
 	public int getMaxIterations() {
 		return this.maxIterations;
@@ -42,6 +43,14 @@ public abstract class MCTSFactory<N, A> extends AAlgorithmFactory<IMDP<N, A, Dou
 
 	public void setRandom(final Random random) {
 		this.random = random;
+	}
+
+	public boolean isTabooExhaustedNodes() {
+		return this.tabooExhaustedNodes;
+	}
+
+	public void setTabooExhaustedNodes(final boolean tabooExhaustedNodes) {
+		this.tabooExhaustedNodes = tabooExhaustedNodes;
 	}
 
 	@Override

@@ -58,15 +58,17 @@ public class FixedCommitmentPolicy<N, A> implements IPathUpdatablePolicy<N, A, D
 	}
 
 	@Override
-	public void updatePath(final ILabeledPath<N, A> path, final Double playout) {
+	public void updatePath(final ILabeledPath<N, A> path, final List<Double> scores) {
 		List<N> nodes = path.getNodes();
 		List<A> arcs = path.getArcs();
-		int l = nodes.size() - 1;
-		for (int i = 0; i < l; i++) {
+		int l = nodes.size();
+		double accumulatedScores = 0;
+		for (int i = l - 2; i >= 0; i--) {
 			N node = nodes.get(i);
 			A action = arcs.get(i);
+			accumulatedScores += scores.get(i);
 			DescriptiveStatistics statsForNodeActionPair = this.observationsPerNode.computeIfAbsent(node, n -> new HashMap<>()).computeIfAbsent(action,a -> new DescriptiveStatistics());
-			statsForNodeActionPair.addValue(playout);
+			statsForNodeActionPair.addValue(accumulatedScores);
 		}
 	}
 }

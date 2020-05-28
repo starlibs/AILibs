@@ -8,7 +8,7 @@ import ai.libs.jaicore.search.probleminputs.IMDP;
 
 public class UUCT<N, A> extends MCTS<N, A> {
 
-	public UUCT(final IMDP<N, A, Double> input, final IUCBUtilityFunction utility, final int maxIterations, final double gamma, final double epsilon, final Random random) {
-		super(input, new UUCBPolicy<>(utility), new UniformRandomPolicy<>(random), maxIterations, gamma, epsilon);
+	public UUCT(final IMDP<N, A, Double> input, final IUCBUtilityFunction utility, final int maxIterations, final double gamma, final double epsilon, final Random random, final boolean tabooExhaustedNodes) {
+		super(input, new UUCBPolicy<>(utility), new UniformRandomPolicy<>(random), maxIterations, gamma, epsilon, tabooExhaustedNodes);
 	}
 }

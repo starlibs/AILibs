@@ -22,7 +22,7 @@ public class TAGPolicy<T, A> implements IPathUpdatablePolicy<T, A, Double>, IGra
 
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(TAGPolicy.class);
-	private LabeledGraph<T, A> explorationGraph;
+	private LabeledGraph<T, A> explorationGraph = new LabeledGraph<>();
 	private double explorationConstant = Math.sqrt(2);
 	private final int s;
 	private final double delta;
@@ -107,24 +107,26 @@ public class TAGPolicy<T, A> implements IPathUpdatablePolicy<T, A, Double>, IGra
 	}
 
 	@Override
-	public void updatePath(final ILabeledPath<T, A> path, final Double playout) {
+	public void updatePath(final ILabeledPath<T, A> path, final List<Double> scores) {
 		int l = path.getNumberOfNodes() - 1;
 		List<T> nodes = path.getNodes();
 		List<A> arcs = path.getArcs();
-		for (int i = 0; i < l; i++) {
+		double accumulatedScores = 0;
+		for (int i = l - 2; i >= 0; i--) {
 			T node = nodes.get(i);
-			A action= arcs.get(i);
+			A action = arcs.get(i);
 			this.visitsPerNode.put(node, this.visitsPerNode.computeIfAbsent(node, n -> 0) + 1);
+			this.explorationGraph.addEdge(node, nodes.get(i + 1));
 
 			/* update list of best observed scores */
 			Map<A, PriorityQueue<Double>> actionMap = this.statsPerNode.computeIfAbsent(node, n -> new HashMap<>());
-			PriorityQueue<Double> bestScores = actionMap.computeIfAbsent(action, a -> this.isMaximize ? new PriorityQueue<>((c1,c2) -> Double.compare(c2, c1)) : new PriorityQueue<>());
+			PriorityQueue<Double> bestScores = actionMap.computeIfAbsent(action, a -> this.isMaximize ? new PriorityQueue<>((c1, c2) -> Double.compare(c2, c1)) : new PriorityQueue<>());
+			accumulatedScores += scores.get(i); // no discounting used here
 			if (bestScores.size() < this.s) {
-				bestScores.add(playout);
-			}
-			else if (bestScores.peek() < playout) {
+				bestScores.add(accumulatedScores);
+			} else if (bestScores.peek() < accumulatedScores) {
 				bestScores.poll();
-				bestScores.add(playout);
+				bestScores.add(accumulatedScores);
 			}
 		}
 	}

@@ -8,6 +8,6 @@ public class BRUEFactory<N, A> extends MCTSFactory<N, A> {
 
 	@Override
 	public MCTS<N, A> getAlgorithm(final IMDP<N, A, Double> input) {
-		return new BRUE<>(input, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.getRandom());
+		return new BRUE<>(input, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.getRandom(), this.isTabooExhaustedNodes());
 	}
 }

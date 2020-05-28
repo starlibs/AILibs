@@ -12,7 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -122,14 +121,6 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	@Override
 	public void setNumCPUs(final int numberOfCPUs) {
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setTimeout(final long timeout, final TimeUnit timeUnit) {
 		throw new UnsupportedOperationException();
 	}
 

@@ -1,6 +1,8 @@
 package ai.libs.jaicore.search.algorithms.mdp.mcts.uct;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,25 +13,26 @@ import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.search.algorithms.mdp.mcts.EBehaviorForNotFullyExploredStates;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.IPathUpdatablePolicy;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.NodeLabel;
 
 public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILoggingCustomizable {
 
-	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(AUpdatingPolicy.class);
 
+	private final double gamma; // discount factor to consider when interpreting the scores
 	private final boolean maximize;
 
-	public AUpdatingPolicy() {
-		this(true);
-	}
-
-	public AUpdatingPolicy(final boolean maximize) {
-		this.maximize = maximize;
-	}
+	private EBehaviorForNotFullyExploredStates behaviorWhenActionForNotFullyExploredStateIsRequested = EBehaviorForNotFullyExploredStates.EXCEPTION;
 
 	private final Map<N, NodeLabel<A>> labels = new HashMap<>();
+
+	public AUpdatingPolicy(final double gamma, final boolean maximize) {
+		super();
+		this.gamma = gamma;
+		this.maximize = maximize;
+	}
 
 	public NodeLabel<A> getLabelOfNode(final N node) {
 		if (!this.labels.containsKey(node)) {
@@ -43,26 +46,32 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 	public abstract A getActionBasedOnScores(Map<A, Double> scores);
 
 	/**
-	 * Note that this is a transposition-based and hence, only partially path-dependent, update.
-	 * The labels are associated to nodes of the original MDP (states) and not to nodes in the MCTS search tree (paths)!
-	 * This means that, in fact, several paths are (partially) updated simultanously.
-	 * However, on all other paths crossing the nodes on the updated paths, only those situations are updated and not the situations
-	 * in higher nodes of the search tree.
+	 * Note that this is a transposition-based and hence, only partially path-dependent, update. The labels are associated to nodes of the original MDP (states) and not to nodes in the MCTS search tree (paths)! This means that, in fact,
+	 * several paths are (partially) updated simultanously. However, on all other paths crossing the nodes on the updated paths, only those situations are updated and not the situations in higher nodes of the search tree.
 	 *
 	 */
 	@Override
-	public void updatePath(final ILabeledPath<N, A> path, final Double score) {
-		this.logger.debug("Updating path {} with score {}", path, score);
+	public void updatePath(final ILabeledPath<N, A> path, final List<Double> scores) {
+		this.logger.debug("Updating path {} with score {}", path, scores);
 		if (path.isPoint()) {
 			throw new IllegalArgumentException("Cannot update path consisting only of the root.");
 		}
-		for (N node : path.getPathToParentOfHead().getNodes()) {
-			A action = path.getOutArc(node);
+
+		List<N> nodes = path.getNodes();
+		List<A> arcs = path.getArcs();
+		int l = nodes.size();
+		double accumulatedDiscountedReward = 0;
+		for (int i = l - 2; i >= 0; i--) { // update bottom up
+			N node = nodes.get(i);
+			A action = arcs.get(i);
 			NodeLabel<A> label = this.labels.computeIfAbsent(node, n -> new NodeLabel<>());
-			label.addRewardForAction(action,  score);
+			double rewardForThisAction = scores.get(i);
+			accumulatedDiscountedReward = rewardForThisAction + this.gamma * accumulatedDiscountedReward;
+			label.addRewardForAction(action, accumulatedDiscountedReward);
 			label.addPull(action);
 			label.addVisit();
-			this.logger.trace("Updated label of node {}. Visits now {}. Action pulls of {} now {}. Observed total rewards for this action: {}", node, label.getVisits(), action, label.getNumPulls(action), label.getAccumulatedRewardsOfAction(action));
+			this.logger.trace("Updated label of node {}. Visits now {}. Action pulls of {} now {}. Observed total rewards for this action: {}", node, label.getVisits(), action, label.getNumPulls(action),
+					label.getAccumulatedRewardsOfAction(action));
 		}
 		this.logger.debug("Path update completed.");
 	}
@@ -83,17 +92,31 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 		NodeLabel<A> labelOfNode = this.labels.get(node);
 		this.logger.debug("All actions have been tried. Label is: {}", labelOfNode);
 		Map<A, Double> scores = new HashMap<>();
+		boolean hasUnexploredAction = false;
 		for (A action : possibleActions) {
 			assert labelOfNode.getVisits() != 0 : "Visits of action " + action + " cannot be 0 if we already used this action before!";
 			this.logger.trace("Considering action {}, which has {} visits and cummulative rewards {}.", action, labelOfNode.getNumPulls(action), labelOfNode.getAccumulatedRewardsOfAction(action));
 			Double score = this.getScore(node, action);
 			if (score.isNaN()) {
-				throw new IllegalStateException("Score of action " + action + " is NaN, which it must not be!");
+				if (this.behaviorWhenActionForNotFullyExploredStateIsRequested == EBehaviorForNotFullyExploredStates.EXCEPTION) {
+					throw new IllegalStateException("Score of action " + action + " is NaN, which it must not be the case!");
+				}
+				hasUnexploredAction = true;
+			} else {
+				scores.put(action, score);
+				assert !score.isNaN() : "The score of action " + action + " is NaN, which cannot be the case.";
 			}
-			scores.put(action, score);
-			assert !score.isNaN() : "The score of action " + action + " is NaN, which cannot be the case.";
 		}
-		A choice = this.getActionBasedOnScores(scores);
+
+		/* finalize the choice */
+		A choice = null;
+		if (!hasUnexploredAction || this.behaviorWhenActionForNotFullyExploredStateIsRequested == EBehaviorForNotFullyExploredStates.BEST) {
+			choice = this.getActionBasedOnScores(scores);
+		} else {
+			List<A> shuffledList = new ArrayList<>(possibleActions);
+			Collections.shuffle(shuffledList);
+			choice = shuffledList.get(0);
+		}
 
 		/* quick sanity check */
 		if (choice == null) {
@@ -109,14 +132,24 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 
 	@Override
 	public String getLoggerName() {
-		return this.loggerName;
+		return this.logger.getName();
 	}
 
 	@Override
 	public void setLoggerName(final String name) {
-		this.loggerName = name;
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Set logger of {} to {}", this, name);
 	}
 
+	public double getGamma() {
+		return this.gamma;
+	}
+
+	public EBehaviorForNotFullyExploredStates getBehaviorWhenActionForNotFullyExploredStateIsRequested() {
+		return this.behaviorWhenActionForNotFullyExploredStateIsRequested;
+	}
+
+	public void setBehaviorWhenActionForNotFullyExploredStateIsRequested(final EBehaviorForNotFullyExploredStates behaviorWhenActionForNotFullyExploredStateIsRequested) {
+		this.behaviorWhenActionForNotFullyExploredStateIsRequested = behaviorWhenActionForNotFullyExploredStateIsRequested;
+	}
 }

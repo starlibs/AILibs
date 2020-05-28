@@ -38,14 +38,14 @@ public class DominatedFunnelTreasureModel extends AIslandTreasureModel {
 	private final Map<BigInteger, Double> plateausOfIslands = new HashMap<>();
 
 	private void distributeTreasures() {
-		Random random = new Random(this.seed);
+		Random localRandom = new Random(this.seed);
 		this.bestPlateauOfTreasures = Double.MAX_VALUE;
 
 		/* determine indices of treasure island(s) */
 		while (this.indicesOfTreasureIslands.size() < this.numberOfTreasureIslands) {
 			BigInteger newTreasureIsland;
 			do {
-				newTreasureIsland = new BigInteger(this.getIslandModel().getNumberOfIslands().bitLength(), random);
+				newTreasureIsland = new BigInteger(this.getIslandModel().getNumberOfIslands().bitLength(), localRandom);
 			}
 			while (newTreasureIsland.compareTo(this.getIslandModel().getNumberOfIslands()) >= 0);
 			this.indicesOfTreasureIslands.add(newTreasureIsland);
@@ -53,12 +53,12 @@ public class DominatedFunnelTreasureModel extends AIslandTreasureModel {
 
 		/* compute the quality of the treasure islands */
 		for (BigInteger island : this.indicesOfTreasureIslands) {
-			double plateauOfThisIsland = this.plateauMin + (.9 - this.plateauMin) * random.nextDouble();
+			double plateauOfThisIsland = this.plateauMin + (.9 - this.plateauMin) * localRandom.nextDouble();
 			this.plateausOfIslands.put(island, plateauOfThisIsland);
 			this.bestPlateauOfTreasures = Math.min(this.bestPlateauOfTreasures, plateauOfThisIsland);
 		}
 
-		System.out.println("Treasure plateaus: " + this.getInnerPlateauOfTreasureIsland(this.bestPlateauOfTreasures) + ". Treasure island: " + this.indicesOfTreasureIslands);
+		this.logger.info("Treasure plateaus: {}. Treasure island: {}", this.getInnerPlateauOfTreasureIsland(this.bestPlateauOfTreasures), this.indicesOfTreasureIslands);
 	}
 
 	@Override
@@ -103,35 +103,7 @@ public class DominatedFunnelTreasureModel extends AIslandTreasureModel {
 			double plateauMax = this.getInnerPlateauOfTreasureIsland(this.bestPlateauOfTreasures);
 			return plateauMax - this.absSlopeOfInnerPlateau * distanceToPlateauBorder;
 		}
-
-		//		/* compute important island positions for distribution */
-		//		BigDecimal c1;
-		//		BigDecimal c2;
-		//		BigDecimal median;
-		//		if (islandSize.remainder(BigInteger.valueOf(2)).equals(BigInteger.ZERO)) {
-		//			c1 = islandSizeAsDecimal.multiply(BigDecimal.valueOf(this.plateauSizes / 2.0)).round(new MathContext(1, RoundingMode.CEILING));
-		//			c2 = islandSizeAsDecimal.subtract(c1).round(new MathContext(1, RoundingMode.FLOOR));
-		//			median = islandSizeAsDecimal.divide(BigDecimal.valueOf(2));
-		//		}
-		//		else {
-		//			c1 = islandSizeAsDecimal.multiply(BigDecimal.valueOf(this.plateauSizes / 2.0)).round(new MathContext(1, RoundingMode.FLOOR));
-		//			c2 = islandSizeAsDecimal.subtract(islandSizeAsDecimal.multiply(BigDecimal.valueOf(this.plateauSizes / 2.0))).round(new MathContext(1, RoundingMode.CEILING)).add(BigDecimal.ONE);
-		//			median = islandSizeAsDecimal.add(BigDecimal.ONE).divide(BigDecimal.valueOf(2));
-		//		}
-		//
-		//
-		//		double val;
-		//		if (positionOnIsland.compareTo(c1.toBigInteger()) <= 0 || positionOnIsland.compareTo(c2.toBigInteger()) > 0) {
-		//			val = plateauOfIsland;
-		//		}
-		//		else if (positionOnIsland.compareTo(median.toBigInteger()) <= 0) {
-		//			val = new AffineFunction(c1, BigDecimal.valueOf(plateauOfIsland), median, BigDecimal.valueOf(plateauOfIsland).subtract(BigDecimal.valueOf(this.funnelDepth))).apply(positionOnIsland);
-		//		}
-		//		else {
-		//			val = new AffineFunction(c2, BigDecimal.valueOf(plateauOfIsland), median, BigDecimal.valueOf(plateauOfIsland).subtract(BigDecimal.valueOf(this.funnelDepth))).apply(positionOnIsland);
-		//		}
-		double val = this.random.nextDouble() * .1;
-		return val;
+		return this.random.nextDouble() * .1;
 	}
 
 	private double getInnerPlateauOfTreasureIsland(final double nivel) {

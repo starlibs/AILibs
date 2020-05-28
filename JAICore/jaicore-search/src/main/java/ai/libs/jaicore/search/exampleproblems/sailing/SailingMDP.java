@@ -16,13 +16,18 @@ public class SailingMDP extends AMDP<SailingState, SailingMove, Double> {
 	private final int cols;
 	private final int goalRow;
 	private final int goalCol;
+	private final int movesToNormalizeOver;
 
-	public SailingMDP(final int rows, final int cols, final int initRow, final int initCol, final int goalRow, final int goalCol, final SailingMove initWind) {
+	public SailingMDP(final int rows, final int cols, final int initRow, final int initCol, final int goalRow, final int goalCol, final SailingMove initWind, final int movesToNormalizeOver) {
 		super(new SailingState(initRow, initCol, initWind));
 		this.rows = rows;
 		this.cols = cols;
 		this.goalRow = goalRow;
 		this.goalCol = goalCol;
+		if (movesToNormalizeOver < 0) {
+			throw new IllegalArgumentException("Number of moves to normalize over must not be negative!");
+		}
+		this.movesToNormalizeOver = 4 * movesToNormalizeOver > 0 ? movesToNormalizeOver : movesToNormalizeOver / 4;
 	}
 
 	@Override
@@ -126,6 +131,11 @@ public class SailingMDP extends AMDP<SailingState, SailingMove, Double> {
 
 	@Override
 	public Double getScore(final SailingState state, final SailingMove action, final SailingState successor) {
+		double unnormalizedScore = this.getUnnormalizedScore(state, action, successor);
+		return this.movesToNormalizeOver > 0 ? unnormalizedScore / (4 * this.movesToNormalizeOver) : unnormalizedScore;
+	}
+
+	public double getUnnormalizedScore(final SailingState state, final SailingMove action, final SailingState successor) {
 		SailingMove wind = state.getWind();
 		switch (wind) {
 		case N:

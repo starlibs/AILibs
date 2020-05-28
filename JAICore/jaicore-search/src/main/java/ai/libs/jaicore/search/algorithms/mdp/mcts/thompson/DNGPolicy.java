@@ -1,13 +1,14 @@
 package ai.libs.jaicore.search.algorithms.mdp.mcts.thompson;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
-import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.common.event.IRelaxedEventEmitter;
@@ -22,13 +23,16 @@ import ai.libs.jaicore.search.algorithms.mdp.mcts.ActionPredictionFailedExceptio
 import ai.libs.jaicore.search.algorithms.mdp.mcts.IPathUpdatablePolicy;
 
 /**
- * This is a slightly simplified implementation of the algorithm presented in
+ * This is the implementation of the DNG-algorithm (for MDPs) presented in
  *
  * @article{bai2018posterior, title={Posterior sampling for Monte Carlo planning under uncertainty}, author={Bai, Aijun and Wu, Feng and Chen, Xiaoping}, journal={Applied Intelligence}, volume={48}, number={12}, pages={4998--5018},
  *                            year={2018}, publisher={Springer} } It does not consider rewards per step but only once for a complete roll-out
  *
+ *                            Implementation details: - the time horizon H is irrelevant for the policy, because, if a horizon is used, the MCTS algorithm would not call the tree policy for cases of d >= H - we add another parameter for a
+ *                            factor that will be multiplied to the sampled variance \tau
  *
- * @author felix
+ *
+ * @author Felix Mohr
  *
  * @param <N>
  * @param <A>
@@ -44,57 +48,96 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	private final double initBeta;
 	private static final double INIT_MU = 1.0;
 
+	/* DNG model parameters */
 	private final Map<N, Double> alpha = new HashMap<>();
 	private final Map<N, Double> beta = new HashMap<>();
 	private final Map<N, Double> mu = new HashMap<>();
 	private final Map<N, Double> lambda = new HashMap<>();
+	private final Map<N, Map<A, Map<N, Integer>>> rho = new HashMap<>();
 
-	private final INodeGoalTester<N, A> goalTester;
-	private final IObjectEvaluator<N, Double> leafNodeEvaluator;
+	/* MDP-related variables */
+	private final double gammaMDP; // the discount factor of the MDP
+	private final Predicate<N> terminalStatePredicate; // this policy needs to know a bit of the MDP: it needs to know whether or not a state is terminal
+	private final Map<N, Map<A, Double>> rewardsMDP = new HashMap<>(); // memorizes the rewards observed for an action in the MDP
+
 	private final double varianceFactor;
+	private boolean sampling = true; // can be deactivated after using the policy to only use the final model
 
-	public DNGPolicy(final INodeGoalTester<N, A> goalTester, final IObjectEvaluator<N, Double> leafNodeEvaluator, final double varianceFactor, final double lambda) {
+	public DNGPolicy(final double gammaMDP, final Predicate<N> terminalStatePredicate, final double varianceFactor, final double lambda) {
 		super();
-		this.goalTester = goalTester;
-		this.leafNodeEvaluator = leafNodeEvaluator;
+		this.gammaMDP = gammaMDP;
+		this.terminalStatePredicate = terminalStatePredicate;
 		this.varianceFactor = varianceFactor;
 		this.initLambda = lambda;
 		this.initBeta = 1 / this.initLambda;
 	}
 
-	@Override
-	/**
-	 * This is the first part of the ELSE branch in the MCTS algorithm of the paper (calling Thompson sampling to choose A).
-	 * The "simulation" part is taken over by the general MCTS routine
-	 */
-	public A getAction(final N node, final Collection<A> actionsWithSuccessors) throws ActionPredictionFailedException {
-		try {
-			return this.sampleWithThompson(node, actionsWithSuccessors);
-		} catch (ObjectEvaluationFailedException e) {
-			throw new ActionPredictionFailedException(e);
-		}
-		catch (InterruptedException e) {
-			this.logger.info("Policy thread has been interrupted. Re-interrupting myself, because no InterruptedException can be thrown here.");
-			Thread.currentThread().interrupt();
-			return null;
-		}
+	public boolean isSampling() {
+		return this.sampling;
+	}
+
+	public void setSampling(final boolean sampling) {
+		this.sampling = sampling;
 	}
 
 	@Override
 	/**
-	 * This is the part of the ELSE branch of the MCTS algorithm of the paper that FOLLOWS the simulation.
-	 * In fact, without inner rewards and without discounting, this just amounts to use the playout score
-	 * for all nodes on the path, which can be done in a simple loop.
+	 * This is the first part of the ELSE branch in the MCTS algorithm of the paper (calling Thompson sampling to choose A). The "simulation" part is taken over by the general MCTS routine
 	 */
-	public void updatePath(final ILabeledPath<N, A> path, final Double playoutScore) {
-		for (N node : path.getNodes()) {
-			double lambdaOfN = this.lambda.computeIfAbsent(node, n -> this.initLambda);
-			double muOfN = this.mu.computeIfAbsent(node, n -> INIT_MU);
-			this.alpha.put(node, this.alpha.computeIfAbsent(node, n -> INIT_ALPHA) + 0.5);
-			this.beta.put(node, this.beta.computeIfAbsent(node, n -> this.initBeta) + (lambdaOfN * Math.pow(playoutScore - muOfN, 2) / (lambdaOfN + 1)) / 2);
-			this.mu.put(node, (muOfN * lambdaOfN + playoutScore) / (lambdaOfN + 1));
-			this.lambda.put(node, lambdaOfN + 1);
-			this.eventBus.post(new DNGBeliefUpdateEvent<N>(null, node, this.mu.get(node), this.alpha.get(node), this.beta.get(node), this.lambda.get(node)));
+	public A getAction(final N node, final Collection<A> actionsWithSuccessors) throws ActionPredictionFailedException, InterruptedException {
+		return this.sampleWithThompson(node, actionsWithSuccessors);
+	}
+
+	@Override
+	/**
+	 * This is the update section of the algorithm, which can be found in the ELSE-branch on the left of Fig. 1 (lines 21-25)
+	 */
+	public void updatePath(final ILabeledPath<N, A> path, final List<Double> scores) {
+		List<N> nodes = path.getNodes();
+		List<A> actions = path.getArcs();
+		int l = path.getNumberOfNodes();
+
+		double accumulatedScores = 0;
+		for (int i = 0; i < l - 1; i++) {
+			N node = nodes.get(i);
+			A action = actions.get(i);
+			double rewardOfThisAction = scores.get(i);
+			this.rewardsMDP.computeIfAbsent(node, n -> new HashMap<>()).putIfAbsent(action, rewardOfThisAction);
+			accumulatedScores = rewardOfThisAction + this.gammaMDP * accumulatedScores;
+
+			/* if we had no model for this node yet, create an empty one (and exit the update routine) */
+			if (!this.lambda.containsKey(node)) {
+
+				/* NormalGamma parameters */
+				this.lambda.put(node, this.initLambda);
+				this.mu.put(node, INIT_MU);
+				this.alpha.put(node, INIT_ALPHA);
+				this.beta.put(node, this.initBeta);
+
+				/* rho-parameter */
+				N succNode = nodes.get(i + 1);
+				Map<N, Integer> rhoForNodeActionPair = new HashMap<>();
+				rhoForNodeActionPair.put(succNode, 1);
+				Map<A, Map<N, Integer>> mapForAction = new HashMap<>();
+				mapForAction.put(action, rhoForNodeActionPair);
+				this.rho.put(node, mapForAction);
+				return;
+			}
+			else {
+
+				/* update model parameters */
+				double lambdaOfN = this.lambda.get(node);
+				double muOfN = this.mu.get(node);
+				this.alpha.put(node, this.alpha.get(node) + 0.5);
+				this.beta.put(node, this.beta.get(node) + (lambdaOfN * Math.pow(accumulatedScores - muOfN, 2) / (lambdaOfN + 1)) / 2);
+				this.mu.put(node, (muOfN * lambdaOfN + accumulatedScores) / (lambdaOfN + 1));
+				this.lambda.put(node, lambdaOfN + 1);
+				N succNode = nodes.get(i + 1);
+				this.rho.get(node).computeIfAbsent(action, a -> new HashMap<>()).put(succNode, this.rho.get(node).get(action).computeIfAbsent(succNode, n -> 0) + 1);
+
+				this.eventBus.post(new DNGBeliefUpdateEvent<N>(null, node, this.mu.get(node), this.alpha.get(node), this.beta.get(node), this.lambda.get(node)));
+
+			}
 		}
 	}
 
@@ -107,14 +150,14 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	 * @throws InterruptedException
 	 * @throws ObjectEvaluationFailedException
 	 */
-	public A sampleWithThompson(final N state, final Collection<A> actions) throws ObjectEvaluationFailedException, InterruptedException {
+	public A sampleWithThompson(final N state, final Collection<A> actions) throws InterruptedException {
 		A bestAction = null;
 		double bestScore = Double.MAX_VALUE;
 		for (A action : actions) {
 			double score = this.getQValue(state, action);
-			this.eventBus.post(new DNGQSampleEvent<N, A>(null, state, actionStatePair.getValue(), actionStatePair.getKey(), score));
+			this.eventBus.post(new DNGQSampleEvent<N, A>(null, state, action, score));
 			if (score < bestScore) {
-				bestAction = actionStatePair.getKey();
+				bestAction = action;
 				bestScore = score;
 			}
 		}
@@ -131,8 +174,44 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	 * @throws InterruptedException
 	 * @throws ObjectEvaluationFailedException
 	 */
-	public double getQValue(final N state, final N successorState) throws ObjectEvaluationFailedException, InterruptedException {
-		return this.getValue(successorState);
+	public double getQValue(final N state, final A action) throws InterruptedException {
+
+		/* make sure that the rho-values are available to estimate the transition probabilities */
+		Map<N, Integer> rhoForThisPair = this.rho.get(state).get(action);
+		if (rhoForThisPair == null) {
+			throw new IllegalStateException("Have no rho vector for state/action pair " + state + "/" + action);
+		}
+		List<N> possibleSuccessors = new ArrayList<>(rhoForThisPair.keySet());
+		int numSuccessors = possibleSuccessors.size();
+		if (rhoForThisPair.size() < numSuccessors) {
+			throw new IllegalStateException("The rho vector for state/action pair " + state + "/" + action + " is incomplete and only has " + rhoForThisPair.size() + " instead of " + numSuccessors + " entries.");
+		}
+
+		/* compute score */
+		double r = 0;
+		if (this.sampling) { // draw weight vector from Dirichlet (we sample using sampling from a Gamma distribution)
+			double[] gammaVector = new double[numSuccessors];
+			double totalGammas = 0;
+			for (int i = 0; i < numSuccessors; i++)  {
+				N succ = possibleSuccessors.get(i);
+				double gamma = new GammaDistribution(rhoForThisPair.get(succ), 1).sample();
+				gammaVector[i] = gamma;
+				totalGammas += gamma;
+			}
+			if (totalGammas == 0) {
+				throw new IllegalStateException("The gamma estimates must not sum up to 0!");
+			}
+			for (int i = 0; i < numSuccessors; i++)  {
+				r += gammaVector[i] / totalGammas * this.getValue(possibleSuccessors.get(i)); // the first factor is the Dirichlet estimate
+			}
+		}
+		else {
+			double denominator = rhoForThisPair.values().stream().reduce((a, b) -> a + b).get();
+			for (N succ : possibleSuccessors) {
+				r += rhoForThisPair.get(succ) / denominator;
+			}
+		}
+		return this.rewardsMDP.get(state).get(action) + this.gammaMDP * r;
 	}
 
 	public Pair<Double, Double> sampleWithNormalGamma(final N state) {
@@ -148,13 +227,19 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	 * @throws InterruptedException
 	 * @throws ObjectEvaluationFailedException
 	 */
-	public double getValue(final N state) throws ObjectEvaluationFailedException, InterruptedException {
-		if (this.goalTester.isGoal(state)) {
-			return this.leafNodeEvaluator.evaluate(state);
+	public double getValue(final N state) throws InterruptedException {
+		boolean isTerminal = this.terminalStatePredicate.test(state);
+		if (Thread.interrupted()) {
+			throw new InterruptedException();
 		}
-		else {
+		if (isTerminal) {
+			return 0;
+		} else if (this.sampling) {
 			Pair<Double, Double> meanAndVariance = this.sampleWithNormalGamma(state);
 			return meanAndVariance.getX() - this.varianceFactor * Math.sqrt(meanAndVariance.getY());
+		}
+		else {
+			return this.mu.get(state);
 		}
 	}
 
