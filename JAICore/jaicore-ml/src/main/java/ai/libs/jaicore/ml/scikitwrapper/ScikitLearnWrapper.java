@@ -614,7 +614,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				processParameters.add(this.anacondaEnvironment);
 				processParameters.add("&&");
 			}
-			if (os == OS.LINUX) {
+			if (timeout != null && os == OS.LINUX) {
 				processParameters.add("timeout");
 				processParameters.add(this.timeout.seconds() - 5 + "");
 			}
