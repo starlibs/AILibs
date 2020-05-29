@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,14 +24,20 @@ import weka.filters.unsupervised.attribute.Add;
 
 public class HOMERNode extends AbstractMultiLabelClassifier {
 
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -2634579245812714183L;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(HOMERNode.class);
 	private static final boolean HIERARCHICAL_STRING = false;
+	private static final double THRESHOLD = 0.5;
 
 	private List<HOMERNode> children;
 
 	private MultiLabelClassifier baselearner;
 	private String baselearnerName;
-	private final double threshold = 0.5;
+	private boolean doThreshold = false;
 
 	public HOMERNode(final HOMERNode... nodes) {
 		this(Arrays.asList(nodes));
@@ -40,18 +45,18 @@ public class HOMERNode extends AbstractMultiLabelClassifier {
 
 	public HOMERNode(final List<HOMERNode> nodes) {
 		this.children = nodes;
-		Collections.sort(this.children, new Comparator<HOMERNode>() {
-			@Override
-			public int compare(final HOMERNode o1, final HOMERNode o2) {
-				List<Integer> o1Labels = new LinkedList<>(o1.getLabels());
-				List<Integer> o2Labels = new LinkedList<>(o2.getLabels());
-				Collections.sort(o1Labels);
-				Collections.sort(o2Labels);
-				return o1Labels.get(0).compareTo(o2Labels.get(0));
-			}
-
+		Collections.sort(this.children, (o1, o2) -> {
+			List<Integer> o1Labels = new LinkedList<>(o1.getLabels());
+			List<Integer> o2Labels = new LinkedList<>(o2.getLabels());
+			Collections.sort(o1Labels);
+			Collections.sort(o2Labels);
+			return o1Labels.get(0).compareTo(o2Labels.get(0));
 		});
 		this.baselearner = new BR();
+	}
+
+	public void setThreshold(final boolean doThreshold) {
+		this.doThreshold = doThreshold;
 	}
 
 	public void setBaselearner(final MultiLabelClassifier baselearner) {
@@ -81,6 +86,7 @@ public class HOMERNode extends AbstractMultiLabelClassifier {
 
 	@Override
 	public void buildClassifier(final Instances trainingSet) throws Exception {
+		LOGGER.debug("Build node with {} as a base learner", this.baselearnerName);
 		Instances currentDataset = this.prepareInstances(trainingSet);
 		List<Integer> removeInstances = new ArrayList<>();
 		for (int i = 0; i < trainingSet.size(); i++) {
@@ -118,13 +124,12 @@ public class HOMERNode extends AbstractMultiLabelClassifier {
 		copy.add(testInstance.copy(testInstance.toDoubleArray()));
 
 		Instances prepared = this.prepareInstances(copy);
-		boolean threshold = false;
 
 		int length;
 		int[] tDist = {};
 		double[] dist = {};
-		if (threshold) {
-			tDist = ArrayUtil.thresholdDoubleToBinaryArray(this.baselearner.distributionForInstance(prepared.get(0)), this.threshold);
+		if (this.doThreshold) {
+			tDist = ArrayUtil.thresholdDoubleToBinaryArray(this.baselearner.distributionForInstance(prepared.get(0)), this.THRESHOLD);
 			length = tDist.length;
 		} else {
 			dist = this.baselearner.distributionForInstance(prepared.get(0));
@@ -133,13 +138,13 @@ public class HOMERNode extends AbstractMultiLabelClassifier {
 		double[] returnDist = new double[testInstance.classIndex()];
 
 		for (int i = 0; i < length; i++) {
-			if (threshold && tDist[i] == 1) {
+			if (this.doThreshold && tDist[i] == 1) {
 				if (this.children.get(i).getLabels().size() == 1) {
 					returnDist[this.children.get(i).getLabels().iterator().next()] = 1.0;
 				} else {
 					ArrayUtil.add(returnDist, this.children.get(i).distributionForInstance(testInstance));
 				}
-			} else if (!threshold) {
+			} else if (!this.doThreshold) {
 				if (this.children.get(i).getLabels().size() == 1) {
 					returnDist[this.children.get(i).getLabels().iterator().next()] = dist[i];
 				} else {
@@ -177,8 +182,8 @@ public class HOMERNode extends AbstractMultiLabelClassifier {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		if (!HIERARCHICAL_STRING) {
-			String baselearnerName = this.baselearner.getOptions()[1];
-			sb.append(baselearnerName.substring(baselearnerName.lastIndexOf('.') + 1, baselearnerName.length()));
+			String actualBaselearnerName = this.baselearner.getOptions()[1];
+			sb.append(actualBaselearnerName.substring(actualBaselearnerName.lastIndexOf('.') + 1, actualBaselearnerName.length()));
 			sb.append("(");
 			sb.append(this.children.stream().map(HOMERNode::toString).collect(Collectors.joining(",")));
 			sb.append(")");
