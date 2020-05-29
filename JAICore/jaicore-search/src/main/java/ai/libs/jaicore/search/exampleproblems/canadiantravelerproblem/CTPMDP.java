@@ -33,10 +33,8 @@ public class CTPMDP extends AMDP<CTPState, Short, Double> {
 	public Collection<Short> getApplicableActions(final CTPState state) {
 		Collection<Short> applicable = new ArrayList<>();
 		for (short nextPos : this.network.getConnected(state.getPosition())) {
-			if (state.getCurrentTour().contains(nextPos)) { // avoid that a visited position is visited again (except the start 0)
-				if (nextPos != 0 || state.getCurrentTour().size() != this.network.getItems().size()) {
-					continue;
-				}
+			if (state.getCurrentTour().contains(nextPos) && (nextPos != 0 || state.getCurrentTour().size() != this.network.getItems().size())) { // avoid that a visited position is visited again (except the start 0)
+				continue;
 			}
 			short first = (short)Math.min(state.getPosition(), nextPos);
 			short second = (short)Math.max(state.getPosition(), nextPos);

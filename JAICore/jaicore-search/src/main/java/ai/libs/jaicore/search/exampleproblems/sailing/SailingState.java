@@ -57,9 +57,6 @@ public class SailingState {
 		if (this.row != other.row) {
 			return false;
 		}
-		if (this.wind != other.wind) {
-			return false;
-		}
-		return true;
+		return this.wind == other.wind;
 	}
 }

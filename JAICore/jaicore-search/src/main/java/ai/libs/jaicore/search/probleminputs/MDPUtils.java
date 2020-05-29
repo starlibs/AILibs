@@ -1,11 +1,12 @@
 package ai.libs.jaicore.search.probleminputs;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Stack;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ public class MDPUtils implements ILoggingCustomizable {
 
 	public <N, A> Collection<N> getStates(final IMDP<N, A, ?> mdp) throws InterruptedException {
 		Collection<N> states = new HashSet<>();
-		Stack<N> open = new Stack<>();
+		Deque<N> open = new ArrayDeque<>();
 		open.add(mdp.getInitState());
 		while (!open.isEmpty()) {
 			N next = open.pop();

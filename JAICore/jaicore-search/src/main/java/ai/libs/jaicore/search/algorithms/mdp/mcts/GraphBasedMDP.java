@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
+import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
@@ -36,7 +37,7 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double> {
 
 	@Override
 	public Collection<A> getApplicableActions(final N state) throws InterruptedException {
-		return this.succGen.generateSuccessors(state).stream().map(nd -> nd.getArcLabel()).collect(Collectors.toList());
+		return this.succGen.generateSuccessors(state).stream().map(INewNodeDescription::getArcLabel).collect(Collectors.toList());
 	}
 
 	@Override

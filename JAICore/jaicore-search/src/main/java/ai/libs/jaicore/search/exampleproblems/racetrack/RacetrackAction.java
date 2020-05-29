@@ -43,10 +43,7 @@ public class RacetrackAction {
 		if (this.hAcceleration != other.hAcceleration) {
 			return false;
 		}
-		if (this.vAcceleration != other.vAcceleration) {
-			return false;
-		}
-		return true;
+		return this.vAcceleration == other.vAcceleration;
 	}
 
 	@Override

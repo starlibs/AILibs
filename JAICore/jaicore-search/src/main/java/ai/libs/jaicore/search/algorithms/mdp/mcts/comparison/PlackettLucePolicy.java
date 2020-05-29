@@ -51,7 +51,6 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	private static final int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT = 5;
 	private static final int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_ABS = 2;
 	private static final int GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_ONE = 10;
-	private static final int GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_MAX = 20;
 	public PlackettLucePolicy(final IPreferenceKernel<N, A> preferenceKernel, final Random random) {
 		super();
 		this.preferenceKernel = preferenceKernel;

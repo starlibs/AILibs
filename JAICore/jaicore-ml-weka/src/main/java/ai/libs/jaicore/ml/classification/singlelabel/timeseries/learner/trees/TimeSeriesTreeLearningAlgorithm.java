@@ -256,7 +256,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		List<List<Double>> thresholdCandidates = generateThresholdCandidates(pairOfIntervalLists, NUM_THRESH_CANDIDATES, transformedInstances);
 
 		// Get unique classes
-		final List<Integer> classes = new ArrayList<>(new HashSet<Integer>(Arrays.asList(ArrayUtils.toObject(targets))));
+		final List<Integer> classes = new ArrayList<>(new HashSet<>(Arrays.asList(ArrayUtils.toObject(targets))));
 
 		// Initialize solution storing variables
 		double deltaEntropyStar = 0;

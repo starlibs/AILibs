@@ -54,9 +54,6 @@ public class LakeLayout {
 		if (!Arrays.equals(this.pits, other.pits)) {
 			return false;
 		}
-		if (this.rows != other.rows) {
-			return false;
-		}
-		return true;
+		return (this.rows == other.rows);
 	}
 }

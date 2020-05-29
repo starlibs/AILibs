@@ -26,9 +26,7 @@ import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public class KnapsackProblemGraphGenerator implements IGraphGenerator<KnapsackConfiguration, String>, ILoggingCustomizable {
 
-	private static final long serialVersionUID = 1L;
-
-	private transient Logger logger = LoggerFactory.getLogger(KnapsackProblemGraphGenerator.class);
+	private Logger logger = LoggerFactory.getLogger(KnapsackProblemGraphGenerator.class);
 	private final KnapsackProblem problem;
 
 	public KnapsackProblemGraphGenerator(final KnapsackProblem problem) {
@@ -61,17 +59,10 @@ public class KnapsackProblemGraphGenerator implements IGraphGenerator<KnapsackCo
 			List<INewNodeDescription<KnapsackConfiguration, String>> l = new ArrayList<>();
 			List<String> possibleDestinations = this.getPossiblePackingObjects(node);
 			int n = possibleDestinations.size();
-			Thread.sleep(1);
-			long lastSleep = System.currentTimeMillis();
 			for (int i = 0; i < n; i++) {
 				if (Thread.interrupted()) { // reset interrupted flag prior to throwing the exception (Java convention)
 					KnapsackProblemGraphGenerator.this.logger.info("Successor generation has been interrupted.");
 					throw new InterruptedException("Successor generation interrupted");
-				}
-				if (System.currentTimeMillis() - lastSleep > 10) {
-					Thread.sleep(1);
-					lastSleep = System.currentTimeMillis();
-					KnapsackProblemGraphGenerator.this.logger.info("Sleeping");
 				}
 				l.add(this.generateSuccessor(node, possibleDestinations, i));
 			}

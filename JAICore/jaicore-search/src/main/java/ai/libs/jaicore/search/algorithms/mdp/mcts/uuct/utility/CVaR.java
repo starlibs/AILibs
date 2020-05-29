@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.doubles.DoubleList;
 public class CVaR implements IUCBUtilityFunction {
 
 	private final double alpha;
-	private final boolean maximize = true; // true if we want to minimize the observations
+	private static final boolean MAXIMIZE = true; // true if we want to minimize the observations
 
 	public CVaR(final double alpha) {
 		super();
@@ -23,7 +23,7 @@ public class CVaR implements IUCBUtilityFunction {
 		Collections.sort(inverseList);
 		int threshold = (int)Math.ceil(this.alpha * inverseList.size());
 		double sum = 0;
-		if (this.maximize) {
+		if (MAXIMIZE) {
 			for (int i = 0; i < threshold; i++) {
 				sum += inverseList.get(i);
 			}

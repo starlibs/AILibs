@@ -90,10 +90,7 @@ public class LakeState {
 		} else if (!this.layout.equals(other.layout)) {
 			return false;
 		}
-		if (this.row != other.row) {
-			return false;
-		}
-		return true;
+		return this.row == other.row;
 	}
 
 	@Override

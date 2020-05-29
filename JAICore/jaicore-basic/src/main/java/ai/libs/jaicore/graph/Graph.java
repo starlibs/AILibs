@@ -280,7 +280,7 @@ public class Graph<T> {
 		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
-		Graph other = (Graph) obj;
+		Graph<?> other = (Graph<?>) obj;
 		if (!this.predecessors.equals(other.predecessors)) {
 			return false;
 		}

@@ -103,8 +103,7 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 									this.tabooLastActionOfPath(path);
 								}
 							}
-						}
-						else if (possibleActions.isEmpty()) {
+						} else if (possibleActions.isEmpty()) {
 							if (path.isPoint()) { // if we are in the root and cannot do anything anymore, then stop the algorithm.
 								this.logger.info("There are no possible actions in the root. Finishing.");
 								return this.terminate();
@@ -228,6 +227,10 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 			last = node;
 		}
 		throw new UnsupportedOperationException("Currently, enforced prefixes are ignored!");
+	}
+
+	public ILabeledPath<N, A> getEnforcedPrefixPath() {
+		return this.enforcedPrefixPath.getUnmodifiableAccessor();
 	}
 
 	@Override

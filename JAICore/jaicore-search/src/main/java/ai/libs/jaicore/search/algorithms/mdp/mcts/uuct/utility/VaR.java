@@ -7,7 +7,6 @@ public class VaR implements IUCBUtilityFunction {
 
 	private final double alpha;
 	private final double b;
-	private final boolean maximizeObservations = false;
 
 	public VaR(final double alpha, final double b) {
 		super();

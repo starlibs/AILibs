@@ -78,7 +78,8 @@ public class SailingMDP extends AMDP<SailingState, SailingMove, Double> {
 		case S:
 			newRow += 1;
 			break;
-
+		default: // do nothing in this case
+			break;
 		}
 		switch (action) {
 		case NW:
@@ -90,6 +91,8 @@ public class SailingMDP extends AMDP<SailingState, SailingMove, Double> {
 		case E:
 		case SE:
 			newCol += 1;
+			break;
+		default: // do nothing in this case
 			break;
 		}
 
@@ -119,8 +122,9 @@ public class SailingMDP extends AMDP<SailingState, SailingMove, Double> {
 		case NW:
 			windDirections = Arrays.asList(SailingMove.W, SailingMove.NW, SailingMove.N);
 			break;
+		default:
+			throw new IllegalStateException("Wind direction has an unknown value " + state.getWind() + "!");
 		}
-
 		Map<SailingState, Double> map = new HashMap<>();
 
 		for (SailingMove wind : windDirections) {
@@ -131,11 +135,11 @@ public class SailingMDP extends AMDP<SailingState, SailingMove, Double> {
 
 	@Override
 	public Double getScore(final SailingState state, final SailingMove action, final SailingState successor) {
-		double unnormalizedScore = this.getUnnormalizedScore(state, action, successor);
+		double unnormalizedScore = this.getUnnormalizedScore(state, action);
 		return this.movesToNormalizeOver > 0 ? unnormalizedScore / (4 * this.movesToNormalizeOver) : unnormalizedScore;
 	}
 
-	public double getUnnormalizedScore(final SailingState state, final SailingMove action, final SailingState successor) {
+	public double getUnnormalizedScore(final SailingState state, final SailingMove action) {
 		SailingMove wind = state.getWind();
 		switch (wind) {
 		case N:

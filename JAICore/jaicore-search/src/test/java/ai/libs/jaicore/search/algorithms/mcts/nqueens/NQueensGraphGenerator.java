@@ -30,11 +30,8 @@ public class NQueensGraphGenerator implements IGraphGenerator<QueenNode, String>
 		return n -> {
 			List<INewNodeDescription<QueenNode, String>> l = new ArrayList<>();
 			int currentRow = n.getPositions().size();
-			for (int i = 0; i < this.dimension; i++, this.countSinceLastSleep ++) {
-				if (this.countSinceLastSleep % 100 == 0) {
-					Thread.sleep(5);
-				}
-				if (Thread.interrupted()) {
+			for (int i = 0; i < this.dimension; i++, this.countSinceLastSleep++) {
+				if (this.countSinceLastSleep % 100 == 0 && Thread.interrupted()) {
 					throw new InterruptedException("Successor generation has been interrupted.");
 				}
 				if (!n.attack(currentRow, i)) {
