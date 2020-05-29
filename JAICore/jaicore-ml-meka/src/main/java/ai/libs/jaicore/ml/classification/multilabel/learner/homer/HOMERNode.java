@@ -129,7 +129,7 @@ public class HOMERNode extends AbstractMultiLabelClassifier {
 		int[] tDist = {};
 		double[] dist = {};
 		if (this.doThreshold) {
-			tDist = ArrayUtil.thresholdDoubleToBinaryArray(this.baselearner.distributionForInstance(prepared.get(0)), this.THRESHOLD);
+			tDist = ArrayUtil.thresholdDoubleToBinaryArray(this.baselearner.distributionForInstance(prepared.get(0)), THRESHOLD);
 			length = tDist.length;
 		} else {
 			dist = this.baselearner.distributionForInstance(prepared.get(0));

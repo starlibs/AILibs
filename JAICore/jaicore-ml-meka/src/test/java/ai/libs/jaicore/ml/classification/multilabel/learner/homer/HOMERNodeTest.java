@@ -51,10 +51,14 @@ public class HOMERNodeTest {
 		List<IWekaInstances> split = WekaUtil.realizeSplit(new WekaInstances(data), WekaUtil.getArbitrarySplit(new WekaInstances(data), new Random(42), .7));
 		node.buildClassifier(split.get(0).getInstances());
 
+		boolean predictionsWorked = false;
 		for (Instance i : split.get(1).getInstances()) {
 			double[] dist = node.distributionForInstance(i);
 			System.out.println(Arrays.toString(dist) + " " + Arrays.toString(this.extractLabels(i)));
+			predictionsWorked = true;
 		}
+
+		assertTrue("Could not make any predictions.", !predictionsWorked);
 	}
 
 	public double[] extractLabels(final Instance i) {
