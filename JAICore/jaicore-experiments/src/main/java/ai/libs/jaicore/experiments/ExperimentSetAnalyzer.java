@@ -50,7 +50,8 @@ public class ExperimentSetAnalyzer {
 	public void reloadConfiguration() {
 
 		/* reload configuration */
-		//		this.config.reload();
+		//FIXME this reload yields empty config object.
+//		this.config.reload();
 
 		/* erase laze fields */
 		synchronized (this.config) {

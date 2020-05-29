@@ -25,9 +25,6 @@ project(":hasco-core").projectDir = new File(configPrefix,"hasco/core")
 include 'hasco-fanova'
 project(":hasco-fanova").projectDir = new File(configPrefix,"hasco/extensions/fanova")
 
-include 'hyperopt'
-project(":hyperopt").projectDir = new File(configPrefix,"hyperopt")
-
 include 'mlplan-core'
 project(":mlplan-core").projectDir = new File(configPrefix, "mlplan/core")
 

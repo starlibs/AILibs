@@ -548,12 +548,9 @@ public class SQLAdapter implements IDatabaseAdapter {
 	@Override
 	public List<IKVStore> query(final String sqlStatement) throws SQLException, IOException {
 		this.checkConnection();
-		try (PreparedStatement ps = this.connect.prepareStatement(sqlStatement)) {
-			boolean success = ps.execute();
-			if (success) {
-				return new ResultSetToKVStoreSerializer().serialize(ps.getResultSet());
-			} else {
-				return new LinkedList<>();
+		try (Statement stmt = this.connect.createStatement()) {
+			try (ResultSet ps = stmt.executeQuery(sqlStatement)) {
+				return new ResultSetToKVStoreSerializer().serialize(ps);
 			}
 		}
 	}
