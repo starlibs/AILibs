@@ -36,6 +36,10 @@ public class MonteCarloCrossValidationEvaluator extends TrainPredictionBasedClas
 		this.metric = metric;
 	}
 
+	public int getRepeats() {
+		return this.repeats;
+	}
+
 	@Override
 	public String toString() {
 		return "MonteCarloCrossValidationEvaluator [splitter = " + this.datasetSplitter + ", repeats = " + this.repeats + ", Random = " + this.random + ", metric = " + this.metric.getBaseMeasure() + "]";

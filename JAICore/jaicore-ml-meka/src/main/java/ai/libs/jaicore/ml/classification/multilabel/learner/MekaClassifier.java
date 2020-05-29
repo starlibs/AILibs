@@ -1,11 +1,8 @@
 package ai.libs.jaicore.ml.classification.multilabel.learner;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
-import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassificationPredictionBatch;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -20,16 +17,14 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.reconstruction.ReconstructionPlan;
 import ai.libs.jaicore.ml.classification.multilabel.MultiLabelClassification;
-import ai.libs.jaicore.ml.classification.multilabel.MultiLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.classification.multilabel.dataset.IMekaInstances;
 import ai.libs.jaicore.ml.classification.multilabel.dataset.MekaInstance;
 import ai.libs.jaicore.ml.classification.multilabel.dataset.MekaInstances;
-import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import weka.core.DenseInstance;
 
-public class MekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, IMultiLabelClassification, IMultiLabelClassificationPredictionBatch> implements IMekaClassifier, IReconstructible {
+public class MekaClassifier extends AMultiLabelClassifier implements IMekaClassifier, IReconstructible {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MekaClassifier.class);
 
@@ -114,15 +109,6 @@ public class MekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 		} catch (Exception e) {
 			throw new PredictionException("Could not make a prediction since an exception occurred in the wrapped weka classifier.", e);
 		}
-	}
-
-	@Override
-	public IMultiLabelClassificationPredictionBatch predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
-		List<IMultiLabelClassification> batch = new ArrayList<>();
-		for (ILabeledInstance instance : dTest) {
-			batch.add(this.predict(instance));
-		}
-		return new MultiLabelClassificationPredictionBatch(batch);
 	}
 
 	@Override

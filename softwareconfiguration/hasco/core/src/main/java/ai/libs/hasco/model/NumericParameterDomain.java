@@ -95,4 +95,9 @@ public class NumericParameterDomain implements IParameterDomain {
 		}
 		return Double.doubleToLongBits(this.min) == Double.doubleToLongBits(other.min);
 	}
+
+	@Override
+	public boolean isEquals(final Object obj0, final Object obj1) {
+		return Math.abs(Double.parseDouble(obj0 + "") - Double.parseDouble(obj1 + "")) < 1E-8;
+	}
 }

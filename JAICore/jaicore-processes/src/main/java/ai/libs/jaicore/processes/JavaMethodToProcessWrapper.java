@@ -16,6 +16,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +80,7 @@ public class JavaMethodToProcessWrapper {
 	 * @throws InterruptedException
 	 *             This is only thrown if the executing thread is interrupted from *outside* but not when it is canceled due to the timeout
 	 */
-	public Optional<Object> runWithTimeout(final String clazz, final String method, final Object target, final int timeout, final Object... inputs) throws AlgorithmTimeoutedException, InvocationTargetException, InterruptedException {
+	public Optional<Object> runWithTimeout(final String clazz, final String method, final Object target, final Timeout timeout, final Object... inputs) throws AlgorithmTimeoutedException, InvocationTargetException, InterruptedException {
 		Object c;
 		try {
 			c = TimedComputation.compute(() -> this.run(clazz, method, target, inputs), timeout, "Process has timed out!");

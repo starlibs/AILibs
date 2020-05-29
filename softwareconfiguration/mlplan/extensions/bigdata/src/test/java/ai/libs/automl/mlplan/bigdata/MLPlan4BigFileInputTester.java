@@ -36,7 +36,6 @@ public class MLPlan4BigFileInputTester {
 			saver.setInstances(split.get(1));
 			saver.setFile(new File(origDataSrcName + ".test"));
 			saver.writeBatch();
-			System.exit(0);
 		}
 
 		MLPlan4BigFileInput mlplan = new MLPlan4BigFileInput(new File(origDataSrcName + ".train"));

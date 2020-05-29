@@ -3,7 +3,7 @@
   "components" : [ {
     "name" : "weka.classifiers.meta.AdaBoostM1",
     "requiredInterface" : [ {"id": "W", "name": "BoostableBaseClassifier"} ],
-    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler", "PipelineClassifier" ],
     "parameter" : [ {
       "name" : "pActivator",
       "type" : "cat",
@@ -45,7 +45,7 @@
   },  {
     "name" : "weka.classifiers.meta.Vote",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier", "MetaClassifier"],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "PipelineClassifier"],
     "parameter" : [ {
       "name" : "R",
       "type" : "cat",
@@ -61,7 +61,7 @@
   },  {
     "name" : "weka.classifiers.meta.Stacking",
     "requiredInterface" : [ {"id": "B", "name": "BaseClassifier"} ],
-    "providedInterface" : [ "AbstractClassifier", "MetaClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "PipelineClassifier" ],
     "parameter" : [ {
       "name" : "X",
       "type" : "cat",
@@ -78,7 +78,7 @@
   {
     "name" : "weka.classifiers.lazy.LWL",
     "requiredInterface" : [ {"id": "W", "name":"WeightedInstancesHandler" } ],
-    "providedInterface" : [ "AbstractClassifier", "MetaClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "PipelineClassifier" ],
     "parameter" : [ {
       "name" : "K",
       "type" : "cat",
@@ -97,7 +97,7 @@
   },{
     "name" : "weka.classifiers.meta.RandomSubSpace",
     "requiredInterface" : [  {"id": "W", "name": "BaseClassifier" } ],
-    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler", "PipelineClassifier" ],
     "parameter" : [ {
       "name" : "I",
       "type" : "int",
@@ -124,7 +124,7 @@
   },{
     "name" : "weka.classifiers.meta.Bagging",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler"],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler", "PipelineClassifier" ],
     "parameter" : [ {
       "name" : "P",
       "type" : "int",
@@ -159,7 +159,7 @@
   {
     "name" : "weka.classifiers.meta.RandomCommittee",
     "requiredInterface" : [ {"id": "W", "name": "RandomizableBaseClassifier" } ],
-    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler", "PipelineClassifier" ],
     "parameter" : [ {
       "name" : "I",
       "type" : "int",
@@ -180,7 +180,7 @@
   {
 	"name": "weka.classifiers.meta.AttributeSelectedClassifier",
 	"requiredInterface": [],
-	"providedInterface": ["AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
+	"providedInterface": ["AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler", "PipelineClassifier" ],
 	"parameter": [ {
 		"name": "E",
 		"type": "cat",
@@ -190,7 +190,7 @@
 		"name": "S",
 		"type": "cat",
 		"default": "weka.attributeSelection.BestFirst",
-		"values": ["weka.attributeSelection.BestFirst", "weka.attributeSelection.BestFirst -D 1", "weka.attributeSelection.GreedyStepWise" ]
+		"values": ["weka.attributeSelection.BestFirst", "weka.attributeSelection.BestFirst -D 1", "weka.attributeSelection.GreedyStepwise" ]
 	}],
 	"dependencies": []
   },
@@ -198,7 +198,7 @@
   {
     "name" : "weka.classifiers.meta.AdditiveRegression",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "Regressor", "WeightedInstancesHandler" ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "Regressor", "WeightedInstancesHandler", "PipelineClassifier" ],
     "parameter" : [ {
       "name" : "sActivator",
       "type" : "cat",
@@ -232,19 +232,19 @@
   },  {
     "name" : "weka.classifiers.meta.ClassificationViaRegression",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier", "MetaClassifier" ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "PipelineClassifier" ],
     "parameter" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "weka.classifiers.meta.LogitBoost",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler", "PipelineClassifier" ],
     "parameter" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "weka.classifiers.meta.MultiClassClassifier",
     "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier",  "MetaClassifier" ],
+    "providedInterface" : [ "AbstractClassifier",  "MetaClassifier", "PipelineClassifier" ],
     "parameter" : [ ],
     "dependencies" : [ ]
   }]
