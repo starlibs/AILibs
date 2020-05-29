@@ -15,6 +15,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.problems.nqueens.NQueensProblem;
@@ -26,6 +28,8 @@ import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraph
 
 @RunWith(Parameterized.class)
 public class BestFirstSearchRuntimeTest {
+
+	private static final Logger logger = LoggerFactory.getLogger("testers");
 
 	@Parameters(name = "problem = {0}")
 	public static Collection<Object[]> data() {
@@ -62,8 +66,7 @@ public class BestFirstSearchRuntimeTest {
 		double creationsPerSecond = MathExt.round(bf.getCreatedCounter() / (runtime / 1000f), 2);
 		assertTrue("Only achieved " + expansionsPerSecond + " but 1000 were required. Total runtime was " + runtime + " for " + bf.getExpandedCounter() + " expansions.", runtime < 1000 || (expansionsPerSecond > 1000));
 		assertTrue(runtime < 1000 || creationsPerSecond > 1000);
-		System.out.println("Needed " + runtime + "ms to identify " + bf.getSolutionQueue().size() + " solutions. Expanded " + bf.getExpandedCounter() + "/" + bf.getCreatedCounter() + " created nodes. This corresponds to "
-				+ expansionsPerSecond + " expansions and " + creationsPerSecond + " creations per second.");
+		logger.info("Needed {}ms to identify {} solutions. Expanded {}/{} created nodes. This corresponds to {} expansions and {} creations per second.", runtime, bf.getSolutionQueue().size(), bf.getExpandedCounter(), bf.getCreatedCounter(), expansionsPerSecond, creationsPerSecond);
 	}
 
 	@Test
@@ -73,6 +76,6 @@ public class BestFirstSearchRuntimeTest {
 		dfs.run();
 		int runtime = (int) (System.currentTimeMillis() - start);
 		assertTrue(true);
-		System.out.println("Needed " + runtime + "ms to identify " + dfs.getSolutionPaths().size() + " solutions.");
+		logger.info("Needed {}ms to identify {} solutions.", runtime, dfs.getSolutionPaths().size());
 	}
 }

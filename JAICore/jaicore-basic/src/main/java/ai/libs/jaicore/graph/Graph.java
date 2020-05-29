@@ -174,6 +174,13 @@ public class Graph<T> {
 		return Collections.unmodifiableSet(this.predecessors.get(item));
 	}
 
+	public Set<T> getConnected(final T item) {
+		Set<T> connected = new HashSet<>();
+		connected.addAll(this.getSuccessors(item));
+		connected.addAll(this.getPredecessors(item));
+		return connected;
+	}
+
 	private void checkNodeExistence(final T item) {
 		if (!this.hasItem(item)) {
 			throw new IllegalArgumentException("Cannot perform operation on node " + item + ", which does not exist!");
@@ -273,7 +280,7 @@ public class Graph<T> {
 		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
-		Graph other = (Graph) obj;
+		Graph<?> other = (Graph<?>) obj;
 		if (!this.predecessors.equals(other.predecessors)) {
 			return false;
 		}
