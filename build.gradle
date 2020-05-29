@@ -233,7 +233,6 @@ task showDirs {
 dependencies{
 	compile project(":hasco-core")
 	compile project(":hasco-fanova")
-	compile project(":hyperopt")
 	//compile project(":autofe")
 	//compile project(":autofe-reldata")
 	compile project(":mlplan-core")

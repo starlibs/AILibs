@@ -153,7 +153,12 @@ public class ExperimentRunner implements ILoggingCustomizable {
 							+ ". Deviation: " + memoryDeviation);
 				}
 			}
+			if (expEntry.getExperiment().getNumCPUs() > Runtime.getRuntime().availableProcessors()) {
+				throw new IllegalStateException(
+						"Cannot conduct experiment " + expEntry.getExperiment() + ", because only " + Runtime.getRuntime().availableProcessors() + " CPU cores are available where declared is " + expEntry.getExperiment().getNumCPUs());
+			}
 			this.handle.startExperiment(expEntry);
+			this.conductor.evaluate(expEntry, m -> {
 				try {
 					this.logger.info("Updating experiment with id {} with the following map: {}", expEntry.getId(), m);
 					this.handle.updateExperiment(expEntry, m);
@@ -194,7 +199,4 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		}
 	}
 
-	public void setDoMemoryCheck(final boolean doMemoryCheck) {
-		this.doMemoryCheck = doMemoryCheck;
-	}
 }
