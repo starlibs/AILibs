@@ -130,7 +130,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
 		this.priorityPredicateForRDFS = priorityPredicateForRDFS;
 
-		this.logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node", timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS);
+		this.logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node. Prioriziting predicate: {}", timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, priorityPredicateForRDFS);
 
 		/* check whether assertions are on */
 		assert this.logAssertionActivation();
@@ -267,21 +267,19 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 								this.logger.warn("Got NULL result as score for evaluation with id {}", evaluationId);
 							}
 							return true;
-						}, timeoutForJob, "RCNE-timeout for evaluation with id " + evaluationId);
+						}, new Timeout(timeoutForJob, TimeUnit.MILLISECONDS), "RCNE-timeout for evaluation with id " + evaluationId);
 					} catch (InterruptedException e) { // Interrupts are directly re-thrown
 						this.logger.debug("Path evaluation has been interrupted.");
 						throw e;
-					}
-					catch (Exception ex) {
+					} catch (Exception ex) {
 						if (countedExceptions == this.maxSamples) {
-							this.logger.warn("Too many retry attempts, giving up. {} samples were drawn, {} were successful.", drawnSamples, successfulSamples);
+							this.logger.warn("Too many retry attempts, giving up. {} samples were drawn, {} were successful.", drawnSamples, successfulSamples, path.getHead());
 							throw new PathEvaluationException("Error in the evaluation of a node!", ex);
 						} else {
 							countedExceptions++;
 							if (ex instanceof AlgorithmTimeoutedException) {
 								this.logger.debug("Candidate evaluation failed due to timeout (either for this candidate or for the whole node).");
-							}
-							else {
+							} else {
 								if (LOG_FAILURES_AS_ERRORS) {
 									this.logger.error("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
 								} else {
@@ -569,8 +567,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 		if (this.solutionEvaluator instanceof ILoggingCustomizable) {
 			this.logger.info("Setting logger of evaluator {} to {}.evaluator", this.solutionEvaluator.getClass().getName(), name);
 			((ILoggingCustomizable) this.solutionEvaluator).setLoggerName(name + ".evaluator");
-		}
-		else {
+		} else {
 			this.logger.info("Evaluator {} is not customizable for logger, so not configuring it.", this.solutionEvaluator.getClass().getName());
 		}
 		this.logger.info("Switched logger (name) of {} to {}", this, name);

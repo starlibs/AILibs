@@ -79,6 +79,7 @@ public class SparseInstance extends AInstance {
 	@Override
 	public void removeColumn(final int columnPos) {
 		this.attributeMap.remove(columnPos);
+		this.numAttributes --;
 	}
 
 	@Override

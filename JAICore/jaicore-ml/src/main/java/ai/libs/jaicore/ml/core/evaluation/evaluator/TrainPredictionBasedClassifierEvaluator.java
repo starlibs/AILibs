@@ -103,12 +103,11 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 			this.logger.info("Computed value for metric {} of {} executions. Metric value is: {}", this.metric, n, score);
 			return score;
 		} catch (LearnerExecutionFailedException | SplitFailedException e) {
-			this.logger.debug("Failed to evaluate the classifier {}.", e);
 			throw new ObjectEvaluationFailedException(e);
 		}
 	}
 
-	protected IFixedDatasetSplitSetGenerator<ILabeledDataset<? extends ILabeledInstance>> getSplitGenerator() {
+	public IFixedDatasetSplitSetGenerator<ILabeledDataset<? extends ILabeledInstance>> getSplitGenerator() {
 		return this.splitGenerator;
 	}
 

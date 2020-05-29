@@ -105,7 +105,9 @@ public class LearnerRunReport implements ILearnerRunReport {
 		fields.put("testStartTime", this.testStartTime);
 		fields.put("testEndTime", this.testEndTime);
 		fields.put("exception", this.exception);
-		fields.put("diffClass", this.diff.getClass().getName());
+		if (this.diff != null) {
+			fields.put("diffClass", this.diff.getClass().getName());
+		}
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 }
