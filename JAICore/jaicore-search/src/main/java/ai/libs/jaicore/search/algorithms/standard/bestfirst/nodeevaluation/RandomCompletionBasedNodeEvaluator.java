@@ -352,6 +352,8 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 	public ILabeledPath<T, A> getNextRandomPathCompletionForNode(final BackPointerPath<T, A, ?> n) throws InterruptedException, RCNEPathCompletionFailedException {
 
 		/* make sure that the completer has the path from the root to the node in question and that the f-values of the nodes above are added to the map */
+		this.logger.debug("Starting completion for path of size {}. Enable TRACE for exact path.", n.getNumberOfNodes());
+		this.logger.trace("Path for which completion is drawn: {}", n.getNodes());
 		if (!this.completer.knowsNode(n.getHead())) {
 			synchronized (this.completer) {
 				this.completer.appendPathToNode(n);
@@ -365,7 +367,6 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 		}
 
 		/* now draw random completion */
-		ILabeledPath<T, A> pathCompletion = null;
 		ILabeledPath<T, A> completedPath = null;
 		synchronized (this.completer) {
 			long startCompletion = System.currentTimeMillis();
@@ -374,29 +375,44 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 				throw new RCNEPathCompletionFailedException("Completer has been canceled.");
 			}
 			this.logger.debug("Starting search for next solution ...");
-			SearchGraphPath<T, A> solutionPathFromN = null;
 			try {
 				if (!this.completer.getExploredGraph().hasItem(n.getHead())) {
 					throw new IllegalStateException("The completer does not know hte head.");
 				}
-				solutionPathFromN = this.completer.nextSolutionUnderSubPath(n);
+				completedPath = this.completer.nextSolutionUnderSubPath(n);
 			} catch (AlgorithmExecutionCanceledException | TimeoutException e) {
 				this.logger.info("Completer has been canceled or timeouted. Returning control.");
 				throw new RCNEPathCompletionFailedException(e);
 			}
-			if (solutionPathFromN == null) {
+			if (completedPath == null) {
 				this.logger.info("No completion was found for path {}.", n.getNodes());
 				throw new RCNEPathCompletionFailedException("No completion found for path " + n.getNodes());
 			}
-			assert solutionPathFromN.getArcs() != null : "The RandomSearch has returned a solution path with a null pointer for the edges.";
-			assert solutionPathFromN.getNumberOfNodes() == solutionPathFromN.getArcs().size() + 1;
+			assert completedPath.getArcs() != null : "The RandomSearch has returned a solution path with a null pointer for the edges.";
+			assert completedPath.getNumberOfNodes() == completedPath.getArcs().size() + 1;
+			assert this.checkValidityOfPathCompletion(n, completedPath);
 			long finishedCompletion = System.currentTimeMillis();
-			this.logger.debug("Found solution of length {} in {}ms. Enable TRACE for details.", solutionPathFromN.getNodes().size(), finishedCompletion - startCompletion);
-			this.logger.trace("Solution path is {}", solutionPathFromN);
-			pathCompletion = solutionPathFromN.getPathFromChildOfRoot();
-			completedPath = new SearchGraphPath<>(n, pathCompletion, solutionPathFromN.getArcs() != null ? solutionPathFromN.getArcs().get(0) : null);
+			this.logger.debug("Found completion of length {} in {}ms. Enable TRACE for details.", completedPath.getNumberOfNodes(), finishedCompletion - startCompletion);
+			this.logger.trace("Completion is {}", completedPath);
 		}
 		return completedPath;
+	}
+
+	private boolean checkValidityOfPathCompletion(final ILabeledPath<T, A> path, final ILabeledPath<T, A> completion) {
+		List<T> prefixNodes = path.getNodes();
+		List<A> prefixArcs = path.getArcs();
+		List<T> completionNodes = completion.getNodes();
+		List<A> completionArcs = completion.getArcs();
+		int l = prefixNodes.size();
+		for (int i = 0; i < l; i++) {
+			if (prefixNodes.get(i) != completionNodes.get(i)) {
+				return false;
+			}
+			if (i < l-1 && prefixArcs.get(i) != completionArcs.get(i)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private void updateMapOfBestScoreFoundSoFar(final ILabeledPath<T, A> nodeInCompleterGraph, final V scoreOnOriginalBenchmark) {

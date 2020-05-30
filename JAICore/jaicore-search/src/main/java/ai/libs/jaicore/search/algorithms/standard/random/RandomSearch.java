@@ -270,6 +270,16 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		}
 	}
 
+	/**
+	 * Returns a completion of the given path so that the whole path is a goal path.
+	 * The given path is then a prefix of the returned path.
+	 *
+	 * @param path
+	 * @return
+	 * @throws InterruptedException
+	 * @throws AlgorithmExecutionCanceledException
+	 * @throws AlgorithmTimeoutedException
+	 */
 	public SearchGraphPath<N, A> nextSolutionUnderSubPath(final ILabeledPath<N, A> path) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		if (this.logger.isInfoEnabled()) {
 			this.logger.info("Looking for next solution under node with hash code {}. Remaining time is {}. Enable TRACE for concrete node description.", path.getHead().hashCode(), this.getRemainingTimeToDeadline());
@@ -382,6 +392,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		this.updateExhaustedAndPrioritizedState(head);
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug("Returning next solution path. Hash code is {}", cPath.hashCode());
+		}
+		if (cPath.getRoot() != path.getRoot()) {
+			throw new IllegalStateException("Root got lost over the path!");
 		}
 		return head == this.root ? null : cPath;
 	}
