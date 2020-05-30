@@ -283,7 +283,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 								if (LOG_FAILURES_AS_ERRORS) {
 									this.logger.error("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
 								} else {
-									this.logger.debug("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
+									this.logger.warn("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
 								}
 							}
 						}
@@ -398,18 +398,26 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 		return completedPath;
 	}
 
-	private boolean checkValidityOfPathCompletion(final ILabeledPath<T, A> path, final ILabeledPath<T, A> completion) {
+	private boolean checkValidityOfPathCompletion(final ILabeledPath<T, A> path, final ILabeledPath<T, A> completion) throws InterruptedException {
 		List<T> prefixNodes = path.getNodes();
 		List<A> prefixArcs = path.getArcs();
 		List<T> completionNodes = completion.getNodes();
 		List<A> completionArcs = completion.getArcs();
 		int l = prefixNodes.size();
 		for (int i = 0; i < l; i++) {
+			this.checkInterruption();
 			if (prefixNodes.get(i) != completionNodes.get(i)) {
 				return false;
 			}
 			if (i < l-1 && prefixArcs.get(i) != completionArcs.get(i)) {
 				return false;
+			}
+		}
+		int n = completionNodes.size();
+		for (int i = l; i < n; i++) {
+			this.checkInterruption();
+			if (prefixNodes.contains(completionNodes.get(i))) {
+				throw new IllegalStateException("A node contained in the completion (without prefix) must not also be contained in the prefix already. The following node is contained twice:\n\t" + completionNodes.get(i));
 			}
 		}
 		return true;
