@@ -3,10 +3,6 @@ package ai.libs.jaicore.search.gui.plugins.rolloutboxplots;
 import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.data.statistics.BoxAndWhiskerXYDataset;
-import org.jfree.data.statistics.DefaultBoxAndWhiskerXYDataset;
 
 import ai.libs.jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
@@ -30,15 +26,7 @@ public class SearchRolloutBoxplotPluginView extends ASimpleMVCPluginView<SearchR
 	private final Button right = new Button("right");
 	private final Button parent = new Button("parent");
 
-	//	private ObservableList<Double> leftScores = new ObservableListWrapper<>(new ArrayList<>());
-	//	private ObservableList<Double> rightScores = new ObservableListWrapper<>(new ArrayList<>());
-	//	private DescriptiveStatisticsTimelineView leftChart = new DescriptiveStatisticsTimelineView(this.leftScores);
-	//	private DescriptiveStatisticsTimelineView rightChart = new DescriptiveStatisticsTimelineView(this.rightScores);
-
 	private WebEngine engine;
-	private final BoxAndWhiskerXYDataset dataset = new DefaultBoxAndWhiskerXYDataset("plot");
-	private final JFreeChart chart = ChartFactory.createBoxAndWhiskerChart(
-			"Box and Whisker Chart", "Time", "Value", this.dataset, true);
 
 	public SearchRolloutBoxplotPluginView(final SearchRolloutBoxplotPluginModel model) {
 		super(model, new FlowPane());
@@ -51,8 +39,6 @@ public class SearchRolloutBoxplotPluginView extends ASimpleMVCPluginView<SearchR
 			node.getChildren().add(this.left);
 			node.getChildren().add(this.right);
 			node.getChildren().add(this.parent);
-			//			node.getChildren().add(this.leftChart);
-			//			node.getChildren().add(this.rightChart);
 			this.left.setOnMouseClicked(e -> {
 				DefaultGUIEventBus.getInstance().postEvent(new NodeClickedEvent(null, this.getLeftChild(model.getCurrentlySelectedNode())));
 				this.parent.setDisable(false);
@@ -92,40 +78,23 @@ public class SearchRolloutBoxplotPluginView extends ASimpleMVCPluginView<SearchR
 			if (successors != null) {
 				sb.append("<table><tr>");
 				for (String successor : successors) {
-					int index = successors.indexOf(successor);
 					DescriptiveStatistics statsOfSuccessor = this.getModel().getObservedPerformances().get(successor);
 
 					/* update table */
 					sb.append("<td>");
 					sb.append(statsOfSuccessor.toString().replace("\n", "<br />"));
 					sb.append("</td>");
-
-					/* update charts of mean values */
-					//					ObservableList<Double> list = index == 0 ? this.leftScores : this.rightScores;
-					//					double[] performanceValuesOfSuccessor = statsOfSuccessor.getValues();
-					//					//					System.out.println(Arrays.toString(performanceValuesOfSuccessor) + " -> " + list);
-					//					int m = performanceValuesOfSuccessor.length;
-					//					int n = list.size();
-					//					if (n > m) {
-					//						throw new IllegalStateException("Cannot have more observations in view than in model! View has " + n + " points, model has " + m);
-					//					}
-					//					for (int i = n; i < m; i++) {
-					//						list.add(performanceValuesOfSuccessor[i]);
-					//					}
 				}
 				sb.append("</tr></table>");
 			}
-			Platform.runLater(() -> {
-				this.engine.loadContent(sb.toString());
-			});
+			Platform.runLater(() -> this.engine.loadContent(sb.toString()));
 		}
 	}
 
 	@Override
 	public synchronized void clear() {
-		//		this.leftScores.clear();
-		//		this.rightScores.clear();
-		//		System.out.println("CLEARED");
+
+		/* nothing to do */
 	}
 
 	@Override
