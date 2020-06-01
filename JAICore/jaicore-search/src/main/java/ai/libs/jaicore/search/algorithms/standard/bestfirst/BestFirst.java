@@ -103,6 +103,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 	/* algorithm configuration */
 	private int timeoutForComputationOfF;
 	private IPathEvaluator<N, A, V> timeoutNodeEvaluator;
+	private final boolean considerNodeEvaluationOptimistic; // if this is set to true, then every node with a score worst than the currently best will be pruned (B&B)
 
 	/* automatically derived auxiliary variables */
 	private final boolean solutionReportingNodeEvaluator;
@@ -145,6 +146,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 		this.rootGenerator = this.graphGenerator.getRootGenerator();
 		this.successorGenerator = this.graphGenerator.getSuccessorGenerator();
 		this.pathGoalTester = problem.getGoalTester();
+		this.considerNodeEvaluationOptimistic = config.optimisticHeuristic();
 
 		/* if the node evaluator is graph dependent, communicate the generator to it */
 		this.nodeEvaluator = problem.getPathEvaluator();
@@ -1013,7 +1015,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 			switch (this.getState()) {
 			case CREATED:
 				AlgorithmInitializedEvent initEvent = this.activate();
-				this.bfLogger.info("Initializing BestFirst search {} with the following configuration:\n\tCPUs: {}\n\tTimeout: {}ms\n\tNode Evaluator: {}", this, this.getConfig().cpus(), this.getConfig().timeout(), this.nodeEvaluator);
+				this.bfLogger.info("Initializing BestFirst search {} with the following configuration:\n\tCPUs: {}\n\tTimeout: {}ms\n\tNode Evaluator: {}\n\tConsidering node evaluator optimistic: {}", this, this.getConfig().cpus(), this.getConfig().timeout(), this.nodeEvaluator, this.considerNodeEvaluationOptimistic);
 				int additionalCPUs = this.getConfig().cpus() - 1;
 				if (additionalCPUs > 0) {
 					this.parallelizeNodeExpansion(additionalCPUs);

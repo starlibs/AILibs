@@ -59,7 +59,7 @@ public class AlternativeNodeEvaluator<N, A, V extends Comparable<V>> extends Dec
 		if (super.reportsSolutions()) {
 			return true;
 		}
-		return this.doesDecoratedEvaluatorReportSolutions();
+		return this.ne1 instanceof IPotentiallySolutionReportingPathEvaluator && ((IPotentiallySolutionReportingPathEvaluator<?, ?, ?>) this.ne1).reportsSolutions();
 	}
 
 	@Override
