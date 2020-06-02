@@ -8,16 +8,21 @@ import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicHomogen
 import ai.libs.jaicore.ml.regression.loss.dataset.AsymmetricLoss;
 import ai.libs.jaicore.ml.regression.loss.dataset.LinearMeanSquaredError;
 import ai.libs.jaicore.ml.regression.loss.dataset.MeanAbsoluteError;
+import ai.libs.jaicore.ml.regression.loss.dataset.MeanAbsolutePercentageError;
+import ai.libs.jaicore.ml.regression.loss.dataset.MeanPercentageError;
 import ai.libs.jaicore.ml.regression.loss.dataset.MeanSquaredError;
 import ai.libs.jaicore.ml.regression.loss.dataset.MeanSquaredLogarithmicMeanSquaredError;
+import ai.libs.jaicore.ml.regression.loss.dataset.MeanSquaredPercentageError;
 import ai.libs.jaicore.ml.regression.loss.dataset.QuadraticQuadraticError;
+import ai.libs.jaicore.ml.regression.loss.dataset.RootMeanSquaredError;
 import ai.libs.jaicore.ml.regression.loss.dataset.WeightedAbsoluteError;
 import ai.libs.jaicore.ml.regression.loss.dataset.WeightedAsymmetricAbsoluteError;
 
 public enum ERulPerformanceMeasure implements IDeterministicHomogeneousPredictionPerformanceMeasure<Double> {
-	ASYMMETRIC_LOSS(new AsymmetricLoss()), MEAN_ABSOLUTE_ERROR(new MeanAbsoluteError()), MEAN_SQUARED_ERROR(new MeanSquaredError()), WEIGHTED_ABSOLUTE_ERROR(new WeightedAbsoluteError()), WEIGHTED_ASYMMETRIC_ABSOLUTE_ERROR(
-			new WeightedAsymmetricAbsoluteError()), LINEAR_MEAN_SQUARED_ERROR(
-					new LinearMeanSquaredError()), MEAN_SQUARED_LOGARITHMIC_MEAN_SQUARED_ERROR(new MeanSquaredLogarithmicMeanSquaredError()), QUADRATIC_QUADRATIC_ERROR(new QuadraticQuadraticError());
+	ASYMMETRIC_LOSS(new AsymmetricLoss()), MEAN_PERCENTAGE_ERROR(new MeanPercentageError()), MEAN_ABSOLUTE_PERCENTAGE_ERROR(new MeanAbsolutePercentageError()), MEAN_SQUARED_PERCENTAGE_ERROR(
+			new MeanSquaredPercentageError()), MEAN_ABSOLUTE_ERROR(new MeanAbsoluteError()), ROOT_MEAN_ABSOLUTE_ERROR(new RootMeanSquaredError()), MEAN_SQUARED_ERROR(new MeanSquaredError()), WEIGHTED_ABSOLUTE_ERROR(
+					new WeightedAbsoluteError()), WEIGHTED_ASYMMETRIC_ABSOLUTE_ERROR(new WeightedAsymmetricAbsoluteError()), LINEAR_MEAN_SQUARED_ERROR(
+							new LinearMeanSquaredError()), MEAN_SQUARED_LOGARITHMIC_MEAN_SQUARED_ERROR(new MeanSquaredLogarithmicMeanSquaredError()), QUADRATIC_QUADRATIC_ERROR(new QuadraticQuadraticError());
 
 	private final IDeterministicHomogeneousPredictionPerformanceMeasure<Double> measure;
 
