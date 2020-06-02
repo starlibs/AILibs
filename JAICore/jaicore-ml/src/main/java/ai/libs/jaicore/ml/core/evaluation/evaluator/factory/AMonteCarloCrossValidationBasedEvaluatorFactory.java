@@ -27,6 +27,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 	private double trainFoldSize;
 	private int timeoutForSolutionEvaluation;
 	protected IDeterministicPredictionPerformanceMeasure<?, ?> metric;
+	private boolean cacheSplitSets = false;
 
 	/**
 	 * Standard c'tor.
@@ -152,5 +153,14 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 	public F withMeasure(final IDeterministicPredictionPerformanceMeasure<?, ?> measure) {
 		this.setMeasure(measure);
 		return this.getSelf();
+	}
+	
+	public F withCacheSplitSets(boolean cacheSplitSets) {
+		this.cacheSplitSets = cacheSplitSets;
+		return this.getSelf();
+	}
+	
+	public boolean getCacheSplitSets() {
+		return this.cacheSplitSets;
 	}
 }
