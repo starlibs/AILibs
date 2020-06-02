@@ -12,7 +12,7 @@ public class MeanPercentageError extends ARegressionMeasure {
 		this.checkConsistency(expected, actual);
 		List<Double> errors = new ArrayList<>();
 		for (int i = 0; i < expected.size(); i++) {
-			Double percentageError = 100 * ((expected.get(i) - actual.get(i)) / expected.get(i));
+			Double percentageError = (expected.get(i) - actual.get(i)) / expected.get(i);
 			errors.add(percentageError);
 		}
 		return StatisticsUtil.mean(errors);
