@@ -138,7 +138,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			DefaultPathPriorizingPredicate<N, A> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
 
 			/* set HASCO objects within the default path prioritizing node evaluator */
-			prioritizingPredicate.setHasco(this.hasco);
+			prioritizingPredicate.setHascoReference(this.hasco);
 			this.setHASCOLoggerNameIfPossible();
 			this.logger.info("Initialized HASCO with start time {}.", this.timeOfStart);
 			return event;
@@ -170,9 +170,9 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 								TwoPhaseHASCO.this.logger.info("HASCO canceled successfully after {}ms", (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart) - timeElapsed);
 								this.cancel();
 							}
-						}
-						catch (Exception e) {
-							TwoPhaseHASCO.this.logger.error("Observed {} while checking termination of phase 1. Stack trace is: {}", e.getClass().getName(), Arrays.stream(e.getStackTrace()).map(se -> "\n\t" + se.toString()).collect(Collectors.joining()));
+						} catch (Exception e) {
+							TwoPhaseHASCO.this.logger.error("Observed {} while checking termination of phase 1. Stack trace is: {}", e.getClass().getName(),
+									Arrays.stream(e.getStackTrace()).map(se -> "\n\t" + se.toString()).collect(Collectors.joining()));
 						}
 					}
 				};
@@ -209,7 +209,8 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			if (selectionBenchmark != null) {
 				if (this.logger.isInfoEnabled()) {
 					this.logger.info("Entering phase 2.");
-					this.logger.debug("Solutions seen so far had the following (internal) errors (one per line): {}", this.phase1ResultQueue.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
+					this.logger.debug("Solutions seen so far had the following (internal) errors (one per line): {}",
+							this.phase1ResultQueue.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
 				}
 				this.post(new TwoPhaseHASCOPhaseSwitchEvent(this));
 				if (selectionBenchmark instanceof IInformedObjectEvaluatorExtension) {
@@ -374,7 +375,8 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info(
 						"We expect phase 2 to consume {}ms for {} candidates, and post-processing is assumed to take at most {}ms, which is a total remaining runtime of {}ms. {}ms are permitted by timeout. The following candidates are considered (one per line with the internal error of phase 1): {}",
-						expectedTimeForPhase2, ensembleToSelectFrom.size(), expectedPostprocessingTime, expectedMaximumRemainingRuntime, remainingTime, ensembleToSelectFrom.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
+						expectedTimeForPhase2, ensembleToSelectFrom.size(), expectedPostprocessingTime, expectedMaximumRemainingRuntime, remainingTime,
+						ensembleToSelectFrom.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
 			}
 		} else {
 			ensembleToSelectFrom = this.getSelectionForPhase2();

@@ -402,9 +402,12 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 		return this.optimizingFactory;
 	}
 
+	public HASCO<?, ?, ?, ?> getHASCO() {
+		return ((TwoPhaseHASCO<?, ?, ?>) this.optimizingFactory.getOptimizer()).getHasco();
+	}
+
 	public IAlgorithm<?, ?> getSearch() {
-		HASCO<?, ?, ?, ?> hasco = ((TwoPhaseHASCO<?, ?, ?>) this.optimizingFactory.getOptimizer()).getHasco();
-		return hasco.getSearch();
+		return this.getHASCO().getSearch();
 	}
 
 	@Subscribe

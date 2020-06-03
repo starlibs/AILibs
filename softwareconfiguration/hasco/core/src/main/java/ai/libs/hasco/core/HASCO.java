@@ -82,7 +82,8 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 	/* runtime variables of algorithm */
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
 
-	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver, final IOptimalPathInORGraphSearchFactory<S, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory,
+	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver,
+			final IOptimalPathInORGraphSearchFactory<S, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory,
 			final AlgorithmicProblemReduction<? super GraphSearchWithPathEvaluationsInput<N, A, V>, ? super EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer) {
 		this(ConfigFactory.create(HASCOConfig.class), configurationProblem, planningGraphGeneratorDeriver, searchFactory, searchProblemTransformer);
 	}
@@ -126,18 +127,20 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 				new SoftwareConfigurationProblem<V>(this.getInput().getComponents(), this.getInput().getRequiredInterface(), this.timeGrabbingEvaluationWrapper), this.getInput().getParamRefinementConfig());
 		HASCOReduction<V> hascoReduction = new HASCOReduction<>(this::getBestSeenSolution);
 		this.planningProblem = hascoReduction.encodeProblem(refConfigSoftwareConfigurationProblem);
-		if (this.logger.isDebugEnabled()) {
-			String operations = this.planningProblem.getCorePlanningProblem().getDomain().getOperations().stream()
-					.map(o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: " + o.getPrecondition() + "\n\t\t\tAdd List: " + o.getAddLists() + "\n\t\t\tDelete List: " + o.getDeleteLists()).collect(Collectors.joining());
-			String methods = this.planningProblem.getCorePlanningProblem().getDomain().getMethods().stream().map(m -> "\n\t\t" + m.getName() + "(" + m.getParameters() + ") for task " + m.getTask() + "\n\t\t\tPre: " + m.getPrecondition()
-			+ "\n\t\t\tPre Eval: " + m.getEvaluablePrecondition() + "\n\t\t\tNetwork: " + m.getNetwork().getLineBasedStringRepresentation()).collect(Collectors.joining());
-			this.logger.debug("Derived the following HTN planning problem:\n\tOperations:{}\n\tMethods:{}", operations, methods);
-		}
-		this.searchProblem = new CostSensitivePlanningToSearchProblemReduction<N, A, V, CEOCIPSTNPlanningProblem, S, EvaluatedSearchGraphPath<N, A, V>>(this.planningGraphGeneratorDeriver, searchProblemTransformer).encodeProblem(this.planningProblem);
+		this.searchProblem = new CostSensitivePlanningToSearchProblemReduction<N, A, V, CEOCIPSTNPlanningProblem, S, EvaluatedSearchGraphPath<N, A, V>>(this.planningGraphGeneratorDeriver, searchProblemTransformer)
+				.encodeProblem(this.planningProblem);
 
 		/* create search object */
 		this.logger.debug("Creating and initializing the search object");
 		this.search = this.searchFactory.getAlgorithm(this.searchProblem);
+
+		/* now tell some of the used components that they are used here */
+		if (planningGraphGeneratorDeriver instanceof IHascoAware) {
+			((IHascoAware) planningGraphGeneratorDeriver).setHascoReference(this);
+		}
+		if (searchProblemTransformer instanceof IHascoAware) {
+			((IHascoAware) searchProblemTransformer).setHascoReference(this);
+		}
 	}
 
 	@Override
@@ -151,7 +154,19 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 		/* act depending on state */
 		switch (this.getState()) {
 		case CREATED:
-			this.logger.info("Starting HASCO run.");
+			this.logger.info("Starting HASCO run. Enable DEBUG to get an overview of the considered HTN planning problem.");
+			if (this.logger.isInfoEnabled()) {
+				String reqInterface = this.getInput().getRequiredInterface();
+				this.logger.info("HASCO Configuration:\n\tRequired Interface: {}\n\tComponents: {}", reqInterface,
+						this.getInput().getComponents().stream().map(c -> "\n\t\t [" + (c.getProvidedInterfaces().contains(reqInterface) ? "*" : " ") + "]" + c.toString()).collect(Collectors.joining()));
+			}
+			if (this.logger.isDebugEnabled()) {
+				String operations = this.planningProblem.getCorePlanningProblem().getDomain().getOperations().stream()
+						.map(o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: " + o.getPrecondition() + "\n\t\t\tAdd List: " + o.getAddLists() + "\n\t\t\tDelete List: " + o.getDeleteLists()).collect(Collectors.joining());
+				String methods = this.planningProblem.getCorePlanningProblem().getDomain().getMethods().stream().map(m -> "\n\t\t" + m.getName() + "(" + m.getParameters() + ") for task " + m.getTask() + "\n\t\t\tPre: " + m.getPrecondition()
+						+ "\n\t\t\tPre Eval: " + m.getEvaluablePrecondition() + "\n\t\t\tNetwork: " + m.getNetwork().getLineBasedStringRepresentation()).collect(Collectors.joining());
+				this.logger.debug("Derived the following HTN planning problem:\n\tOperations:{}\n\tMethods:{}", operations, methods);
+			}
 			AlgorithmInitializedEvent event = this.activate();
 
 			/* analyze problem */
@@ -222,8 +237,7 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 				this.logger.debug("Search has been initialized.");
 				this.logger.info("HASCO initialization completed.");
 				return event;
-			}
-			catch (AlgorithmException e) {
+			} catch (AlgorithmException e) {
 				throw new AlgorithmException("HASCO initialization failed.\nOne possible reason is that the graph has no solution.", e);
 			}
 
