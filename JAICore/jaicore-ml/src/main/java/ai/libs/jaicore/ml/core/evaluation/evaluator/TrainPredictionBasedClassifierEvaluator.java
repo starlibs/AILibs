@@ -55,7 +55,7 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 			List<ILearnerRunReport> reports = new ArrayList<>(n);
 			for (int i = 0; i < n; i++) {
 				List<ILabeledDataset<? extends ILabeledInstance>> folds = splitSet.getFolds(i);
-				this.logger.debug("Executing learner{} on folds of sizes {} (train) and {} (test) using {}.", learner, folds.get(0).size(), folds.get(1).size(), this.executor.getClass().getName());
+				this.logger.debug("Executing learner {} on folds of sizes {} (train) and {} (test) using {}.", learner, folds.get(0).size(), folds.get(1).size(), this.executor.getClass().getName());
 				ILearnerRunReport report;
 				try {
 					report = this.executor.execute(learner, folds.get(0), folds.get(1));
@@ -120,15 +120,15 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 
 	@Override
 	public void setLoggerName(final String name) {
-		 this.logger = LoggerFactory.getLogger(name);
-		 if (this.splitGenerator instanceof ILoggingCustomizable) {
-		 ((ILoggingCustomizable) this.splitGenerator).setLoggerName(name + ".splitgen");
-		 this.logger.trace("Setting logger of split generator {} to {}.splitgen", this.splitGenerator.getClass().getName(), name);
-		 } else {
-		 this.logger.trace("Split generator {} is not configurable for logging, so not configuring it.", this.splitGenerator.getClass().getName());
-		 }
-		 this.executor.setLoggerName(name + ".executor");
-		 this.logger.trace("Setting logger of learner executor {} to {}.executor", this.executor.getClass().getName(), name);
+		this.logger = LoggerFactory.getLogger(name);
+		if (this.splitGenerator instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.splitGenerator).setLoggerName(name + ".splitgen");
+			this.logger.trace("Setting logger of split generator {} to {}.splitgen", this.splitGenerator.getClass().getName(), name);
+		} else {
+			this.logger.trace("Split generator {} is not configurable for logging, so not configuring it.", this.splitGenerator.getClass().getName());
+		}
+		this.executor.setLoggerName(name + ".executor");
+		this.logger.trace("Setting logger of learner executor {} to {}.executor", this.executor.getClass().getName(), name);
 	}
 
 	@Override
