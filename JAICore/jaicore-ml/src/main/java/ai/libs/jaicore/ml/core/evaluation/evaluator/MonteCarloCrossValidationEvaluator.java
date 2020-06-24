@@ -9,6 +9,7 @@ import org.api4.java.ai.ml.core.evaluation.execution.IAggregatedPredictionPerfor
 
 import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
+import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.CachingMonteCarloCrossValidationSplitSetGenerator;
 import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.FixedDataSplitSetGenerator;
 import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValidationSplitSetGenerator;
 
@@ -26,10 +27,10 @@ public class MonteCarloCrossValidationEvaluator extends TrainPredictionBasedClas
 	public MonteCarloCrossValidationEvaluator(final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random, final IAggregatedPredictionPerformanceMeasure metric) {
 		this(data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, metric);
 	}
-
-	public MonteCarloCrossValidationEvaluator(final ILabeledDataset<? extends ILabeledInstance> data, final IRandomDatasetSplitter<ILabeledDataset<ILabeledInstance>> datasetSplitter, final int repeats, final Random random,
+  
+	public MonteCarloCrossValidationEvaluator(final boolean cacheSplitSets, final ILabeledDataset<? extends ILabeledInstance> data, final IRandomDatasetSplitter<ILabeledDataset<ILabeledInstance>> datasetSplitter, final int repeats, final Random random,
 			final IAggregatedPredictionPerformanceMeasure metric) {
-		super(new FixedDataSplitSetGenerator(data, new MonteCarloCrossValidationSplitSetGenerator<>(datasetSplitter, repeats, random)), metric);
+		super(new FixedDataSplitSetGenerator(data, (cacheSplitSets ? new CachingMonteCarloCrossValidationSplitSetGenerator<>(datasetSplitter, repeats, random) : new MonteCarloCrossValidationSplitSetGenerator<>(datasetSplitter, repeats, random))), metric);
 		this.datasetSplitter = datasetSplitter;
 		this.repeats = repeats;
 		this.random = random;

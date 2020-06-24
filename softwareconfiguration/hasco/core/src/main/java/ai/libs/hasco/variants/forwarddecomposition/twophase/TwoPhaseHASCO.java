@@ -141,10 +141,11 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 
 			/* set HASCO objects within the default path prioritizing node evaluator */
 			prioritizingPredicate.setHascoReference(this.hasco);
+			this.setHASCOLoggerNameIfPossible();
 			this.logger.info("Initialized HASCO with start time {}.", this.timeOfStart);
 			return event;
 
-			/* active is only one step in this model; this could be refined */
+		/* active is only one step in this model; this could be refined */
 		case ACTIVE:
 
 			/* phase 1: gather solutions */
@@ -195,7 +196,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 					this.phase1CancellationTask.cancel();
 				}
 			}
-			this.secondsSpentInPhase1 = (int) Math.round(System.currentTimeMillis() - this.timeOfStart / 1000.0);
+			this.secondsSpentInPhase1 = (int) Math.round((System.currentTimeMillis() - this.timeOfStart) / 1000.0);
 
 			/* if there is no candidate, and the remaining time is very small, throw an AlgorithmTimeoutedException */
 			this.logger.info("HASCO has finished. {} solutions were found.", this.phase1ResultQueue.size());

@@ -21,7 +21,7 @@ public class FDAndBestFirstWithRandomCompletionTransformer<V extends Comparable<
 	@Override
 	public void setHascoReference(final HASCO hasco) {
 		if (this.getPrioritizedNodePredicatesForRandomCompletion() instanceof IHascoAware) {
-			((IHascoAware)this.getPrioritizedNodePredicatesForRandomCompletion()).setHascoReference(hasco);
+			((IHascoAware) this.getPrioritizedNodePredicatesForRandomCompletion()).setHascoReference(hasco);
 		}
 		this.hasco = hasco;
 	}

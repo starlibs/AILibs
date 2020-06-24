@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
@@ -32,16 +34,16 @@ public class MLPlanSKLearnExample {
 		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(60);
 		List<ILabeledDataset<?>> testSplit = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
-		MLPlanSKLearnBuilder builder = new MLPlanSKLearnBuilder();
+		MLPlanSKLearnBuilder<SingleLabelClassification, SingleLabelClassificationPredictionBatch> builder = new MLPlanSKLearnBuilder<>();
 		builder.withTimeOut(TIMEOUT);
 		builder.withNodeEvaluationTimeOut(new Timeout(90, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS));
 		builder.withDataset(testSplit.get(0));
 
-		MLPlan<ScikitLearnWrapper> mlplan = builder.build();
+		MLPlan<ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>> mlplan = builder.build();
 		mlplan.setLoggerName("sklmlplanc");
 
-		ScikitLearnWrapper wrapper = mlplan.call();
+		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> wrapper = mlplan.call();
 
 		List<Integer> actual = wrapper.predict(testSplit.get(1)).stream().map(x -> x.getPrediction()).collect(Collectors.toList());
 		List<Integer> expected = testSplit.get(1).stream().map(x -> (int) x.getLabel()).collect(Collectors.toList());

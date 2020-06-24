@@ -35,11 +35,10 @@ public class DefaultPathPriorizingPredicate<N, A> implements Predicate<N>, IHasc
 		if (this.hasco.getInput() == null) {
 			throw new IllegalStateException("HASCO exists, but its problem input has not been defined yet.");
 		}
-		TFDNode tfd = (TFDNode)node;
+		TFDNode tfd = (TFDNode) node;
 		Monom stateAfterLastAction = tfd.getState();
 
 		/* now check whether the last edge was a method that will necessary induce a certain successor state  */
-
 		ComponentInstance inst = Util.getSolutionCompositionFromState(this.hasco.getInput().getComponents(), stateAfterLastAction, false);
 		if (inst == null) {
 			return true;

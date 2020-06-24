@@ -25,9 +25,23 @@ public class DefaultProcessListener extends AProcessListener {
 
 	/**
 	 * Constructor to initialize the DefaultProcessListener.
+	 *
 	 * @param verbose Flag whether standard outputs are forwarded to the logger.
 	 */
 	public DefaultProcessListener(final boolean verbose) {
+		super();
+		this.verbose = verbose;
+		this.errorSB = new StringBuilder();
+		this.defaultSB = new StringBuilder();
+	}
+
+	/**
+	 * Constructor to initialize the DefaultProcessListener.
+	 *
+	 * @param verbose Flag whether standard outputs are forwarded to the logger.
+	 */
+	public DefaultProcessListener(final boolean verbose, final boolean listenToPIDFromProcess) {
+		super(listenToPIDFromProcess);
 		this.verbose = verbose;
 		this.errorSB = new StringBuilder();
 		this.defaultSB = new StringBuilder();

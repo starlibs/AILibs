@@ -11,4 +11,5 @@ public interface IHascoAware {
 	public void setHascoReference(HASCO hasco);
 
 	public HASCO getHASCOReference();
+
 }
