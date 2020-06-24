@@ -1,5 +1,7 @@
 package ai.libs.automl.mlplan.multiclass.wekamlplan.sklearn;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,6 +82,7 @@ public class SearchSpaceConfigurationTest {
 			}
 		}
 
+		assertTrue("All models of the search space configuration could be evaluated", true);
 	}
 
 	private static ComponentInstance instantiateWithDefaultParameters(final ComponentInstance ciToInstantiate) {

@@ -154,7 +154,9 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 	@Override
 	public MLPlanSKLearnBuilder<P, B> withClassifierFactory(final ILearnerFactory<ScikitLearnWrapper<P, B>> factory) {
 		super.withClassifierFactory(factory);
-		this.logger.info("Setting factory for the problem type {}: {}", this.problemType.name(), factory.getClass().getSimpleName());
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("Setting factory for the problem type {}: {}", this.problemType.name(), factory.getClass().getSimpleName());
+		}
 		if (this.problemType != null) {
 			if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
 				((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setProblemType(this.problemType.getBasicProblemType());
@@ -168,7 +170,9 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 	@SuppressWarnings("unchecked")
 	public MLPlanSKLearnBuilder<P, B> withProblemType(final EMLPlanSkLearnProblemType problemType) throws IOException {
 		this.problemType = problemType;
-		this.logger.info("Setting problem type to {}.", this.problemType.name());
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("Setting problem type to {}.", this.problemType.name());
+		}
 		if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
 			SKLearnClassifierFactory<P, B> factory = ((SKLearnClassifierFactory<P, B>) this.getLearnerFactory());
 			factory.setProblemType(this.problemType.getBasicProblemType());
