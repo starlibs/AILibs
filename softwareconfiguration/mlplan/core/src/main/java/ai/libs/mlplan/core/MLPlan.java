@@ -12,6 +12,7 @@ import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomData
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.Timeout;
@@ -55,6 +56,8 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
 import ai.libs.mlplan.core.events.MLPlanPhaseSwitchedEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.safeguard.IEvaluationSafeGuard;
+import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
 
 public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> extends AAlgorithm<ILabeledDataset<?>, L> implements ILoggingCustomizable {
 
@@ -208,9 +211,25 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			PipelineEvaluator classifierEvaluatorForSearch;
 			PipelineEvaluator classifierEvaluatorForSelection;
 			try {
-				classifierEvaluatorForSearch = new PipelineEvaluator(this.builder.getLearnerFactory(), evaluatorFactoryForSearch.getLearnerEvaluator(), this.getConfig().timeoutForCandidateEvaluation());
-				classifierEvaluatorForSelection = dataShownToSelection != null ? new PipelineEvaluator(this.builder.getLearnerFactory(), evaluatorFactoryForSelection.getLearnerEvaluator(), this.getConfig().timeoutForCandidateEvaluation())
-						: null;
+				ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> searchEvaluator = evaluatorFactoryForSearch.getLearnerEvaluator();
+				classifierEvaluatorForSearch = new PipelineEvaluator(this.builder.getLearnerFactory(), searchEvaluator, new Timeout(this.getConfig().timeoutForCandidateEvaluation(), TimeUnit.MILLISECONDS));
+				if (this.builder.getSafeGuardFactory() != null) {
+					IEvaluationSafeGuardFactory safeGuardFactory = this.builder.getSafeGuardFactory();
+					safeGuardFactory.withEvaluator(searchEvaluator);
+					try {
+						IEvaluationSafeGuard safeGuard = safeGuardFactory.build();
+						safeGuard.registerListener(this);
+						classifierEvaluatorForSearch.setSafeGuard(safeGuard);
+					} catch (InterruptedException e) {
+						throw e;
+					} catch (Exception e) {
+						throw new AlgorithmException("Could not build safe guard.", e);
+					}
+				}
+
+				classifierEvaluatorForSelection = dataShownToSelection != null
+						? new PipelineEvaluator(this.builder.getLearnerFactory(), evaluatorFactoryForSelection.getLearnerEvaluator(), new Timeout(this.getConfig().timeoutForCandidateEvaluation(), TimeUnit.MILLISECONDS))
+								: null;
 			} catch (LearnerEvaluatorConstructionFailedException e2) {
 				throw new AlgorithmException("Could not create the pipeline evaluator", e2);
 			}

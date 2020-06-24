@@ -127,7 +127,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	@Override
-	public void setTimeout(final long timeout, final TimeUnit timeUnit) {
+	public final void setTimeout(final long timeout, final TimeUnit timeUnit) {
 		this.setTimeout(new Timeout(timeout, timeUnit));
 	}
 
@@ -396,8 +396,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		if (this.getTimeout().milliseconds() > 0) {
 			this.deadline = System.currentTimeMillis() + this.getTimeout().milliseconds() - this.timeoutPrecautionOffset;
 			this.logger.info("Timeout is {}. Setting deadline to timestamp {}. Remaining time: {}", this.getTimeout(), this.deadline, this.getRemainingTimeToDeadline());
-		}
-		else {
+		} else {
 			this.deadline = System.currentTimeMillis() + 86400 * 1000 * 365;
 			this.logger.info("No timeout defined. Setting deadline to timestamp {}. Remaining time: {}", this.deadline, this.getRemainingTimeToDeadline());
 		}
@@ -492,7 +491,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 		/* conduct timed computation */
 		try {
-			return TimedComputation.compute(r, remainingTime - this.timeoutPrecautionOffset, reasonToLogOnTimeout);
+			return TimedComputation.compute(r, new Timeout(remainingTime - this.timeoutPrecautionOffset, TimeUnit.MILLISECONDS), reasonToLogOnTimeout);
 		} catch (AlgorithmTimeoutedException e) {
 			this.logger.debug("TimedComputation has been timeouted. Setting the TimeoutDetection flag to now. Remaining time is {}ms.", this.getRemainingTimeToDeadline().milliseconds());
 			this.timeOfTimeoutDetection = System.currentTimeMillis();

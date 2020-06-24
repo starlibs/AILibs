@@ -41,6 +41,10 @@ public class Parameter {
 		return this.defaultValue;
 	}
 
+	public boolean isDefaultValue(final Object value) {
+		return this.defaultDomain.isEquals(this.defaultValue, value);
+	}
+
 	public boolean isNumeric() {
 		return this.defaultDomain instanceof NumericParameterDomain;
 	}

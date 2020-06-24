@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -63,8 +65,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 	}
 
 	@Override
-	public IAlgorithmEvent nextWithException()
-			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
 		case CREATED:
 			// Sort dataset and skip with reader the ARFF header.
@@ -76,14 +77,14 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 				}
 				this.setDeadline();
 				long remainingMS = this.getRemainingTimeToDeadline().milliseconds() - this.getTimeoutPrecautionOffset();
-				sortedDatasetFile = TimedComputation.compute(() -> this.sorter.sort(
-						this.tempFileHandler.getTempFileDirPath() + File.separator + UUID.randomUUID().toString()), remainingMS, "No time left");
+				sortedDatasetFile = TimedComputation.compute(() -> this.sorter.sort(this.tempFileHandler.getTempFileDirPath() + File.separator + UUID.randomUUID().toString()), new Timeout(remainingMS, TimeUnit.MILLISECONDS),
+						"No time left");
 				sortedDatasetFile.deleteOnExit();
 				this.sortedDatasetFileReader = new BufferedReader(new FileReader(sortedDatasetFile));
 				ArffUtilities.skipWithReaderToDatapoints(this.sortedDatasetFileReader);
 			} catch (IOException | ExecutionException e) {
 				if (e.getCause() instanceof AlgorithmExecutionCanceledException) {
-					throw (AlgorithmExecutionCanceledException)e.getCause();
+					throw (AlgorithmExecutionCanceledException) e.getCause();
 				}
 				throw new AlgorithmException("Was not able to create a sorted dataset file.", e);
 			}

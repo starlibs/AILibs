@@ -109,7 +109,7 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 		}
 	}
 
-	protected IFixedDatasetSplitSetGenerator<ILabeledDataset<? extends ILabeledInstance>> getSplitGenerator() {
+	public IFixedDatasetSplitSetGenerator<ILabeledDataset<? extends ILabeledInstance>> getSplitGenerator() {
 		return this.splitGenerator;
 	}
 

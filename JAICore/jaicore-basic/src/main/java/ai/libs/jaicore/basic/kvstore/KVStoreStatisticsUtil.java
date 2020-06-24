@@ -445,7 +445,7 @@ public class KVStoreStatisticsUtil {
 		}
 		return averageRanks;
 	}
-
+  
 	public static void bestWilcoxonSignedRankTest(final KVStoreCollection collection, final String setting, final String sampleID, final String pairingIndices, final String sampledValues, final String output) {
 		String bestField = output + "_best";
 		KVStoreCollectionOneLayerPartition bestPart = new KVStoreCollectionOneLayerPartition(setting, collection);

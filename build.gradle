@@ -45,8 +45,8 @@ allprojects {
 	project.version = '0.2.0'
 	
 	ext {
-	    ossrhUsername = hasProperty('ossrhUsername') ? ossrhUsername : System.getenv("ossrhUsername")
-	    ossrhPassword = hasProperty('ossrhPassword') ? ossrhPassword : System.getenv("ossrhPassword")
+	    ossrhUsername = project.hasProperty('ossrhUsername') ? ossrhUsername : System.getenv("ossrhUsername")
+	    ossrhPassword = project.hasProperty('ossrhPassword') ? ossrhPassword : System.getenv("ossrhPassword")
 	    
 	    // api4 dependencies
 	    api4Version = '1.0.0'
@@ -85,9 +85,9 @@ allprojects {
 	    fastUtil = 'it.unimi.dsi:fastutil:8.2.1' // JAICore-Basic
 	    mtj = 'io.github.andreas-solti.matrix-toolkits-java:mtj:1.0.8'
 	    jna = 'net.java.dev.jna:jna:4.5.2' // JAICore-Processes
-	    weka = 'ai.libs.thirdparty:interruptible-weka:0.1.2'
+	    weka = 'ai.libs.thirdparty:interruptible-weka:0.1.5'
 	    wekaRotationForest = 'nz.ac.waikato.cms.weka:rotationForest:1.0.3'
-	    meka = 'ai.libs.thirdparty:interruptible-meka:0.1.0'
+	    meka = 'ai.libs.thirdparty:interruptible-meka:0.1.1'
 	    mysql = 'mysql:mysql-connector-java:5.1.45'
 	    moea = 'org.moeaframework:moeaframework:2.12'
 	    cli = 'commons-cli:commons-cli:1.4'
@@ -233,7 +233,6 @@ task showDirs {
 dependencies{
 	compile project(":hasco-core")
 	compile project(":hasco-fanova")
-	compile project(":hyperopt")
 	//compile project(":autofe")
 	//compile project(":autofe-reldata")
 	compile project(":mlplan-core")

@@ -374,7 +374,7 @@ public class ComponentLoader {
 
 					this.requiredInterfaces.addAll(c.getRequiredInterfaces().values());
 					this.providedInterfaces.addAll(c.getProvidedInterfaces());
-				} catch (Exception e) {
+        } catch (Exception e)  {
 					throw new IllegalStateException("Could not parse component " + component.get("name") + " due to exception.", e);
 				}
 			}

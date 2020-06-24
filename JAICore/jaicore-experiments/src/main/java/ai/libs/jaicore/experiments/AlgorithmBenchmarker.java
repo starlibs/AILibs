@@ -52,10 +52,11 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 			IAlgorithm<?, ?> algorithm = this.caps.decoder.getAlgorithm(experimentEntry.getExperiment());
 			this.logger.debug("Created optimizer {} for problem instance {}. Configuring logger name if possible.", algorithm, algorithm.getInput());
 			if (algorithm instanceof ILoggingCustomizable) {
-				((ILoggingCustomizable) algorithm).setLoggerName(this.getLoggerName() + ".optimizer");
+				((ILoggingCustomizable) algorithm).setLoggerName(this.getLoggerName() + ".algorithm");
 			}
 
 			final List<IEventBasedResultUpdater> resultUpdaters = this.controller.getResultUpdaterComputer(experimentEntry.getExperiment());
+			resultUpdaters.forEach(ru -> ru.setAlgorithm(algorithm));
 			final List<IExperimentTerminationCriterion> terminationCriteria = this.controller.getTerminationCriteria(experimentEntry.getExperiment());
 
 			/* create thread to process events */
@@ -63,7 +64,12 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 			this.eventThread = new Thread(() -> {
 
 				while (!Thread.currentThread().isInterrupted()) {
-					IAlgorithmEvent e = eventQueue.poll();
+					IAlgorithmEvent e;
+					try {
+						e = eventQueue.take();
+					} catch (InterruptedException e1) {
+						break;
+					}
 
 					/* update result */
 					final Map<String, Object> results = new HashMap<>();
@@ -92,9 +98,10 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 				}
 			});
 
-			/* run search algorithm */
+			/* run algorithm */
 			Thread t = new Thread(() -> {
 				try {
+					this.logger.info("Running call method on {}", algorithm);
 					algorithm.call();
 				} catch (AlgorithmExecutionCanceledException e) {
 					this.logger.info("CANCEL");

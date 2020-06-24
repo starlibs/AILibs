@@ -130,8 +130,7 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
 		this.priorityPredicateForRDFS = priorityPredicateForRDFS;
 
-		this.logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node. Prioriziting predicate: {}", timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS,
-				priorityPredicateForRDFS);
+		this.logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node. Prioriziting predicate: {}", timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, priorityPredicateForRDFS);
 
 		/* check whether assertions are on */
 		assert this.logAssertionActivation();
@@ -268,13 +267,13 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 								this.logger.warn("Got NULL result as score for evaluation with id {}", evaluationId);
 							}
 							return true;
-						}, timeoutForJob, "RCNE-timeout for evaluation with id " + evaluationId);
+						}, new Timeout(timeoutForJob, TimeUnit.MILLISECONDS), "RCNE-timeout for evaluation with id " + evaluationId);
 					} catch (InterruptedException e) { // Interrupts are directly re-thrown
 						this.logger.debug("Path evaluation has been interrupted.");
 						throw e;
 					} catch (Exception ex) {
 						if (countedExceptions == this.maxSamples) {
-							this.logger.warn("Too many retry attempts, giving up. {} samples were drawn, {} were successful.", drawnSamples, successfulSamples);
+							this.logger.warn("Too many retry attempts, giving up. {} samples were drawn, {} were successful.", drawnSamples, successfulSamples, path.getHead());
 							throw new PathEvaluationException("Error in the evaluation of a node!", ex);
 						} else {
 							countedExceptions++;

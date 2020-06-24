@@ -21,13 +21,13 @@ public class MonteCarloCrossValidationEvaluator extends TrainPredictionBasedClas
 	private final IAggregatedPredictionPerformanceMeasure metric;
 
 	public MonteCarloCrossValidationEvaluator(final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random) {
-		this(false, data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, EAggregatedClassifierMetric.MEAN_ERRORRATE);
+		this(data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, EAggregatedClassifierMetric.MEAN_ERRORRATE);
 	}
 
-	public MonteCarloCrossValidationEvaluator(final boolean cacheSplitSets, final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random, final IAggregatedPredictionPerformanceMeasure metric) {
-		this(cacheSplitSets, data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, metric);
+	public MonteCarloCrossValidationEvaluator(final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random, final IAggregatedPredictionPerformanceMeasure metric) {
+		this(data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, metric);
 	}
-
+  
 	public MonteCarloCrossValidationEvaluator(final boolean cacheSplitSets, final ILabeledDataset<? extends ILabeledInstance> data, final IRandomDatasetSplitter<ILabeledDataset<ILabeledInstance>> datasetSplitter, final int repeats, final Random random,
 			final IAggregatedPredictionPerformanceMeasure metric) {
 		super(new FixedDataSplitSetGenerator(data, (cacheSplitSets ? new CachingMonteCarloCrossValidationSplitSetGenerator<>(datasetSplitter, repeats, random) : new MonteCarloCrossValidationSplitSetGenerator<>(datasetSplitter, repeats, random))), metric);
@@ -36,7 +36,11 @@ public class MonteCarloCrossValidationEvaluator extends TrainPredictionBasedClas
 		this.random = random;
 		this.metric = metric;
 	}
-	
+
+	public int getRepeats() {
+		return this.repeats;
+	}
+
 	@Override
 	public String toString() {
 		return "MonteCarloCrossValidationEvaluator [splitter = " + this.datasetSplitter + ", repeats = " + this.repeats + ", Random = " + this.random + ", metric = " + this.metric.getBaseMeasure() + "]";

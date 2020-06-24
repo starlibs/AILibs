@@ -1,9 +1,11 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.ILabeledPath;
@@ -61,7 +63,7 @@ public abstract class TimeAwareNodeEvaluator<T, A, V extends Comparable<V>> impl
 
 		/* execute evaluation */
 		try {
-			return TimedComputation.compute(() -> this.fTimeouted(path, grantedTime), interruptionTime,
+			return TimedComputation.compute(() -> this.fTimeouted(path, grantedTime), new Timeout(interruptionTime, TimeUnit.MILLISECONDS),
 					"Node evaluation has timed out (" + TimeAwareNodeEvaluator.class.getName() + "::" + Thread.currentThread() + "-" + System.currentTimeMillis() + ")");
 		} catch (AlgorithmTimeoutedException e) {
 			this.logger.warn("Computation of f-value for {} failed due to exception {} with message {}", path, e.getClass().getName(), e.getMessage());

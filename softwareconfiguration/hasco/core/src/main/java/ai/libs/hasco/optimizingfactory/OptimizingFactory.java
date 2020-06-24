@@ -54,10 +54,6 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 		case CREATED:
 
 			/* initialize optimizer */
-			if (this.loggerName != null) {
-				this.logger.info("Setting logger of optimizer {} to {}.optAlgo", this.optimizer.getClass().getName(), this.loggerName);
-				this.optimizer.setLoggerName(this.loggerName + ".optAlgo");
-			}
 			IAlgorithmEvent initEvent = this.optimizer.next();
 			assert initEvent instanceof AlgorithmInitializedEvent : "The first event emitted by the optimizer has not been its AlgorithmInitializationEvent";
 			return this.activate();
@@ -122,6 +118,9 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 		this.loggerName = name;
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
+		//		if (this.optimizer instanceof ILoggingCustomizable) {
+		//			this.optimizer.setLoggerName(name + ".optimizer");
+		//		}
 		super.setLoggerName(this.loggerName + "._algorithm");
 	}
 

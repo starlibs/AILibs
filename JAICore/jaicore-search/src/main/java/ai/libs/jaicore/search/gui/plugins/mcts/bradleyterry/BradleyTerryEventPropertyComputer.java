@@ -9,7 +9,7 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyComputationFailedException;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
-import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.ObservationsUpdatedEvent;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.comparison.ObservationsUpdatedEvent;
 
 public class BradleyTerryEventPropertyComputer implements AlgorithmEventPropertyComputer {
 

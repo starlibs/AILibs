@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 /**
  * This class provides handy utility functions when dealing with Strings.
@@ -249,4 +250,38 @@ public class StringUtil {
 			throw new NoSuchElementException("Could not find an element with prefix " + prefix + " in the given collection.");
 		}
 	}
+
+	/**
+	 * Returns a string consisting of the given number of spaces.
+	 * @param numSpaces The number of spaces to output.
+	 * @return The string of numSpaces many spaces.
+	 */
+	public static String spaces(final int numSpaces) {
+		if (numSpaces == 0) {
+			return "";
+		} else {
+			return IntStream.range(0, numSpaces).mapToObj(x -> " ").reduce((a, b) -> a + b).get();
+		}
+	}
+
+	/**
+	 * Returns a string which is padded with spaces to obtain a string of length <code>length</code>. Spaces are prepended to the given string.
+	 * @param stringToPad The string to pad with spaces.
+	 * @param length The desired length of the padded string.
+	 * @return The given string padded with spaces prior to the provided string.
+	 */
+	public static String prepaddedString(final String stringToPad, final int length) {
+		return spaces(length - stringToPad.length()).concat(stringToPad);
+	}
+
+	/**
+	 * Returns a string which is padded with spaces to obtain a string of length <code>length</code>. Spaces are appended to the given string.
+	 * @param stringToPad The string to pad with spaces.
+	 * @param length The desired length of the padded string.
+	 * @return The given string padded with spaces prior to the provided string.
+	 */
+	public static String postpaddedString(final String stringToPad, final int length) {
+		return stringToPad.concat(spaces(length - stringToPad.length()));
+	}
+
 }

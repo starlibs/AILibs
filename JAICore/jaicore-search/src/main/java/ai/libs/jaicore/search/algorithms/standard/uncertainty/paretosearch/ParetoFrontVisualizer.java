@@ -17,16 +17,8 @@ public class ParetoFrontVisualizer {
 	private final List<Double> fValues;
 	private final List<Double> uncertainties;
 
-	public ParetoFrontVisualizer () {
-		this.chart = new XYChartBuilder()
-				.width(600)
-				.height(500)
-				.title("Paretofront Visualizer")
-				.theme(ChartTheme.Matlab)
-				.xAxisTitle("Uncertainty")
-				.yAxisTitle("F Value")
-				.build();
-
+	public ParetoFrontVisualizer() {
+		this.chart = new XYChartBuilder().width(600).height(500).title("Paretofront Visualizer").theme(ChartTheme.Matlab).xAxisTitle("Uncertainty").yAxisTitle("F Value").build();
 		this.chart.getStyler().setYAxisMin(0.0d);
 		this.chart.getStyler().setXAxisMin(0.0d);
 		this.chart.getStyler().setYAxisMax(1.0d);
@@ -34,7 +26,7 @@ public class ParetoFrontVisualizer {
 		this.chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Scatter);
 		this.chart.getStyler().setLegendPosition(LegendPosition.OutsideS);
 		this.chart.getStyler().setMarkerSize(4);
-		this.chart.addSeries("Paretofront Candidates", new double[] {1}, new double[] {1});
+		this.chart.addSeries("Paretofront Candidates", new double[] { 1 }, new double[] { 1 });
 
 		this.vis = new SwingWrapper<>(this.chart);
 
@@ -42,11 +34,11 @@ public class ParetoFrontVisualizer {
 		this.uncertainties = new ArrayList<>();
 	}
 
-	public void show () {
+	public void show() {
 		this.vis.displayChart();
 	}
 
-	public void update (final double fValue, final double uncertainty) {
+	public void update(final double fValue, final double uncertainty) {
 		this.fValues.add(fValue);
 		this.uncertainties.add(uncertainty);
 
@@ -62,7 +54,7 @@ public class ParetoFrontVisualizer {
 				this.vis.repaintChart();
 			});
 		} else {
-			System.out.println("ERROR: Unqueal value amounts");
+			throw new IllegalStateException("Unqueal value amounts");
 		}
 	}
 

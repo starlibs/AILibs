@@ -2,13 +2,13 @@ package ai.libs.jaicore.search.gui.plugins.mcts.dng;
 
 public class DNGQSample {
 	private final String node;
-	private final String successor;
+	private final String action;
 	private final double score;
 
-	public DNGQSample(final String node, final String successor, final double score) {
+	public DNGQSample(final String node, final String action, final double score) {
 		super();
 		this.node = node;
-		this.successor = successor;
+		this.action = action;
 		this.score = score;
 	}
 
@@ -17,7 +17,7 @@ public class DNGQSample {
 	}
 
 	public String getSuccessor() {
-		return this.successor;
+		return this.action;
 	}
 
 	public double getScore() {

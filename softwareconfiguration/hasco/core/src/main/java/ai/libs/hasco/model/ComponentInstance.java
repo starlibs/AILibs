@@ -37,6 +37,8 @@ public class ComponentInstance {
 	private final Map<String, String> parameterValues;
 	private final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces;
 
+	private final Map<String, String> annotations = new HashMap<>();
+
 	@SuppressWarnings("unused")
 	private ComponentInstance() {
 		// for serialization purposes
@@ -50,6 +52,7 @@ public class ComponentInstance {
 		this.parameterValues = new HashMap<>(other.parameterValues);
 		this.satisfactionOfRequiredInterfaces = new HashMap<>();
 		other.satisfactionOfRequiredInterfaces.entrySet().forEach(x -> this.satisfactionOfRequiredInterfaces.put(x.getKey(), new ComponentInstance(x.getValue())));
+		other.annotations.entrySet().forEach(x -> this.annotations.put(x.getKey(), x.getValue()));
 	}
 
 	/**
@@ -275,6 +278,32 @@ public class ComponentInstance {
 		sb.append(this.getComponent().getName());
 		this.satisfactionOfRequiredInterfaces.values().stream().map(x -> " - " + x.getNestedComponentDescription()).forEach(sb::append);
 		return sb.toString();
+	}
+
+	/**
+	 * Add an annotation to this component instance.
+	 * @param key The key of how to address this annotation.
+	 * @param annotation The annotation value.
+	 */
+	public void putAnnotation(final String key, final String annotation) {
+		this.annotations.put(key, annotation);
+	}
+
+	/**
+	 * Retrieve an annotation by its key.
+	 * @param key The key for which to retrieve the annotation.
+	 * @return The annotation value.
+	 */
+	public String getAnnotation(final String key) {
+		return this.annotations.get(key);
+	}
+
+	public void appendAnnotation(final String key, final String annotation) {
+		if (this.annotations.containsKey(key)) {
+			this.annotations.put(key, this.annotations.get(key) + annotation);
+		} else {
+			this.annotations.put(key, annotation);
+		}
 	}
 
 	public boolean isDefaultParametrized() {
