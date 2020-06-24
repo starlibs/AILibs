@@ -337,7 +337,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification((int) (double) x)).collect(Collectors.toList()));
 		} else if (this.problemType == EBasicProblemType.RUL) {
 			if (L.isInfoEnabled()) {
-				L.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()).toString());
+				L.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()));
 			}
 			L.debug("#Created construction string: {}", this.constructInstruction);
 			return (B) new SingleTargetRegressionPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleTargetRegressionPrediction((double) x)).collect(Collectors.toList()));

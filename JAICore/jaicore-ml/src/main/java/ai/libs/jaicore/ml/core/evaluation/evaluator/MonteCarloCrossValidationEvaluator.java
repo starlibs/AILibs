@@ -26,7 +26,7 @@ public class MonteCarloCrossValidationEvaluator extends TrainPredictionBasedClas
 
 	public MonteCarloCrossValidationEvaluator(final boolean cacheSplitSets, final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random,
 			final IAggregatedPredictionPerformanceMeasure metric) {
-		this(cacheSplitSets, data, new RandomHoldoutSplitter<ILabeledDataset<? extends ILabeledInstance>>(trainingPortion), repeats, random, metric);
+		this(cacheSplitSets, data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, metric);
 	}
 
 	public MonteCarloCrossValidationEvaluator(final boolean cacheSplitSets, final ILabeledDataset<? extends ILabeledInstance> data, final IRandomDatasetSplitter<ILabeledDataset<? extends ILabeledInstance>> datasetSplitter,
