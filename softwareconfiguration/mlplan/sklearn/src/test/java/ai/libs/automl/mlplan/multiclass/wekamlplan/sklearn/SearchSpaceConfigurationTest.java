@@ -93,7 +93,7 @@ public class SearchSpaceConfigurationTest {
 				ComponentInstance parameterization = null;
 				while (parameterization == null) {
 					try {
-						parameterization = ComponentUtil.defaultParameterizationOfComponent(currentCI.getComponent());
+						parameterization = ComponentUtil.getDefaultParameterizationOfComponent(currentCI.getComponent());
 					} catch (Exception e) {
 						LOGGER.warn("Could not instantiate component instance {} with default parameters", ciToInstantiate, e);
 					}

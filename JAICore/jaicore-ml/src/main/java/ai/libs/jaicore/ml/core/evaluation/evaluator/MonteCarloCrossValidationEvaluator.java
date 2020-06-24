@@ -21,16 +21,18 @@ public class MonteCarloCrossValidationEvaluator extends TrainPredictionBasedClas
 	private final IAggregatedPredictionPerformanceMeasure metric;
 
 	public MonteCarloCrossValidationEvaluator(final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random) {
-		this(data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, EAggregatedClassifierMetric.MEAN_ERRORRATE);
+		this(false, data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, EAggregatedClassifierMetric.MEAN_ERRORRATE);
 	}
 
-	public MonteCarloCrossValidationEvaluator(final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random, final IAggregatedPredictionPerformanceMeasure metric) {
-		this(data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, metric);
-	}
-  
-	public MonteCarloCrossValidationEvaluator(final boolean cacheSplitSets, final ILabeledDataset<? extends ILabeledInstance> data, final IRandomDatasetSplitter<ILabeledDataset<ILabeledInstance>> datasetSplitter, final int repeats, final Random random,
+	public MonteCarloCrossValidationEvaluator(final boolean cacheSplitSets, final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random,
 			final IAggregatedPredictionPerformanceMeasure metric) {
-		super(new FixedDataSplitSetGenerator(data, (cacheSplitSets ? new CachingMonteCarloCrossValidationSplitSetGenerator<>(datasetSplitter, repeats, random) : new MonteCarloCrossValidationSplitSetGenerator<>(datasetSplitter, repeats, random))), metric);
+		this(cacheSplitSets, data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, metric);
+	}
+
+	public MonteCarloCrossValidationEvaluator(final boolean cacheSplitSets, final ILabeledDataset<? extends ILabeledInstance> data, final IRandomDatasetSplitter<ILabeledDataset<ILabeledInstance>> datasetSplitter, final int repeats,
+			final Random random, final IAggregatedPredictionPerformanceMeasure metric) {
+		super(new FixedDataSplitSetGenerator(data,
+				(cacheSplitSets ? new CachingMonteCarloCrossValidationSplitSetGenerator<>(datasetSplitter, repeats, random) : new MonteCarloCrossValidationSplitSetGenerator<>(datasetSplitter, repeats, random))), metric);
 		this.datasetSplitter = datasetSplitter;
 		this.repeats = repeats;
 		this.random = random;
