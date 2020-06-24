@@ -15,7 +15,7 @@ import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValid
 
 public class MonteCarloCrossValidationEvaluator extends TrainPredictionBasedClassifierEvaluator {
 
-	private final IRandomDatasetSplitter<ILabeledDataset<ILabeledInstance>> datasetSplitter;
+	private final IRandomDatasetSplitter<ILabeledDataset<? extends ILabeledInstance>> datasetSplitter;
 	private final int repeats;
 	private final Random random;
 	private final IAggregatedPredictionPerformanceMeasure metric;
@@ -26,11 +26,11 @@ public class MonteCarloCrossValidationEvaluator extends TrainPredictionBasedClas
 
 	public MonteCarloCrossValidationEvaluator(final boolean cacheSplitSets, final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random,
 			final IAggregatedPredictionPerformanceMeasure metric) {
-		this(cacheSplitSets, data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, metric);
+		this(cacheSplitSets, data, new RandomHoldoutSplitter<ILabeledDataset<? extends ILabeledInstance>>(trainingPortion), repeats, random, metric);
 	}
 
-	public MonteCarloCrossValidationEvaluator(final boolean cacheSplitSets, final ILabeledDataset<? extends ILabeledInstance> data, final IRandomDatasetSplitter<ILabeledDataset<ILabeledInstance>> datasetSplitter, final int repeats,
-			final Random random, final IAggregatedPredictionPerformanceMeasure metric) {
+	public MonteCarloCrossValidationEvaluator(final boolean cacheSplitSets, final ILabeledDataset<? extends ILabeledInstance> data, final IRandomDatasetSplitter<ILabeledDataset<? extends ILabeledInstance>> datasetSplitter,
+			final int repeats, final Random random, final IAggregatedPredictionPerformanceMeasure metric) {
 		super(new FixedDataSplitSetGenerator(data,
 				(cacheSplitSets ? new CachingMonteCarloCrossValidationSplitSetGenerator<>(datasetSplitter, repeats, random) : new MonteCarloCrossValidationSplitSetGenerator<>(datasetSplitter, repeats, random))), metric);
 		this.datasetSplitter = datasetSplitter;
