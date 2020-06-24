@@ -9,6 +9,7 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.datastructure.graph.ILabeledPath;
 
+import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 
 public class TasksAlreadyResolvedPathEvaluator implements IPathEvaluator<TFDNode, String, Double> {
@@ -21,8 +22,7 @@ public class TasksAlreadyResolvedPathEvaluator implements IPathEvaluator<TFDNode
 
 	@Override
 	public Double evaluate(final ILabeledPath<TFDNode, String> path) throws PathEvaluationException, InterruptedException {
-		Set<String> openTasks = path.getHead().getRemainingTasks().stream().map(x -> x.getPropertyName()).collect(Collectors.toSet());
-		System.out.println(openTasks);
+		Set<String> openTasks = path.getHead().getRemainingTasks().stream().map(Literal::getPropertyName).collect(Collectors.toSet());
 		for (String prefix : this.prefixesWhichHaveToBeResolvedBeforeGoingToNextPhase) {
 			if (openTasks.stream().anyMatch(t -> t.startsWith("1_tResolve" + prefix))) {
 				return 0d;

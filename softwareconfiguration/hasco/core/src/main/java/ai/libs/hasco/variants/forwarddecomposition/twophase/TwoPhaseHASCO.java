@@ -130,7 +130,6 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			if (this.hasco == null) {
 				throw new IllegalStateException("Cannot start algorithm before HASCO has been set. Please set HASCO either in constructor or via the setter.");
 			}
-			//			this.setHASCOLoggerNameIfPossible();
 			this.timeOfStart = System.currentTimeMillis();
 			AlgorithmInitializedEvent event = this.activate();
 			this.logger.info(
@@ -604,7 +603,6 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 	}
 
 	private void setHASCOLoggerNameIfPossible() {
-		System.err.println(this.getLoggerName());
 		if (this.hasco == null) {
 			this.logger.info("HASCO object is null, so not setting a logger.");
 			return;

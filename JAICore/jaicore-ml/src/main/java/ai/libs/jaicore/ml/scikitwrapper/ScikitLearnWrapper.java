@@ -212,7 +212,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				this.runProcess(trainCommand, listener);
 
 				if (!listener.getErrorOutput().isEmpty()) {
-					L.error("Raise error message: " + listener.getErrorOutput());
+					L.error("Raise error message: {}", listener.getErrorOutput());
 					throw new TrainingException(listener.getErrorOutput().split("\\n")[0]);
 				}
 			}
@@ -336,7 +336,9 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		if (this.problemType == EBasicProblemType.CLASSIFICATION) {
 			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification((int) (double) x)).collect(Collectors.toList()));
 		} else if (this.problemType == EBasicProblemType.RUL) {
-			L.info(this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()).toString());
+			if (L.isInfoEnabled()) {
+				L.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()).toString());
+			}
 			L.debug("#Created construction string: {}", this.constructInstruction);
 			return (B) new SingleTargetRegressionPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleTargetRegressionPrediction((double) x)).collect(Collectors.toList()));
 		}
@@ -474,8 +476,9 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		}
 		Process process = processBuilder.start();
 		try {
-			L.debug("Started process with PID:" + ProcessUtil.getPID(process));
+			L.debug("Started process with PID: {}", ProcessUtil.getPID(process));
 		} catch (ProcessIDNotRetrievableException e) {
+			L.warn("Could not retrieve process ID.");
 		}
 		listener.listenTo(process);
 	}
@@ -615,7 +618,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				processParameters.add("&&");
 			}
 			if (this.timeout != null && os == OS.LINUX) {
-				L.info("Executing with timeout {}s",  this.timeout.seconds() );
+				L.info("Executing with timeout {}s", this.timeout.seconds());
 				processParameters.add("timeout");
 				processParameters.add(this.timeout.seconds() - 5 + "");
 			}

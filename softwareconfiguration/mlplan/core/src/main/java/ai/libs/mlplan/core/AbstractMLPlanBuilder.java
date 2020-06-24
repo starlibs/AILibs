@@ -224,7 +224,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		this.components.clear();
 		this.components.addAll(new ComponentLoader(this.searchSpaceFile).getComponents());
 		this.update();
-		this.logger.info("The search space configuration file has been set: " + searchSpaceConfig.getCanonicalPath());
+		this.logger.info("The search space configuration file has been set to {}.", searchSpaceConfig.getCanonicalPath());
 		return this.getSelf();
 	}
 

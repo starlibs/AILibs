@@ -130,7 +130,8 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
 		this.priorityPredicateForRDFS = priorityPredicateForRDFS;
 
-		this.logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node. Prioriziting predicate: {}", timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, priorityPredicateForRDFS);
+		this.logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node. Prioriziting predicate: {}", timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS,
+				priorityPredicateForRDFS);
 
 		/* check whether assertions are on */
 		assert this.logAssertionActivation();
@@ -273,7 +274,7 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 						throw e;
 					} catch (Exception ex) {
 						if (countedExceptions == this.maxSamples) {
-							this.logger.warn("Too many retry attempts, giving up. {} samples were drawn, {} were successful.", drawnSamples, successfulSamples, path.getHead());
+							this.logger.warn("Too many retry attempts, giving up. {} samples were drawn, {} were successful. Head of path is: {}.", drawnSamples, successfulSamples, path.getHead());
 							throw new PathEvaluationException("Error in the evaluation of a node!", ex);
 						} else {
 							countedExceptions++;

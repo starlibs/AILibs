@@ -31,6 +31,8 @@ import ai.libs.mlplan.core.ILearnerFactory;
  */
 public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredictionBatch> implements ILearnerFactory<ScikitLearnWrapper<P, B>>, ILoggingCustomizable {
 
+	private static final String N_PREPROCESSOR = "preprocessor";
+
 	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList("True", "False"));
 	private static final List<String> EXCEPTIONS = Arrays.asList("None", "np.inf", "f_regression");
 
@@ -98,7 +100,7 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 		sb.append("(");
 		if (groundComponent.getComponent().getName().contains("make_pipeline")) {
 			if (this.problemType == EBasicProblemType.CLASSIFICATION) {
-				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor"), importSet));
+				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get(N_PREPROCESSOR), importSet));
 				sb.append(",");
 				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("classifier"), importSet));
 			} else if (this.problemType == EBasicProblemType.RUL) {
@@ -107,9 +109,9 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("data_cleaner"), importSet));
 				sb.append(",");
 				int i = 0;
-				while (groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor" + i) != null) {
-					if (!groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor" + i).getComponent().getName().equals("NoPreprocessor")) {
-						sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor" + i), importSet));
+				while (groundComponent.getSatisfactionOfRequiredInterfaces().get(N_PREPROCESSOR + i) != null) {
+					if (!groundComponent.getSatisfactionOfRequiredInterfaces().get(N_PREPROCESSOR + i).getComponent().getName().equals("NoPreprocessor")) {
+						sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get(N_PREPROCESSOR + i), importSet));
 						sb.append(",");
 					}
 					i++;

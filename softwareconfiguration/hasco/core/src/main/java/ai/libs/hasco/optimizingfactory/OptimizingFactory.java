@@ -8,6 +8,7 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,9 +119,9 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 		this.loggerName = name;
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
-		//		if (this.optimizer instanceof ILoggingCustomizable) {
-		//			this.optimizer.setLoggerName(name + ".optimizer");
-		//		}
+		if (this.optimizer instanceof ILoggingCustomizable) {
+			this.optimizer.setLoggerName(name + ".optimizer");
+		}
 		super.setLoggerName(this.loggerName + "._algorithm");
 	}
 

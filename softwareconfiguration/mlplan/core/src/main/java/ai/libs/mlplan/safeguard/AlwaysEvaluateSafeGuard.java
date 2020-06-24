@@ -43,11 +43,10 @@ public class AlwaysEvaluateSafeGuard implements IEvaluationSafeGuard {
 	@Override
 	public void updateWithActualInformation(final ComponentInstance ci, final ITimeTrackingLearner learner) {
 		// nothing to remember here
-		return;
 	}
 
 	@Override
 	public void registerListener(final Object listener) {
-		return;
+		// nothing to register at this point.
 	}
 }

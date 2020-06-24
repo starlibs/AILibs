@@ -102,9 +102,7 @@ public class KVStoreCollection extends LinkedList<IKVStore> {
 		KVStoreCollection selectedCollection = new KVStoreCollection();
 		for (IKVStore store : this) {
 			long count = containsSelect.entrySet().stream().filter(x -> x.getValue().contains(store.getAsString(x.getKey()))).count();
-			if (or && count > 0) {
-				selectedCollection.add(store);
-			} else if (!or && count == containsSelect.size()) {
+			if ((or && count > 0) || (!or && count == containsSelect.size())) {
 				selectedCollection.add(store);
 			}
 		}

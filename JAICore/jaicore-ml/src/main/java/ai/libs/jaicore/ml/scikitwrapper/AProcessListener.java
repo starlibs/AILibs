@@ -75,7 +75,7 @@ public abstract class AProcessListener implements IProcessListener {
 	private void handleProcessIDLine(final String line) {
 		if (this.listenForPIDFromProcess && !Strings.isNullOrEmpty(line)) {
 			if (line.startsWith("CURRENT_PID:")) {
-				this.processIDObtainedFromListening = Integer.parseInt(line.replaceAll("CURRENT_PID:", "").trim());
+				this.processIDObtainedFromListening = Integer.parseInt(line.replace("CURRENT_PID:", "").trim());
 				LOGGER.debug("Listen to process id: {}", this.processIDObtainedFromListening);
 			}
 			LOGGER.trace("Other console output: {}", line);
