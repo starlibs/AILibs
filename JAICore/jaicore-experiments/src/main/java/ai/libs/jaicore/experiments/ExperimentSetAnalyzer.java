@@ -13,6 +13,10 @@ import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.slf4j.Logger;
@@ -51,7 +55,7 @@ public class ExperimentSetAnalyzer {
 
 		/* reload configuration */
 		//FIXME this reload yields empty config object.
-//		this.config.reload();
+		//		this.config.reload();
 
 		/* erase laze fields */
 		synchronized (this.config) {
@@ -131,7 +135,7 @@ public class ExperimentSetAnalyzer {
 		if (this.possibleKeyCombinations == null) {
 			this.logger.debug("Computing all possible experiments.");
 
-			/* build cartesian product over all possible key-value */
+			/* build cartesian product over all possible key-values */
 			List<List<String>> values = new ArrayList<>();
 			for (String key : this.keyFields) {
 				if (!this.valuesForKeyFieldsInConfig.containsKey(key)) {
@@ -145,25 +149,62 @@ public class ExperimentSetAnalyzer {
 
 			/* get constraints */
 			List<Predicate<List<String>>> constraints = new ArrayList<>();
+			ScriptEngineManager mgr = new ScriptEngineManager();
+			ScriptEngine engine = mgr.getEngineByName("JavaScript");
 			if (this.config.getConstraints() != null) {
 				for (String p : this.config.getConstraints()) {
-					if (!p.startsWith(PROTOCOL_JAVA)) {
-						this.logger.warn("Ignoring constraint {} since currently only java constraints are allowed.", p);
-						continue;
+					if (p.startsWith(PROTOCOL_JAVA)) {
+						try {
+							constraints.add((Predicate<List<String>>) Class.forName(p.substring(PROTOCOL_JAVA.length()).trim()).getConstructor().newInstance());
+						} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+							this.logger.error("Error in loading constraint {}: {}", p, e);
+						}
 					}
-					try {
-						constraints.add((Predicate<List<String>>) Class.forName(p.substring(PROTOCOL_JAVA.length()).trim()).getConstructor().newInstance());
-					} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-						this.logger.error("Error in loading constraint {}: {}", p, e);
+					else {
+						this.logger.info("Parsing constraint {}", p);
+						Predicate<List<String>> predicate = new Predicate<List<String>>() {
+
+							private final int highestRequiredIndex = ExperimentSetAnalyzer.this.keyFields.stream().filter(k -> p.contains(k)).map(k -> ExperimentSetAnalyzer.this.keyFields.indexOf(k)).max(Integer::compare).get();
+
+							@Override
+							public boolean test(final List<String> t) {
+								String evaluatedConstraint = p;
+								int n = t.size(); // n is the number of key fields considered in t (grows over time)
+								if (n <= this.highestRequiredIndex) { // only filter conditions in which all necessary variables have been defined
+									return true;
+								}
+								for (int i = 0; i < n; i++) {
+									evaluatedConstraint = evaluatedConstraint.replace(ExperimentSetAnalyzer.this.keyFields.get(i), t.get(i));
+								}
+								try {
+									return (boolean)engine.eval(evaluatedConstraint);
+								} catch (ScriptException e) {
+									ExperimentSetAnalyzer.this.logger.error(LoggerUtil.getExceptionInfo(e));
+									return false;
+								}
+							}
+						};
+						constraints.add(predicate);
 					}
 				}
 			}
+			Predicate<List<String>> jointConstraints = new Predicate<List<String>>() {
+				@Override
+				public boolean test(final List<String> t) {
+					for (Predicate<List<String>> c : constraints) {
+						if (!c.test(t)) {
+							return false;
+						}
+					}
+					return true;
+				}
+			};
 
 			/* create one experiment object from every tuple */
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Building relation from {} cartesian product with {} constraints.", values.stream().map(l -> "" + l.size()).collect(Collectors.joining(" x ")), constraints.size());
 			}
-			RelationComputationProblem<String> problem = constraints.isEmpty() ? new RelationComputationProblem<>(values) : new RelationComputationProblem<>(values, constraints.get(0));
+			RelationComputationProblem<String> problem = constraints.isEmpty() ? new RelationComputationProblem<>(values) : new RelationComputationProblem<>(values, jointConstraints);
 			LDSRelationComputer<String> lc = new LDSRelationComputer<>(problem);
 			lc.setLoggerName(this.logger.getName() + ".relationcomputer");
 			List<List<String>> combinationsAsList = lc.call();
@@ -258,7 +299,7 @@ public class ExperimentSetAnalyzer {
 
 	public Pair<String, String> getNameTypeSplitForAttribute(final String name) {
 		String[] parts = name.split(":");
-		String type = parts.length == 2 ? parts[1] : "varchar(500)";
+		String type = parts.length == 2 ? parts[1] : null;
 		return new Pair<>(parts[0], type);
 	}
 }

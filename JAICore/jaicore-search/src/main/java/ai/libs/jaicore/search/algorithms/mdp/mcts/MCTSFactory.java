@@ -7,7 +7,7 @@ import ai.libs.jaicore.search.probleminputs.IMDP;
 
 public abstract class MCTSFactory<N, A> extends AAlgorithmFactory<IMDP<N, A, Double>, IPolicy<N, A>, MCTS<N, A>> {
 
-	private int maxIterations = 10000;
+	private int maxIterations = Integer.MAX_VALUE;
 	private double gamma = 1.0;
 	private double epsilon = 0.0;
 	private Random random = new Random(0);

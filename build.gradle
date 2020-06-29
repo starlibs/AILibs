@@ -117,7 +117,7 @@ allprojects {
 		mavenCentral()
 		mavenLocal()
 		maven { url "https://jitpack.io" }
-		maven { url "http://clojars.org/repo/" }
+		maven { url "https://clojars.org/repo/" }
 		maven { url "https://plugins.gradle.org/m2/" }
 	}
 	//Dependencies for all(!) projects
@@ -202,6 +202,7 @@ allprojects {
 	eclipse {
 	    project.natures "org.eclipse.buildship.core.gradleprojectnature"
 	}
+
 
 
 	test {

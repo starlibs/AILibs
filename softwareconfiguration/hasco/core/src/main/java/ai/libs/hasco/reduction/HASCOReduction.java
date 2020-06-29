@@ -13,11 +13,11 @@ import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.core.IHASCOPlanningReduction;
+import ai.libs.hasco.core.IsNotRefinable;
 import ai.libs.hasco.core.IsRefinementCompletedPredicate;
 import ai.libs.hasco.core.IsValidParameterRangeRefinementPredicate;
 import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.hasco.core.Util;
-import ai.libs.hasco.core.IsNotRefinable;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.NumericParameterDomain;

@@ -33,6 +33,7 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 
 	/* currently best solution candidate observed so far */
 	private O bestSeenSolution;
+	private V bestScoreKnownToExist = null;
 
 	/**
 	 * C'tor taking only an input as a parameter.
@@ -59,6 +60,7 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	 */
 	protected boolean updateBestSeenSolution(final O candidate) {
 		assert (candidate != null) : "Cannot update best solution with null.";
+		this.tellAboutBestScoreKnownToExist(candidate.getScore());
 		if (this.bestSeenSolution == null || (candidate.getScore() != null && candidate.getScore().compareTo(this.bestSeenSolution.getScore()) < 0)) {
 			this.bestSeenSolution = candidate;
 			return true;
@@ -74,6 +76,7 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	 */
 	protected boolean setBestSeenSolution(final O candidate) {
 		boolean isBetterThanCurrent = (this.bestSeenSolution == null || (candidate.getScore() != null && candidate.getScore().compareTo(this.bestSeenSolution.getScore()) < 0));
+		this.tellAboutBestScoreKnownToExist(candidate.getScore());
 		this.bestSeenSolution = candidate;
 		return isBetterThanCurrent;
 	}
@@ -96,6 +99,19 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 			}
 		}
 		throw new NoSuchElementException();
+	}
+
+
+
+	public V getBestScoreKnownToExist() {
+		return this.bestScoreKnownToExist;
+	}
+
+	public void tellAboutBestScoreKnownToExist(final V bestScoreKnownToExist) {
+		if (this.bestScoreKnownToExist == null || bestScoreKnownToExist.compareTo(this.bestScoreKnownToExist) < 0) {
+			this.logger.info("Updating best known achievable score to {}.", bestScoreKnownToExist);
+			this.bestScoreKnownToExist = bestScoreKnownToExist;
+		}
 	}
 
 	/**

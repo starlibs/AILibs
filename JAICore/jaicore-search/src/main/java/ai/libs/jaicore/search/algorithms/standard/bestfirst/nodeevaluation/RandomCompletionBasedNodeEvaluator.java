@@ -51,6 +51,7 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.RCNEPathCompletionFailedException;
 import ai.libs.jaicore.search.algorithms.standard.gbf.SolutionEventBus;
 import ai.libs.jaicore.search.algorithms.standard.random.RandomSearch;
+import ai.libs.jaicore.search.algorithms.standard.random.RandomSearchUtil;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
@@ -150,7 +151,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected V fTimeouted(final ILabeledPath<T, A> path, final int timeout) throws InterruptedException, PathEvaluationException {
+	protected V evaluateTimeouted(final ILabeledPath<T, A> path, final int timeout) throws InterruptedException, PathEvaluationException {
 		assert this.generator != null : "Cannot compute f as no generator has been set!";
 		if (!(path instanceof BackPointerPath)) {
 			throw new IllegalArgumentException("Random Completer currently can only work with backpointer-based paths.");
@@ -390,7 +391,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 			}
 			assert completedPath.getArcs() != null : "The RandomSearch has returned a solution path with a null pointer for the edges.";
 			assert completedPath.getNumberOfNodes() == completedPath.getArcs().size() + 1;
-			assert this.checkValidityOfPathCompletion(n, completedPath);
+			assert RandomSearchUtil.checkValidityOfPathCompletion(n, completedPath);
 			long finishedCompletion = System.currentTimeMillis();
 			this.logger.debug("Found completion of length {} in {}ms. Enable TRACE for details.", completedPath.getNumberOfNodes(), finishedCompletion - startCompletion);
 			this.logger.trace("Completion is {}", completedPath);
@@ -398,30 +399,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 		return completedPath;
 	}
 
-	private boolean checkValidityOfPathCompletion(final ILabeledPath<T, A> path, final ILabeledPath<T, A> completion) throws InterruptedException {
-		List<T> prefixNodes = path.getNodes();
-		List<A> prefixArcs = path.getArcs();
-		List<T> completionNodes = completion.getNodes();
-		List<A> completionArcs = completion.getArcs();
-		int l = prefixNodes.size();
-		for (int i = 0; i < l; i++) {
-			this.checkInterruption();
-			if (prefixNodes.get(i) != completionNodes.get(i)) {
-				return false;
-			}
-			if (i < l-1 && prefixArcs.get(i) != completionArcs.get(i)) {
-				return false;
-			}
-		}
-		int n = completionNodes.size();
-		for (int i = l; i < n; i++) {
-			this.checkInterruption();
-			if (prefixNodes.contains(completionNodes.get(i))) {
-				throw new IllegalStateException("A node contained in the completion (without prefix) must not also be contained in the prefix already. The following node is contained twice:\n\t" + completionNodes.get(i));
-			}
-		}
-		return true;
-	}
+
 
 	private void updateMapOfBestScoreFoundSoFar(final ILabeledPath<T, A> nodeInCompleterGraph, final V scoreOnOriginalBenchmark) {
 		V bestKnownScore = this.bestKnownScoreUnderNodeInCompleterGraph.get(nodeInCompleterGraph.getNodes());

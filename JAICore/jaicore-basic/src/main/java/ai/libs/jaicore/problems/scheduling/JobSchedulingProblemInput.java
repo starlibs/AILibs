@@ -3,6 +3,7 @@ package ai.libs.jaicore.problems.scheduling;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -23,6 +24,19 @@ public class JobSchedulingProblemInput implements IJobSchedulingInput {
 	private final Map<String, Machine> machines;
 	private final JobShopMetric metric;
 	private final int latestArrivalTime; // this is for problems in which the arrival time is a decision variable. Then we typically have an upper bound on the arrival time
+
+	public JobSchedulingProblemInput(final Collection<Job> jobs, final Collection<Workcenter> workcenters, final Collection<Operation> operations, final Collection<Machine> machines, final JobShopMetric metric,final int latestArrivalTime) {
+		this.jobs = new HashMap<>();
+		jobs.forEach(j -> this.jobs.put(j.getJobID(), j));
+		this.workcenters = new HashMap<>();
+		workcenters.forEach(j -> this.workcenters.put(j.getWorkcenterID(), j));
+		this.operations = new HashMap<>();
+		operations.forEach(j -> this.operations.put(j.getName(), j));
+		this.machines = new HashMap<>();
+		machines.forEach(j -> this.machines.put(j.getMachineID(), j));
+		this.metric = metric;
+		this.latestArrivalTime = latestArrivalTime;
+	}
 
 	public JobSchedulingProblemInput(final Map<String, Job> jobs, final Map<String, Workcenter> workcenters, final Map<String, Operation> operations, final Map<String, Machine> machines, final JobShopMetric metric,
 			final int latestArrivalTime) {
@@ -88,6 +102,10 @@ public class JobSchedulingProblemInput implements IJobSchedulingInput {
 	public double getScoreOfSchedule(final ISchedule s) {
 		Objects.requireNonNull(s);
 		return this.metric.getScore(this, s);
+	}
+
+	public int getTotalProcessingTime() {
+		return this.operations.values().stream().map(o -> o.getProcessTime()).reduce((a, b) -> a+b).get();
 	}
 
 	public void printWorkcenters(final OutputStream out) throws IOException {
