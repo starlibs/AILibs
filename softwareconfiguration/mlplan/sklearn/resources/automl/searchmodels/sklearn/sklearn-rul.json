@@ -15,6 +15,10 @@
 			],
 			"requiredInterface": [
 				{
+					"id": "regressor",
+					"name": "BasicRegressor"
+				},
+				{
 					"id": "timeseries_transformer",
 					"name": "TimeseriesTransformer"
 				},
@@ -25,26 +29,6 @@
 				{
 					"id": "preprocessor0",
 					"name": "BasicPreprocessor"
-				},
-				{
-					"id": "preprocessor1",
-					"name": "BasicPreprocessor"
-				},
-				{
-					"id": "preprocessor2",
-					"name": "BasicPreprocessor"
-				},
-				{
-					"id": "preprocessor3",
-					"name": "BasicPreprocessor"
-				},
-				{
-					"id": "preprocessor4",
-					"name": "BasicPreprocessor"
-				},
-				{
-					"id": "regressor",
-					"name": "BasicRegressor"
 				}
 			],
 			"parameter": []

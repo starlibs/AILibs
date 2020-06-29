@@ -20,16 +20,16 @@
           "max": 500,
           "default": 50,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "learning_rate",
           "type": "double",
-          "min": 0.0,
+          "min": 0.01,
           "max": 1.0,
           "default": 1.0,
           "minInterval": 0.01,
-          "refineSplits": 2
+          "refineSplits": 16
         },
         {
           "name": "loss",
@@ -44,77 +44,11 @@
       ]
     },
     {
-      "name": "sklearn.ensemble.BaggingRegressor",
-      "providedInterface": [
-        "BasicRegressor"
-      ],
-      "requiredInterface": [
-        {
-          "id": "base_estimator",
-          "name": "BaseLearner"
-        }
-      ],
-      "parameter": [
-        {
-          "name": "n_estimators",
-          "type": "int",
-          "min": 1,
-          "max": 500,
-          "default": 10,
-          "minInterval": 1,
-          "refineSplits": 2
-        },
-        {
-          "name": "max_samples",
-          "type": "double",
-          "min": 0.0,
-          "max": 1.0,
-          "default": 1.0,
-          "minInterval": 0.05,
-          "refineSplits": 2
-        },
-        {
-          "name": "max_features",
-          "type": "double",
-          "min": 0.0,
-          "max": 1.0,
-          "default": 1.0,
-          "minInterval": 0.01,
-          "refineSplits": 2
-        },
-        {
-          "name": "bootstrap",
-          "type": "cat",
-          "values": [
-            "True",
-            "False"
-          ],
-          "default": "True"
-        },
-        {
-          "name": "bootstrap_features",
-          "type": "cat",
-          "values": [
-            "True",
-            "False"
-          ],
-          "default": "False"
-        },
-        {
-          "name": "n_jobs",
-          "type": "cat",
-          "values": [
-            "1"
-          ],
-          "default": "1"
-        }
-      ]
-    },
-    {
       "name": "sklearn.ensemble.ExtraTreesRegressor",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner",
+        "FeatureImportanceEstimator"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -125,7 +59,7 @@
           "max": 500,
           "default": 10,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "criterion",
@@ -203,7 +137,7 @@
           "min": 2,
           "max": 21,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "min_samples_leaf",
@@ -212,23 +146,22 @@
           "min": 1,
           "max": 10,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "min_weight_fraction_leaf",
           "type": "double",
           "default": 0.0,
           "min": 0.0,
-          "max": 1.0,
+          "max": 0.5,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "max_leaf_nodes",
           "type": "cat",
           "values": [
             "None",
-            "1",
             "2",
             "3",
             "4",
@@ -259,7 +192,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "bootstrap",
@@ -284,7 +217,8 @@
       "name": "sklearn.ensemble.GradientBoostingRegressor",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner",
+        "FeatureImportanceEstimator"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -302,11 +236,11 @@
         {
           "name": "learning_rate",
           "type": "double",
-          "min": 0.0,
+          "min": 0.01,
           "max": 1.0,
           "default": 0.1,
           "minInterval": 0.01,
-          "refineSplits": 2
+          "refineSplits": 16
         },
         {
           "name": "n_estimators",
@@ -315,7 +249,7 @@
           "min": 1,
           "max": 500,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "max_depth",
@@ -324,7 +258,7 @@
           "min": 1,
           "max": 21,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "criterion",
@@ -343,7 +277,7 @@
           "min": 2,
           "max": 21,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "min_samples_leaf",
@@ -352,25 +286,25 @@
           "min": 1,
           "max": 10,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "min_weight_fraction_leaf",
           "type": "double",
           "default": 0.0,
           "min": 0.0,
-          "max": 1.0,
+          "max": 0.5,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "subsample",
           "type": "double",
-          "min": 0.0,
+          "min": 0.01,
           "max": 1.0,
           "default": 1.0,
           "minInterval": 0.05,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "max_features",
@@ -408,7 +342,6 @@
           "type": "cat",
           "values": [
             "None",
-            "1",
             "2",
             "3",
             "4",
@@ -439,16 +372,16 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "alpha",
           "type": "double",
           "default": 0.9,
-          "min": 0.0,
-          "max": 1.8,
-          "minInterval": 1,
-          "refineSplits": 2
+          "min": 0.01,
+          "max": 0.99,
+          "minInterval": 0.1,
+          "refineSplits": 8
         },
         {
           "name": "validation_fraction",
@@ -457,7 +390,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "n_iter_no_change",
@@ -488,7 +421,8 @@
       "name": "sklearn.tree.DecisionTreeRegressor",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner",
+        "FeatureImportanceEstimator"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -552,7 +486,7 @@
           "min": 2,
           "max": 21,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "min_samples_leaf",
@@ -561,16 +495,16 @@
           "min": 1,
           "max": 10,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "min_weight_fraction_leaf",
           "type": "double",
           "default": 0.0,
           "min": 0.0,
-          "max": 1.0,
+          "max": 0.5,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "max_features",
@@ -608,7 +542,6 @@
           "type": "cat",
           "values": [
             "None",
-            "1",
             "2",
             "3",
             "4",
@@ -639,7 +572,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         }
       ]
     },
@@ -647,7 +580,8 @@
       "name": "sklearn.ensemble.RandomForestRegressor",
       "providedInterface": [
         "BasicRegressor", 
-        "BaseLearner"
+        "BaseLearner",
+        "FeatureImportanceEstimator"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -658,7 +592,7 @@
           "max": 500,
           "default": 10,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "criterion",
@@ -736,7 +670,7 @@
           "min": 2,
           "max": 21,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "min_samples_leaf",
@@ -745,23 +679,22 @@
           "min": 1,
           "max": 10,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "min_weight_fraction_leaf",
           "type": "double",
           "default": 0.0,
           "min": 0.0,
-          "max": 1.0,
+          "max": 0.5,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "max_leaf_nodes",
           "type": "cat",
           "values": [
             "None",
-            "1",
             "2",
             "3",
             "4",
@@ -792,7 +725,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "bootstrap",
@@ -816,7 +749,8 @@
       "name": "sklearn.tree.ExtraTreeRegressor",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner",
+        "FeatureImportanceEstimator"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -875,7 +809,7 @@
           "min": 2,
           "max": 21,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "min_samples_leaf",
@@ -884,16 +818,16 @@
           "min": 1,
           "max": 10,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "min_weight_fraction_leaf",
           "type": "double",
           "default": 0.0,
           "min": 0.0,
-          "max": 1.0,
+          "max": 0.5,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "max_features",
@@ -933,14 +867,13 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "max_leaf_nodes",
           "type": "cat",
           "values": [
             "None",
-            "1",
             "2",
             "3",
             "4",
@@ -1025,7 +958,7 @@
           "min": 0.0,
           "max": 5.0,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "fit_intercept",
@@ -1060,7 +993,7 @@
           "min": 1,
           "max": 10000,
           "minInterval": 20,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "solver",
@@ -1115,7 +1048,7 @@
           "min": 0.0,
           "max": 5.0,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "l1_ratio",
@@ -1124,7 +1057,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.05,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "fit_intercept",
@@ -1142,7 +1075,7 @@
           "min": 1,
           "max": 10000,
           "minInterval": 20,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "tol",
@@ -1151,7 +1084,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.005,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "shuffle",
@@ -1169,7 +1102,7 @@
           "min": 0.0,
           "max": 200.0,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "learning_rate",
@@ -1186,10 +1119,10 @@
           "name": "eta0",
           "type": "double",
           "default": 0.01,
-          "min": 0.0,
+          "min": 0.001,
           "max": 1.0,
           "minInterval": 0.001,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "power_t",
@@ -1198,7 +1131,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.01,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "early_stopping",
@@ -1213,10 +1146,10 @@
           "name": "validation_fraction",
           "type": "double",
           "default": 0.1,
-          "min": 0.0,
-          "max": 1.0,
+          "min": 0.01,
+          "max": 0.99,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "n_iter_no_change",
@@ -1225,7 +1158,7 @@
           "min": 1,
           "max": 15,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         }
       ]
     },{
@@ -1243,7 +1176,7 @@
           "min": 0.0,
           "max": 2.0,
           "minInterval": 0.01,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "l1_ratio",
@@ -1252,7 +1185,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.05,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "fit_intercept",
@@ -1279,7 +1212,7 @@
           "min": 1,
           "max": 10000,
           "minInterval": 20,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "copy_X",
@@ -1296,7 +1229,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.0005,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "positive",
@@ -1319,72 +1252,6 @@
       ]
     },
     {
-      "name": "sklearn.linear_model.Lars",
-      "providedInterface": [
-        "BasicRegressor",
-        "BaseLearner"
-      ],
-      "requiredInterface": [],
-      "parameter": [
-        {
-          "name": "fit_intercept",
-          "type": "cat",
-          "values": [
-            "True",
-            "False"
-          ],
-          "default": "True"
-        },
-        {
-          "name": "normalize",
-          "type": "cat",
-          "values": [
-            "True",
-            "False"
-          ],
-          "default": "True"
-        },
-        {
-          "name": "n_nonzero_coefs",
-          "type": "cat",
-          "values": [
-            "10",
-            "20",
-            "50",
-            "100",
-            "200",
-            "300",
-            "400",
-            "500",
-            "750",
-            "1000",
-            "2500",
-            "5000",
-            "10000",
-            "np.inf"
-          ],
-          "default": "500"
-        },
-        {
-          "name": "copy_X",
-          "type": "cat",
-          "values": [
-            "True"
-          ],
-          "default": "True"
-        },
-        {
-          "name": "fit_path",
-          "type": "cat",
-          "values": [
-            "True",
-            "False"
-          ],
-          "default": "False"
-        }
-      ]
-    },
-    {
       "name": "sklearn.linear_model.Lasso",
       "providedInterface": [
         "BasicRegressor",
@@ -1399,7 +1266,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.01,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "fit_intercept",
@@ -1434,7 +1301,7 @@
           "min": 1,
           "max": 10000,
           "minInterval": 20,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "tol",
@@ -1443,7 +1310,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.0005,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "positive",
@@ -1480,7 +1347,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.01,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "fit_intercept",
@@ -1507,7 +1374,7 @@
           "min": 1,
           "max": 10000,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "copy_X",
@@ -1640,7 +1507,7 @@
           "min": 1,
           "max": 3000,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "tol",
@@ -1649,7 +1516,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.001,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "alpha_1",
@@ -1658,7 +1525,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.00001,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "alpha_2",
@@ -1667,7 +1534,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.00001,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "lambda_1",
@@ -1676,7 +1543,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.00001,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "lambda_2",
@@ -1685,7 +1552,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.00001,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "compute_score",
@@ -1703,7 +1570,7 @@
           "min": 50.0,
           "max": 100000.0,
           "minInterval": 50,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "fit_intercept",
@@ -1748,7 +1615,7 @@
           "min": 1,
           "max": 3000,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "tol",
@@ -1757,7 +1624,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.001,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "alpha_1",
@@ -1766,7 +1633,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.00001,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "alpha_2",
@@ -1775,7 +1642,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.00001,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "lambda_1",
@@ -1784,7 +1651,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.00001,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "lambda_2",
@@ -1793,7 +1660,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.00001,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "compute_score",
@@ -1847,7 +1714,7 @@
           "min": 1.0,
           "max": 10,
           "minInterval": 0.2,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "max_iter",
@@ -1856,7 +1723,7 @@
           "min": 1,
           "max": 1000,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "alpha",
@@ -1865,7 +1732,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "fit_intercept",
@@ -1883,168 +1750,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.00001,
-          "refineSplits": 2
-        }
-      ]
-    },
-    {
-      "name": "sklearn.linear_model.RANSACRegressor",
-      "providedInterface": [
-        "BasicRegressor"
-      ],
-      "requiredInterface": [
-        {
-          "id": "base_estimator",
-          "name": "BaseLearner"
-        }
-      ],
-      "parameter": [
-        {
-          "name": "min_samples",
-          "type": "double",
-          "default": 0.05,
-          "min": 0.05,
-          "max": 1.0,
-          "minInterval": 0.05,
-          "refineSplits": 2
-        },
-        {
-          "name": "residual_threshold",
-          "type": "cat",
-          "values": [
-            "None",
-            "0.0001",
-            "0.001",
-            "0.01",
-            "0.1",
-            "0.2",
-            "0.3",
-            "0.4",
-            "0.5",
-            "0.6",
-            "0.7",
-            "0.8",
-            "0.9",
-            "1.0",
-            "2.0",
-            "3.0",
-            "4.0",
-            "5.0"
-          ],
-          "default": "None"
-        },
-        {
-          "name": "max_trials",
-          "type": "int",
-          "default": 100,
-          "min": 1,
-          "max": 1000,
-          "minInterval": 1,
-          "refineSplits": 2
-        },
-        {
-          "name": "max_skips",
-          "type": "cat",
-          "values": [
-            "np.inf",
-            "1",
-            "10",
-            "25",
-            "50",
-            "100",
-            "1000",
-            "10000",
-            "100000"
-          ],
-          "default": "np.inf"
-        },
-        {
-          "name": "stop_n_inliers",
-          "type": "cat",
-          "values": [
-            "np.inf",
-            "1",
-            "5",
-            "10",
-            "15",
-            "20",
-            "25",
-            "50",
-            "100"
-          ],
-          "default": "np.inf"
-        },
-        {
-          "name": "stop_probability",
-          "type": "double",
-          "default": 0.99,
-          "min": 0.0,
-          "max": 1.0,
-          "minInterval": 0.01,
-          "refineSplits": 2
-        },
-        {
-          "name": "loss",
-          "type": "cat",
-          "default": "absolute_loss",
-          "values": [
-            "absolute_loss",
-            "squared_loss"
-          ]
-        }
-      ]
-    },
-    {
-      "name": "sklearn.linear_model.TheilSenRegressor",
-      "providedInterface": [
-        "BasicRegressor",
-        "BaseLearner"
-      ],
-      "requiredInterface": [],
-      "parameter": [
-        {
-          "name": "fit_intercept",
-          "type": "cat",
-          "values": [
-            "True",
-            "False"
-          ],
-          "default": "True"
-        },
-        {
-          "name": "copy_X",
-          "type": "cat",
-          "values": [
-            "True"
-          ],
-          "default": "True"
-        },
-        {
-          "name": "max_subpopulation",
-          "type": "int",
-          "default": 10000,
-          "min": 10,
-          "max": 100000,
-          "minInterval": 50,
-          "refineSplits": 2
-        },
-        {
-          "name": "max_iter",
-          "type": "int",
-          "default": 300,
-          "min": 1,
-          "max": 3000,
-          "minInterval": 1,
-          "refineSplits": 2
-        },
-        {
-          "name": "tol",
-          "type": "double",
-          "default": 0.001,
-          "min": 0.0,
-          "max": 1.0,
-          "minInterval": 0.001,
-          "refineSplits": 2
+          "refineSplits": 8
         }
       ]
     },
@@ -2063,7 +1769,7 @@
           "min": 0.0,
           "max": 5.0,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "fit_intercept",
@@ -2081,7 +1787,7 @@
           "min": 1,
           "max": 10000,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "tol",
@@ -2090,7 +1796,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.001,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "early_stopping",
@@ -2105,10 +1811,10 @@
           "name": "validation_fraction",
           "type": "double",
           "default": 0.1,
-          "min": 0.0,
-          "max": 1.0,
+          "min": 0.01,
+          "max": 0.99,
           "minInterval": 0.05,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "n_iter_no_change",
@@ -2117,7 +1823,7 @@
           "min": 1,
           "max": 100,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "shuffle",
@@ -2144,7 +1850,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.01,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "average",
@@ -2170,9 +1876,9 @@
           "type": "int",
           "default": 5,
           "min": 1,
-          "max": 25,
+          "max": 15,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "weights",
@@ -2199,9 +1905,9 @@
           "type": "int",
           "default": 30,
           "min": 1,
-          "max": 300,
+          "max": 100,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "p",
@@ -2210,7 +1916,7 @@
           "min": 1,
           "max": 5,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "metric",
@@ -2218,14 +1924,7 @@
           "values": [
             "minkowski",
             "euclidean",
-            "manhattan",
-            "chebyshev",
-            "wminkowski",
-            "seuclidean",
-            "mahalanobis",
-            "hamming",
-            "canberra",
-            "braycurtis"
+            "manhattan"
           ],
           "default": "minkowski"
         },
@@ -2236,343 +1935,6 @@
             "1"
           ],
           "default": "1"
-        }
-      ]
-    },
-    {
-      "name": "sklearn.neighbors.RadiusNeighborsRegressor",
-      "providedInterface": [
-        "BasicRegressor",
-        "BaseLearner"
-      ],
-      "requiredInterface": [],
-      "parameter": [
-        {
-          "name": "radius",
-          "type": "double",
-          "default": 1.0,
-          "min": 0.0,
-          "max": 25.0,
-          "minInterval": 1,
-          "refineSplits": 2
-        },
-        {
-          "name": "weights",
-          "type": "cat",
-            "values": [
-              "uniform",
-              "distance"
-            ],
-            "default": "uniform"
-          },
-        {
-          "name": "algorithm",
-          "type": "cat",
-          "values": [
-            "auto",
-            "ball_tree",
-            "kd_tree",
-            "brute"
-          ],
-          "default": "auto"
-        },
-        {
-          "name": "leaf_size",
-          "type": "int",
-          "default": 30,
-          "min": 1,
-          "max": 300,
-          "minInterval": 1,
-          "refineSplits": 2
-        },
-        {
-          "name": "p",
-          "type": "int",
-          "default": 2,
-          "min": 1,
-          "max": 5,
-          "minInterval": 1,
-          "refineSplits": 2
-        },
-        {
-          "name": "metric",
-          "type": "cat",
-          "values": [
-            "minkowski",
-            "euclidean",
-            "manhattan",
-            "chebyshev",
-            "wminkowski",
-            "seuclidean",
-            "mahalanobis",
-            "hamming",
-            "canberra",
-            "braycurtis"
-          ],
-          "default": "minkowski"
-        },
-        {
-          "name": "n_jobs",
-          "type": "cat",
-          "values": [
-            "1"
-          ],
-          "default": "1"
-        }
-      ]
-    },
-    {
-      "name": "sklearn.neural_network.MLPRegressor",
-      "providedInterface": [
-        "BasicRegressor",
-        "BaseLearner"
-      ],
-      "requiredInterface": [],
-      "parameter": [
-        {
-          "name": "activation",
-          "type": "cat",
-          "values": [
-            "identity",
-            "logistic",
-            "tanh",
-            "relu"
-          ],
-          "default": "relu"
-        },
-        {
-          "name": "solver",
-          "type": "cat",
-          "values": [
-            "lbfgs",
-            "sgd",
-            "adam"
-          ],
-          "default": "adam"
-        },
-        {
-          "name": "alpha",
-          "type": "double",
-          "default": 0.0001,
-          "min": 0.0,
-          "max": 1.0,
-          "minInterval": 0.00001,
-          "refineSplits": 2
-        },
-        {
-          "name": "batch_size",
-          "type": "cat",
-          "values": [
-            "auto",
-            "5",
-            "10",
-            "15",
-            "30",
-            "50",
-            "100",
-            "125"
-          ],
-          "default": "auto"
-        },
-        {
-          "name": "learning_rate",
-          "type": "cat",
-          "values": [
-            "constant",
-            "invscaling",
-            "adaptive"
-          ],
-          "default": "constant"
-        },
-        {
-          "name": "learning_rate_init",
-          "type": "double",
-          "default": 0.001,
-          "min": 0.0,
-          "max": 1.0,
-          "minInterval": 0.001,
-          "refineSplits": 2
-        },
-        {
-          "name": "power_t",
-          "type": "double",
-          "default": 0.5,
-          "min": 0.0,
-          "max": 1.0,
-          "minInterval": 0.1,
-          "refineSplits": 2
-        },
-        {
-          "name": "max_iter",
-          "type": "int",
-          "default": 200,
-          "min": 1,
-          "max": 2000,
-          "minInterval": 1,
-          "refineSplits": 2
-        },
-        {
-          "name": "shuffle",
-          "type": "cat",
-          "values": [
-            "True",
-            "False"
-          ],
-          "default": "False"
-        },
-        {
-          "name": "tol",
-          "type": "double",
-          "default": 0.0001,
-          "min": 0.0,
-          "max": 1.0,
-          "minInterval": 0.0001,
-          "refineSplits": 2
-        },
-        {
-          "name": "momentum",
-          "type": "double",
-          "default": 0.9,
-          "min": 0.0,
-          "max": 1.0,
-          "minInterval": 0.1,
-          "refineSplits": 2
-        },
-        {
-          "name": "nesterovs_momentum",
-          "type": "cat",
-          "values": [
-            "True",
-            "False"
-          ],
-          "default": "True"
-        },
-        {
-          "name": "early_stopping",
-          "type": "cat",
-          "values": [
-            "True",
-            "False"
-          ],
-          "default": "False"
-        },
-        {
-          "name": "validation_fraction",
-          "type": "double",
-          "default": 0.1,
-          "min": 0.0,
-          "max": 1.0,
-          "minInterval": 0.05,
-          "refineSplits": 2
-        },
-        {
-          "name": "beta_1",
-          "type": "double",
-          "default": 0.9,
-          "min": 0.0,
-          "max": 1.0,
-          "minInterval": 0.01,
-          "refineSplits": 2
-        },
-        {
-          "name": "beta_2",
-          "type": "double",
-          "default": 0.999,
-          "min": 0.0,
-          "max": 1.0,
-          "minInterval": 0.01,
-          "refineSplits": 2
-        },
-        {
-          "name": "n_iter_no_change",
-          "type": "int",
-          "default": 10,
-          "min": 1,
-          "max": 50,
-          "minInterval": 1,
-          "refineSplits": 2
-        }
-      ]
-    },
-    {
-      "name": "sklearn.kernel_ridge.KernelRidge",
-      "providedInterface": [
-        "BasicRegressor",
-        "BaseLearner"
-      ],
-      "requiredInterface": [],
-      "parameter": [
-        {
-          "name": "alpha",
-          "type": "double",
-          "default": 1.0,
-          "min": 0.0,
-          "max": 1.8,
-          "minInterval": 1,
-          "refineSplits": 2
-        },
-        {
-          "name": "kernel",
-          "type": "cat",
-          "values": [
-            "linear",
-            "additive_chi2",
-            "chi2",
-            "linear",
-            "polynomial",
-            "poly",
-            "rbf",
-            "laplacian",
-            "sigmoid",
-            "cosine"
-          ],
-          "default": "linear"
-        },
-        {
-          "name": "gamma",
-          "type": "cat",
-          "values": [
-            "None",
-            "0.1",
-            "0.2",
-            "0.3",
-            "0.4",
-            "0.5",
-            "0.6",
-            "0.7",
-            "0.8",
-            "0.9",
-            "1.0",
-            "1.1",
-            "1.2",
-            "1.3",
-            "1.4",
-            "1.5",
-            "1.6",
-            "1.7",
-            "1.8",
-            "1.9",
-            "2.0"
-          ],
-          "default": "None"
-        },
-        {
-          "name": "degree",
-          "type": "double",
-          "default": 3.0,
-          "min": 1.0,
-          "max": 6.0,
-          "minInterval": 0.1,
-          "refineSplits": 2
-        },
-        {
-          "name": "coef0",
-          "type": "double",
-          "default": 1,
-          "min": 0,
-          "max": 2,
-          "minInterval": 0.1,
-          "refineSplits": 2
         }
       ]
     },
@@ -2591,7 +1953,7 @@
           "min": 0.0,
           "max": 3.0,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "tol",
@@ -2600,7 +1962,7 @@
           "min": 0.000000001,
           "max": 1.0,
           "minInterval": 0.001,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "loss",
@@ -2624,19 +1986,10 @@
           "name": "intercept_scaling",
           "type": "double",
           "default": 1.0,
-          "min": 0.0,
+          "min": 0.0001,
           "max": 3.0,
           "minInterval": 0.1,
-          "refineSplits": 2
-        },
-        {
-          "name": "dual",
-          "type": "cat",
-          "values": [
-            "True",
-            "False"
-          ],
-          "default": "True"
+          "refineSplits": 8
         },
         {
           "name": "max_iter",
@@ -2645,7 +1998,7 @@
           "min": 1,
           "max": 10000,
           "minInterval": 20,
-          "refineSplits": 2
+          "refineSplits": 8
         }
       ]
     },
@@ -2664,7 +2017,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "C",
@@ -2673,7 +2026,7 @@
           "min": 0.01,
           "max": 5.0,
           "minInterval": 0.2,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "kernel",
@@ -2693,7 +2046,7 @@
           "min": 1,
           "max": 6,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "gamma",
@@ -2730,7 +2083,7 @@
           "min": 0.0,
           "max": 2.0,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "shrinking",
@@ -2748,7 +2101,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.005,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "max_iter",
@@ -2757,7 +2110,7 @@
           "min": -1,
           "max": 10000,
           "minInterval": 20,
-          "refineSplits": 2
+          "refineSplits": 8
         }
       ]
     },
@@ -2787,7 +2140,7 @@
           "min": 1,
           "max": 6,
           "minInterval": 1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "gamma",
@@ -2824,7 +2177,7 @@
           "min": 0.0,
           "max": 2.0,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "tol",
@@ -2833,7 +2186,7 @@
           "min": 0.0,
           "max": 1.0,
           "minInterval": 0.005,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "C",
@@ -2842,7 +2195,7 @@
           "min": 0.0,
           "max": 5.0,
           "minInterval": 0.1,
-          "refineSplits": 2
+          "refineSplits": 8
         },
         {
           "name": "shrinking",
@@ -2860,7 +2213,7 @@
           "min": -1,
           "max": 10000,
           "minInterval": 20,
-          "refineSplits": 2
+          "refineSplits": 8
         }
       ]
     }
