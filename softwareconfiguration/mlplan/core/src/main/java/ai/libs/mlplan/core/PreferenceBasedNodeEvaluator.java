@@ -63,7 +63,7 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 		this.logger.debug("The associated component instance is {}. Constitutes a pipeline? {}", instance, isPipeline ? "yes" : "no");
 		if (instance != null) {
 			if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
-				lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith(this.problemType.getPreferredBasicProblemComponentName());
+				lastMethod = appliedMethods.get(appliedMethods.size() - 1).startsWith(this.problemType.getPreferredBasicProblemComponentName());
 
 				if (instance.getSatisfactionOfRequiredInterfaces().containsKey("classifier")) {
 					classifierName = instance.getSatisfactionOfRequiredInterfaces().get("classifier").getComponent().getName();
@@ -74,7 +74,7 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 				}
 			} else {
 				classifierName = instance.getComponent().getName();
-				lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith(this.problemType.getPreferredComponentName());
+				lastMethod = appliedMethods.get(appliedMethods.size() - 1).startsWith(this.problemType.getPreferredComponentName());
 			}
 
 			if (lastMethod) {

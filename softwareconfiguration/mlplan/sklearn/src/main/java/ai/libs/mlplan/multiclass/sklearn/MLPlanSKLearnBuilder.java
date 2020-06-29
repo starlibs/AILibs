@@ -72,9 +72,6 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 
 	private EMLPlanSkLearnProblemType problemType;
 	private String pathVariable;
-	private String anacondaEnvironment;
-	private long seed;
-	private Timeout timeout;
 	private final boolean skipSetupCheck;
 
 	/**
@@ -201,9 +198,8 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 
 	@SuppressWarnings("unchecked")
 	public MLPlanSKLearnBuilder<P, B> withAnacondaEnvironment(final String env) {
-		this.anacondaEnvironment = env;
 		if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
-			((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setAnacondaEnvironment(this.anacondaEnvironment);
+			((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setAnacondaEnvironment(env);
 		} else {
 			this.logger.warn("Setting anaconda environment only supported by SKLearnClassifierFactory.");
 		}
@@ -214,10 +210,9 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 	@SuppressWarnings("unchecked")
 	public MLPlanSKLearnBuilder<P, B> withSeed(final long seed) {
 		super.withSeed(seed);
-		this.seed = seed;
 		if (this.getLearnerFactory() != null) {
 			if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
-				((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setSeed(this.seed);
+				((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setSeed(seed);
 			} else {
 				this.logger.warn("Setting seed only supported by SKLearnClassifierFactory.");
 			}
@@ -229,10 +224,9 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 	@SuppressWarnings("unchecked")
 	public MLPlanSKLearnBuilder<P, B> withCandidateEvaluationTimeOut(final Timeout timeout) {
 		super.withCandidateEvaluationTimeOut(timeout);
-		this.timeout = timeout;
 		if (this.getLearnerFactory() != null) {
 			if (this.getLearnerFactory() instanceof SKLearnClassifierFactory) {
-				((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setTimeout(this.timeout);
+				((SKLearnClassifierFactory<P, B>) this.getLearnerFactory()).setTimeout(timeout);
 			} else {
 				this.logger.warn("Setting timeout only supported by SKLearnClassifierFactory.");
 			}
