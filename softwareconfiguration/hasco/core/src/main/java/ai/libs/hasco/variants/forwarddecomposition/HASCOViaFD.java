@@ -2,8 +2,8 @@ package ai.libs.hasco.variants.forwarddecomposition;
 
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
 
-import ai.libs.hasco.core.DefaultHASCOPlanningReduction;
 import ai.libs.hasco.core.HASCO;
+import ai.libs.hasco.core.reduction.planning2search.DefaultHASCOPlanningReduction;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.SimpleForwardDecompositionReducer;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;

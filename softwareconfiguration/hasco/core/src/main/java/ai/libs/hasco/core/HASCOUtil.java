@@ -14,6 +14,7 @@ import org.apache.commons.math3.geometry.partitioning.Region.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.logic.fol.structure.Literal;
@@ -45,7 +46,7 @@ public class HASCOUtil {
 
 	}
 
-	static Map<String, String> getParameterContainerMap(final Monom state, final String objectName) {
+	public static Map<String, String> getParameterContainerMap(final Monom state, final String objectName) {
 		Map<String, String> parameterContainerMap = new HashMap<>();
 		List<Literal> containerLiterals = state.stream().filter(l -> l.getPropertyName().equals(LITERAL_PARAMCONTAINER) && l.getParameters().get(2).getName().equals(objectName)).collect(Collectors.toList());
 		containerLiterals.forEach(l -> parameterContainerMap.put(l.getParameters().get(1).getName(), l.getParameters().get(3).getName()));
@@ -142,7 +143,7 @@ public class HASCOUtil {
 		return state.stream().filter(l -> l.getPropertyName().equals("closed")).map(l -> l.getParameters().get(0).getName()).collect(Collectors.toSet());
 	}
 
-	static Map<String, ComponentInstance> getGroundComponentsFromState(final Monom state, final Collection<Component> components, final boolean resolveIntervals) {
+	public static Map<String, ComponentInstance> getGroundComponentsFromState(final Monom state, final Collection<Component> components, final boolean resolveIntervals) {
 		Map<String, ComponentInstance> objectMap = new HashMap<>();
 		Map<String, Map<String, String>> parameterContainerMap = new HashMap<>(); // stores for each object the name of the container of each parameter
 		Map<String, String> parameterValues = new HashMap<>();

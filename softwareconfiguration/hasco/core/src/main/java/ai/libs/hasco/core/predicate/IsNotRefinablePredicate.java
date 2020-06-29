@@ -1,4 +1,4 @@
-package ai.libs.hasco.core;
+package ai.libs.hasco.core.predicate;
 
 import java.util.Collection;
 import java.util.List;
@@ -11,11 +11,11 @@ import ai.libs.softwareconfiguration.model.Component;
 import ai.libs.softwareconfiguration.model.Parameter;
 import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
 
-public class IsNotRefinable implements EvaluablePredicate {
+public class IsNotRefinablePredicate implements EvaluablePredicate {
 
 	private final IsValidParameterRangeRefinementPredicate p;
 
-	public IsNotRefinable(final Collection<Component> components, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration) {
+	public IsNotRefinablePredicate(final Collection<Component> components, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration) {
 		super();
 		this.p = new IsValidParameterRangeRefinementPredicate(components, refinementConfiguration);
 	}

@@ -1,4 +1,4 @@
-package ai.libs.hasco.reduction;
+package ai.libs.hasco.core.reduction.softcomp2planning;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,10 +13,10 @@ import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.core.HASCOUtil;
-import ai.libs.hasco.core.IHASCOPlanningReduction;
-import ai.libs.hasco.core.IsNotRefinable;
-import ai.libs.hasco.core.IsRefinementCompletedPredicate;
-import ai.libs.hasco.core.IsValidParameterRangeRefinementPredicate;
+import ai.libs.hasco.core.predicate.IsNotRefinablePredicate;
+import ai.libs.hasco.core.predicate.IsRefinementCompletedPredicate;
+import ai.libs.hasco.core.predicate.IsValidParameterRangeRefinementPredicate;
+import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.logic.fol.structure.CNFFormula;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
@@ -255,7 +255,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 	public CEOCIPSTNPlanningProblem getPlanningProblem(final CEOCIPSTNPlanningDomain domain, final CNFFormula knowledge, final Monom init) {
 		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
 		evaluablePredicates.put("isValidParameterRangeRefinement", new IsValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
-		evaluablePredicates.put("notRefinable", new IsNotRefinable(this.components, this.paramRefinementConfig));
+		evaluablePredicates.put("notRefinable", new IsNotRefinablePredicate(this.components, this.paramRefinementConfig));
 		evaluablePredicates.put("refinementCompleted", new IsRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
 		return new CEOCIPSTNPlanningProblem(domain, knowledge, init, new TaskNetwork(RESOLVE_COMPONENT_IFACE_PREFIX + this.originalProblem.getRequiredInterface() + "('request', 'solution')"), evaluablePredicates, new HashMap<>());
 	}

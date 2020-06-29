@@ -1,4 +1,4 @@
-package ai.libs.hasco.reduction;
+package ai.libs.hasco.core.reduction.softcomp2planning;
 
 import java.util.HashMap;
 import java.util.Map;

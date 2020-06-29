@@ -1,4 +1,4 @@
-package ai.libs.hasco.core;
+package ai.libs.hasco.core.predicate;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,6 +9,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;

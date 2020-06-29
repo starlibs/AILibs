@@ -25,8 +25,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
+import ai.libs.hasco.core.reduction.softcomp2planning.HASCOReduction;
 import ai.libs.hasco.events.HASCOSolutionEvent;
-import ai.libs.hasco.reduction.HASCOReduction;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
