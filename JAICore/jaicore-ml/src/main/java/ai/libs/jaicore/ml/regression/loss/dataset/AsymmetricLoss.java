@@ -7,15 +7,15 @@ import ai.libs.jaicore.basic.StatisticsUtil;
 
 public class AsymmetricLoss extends ARegressionMeasure {
 
-	private double dividerUnderestimation = 5;
-	private double dividerOverestimation = 20;
+	private double dividerOverestimation = 5;
+	private double dividerUnderestimation = 20;
 
 	public AsymmetricLoss() {
 	}
 
 	public AsymmetricLoss(final double dividerUnderestimation, final double dividerOverestimation) {
-		this.dividerUnderestimation = dividerUnderestimation;
-		this.dividerOverestimation = dividerOverestimation;
+		this.dividerOverestimation = dividerUnderestimation;
+		this.dividerUnderestimation = dividerOverestimation;
 	}
 
 	@Override
@@ -26,9 +26,9 @@ public class AsymmetricLoss extends ARegressionMeasure {
 			Double percentageError = 100 * ((expected.get(i) - actual.get(i)) / expected.get(i));
 			Double accuracy;
 			if (percentageError <= 0) {
-				accuracy = Math.exp(-Math.log(0.5) * (percentageError / this.dividerUnderestimation));
+				accuracy = Math.exp(-Math.log(0.5) * (percentageError / this.dividerOverestimation));
 			} else {
-				accuracy = Math.exp(Math.log(0.5) * (percentageError / this.dividerOverestimation));
+				accuracy = Math.exp(Math.log(0.5) * (percentageError / this.dividerUnderestimation));
 			}
 			accuracyList.add(accuracy);
 		}
