@@ -18,7 +18,6 @@ public class SingleTargetRegressionPredictionBatch extends ArrayList<IRegression
 
 	public SingleTargetRegressionPredictionBatch(final Collection<IRegressionPrediction> predictions) {
 		this.addAll(predictions);
-		LOGGER.debug("Predictions: {}", predictions.stream().map(IRegressionPrediction::getDoublePrediction).collect(Collectors.toList()));
 	}
 
 	@Override

@@ -59,7 +59,7 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 				ILearnerRunReport report;
 				try {
 					report = this.executor.execute(learner, folds.get(0), folds.get(1));
-					this.logger.info("Obtained report. Training times was {}ms, testing time {}ms. Ground truth vector: {}, prediction vector: {}. Pipeline: {}", report.getTrainEndTime() - report.getTrainStartTime(),
+					this.logger.trace("Obtained report. Training times was {}ms, testing time {}ms. Ground truth vector: {}, prediction vector: {}. Pipeline: {}", report.getTrainEndTime() - report.getTrainStartTime(),
 							report.getTestEndTime() - report.getTestStartTime(), report.getPredictionDiffList().getGroundTruthAsList(), report.getPredictionDiffList().getPredictionsAsList(), learner);
 				} catch (LearnerExecutionInterruptedException e) {
 					this.logger.info("Received interrupt of training in iteration #{} after a total evaluation time of {}ms. Sending an event over the bus and forwarding the exception.", i + 1, System.currentTimeMillis() - evaluationStart);
@@ -93,7 +93,7 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 						}
 					}
 					if (m - mistakes == 0) {
-						this.logger.debug("0 correct predictions seems suspicious. Here are the vectors: \n\tGround truth: {}\n\tPredictions: {}", report.getPredictionDiffList().getGroundTruthAsList(),
+						this.logger.warn("0 correct predictions seems suspicious. Here are the vectors: \n\tGround truth: {}\n\tPredictions: {}", report.getPredictionDiffList().getGroundTruthAsList(),
 								report.getPredictionDiffList().getPredictionsAsList());
 					}
 					this.logger.debug("Execution completed. Classifier predicted {}/{} test instances correctly.", (m - mistakes), m);
