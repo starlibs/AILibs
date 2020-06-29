@@ -42,6 +42,7 @@ import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitivePlanningT
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
+import ai.libs.jaicore.timing.TimeRecordingObjectEvaluator;
 import ai.libs.softwareconfiguration.model.Component;
 import ai.libs.softwareconfiguration.model.ComponentInstance;
 import ai.libs.softwareconfiguration.model.ComponentUtil;
@@ -83,7 +84,7 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 	private boolean createComponentInstancesFromNodesInsteadOfPlans = false;
 
 	/* runtime variables of algorithm */
-	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
+	private final TimeRecordingObjectEvaluator<ComponentInstance, V> timeGrabbingEvaluationWrapper;
 
 	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver, final IOptimalPathInORGraphSearchFactory<S, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory,
 			final AlgorithmicProblemReduction<? super GraphSearchWithPathEvaluationsInput<N, A, V>, ? super EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer) {
@@ -103,7 +104,7 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 		this.planningGraphGeneratorDeriver = planningGraphGeneratorDeriver;
 		this.searchFactory = searchFactory;
 		this.searchProblemTransformer = searchProblemTransformer;
-		this.timeGrabbingEvaluationWrapper = new TimeRecordingEvaluationWrapper<>(configurationProblem.getCompositionEvaluator());
+		this.timeGrabbingEvaluationWrapper = new TimeRecordingObjectEvaluator<>(configurationProblem.getCompositionEvaluator());
 
 		/* check whether there is a refinement config for each numeric parameter */
 		Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig = this.getInput().getParamRefinementConfig();
