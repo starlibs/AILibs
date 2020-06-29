@@ -3,8 +3,8 @@ package ai.libs.mlplan.core.events;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.event.IEvent;
 
-import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.mlplan.core.ITimeTrackingLearner;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
 
 public class TimeTrackingLearnerEvaluationEvent implements IEvent {
 

@@ -19,10 +19,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
-import ai.libs.hasco.core.Util;
+import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.metamining.MetaMinerBasedSorter;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
@@ -40,6 +38,8 @@ import ai.libs.mlplan.multiclass.wekamlplan.MLPlan4Weka;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -142,7 +142,7 @@ public class MetaMLPlan extends AbstractClassifier {
 				}
 
 				// Prepare pipeline
-				ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, solution.get(solution.size() - 1).getState(), true);
+				ComponentInstance ci = HASCOUtil.getSolutionCompositionFromState(this.components, solution.get(solution.size() - 1).getState(), true);
 				IWekaClassifier pl = this.factory.getComponentInstantiation(ci);
 
 				// Evaluate pipeline

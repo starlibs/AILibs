@@ -8,8 +8,9 @@ import java.util.Collection;
 
 import org.junit.Test;
 
-import ai.libs.hasco.model.Component;
 import ai.libs.jaicore.basic.ResourceFile;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.serialization.ComponentLoader;
 
 public class ComponentLoaderTest {
 

@@ -19,6 +19,9 @@ include ":JAICore:jaicore-search"
 
 
 // Software-Configuration
+include 'softwareconfigurationmodels'
+project(":softwareconfigurationmodels").projectDir = new File(configPrefix,"model")
+
 include 'hasco-core'
 project(":hasco-core").projectDir = new File(configPrefix,"hasco/core")
 

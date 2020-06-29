@@ -7,12 +7,12 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.NumericParameterDomain;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.classification.multilabel.learner.MekaClassifier;
+import ai.libs.softwareconfiguration.exceptions.ComponentInstantiationFailedException;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.NumericParameterDomain;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.MultipleClassifiersCombiner;
@@ -21,10 +21,10 @@ import weka.classifiers.functions.supportVector.Kernel;
 import weka.core.OptionHandler;
 
 /**
-* A pipeline factory that converts a given ComponentInstance that consists of
-* components that correspond to MEKA algorithms to a MultiLabelClassifier.
-*
-*/
+ * A pipeline factory that converts a given ComponentInstance that consists of
+ * components that correspond to MEKA algorithms to a MultiLabelClassifier.
+ *
+ */
 public class MekaPipelineFactory implements IMekaPipelineFactory {
 
 	private static final String PARAMETER_NAME_WITH_DASH_WARNING = "Required interface of component {} has dash or underscore in interface id {}";

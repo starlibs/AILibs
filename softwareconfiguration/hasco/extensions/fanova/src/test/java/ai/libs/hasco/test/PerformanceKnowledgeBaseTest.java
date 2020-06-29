@@ -8,11 +8,11 @@ import java.util.HashMap;
 import org.junit.Test;
 
 import ai.libs.hasco.knowledgebase.PerformanceKnowledgeBase;
-import ai.libs.hasco.model.CategoricalParameterDomain;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.NumericParameterDomain;
-import ai.libs.hasco.model.Parameter;
+import ai.libs.softwareconfiguration.model.CategoricalParameterDomain;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.NumericParameterDomain;
+import ai.libs.softwareconfiguration.model.Parameter;
 
 public class PerformanceKnowledgeBaseTest {
 

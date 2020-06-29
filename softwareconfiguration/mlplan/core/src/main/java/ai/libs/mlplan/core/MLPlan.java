@@ -34,10 +34,6 @@ import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.hasco.events.TwoPhaseHASCOPhaseSwitchEvent;
-import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.optimizingfactory.OptimizingFactory;
-import ai.libs.hasco.optimizingfactory.OptimizingFactoryProblem;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory;
@@ -58,6 +54,10 @@ import ai.libs.mlplan.core.events.MLPlanPhaseSwitchedEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuard;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
+import ai.libs.softwareconfiguration.exceptions.ComponentInstantiationFailedException;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.optimizingfactory.OptimizingFactory;
+import ai.libs.softwareconfiguration.optimizingfactory.OptimizingFactoryProblem;
 
 public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> extends AAlgorithm<ILabeledDataset<?>, L> implements ILoggingCustomizable {
 

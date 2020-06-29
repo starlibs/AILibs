@@ -37,8 +37,6 @@ import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.hasco.events.TwoPhaseHASCOPhaseSwitchEvent;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import ai.libs.hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
@@ -49,6 +47,8 @@ import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.timing.TimedComputation;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.optimizingfactory.SoftwareConfigurationAlgorithm;
 
 public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
 

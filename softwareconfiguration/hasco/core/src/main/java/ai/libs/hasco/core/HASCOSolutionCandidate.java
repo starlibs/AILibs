@@ -1,8 +1,8 @@
 package ai.libs.hasco.core;
 
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.EvaluatedSoftwareConfigurationSolution;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedGraphSearchBasedPlan;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.EvaluatedSoftwareConfigurationSolution;
 
 /**
  * This is a wrapper class only used for efficient processing of solutions. For example, to lookup the annotations of a solution, we do not need the possibly costly equals method of T but only this

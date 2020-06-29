@@ -10,13 +10,13 @@ import org.openml.webapplication.fantail.dc.LandmarkerCharacterizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.model.Component;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.ranking.dyad.learner.search.ADyadRankedNodeQueueConfig;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.ComponentInstanceVectorFeatureGenerator;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
+import ai.libs.softwareconfiguration.model.Component;
 import weka.core.Instances;
 
 /**

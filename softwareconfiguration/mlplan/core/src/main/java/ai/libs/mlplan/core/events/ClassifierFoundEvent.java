@@ -7,9 +7,9 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.events.result.IScoredSolutionCandidateFoundEvent;
 
-import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.algorithm.ASolutionCandidateFoundEvent;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
 
 public class ClassifierFoundEvent extends ASolutionCandidateFoundEvent<ISupervisedLearner<?, ?>> implements IScoredSolutionCandidateFoundEvent<ISupervisedLearner<?, ?>, Double> {
 

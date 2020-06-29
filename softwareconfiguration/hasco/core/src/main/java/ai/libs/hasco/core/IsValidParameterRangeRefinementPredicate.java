@@ -15,18 +15,18 @@ import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.model.CategoricalParameterDomain;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.IParameterDomain;
-import ai.libs.hasco.model.NumericParameterDomain;
-import ai.libs.hasco.model.Parameter;
-import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.logic.fol.theories.EvaluablePredicate;
+import ai.libs.softwareconfiguration.model.CategoricalParameterDomain;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.IParameterDomain;
+import ai.libs.softwareconfiguration.model.NumericParameterDomain;
+import ai.libs.softwareconfiguration.model.Parameter;
+import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
 
 public class IsValidParameterRangeRefinementPredicate implements EvaluablePredicate {
 
@@ -78,10 +78,10 @@ public class IsValidParameterRangeRefinementPredicate implements EvaluablePredic
 		boolean hasBeenSetBefore = state.contains(new Literal("overwritten('" + containerName + "')"));
 
 		/* determine component instance and the true domain of parameter */
-		ComponentInstance instance = Util.getComponentInstanceFromState(this.components, state, componentIdentifier, false);
+		ComponentInstance instance = HASCOUtil.getComponentInstanceFromState(this.components, state, componentIdentifier, false);
 		this.logger.debug("Derived component instance to be refined: {}. Parameter to refine: {}. Current value of parameter: {}", instance, param, currentParamValue);
 		try {
-			Map<Parameter, IParameterDomain> paramDomains = Util.getUpdatedDomainsOfComponentParameters(instance);
+			Map<Parameter, IParameterDomain> paramDomains = HASCOUtil.getUpdatedDomainsOfComponentParameters(instance);
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Parameter domains are: {}", paramDomains.keySet().stream().map(k -> "\n\t" + k + ": " + paramDomains.get(k)).collect(Collectors.joining()));
 			}

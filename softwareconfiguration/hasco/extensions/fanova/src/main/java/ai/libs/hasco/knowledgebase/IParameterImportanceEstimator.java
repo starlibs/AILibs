@@ -3,8 +3,8 @@ package ai.libs.hasco.knowledgebase;
 import java.util.Map;
 import java.util.Set;
 
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
 
 public interface IParameterImportanceEstimator {
 

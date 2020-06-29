@@ -1,6 +1,6 @@
 package ai.libs.hasco.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -9,9 +9,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import ai.libs.hasco.core.Util;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.Util;
 
 public class UtilCompositionTest {
 
@@ -42,7 +42,8 @@ public class UtilCompositionTest {
 		sat1.put("Interface2", instance4);
 		ComponentInstance instance1 = new ComponentInstance(component1, parameterValues, sat1);
 		List<Component> components = Util.getComponentsOfComposition(instance1);
-		for(int i = 0; i < groundTruth.size(); i++)
+		for(int i = 0; i < groundTruth.size(); i++) {
 			assertEquals(components.get(i), groundTruth.get(i));
+		}
 	}
 }

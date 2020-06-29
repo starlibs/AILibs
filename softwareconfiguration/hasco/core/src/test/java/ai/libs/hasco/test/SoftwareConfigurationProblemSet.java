@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.hasco.serialization.UnresolvableRequiredInterfaceException;
 import ai.libs.jaicore.basic.algorithm.AAlgorithmTestProblemSet;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
+import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.softwareconfiguration.serialization.UnresolvableRequiredInterfaceException;
 
 public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<RefinementConfiguredSoftwareConfigurationProblem<Double>> {
 

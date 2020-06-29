@@ -231,6 +231,7 @@ task showDirs {
 
 
 dependencies{
+	compile project(":softwareconfigurationmodels")
 	compile project(":hasco-core")
 	compile project(":hasco-fanova")
 	//compile project(":autofe")

@@ -9,11 +9,11 @@ import org.api4.java.common.math.IVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.model.CategoricalParameterDomain;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.Parameter;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
+import ai.libs.softwareconfiguration.model.CategoricalParameterDomain;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.Parameter;
 
 /**
  * Characterizes a pipelines by the components that occur in it and the

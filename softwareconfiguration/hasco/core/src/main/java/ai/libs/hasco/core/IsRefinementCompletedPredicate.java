@@ -9,17 +9,17 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.model.CategoricalParameterDomain;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.NumericParameterDomain;
-import ai.libs.hasco.model.Parameter;
-import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.logic.fol.theories.EvaluablePredicate;
+import ai.libs.softwareconfiguration.model.CategoricalParameterDomain;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.NumericParameterDomain;
+import ai.libs.softwareconfiguration.model.Parameter;
+import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
 
 public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 
@@ -64,9 +64,9 @@ public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 		final String objectContainer = params[1].getName();
 
 		/* determine current values for the params */
-		ComponentInstance groundComponent = Util.getGroundComponentsFromState(state, components, false).get(objectContainer);
+		ComponentInstance groundComponent = HASCOUtil.getGroundComponentsFromState(state, this.components, false).get(objectContainer);
 		Component component = groundComponent.getComponent();
-		Map<String, String> componentParamContainers = Util.getParameterContainerMap(state, objectContainer);
+		Map<String, String> componentParamContainers = HASCOUtil.getParameterContainerMap(state, objectContainer);
 		for (Parameter param : component.getParameters()) {
 			String containerOfParam = componentParamContainers.get(param.getName());
 			String currentValueOfParam = groundComponent.getParameterValue(param);
@@ -76,7 +76,7 @@ public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 			assert variableHasBeenSet == groundComponent.getParametersThatHaveBeenSetExplicitly().contains(param);
 			assert !variableHasBeenClosed || variableHasBeenSet : "Parameter " + param.getName() + " of component " + component.getName() + " with default domain " + param.getDefaultDomain() + " has been closed but no value has been set.";
 
-			ParameterRefinementConfiguration refinementConfig = refinementConfiguration.get(component).get(param);
+			ParameterRefinementConfiguration refinementConfig = this.refinementConfiguration.get(component).get(param);
 
 			if (param.isNumeric()) {
 				double min = 0;
@@ -93,21 +93,21 @@ public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 				double length = max - min;
 
 				if (refinementConfig.isInitRefinementOnLogScale() && (max / min - 1) > lengthStopCriterion || ! refinementConfig.isInitRefinementOnLogScale() && length > lengthStopCriterion) {
-					logger.info("Test for isRefinementCompletedPredicate({},{}) is negative. Interval length of [{},{}] is {}. Required length to consider an interval atomic is {}", params[0].getName(), objectContainer, min, max,
-							length, refinementConfiguration.get(component).get(param).getIntervalLength());
+					this.logger.info("Test for isRefinementCompletedPredicate({},{}) is negative. Interval length of [{},{}] is {}. Required length to consider an interval atomic is {}", params[0].getName(), objectContainer, min, max,
+							length, this.refinementConfiguration.get(component).get(param).getIntervalLength());
 					return false;
 				}
 			} else if (param.getDefaultDomain() instanceof CategoricalParameterDomain) { // categorical params can be refined iff the have not been set and closed before
 				assert param.getDefaultValue() != null : "Param " + param.getName() + " has no default value!";
 				if (!variableHasBeenSet && !variableHasBeenClosed) {
-					logger.info("Test for isRefinementCompletedPredicate({},{}) is negative", params[0].getName(), objectContainer);
+					this.logger.info("Test for isRefinementCompletedPredicate({},{}) is negative", params[0].getName(), objectContainer);
 					return false;
 				}
 			} else {
 				throw new UnsupportedOperationException("Currently no support for testing parameters of type " + param.getClass().getName());
 			}
 		}
-		logger.info("Test for isRefinementCompletedPredicate({},{}) is positive", params[0].getName(), objectContainer);
+		this.logger.info("Test for isRefinementCompletedPredicate({},{}) is positive", params[0].getName(), objectContainer);
 		return true;
 	}
 }

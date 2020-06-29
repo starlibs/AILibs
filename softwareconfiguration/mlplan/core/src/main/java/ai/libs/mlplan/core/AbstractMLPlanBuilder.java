@@ -22,10 +22,6 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.Parameter;
-import ai.libs.hasco.model.ParameterRefinementConfiguration;
-import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
 import ai.libs.hasco.variants.forwarddecomposition.FDAndBestFirstWithRandomCompletionTransformer;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDFactory;
@@ -45,6 +41,10 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.Alter
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.Parameter;
+import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
+import ai.libs.softwareconfiguration.serialization.ComponentLoader;
 
 /**
  * The MLPlanBuilder helps to easily configure and initialize ML-Plan with specific parameter settings.

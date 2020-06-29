@@ -5,11 +5,11 @@ import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 
 import ai.libs.hasco.core.HASCO;
-import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
 
 public class HASCOViaFDAndBestFirst<V extends Comparable<V>> extends HASCOViaFD<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V>, V> {
 

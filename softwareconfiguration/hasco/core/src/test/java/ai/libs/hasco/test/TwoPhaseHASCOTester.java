@@ -15,12 +15,12 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
-import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsFactory;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
+import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
 
 public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 

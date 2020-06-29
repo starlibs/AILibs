@@ -26,13 +26,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.events.HASCOSolutionEvent;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.ComponentUtil;
-import ai.libs.hasco.model.Parameter;
-import ai.libs.hasco.model.ParameterRefinementConfiguration;
-import ai.libs.hasco.model.UnparametrizedComponentInstance;
-import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import ai.libs.hasco.reduction.HASCOReduction;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
@@ -48,6 +41,15 @@ import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitivePlanningT
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.ComponentUtil;
+import ai.libs.softwareconfiguration.model.Parameter;
+import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
+import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.softwareconfiguration.model.SoftwareConfigurationProblem;
+import ai.libs.softwareconfiguration.model.UnparametrizedComponentInstance;
+import ai.libs.softwareconfiguration.optimizingfactory.SoftwareConfigurationAlgorithm;
 
 /**
  * Hierarchically create an object of type T
@@ -197,9 +199,9 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 					IPlan plan = HASCO.this.planningGraphGeneratorDeriver.decodeSolution(searchPath);
 					ComponentInstance objectInstance;
 					if (HASCO.this.createComponentInstancesFromNodesInsteadOfPlans) {
-						objectInstance = Util.getSolutionCompositionFromState(HASCO.this.getInput().getComponents(), ((TFDNode) searchPath.getNodes().get(searchPath.getNodes().size() - 1)).getState(), true);
+						objectInstance = HASCOUtil.getSolutionCompositionFromState(HASCO.this.getInput().getComponents(), ((TFDNode) searchPath.getNodes().get(searchPath.getNodes().size() - 1)).getState(), true);
 					} else {
-						objectInstance = Util.getSolutionCompositionForPlan(HASCO.this.getInput().getComponents(), HASCO.this.planningProblem.getCorePlanningProblem().getInit(), plan, true);
+						objectInstance = HASCOUtil.getSolutionCompositionForPlan(HASCO.this.getInput().getComponents(), HASCO.this.planningProblem.getCorePlanningProblem().getInit(), plan, true);
 					}
 					HASCO.this.returnedUnparametrizedComponentInstances.add(new UnparametrizedComponentInstance(objectInstance));
 					V score;

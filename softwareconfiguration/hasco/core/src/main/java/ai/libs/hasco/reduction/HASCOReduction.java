@@ -12,17 +12,11 @@ import java.util.function.Supplier;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.hasco.core.HASCOSolutionCandidate;
+import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.core.IHASCOPlanningReduction;
+import ai.libs.hasco.core.IsNotRefinable;
 import ai.libs.hasco.core.IsRefinementCompletedPredicate;
 import ai.libs.hasco.core.IsValidParameterRangeRefinementPredicate;
-import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.hasco.core.Util;
-import ai.libs.hasco.core.IsNotRefinable;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.NumericParameterDomain;
-import ai.libs.hasco.model.Parameter;
-import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.logic.fol.structure.CNFFormula;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
@@ -39,6 +33,12 @@ import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlannin
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.TaskNetwork;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.NumericParameterDomain;
+import ai.libs.softwareconfiguration.model.Parameter;
+import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
+import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
 
 /**
  * This is the class that conducts the actual problem reduction of software configuration to HTN Planning
@@ -299,7 +299,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 	}
 
 	public ComponentInstance decodeSolution(final IPlan plan) {
-		return Util.getSolutionCompositionForPlan(HASCOReduction.this.components, HASCOReduction.this.getInitState(), plan, true);
+		return HASCOUtil.getSolutionCompositionForPlan(HASCOReduction.this.components, HASCOReduction.this.getInitState(), plan, true);
 	}
 
 	public Supplier<HASCOSolutionCandidate<V>> getBestSolutionSupplier() {

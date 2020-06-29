@@ -10,8 +10,8 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
 
 public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements IObjectEvaluator<ComponentInstance, V>, IInformedObjectEvaluatorExtension<V>, ILoggingCustomizable {
 

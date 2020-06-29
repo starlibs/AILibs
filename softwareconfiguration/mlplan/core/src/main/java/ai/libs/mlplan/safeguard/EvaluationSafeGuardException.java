@@ -2,7 +2,7 @@ package ai.libs.mlplan.safeguard;
 
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
 
 public class EvaluationSafeGuardException extends ObjectEvaluationFailedException {
 

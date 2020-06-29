@@ -13,7 +13,6 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
@@ -25,6 +24,7 @@ import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.PipelineEvaluator;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
+import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
 import weka.core.Instances;
 
 /**

@@ -12,16 +12,16 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.ComponentUtil;
-import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaPathConfig;
 import ai.libs.mlplan.multilabel.mekamlplan.MekaPipelineFactory;
+import ai.libs.softwareconfiguration.exceptions.ComponentInstantiationFailedException;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.ComponentUtil;
+import ai.libs.softwareconfiguration.serialization.ComponentLoader;
 import meka.core.MLUtils;
 import weka.core.Instances;
 

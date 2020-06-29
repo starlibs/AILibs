@@ -7,7 +7,6 @@ import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
 import org.api4.java.datastructure.graph.ILabeledPath;
 
-import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
@@ -15,6 +14,8 @@ import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningT
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
+import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.softwareconfiguration.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 
 public class HASCOFactory<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V, HASCO<S, N, A, V>> {
 

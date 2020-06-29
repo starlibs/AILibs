@@ -13,12 +13,12 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.ComponentUtil;
-import ai.libs.hasco.model.NumericParameterDomain;
-import ai.libs.hasco.model.Parameter;
-import ai.libs.hasco.serialization.ComponentLoader;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.ComponentUtil;
+import ai.libs.softwareconfiguration.model.NumericParameterDomain;
+import ai.libs.softwareconfiguration.model.Parameter;
+import ai.libs.softwareconfiguration.serialization.ComponentLoader;
 
 /**
  * Tests whether the methods provided by the ComponentUtil work properly.

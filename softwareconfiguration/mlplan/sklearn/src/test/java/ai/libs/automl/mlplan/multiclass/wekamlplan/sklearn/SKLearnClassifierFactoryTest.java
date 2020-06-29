@@ -16,12 +16,12 @@ import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.ComponentUtil;
-import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.mlplan.multiclass.sklearn.SKLearnClassifierFactory;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.ComponentUtil;
+import ai.libs.softwareconfiguration.serialization.ComponentLoader;
 import weka.core.Instances;
 
 /**

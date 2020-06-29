@@ -11,11 +11,11 @@ import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.core.Util;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
 
 public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, String, Double>, ILoggingCustomizable {
 
@@ -52,7 +52,7 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 		this.logger.debug("Determined {} applied methods: {}", appliedMethods.size(), appliedMethods);
 
 		/* get partial component */
-		ComponentInstance instance = Util.getSolutionCompositionFromState(this.components, n.getHead().getState(), false);
+		ComponentInstance instance = HASCOUtil.getSolutionCompositionFromState(this.components, n.getHead().getState(), false);
 		boolean isPipeline = appliedMethods.stream().anyMatch(x -> x.toLowerCase().contains("pipeline"));
 		boolean lastMethod = false;
 		String classifierName = null;

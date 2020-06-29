@@ -6,12 +6,12 @@ import java.util.Map;
 
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 
-import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.hasco.core.SoftwareConfigurationProblem;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.Parameter;
-import ai.libs.hasco.model.ParameterRefinementConfiguration;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.Parameter;
+import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
+import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.softwareconfiguration.model.SoftwareConfigurationProblem;
 
 public class TwoPhaseSoftwareConfigurationProblem extends RefinementConfiguredSoftwareConfigurationProblem<Double> {
 	private final IObjectEvaluator<ComponentInstance, Double> selectionBenchmark;
