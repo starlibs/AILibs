@@ -74,7 +74,7 @@ public class SoftwareConfigurationProblem<V extends Comparable<V>> {
 		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
-		SoftwareConfigurationProblem other = (SoftwareConfigurationProblem) obj;
+		SoftwareConfigurationProblem<?> other = (SoftwareConfigurationProblem<?>) obj;
 		if (this.components == null) {
 			if (other.components != null) {
 				return false;

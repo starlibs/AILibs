@@ -295,13 +295,13 @@ public class ComponentUtil {
 		affectedComponents.forEach(x -> x.getRequiredInterfaces().values().stream().map(interfaceName -> getAffectedComponents(components, interfaceName)).forEach(recursiveResolvedComps::addAll));
 		affectedComponents.addAll(recursiveResolvedComps);
 		return affectedComponents;
-  }
+	}
 
-  public static String getComponentInstanceAsComponentNames(final ComponentInstance instance) {
+	public static String getComponentInstanceAsComponentNames(final ComponentInstance instance) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(instance.getComponent().getName());
 		if (!instance.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-			sb.append("{").append(instance.getSatisfactionOfRequiredInterfaces().values().stream().map(x -> getComponentInstanceAsComponentNames(x)).collect(Collectors.joining(","))).append("}");
+			sb.append("{").append(instance.getSatisfactionOfRequiredInterfaces().values().stream().map(ComponentUtil::getComponentInstanceAsComponentNames).collect(Collectors.joining(","))).append("}");
 		}
 		return sb.toString();
 	}

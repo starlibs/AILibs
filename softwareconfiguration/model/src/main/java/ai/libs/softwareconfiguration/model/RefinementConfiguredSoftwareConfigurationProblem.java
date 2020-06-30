@@ -49,7 +49,7 @@ public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparab
 		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
-		RefinementConfiguredSoftwareConfigurationProblem other = (RefinementConfiguredSoftwareConfigurationProblem) obj;
+		RefinementConfiguredSoftwareConfigurationProblem<?> other = (RefinementConfiguredSoftwareConfigurationProblem<?>) obj;
 		if (this.paramRefinementConfig == null) {
 			if (other.paramRefinementConfig != null) {
 				return false;

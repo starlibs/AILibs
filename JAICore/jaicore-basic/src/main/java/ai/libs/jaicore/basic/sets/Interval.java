@@ -62,8 +62,10 @@ public class Interval implements Serializable {
 			return false;
 		}
 		Double n = (Double) item;
-		boolean isInRange = n >= this.min && n <= this.max;
-		return isInRange;
+		if (this.isInteger && n != n.intValue()) {
+			return false;
+		}
+		return n >= this.min && n <= this.max;
 	}
 
 	public boolean subsumes(final Interval otherInterval) {

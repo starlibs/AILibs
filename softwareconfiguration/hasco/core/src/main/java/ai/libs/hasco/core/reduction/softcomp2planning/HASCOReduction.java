@@ -171,46 +171,46 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 
 			/* create methods for the refinement of the interfaces offered by this component */
 			for (String i : c.getProvidedInterfaces()) {
-				List<VariableParam> params = new ArrayList<>();
+				List<VariableParam> methodParams = new ArrayList<>();
 				VariableParam inputParam = new VariableParam("c1");
-				params.add(inputParam);
-				params.add(new VariableParam("c2"));
+				methodParams.add(inputParam);
+				methodParams.add(new VariableParam("c2"));
 				Map<String, String> requiredInterfaces = c.getRequiredInterfaces();
 				List<Literal> network = new ArrayList<>();
 
-				StringBuilder refinementArgumentsSB = new StringBuilder();
+				StringBuilder satisfyOpArgumentsSB = new StringBuilder();
 				int j = 0;
 				if (CONFIGURE_PARAMS) {
 					for (j = 1; j <= c.getParameters().size(); j++) {
 						String paramIdentifier = "p" + j;
-						refinementArgumentsSB.append(", " + paramIdentifier);
+						satisfyOpArgumentsSB.append(", " + paramIdentifier);
 					}
 				}
 
 				for (int k = 1; k <= requiredInterfaces.entrySet().size(); k++) {
-					refinementArgumentsSB.append(",sc" + k);
+					satisfyOpArgumentsSB.append(",sc" + k);
 				}
 
 				int sc = 0;
-				network.add(new Literal(SATISFY_PREFIX + i + "With" + c.getName() + "(" + "c1" + "," + "c2" + refinementArgumentsSB.toString() + ")"));
+				network.add(new Literal(SATISFY_PREFIX + i + "With" + c.getName() + "(" + "c1" + "," + "c2" + satisfyOpArgumentsSB.toString() + ")"));
 				for (Entry<String, String> requiredInterface : requiredInterfaces.entrySet()) {
 					String paramName = "sc" + (++sc);
-					params.add(new VariableParam(paramName));
+					methodParams.add(new VariableParam(paramName));
 					network.add(new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + requiredInterface.getValue() + "(c2," + paramName + ")"));
 				}
 
-				refinementArgumentsSB = new StringBuilder();
+				StringBuilder refinementArgumentsSB = new StringBuilder();
 				if (CONFIGURE_PARAMS) {
 					for (j = 1; j <= c.getParameters().size(); j++) {
 						String paramIdentifier = "p" + j;
-						params.add(new VariableParam(paramIdentifier));
+						methodParams.add(new VariableParam(paramIdentifier));
 						refinementArgumentsSB.append(", " + paramIdentifier);
 					}
 				}
 				network.add(new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(" + "c1" + "," + "c2" + refinementArgumentsSB.toString() + ")"));
-				List<VariableParam> outputs = new ArrayList<>(params);
+				List<VariableParam> outputs = new ArrayList<>(methodParams);
 				outputs.remove(inputParam);
-				methods.add(new OCIPMethod("resolve" + i + "With" + c.getName(), params, new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + i + "(c1,c2)"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, outputs, new Monom()));
+				methods.add(new OCIPMethod("resolve" + i + "With" + c.getName(), methodParams, new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + i + "(c1,c2)"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, outputs, new Monom()));
 			}
 
 			/* create methods for choosing/refining parameters */

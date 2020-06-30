@@ -25,7 +25,7 @@ import ai.libs.softwareconfiguration.model.SoftwareConfigurationProblem;
 public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
 
 	/* logging */
-	private Logger logger = LoggerFactory.getLogger(OptimizingFactory.class);
+	private Logger localLogger = LoggerFactory.getLogger(OptimizingFactory.class);
 	private String loggerName;
 
 	private final SoftwareConfigurationAlgorithmFactory<P, C, V, ?> factoryForOptimizationAlgorithm;
@@ -114,13 +114,10 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 
 	@Override
 	public void setLoggerName(final String name) {
-		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
+		this.localLogger.info("Switching logger from {} to {}", this.localLogger.getName(), name);
 		this.loggerName = name;
-		this.logger = LoggerFactory.getLogger(name);
-		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
-		//		if (this.optimizer instanceof ILoggingCustomizable) {
-		//			this.optimizer.setLoggerName(name + ".optimizer");
-		//		}
+		this.localLogger = LoggerFactory.getLogger(name);
+		this.localLogger.info("Activated logger {} with name {}", name, this.localLogger.getName());
 		super.setLoggerName(this.loggerName + "._algorithm");
 	}
 
@@ -136,9 +133,9 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 
 	@Override
 	public void cancel() {
-		this.logger.info("Received cancel. First canceling the optimizer {}, then my own routine!", this.optimizer.getId());
+		this.localLogger.info("Received cancel. First canceling the optimizer {}, then my own routine!", this.optimizer.getId());
 		this.optimizer.cancel();
-		this.logger.debug("Now canceling the OptimizingFactory itself.");
+		this.localLogger.debug("Now canceling the OptimizingFactory itself.");
 		super.cancel();
 		assert this.isCanceled() : "Cancel-flag must be true at end of cancel routine!";
 	}
@@ -146,7 +143,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 	@Override
 	public void setTimeout(final Timeout to) {
 		super.setTimeout(to);
-		this.logger.info("Forwarding timeout {} to optimizer.", to);
+		this.localLogger.info("Forwarding timeout {} to optimizer.", to);
 		this.optimizer.setTimeout(to);
 	}
 }
