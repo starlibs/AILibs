@@ -1,4 +1,4 @@
-package ai.libs.hasco.model;
+package ai.libs.softwareconfiguration.model;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

@@ -39,7 +39,7 @@ public class CategoricalParameterDomain implements IParameterDomain {
 
 	@Override
 	public boolean equals(final Object obj) {
-		return this == obj || (obj != null && obj.getClass() == CategoricalParameterDomain.class && Arrays.equals(this.values, ((CategoricalParameterDomain)obj).values));
+		return this == obj || (obj != null && obj.getClass() == this.getClass() && Arrays.equals(this.values, ((CategoricalParameterDomain)obj).values));
 	}
 
 	@Override

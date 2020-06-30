@@ -21,6 +21,18 @@ public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparab
 	public RefinementConfiguredSoftwareConfigurationProblem(final File configurationFile, final String requiredInterface, final IObjectEvaluator<ComponentInstance, V> compositionEvaluator) throws IOException {
 		super(configurationFile, requiredInterface, compositionEvaluator);
 		this.paramRefinementConfig = new ComponentLoader(configurationFile).getParamConfigs();
+
+		/* check that parameter refinements are defined for all components */
+		for (Component c : this.getComponents()) {
+			if (!this.paramRefinementConfig.containsKey(c)) {
+				throw new IllegalArgumentException("Error in parsing config file " + configurationFile.getAbsolutePath() + ". Component " + c.getName() + " has not parameter refinement configs associated.");
+			}
+			for (Parameter p : c.getParameters()) {
+				if (p.isNumeric() && !this.paramRefinementConfig.get(c).containsKey(p)) {
+					throw new IllegalArgumentException("Error in parsing config file " + configurationFile.getAbsolutePath() + ". No refinement config was delivered for numeric parameter " + p.getName() + " of component " + c.getName());
+				}
+			}
+		}
 	}
 
 	public RefinementConfiguredSoftwareConfigurationProblem(final SoftwareConfigurationProblem<V> coreProblem, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig) {

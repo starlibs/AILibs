@@ -224,6 +224,7 @@ public class ComponentLoader {
 							} else {
 								paramConfig.put(p, new ParameterRefinementConfiguration(boolParamValues[1], (int) doubleParamValues[3], doubleParamValues[4]));
 							}
+							assert paramConfig.containsKey(p) && paramConfig.get(p) != null;
 							break;
 						case "bool":
 						case "boolean":
@@ -370,6 +371,7 @@ public class ComponentLoader {
 					}
 
 					this.paramConfigs.put(c, paramConfig);
+					assert this.paramConfigs.containsKey(c) && this.paramConfigs.get(c).equals(paramConfig);
 					this.components.add(c);
 
 					this.requiredInterfaces.addAll(c.getRequiredInterfaces().values());

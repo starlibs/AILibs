@@ -61,7 +61,19 @@ public class Interval implements Serializable {
 		if (!(item instanceof Number)) {
 			return false;
 		}
-		Double n = (Double) item;
+		Double n;
+		if (item instanceof Double) {
+			n = (double)item;
+		}
+		else if (item instanceof Long) {
+			n = (double)(Long)item;
+		}
+		else if (item instanceof Integer) {
+			n = (double)(int)item;
+		}
+		else {
+			throw new IllegalArgumentException("No support for number type " + item.getClass());
+		}
 		if (this.isInteger && n != n.intValue()) {
 			return false;
 		}
@@ -106,6 +118,9 @@ public class Interval implements Serializable {
 		if (Double.doubleToLongBits(this.max) != Double.doubleToLongBits(other.max)) {
 			return false;
 		}
-		return Double.doubleToLongBits(this.min) == Double.doubleToLongBits(other.min);
+		if (Double.doubleToLongBits(this.min) != Double.doubleToLongBits(other.min)) {
+			return false;
+		}
+		return true;
 	}
 }
