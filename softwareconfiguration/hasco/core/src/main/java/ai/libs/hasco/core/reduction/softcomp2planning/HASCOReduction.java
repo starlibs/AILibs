@@ -169,9 +169,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 		Collection<OCIPMethod> methods = new ArrayList<>();
 		for (Component c : this.components) {
 
-			/*
-			 * create methods for the refinement of the interfaces offered by this component
-			 */
+			/* create methods for the refinement of the interfaces offered by this component */
 			for (String i : c.getProvidedInterfaces()) {
 				List<VariableParam> params = new ArrayList<>();
 				VariableParam inputParam = new VariableParam("c1");
@@ -222,10 +220,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 			StringBuilder refinementArgumentsSB = new StringBuilder();
 			int j = 0;
 
-			/*
-			 * go, in an ordering that is consistent with the pre-order on the params
-			 * imposed by the dependencies, over the set of params
-			 */
+			/* go, in an ordering that is consistent with the pre-order on the params imposed by the dependencies, over the set of params */
 			if (CONFIGURE_PARAMS) {
 				for (Parameter p : c.getParameters()) {
 					String paramName = "p" + (++j);

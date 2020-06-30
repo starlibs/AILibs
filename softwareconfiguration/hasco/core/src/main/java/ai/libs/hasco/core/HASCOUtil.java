@@ -33,6 +33,12 @@ import ai.libs.softwareconfiguration.model.IParameterDomain;
 import ai.libs.softwareconfiguration.model.NumericParameterDomain;
 import ai.libs.softwareconfiguration.model.Parameter;
 
+/**
+ * Utility functions in the context of HASCO algorithm selection and configurtion.
+ *
+ * @author Felix Mohr
+ *
+ */
 public class HASCOUtil {
 
 	private static final String LITERAL_RESOLVES = "resolves";
@@ -46,6 +52,12 @@ public class HASCOUtil {
 
 	}
 
+	/**
+	 *
+	 * @param state
+	 * @param objectName
+	 * @return
+	 */
 	public static Map<String, String> getParameterContainerMap(final Monom state, final String objectName) {
 		Map<String, String> parameterContainerMap = new HashMap<>();
 		List<Literal> containerLiterals = state.stream().filter(l -> l.getPropertyName().equals(LITERAL_PARAMCONTAINER) && l.getParameters().get(2).getName().equals(objectName)).collect(Collectors.toList());

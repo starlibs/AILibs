@@ -11,6 +11,7 @@ import ai.libs.softwareconfiguration.serialization.UnresolvableRequiredInterface
 
 public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<RefinementConfiguredSoftwareConfigurationProblem<Double>> {
 
+	private static final String PATH_TO_SOFTWARECONFIG = "../../model/";
 	private final Random random = new Random(0);
 
 	public SoftwareConfigurationProblemSet() {
@@ -20,7 +21,7 @@ public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<Re
 	@Override
 	public RefinementConfiguredSoftwareConfigurationProblem<Double> getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
 		try {
-			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File("testrsc/simpleproblem.json"), "IFace", n -> this.random.nextDouble());
+			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/simpleproblem.json"), "IFace", n -> this.random.nextDouble());
 		} catch (UnresolvableRequiredInterfaceException | IOException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
@@ -28,7 +29,7 @@ public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<Re
 
 	public RefinementConfiguredSoftwareConfigurationProblem<Double> getDependencyProblemInput() throws AlgorithmTestProblemSetCreationException {
 		try {
-			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File("testrsc/problemwithdependencies.json"), "IFace", n -> this.random.nextDouble());
+			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/problemwithdependencies.json"), "IFace", n -> this.random.nextDouble());
 		} catch (UnresolvableRequiredInterfaceException | IOException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
@@ -37,7 +38,7 @@ public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<Re
 	@Override
 	public RefinementConfiguredSoftwareConfigurationProblem<Double> getDifficultProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
 		try {
-			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File("testrsc/difficultproblem.json"), "IFace", n -> this.random.nextDouble());
+			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/difficultproblem.json"), "IFace", n -> this.random.nextDouble());
 		} catch (UnresolvableRequiredInterfaceException | IOException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}

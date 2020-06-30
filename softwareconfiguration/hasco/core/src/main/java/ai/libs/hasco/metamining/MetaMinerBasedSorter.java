@@ -8,14 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOUtil;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.softwareconfiguration.model.Component;
 import ai.libs.softwareconfiguration.model.ComponentInstance;
 
 /**
- * A Comparator for {@link TFDNode}s that sorts based on meta information about
- * the underlying {@link ComponentInstance} of the node and possibly application
- * context.
+ * A Comparator for {@link TFDNode}s that sorts based on meta information about the underlying {@link ComponentInstance} of the node and possibly application context.
  *
  * @author Helena Graf
  *
@@ -25,21 +24,18 @@ public class MetaMinerBasedSorter implements Comparator<TFDNode> {
 	private Logger logger = LoggerFactory.getLogger(MetaMinerBasedSorter.class);
 
 	/**
-	 * Components for the current configuration used to convert TFDNodes to
-	 * ComponentInstances
+	 * Components for the current configuration used to convert TFDNodes to ComponentInstances
 	 */
 	private Collection<Component> components;
 
 	/**
-	 * The "MetaMiner" has access to the meta information of the given
-	 * {@link ComponentInstance} and possibly its application context. It is used to
-	 * derive a score of a given ComponentInstance, based on which a comparison of
-	 * the given {@link TFDNode}s is made.
+	 * The "MetaMiner" has access to the meta information of the given {@link ComponentInstance} and possibly its application context. It is used to derive a score of a given ComponentInstance, based on which a comparison of the given
+	 * {@link TFDNode}s is made.
 	 */
 	private IMetaMiner metaminer;
 
 	public MetaMinerBasedSorter(final IMetaMiner metaminer, final Collection<Component> components) {
-		if (components==null) {
+		if (components == null) {
 			this.logger.warn("No Components in sorter!");
 		}
 		this.components = components;
@@ -61,18 +57,18 @@ public class MetaMinerBasedSorter implements Comparator<TFDNode> {
 		double score2 = this.metaminer.score(this.convertToComponentInstance(o2));
 
 		try {
-			this.logger.trace("Node {} converted to {}",o1,this.convertToComponentInstance(o1).getPrettyPrint());
+			this.logger.trace("Node {} converted to {}", o1, this.convertToComponentInstance(o1).getPrettyPrint());
 		} catch (IOException e) {
-			this.logger.error("Logging failed due to {}",e);
+			this.logger.error("Logging failed due to {}", LoggerUtil.getExceptionInfo(e));
 		}
 
 		try {
-			this.logger.trace("Node {} converted to {}",o2,this.convertToComponentInstance(o2).getPrettyPrint());
+			this.logger.trace("Node {} converted to {}", o2, this.convertToComponentInstance(o2).getPrettyPrint());
 		} catch (IOException e) {
-			this.logger.error("Logging failed due to {}",e);
+			this.logger.error("Logging failed due to {}", LoggerUtil.getExceptionInfo(e));
 		}
 
-		this.logger.debug("Comparing nodes with scores: {} vs {}",score1,score2);
+		this.logger.debug("Comparing nodes with scores: {} vs {}", score1, score2);
 		return (int) Math.signum(score1 - score2);
 	}
 
@@ -88,8 +84,7 @@ public class MetaMinerBasedSorter implements Comparator<TFDNode> {
 	}
 
 	/**
-	 * Gets the {@link IMetaMiner}, which is used to derive a score for a given
-	 * {@link TFDNode} based on its attached {@link ComponentInstance}.
+	 * Gets the {@link IMetaMiner}, which is used to derive a score for a given {@link TFDNode} based on its attached {@link ComponentInstance}.
 	 *
 	 * @return The meta miner
 	 */
@@ -98,8 +93,7 @@ public class MetaMinerBasedSorter implements Comparator<TFDNode> {
 	}
 
 	/**
-	 * Sets the {@link IMetaMiner}, which is used to derive a score for a given
-	 * {@link TFDNode} based on its attached {@link ComponentInstance}.
+	 * Sets the {@link IMetaMiner}, which is used to derive a score for a given {@link TFDNode} based on its attached {@link ComponentInstance}.
 	 *
 	 * @param metaminer
 	 *            The meta miner
