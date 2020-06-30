@@ -69,16 +69,48 @@ declareClosed(container)
 #### Methods
 
 ```
-resolve<i>With<c>(c1, c2, p1,.., pm, c'1,..,c'k)
+resolve<i>With<c>(c1; c2, p1,.., pm, sc1,..,scn)
 	taskName: tResolve<i>(c1, c2)
 	pre-condition: component(c1)
 	task-network:
-		satisfy<i>With<c>(c1, c2, p1,.., pm, s1,..,sn) ->
-		tResolve<i1>(c2, c'1) ->
+		satisfy<i>With<c>(c1, c2, p1,.., pm, sc1,..,scn) ->
+		tResolve<i1>(c2, sc1) ->
 		.. ->
-		tResolve<ik>(c2,..,c'k) ->
-		tRefineParamsOf<c>(c1, c2, p1, .., pn)
+		tResolve<ik>(c2,..,scn) ->
+		tRefineParamsOf<c>(c1, c2, p1, .., pm)
 	outputs: p1,..,pm,s1,..,sn
+
+ignoreParamRefinementFor<p>Of<c>(object, container, curval)
+	taskName: tRefineParam<p>Of<c>(object, container)
+	pre-condition: parameterContainer('<c.name>', '<p.name>', object, container) & val(container,curval) & overwritten(container)
+	pre-condition (evaluable): notRefinable('<c.name>', object, '<p.name>', container, curval)
+	task-network: declareClosed(container)
+
+refineParam<p>Of<c>(object, container, curval, newval)
+	taskName tRefineParam<p>Of<c>(object, container)
+	pre-condition: parameterContainer(<c.name>', '<p.name>', object, container) & val(container,curval)
+	pre-condition (evaluable): isValidParameterRangeRefinement('<c.name>', object, '<p.name>', container, curval, newval)
+	task-network: redefValue(container, curval, newval)
+	
+
+refineParamsOf<c>(c1, c2, p1,..,pm)
+	taskName: tRefineParamsOf<c>(c1,c2,p1,..,pm)
+	pre-condition: component(c1)
+	pre-condition (evaluable): !refinementCompleted('<c.name>', c2)
+	task-network:
+		tRefineParam<p>Of<c>(c2, p1) ->
+		..
+		tRefineParam<p>Of<c>(c2, pm) ->
+		tRefineParamsOf<c>(c1, c2, p1, .., pm)
+
+
+closeRefinementOfParamsOf<c>(c1, c2, p1,..,pm)
+	taskName: tRefineParamsOf<c>(c1, c2, p1,..,pm)
+	pre-condition: component(c1)
+	pre-condition (evaluable): refinementCompleted('<c.name>', c2)
+	task-network: <empty>
+
+
 ```
 
 ### JavaDoc
