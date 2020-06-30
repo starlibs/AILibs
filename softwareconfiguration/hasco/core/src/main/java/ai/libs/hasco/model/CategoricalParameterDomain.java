@@ -83,6 +83,6 @@ public class CategoricalParameterDomain implements IParameterDomain {
 
 	@Override
 	public boolean isEquals(final Object obj0, final Object obj1) {
-		return new String(obj0 + "").equals(obj1 + "");
+		return (obj0 + "").equals(obj1 + "");
 	}
 }

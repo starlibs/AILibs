@@ -128,7 +128,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 		this.connectionProperties = connectionProperties;
 
 		try {
-//			Runtime.getRuntime().addShutdownHook(new ShutdownThread(SQLAdapter.this));
+			Runtime.getRuntime().addShutdownHook(new ShutdownThread(SQLAdapter.this));
 		} catch (Exception e) {
 			this.logger.warn("Failed to add shutdown hook for SQLAdapter");
 		}
@@ -183,8 +183,6 @@ public class SQLAdapter implements IDatabaseAdapter {
 			}
 		} while (tries < 3);
 		this.logger.error("Quitting execution as no database connection could be established");
-		System.err.println("Quitting execution as no database connection could be established");
-		System.out.println("Quitting execution as not database connection could be established");
 		System.exit(1);
 	}
 
@@ -419,7 +417,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 	 */
 	@Override
 	public int update(final String sql) throws SQLException {
-		return this.update(sql, new ArrayList<String>());
+		return this.update(sql, new ArrayList<>());
 	}
 
 	/**

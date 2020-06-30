@@ -32,7 +32,7 @@ public class MLEvaluationUtil {
 	}
 
 	public static double mccv(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainFoldSize, final long seed, final EAggregatedClassifierMetric metric) throws ObjectEvaluationFailedException, InterruptedException {
-		return evaluate(learner, new MonteCarloCrossValidationEvaluator(data, repeats, trainFoldSize, new Random(seed), metric));
+		return evaluate(learner, new MonteCarloCrossValidationEvaluator(false, data, repeats, trainFoldSize, new Random(seed), metric));
 	}
 
 	public static double mccv(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainFoldSize, final long seed) throws ObjectEvaluationFailedException, InterruptedException {

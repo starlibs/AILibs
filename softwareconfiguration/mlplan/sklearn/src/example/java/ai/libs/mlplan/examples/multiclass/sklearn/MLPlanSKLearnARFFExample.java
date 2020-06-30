@@ -12,6 +12,8 @@ import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
@@ -32,19 +34,19 @@ public class MLPlanSKLearnARFFExample {
 		List<ILabeledDataset<ILabeledInstance>> split = RandomHoldoutSplitter.createSplit(dataset, 42, .7);
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
-		MLPlanSKLearnBuilder builder = new MLPlanSKLearnBuilder();
+		MLPlanSKLearnBuilder<SingleLabelClassification, SingleLabelClassificationPredictionBatch> builder = new MLPlanSKLearnBuilder<>();
 		builder.withNodeEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
 		builder.withTimeOut(new Timeout(3, TimeUnit.MINUTES));
 		builder.withNumCpus(4);
 
-		MLPlan<ScikitLearnWrapper> mlplan = builder.withDataset(split.get(0)).build();
+		MLPlan<ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("testedalgorithm");
 
 		try {
 			start = System.currentTimeMillis();
-			ScikitLearnWrapper optimizedClassifier = mlplan.call();
+			ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			LOGGER.info("Finished build of the classifier.");
 			if (LOGGER.isInfoEnabled()) {

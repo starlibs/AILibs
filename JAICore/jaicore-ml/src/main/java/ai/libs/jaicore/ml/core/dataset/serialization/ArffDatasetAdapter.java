@@ -43,6 +43,7 @@ import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.StringAttribute;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffAttributeType;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffItem;
+import ai.libs.jaicore.ml.pdm.dataset.SensorTimeSeriesAttribute;
 
 public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<ILabeledInstance>> {
 
@@ -164,14 +165,14 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 		String name = m.group(1);
 		String type = m.group(2);
-		//		String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION));
-		//		if (name.trim().startsWith("'") && !name.trim().endsWith("'")) {
-		//			int cutIndex = attributeDefinitionSplit.indexOf('\'', name.length());
-		//			name += attributeDefinitionSplit.substring(name.length(), name.length() + cutIndex + 1);
-		//		}
-		//
-		//
-		//		String type = attributeDefinitionSplit.substring(name.length() + 1).trim();
+
+		// String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION));
+		// if (name.trim().startsWith("'") && !name.trim().endsWith("'")) {
+		// int cutIndex = attributeDefinitionSplit.indexOf('\'', name.length());
+		// name += attributeDefinitionSplit.substring(name.length(), name.length() + cutIndex + 1);
+		// }
+		// String type = attributeDefinitionSplit.substring(name.length() + 1).trim();
+
 		name = name.trim();
 		if ((name.startsWith("'") && name.endsWith("'")) || (name.startsWith("\"") && name.endsWith("\""))) {
 			name = name.substring(1, name.length() - 1);
@@ -197,6 +198,8 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			return new NumericAttribute(name);
 		case STRING:
 			return new StringAttribute(name);
+		case TIMESERIES:
+			return new SensorTimeSeriesAttribute(name);
 		case NOMINAL:
 			if (values != null) {
 				return new IntBasedCategoricalAttribute(name,
@@ -204,6 +207,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			} else {
 				throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
 			}
+
 		default:
 			throw new UnsupportedAttributeTypeException("Can not deal with attribute type " + type);
 		}
@@ -409,6 +413,8 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			sb.append("{'" + ((ICategoricalAttribute) att).getLabels().stream().collect(Collectors.joining("','")) + "'}");
 		} else if (att instanceof INumericAttribute) {
 			sb.append(EArffAttributeType.NUMERIC.getName());
+		} else if (att instanceof SensorTimeSeriesAttribute) {
+			sb.append(EArffAttributeType.TIMESERIES.getName());
 		}
 		return sb.toString();
 	}

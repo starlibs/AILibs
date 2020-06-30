@@ -169,6 +169,7 @@ def parse_args():
     parser.add_argument('--model', help="Path to the trained model (in .pcl format) that shall be used for testing.")
     parser.add_argument('--regression', action='store_true', help="If set, the data is assumed to be a regression problem instead of a categorical one.")
     parser.add_argument('--targets', nargs='*', type=int, help="Declare which of the columns of the ARFF to use as targets. Default is only the last column.")
+    parser.add_argument('--seed', required=True, help="Sets the seed.")
     sys.argv = vars(parser.parse_args())
 
 def load_arff_file(arff_path):
@@ -315,6 +316,8 @@ def run_test_mode(data):
 
 
 def main():
+    print("using seed ", sys.argv["seed"])
+    np.random.seed(int(sys.argv["seed"]))
     print("load arff file from ", sys.argv["arff"])
     data = load_arff_file(sys.argv["arff"])
     print("run script in mode ", sys.argv["mode"])

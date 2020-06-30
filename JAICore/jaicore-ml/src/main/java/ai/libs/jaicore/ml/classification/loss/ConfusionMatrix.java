@@ -21,8 +21,7 @@ public class ConfusionMatrix {
 
 	private static final String COL_SEP = " | ";
 	private final List<Object> objectIndex;
-
-	private int[][] confusionMatrix;
+	private int[][] matrixEntries;
 
 	/**
 	 * Constructor computing the confusion matrix based on the given equal-length lists expected and actual.
@@ -37,9 +36,9 @@ public class ConfusionMatrix {
 		Set<Object> distinctClasses = new HashSet<>(expected);
 		distinctClasses.addAll(actual);
 		this.objectIndex = new ArrayList<>(distinctClasses);
-		this.confusionMatrix = new int[this.objectIndex.size()][this.objectIndex.size()];
+		this.matrixEntries = new int[this.objectIndex.size()][this.objectIndex.size()];
 		for (int i = 0; i < expected.size(); i++) {
-			this.confusionMatrix[this.objectIndex.indexOf(expected.get(i))][this.objectIndex.indexOf(actual.get(i))] += 1;
+			this.matrixEntries[this.objectIndex.indexOf(expected.get(i))][this.objectIndex.indexOf(actual.get(i))] += 1;
 		}
 	}
 
@@ -65,7 +64,7 @@ public class ConfusionMatrix {
 	 * @return The integer matrix counting all occurring confusions.
 	 */
 	public int[][] getConfusionMatrix() {
-		return this.confusionMatrix;
+		return this.matrixEntries;
 	}
 
 	@Override
@@ -73,7 +72,7 @@ public class ConfusionMatrix {
 		StringBuilder sb = new StringBuilder();
 		// determine maximum cell width
 		int cellWidth = Math.max(this.objectIndex.stream().mapToInt(x -> x.toString().length()).max().getAsInt(),
-				Arrays.stream(this.confusionMatrix).mapToInt(x -> Arrays.stream(x).map(y -> new String(y + "").length()).max().getAsInt()).max().getAsInt());
+				Arrays.stream(this.matrixEntries).mapToInt(x -> Arrays.stream(x).map(y -> (y + "").length()).max().getAsInt()).max().getAsInt());
 
 		// write table head row
 		sb.append(spaces(cellWidth));
@@ -85,7 +84,7 @@ public class ConfusionMatrix {
 		for (int i = 0; i < this.objectIndex.size(); i++) {
 			sb.append(postpaddedString(this.objectIndex.get(i).toString(), cellWidth));
 			for (int j = 0; j < this.objectIndex.size(); j++) {
-				sb.append(COL_SEP).append(prepaddedString(this.confusionMatrix[i][j] + "", cellWidth));
+				sb.append(COL_SEP).append(prepaddedString(this.matrixEntries[i][j] + "", cellWidth));
 			}
 			sb.append("\n");
 		}

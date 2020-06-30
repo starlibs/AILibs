@@ -73,7 +73,7 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 		TimeSeriesDataset2 tmp = this.slide.specialFitTransform(univInstance);
 
 		// need to call a new fit for each predict because each window gets z normalized by its own.
-		// c.f.p. 1509 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
+		// c.f.p. 1509 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schaefer"
 		for (int instance = 0; instance < tmp.getValues(0).length; instance++) {
 			tmp.getValues(0)[instance] = this.znorm.fitTransform(tmp.getValues(0)[instance]);
 		}
@@ -128,7 +128,7 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 	 *         squared for each word and summed up over the whole histogram.
 	 *         Therefore the two histograms do not need to be of the same size and the distance of "a" to "b" must not
 	 *         be equal to the distance of "b" to "a".
-	 *         c.f. p. 1516 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
+	 *         c.f. p. 1516 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schaefer"
 	 */
 	private double getBossDistance(final Map<Integer, Integer> a, final Map<Integer, Integer> b) {
 		double result = 0;
