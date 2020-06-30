@@ -15,13 +15,13 @@ public class R2ScoreTest {
 	public void testScore() {
 		List<Double> expected = Arrays.asList(2.0, 4.0, 5.0, 4.0, 5.0);
 		List<Double> actual = Arrays.asList(2.8, 3.4, 4.0, 4.6, 5.2);
-		R2Score score = new R2Score();
+		R2 score = new R2();
 		assertEquals("R2Score does not return the expected value.", 0.6, score.score(expected, actual), 1E-8);
 	}
 
 	@Test
 	public void testRandomNumbers() {
-		R2Score score = new R2Score();
+		R2 score = new R2();
 		Random r = new Random();
 		int n = 20;
 
