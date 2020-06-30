@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class UnparametrizedComponentInstance {
@@ -47,11 +50,7 @@ public class UnparametrizedComponentInstance {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((this.componentName == null) ? 0 : this.componentName.hashCode());
-		result = prime * result + ((this.satisfactionOfRequiredInterfaces == null) ? 0 : this.satisfactionOfRequiredInterfaces.hashCode());
-		return result;
+		return new HashCodeBuilder().append(this.componentName).append(this.satisfactionOfRequiredInterfaces).hashCode();
 	}
 
 	@Override
@@ -59,28 +58,11 @@ public class UnparametrizedComponentInstance {
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (this.getClass() != obj.getClass()) {
+		if (obj == null || obj.getClass() != UnparametrizedComponentInstance.class) {
 			return false;
 		}
 		UnparametrizedComponentInstance other = (UnparametrizedComponentInstance) obj;
-		if (this.componentName == null) {
-			if (other.componentName != null) {
-				return false;
-			}
-		} else if (!this.componentName.equals(other.componentName)) {
-			return false;
-		}
-		if (this.satisfactionOfRequiredInterfaces == null) {
-			if (other.satisfactionOfRequiredInterfaces != null) {
-				return false;
-			}
-		} else if (!this.satisfactionOfRequiredInterfaces.equals(other.satisfactionOfRequiredInterfaces)) {
-			return false;
-		}
-		return true;
+		return new EqualsBuilder().append(this.componentName, other.componentName).append(this.satisfactionOfRequiredInterfaces, other.satisfactionOfRequiredInterfaces).isEquals();
 	}
 
 	@Override

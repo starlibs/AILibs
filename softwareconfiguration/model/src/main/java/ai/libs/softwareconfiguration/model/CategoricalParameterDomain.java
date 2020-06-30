@@ -3,6 +3,8 @@ package ai.libs.softwareconfiguration.model;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -32,25 +34,12 @@ public class CategoricalParameterDomain implements IParameterDomain {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + Arrays.hashCode(this.values);
-		return result;
+		return new HashCodeBuilder().append(this.values).hashCode();
 	}
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (this.getClass() != obj.getClass()) {
-			return false;
-		}
-		CategoricalParameterDomain other = (CategoricalParameterDomain) obj;
-		return Arrays.equals(this.values, other.values);
+		return this == obj || (obj != null && obj.getClass() == CategoricalParameterDomain.class && Arrays.equals(this.values, ((CategoricalParameterDomain)obj).values));
 	}
 
 	@Override
@@ -83,6 +72,6 @@ public class CategoricalParameterDomain implements IParameterDomain {
 
 	@Override
 	public boolean isEquals(final Object obj0, final Object obj1) {
-		return new String(obj0 + "").equals(obj1 + "");
+		return (obj0 + "").equals(obj1 + "");
 	}
 }
