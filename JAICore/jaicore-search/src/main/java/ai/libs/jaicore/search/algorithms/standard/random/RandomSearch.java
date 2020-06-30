@@ -87,7 +87,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		this.random = random;
 		this.priorityPredicate = priorityPredicate;
 		if (this.isRandomizableSingleNodeSuccessorGenerator) {
-			((IRandomConfigurable)this.gen).setRandom(random);
+			((IRandomConfigurable) this.gen).setRandom(random);
 		}
 	}
 
@@ -101,7 +101,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 	 * @throws AlgorithmExecutionCanceledException
 	 * @throws AlgorithmTimeoutedException
 	 */
-	private void expandPath(final ILabeledPath<N,A> path) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
+	private void expandPath(final ILabeledPath<N, A> path) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
 		synchronized (this.exploredGraph) {
 			assert this.exploredGraph.isGraphSane();
 			assert !this.goalTester.isGoal(path) : "Goal nodes cannot be expanded!";
@@ -153,10 +153,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 					}
 					if (knownSuccessors.contains(successor.getTo())) {
 						this.logger.debug("Skipping successor {}, which is already part of the model.", successor.getTo());
-					}
-					else {
+					} else {
 						this.addNodeToLocalModel(path, successor.getTo(), successor.getArcLabel());
-						addedSuccessors ++;
+						addedSuccessors++;
 					}
 				}
 				this.logger.debug("{} nodes have been added to the local model. Now checking prioritization.", addedSuccessors);
@@ -187,7 +186,8 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		assert from != null;
 		assert to != null;
 		assert !this.exploredGraph.hasItem(to);
-		assert this.exploredGraph.hasItem(from) : "The head " + from + " of the path with " + path.getNumberOfNodes() + " nodes is not part of the explored graph! Here is the path: \n\t" + path.getNodes().stream().map(Object::toString).collect(Collectors.joining("\n\t"));
+		assert this.exploredGraph.hasItem(from) : "The head " + from + " of the path with " + path.getNumberOfNodes() + " nodes is not part of the explored graph! Here is the path: \n\t"
+				+ path.getNodes().stream().map(Object::toString).collect(Collectors.joining("\n\t"));
 		this.exploredGraph.addItem(to);
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug("Added node with hash code {} to graph.", to.hashCode());
@@ -308,7 +308,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 				/* get unexhausted successors */
 				List<N> successors = this.exploredGraph.getSuccessors(head).stream().filter(n -> !this.exhausted.contains(n)).collect(Collectors.toList());
 				assert this.exploredGraph.getSuccessors(head).stream().filter(n -> !this.exploredGraph.hasItem(n)).collect(Collectors.toList()).isEmpty() : "Corrupt exploration graph: Some successors cannot be found again in the graph: "
-				+ this.exploredGraph.getSuccessors(head).stream().filter(n -> !this.exploredGraph.hasItem(n)).collect(Collectors.toList());
+						+ this.exploredGraph.getSuccessors(head).stream().filter(n -> !this.exploredGraph.hasItem(n)).collect(Collectors.toList());
 
 				/* if we are in a dead end, mark the node as exhausted and remove the head again */
 				if (successors.isEmpty()) {
@@ -327,7 +327,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 
 				/* if at least one of the successors is prioritized, choose one of those; otherwise choose one at random */
 				assert SetUtil.intersection(this.exhausted, this.prioritizedNodes).isEmpty() : "There are nodes that are both exhausted and prioritized, which must not be the case:"
-				+ SetUtil.intersection(this.exhausted, this.prioritizedNodes).stream().map(n -> "\n\t" + n).collect(Collectors.joining());
+						+ SetUtil.intersection(this.exhausted, this.prioritizedNodes).stream().map(n -> "\n\t" + n).collect(Collectors.joining());
 				Collection<N> prioritizedSuccessors = SetUtil.intersection(successors, this.prioritizedNodes);
 				N lastHead = head;
 				if (!prioritizedSuccessors.isEmpty()) {
@@ -347,20 +347,18 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 						this.logger.debug("The current head is not prioritized, but we know that there are prioritized nodes we could follow. Stepping back! Current head: {}", head);
 						cPath = cPath.getPathToParentOfHead();
 						head = cPath.getHead();
-						triedStepbacks ++;
+						triedStepbacks++;
 						if (triedStepbacks > 50) {
 							chasePrioritizedPath = false;
 						}
 						continue;
-					}
-					else {
-						this.logger.debug("The current head is not prioritized, and we throught that there should be more prioritized nodes. But we have reached the root and hence know that there are none. Hence, we change the flag and now follow unprioritized nodes!");
+					} else {
+						this.logger.debug(
+								"The current head is not prioritized, and we throught that there should be more prioritized nodes. But we have reached the root and hence know that there are none. Hence, we change the flag and now follow unprioritized nodes!");
 						chasePrioritizedPath = false;
 						continue; // this will make the RandomSearch try the same node again (now not chasing prioritized nodes anymore)
 					}
-				}
-
-				else {
+				} else {
 					int n = successors.size();
 					assert n != 0 : "Ended up in a situation where only exhausted nodes can be chosen.";
 					int k = this.random.nextInt(n);

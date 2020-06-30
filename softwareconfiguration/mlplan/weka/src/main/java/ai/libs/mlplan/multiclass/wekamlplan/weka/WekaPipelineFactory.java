@@ -92,7 +92,6 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 				return new WekaClassifier(c);
 			}
 		} catch (Exception e) {
-			this.logger.warn("Could not instantiate component instance", e);
 			throw new ComponentInstantiationFailedException(e, "Could not instantiate component.");
 		}
 	}
@@ -114,14 +113,11 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 		List<String> parameters = new LinkedList<>();
 
 		for (Entry<String, String> parameterValues : ci.getParameterValues().entrySet()) {
-			if (parameterValues.getKey().toLowerCase().endsWith("activator") || parameterValues.getValue().equals("REMOVED")) {
-				continue;
-			}
 
 			Parameter param = ci.getComponent().getParameterWithName(parameterValues.getKey());
 			boolean isDefault = param.isDefaultValue(parameterValues.getValue());
 
-			if (isDefault) {
+			if (parameterValues.getKey().toLowerCase().endsWith("activator") || parameterValues.getValue().equals("REMOVED") || isDefault) {
 				continue;
 			}
 

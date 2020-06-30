@@ -15,7 +15,7 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeri
  * and that the best ones according to a percentage of the best combination are already chosen
  * and put into the delivered HashMap.
  * cf.p.1520
- * "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer" */
+ * "The BOSS is concerned with time series classification in the presence of noise by Patrick Schaefer" */
 public class BOSSEnsembleClassifier extends ASimplifiedTSClassifier<Integer> {
 	private ArrayList<BOSSClassifier> ensemble = new ArrayList<>();
 
@@ -27,7 +27,7 @@ public class BOSSEnsembleClassifier extends ASimplifiedTSClassifier<Integer> {
 
 	/*
 	 * In the empirical observations as described in paper:
-	 * "The BOSS is concerned with time series classification in the presence of noise Patrick Schäfer" p.1519,
+	 * "The BOSS is concerned with time series classification in the presence of noise Patrick Schaefer" p.1519,
 	 * showed that most of
 	 * the time a alphabet size of 4 works best.
 	 */

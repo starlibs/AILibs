@@ -13,6 +13,8 @@ import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
@@ -30,7 +32,15 @@ public class MLPlanSKLearnGraphVisualizationExample {
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */
-		MLPlan<ScikitLearnWrapper> mlplan = new MLPlanSKLearnBuilder().withNumCpus(4).withTimeOut(new Timeout(1, TimeUnit.HOURS)).withDataset(split.get(0)).build();
+		MLPlanSKLearnBuilder<SingleLabelClassification, SingleLabelClassificationPredictionBatch> builder = new MLPlanSKLearnBuilder<>();
+		builder.withNumCpus(4);
+		builder.withTimeOut(new Timeout(1, TimeUnit.HOURS));
+		builder.withDataset(split.get(0));
+
+		MLPlan<ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>> mlplan = builder.build();
+		mlplan.setRandomSeed(1);
+		mlplan.setPortionOfDataForPhase2(.3f);
+		mlplan.setLoggerName("testedalgorithm");
 
 		/* start visualization */
 		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan);
@@ -39,7 +49,7 @@ public class MLPlanSKLearnGraphVisualizationExample {
 
 		try {
 			long start = System.currentTimeMillis();
-			ScikitLearnWrapper optimizedClassifier = mlplan.call();
+			ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			System.out.println("Finished build of the classifier. Training time was " + trainTime + "s.");
 

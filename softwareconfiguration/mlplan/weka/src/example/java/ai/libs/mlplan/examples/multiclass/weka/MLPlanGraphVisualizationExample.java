@@ -29,7 +29,7 @@ public class MLPlanGraphVisualizationExample {
 	public static void main(final String[] args) throws Exception {
 
 //		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(346);
-		File datasetFile = new File("../../../../datasets/classification/mlj/credit-g.arff");
+		File datasetFile = new File("testrsc/car.arff");
 		System.out.println(datasetFile.getAbsolutePath());
 
 		ILabeledDataset<?> ds = ArffDatasetAdapter.readDataset(datasetFile);
@@ -37,8 +37,8 @@ public class MLPlanGraphVisualizationExample {
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(1), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */
-		MLPlanWekaBuilder mlplanBuilder = new MLPlanWekaBuilder().withNumCpus(8).withTimeOut(new Timeout(3600, TimeUnit.SECONDS)).withCandidateEvaluationTimeOut(new Timeout(300, TimeUnit.SECONDS))
-				.withNodeEvaluationTimeOut(new Timeout(900, TimeUnit.SECONDS)).withDataset(split.get(0));
+		MLPlanWekaBuilder mlplanBuilder = new MLPlanWekaBuilder().withNumCpus(4).withTimeOut(new Timeout(60, TimeUnit.SECONDS)).withCandidateEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS))
+				.withNodeEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS)).withDataset(split.get(0));
 		MLPlan<IWekaClassifier> mlplan = mlplanBuilder.build();
 
 		/* create visualization */

@@ -27,12 +27,12 @@ public class AlwaysPreventSafeGuard implements IEvaluationSafeGuard {
 
 	@Override
 	public void updateWithActualInformation(final ComponentInstance ci, final ITimeTrackingLearner wrappedLearner) {
-		return;
+		// intentionally do nothing
 	}
 
 	@Override
 	public void registerListener(final Object listener) {
-		return;
+		// intentionally do nothing
 	}
 
 }

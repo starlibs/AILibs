@@ -19,8 +19,7 @@ import ai.libs.jaicore.basic.kvstore.KVStore;
 import ai.libs.jaicore.basic.sets.SetUtil;
 
 /**
- * The ComponentUtil class can be used to deal with Components in a convenient way.
- * For instance, for a given component (type) it can be used to return a parameterized ComponentInstance.
+ * The ComponentUtil class can be used to deal with Components in a convenient way. For instance, for a given component (type) it can be used to return a parameterized ComponentInstance.
  *
  * @author wever
  */
@@ -33,10 +32,10 @@ public class ComponentUtil {
 	}
 
 	/**
-	 * This procedure returns a ComponentInstance of the given Component with default parameterization.
-	 * Note that required interfaces are not resolved.
+	 * This procedure returns a ComponentInstance of the given Component with default parameterization. Note that required interfaces are not resolved.
 	 *
-	 * @param component The component for which a random parameterization is to be returned.
+	 * @param component
+	 *            The component for which a random parameterization is to be returned.
 	 * @return An instantiation of the component with default parameterization.
 	 */
 	public static ComponentInstance getDefaultParameterizationOfComponent(final Component component) {
@@ -48,11 +47,12 @@ public class ComponentUtil {
 	}
 
 	/**
-	 * This procedure returns a valid random parameterization of a given component. Random decisions are made with the help of the given Random object.
-	 * Note that required interfaces are not resolved.
+	 * This procedure returns a valid random parameterization of a given component. Random decisions are made with the help of the given Random object. Note that required interfaces are not resolved.
 	 *
-	 * @param component The component for which a random parameterization is to be returned.
-	 * @param rand The Random instance for making the random decisions.
+	 * @param component
+	 *            The component for which a random parameterization is to be returned.
+	 * @param rand
+	 *            The Random instance for making the random decisions.
 	 * @return An instantiation of the component with valid random parameterization.
 	 */
 	public static ComponentInstance getRandomParameterizationOfComponent(final Component component, final Random rand) {
@@ -85,15 +85,102 @@ public class ComponentUtil {
 		return ci;
 	}
 
+	public static ComponentInstance minParameterizationOfComponent(final Component component) {
+		ComponentInstance ci = null;
+		do {
+			Map<String, String> parameterValues = new HashMap<>();
+			for (Parameter p : component.getParameters()) {
+				if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
+					parameterValues.put(p.getName(), p.getDefaultValue() + "");
+				} else {
+					NumericParameterDomain numDomain = (NumericParameterDomain) p.getDefaultDomain();
+					if (numDomain.isInteger()) {
+						if ((int) (numDomain.getMax() - numDomain.getMin()) > 0) {
+							parameterValues.put(p.getName(), (int) numDomain.getMin() + "");
+						} else {
+							parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
+						}
+					} else {
+						parameterValues.put(p.getName(), numDomain.getMin() + "");
+					}
+				}
+			}
+			ci = componentInstanceWithNoRequiredInterfaces(component, parameterValues);
+		} while (!ComponentInstanceUtil.isValidComponentInstantiation(ci));
+		return ci;
+	}
+
+	public static ComponentInstance maxParameterizationOfComponent(final Component component) {
+		ComponentInstance ci;
+		do {
+			Map<String, String> parameterValues = new HashMap<>();
+			for (Parameter p : component.getParameters()) {
+				if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
+					parameterValues.put(p.getName(), p.getDefaultValue() + "");
+				} else {
+					NumericParameterDomain numDomain = (NumericParameterDomain) p.getDefaultDomain();
+					if (numDomain.isInteger()) {
+						if ((int) (numDomain.getMax() - numDomain.getMin()) > 0) {
+							parameterValues.put(p.getName(), (int) numDomain.getMax() + "");
+						} else {
+							parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
+						}
+					} else {
+						parameterValues.put(p.getName(), numDomain.getMax() + "");
+					}
+				}
+			}
+			ci = componentInstanceWithNoRequiredInterfaces(component, parameterValues);
+		} while (!ComponentInstanceUtil.isValidComponentInstantiation(ci));
+		return ci;
+	}
+
 	private static ComponentInstance componentInstanceWithNoRequiredInterfaces(final Component component, final Map<String, String> parameterValues) {
 		return new ComponentInstance(component, parameterValues, new HashMap<>());
+	}
+
+	public static List<ComponentInstance> categoricalParameterizationsOfComponent(final Component component) {
+		Map<String, String> parameterValues = new HashMap<>();
+		List<ComponentInstance> parameterizedInstances = new ArrayList<>();
+		List<Parameter> categoricalParameters = new ArrayList<>();
+		int maxParameterIndex = 0;
+		for (Parameter p : component.getParameters()) {
+			if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
+				String[] values = ((CategoricalParameterDomain) p.getDefaultDomain()).getValues();
+				if (values.length > maxParameterIndex) {
+					maxParameterIndex = values.length;
+				}
+				categoricalParameters.add(p);
+			} else {
+				parameterValues.put(p.getName(), p.getDefaultValue() + "");
+			}
+		}
+		for (int parameterIndex = 0; parameterIndex < maxParameterIndex; parameterIndex++) {
+			Map<String, String> categoricalParameterValues = new HashMap<>();
+			for (int i = 0; i < categoricalParameters.size(); i++) {
+				String parameterValue = null;
+				String[] values = ((CategoricalParameterDomain) categoricalParameters.get(i).getDefaultDomain()).getValues();
+				if (parameterIndex < values.length) {
+					parameterValue = values[parameterIndex];
+				} else {
+					parameterValue = categoricalParameters.get(i).getDefaultValue() + "";
+				}
+				categoricalParameterValues.put(categoricalParameters.get(i).getName(), parameterValue);
+			}
+			categoricalParameterValues.putAll(parameterValues);
+			parameterizedInstances.add(new ComponentInstance(component, categoricalParameterValues, new HashMap<>()));
+		}
+
+		return parameterizedInstances;
 	}
 
 	/**
 	 * Searches and returns all components within a collection of components that provide a specific interface.
 	 *
-	 * @param components The collection of components to search in.
-	 * @param providedInterface The interface of interest.
+	 * @param components
+	 *            The collection of components to search in.
+	 * @param providedInterface
+	 *            The interface of interest.
 	 * @return A sub-collection of components all of which provide the requested providedInterface.
 	 */
 	public static Collection<Component> getComponentsProvidingInterface(final Collection<Component> components, final String providedInterface) {
@@ -101,11 +188,12 @@ public class ComponentUtil {
 	}
 
 	/**
-	 * Enumerates all possible component instances for a specific root component and a collection of components for resolving required interfaces.
-	 * Hyperparameters are set to the default value.
+	 * Enumerates all possible component instances for a specific root component and a collection of components for resolving required interfaces. Hyperparameters are set to the default value.
 	 *
-	 * @param rootComponent The component to be considered the root.
-	 * @param components The collection fo components that is used for resolving required interfaces recursively.
+	 * @param rootComponent
+	 *            The component to be considered the root.
+	 * @param components
+	 *            The collection fo components that is used for resolving required interfaces recursively.
 	 * @return A collection of component instances of the given root component with all possible algorithm choices.
 	 */
 	public static Collection<ComponentInstance> getAllAlgorithmSelectionInstances(final Component rootComponent, final Collection<Component> components) {
@@ -134,11 +222,12 @@ public class ComponentUtil {
 	}
 
 	/**
-	 * Enumerates all possible component instances for a specific root component and a collection of components for resolving required interfaces.
-	 * Hyperparameters are set to the default value.
+	 * Enumerates all possible component instances for a specific root component and a collection of components for resolving required interfaces. Hyperparameters are set to the default value.
 	 *
-	 * @param requiredInterface The interface required to be provided by the root components.
-	 * @param components The collection fo components that is used for resolving required interfaces recursively.
+	 * @param requiredInterface
+	 *            The interface required to be provided by the root components.
+	 * @param components
+	 *            The collection fo components that is used for resolving required interfaces recursively.
 	 * @return A collection of component instances of the given root component with all possible algorithm choices.
 	 */
 	public static Collection<ComponentInstance> getAllAlgorithmSelectionInstances(final String requiredInterface, final Collection<Component> components) {
@@ -282,8 +371,11 @@ public class ComponentUtil {
 
 	/**
 	 * Returns a collection of components that is relevant to resolve all recursive dependency when the request concerns a component with the provided required interface.
-	 * @param components A collection of component to search for relevant components.
-	 * @param requiredInterface The requested required interface.
+	 *
+	 * @param components
+	 *            A collection of component to search for relevant components.
+	 * @param requiredInterface
+	 *            The requested required interface.
 	 * @return The collection of affected components when requesting the given required interface.
 	 */
 	public static Collection<Component> getAffectedComponents(final Collection<Component> components, final String requiredInterface) {
