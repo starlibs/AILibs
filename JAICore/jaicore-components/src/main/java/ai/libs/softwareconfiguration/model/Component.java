@@ -1,14 +1,13 @@
 package ai.libs.softwareconfiguration.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +30,7 @@ import ai.libs.jaicore.logging.ToJSONStringUtil;
  * @author fmohr, wever
  */
 @JsonPropertyOrder({ "name", "parameters", "dependencies", "providedInterfaces", "requiredInterfaces" })
-public class Component implements Serializable {
-
-	/* Auto-generated serial version UID. */
-	private static final long serialVersionUID = -3708378164716812585L;
+public class Component {
 
 	/* Logger */
 	private static final Logger L = LoggerFactory.getLogger(Component.class);
@@ -42,7 +38,7 @@ public class Component implements Serializable {
 	/* Description of the component. */
 	private final String name;
 	private Collection<String> providedInterfaces = new ArrayList<>();
-	private Map<String, String> requiredInterfaces = new LinkedHashMap<>();
+	private final List<Interface> requiredInterfaces = new ArrayList<>();
 	private PartialOrderedSet<Parameter> parameters = new PartialOrderedSet<>();
 	private Collection<Dependency> dependencies = new ArrayList<>();
 
@@ -73,11 +69,14 @@ public class Component implements Serializable {
 	 *            A list of dependencies to constrain the values of parameters (may be empty).
 	 */
 	@JsonCreator
-	public Component(@JsonProperty("name") final String name, @JsonProperty("providedInterfaces") final Collection<String> providedInterfaces, @JsonProperty("requiredInterfaces") final Map<String, String> requiredInterfaces,
-			@JsonProperty("parameters") final PartialOrderedSet<Parameter> parameters, @JsonProperty("dependencies") final Collection<Dependency> dependencies) {
+	public Component(@JsonProperty("name") final String name,
+					 @JsonProperty("providedInterfaces") final Collection<String> providedInterfaces,
+					 @JsonProperty("requiredInterfaces") final List<Interface> requiredInterfaces,
+					 @JsonProperty("parameters") final PartialOrderedSet<Parameter> parameters,
+                     @JsonProperty("dependencies") final Collection<Dependency> dependencies) {
 		this(name);
 		this.providedInterfaces = providedInterfaces;
-		this.requiredInterfaces = new LinkedHashMap<>(requiredInterfaces);
+		this.requiredInterfaces.addAll(requiredInterfaces);
 		this.parameters = parameters;
 		this.dependencies = new ArrayList<>(dependencies);
 	}
@@ -96,11 +95,10 @@ public class Component implements Serializable {
 	 * @param dependencies
 	 *            A list of dependencies to constrain the values of parameters (may be empty).
 	 */
-	public Component(final String name, final Collection<String> providedInterfaces, final List<Map<String, String>> requiredInterfaces, final PartialOrderedSet<Parameter> parameters, final List<Dependency> dependencies) {
+	public Component(final String name, final Collection<String> providedInterfaces, final List<Interface> requiredInterfaces, final PartialOrderedSet<Parameter> parameters, final List<Dependency> dependencies) {
 		this(name);
 		this.providedInterfaces = providedInterfaces;
-		this.requiredInterfaces = new LinkedHashMap<>();
-		requiredInterfaces.stream().forEach(this.requiredInterfaces::putAll);
+		this.requiredInterfaces.addAll(requiredInterfaces);
 		this.parameters = parameters;
 		this.dependencies = dependencies;
 	}
@@ -113,10 +111,24 @@ public class Component implements Serializable {
 	}
 
 	/**
-	 * @return The map of required interfaces.
+	 * @return The list of required interfaces.
 	 */
-	public Map<String, String> getRequiredInterfaces() {
+	public List<Interface> getRequiredInterfaces() {
 		return this.requiredInterfaces;
+	}
+
+	/**
+	 * @return The list of names of required interfaces.
+	 */
+	public List<String> getRequiredInterfaceNames() {
+		return this.requiredInterfaces.stream().map(Interface::getName).collect(Collectors.toList());
+	}
+
+	/**
+	 * @return The list of ids of required interfaces.
+	 */
+	public List<String> getRequiredInterfaceIds() {
+		return this.requiredInterfaces.stream().map(Interface::getId).collect(Collectors.toList());
 	}
 
 	/**
@@ -176,9 +188,15 @@ public class Component implements Serializable {
 	 *            The local identifier to reference the specific required interface.
 	 * @param interfaceName
 	 *            The provided interface of another component.
+	 * @param min
+	 * 	          Minimun times the interface is required?
+	 * @param max
+	 *            Maximum times the interface is required?
 	 */
-	public void addRequiredInterface(final String interfaceID, final String interfaceName) {
-		this.requiredInterfaces.put(interfaceID, interfaceName);
+	public void addRequiredInterface(String interfaceID, String interfaceName, Integer min, Integer max) {
+		this.requiredInterfaces.add(
+				new Interface(interfaceID, interfaceName, min, max)
+		);
 	}
 
 	/**

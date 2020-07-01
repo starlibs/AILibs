@@ -200,15 +200,15 @@ public class ComponentUtil {
 		Collection<ComponentInstance> instanceList = new LinkedList<>();
 		instanceList.add(ComponentUtil.getDefaultParameterizationOfComponent(rootComponent));
 
-		for (Entry<String, String> requiredInterface : rootComponent.getRequiredInterfaces().entrySet()) {
+		for (Interface requiredInterface : rootComponent.getRequiredInterfaces()) {
 			List<ComponentInstance> tempList = new LinkedList<>();
 
-			Collection<Component> possiblePlugins = ComponentUtil.getComponentsProvidingInterface(components, requiredInterface.getValue());
+			Collection<Component> possiblePlugins = ComponentUtil.getComponentsProvidingInterface(components, requiredInterface.getName());
 			for (ComponentInstance ci : instanceList) {
 				for (Component possiblePlugin : possiblePlugins) {
 					for (ComponentInstance reqICI : getAllAlgorithmSelectionInstances(possiblePlugin, components)) {
 						ComponentInstance copyOfCI = new ComponentInstance(ci.getComponent(), new HashMap<>(ci.getParameterValues()), new HashMap<>(ci.getSatisfactionOfRequiredInterfaces()));
-						copyOfCI.getSatisfactionOfRequiredInterfaces().put(requiredInterface.getKey(), reqICI);
+						copyOfCI.getSatisfactionOfRequiredInterfaces().put(requiredInterface.getId(), reqICI);
 						tempList.add(copyOfCI);
 					}
 				}
@@ -248,8 +248,13 @@ public class ComponentUtil {
 			if (candidate.getRequiredInterfaces().isEmpty()) {
 				waysToResolveComponent = 1;
 			} else {
-				for (String req : candidate.getRequiredInterfaces().keySet()) {
-					int subSolutionsForThisInterface = getNumberOfUnparametrizedCompositions(components, candidate.getRequiredInterfaces().get(req));
+//				for (String req : candidate.getRequiredInterfaces().keySet()) { // id of every reqIFace
+//					int subSolutionsForThisInterface = getNumberOfUnparametrizedCompositions(components, candidate.getRequiredInterfaces().get(req)); // name of reqIFace found by its id
+				for (String reqIFace : candidate.getRequiredInterfaceNames()) {
+					int subSolutionsForThisInterface = getNumberOfUnparametrizedCompositions(
+							components,
+							reqIFace
+					);
 					if (waysToResolveComponent > 0) {
 						waysToResolveComponent *= subSolutionsForThisInterface;
 					} else {
@@ -283,7 +288,7 @@ public class ComponentUtil {
 			List<String> componentListCopy = new LinkedList<>(componentList);
 			componentListCopy.add(c.getName());
 
-			for (String subRequiredInterface : c.getRequiredInterfaces().values()) {
+			for (String subRequiredInterface : c.getRequiredInterfaceNames()) {
 				if (hasCycles(components, subRequiredInterface, componentListCopy)) {
 					return true;
 				}
@@ -384,7 +389,7 @@ public class ComponentUtil {
 			throw new IllegalArgumentException("Could not resolve the requiredInterface " + requiredInterface);
 		}
 		Set<Component> recursiveResolvedComps = new HashSet<>();
-		affectedComponents.forEach(x -> x.getRequiredInterfaces().values().stream().map(interfaceName -> getAffectedComponents(components, interfaceName)).forEach(recursiveResolvedComps::addAll));
+		affectedComponents.forEach(x -> x.getRequiredInterfaceNames().stream().map(interfaceName -> getAffectedComponents(components, interfaceName)).forEach(recursiveResolvedComps::addAll));
 		affectedComponents.addAll(recursiveResolvedComps);
 		return affectedComponents;
 	}

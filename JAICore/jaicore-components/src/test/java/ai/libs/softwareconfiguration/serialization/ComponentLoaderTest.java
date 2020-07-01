@@ -23,6 +23,7 @@ import ai.libs.softwareconfiguration.model.Parameter;
 import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
 import ai.libs.softwareconfiguration.serialization.ComponentLoader;
 
+@SuppressWarnings("SimplifiableJUnitAssertion")
 public class ComponentLoaderTest {
 
 	@Test
@@ -108,7 +109,7 @@ public class ComponentLoaderTest {
 
 	@Test
 	public void testLoadFromResource() throws IOException {
-		Collection<Component> components = new ComponentLoader(new ResourceFile("ai/libs/hasco/testrsc/weka-all-autoweka.json")).getComponents();
+		Collection<Component> components = new ComponentLoader(new File("testrsc/weka-all-autoweka.json")).getComponents();
 		assertTrue(!components.isEmpty());
 	}
 

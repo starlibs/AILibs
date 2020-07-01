@@ -38,9 +38,7 @@ public class Util {
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			components.add(curInstance);
-			Map<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
-			// This set should be ordered
-			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
+			List<String> requiredInterfaceNames = curInstance.getComponent().getRequiredInterfaceIds();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
 				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
 				componentInstances.push(instance);
@@ -63,9 +61,7 @@ public class Util {
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			builder.append(curInstance.getComponent().getName());
-			Map<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
-			// This set should be ordered
-			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
+			List<String> requiredInterfaceNames = curInstance.getComponent().getRequiredInterfaceIds();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
 				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
 				componentInstances.push(instance);
@@ -88,9 +84,7 @@ public class Util {
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			components.add(curInstance.getComponent());
-			Map<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
-			// This set should be ordered
-			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
+			List<String> requiredInterfaceNames = curInstance.getComponent().getRequiredInterfaceIds();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
 				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
 				componentInstances.push(instance);
