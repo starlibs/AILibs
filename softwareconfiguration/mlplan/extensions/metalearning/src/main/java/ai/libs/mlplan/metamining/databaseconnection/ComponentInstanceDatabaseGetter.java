@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.db.sql.SQLAdapter;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.jaicore.ml.weka.classification.pipeline.SupervisedFilterSelector;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
@@ -95,7 +96,7 @@ public class ComponentInstanceDatabaseGetter extends Thread {
 			this.pipelinePerformances.add(datasetPerformances);
 		} catch (ComponentNotFoundException e) {
 			// Could not convert pipeline - component not in loaded configuration
-			this.logger.warn("Could not convert component due to {}", e);
+			this.logger.warn("Could not convert component due to {}", LoggerUtil.getExceptionInfo(e));
 		}
 	}
 

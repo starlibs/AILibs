@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -248,13 +247,11 @@ public class ComponentUtil {
 			if (candidate.getRequiredInterfaces().isEmpty()) {
 				waysToResolveComponent = 1;
 			} else {
-//				for (String req : candidate.getRequiredInterfaces().keySet()) { // id of every reqIFace
-//					int subSolutionsForThisInterface = getNumberOfUnparametrizedCompositions(components, candidate.getRequiredInterfaces().get(req)); // name of reqIFace found by its id
 				for (String reqIFace : candidate.getRequiredInterfaceNames()) {
 					int subSolutionsForThisInterface = getNumberOfUnparametrizedCompositions(
 							components,
 							reqIFace
-					);
+							);
 					if (waysToResolveComponent > 0) {
 						waysToResolveComponent *= subSolutionsForThisInterface;
 					} else {

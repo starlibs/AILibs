@@ -118,9 +118,6 @@ public class Interval implements Serializable {
 		if (Double.doubleToLongBits(this.max) != Double.doubleToLongBits(other.max)) {
 			return false;
 		}
-		if (Double.doubleToLongBits(this.min) != Double.doubleToLongBits(other.min)) {
-			return false;
-		}
-		return true;
+		return Double.doubleToLongBits(this.min) == Double.doubleToLongBits(other.min);
 	}
 }

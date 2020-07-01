@@ -8,7 +8,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.slf4j.Logger;

@@ -14,7 +14,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import ai.libs.softwareconfiguration.model.*;
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +26,15 @@ import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.softwareconfiguration.model.BooleanParameterDomain;
+import ai.libs.softwareconfiguration.model.CategoricalParameterDomain;
+import ai.libs.softwareconfiguration.model.Component;
+import ai.libs.softwareconfiguration.model.Dependency;
+import ai.libs.softwareconfiguration.model.IParameterDomain;
+import ai.libs.softwareconfiguration.model.Interface;
+import ai.libs.softwareconfiguration.model.NumericParameterDomain;
+import ai.libs.softwareconfiguration.model.Parameter;
+import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
 
 public class ComponentLoader {
 

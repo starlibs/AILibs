@@ -58,7 +58,7 @@ public class MLPlanConfigConsistencyTester {
 		RandomCompletionBasedNodeEvaluator rcne = (RandomCompletionBasedNodeEvaluator) ((AlternativeNodeEvaluator) search.getNodeEvaluator()).getEvaluator();
 		PipelineEvaluator pe = (PipelineEvaluator) problem.getCompositionEvaluator();
 		assertEquals(this.timeoutForNodeEvaluation.milliseconds(), rcne.getTimeoutForNodeEvaluationInMS());
-		assertEquals(this.timeoutForSingleSolutionEvaluation.milliseconds(), pe.getTimeout(null));
+		assertEquals(this.timeoutForSingleSolutionEvaluation.milliseconds(), pe.getTimeout(null).milliseconds());
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class MLPlanConfigConsistencyTester {
 		RandomCompletionBasedNodeEvaluator rcne = (RandomCompletionBasedNodeEvaluator) ((AlternativeNodeEvaluator) search.getNodeEvaluator()).getEvaluator();
 		PipelineEvaluator pe = (PipelineEvaluator) problem.getCompositionEvaluator();
 		assertEquals(this.timeoutForNodeEvaluation.milliseconds(), rcne.getTimeoutForNodeEvaluationInMS());
-		assertEquals(this.timeoutForSingleSolutionEvaluation.milliseconds(), pe.getTimeout(null));
+		assertEquals(this.timeoutForSingleSolutionEvaluation.milliseconds(), pe.getTimeout(null).milliseconds());
 	}
 
 	@Test
@@ -86,7 +86,7 @@ public class MLPlanConfigConsistencyTester {
 		assertTrue(event instanceof AlgorithmInitializedEvent);
 		TwoPhaseHASCO twoPhaseHasco = (TwoPhaseHASCO) mlplan.getOptimizingFactory().getOptimizer();
 		PipelineEvaluator evaluator = (PipelineEvaluator) ((RefinementConfiguredSoftwareConfigurationProblem) twoPhaseHasco.getHasco().getInput()).getCompositionEvaluator();
-		assertEquals(this.timeoutForSingleSolutionEvaluation.milliseconds(), evaluator.getTimeout(null));
+		assertEquals(this.timeoutForSingleSolutionEvaluation.milliseconds(), evaluator.getTimeout(null).milliseconds());
 	}
 
 	@Test

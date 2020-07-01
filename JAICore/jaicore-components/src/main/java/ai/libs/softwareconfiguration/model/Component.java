@@ -1,5 +1,6 @@
 package ai.libs.softwareconfiguration.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,7 +30,9 @@ import ai.libs.jaicore.logging.ToJSONStringUtil;
  * @author fmohr, wever
  */
 @JsonPropertyOrder({ "name", "parameters", "dependencies", "providedInterfaces", "requiredInterfaces" })
-public class Component {
+public class Component implements Serializable {
+
+	private static final long serialVersionUID = -5382777749445815025L;
 
 	/* Logger */
 	private static final Logger L = LoggerFactory.getLogger(Component.class);

@@ -1,14 +1,17 @@
 package ai.libs.softwareconfiguration.model;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({ "name", "defaultDomain", "defaultValue" })
-public class Parameter {
+public class Parameter implements Serializable {
+	private static final long serialVersionUID = 8735407907221383716L;
 	private final String name;
 	private final IParameterDomain defaultDomain;
-	private final Object defaultValue;
+	private final Serializable defaultValue;
 
 	@SuppressWarnings("unused")
 	private Parameter() {
@@ -19,7 +22,7 @@ public class Parameter {
 	}
 
 	@JsonCreator
-	public Parameter(@JsonProperty("name") final String name, @JsonProperty("defaultDomain") final IParameterDomain defaultDomain, @JsonProperty("defaultValue") final Object defaultValue) {
+	public Parameter(@JsonProperty("name") final String name, @JsonProperty("defaultDomain") final IParameterDomain defaultDomain, @JsonProperty("defaultValue") final Serializable defaultValue) {
 		super();
 		this.name = name;
 		this.defaultDomain = defaultDomain;
