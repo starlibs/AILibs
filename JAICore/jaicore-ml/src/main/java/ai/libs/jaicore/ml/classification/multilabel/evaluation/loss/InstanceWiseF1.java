@@ -30,15 +30,15 @@ public class InstanceWiseF1 extends AThresholdBasedMultiLabelClassificationMeasu
 	}
 
 	@Override
-	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> actual) {
-		return 1 - this.score(expected, actual);
+	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
+		return 1 - this.score(expected, predicted);
 	}
 
 	@Override
-	public double score(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> actual) {
-		this.checkConsistency(expected, actual);
+	public double score(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
+		this.checkConsistency(expected, predicted);
 		int[][] expectedMatrix = this.listToMatrix(expected);
-		int[][] actualMatrix = this.listToThresholdedRelevanceMatrix(actual);
+		int[][] actualMatrix = this.listToThresholdedRelevanceMatrix(predicted);
 		F1Measure baseMeasure = new F1Measure(1);
 		OptionalDouble res = IntStream.range(0, expectedMatrix.length)
 				.mapToDouble(x -> baseMeasure.score(Arrays.stream(expectedMatrix[x]).mapToObj(Integer::valueOf).collect(Collectors.toList()), Arrays.stream(actualMatrix[x]).mapToObj(Integer::valueOf).collect(Collectors.toList())))

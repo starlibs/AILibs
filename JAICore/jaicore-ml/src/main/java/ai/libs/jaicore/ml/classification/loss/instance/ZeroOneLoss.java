@@ -9,13 +9,13 @@ import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicInstanc
 public class ZeroOneLoss implements IDeterministicInstancePredictionPerformanceMeasure<Object, Object> {
 
 	@Override
-	public double loss(final Object expected, final Object actual) {
-		return expected.equals(actual) ? 0.0 : 1.0;
+	public double loss(final Object expected, final Object predicted) {
+		return expected.equals(predicted) ? 0.0 : 1.0;
 	}
 
 	@Override
-	public double score(final Object expected, final Object actual) {
-		return 1 - this.loss(expected, actual);
+	public double score(final Object expected, final Object predicted) {
+		return 1 - this.loss(expected, predicted);
 	}
 
 }

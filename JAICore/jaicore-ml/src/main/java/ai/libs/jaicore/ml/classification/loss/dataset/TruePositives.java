@@ -12,8 +12,8 @@ public class TruePositives extends AHomogeneousPredictionPerformanceMeasure<Obje
 	}
 
 	@Override
-	public double score(final List<?> expected, final List<?> actual) {
-		return IntStream.range(0, expected.size()).filter(i -> expected.get(i).equals(this.positiveClass) && expected.get(i).equals(actual.get(i))).map(x -> 1).sum();
+	public double score(final List<?> expected, final List<?> predicted) {
+		return IntStream.range(0, expected.size()).filter(i -> expected.get(i).equals(this.positiveClass) && expected.get(i).equals(predicted.get(i))).map(x -> 1).sum();
 	}
 
 }

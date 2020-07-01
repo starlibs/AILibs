@@ -15,7 +15,7 @@ public class AreaUnderROCCurve extends AHomogeneousPredictionPerformanceMeasure<
 	}
 
 	@Override
-	public double score(final List<?> expected, final List<?> actual) {
+	public double score(final List<?> expected, final List<?> predicted) {
 		throw new UnsupportedOperationException("AUROC cannot be implemented as we do not have any class probabilities available");
 	}
 

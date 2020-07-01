@@ -20,14 +20,14 @@ public class R2 extends ARegressionMeasure {
 	}
 
 	@Override
-	public double score(final List<? extends Double> expected, final List<? extends Double> actual) {
-		this.checkConsistency(expected, actual);
+	public double score(final List<? extends Double> expected, final List<? extends Double> predicted) {
+		this.checkConsistency(expected, predicted);
 		double meanExpected = expected.stream().mapToDouble(x -> x).average().getAsDouble();
 		double sumOfActualSquares = 0.0;
 		double sumOfExpectedSquares = 0.0;
 
-		for (int i = 0; i < actual.size(); i++) {
-			sumOfActualSquares += Math.pow(actual.get(i) - meanExpected, 2);
+		for (int i = 0; i < predicted.size(); i++) {
+			sumOfActualSquares += Math.pow(predicted.get(i) - meanExpected, 2);
 			sumOfExpectedSquares += Math.pow(expected.get(i) - meanExpected, 2);
 		}
 		return sumOfActualSquares / sumOfExpectedSquares;

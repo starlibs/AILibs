@@ -13,9 +13,9 @@ public class Precision extends AHomogeneousPredictionPerformanceMeasure<Object> 
 	}
 
 	@Override
-	public double score(final List<?> expected, final List<?> actual) {
-		double truePositives = this.tp.score(expected, actual);
-		double denominator = (truePositives + this.fp.score(expected, actual));
+	public double score(final List<?> expected, final List<?> predicted) {
+		double truePositives = this.tp.score(expected, predicted);
+		double denominator = (truePositives + this.fp.score(expected, predicted));
 		return denominator == 0.0 ? 0 : truePositives / denominator;
 	}
 

@@ -19,14 +19,14 @@ public class ExactMatch extends AMultiLabelClassificationMeasure {
 	}
 
 	@Override
-	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> actual) {
-		this.checkConsistency(expected, actual);
-		return (double) IntStream.range(0, expected.size()).map(x -> SetUtils.isEqualSet(ArrayUtil.argMax(expected.get(x)), this.getThresholdedPredictionAsSet(actual.get(x))) ? 0 : 1).sum() / expected.size();
+	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
+		this.checkConsistency(expected, predicted);
+		return (double) IntStream.range(0, expected.size()).map(x -> SetUtils.isEqualSet(ArrayUtil.argMax(expected.get(x)), this.getThresholdedPredictionAsSet(predicted.get(x))) ? 0 : 1).sum() / expected.size();
 	}
 
 	@Override
-	public double score(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> actual) {
-		return 1 - this.loss(expected, actual);
+	public double score(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
+		return 1 - this.loss(expected, predicted);
 	}
 
 }

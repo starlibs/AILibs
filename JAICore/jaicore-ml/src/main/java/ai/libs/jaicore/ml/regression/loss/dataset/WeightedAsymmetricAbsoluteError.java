@@ -19,10 +19,10 @@ public class WeightedAsymmetricAbsoluteError extends AUnboundedRegressionMeasure
 	}
 
 	@Override
-	public double loss(final List<? extends Double> expected, final List<? extends Double> actual) {
+	public double loss(final List<? extends Double> expected, final List<? extends Double> predicted) {
 		List<Double> errors = new ArrayList<>();
 		for (int i = 0; i < expected.size(); i++) {
-			double d = actual.get(i) - expected.get(i);
+			double d = predicted.get(i) - expected.get(i);
 			Double error;
 			if (d <= 0) {
 				error = -this.weightUnderestimation * d;

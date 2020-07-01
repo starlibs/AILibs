@@ -10,14 +10,8 @@ public enum EClassificationPerformanceMeasure implements IDeterministicHomogeneo
 	// AREA_ABOVE_ROC, AREA_UNDER_ROC, AVG_COST, CORRECT, CORRELATION_COEFFICIENT, ERROR_RATE, FALSE_NEGATIVE_RATE, FALSE_POSITIVE_RATE, F_MEASURE, INCORRECT, KAPPA, KB_INFORMATION, KB_MEA_INFORMATION, KB_RELATIVE_INFORMATION,
 	// MEAN_ABSOLUTE_ERROR, PCT_CORRECT, PCT_INCORRECT, PRECISION, RELATIVE_ABSOLUTE_ERROR, ROOT_MEAN_SQUARED_ERROR, ROOT_RELATIVE_SQUARED_ERROR, WEIGHTED_AREA_UNDER_ROC, WEIGHTED_FALSE_NEGATIVE_RATE, WEIGHTED_FALSE_POSITIVE_RATE,
 	// WEIGHTED_F_MEASURE, WEIGHTED_PRECISION, WEIGHTED_RECALL, WEIGHTED_TRUE_NEGATIVE_RATE, WEIGHTED_TRUE_POSITIVE_RATE
-	ERRORRATE(new ErrorRate()),
-	TRUE_NEGATIVES_WITH_1_POSITIVE(new TrueNegatives(1)),
-	TRUE_POSITIVES_WITH_1_POSITIVE(new TruePositives(1)),
-	FALSE_NEGATIVES_WITH_1_POSITIVE(new FalseNegatives(1)),
-	FALSE_POSITIVES_WITH_1_POSITIVE(new FalsePositives(1)),
-	PRECISION_WITH_1_POSITIVE(new Precision(1)),
-	RECALL_WITH_1_POSITIVE(new Recall(1)),
-	F1_WITH_1_POSITIVE(new F1Measure(1));
+	ERRORRATE(new ErrorRate()), TRUE_NEGATIVES_WITH_1_POSITIVE(new TrueNegatives(1)), TRUE_POSITIVES_WITH_1_POSITIVE(new TruePositives(1)), FALSE_NEGATIVES_WITH_1_POSITIVE(new FalseNegatives(1)),
+	FALSE_POSITIVES_WITH_1_POSITIVE(new FalsePositives(1)), PRECISION_WITH_1_POSITIVE(new Precision(1)), RECALL_WITH_1_POSITIVE(new Recall(1)), F1_WITH_1_POSITIVE(new F1Measure(1));
 
 	private final IDeterministicHomogeneousPredictionPerformanceMeasure<Object> measure;
 
@@ -26,8 +20,8 @@ public enum EClassificationPerformanceMeasure implements IDeterministicHomogeneo
 	}
 
 	@Override
-	public double loss(final List<? extends Object> actual, final List<? extends Object> expected) {
-		return this.measure.loss(actual, expected);
+	public double loss(final List<? extends Object> expected, final List<? extends Object> predicted) {
+		return this.measure.loss(expected, predicted);
 	}
 
 	@Override
@@ -36,8 +30,8 @@ public enum EClassificationPerformanceMeasure implements IDeterministicHomogeneo
 	}
 
 	@Override
-	public double score(final List<? extends Object> expected, final List<? extends Object> actual) {
-		return this.measure.score(expected, actual);
+	public double score(final List<? extends Object> expected, final List<? extends Object> predicted) {
+		return this.measure.score(expected, predicted);
 	}
 
 	@Override

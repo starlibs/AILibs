@@ -34,8 +34,8 @@ public class AutoMEKAGGPFitnessMeasureLoss extends AThresholdBasedMultiLabelClas
 	}
 
 	@Override
-	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> actual) {
-		OptionalDouble res = Arrays.stream(this.measures).mapToDouble(x -> x.loss(expected, actual)).average();
+	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
+		OptionalDouble res = Arrays.stream(this.measures).mapToDouble(x -> x.loss(expected, predicted)).average();
 		if (res.isPresent()) {
 			return res.getAsDouble();
 		} else {

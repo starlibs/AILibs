@@ -21,15 +21,15 @@ public class F1MacroAverageL extends AThresholdBasedMultiLabelClassificationMeas
 	}
 
 	@Override
-	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> actual) {
-		return 1 - this.score(expected, actual);
+	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
+		return 1 - this.score(expected, predicted);
 	}
 
 	@Override
-	public double score(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> actual) {
-		this.checkConsistency(expected, actual);
+	public double score(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
+		this.checkConsistency(expected, predicted);
 		int[][] expectedMatrix = this.transposeMatrix(this.listToMatrix(expected));
-		int[][] actualMatrix = this.transposeMatrix(this.listToThresholdedRelevanceMatrix(actual));
+		int[][] actualMatrix = this.transposeMatrix(this.listToThresholdedRelevanceMatrix(predicted));
 
 		F1Measure loss = new F1Measure(1);
 		OptionalDouble res = IntStream.range(0, expectedMatrix.length)

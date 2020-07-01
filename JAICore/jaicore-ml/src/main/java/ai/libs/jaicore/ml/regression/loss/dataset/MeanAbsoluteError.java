@@ -12,8 +12,8 @@ public class MeanAbsoluteError extends AUnboundedRegressionMeasure {
 	private static final AbsoluteError ABSOLUTE_ERROR_LOSS = new AbsoluteError();
 
 	@Override
-	public double loss(final List<? extends Double> expected, final List<? extends Double> actual) {
-		return StatisticsUtil.mean(IntStream.range(0, expected.size()).mapToObj(x -> Double.valueOf(ABSOLUTE_ERROR_LOSS.loss(expected.get(x), actual.get(x)))).collect(Collectors.toList()));
+	public double loss(final List<? extends Double> expected, final List<? extends Double> predicted) {
+		return StatisticsUtil.mean(IntStream.range(0, expected.size()).mapToObj(x -> Double.valueOf(ABSOLUTE_ERROR_LOSS.loss(expected.get(x), predicted.get(x)))).collect(Collectors.toList()));
 	}
 
 }

@@ -15,13 +15,13 @@ import ai.libs.jaicore.ml.classification.loss.ConfusionMatrix;
 public class WeightedAUROC extends AHomogeneousPredictionPerformanceMeasure<Object> {
 
 	@Override
-	public double score(final List<?> expected, final List<?> actual) {
-		ConfusionMatrix cmat = new ConfusionMatrix(expected, actual);
+	public double score(final List<?> expected, final List<?> predicted) {
+		ConfusionMatrix cmat = new ConfusionMatrix(expected, predicted);
 		int[] classCounts = Arrays.stream(cmat.getConfusionMatrix()).mapToInt(x -> Arrays.stream(x).sum()).toArray();
 		double sum = 0;
 		for (int i = 0; i < classCounts.length; i++) {
 			if (classCounts[i] > 0) {
-				sum += new AreaUnderROCCurve(cmat.getObjectIndex().get(i)).score(expected, actual) * classCounts[i];
+				sum += new AreaUnderROCCurve(cmat.getObjectIndex().get(i)).score(expected, predicted) * classCounts[i];
 			}
 		}
 		return sum / Arrays.stream(classCounts).sum();

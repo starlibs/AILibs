@@ -11,11 +11,11 @@ public class ErrorRate extends APredictionPerformanceMeasure<Object, Object> imp
 	}
 
 	@Override
-	public double loss(final List<?> expected, final List<?> actual) {
-		this.checkConsistency(expected, actual);
+	public double loss(final List<?> expected, final List<?> predicted) {
+		this.checkConsistency(expected, predicted);
 		double sumOfZOLoss = 0.0;
 		for (int i = 0; i < expected.size(); i++) {
-			sumOfZOLoss += expected.get(i).equals(actual.get(i)) ? 0.0 : 1.0;
+			sumOfZOLoss += expected.get(i).equals(predicted.get(i)) ? 0.0 : 1.0;
 		}
 		return sumOfZOLoss / expected.size();
 	}

@@ -22,13 +22,13 @@ public abstract class APredictionPerformanceMeasure<E, A> implements IDeterminis
 	}
 
 	@Override
-	public double loss(final List<? extends E> expected, final List<? extends A> actual) {
-		return 1 - this.score(expected, actual);
+	public double loss(final List<? extends E> expected, final List<? extends A> predicted) {
+		return 1 - this.score(expected, predicted);
 	}
 
 	@Override
-	public double score(final List<? extends E> expected, final List<? extends A> actual) {
-		return 1 - this.loss(expected, actual);
+	public double score(final List<? extends E> expected, final List<? extends A> predicted) {
+		return 1 - this.loss(expected, predicted);
 	}
 
 	@Override
@@ -36,8 +36,8 @@ public abstract class APredictionPerformanceMeasure<E, A> implements IDeterminis
 		return this.score(pairTable.getGroundTruthAsList(), pairTable.getPredictionsAsList());
 	}
 
-	protected double averageInstanceWiseLoss(final List<E> expected, final List<A> actual, final IDeterministicInstancePredictionPerformanceMeasure<A, E> subMeasure) {
-		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> subMeasure.loss(expected.get(x), actual.get(x))).average();
+	protected double averageInstanceWiseLoss(final List<E> expected, final List<A> predicted, final IDeterministicInstancePredictionPerformanceMeasure<A, E> subMeasure) {
+		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> subMeasure.loss(expected.get(x), predicted.get(x))).average();
 		if (res.isPresent()) {
 			return res.getAsDouble();
 		} else {
@@ -45,8 +45,8 @@ public abstract class APredictionPerformanceMeasure<E, A> implements IDeterminis
 		}
 	}
 
-	protected double averageInstanceWiseScore(final List<E> expected, final List<A> actual, final IDeterministicInstancePredictionPerformanceMeasure<A, E> subMeasure) {
-		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> subMeasure.score(expected.get(x), actual.get(x))).average();
+	protected double averageInstanceWiseScore(final List<E> expected, final List<A> predicted, final IDeterministicInstancePredictionPerformanceMeasure<A, E> subMeasure) {
+		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> subMeasure.score(expected.get(x), predicted.get(x))).average();
 		if (res.isPresent()) {
 			return res.getAsDouble();
 		} else {

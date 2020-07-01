@@ -17,10 +17,10 @@ public class QuadraticQuadraticError extends AUnboundedRegressionMeasure {
 	}
 
 	@Override
-	public double loss(final List<? extends Double> expected, final List<? extends Double> actual) {
+	public double loss(final List<? extends Double> expected, final List<? extends Double> predicted) {
 		List<Double> errors = new ArrayList<>();
 		for (int i = 0; i < expected.size(); i++) {
-			double difference = actual.get(i) - expected.get(i);
+			double difference = predicted.get(i) - expected.get(i);
 			Double error;
 			if (difference <= 0) {
 				error = 2 * this.weightUnderestimation * Math.pow(difference, 2);

@@ -13,9 +13,9 @@ public class Recall extends AHomogeneousPredictionPerformanceMeasure<Object>  {
 	}
 
 	@Override
-	public double score(final List<? extends Object> expected, final List<? extends Object> actual) {
-		double truePositives = this.tp.score(expected, actual);
-		double denominator = (truePositives + this.fn.score(expected, actual));
+	public double score(final List<? extends Object> expected, final List<? extends Object> predicted) {
+		double truePositives = this.tp.score(expected, predicted);
+		double denominator = (truePositives + this.fn.score(expected, predicted));
 		return denominator == 0.0 ? 0 : truePositives / denominator;
 	}
 

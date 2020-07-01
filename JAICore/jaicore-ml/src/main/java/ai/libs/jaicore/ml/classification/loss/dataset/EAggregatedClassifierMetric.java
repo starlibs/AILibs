@@ -25,11 +25,11 @@ public enum EAggregatedClassifierMetric implements IAggregatedPredictionPerforma
 	}
 
 	@Override
-	public double loss(final List<List<? extends Object>> expected, final List<List<? extends Object>> actual) {
+	public double loss(final List<List<? extends Object>> expected, final List<List<? extends Object>> predicted) {
 		int n = expected.size();
 		List<Double> losses = new ArrayList<>();
 		for (int i = 0; i < n; i++) {
-			losses.add(this.lossFunction.loss(expected.get(i), actual.get(i)));
+			losses.add(this.lossFunction.loss(expected.get(i), predicted.get(i)));
 		}
 		return this.aggregation.aggregate(losses);
 	}
@@ -40,8 +40,8 @@ public enum EAggregatedClassifierMetric implements IAggregatedPredictionPerforma
 	}
 
 	@Override
-	public double score(final List<List<? extends Object>> expected, final List<List<? extends Object>> actual) {
-		return 1 - this.loss(expected, actual);
+	public double score(final List<List<? extends Object>> expected, final List<List<? extends Object>> predicted) {
+		return 1 - this.loss(expected, predicted);
 	}
 
 	@Override

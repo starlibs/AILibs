@@ -13,13 +13,13 @@ import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicInstanc
 public class AInstanceMeasure<E, A> implements IDeterministicInstancePredictionPerformanceMeasure<A, E> {
 
 	@Override
-	public double loss(final E expected, final A actual) {
-		return 1 - this.score(expected, actual);
+	public double loss(final E expected, final A predicted) {
+		return 1 - this.score(expected, predicted);
 	}
 
 	@Override
-	public double score(final E expected, final A actual) {
-		return 1 - this.loss(expected, actual);
+	public double score(final E expected, final A predicted) {
+		return 1 - this.loss(expected, predicted);
 	}
 
 }
