@@ -1,0 +1,2221 @@
+{
+  "repository": "sklearn-regressors",
+  "components": [
+    {
+      "name": "sklearn.ensemble.AdaBoostRegressor",
+      "providedInterface": [
+        "BasicRegressor"
+      ],
+      "requiredInterface": [
+        {
+          "id": "base_estimator",
+          "name": "BaseLearner"
+        }
+      ],
+      "parameter": [
+        {
+          "name": "n_estimators",
+          "type": "int",
+          "min": 1,
+          "max": 500,
+          "default": 50,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "learning_rate",
+          "type": "double",
+          "min": 0.01,
+          "max": 1.0,
+          "default": 1.0,
+          "minInterval": 0.01,
+          "refineSplits": 16
+        },
+        {
+          "name": "loss",
+          "type": "cat",
+          "values": [
+            "linear",
+            "square",
+            "exponential"
+          ],
+          "default": "linear"
+        }
+      ]
+    },
+    {
+      "name": "sklearn.ensemble.ExtraTreesRegressor",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner",
+        "FeatureImportanceEstimator"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "n_estimators",
+          "type": "int",
+          "min": 1,
+          "max": 500,
+          "default": 10,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "criterion",
+          "type": "cat",
+          "default": "mse",
+          "values": [
+            "mse",
+            "mae"
+          ]
+        },
+        {
+          "name": "max_features",
+          "type": "cat",
+          "values": [
+            "None",
+            "auto",
+            "sqrt",
+            "log2",
+            "0.05",
+            "0.1",
+            "0.15",
+            "0.2",
+            "0.25",
+            "0.3",
+            "0.35",
+            "0.4",
+            "0.45",
+            "0.5",
+            "0.55",
+            "0.6",
+            "0.65",
+            "0.7",
+            "0.75",
+            "0.8",
+            "0.85",
+            "0.9",
+            "0.95",
+            "1.0"
+          ],
+          "default": "auto"
+        },
+        {
+          "name": "max_depth",
+          "type": "cat",
+          "values": [
+            "None",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21"
+          ],
+          "default": "None"
+        },
+        {
+          "name": "min_samples_split",
+          "type": "int",
+          "default": 2,
+          "min": 2,
+          "max": 21,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "min_samples_leaf",
+          "type": "int",
+          "default": 1,
+          "min": 1,
+          "max": 10,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "min_weight_fraction_leaf",
+          "type": "double",
+          "default": 0.0,
+          "min": 0.0,
+          "max": 0.5,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "max_leaf_nodes",
+          "type": "cat",
+          "values": [
+            "None",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21"
+          ],
+          "default": "None"
+        },
+        {
+          "name": "min_impurity_decrease",
+          "type": "double",
+          "default": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "bootstrap",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        },
+        {
+          "name": "n_jobs",
+          "type": "cat",
+          "values": [
+            "1"
+          ],
+          "default": "1"
+        }
+      ]
+    },
+    {
+      "name": "sklearn.ensemble.GradientBoostingRegressor",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner",
+        "FeatureImportanceEstimator"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "loss",
+          "type": "cat",
+          "values": [
+            "ls",
+            "lad",
+            "huber",
+            "quantile"
+          ],
+          "default": "ls"
+        },
+        {
+          "name": "learning_rate",
+          "type": "double",
+          "min": 0.01,
+          "max": 1.0,
+          "default": 0.1,
+          "minInterval": 0.01,
+          "refineSplits": 16
+        },
+        {
+          "name": "n_estimators",
+          "type": "int",
+          "default": 100,
+          "min": 1,
+          "max": 500,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "max_depth",
+          "type": "int",
+          "default": 3,
+          "min": 1,
+          "max": 21,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "criterion",
+          "type": "cat",
+          "default": "friedman_mse",
+          "values": [
+            "friedman_mse",
+            "mse",
+            "mae"
+          ]
+        },
+        {
+          "name": "min_samples_split",
+          "type": "int",
+          "default": 2,
+          "min": 2,
+          "max": 21,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "min_samples_leaf",
+          "type": "int",
+          "default": 1,
+          "min": 1,
+          "max": 10,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "min_weight_fraction_leaf",
+          "type": "double",
+          "default": 0.0,
+          "min": 0.0,
+          "max": 0.5,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "subsample",
+          "type": "double",
+          "min": 0.01,
+          "max": 1.0,
+          "default": 1.0,
+          "minInterval": 0.05,
+          "refineSplits": 8
+        },
+        {
+          "name": "max_features",
+          "type": "cat",
+          "values": [
+            "None",
+            "auto",
+            "sqrt",
+            "log2",
+            "0.05",
+            "0.1",
+            "0.15",
+            "0.2",
+            "0.25",
+            "0.3",
+            "0.35",
+            "0.4",
+            "0.45",
+            "0.5",
+            "0.55",
+            "0.6",
+            "0.65",
+            "0.7",
+            "0.75",
+            "0.8",
+            "0.85",
+            "0.9",
+            "0.95",
+            "1.0"
+          ],
+          "default": "None"
+        },
+        {
+          "name": "max_leaf_nodes",
+          "type": "cat",
+          "values": [
+            "None",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21"
+          ],
+          "default": "None"
+        },
+        {
+          "name": "min_impurity_decrease",
+          "type": "double",
+          "default": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "alpha",
+          "type": "double",
+          "default": 0.9,
+          "min": 0.01,
+          "max": 0.99,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "validation_fraction",
+          "type": "double",
+          "default": 0.1,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "n_iter_no_change",
+          "type": "cat",
+          "values": [
+            "None",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "default": "None"
+        }
+      ]
+    },
+    {
+      "name": "sklearn.tree.DecisionTreeRegressor",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner",
+        "FeatureImportanceEstimator"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "criterion",
+          "default": "mse",
+          "type": "cat",
+          "values": [
+            "mse",
+            "friedman_mse",
+            "mae"
+          ]
+        },
+        {
+          "name": "splitter",
+          "default": "best",
+          "type": "cat",
+          "values": [
+            "best",
+            "random"
+          ]
+        },
+        {
+          "name": "max_depth",
+          "type": "cat",
+          "values": [
+            "None",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "25",
+            "30",
+            "35",
+            "40",
+            "45",
+            "50"
+          ],
+          "default": "None"
+        },
+        {
+          "name": "min_samples_split",
+          "type": "int",
+          "default": 2,
+          "min": 2,
+          "max": 21,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "min_samples_leaf",
+          "type": "int",
+          "default": 1,
+          "min": 1,
+          "max": 10,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "min_weight_fraction_leaf",
+          "type": "double",
+          "default": 0.0,
+          "min": 0.0,
+          "max": 0.5,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "max_features",
+          "type": "cat",
+          "values": [
+            "None",
+            "auto",
+            "sqrt",
+            "log2",
+            "0.05",
+            "0.1",
+            "0.15",
+            "0.2",
+            "0.25",
+            "0.3",
+            "0.35",
+            "0.4",
+            "0.45",
+            "0.5",
+            "0.55",
+            "0.6",
+            "0.65",
+            "0.7",
+            "0.75",
+            "0.8",
+            "0.85",
+            "0.9",
+            "0.95",
+            "1.0"
+          ],
+          "default": "None"
+        },
+        {
+          "name": "max_leaf_nodes",
+          "type": "cat",
+          "values": [
+            "None",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21"
+          ],
+          "default": "None"
+        },
+        {
+          "name": "min_impurity_decrease",
+          "type": "double",
+          "default": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        }
+      ]
+    },
+    {
+      "name": "sklearn.ensemble.RandomForestRegressor",
+      "providedInterface": [
+        "BasicRegressor", 
+        "BaseLearner",
+        "FeatureImportanceEstimator"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "n_estimators",
+          "type": "int",
+          "min": 1,
+          "max": 500,
+          "default": 10,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "criterion",
+          "type": "cat",
+          "default": "mse",
+          "values": [
+            "mse",
+            "mae"
+          ]
+        },
+        {
+          "name": "max_features",
+          "type": "cat",
+          "values": [
+            "None",
+            "auto",
+            "sqrt",
+            "log2",
+            "0.05",
+            "0.1",
+            "0.15",
+            "0.2",
+            "0.25",
+            "0.3",
+            "0.35",
+            "0.4",
+            "0.45",
+            "0.5",
+            "0.55",
+            "0.6",
+            "0.65",
+            "0.7",
+            "0.75",
+            "0.8",
+            "0.85",
+            "0.9",
+            "0.95",
+            "1.0"
+          ],
+          "default": "auto"
+        },
+        {
+          "name": "max_depth",
+          "type": "cat",
+          "values": [
+            "None",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21"
+          ],
+          "default": "None"
+        },
+        {
+          "name": "min_samples_split",
+          "type": "int",
+          "default": 2,
+          "min": 2,
+          "max": 21,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "min_samples_leaf",
+          "type": "int",
+          "default": 1,
+          "min": 1,
+          "max": 10,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "min_weight_fraction_leaf",
+          "type": "double",
+          "default": 0.0,
+          "min": 0.0,
+          "max": 0.5,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "max_leaf_nodes",
+          "type": "cat",
+          "values": [
+            "None",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21"
+          ],
+          "default": "None"
+        },
+        {
+          "name": "min_impurity_decrease",
+          "type": "double",
+          "default": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "bootstrap",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "n_jobs",
+          "type": "cat",
+          "values": [
+            "1"
+          ],
+          "default": "1"
+        }
+      ]
+    },{
+      "name": "sklearn.tree.ExtraTreeRegressor",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner",
+        "FeatureImportanceEstimator"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "criterion",
+          "type": "cat",
+          "values": [
+            "mse",
+            "friedman_mse",
+            "mae"
+          ],
+          "default": "mse"
+        },
+        {
+          "name": "splitter",
+          "type": "cat",
+          "values": [
+            "random",
+            "best"
+          ],
+          "default": "random"
+        },
+        {
+          "name": "max_depth",
+          "type": "cat",
+          "values": [
+            "None",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21"
+          ],
+          "default": "None"
+        },
+        {
+          "name": "min_samples_split",
+          "type": "int",
+          "default": 2,
+          "min": 2,
+          "max": 21,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "min_samples_leaf",
+          "type": "int",
+          "default": 1,
+          "min": 1,
+          "max": 10,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "min_weight_fraction_leaf",
+          "type": "double",
+          "default": 0.0,
+          "min": 0.0,
+          "max": 0.5,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "max_features",
+          "type": "cat",
+          "values": [
+            "None",
+            "auto",
+            "sqrt",
+            "log2",
+            "0.05",
+            "0.1",
+            "0.15",
+            "0.2",
+            "0.25",
+            "0.3",
+            "0.35",
+            "0.4",
+            "0.45",
+            "0.5",
+            "0.55",
+            "0.6",
+            "0.65",
+            "0.7",
+            "0.75",
+            "0.8",
+            "0.85",
+            "0.9",
+            "0.95",
+            "1.0"
+          ],
+          "default": "auto"
+        },
+        {
+          "name": "min_impurity_decrease",
+          "type": "double",
+          "default": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "max_leaf_nodes",
+          "type": "cat",
+          "values": [
+            "None",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21"
+          ],
+          "default": "None"
+        }
+      ]
+    },
+    {
+      "name": "sklearn.linear_model.LinearRegression",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "fit_intercept",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "normalize",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        },
+        {
+          "name": "copy_X",
+          "type": "cat",
+          "values": [
+            "True"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "n_jobs",
+          "type": "cat",
+          "values": [
+            "1"
+          ],
+          "default": "1"
+        }
+      ]
+    },
+    {
+      "name": "sklearn.linear_model.Ridge",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "alpha",
+          "type": "double",
+          "default": 1.0,
+          "min": 0.0,
+          "max": 5.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "fit_intercept",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "normalize",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        },
+        {
+          "name": "copy_X",
+          "type": "cat",
+          "values": [
+            "True"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "max_iter",
+          "type": "int",
+          "default": 1000,
+          "min": 1,
+          "max": 10000,
+          "minInterval": 20,
+          "refineSplits": 8
+        },
+        {
+          "name": "solver",
+          "type": "cat",
+          "values": [
+            "auto",
+            "svd",
+            "cholesky",
+            "lsqr",
+            "sparse_cg",
+            "sag",
+            "saga"
+          ],
+          "default": "auto"
+        }
+      ]
+    },
+    {
+      "name": "sklearn.linear_model.SGDRegressor",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "loss",
+          "type": "cat",
+          "default": "squared_loss",
+          "values": [
+            "squared_loss",
+            "huber",
+            "epsilon_insensitive",
+            "squared_epsilon_insensitive"
+          ]
+        },
+        {
+          "name": "penalty",
+          "type": "cat",
+          "values": [
+            "l2",
+            "l1",
+            "elasticnet",
+            "none"
+          ],
+          "default": "l2"
+        },
+        {
+          "name": "alpha",
+          "type": "double",
+          "default": 0.0001,
+          "min": 0.0,
+          "max": 5.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "l1_ratio",
+          "type": "double",
+          "default": 0.15,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.05,
+          "refineSplits": 8
+        },
+        {
+          "name": "fit_intercept",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "max_iter",
+          "type": "int",
+          "default": 1000,
+          "min": 1,
+          "max": 10000,
+          "minInterval": 20,
+          "refineSplits": 8
+        },
+        {
+          "name": "tol",
+          "type": "double",
+          "default": 0.001,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.005,
+          "refineSplits": 8
+        },
+        {
+          "name": "shuffle",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "epsilon",
+          "type": "double",
+          "default": 0.1,
+          "min": 0.0,
+          "max": 200.0,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "learning_rate",
+          "type": "cat",
+          "default": "invscaling",
+          "values": [
+              "invscaling",
+              "constant",
+              "optimal",
+              "adaptive"
+          ]
+        },
+        {
+          "name": "eta0",
+          "type": "double",
+          "default": 0.01,
+          "min": 0.001,
+          "max": 1.0,
+          "minInterval": 0.001,
+          "refineSplits": 8
+        },
+        {
+          "name": "power_t",
+          "type": "double",
+          "default": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.01,
+          "refineSplits": 8
+        },
+        {
+          "name": "early_stopping",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "validation_fraction",
+          "type": "double",
+          "default": 0.1,
+          "min": 0.01,
+          "max": 0.99,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "n_iter_no_change",
+          "type": "int",
+          "default": 5,
+          "min": 1,
+          "max": 15,
+          "minInterval": 1,
+          "refineSplits": 8
+        }
+      ]
+    },{
+      "name": "sklearn.linear_model.ElasticNet",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "alpha",
+          "type": "double",
+          "default": 1.0,
+          "min": 0.0,
+          "max": 2.0,
+          "minInterval": 0.01,
+          "refineSplits": 8
+        },
+        {
+          "name": "l1_ratio",
+          "type": "double",
+          "default": 0.15,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.05,
+          "refineSplits": 8
+        },
+        {
+          "name": "fit_intercept",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "normalize",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        },
+        {
+          "name": "max_iter",
+          "type": "int",
+          "default": 1000,
+          "min": 1,
+          "max": 10000,
+          "minInterval": 20,
+          "refineSplits": 8
+        },
+        {
+          "name": "copy_X",
+          "type": "cat",
+          "values": [
+            "True"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "tol",
+          "type": "double",
+          "default": 0.00001,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.0005,
+          "refineSplits": 8
+        },
+        {
+          "name": "positive",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        },
+        {
+          "name": "selection",
+          "type": "cat",
+          "default": "cyclic",
+          "values": [
+              "cyclic",
+              "random"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sklearn.linear_model.Lasso",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "alpha",
+          "type": "double",
+          "default": 1.0,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.01,
+          "refineSplits": 8
+        },
+        {
+          "name": "fit_intercept",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "normalize",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        },
+        {
+          "name": "copy_X",
+          "type": "cat",
+          "values": [
+            "True"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "max_iter",
+          "type": "int",
+          "default": 1000,
+          "min": 1,
+          "max": 10000,
+          "minInterval": 20,
+          "refineSplits": 8
+        },
+        {
+          "name": "tol",
+          "type": "double",
+          "default": 0.0001,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.0005,
+          "refineSplits": 8
+        },
+        {
+          "name": "positive",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        },
+        {
+          "name": "selection",
+          "type": "cat",
+          "default": "cyclic",
+          "values": [
+              "cyclic",
+              "random"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sklearn.linear_model.LassoLars",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "alpha",
+          "type": "double",
+          "default": 1,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.01,
+          "refineSplits": 8
+        },
+        {
+          "name": "fit_intercept",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "normalize",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "max_iter",
+          "type": "int",
+          "default": 500,
+          "min": 1,
+          "max": 10000,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "copy_X",
+          "type": "cat",
+          "values": [
+            "True"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "fit_path",
+          "type": "cat",
+          "values": [
+            "True"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "positive",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        }
+      ]
+    },
+    {
+      "name": "sklearn.linear_model.OrthogonalMatchingPursuit",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "n_nonzero_coefs",
+          "type": "cat",
+          "values": [
+            "None",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "25",
+            "30",
+            "35",
+            "40",
+            "45",
+            "50",
+            "75",
+            "100"
+          ],
+          "default": "None"
+        },
+        {
+          "name": "tol",
+          "type": "cat",
+          "values": [
+            "None",
+            "0.0001",
+            "0.001",
+            "0.01",
+            "0.1",
+            "0.2",
+            "0.3",
+            "0.4",
+            "0.5",
+            "0.6",
+            "0.7",
+            "0.8",
+            "0.9",
+            "1.0",
+            "2.0",
+            "3.0",
+            "4.0",
+            "5.0"
+          ],
+          "default": "None"
+        },
+        {
+          "name": "fit_intercept",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "normalize",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        }
+      ]
+    },
+    {
+      "name": "sklearn.linear_model.ARDRegression",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "n_iter",
+          "type": "int",
+          "default": 300,
+          "min": 1,
+          "max": 3000,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "tol",
+          "type": "double",
+          "default": 0.001,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.001,
+          "refineSplits": 8
+        },
+        {
+          "name": "alpha_1",
+          "type": "double",
+          "default": 1e-06,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.00001,
+          "refineSplits": 8
+        },
+        {
+          "name": "alpha_2",
+          "type": "double",
+          "default": 1e-06,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.00001,
+          "refineSplits": 8
+        },
+        {
+          "name": "lambda_1",
+          "type": "double",
+          "default": 1e-06,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.00001,
+          "refineSplits": 8
+        },
+        {
+          "name": "lambda_2",
+          "type": "double",
+          "default": 1e-06,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.00001,
+          "refineSplits": 8
+        },
+        {
+          "name": "compute_score",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        },
+        {
+          "name": "threshold_lambda",
+          "type": "double",
+          "default": 10000.0,
+          "min": 50.0,
+          "max": 100000.0,
+          "minInterval": 50,
+          "refineSplits": 8
+        },
+        {
+          "name": "fit_intercept",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "normalize",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        },
+        {
+          "name": "copy_X",
+          "type": "cat",
+          "values": [
+            "True"
+          ],
+          "default": "True"
+        }
+      ]
+    },
+    {
+      "name": "sklearn.linear_model.BayesianRidge",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "n_iter",
+          "type": "int",
+          "default": 300,
+          "min": 1,
+          "max": 3000,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "tol",
+          "type": "double",
+          "default": 0.001,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.001,
+          "refineSplits": 8
+        },
+        {
+          "name": "alpha_1",
+          "type": "double",
+          "default": 1e-06,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.00001,
+          "refineSplits": 8
+        },
+        {
+          "name": "alpha_2",
+          "type": "double",
+          "default": 1e-06,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.00001,
+          "refineSplits": 8
+        },
+        {
+          "name": "lambda_1",
+          "type": "double",
+          "default": 1e-06,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.00001,
+          "refineSplits": 8
+        },
+        {
+          "name": "lambda_2",
+          "type": "double",
+          "default": 1e-06,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.00001,
+          "refineSplits": 8
+        },
+        {
+          "name": "compute_score",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        },
+        {
+          "name": "fit_intercept",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "normalize",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        },
+        {
+          "name": "copy_X",
+          "type": "cat",
+          "values": [
+            "True"
+          ],
+          "default": "True"
+        }
+      ]
+    },
+    {
+      "name": "sklearn.linear_model.HuberRegressor",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "epsilon",
+          "type": "double",
+          "default": 1.35,
+          "min": 1.0,
+          "max": 10,
+          "minInterval": 0.2,
+          "refineSplits": 8
+        },
+        {
+          "name": "max_iter",
+          "type": "int",
+          "default": 100,
+          "min": 1,
+          "max": 1000,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "alpha",
+          "type": "double",
+          "default": 0.0001,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "fit_intercept",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "tol",
+          "type": "double",
+          "default": 1e-5,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.00001,
+          "refineSplits": 8
+        }
+      ]
+    },
+    {
+      "name": "sklearn.linear_model.PassiveAggressiveRegressor",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "C",
+          "type": "double",
+          "default": 1.0,
+          "min": 0.0,
+          "max": 5.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "fit_intercept",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "max_iter",
+          "type": "int",
+          "default": 1000,
+          "min": 1,
+          "max": 10000,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "tol",
+          "type": "double",
+          "default": 0.001,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.001,
+          "refineSplits": 8
+        },
+        {
+          "name": "early_stopping",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        },
+        {
+          "name": "validation_fraction",
+          "type": "double",
+          "default": 0.1,
+          "min": 0.01,
+          "max": 0.99,
+          "minInterval": 0.05,
+          "refineSplits": 8
+        },
+        {
+          "name": "n_iter_no_change",
+          "type": "int",
+          "default": 5,
+          "min": 1,
+          "max": 100,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "shuffle",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        },
+        {
+          "name": "loss",
+          "type": "cat",
+          "default": "epsilon_insensitive",
+          "values": [
+            "epsilon_insensitive",
+            "squared_epsilon_insensitive"
+          ]
+        },
+        {
+          "name": "epsilon",
+          "type": "double",
+          "default": 0.1,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.01,
+          "refineSplits": 8
+        },
+        {
+          "name": "average",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "False"
+        }
+      ]
+    },
+    {
+      "name": "sklearn.neighbors.KNeighborsRegressor",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "n_neighbors",
+          "type": "int",
+          "default": 5,
+          "min": 1,
+          "max": 15,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "weights",
+          "type": "cat",
+          "values": [
+            "uniform",
+            "distance"
+          ],
+          "default": "uniform"
+        },
+        {
+          "name": "algorithm",
+          "type": "cat",
+          "values": [
+            "auto",
+            "ball_tree",
+            "kd_tree",
+            "brute"
+          ],
+          "default": "auto"
+        },
+        {
+          "name": "leaf_size",
+          "type": "int",
+          "default": 30,
+          "min": 1,
+          "max": 100,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "p",
+          "type": "int",
+          "default": 2,
+          "min": 1,
+          "max": 5,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "metric",
+          "type": "cat",
+          "values": [
+            "minkowski",
+            "euclidean",
+            "manhattan"
+          ],
+          "default": "minkowski"
+        },
+        {
+          "name": "n_jobs",
+          "type": "cat",
+          "values": [
+            "1"
+          ],
+          "default": "1"
+        }
+      ]
+    },
+    {
+      "name": "sklearn.svm.LinearSVR",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "epsilon",
+          "type": "double",
+          "default": 0.0,
+          "min": 0.0,
+          "max": 3.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "tol",
+          "type": "double",
+          "default": 0.0001,
+          "min": 0.000000001,
+          "max": 1.0,
+          "minInterval": 0.001,
+          "refineSplits": 8
+        },
+        {
+          "name": "loss",
+          "type": "cat",
+          "values": [
+            "epsilon_insensitive",
+            "squared_epsilon_insensitive"
+          ],
+          "default": "epsilon_insensitive"
+        },
+        {
+          "name": "fit_intercept",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "intercept_scaling",
+          "type": "double",
+          "default": 1.0,
+          "min": 0.0001,
+          "max": 3.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "max_iter",
+          "type": "int",
+          "default": 1000,
+          "min": 1,
+          "max": 10000,
+          "minInterval": 20,
+          "refineSplits": 8
+        }
+      ]
+    },
+    {
+      "name": "sklearn.svm.NuSVR",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "nu",
+          "type": "double",
+          "default": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "C",
+          "type": "double",
+          "default": 1.0,
+          "min": 0.01,
+          "max": 5.0,
+          "minInterval": 0.2,
+          "refineSplits": 8
+        },
+        {
+          "name": "kernel",
+          "type": "cat",
+          "values": [
+            "linear",
+            "poly",
+            "rbf",
+            "sigmoid"
+          ],
+          "default": "rbf"
+        },
+        {
+          "name": "degree",
+          "type": "int",
+          "default": 3,
+          "min": 1,
+          "max": 6,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "gamma",
+          "type": "cat",
+          "values": [
+            "auto",
+            "0.1",
+            "0.2",
+            "0.3",
+            "0.4",
+            "0.5",
+            "0.6",
+            "0.7",
+            "0.8",
+            "0.9",
+            "1.0",
+            "1.1",
+            "1.2",
+            "1.3",
+            "1.4",
+            "1.5",
+            "1.6",
+            "1.7",
+            "1.8",
+            "1.9",
+            "2.0"
+          ],
+          "default": "auto"
+        },
+        {
+          "name": "coef0",
+          "type": "double",
+          "default": 0.0,
+          "min": 0.0,
+          "max": 2.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "shrinking",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "tol",
+          "type": "double",
+          "default": 0.001,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.005,
+          "refineSplits": 8
+        },
+        {
+          "name": "max_iter",
+          "type": "int",
+          "default": -1,
+          "min": -1,
+          "max": 10000,
+          "minInterval": 20,
+          "refineSplits": 8
+        }
+      ]
+    },
+    {
+      "name": "sklearn.svm.SVR",
+      "providedInterface": [
+        "BasicRegressor",
+        "BaseLearner"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "kernel",
+          "type": "cat",
+          "values": [
+            "linear",
+            "poly",
+            "rbf",
+            "sigmoid"
+          ],
+          "default": "rbf"
+        },
+        {
+          "name": "degree",
+          "type": "int",
+          "default": 3,
+          "min": 1,
+          "max": 6,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "gamma",
+          "type": "cat",
+          "values": [
+            "auto",
+            "0.1",
+            "0.2",
+            "0.3",
+            "0.4",
+            "0.5",
+            "0.6",
+            "0.7",
+            "0.8",
+            "0.9",
+            "1.0",
+            "1.1",
+            "1.2",
+            "1.3",
+            "1.4",
+            "1.5",
+            "1.6",
+            "1.7",
+            "1.8",
+            "1.9",
+            "2.0"
+          ],
+          "default": "auto"
+        },
+        {
+          "name": "coef0",
+          "type": "double",
+          "default": 0.0,
+          "min": 0.0,
+          "max": 2.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "tol",
+          "type": "double",
+          "default": 0.001,
+          "min": 0.0,
+          "max": 1.0,
+          "minInterval": 0.005,
+          "refineSplits": 8
+        },
+        {
+          "name": "C",
+          "type": "double",
+          "default": 1.0,
+          "min": 0.0,
+          "max": 5.0,
+          "minInterval": 0.1,
+          "refineSplits": 8
+        },
+        {
+          "name": "shrinking",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ],
+          "default": "True"
+        },
+        {
+          "name": "max_iter",
+          "type": "int",
+          "default": -1,
+          "min": -1,
+          "max": 10000,
+          "minInterval": 20,
+          "refineSplits": 8
+        }
+      ]
+    }
+  ]
+}

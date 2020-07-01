@@ -10,7 +10,7 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.exception.NoneFi
  * @author Helen Beierling
  *         This class cuts an instance or a set of instances into a number of smaller instances which are
  *         typically saved in an matrix per instance and the matrices in a list.
- *         c.f. p.1508 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
+ *         c.f. p.1508 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schaefer
  */
 public class SlidingWindowBuilder implements IFilter {
 
@@ -39,7 +39,7 @@ public class SlidingWindowBuilder implements IFilter {
 		}
 
 		if (!this.fitted) {
-			throw new NoneFittedFilterExeception("The fit mehtod must be called before transformning");
+			throw new NoneFittedFilterExeception("The fit method must be called before transformning");
 		}
 
 		return new TimeSeriesDataset2(this.blownUpDataset, null, null);

@@ -36,6 +36,7 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 
 	/**
 	 * C'tor taking only an input as a parameter.
+	 *
 	 * @param input The input of the algorithm.
 	 */
 	public AOptimizer(final I input) {
@@ -44,6 +45,7 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 
 	/**
 	 * C'tor taking a configuration of the algorithm and an input for the algorithm as arguments.
+	 *
 	 * @param config The parameterization of the algorithm.
 	 * @param input The input to the algorithm (the problem to solve).
 	 */
@@ -60,6 +62,11 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	protected boolean updateBestSeenSolution(final O candidate) {
 		assert (candidate != null) : "Cannot update best solution with null.";
 		if (this.bestSeenSolution == null || (candidate.getScore() != null && candidate.getScore().compareTo(this.bestSeenSolution.getScore()) < 0)) {
+			if (this.bestSeenSolution != null) {
+				this.logger.info("New best solution found with score={} (old={})", candidate.getScore(), this.bestSeenSolution.getScore());
+			} else {
+				this.logger.info("First best solution found with score={} ", candidate.getScore());
+			}
 			this.bestSeenSolution = candidate;
 			return true;
 		}

@@ -230,6 +230,7 @@ public class KVStoreStatisticsUtil {
 				} else {
 					otherStore.put(output, ESignificanceTestResult.TIE);
 				}
+
 			}
 		}
 		return groupedCollection;
@@ -444,16 +445,20 @@ public class KVStoreStatisticsUtil {
 		}
 		return averageRanks;
 	}
+  
+	public static void bestWilcoxonSignedRankTest(final KVStoreCollection collection, final String setting, final String sampleID, final String pairingIndices, final String sampledValues, final String output) {
+		String bestField = output + "_best";
+		KVStoreCollectionOneLayerPartition bestPart = new KVStoreCollectionOneLayerPartition(setting, collection);
+		bestPart.forEach(x -> best(x.getValue(), setting, sampleID, sampledValues, bestField));
 
-	public static void bestWilcoxonSignedRankTest(final KVStoreCollection collection, final String setting, final String sampleID, final String sampledValues, final String output) {
 		KVStoreCollectionTwoLayerPartition partition = new KVStoreCollectionTwoLayerPartition(setting, sampleID, collection);
 
 		for (Entry<String, Map<String, KVStoreCollection>> partitionEntry : partition) {
-			Optional<Entry<String, KVStoreCollection>> best = partitionEntry.getValue().entrySet().stream().filter(x -> x.getValue().get(0).getAsBoolean("best")).findFirst();
+			Optional<Entry<String, KVStoreCollection>> best = partitionEntry.getValue().entrySet().stream().filter(x -> x.getValue().get(0).getAsBoolean(bestField)).findFirst();
 			if (best.isPresent()) {
 				KVStoreCollection merged = new KVStoreCollection();
 				partitionEntry.getValue().values().forEach(merged::addAll);
-				KVStoreStatisticsUtil.wilcoxonSignedRankTest(merged, setting, sampleID, "split", sampledValues, best.get().getKey(), "sig");
+				KVStoreStatisticsUtil.wilcoxonSignedRankTest(merged, setting, sampleID, pairingIndices, sampledValues, best.get().getKey(), output);
 			}
 		}
 	}

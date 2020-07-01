@@ -50,7 +50,7 @@ public class ExperimentSetAnalyzer {
 	public void reloadConfiguration() {
 
 		/* reload configuration */
-		//FIXME this reload yields empty config object.
+		// FIXME this reload yields empty config object.
 //		this.config.reload();
 
 		/* erase laze fields */
@@ -64,7 +64,7 @@ public class ExperimentSetAnalyzer {
 			/* create map of possible values for each key field */
 			this.numExperimentsTotal = 1;
 			this.valuesForKeyFieldsInConfig = new HashMap<>();
-			for (String key: this.keyFields) {
+			for (String key : this.keyFields) {
 				String propertyVals = this.config.removeProperty(key);
 				if (propertyVals == null) {
 					throw new IllegalArgumentException("Invalid experiment set configuration! No property values defined for key field \"" + key + "\"");
@@ -154,7 +154,7 @@ public class ExperimentSetAnalyzer {
 					try {
 						constraints.add((Predicate<List<String>>) Class.forName(p.substring(PROTOCOL_JAVA.length()).trim()).getConstructor().newInstance());
 					} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-						this.logger.error("Error in loading constraint {}: {}", p, e);
+						this.logger.error("Error in loading constraint {}.", p, e);
 					}
 				}
 			}

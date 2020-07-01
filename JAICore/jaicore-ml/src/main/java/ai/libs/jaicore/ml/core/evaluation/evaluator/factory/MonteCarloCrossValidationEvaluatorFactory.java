@@ -29,7 +29,7 @@ public class MonteCarloCrossValidationEvaluatorFactory extends AMonteCarloCrossV
 			throw new IllegalStateException("Cannot create MCCV evaluator due to invalid number of repeats " + this.getNumMCIterations() + ". Set number of repeats to a positive value!");
 		}
 		IAggregatedPredictionPerformanceMeasure<?, ?> aggMeasure = new AveragingPredictionPerformanceMeasure<>(this.metric);
-		return new MonteCarloCrossValidationEvaluator(this.data, this.getNumMCIterations(), this.getTrainFoldSize(), this.random, aggMeasure);
+		return new MonteCarloCrossValidationEvaluator(this.getCacheSplitSets(), this.data, this.getNumMCIterations(), this.getTrainFoldSize(), this.random, aggMeasure);
 	}
 
 	@Override

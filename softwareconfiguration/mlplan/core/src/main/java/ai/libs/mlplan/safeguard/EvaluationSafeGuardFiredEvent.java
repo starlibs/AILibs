@@ -20,7 +20,7 @@ public class EvaluationSafeGuardFiredEvent implements IEvent {
 
 	@Override
 	public long getTimestamp() {
-		return 0;
+		return this.timestamp;
 	}
 
 }

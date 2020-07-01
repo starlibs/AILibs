@@ -524,7 +524,7 @@ public class Util {
 		for (Interval proposedRefinement : proposedRefinements) {
 			double epsilon = 1E-7;
 			assert proposedRefinement.getInf() + epsilon >= inf && proposedRefinement.getSup() <= sup + epsilon : "The proposed refinement [" + proposedRefinement.getInf() + ", " + proposedRefinement.getSup()
-			+ "] is not a sub-interval of [" + inf + ", " + sup + "].";
+					+ "] is not a sub-interval of [" + inf + ", " + sup + "].";
 			if (proposedRefinement.equals(interval)) {
 				throw new IllegalStateException("No real refinement! Intervals are identical.");
 			}
