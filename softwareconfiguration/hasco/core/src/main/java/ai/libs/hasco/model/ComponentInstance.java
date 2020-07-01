@@ -1,6 +1,7 @@
 package ai.libs.hasco.model;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,7 +29,12 @@ import ai.libs.jaicore.logging.ToJSONStringUtil;
  *
  */
 @JsonPropertyOrder(alphabetic = true)
-public class ComponentInstance {
+public class ComponentInstance implements Serializable {
+
+	/**
+	 * Auto-generated serial version UID.
+	 */
+	private static final long serialVersionUID = 714378153827839502L;
 
 	/* The component which serves as a kind of "type". */
 	private final Component component;

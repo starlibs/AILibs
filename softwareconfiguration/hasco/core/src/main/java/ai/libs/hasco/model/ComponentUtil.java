@@ -85,6 +85,91 @@ public class ComponentUtil {
 		return ci;
 	}
 
+	public static ComponentInstance minParameterizationOfComponent(final Component component) {
+		ComponentInstance ci = null;
+		do {
+			Map<String, String> parameterValues = new HashMap<>();
+			for (Parameter p : component.getParameters()) {
+				if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
+					parameterValues.put(p.getName(), p.getDefaultValue() + "");
+				} else {
+					NumericParameterDomain numDomain = (NumericParameterDomain) p.getDefaultDomain();
+					if (numDomain.isInteger()) {
+						if ((int) (numDomain.getMax() - numDomain.getMin()) > 0) {
+							parameterValues.put(p.getName(), (int) numDomain.getMin() + "");
+						} else {
+							parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
+						}
+					} else {
+						parameterValues.put(p.getName(), numDomain.getMin() + "");
+					}
+				}
+			}
+			ci = componentInstanceWithNoRequiredInterfaces(component, parameterValues);
+		} while (!ComponentInstanceUtil.isValidComponentInstantiation(ci));
+		return ci;
+	}
+
+	public static ComponentInstance maxParameterizationOfComponent(final Component component) {
+		ComponentInstance ci;
+		do {
+			Map<String, String> parameterValues = new HashMap<>();
+			for (Parameter p : component.getParameters()) {
+				if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
+					parameterValues.put(p.getName(), p.getDefaultValue() + "");
+				} else {
+					NumericParameterDomain numDomain = (NumericParameterDomain) p.getDefaultDomain();
+					if (numDomain.isInteger()) {
+						if ((int) (numDomain.getMax() - numDomain.getMin()) > 0) {
+							parameterValues.put(p.getName(), (int) numDomain.getMax() + "");
+						} else {
+							parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
+						}
+					} else {
+						parameterValues.put(p.getName(), numDomain.getMax() + "");
+					}
+				}
+			}
+			ci = componentInstanceWithNoRequiredInterfaces(component, parameterValues);
+		} while (!ComponentInstanceUtil.isValidComponentInstantiation(ci));
+		return ci;
+	}
+
+	public static List<ComponentInstance> categoricalParameterizationsOfComponent(final Component component) {
+		Map<String, String> parameterValues = new HashMap<>();
+		List<ComponentInstance> parameterizedInstances = new ArrayList<>();
+		List<Parameter> categoricalParameters = new ArrayList<>();
+		int maxParameterIndex = 0;
+		for (Parameter p : component.getParameters()) {
+			if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
+				String[] values = ((CategoricalParameterDomain) p.getDefaultDomain()).getValues();
+				if (values.length > maxParameterIndex) {
+					maxParameterIndex = values.length;
+				}
+				categoricalParameters.add(p);
+			} else {
+				parameterValues.put(p.getName(), p.getDefaultValue() + "");
+			}
+		}
+		for (int parameterIndex = 0; parameterIndex < maxParameterIndex; parameterIndex++) {
+			Map<String, String> categoricalParameterValues = new HashMap<>();
+			for (int i = 0; i < categoricalParameters.size(); i++) {
+				String parameterValue = null;
+				String[] values = ((CategoricalParameterDomain) categoricalParameters.get(i).getDefaultDomain()).getValues();
+				if (parameterIndex < values.length) {
+					parameterValue = values[parameterIndex];
+				} else {
+					parameterValue = categoricalParameters.get(i).getDefaultValue() + "";
+				}
+				categoricalParameterValues.put(categoricalParameters.get(i).getName(), parameterValue);
+			}
+			categoricalParameterValues.putAll(parameterValues);
+			parameterizedInstances.add(new ComponentInstance(component, categoricalParameterValues, new HashMap<>()));
+		}
+
+		return parameterizedInstances;
+	}
+
 	private static ComponentInstance componentInstanceWithNoRequiredInterfaces(final Component component, final Map<String, String> parameterValues) {
 		return new ComponentInstance(component, parameterValues, new HashMap<>());
 	}
@@ -295,13 +380,13 @@ public class ComponentUtil {
 		affectedComponents.forEach(x -> x.getRequiredInterfaces().values().stream().map(interfaceName -> getAffectedComponents(components, interfaceName)).forEach(recursiveResolvedComps::addAll));
 		affectedComponents.addAll(recursiveResolvedComps);
 		return affectedComponents;
-  }
+	}
 
-  public static String getComponentInstanceAsComponentNames(final ComponentInstance instance) {
+	public static String getComponentInstanceAsComponentNames(final ComponentInstance instance) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(instance.getComponent().getName());
 		if (!instance.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-			sb.append("{").append(instance.getSatisfactionOfRequiredInterfaces().values().stream().map(x -> getComponentInstanceAsComponentNames(x)).collect(Collectors.joining(","))).append("}");
+			sb.append("{").append(instance.getSatisfactionOfRequiredInterfaces().values().stream().map(ComponentUtil::getComponentInstanceAsComponentNames).collect(Collectors.joining(","))).append("}");
 		}
 		return sb.toString();
 	}

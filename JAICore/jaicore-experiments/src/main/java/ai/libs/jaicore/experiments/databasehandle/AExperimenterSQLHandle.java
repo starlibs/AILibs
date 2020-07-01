@@ -51,6 +51,8 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	private static final String FIELD_EXCEPTION = "exception";
 	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
+	private static final String Q_AND = " AND ";
+
 	protected final IDatabaseAdapter adapter;
 	protected final String tablename;
 
@@ -159,12 +161,12 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	}
 
 	private String buildWhereClause(final Map<String, ?> map) {
-		return map.entrySet().stream().map(e -> "`" + e.getKey() + "` = '" + e.getValue().toString() + "'").collect(Collectors.joining(" AND "));
+		return map.entrySet().stream().map(e -> "`" + e.getKey() + "` = '" + e.getValue().toString() + "'").collect(Collectors.joining(Q_AND));
 	}
 
 	protected String getSQLPrefixForKeySelectQuery() {
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append("SELECT `" + FIELD_ID + "`, `" + FIELD_MEMORY_MAX + "`, `" + FIELD_NUMCPUS + "`, " + Arrays.stream(this.keyFields).map(k -> this.getDatabaseFieldnameForConfigEntry(k)).collect(Collectors.joining(", ")) + " FROM `");
+		queryStringSB.append("SELECT `" + FIELD_ID + "`, `" + FIELD_MEMORY_MAX + "`, `" + FIELD_NUMCPUS + "`, " + Arrays.stream(this.keyFields).map(this::getDatabaseFieldnameForConfigEntry).collect(Collectors.joining(", ")) + " FROM `");
 		queryStringSB.append(this.tablename);
 		queryStringSB.append("` ");
 		return queryStringSB.toString();
@@ -269,7 +271,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		queryStringSB.append(this.getSQLPrefixForSelectQuery());
 		queryStringSB.append("WHERE time_started IS NOT NULL");
 		if (!fieldFilter.isEmpty()) {
-			queryStringSB.append(" AND ");
+			queryStringSB.append(Q_AND);
 			queryStringSB.append(this.buildWhereClause(fieldFilter));
 		}
 		try {
@@ -287,11 +289,12 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	@Override
 	public List<ExperimentDBEntry> getFailedExperiments(final Map<String, Object> fieldFilter) throws ExperimentDBInteractionFailedException {
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append("SELECT " + FIELD_ID + ", " + FIELD_MEMORY_MAX + ", " + FIELD_NUMCPUS + ", " + Arrays.stream(this.keyFields).map(k -> this.analyzer.getNameTypeSplitForAttribute(k).getX()).collect(Collectors.joining(", ")) + ", exception");
+		queryStringSB.append(
+				"SELECT " + FIELD_ID + ", " + FIELD_MEMORY_MAX + ", " + FIELD_NUMCPUS + ", " + Arrays.stream(this.keyFields).map(k -> this.analyzer.getNameTypeSplitForAttribute(k).getX()).collect(Collectors.joining(", ")) + ", exception");
 		queryStringSB.append(" FROM `" + this.tablename + "`");
 		queryStringSB.append("WHERE exception IS NOT NULL");
 		if (!fieldFilter.isEmpty()) {
-			queryStringSB.append(" AND ");
+			queryStringSB.append(Q_AND);
 			queryStringSB.append(this.buildWhereClause(fieldFilter));
 		}
 		try {
@@ -375,7 +378,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		List<String> keys = new ArrayList<>();
 		keys.add(FIELD_MEMORY_MAX);
 		keys.add(FIELD_NUMCPUS);
-		keys.addAll(Arrays.stream(this.keyFields).map(k -> this.getDatabaseFieldnameForConfigEntry(k)).collect(Collectors.toList()));
+		keys.addAll(Arrays.stream(this.keyFields).map(this::getDatabaseFieldnameForConfigEntry).collect(Collectors.toList()));
 
 		List<List<?>> values = new ArrayList<>();
 		for (Experiment exp : experiments) {

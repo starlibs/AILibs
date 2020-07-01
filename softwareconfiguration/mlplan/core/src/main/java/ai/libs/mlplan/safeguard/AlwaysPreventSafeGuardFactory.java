@@ -7,6 +7,7 @@ import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
 public class AlwaysPreventSafeGuardFactory implements IEvaluationSafeGuardFactory {
 
 	public AlwaysPreventSafeGuardFactory() {
+		// nothing to do here
 	}
 
 	@Override

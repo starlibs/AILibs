@@ -10,6 +10,10 @@ public class AreaUnderROCCurve extends AHomogeneousPredictionPerformanceMeasure<
 		this.positiveClass = positiveClass;
 	}
 
+	public Object getPositiveClass() {
+		return this.positiveClass;
+	}
+
 	@Override
 	public double score(final List<?> expected, final List<?> actual) {
 		throw new UnsupportedOperationException("AUROC cannot be implemented as we do not have any class probabilities available");

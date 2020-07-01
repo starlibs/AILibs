@@ -4,6 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
+
+import ai.libs.jaicore.processes.OS;
 import ai.libs.jaicore.processes.ProcessUtil;
 
 /**
@@ -14,29 +20,65 @@ import ai.libs.jaicore.processes.ProcessUtil;
  */
 public abstract class AProcessListener implements IProcessListener {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(AProcessListener.class);
+
+	private boolean listenForPIDFromProcess = false;
+	private int processIDObtainedFromListening = -1;
+
+	public AProcessListener() {
+
+	}
+
+	public AProcessListener(final boolean listenForPIDFromProcess) {
+		this.listenForPIDFromProcess = listenForPIDFromProcess;
+	}
+
 	@Override
 	public void listenTo(final Process process) throws IOException, InterruptedException {
-		try (BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+		try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
 			// While process is alive the output- and error stream is output.
 			while (process.isAlive()) {
 				if (Thread.currentThread().isInterrupted()) {
-					ProcessUtil.killProcess(process);
+					if (this.listenForPIDFromProcess && this.processIDObtainedFromListening > 0) {
+						ProcessUtil.killProcess(this.processIDObtainedFromListening);
+					} else {
+						ProcessUtil.killProcess(process);
+					}
 					throw new InterruptedException("Process execution was interrupted.");
 				}
 				String line;
-				while ((line = input.readLine()) != null) {
+				while (this.checkReady(inputReader) && (line = inputReader.readLine()) != null) {
+					this.handleProcessIDLine(line);
 					if (line.contains("import imp") || line.contains("imp module")) {
 						continue;
 					}
 					this.handleInput(line);
 				}
-				while ((line = error.readLine()) != null) {
+				while (this.checkReady(inputReader) && (line = errorReader.readLine()) != null) {
 					if (line.contains("import imp") || line.contains("imp module")) {
 						continue;
 					}
 					this.handleError(line);
 				}
 			}
+		}
+	}
+
+	private boolean checkReady(final BufferedReader inputReader) throws IOException {
+		if (ProcessUtil.getOS() == OS.MAC) {
+			return inputReader.ready();
+		} else {
+			return true;
+		}
+	}
+
+	private void handleProcessIDLine(final String line) {
+		if (this.listenForPIDFromProcess && !Strings.isNullOrEmpty(line)) {
+			if (line.startsWith("CURRENT_PID:")) {
+				this.processIDObtainedFromListening = Integer.parseInt(line.replace("CURRENT_PID:", "").trim());
+				LOGGER.debug("Listen to process id: {}", this.processIDObtainedFromListening);
+			}
+			LOGGER.trace("Other console output: {}", line);
 		}
 	}
 

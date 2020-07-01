@@ -49,7 +49,7 @@ public class ComponentInstanceUtil {
 		StringBuilder sb = new StringBuilder();
 		sb.append(ci.getComponent().getName());
 		if (!ci.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-			sb.append("(").append(ci.getSatisfactionOfRequiredInterfaces().values().stream().map(x -> toComponentNameString(x)).collect(Collectors.joining(", "))).append(")");
+			sb.append("(").append(ci.getSatisfactionOfRequiredInterfaces().values().stream().map(ComponentInstanceUtil::toComponentNameString).collect(Collectors.joining(", "))).append(")");
 		}
 		return sb.toString();
 	}
