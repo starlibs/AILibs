@@ -103,8 +103,9 @@ public class ArtificialExperiments {
         long startTime = System.currentTimeMillis();
         int threadCount = 20;
         int experimentsPerThread = 100;
+        List<Future> allJobs = new ArrayList<>();
         for (int i = 0; i < threadCount; i++) {
-            executorService.submit(() -> {
+            Future<?> job = executorService.submit(() -> {
                 try {
                     runMethod.accept(runner, experimentsPerThread);
                     runner.randomlyConductExperiments(experimentsPerThread);
@@ -112,9 +113,16 @@ public class ArtificialExperiments {
                     throw new RuntimeException(e);
                 }
             });
+            allJobs.add(job);
         }
+        allJobs.forEach(future -> {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.error("Error executing experiments in {} mode.", methodName, e);
+            }
+        });
         long runtimeDuration = System.currentTimeMillis() - startTime;
-
         logger.info("It took {} seconds to run {} experiments in {} mode.", TimeUnit.MILLISECONDS.toSeconds(runtimeDuration), threadCount * experimentsPerThread, methodName);
     }
 
@@ -133,7 +141,7 @@ public class ArtificialExperiments {
     public void testSequentialExperimentRuntime() throws ExperimentDBInteractionFailedException, InterruptedException {
         runExperiments((runner, count) -> {
             try {
-                runner.randomlyConductExperiments(count);
+                runner.sequentiallyConductExperiments(count);
             } catch (ExperimentDBInteractionFailedException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -169,9 +177,9 @@ public class ArtificialExperiments {
                     throw new RuntimeException(e);
                 }
                 long runtime = System.currentTimeMillis() - startedTime;
-                Assert.assertTrue(String.format("Starting a random experiment should should take less than 500 ms but took %d",
+                Assert.assertTrue(String.format("Starting a random experiment should should take less than 1000 ms but took %d",
                         runtime),
-                        runtime < 500);
+                        runtime < 1000);
                 Assert.assertTrue(experimentDBEntry.isPresent());
                 try {
                     Thread.sleep(new Random().nextInt(10));
