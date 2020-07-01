@@ -2,27 +2,26 @@ package ai.libs.jaicore.search.exampleproblems.npuzzle.standard;
 
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 
-import ai.libs.jaicore.problems.npuzzle.NPuzzleState;
+import ai.libs.jaicore.problems.npuzzle.NPuzzleProblem;
 
-public class NPuzzleGoalPredicate implements INodeGoalTester<NPuzzleState, String> {
+public class NPuzzleGoalPredicate implements INodeGoalTester<NPuzzleProblem, String> {
 
-	private final int dimension;
-
-	public NPuzzleGoalPredicate(final int dimension) {
+	public NPuzzleGoalPredicate() {
 		super();
-		this.dimension = dimension;
 	}
 
 	@Override
-	public boolean isGoal(final NPuzzleState n) {
+	public boolean isGoal(final NPuzzleProblem n) {
 		int[][] board = n.getBoard();
-		if (board[this.dimension - 1][this.dimension - 1] != 0) {
+		int height = board.length;
+		int width = board[0].length;
+		if (board[0][0] != 0) {
 			return false;
 		} else {
-			int sol = 1;
-			for (int i = 0; i < this.dimension; i++) {
-				for (int j = 0; j < this.dimension; j++) {
-					if (i != this.dimension - 1 && j != this.dimension - 1 && board[i][j] != sol) {
+			int sol = 0;
+			for (int c = 0; c < width; c++) {
+				for (int r = 0; r < height; r++) {
+					if (board[r][c] != sol) {
 						return false;
 					}
 					sol++;

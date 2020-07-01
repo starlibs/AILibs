@@ -27,6 +27,8 @@ import org.api4.java.common.attributedobjects.GetPropertyFailedException;
 import org.api4.java.common.attributedobjects.IGetter;
 
 import ai.libs.jaicore.basic.MathExt;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 
 /**
  * Utility class for sets.
@@ -38,6 +40,18 @@ public class SetUtil {
 
 	private SetUtil() {
 		// prevent instantiation of this util class
+	}
+
+	public static IntList range(final int max) {
+		return range(0, max);
+	}
+
+	public static IntList range(final int min, final int max) {
+		IntList list = new IntArrayList(max - min + 1);
+		for (int i = min; i <= max; i++) {
+			list.add(i);
+		}
+		return list;
 	}
 
 	/* BASIC SET OPERATIONS */
