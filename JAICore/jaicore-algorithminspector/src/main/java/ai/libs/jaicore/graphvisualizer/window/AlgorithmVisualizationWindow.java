@@ -209,9 +209,6 @@ public class AlgorithmVisualizationWindow implements Runnable {
 
 		this.pluginTabPane = new TabPane();
 		centerSplitLayout.getItems().add(this.pluginTabPane);
-		if (this.mainPlugin != null) {
-			centerSplitLayout.getItems().add(this.mainPlugin.getView().getNode());
-		}
 
 		this.rootLayout.setCenter(centerSplitLayout);
 	}
@@ -228,7 +225,7 @@ public class AlgorithmVisualizationWindow implements Runnable {
 
 	private void addPluginToTabList(final IGUIPlugin plugin) {
 		Tab pluginTab = new Tab(plugin.getView().getTitle(), plugin.getView().getNode());
-		this.pluginTabPane.getTabs().add(pluginTab);
+		Platform.runLater(() -> this.pluginTabPane.getTabs().add(pluginTab));
 	}
 
 	/**

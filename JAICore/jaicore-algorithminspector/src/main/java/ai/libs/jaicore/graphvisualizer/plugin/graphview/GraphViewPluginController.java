@@ -14,13 +14,13 @@ import ai.libs.jaicore.graphvisualizer.events.graph.NodeRemovedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import ai.libs.jaicore.graphvisualizer.events.gui.GUIEvent;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginController;
+import ai.libs.jaicore.graphvisualizer.plugin.IGUIMainPluginController;
 import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfo;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
-public class GraphViewPluginController implements IGUIPluginController, ILoggingCustomizable {
+public class GraphViewPluginController implements IGUIMainPluginController, ILoggingCustomizable {
 
 	private GraphViewPluginModel model;
 	private Logger logger = LoggerFactory.getLogger(GraphViewPluginController.class);

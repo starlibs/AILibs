@@ -24,12 +24,12 @@ import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginModel;
 
 public class GraphViewPluginModel implements IGUIPluginModel, ILoggingCustomizable {
 
-	private Logger logger= LoggerFactory.getLogger(GraphViewPluginModel.class);
+	private Logger logger = LoggerFactory.getLogger(GraphViewPluginModel.class);
 
-	private static final String DEF_RES_STYLESHEET_PATH = "searchgraph.css";
+	private static final String DEFAULT_RESSOURCE_STYLESHEET_PATH = "searchgraph.css";
 	private static final String STYLESHEET_PATH = "conf/searchgraph.css";
 
-	private static final File DEF_STYLESHEET = FileUtil.getExistingFileWithHighestPriority(DEF_RES_STYLESHEET_PATH, STYLESHEET_PATH);
+	private static final File DEFAULT_STYLESHEET_FILE = FileUtil.getExistingFileWithHighestPriority(DEFAULT_RESSOURCE_STYLESHEET_PATH, STYLESHEET_PATH);
 
 	private final AtomicInteger nodeIdCounter = new AtomicInteger(0);
 
@@ -42,10 +42,10 @@ public class GraphViewPluginModel implements IGUIPluginModel, ILoggingCustomizab
 	private ConcurrentMap<Node, Set<Edge>> nodeToConnectedEdgesMap;
 
 	public GraphViewPluginModel(final GraphViewPluginView view) {
-		this(view, DEF_STYLESHEET);
+		this(view, DEFAULT_STYLESHEET_FILE);
 	}
 
-	public GraphViewPluginModel(final GraphViewPluginView view, final File searchGraphCSSPath) {
+	private GraphViewPluginModel(final GraphViewPluginView view, final File searchGraphCSSPath) {
 		this.view = view;
 		this.searchGraphNodesToViewGraphNodesMap = new ConcurrentHashMap<>();
 		this.viewGraphNodesToSearchGraphNodesMap = new ConcurrentHashMap<>();
@@ -65,7 +65,7 @@ public class GraphViewPluginModel implements IGUIPluginModel, ILoggingCustomizab
 	}
 
 	public synchronized void addNode(final String node, final List<Object> predecessorNodes, final String typeOfNode) throws ViewGraphManipulationException {
-		try  {
+		try {
 			this.logger.debug("Adding node with external id {}", node);
 			Node viewNode = this.graph.addNode(String.valueOf(this.nodeIdCounter.getAndIncrement()));
 			this.registerNodeMapping(node, viewNode);
@@ -153,7 +153,11 @@ public class GraphViewPluginModel implements IGUIPluginModel, ILoggingCustomizab
 
 	public void reset() {
 		this.graph.clear();
-		this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+		try {
+			this.graph.setAttribute("ui.stylesheet", ResourceUtil.readResourceFileToString(DEFAULT_STYLESHEET_FILE.getPath()));
+		} catch (IOException e) {
+			this.logger.warn("Could not load css stylesheet for graph view plugin. Continue without stylesheet", e);
+		}
 		this.searchGraphNodesToViewGraphNodesMap.clear();
 		this.viewGraphNodesToSearchGraphNodesMap.clear();
 		this.nodeToConnectedEdgesMap.clear();

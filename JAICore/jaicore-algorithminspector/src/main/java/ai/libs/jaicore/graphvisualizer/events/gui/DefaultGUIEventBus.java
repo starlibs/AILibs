@@ -7,6 +7,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.graphvisualizer.plugin.IGUIMainPluginController;
+
 public class DefaultGUIEventBus implements GUIEventBus {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultGUIEventBus.class);
@@ -21,7 +23,11 @@ public class DefaultGUIEventBus implements GUIEventBus {
 
 	@Override
 	public void registerListener(GUIEventListener graphEventListener) {
-		guiEventListeners.add(graphEventListener);
+		if (graphEventListener instanceof IGUIMainPluginController) {
+			guiEventListeners.add(0, graphEventListener);
+		} else {
+			guiEventListeners.add(graphEventListener);
+		}
 	}
 
 	@Override
