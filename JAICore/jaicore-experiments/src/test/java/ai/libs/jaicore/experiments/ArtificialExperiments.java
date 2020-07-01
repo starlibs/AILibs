@@ -5,27 +5,20 @@ import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.*;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import org.aeonbits.owner.ConfigFactory;
-import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
-import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class ArtificialExperiment1 {
+public class ArtificialExperiments {
 
-    private final static Logger logger = LoggerFactory.getLogger(ArtificialExperiment1.class);
+    private final static Logger logger = LoggerFactory.getLogger(ArtificialExperiments.class);
 
     private final static IExperimentSetConfig EX_CONFIG = (IExperimentSetConfig) ConfigFactory
             .create(IExperimentSetConfig.class)
@@ -50,7 +43,7 @@ public class ArtificialExperiment1 {
 
     @Before
     public void prepareExecutor() {
-        executorService  = Executors.newFixedThreadPool(20);
+        executorService  = Executors.newFixedThreadPool(100);
     }
 
     @After
@@ -61,8 +54,8 @@ public class ArtificialExperiment1 {
         }
     }
 
-    @Test
-    public void prepareDB() throws Exception{
+    @BeforeClass
+    public static void prepareDB() throws Exception{
         ExperimenterMySQLHandle handle = new ExperimenterMySQLHandle(DB_CONFIG);
         // Delete the database:
         try {
@@ -78,7 +71,7 @@ public class ArtificialExperiment1 {
         // start 100 experiments:
         List<ExperimentDBEntry> startedExperiments = IntStream.range(0, 100).boxed().map(i -> {
             try {
-                return handle.startRandomExperiment().get();
+                return handle.startNextExperiment().get();
             } catch (ExperimentDBInteractionFailedException e) {
                 throw new RuntimeException(e);
             }
@@ -95,9 +88,7 @@ public class ArtificialExperiment1 {
     }
 
 
-
-    @Test
-    public void runExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
+    public void runExperiments(BiConsumer<ExperimentRunner, Integer> runMethod, String methodName) throws ExperimentDBInteractionFailedException, InterruptedException {
         ExperimenterMySQLHandle handle = new ExperimenterMySQLHandle(DB_CONFIG);
         IExperimentSetEvaluator evaluator =
                 (ExperimentDBEntry experimentEntry,
@@ -107,15 +98,53 @@ public class ArtificialExperiment1 {
                     result.put("R", "result");
                     processor.processResults(result);
                 };
+
         ExperimentRunner runner = new ExperimentRunner(EX_CONFIG, evaluator, handle);
-        runner.randomlyConductExperiments(100);
+        long startTime = System.currentTimeMillis();
+        int threadCount = 20;
+        int experimentsPerThread = 100;
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    runMethod.accept(runner, experimentsPerThread);
+                    runner.randomlyConductExperiments(experimentsPerThread);
+                } catch (ExperimentDBInteractionFailedException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+        long runtimeDuration = System.currentTimeMillis() - startTime;
+
+        logger.info("It took {} seconds to run {} experiments in {} mode.", TimeUnit.MILLISECONDS.toSeconds(runtimeDuration), threadCount * experimentsPerThread, methodName);
+    }
+
+    @Test
+    public void testRandomBatchExperimentRuntime() throws ExperimentDBInteractionFailedException, InterruptedException {
+        runExperiments((runner, count) -> {
+            try {
+                runner.randomlyConductExperiments(count);
+            } catch (ExperimentDBInteractionFailedException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }, "random batch");
+    }
+
+    @Test
+    public void testSequentialExperimentRuntime() throws ExperimentDBInteractionFailedException, InterruptedException {
+        runExperiments((runner, count) -> {
+            try {
+                runner.randomlyConductExperiments(count);
+            } catch (ExperimentDBInteractionFailedException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }, "sequential");
     }
 
     @Test
     public void testStart10RandomExperiments() throws Exception {
         ExperimenterMySQLHandle handle = localHandle.get();
         for (int i = 0; i < 10; i++) {
-            Optional<ExperimentDBEntry> experimentDBEntry = handle.startRandomExperiment();
+            Optional<ExperimentDBEntry> experimentDBEntry = handle.startNextExperiment();
             Assert.assertTrue("There should be a started experiment.", experimentDBEntry.isPresent());
         }
     }
@@ -124,7 +153,7 @@ public class ArtificialExperiment1 {
     public void testStartRandomExperimntsInParallel() throws Exception {
         // create a new handle for each thread:
         List<Future> allJobs = new ArrayList<>();
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 1000; i++) {
             // enqueue a pull request job.
             // THe job may fail if no random experiment could be started.
             // The job may also fail if it takes to long to start a new random experiment.
@@ -133,7 +162,7 @@ public class ArtificialExperiment1 {
                 Optional<ExperimentDBEntry> experimentDBEntry = null;
                 long startedTime = System.currentTimeMillis();
                 try {
-                    experimentDBEntry = handle.startRandomExperiment();
+                    experimentDBEntry = handle.startNextExperiment();
 
                 } catch (ExperimentDBInteractionFailedException e) {
                     logger.error("Error trying to get a random experiment.", e);

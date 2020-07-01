@@ -263,7 +263,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	}
 
 	@Override
-    public Optional<ExperimentDBEntry> startRandomExperiment() throws ExperimentDBInteractionFailedException {
+    public Optional<ExperimentDBEntry> startNextExperiment() throws ExperimentDBInteractionFailedException {
 	    if(cachedHost == null) {
 	        // failed to retrieve  host information.
             throw new ExperimentUpdateFailedException(new IllegalStateException("Host information is unavailable."));
@@ -276,32 +276,6 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
         sb.append("UPDATE ");
             sb.append(this.tablename);
         sb.append(" AS target_table ");
-        // now join on a SELECT of one random row from a pool of unstarted experiments
-//        sb.append("INNER JOIN " +
-//                "    (" +
-//                "        SELECT experiment_id" +
-//                "        FROM (" +
-//                "            SELECT * " +
-//                "            FROM " + tablename +
-//                "            WHERE time_started IS NULL " +
-//                "            LIMIT " + POOL_SUB_TABLE_LIMIT +
-//                "        ) AS limited_table " +
-//                "        ORDER BY RAND() " +
-//                "        LIMIT 1 " +
-//                "    ) AS single_row_table " +
-//                "ON " +
-//                "single_row_table.experiment_id = target_table.experiment_id ");
-
-//        sb.append(" JOIN " +
-//                "    (" +
-//                "        SELECT experiment_id" +
-//                "        FROM " + tablename +
-//                "        WHERE time_started IS NULL " +
-//                "        ORDER BY RAND() " +
-//                "        LIMIT 1 " +
-//                "    ) AS single_row_table " +
-//                "ON " +
-//                "single_row_table.experiment_id = target_table.experiment_id ");
 
         // Fields to be updated are `time_started`=(now) and `host`=(host name of this machine):
         sb.append("SET target_table.");

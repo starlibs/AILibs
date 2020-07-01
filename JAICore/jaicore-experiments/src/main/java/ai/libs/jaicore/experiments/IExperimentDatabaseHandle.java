@@ -101,7 +101,7 @@ public interface IExperimentDatabaseHandle {
 	public List<ExperimentDBEntry> getRandomOpenExperiments(int limit) throws ExperimentDBInteractionFailedException;
 
     /**
-     * Picks a random unstarted experiment, marks it as started and returns it.
+     * Picks an unstarted experiment, marks it as started and returns it.
      * These operations happen atomically, so if a experiment is returned, then ownership on it can be assumed.
      *
      * If no experiment is returned, i.e. an empty optional, then no experiment is remaining.
@@ -109,7 +109,7 @@ public interface IExperimentDatabaseHandle {
      * @return A started experiment if there are any left, or else an empty optional.
      * @throws ExperimentDBInteractionFailedException
      */
-	public Optional<ExperimentDBEntry> startRandomExperiment() throws ExperimentDBInteractionFailedException;
+	public Optional<ExperimentDBEntry> startNextExperiment() throws ExperimentDBInteractionFailedException;
 
 	/**
 	 * Returns a list of all experiments that are currently being conducted.

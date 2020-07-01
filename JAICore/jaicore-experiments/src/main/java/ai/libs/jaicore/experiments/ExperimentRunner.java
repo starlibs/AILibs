@@ -1,6 +1,7 @@
 package ai.libs.jaicore.experiments;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -93,6 +94,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			this.logger.info("Conduct experiment #{} with key values: {}", numberOfConductedExperiments + 1, exp.getExperiment().getValuesOfKeyFields());
 			Thread expThread = new Thread(() -> {
 				try {
+                    this.handle.startExperiment(exp);
 					this.conductExperiment(exp);
 				} catch (InterruptedException e) {
 					this.logger.info("Experiment interrupted.");
@@ -109,6 +111,48 @@ public class ExperimentRunner implements ILoggingCustomizable {
 
 		this.logger.info("Successfully finished {} experiments.", numberOfConductedExperiments);
 	}
+
+	public void sequentiallyConductExperiments(final int maxNumberOfExperiments) throws ExperimentDBInteractionFailedException, InterruptedException {
+        this.logger.info("Starting to run up to {} experiments.", maxNumberOfExperiments);
+
+        int numberOfConductedExperiments = 0;
+        while ((maxNumberOfExperiments <= 0 || numberOfConductedExperiments < maxNumberOfExperiments)) {
+            Optional<ExperimentDBEntry> nextExperiment = this.handle.startNextExperiment();
+            if(!nextExperiment.isPresent()) {
+                logger.info("After running {}/{} experiments, no more un-started experiments were found.", numberOfConductedExperiments, maxNumberOfExperiments);
+                break;
+            }
+
+            /* if we WOULD conduct more experiments but are interrupted, throw an exception */
+            if (Thread.interrupted()) {
+                this.logger.info("Experimenter Thread is interrupted, throwing InterruptedException.");
+                throw new InterruptedException();
+            }
+
+            /* get experiment, create experiment thread, run the thread, and wait for its termination
+             * the dedicated thread is created in order to avoid that interrupts on it cause the main thread
+             * to be interrupted. */
+            ExperimentDBEntry exp = nextExperiment.get();
+            this.checkExperimentValidity(exp.getExperiment());
+            this.logger.info("Conduct experiment #{} with key values: {}", numberOfConductedExperiments + 1, exp.getExperiment().getValuesOfKeyFields());
+            Thread expThread = new Thread(() -> {
+                try {
+                    this.conductExperiment(exp);
+                } catch (InterruptedException e) {
+                    this.logger.info("Experiment interrupted.");
+                    Thread.currentThread().interrupt(); // interrupt myself to make Sonar happy
+                } catch (ExperimentDBInteractionFailedException | ExperimentAlreadyStartedException e) {
+                    this.logger.error(LoggerUtil.getExceptionInfo(e));
+                }
+            });
+            expThread.start();
+            expThread.join();
+            numberOfConductedExperiments++;
+            this.logger.info("Finished experiment #{} with key values {}", numberOfConductedExperiments, exp.getExperiment().getValuesOfKeyFields());
+        }
+
+        this.logger.info("Successfully finished {} experiments.", numberOfConductedExperiments);
+    }
 
 	/**
 	 * Conducts an unbound number of randomly chosen experiments from the grid.
@@ -157,7 +201,6 @@ public class ExperimentRunner implements ILoggingCustomizable {
 				throw new IllegalStateException(
 						"Cannot conduct experiment " + expEntry.getExperiment() + ", because only " + Runtime.getRuntime().availableProcessors() + " CPU cores are available where declared is " + expEntry.getExperiment().getNumCPUs());
 			}
-			this.handle.startExperiment(expEntry);
 			this.evaluator.evaluate(expEntry, m -> {
 				try {
 					this.logger.info("Updating experiment with id {} with the following map: {}", expEntry.getId(), m);
@@ -169,7 +212,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 
 		} catch (ExperimentEvaluationFailedException e) {
 			error = e.getCause();
-		} catch (ExperimentFailurePredictionException e) {
+		} catch (ExperimentFailurePredictionException | RuntimeException e) {
 			error = e;
 		}
 		if (error != null) {
