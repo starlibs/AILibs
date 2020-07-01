@@ -26,9 +26,9 @@ public class UtilCompositionTest {
 		groundTruth.add(component4);
 		groundTruth.add(component2);
 		groundTruth.add(component3);
-		component1.addRequiredInterface("Interface1", "Interface1");
-		component1.addRequiredInterface("Interface2", "Interface2");
-		component2.addRequiredInterface("Interface1", "Interface1");
+		component1.addRequiredInterface("Interface1", "Interface1",0, 1);
+		component1.addRequiredInterface("Interface2", "Interface2",0, 1);
+		component2.addRequiredInterface("Interface1", "Interface1",0, 1);
 		Map<String,ComponentInstance> sat1 = new HashMap<String,ComponentInstance>();
 		Map<String,ComponentInstance> sat2 = new HashMap<String,ComponentInstance>();
 		Map<String,ComponentInstance> sat3 = new HashMap<String,ComponentInstance>();

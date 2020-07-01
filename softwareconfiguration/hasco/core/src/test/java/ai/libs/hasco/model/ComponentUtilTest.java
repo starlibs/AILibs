@@ -45,7 +45,7 @@ public class ComponentUtilTest {
 	public void testDefaultParameterization() {
 		for (Component component : components) {
 			L.info("Testing default parameterization for component {}", component.getName());
-			ComponentInstance ci = ComponentUtil.getDefaultParameterizationOfComponent(component);
+			ComponentInstance ci = ComponentUtil.defaultParameterizationOfComponent(component);
 			for (Parameter param : component.getParameters()) {
 				if (param.getDefaultDomain() instanceof NumericParameterDomain) {
 					double expected = (Double) param.getDefaultValue();
@@ -64,7 +64,7 @@ public class ComponentUtilTest {
 	public void testRandomParameterization() {
 		for (Component component : components) {
 			L.info("Testing random parameterization for component {}", component.getName());
-			ComponentInstance ci = ComponentUtil.getRandomParameterizationOfComponent(component, new Random());
+			ComponentInstance ci = ComponentUtil.randomParameterizationOfComponent(component, new Random());
 			for (Parameter param : component.getParameters()) {
 				if (param.getDefaultDomain() instanceof NumericParameterDomain) {
 					assertTrue("Value for parameter " + param.getName() + " is not a correct value of its domain.", ((NumericParameterDomain) param.getDefaultDomain()).contains(Double.valueOf(ci.getParameterValue(param.getName()))));

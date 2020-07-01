@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -37,8 +36,6 @@ public class ComponentInstance {
 	private final Map<String, String> parameterValues;
 	private final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces;
 
-	private final Map<String, String> annotations = new HashMap<>();
-
 	@SuppressWarnings("unused")
 	private ComponentInstance() {
 		// for serialization purposes
@@ -52,7 +49,6 @@ public class ComponentInstance {
 		this.parameterValues = new HashMap<>(other.parameterValues);
 		this.satisfactionOfRequiredInterfaces = new HashMap<>();
 		other.satisfactionOfRequiredInterfaces.entrySet().forEach(x -> this.satisfactionOfRequiredInterfaces.put(x.getKey(), new ComponentInstance(x.getValue())));
-		other.annotations.entrySet().forEach(x -> this.annotations.put(x.getKey(), x.getValue()));
 	}
 
 	/**
@@ -184,7 +180,7 @@ public class ComponentInstance {
 		int n = path.size();
 		for (; i < n; i++) {
 			Pair<String, String> selection = path.get(i);
-			if (!current.getComponent().getRequiredInterfaces().containsKey(selection.getX())) {
+			if (!current.getComponent().getRequiredInterfaceIds().contains(selection.getX())) {
 				throw new IllegalArgumentException("Invalid path restriction " + path + ": " + selection.getX() + " is not a required interface of " + current.getComponent().getName());
 			}
 			ComponentInstance instanceChosenForRequiredInterface = current.getSatisfactionOfRequiredInterfaces().get(selection.getX());
@@ -280,44 +276,4 @@ public class ComponentInstance {
 		return sb.toString();
 	}
 
-	/**
-	 * Add an annotation to this component instance.
-	 * @param key The key of how to address this annotation.
-	 * @param annotation The annotation value.
-	 */
-	public void putAnnotation(final String key, final String annotation) {
-		this.annotations.put(key, annotation);
-	}
-
-	/**
-	 * Retrieve an annotation by its key.
-	 * @param key The key for which to retrieve the annotation.
-	 * @return The annotation value.
-	 */
-	public String getAnnotation(final String key) {
-		return this.annotations.get(key);
-	}
-
-	public void appendAnnotation(final String key, final String annotation) {
-		if (this.annotations.containsKey(key)) {
-			this.annotations.put(key, this.annotations.get(key) + annotation);
-		} else {
-			this.annotations.put(key, annotation);
-		}
-	}
-
-	public boolean isDefaultParametrized() {
-		for (Entry<String, String> paramEntry : this.parameterValues.entrySet()) {
-			Parameter p = this.component.getParameterWithName(paramEntry.getKey());
-			if ((p.isNumeric() && (double) p.getDefaultValue() != Double.parseDouble(paramEntry.getValue())) || (p.isCategorical() && !p.getDefaultValue().toString().equals(paramEntry.getValue()))) {
-				return false;
-			}
-		}
-		for (ComponentInstance ci : this.satisfactionOfRequiredInterfaces.values()) {
-			if (!ci.isDefaultParametrized()) {
-				return false;
-			}
-		}
-		return true;
-	}
 }
