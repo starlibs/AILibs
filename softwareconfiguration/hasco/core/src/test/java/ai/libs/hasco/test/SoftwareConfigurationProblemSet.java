@@ -11,7 +11,7 @@ import ai.libs.softwareconfiguration.serialization.UnresolvableRequiredInterface
 
 public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<RefinementConfiguredSoftwareConfigurationProblem<Double>> {
 
-	private static final String PATH_TO_SOFTWARECONFIG = "../../model/";
+	private static final String PATH_TO_SOFTWARECONFIG = "../../../JAICore/jaicore-components/";
 	private final Random random = new Random(0);
 
 	public SoftwareConfigurationProblemSet() {

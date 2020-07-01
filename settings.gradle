@@ -5,6 +5,7 @@ def configPrefix = 'softwareconfiguration/'
 
 include ":JAICore:jaicore-basic"
 include ":JAICore:jaicore-algorithminspector"
+include ":JAICore:jaicore-components"
 include ":JAICore:jaicore-ea"
 include ":JAICore:jaicore-experiments"
 include ":JAICore:jaicore-logic"
@@ -19,9 +20,6 @@ include ":JAICore:jaicore-search"
 
 
 // Software-Configuration
-include 'softwareconfigurationmodels'
-project(":softwareconfigurationmodels").projectDir = new File(configPrefix,"model")
-
 include 'hasco-core'
 project(":hasco-core").projectDir = new File(configPrefix,"hasco/core")
 

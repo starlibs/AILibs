@@ -26,7 +26,7 @@ import ai.libs.softwareconfiguration.serialization.ComponentLoader;
 
 public class UtilTester {
 
-	private static final String pathToFiles = "../../model/";
+	private static final String pathToFiles = "../../../JAICore/jaicore-components/";
 
 	@Test
 	public void testComponentInstanceBuilder() throws Exception {

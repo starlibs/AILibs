@@ -19,10 +19,10 @@ uploadArchives {
       		}
 
       		pom.project {
-        		name 'HASCO'
+        		name 'jaicore-component'
         		packaging 'jar'
         		// optionally artifactId can be defined here 
-        		description 'HASCO is a framework for reducing configuration tasks (e.g. software system configuration or algorithm configuration) into an HTN planning problem. This can then in turn be reduced to a graph search problem that can be solved by any kind of standard graph search algorithm, e.g., breadth-first-search.'
+        		description 'jaicore-component is a collection of classes to model and serialize/unserialize component configuration problems.'
         		url 'https://libs.ai'
 
         		scm {

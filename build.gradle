@@ -231,7 +231,6 @@ task showDirs {
 
 
 dependencies{
-	compile project(":softwareconfigurationmodels")
 	compile project(":hasco-core")
 	compile project(":hasco-fanova")
 	//compile project(":autofe")
@@ -245,6 +244,7 @@ dependencies{
 	compile project(":mlplan-ext-bigdata")
 	compile project(":mlplan-full")
 	compile project(":JAICore:jaicore-basic")
+	compile project(":JAICore:jaicore-components")
 	compile (project(":JAICore:jaicore-ea")) {
 		exclude group: 'commons-cli'
 	}
