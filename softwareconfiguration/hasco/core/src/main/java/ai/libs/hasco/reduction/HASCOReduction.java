@@ -6,18 +6,23 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Supplier;
 
-import ai.libs.hasco.model.*;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.core.IHASCOPlanningReduction;
+import ai.libs.hasco.core.IsNotRefinable;
 import ai.libs.hasco.core.IsRefinementCompletedPredicate;
 import ai.libs.hasco.core.IsValidParameterRangeRefinementPredicate;
 import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.hasco.core.Util;
-import ai.libs.hasco.core.IsNotRefinable;
+import ai.libs.hasco.model.Component;
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.model.NumericParameterDomain;
+import ai.libs.hasco.model.Parameter;
+import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.logic.fol.structure.CNFFormula;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
@@ -87,7 +92,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 		Collection<String> ifaces = new HashSet<>();
 		for (Component c : this.components) {
 			ifaces.addAll(c.getProvidedInterfaces());
-			ifaces.addAll(c.getRequiredInterfaceNames());
+			ifaces.addAll(c.getRequiredInterfaces().values());
 		}
 		return ifaces;
 	}
@@ -130,7 +135,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 					standardKnowledgeAboutNewComponent.add(new Literal("val", valParams));
 				}
 				int k = 0;
-				for (String requiredInterfaceID : c.getRequiredInterfaceIds()) {
+				for (String requiredInterfaceID : c.getRequiredInterfaces().keySet()) {
 					String reqIntIdentifier = "sc" + (++k);
 					params.add(new VariableParam(reqIntIdentifier));
 
@@ -172,8 +177,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				VariableParam inputParam = new VariableParam("c1");
 				params.add(inputParam);
 				params.add(new VariableParam("c2"));
-				List<Interface> requiredInterfaces = c.getRequiredInterfaces();
-
+				Map<String, String> requiredInterfaces = c.getRequiredInterfaces();
 				List<Literal> network = new ArrayList<>();
 
 				StringBuilder refinementArgumentsSB = new StringBuilder();
@@ -185,16 +189,16 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 					}
 				}
 
-				for (int k = 1; k <= requiredInterfaces.size(); k++) {
+				for (int k = 1; k <= requiredInterfaces.entrySet().size(); k++) {
 					refinementArgumentsSB.append(",sc" + k);
 				}
 
 				int sc = 0;
 				network.add(new Literal(SATISFY_PREFIX + i + "With" + c.getName() + "(" + "c1" + "," + "c2" + refinementArgumentsSB.toString() + ")"));
-				for (Interface requiredInterface : requiredInterfaces) {
+				for (Entry<String, String> requiredInterface : requiredInterfaces.entrySet()) {
 					String paramName = "sc" + (++sc);
 					params.add(new VariableParam(paramName));
-					network.add(new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + requiredInterface.getName() + "(c2," + paramName + ")"));
+					network.add(new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + requiredInterface.getValue() + "(c2," + paramName + ")"));
 				}
 
 				refinementArgumentsSB = new StringBuilder();
@@ -262,6 +266,9 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 
 	/**
 	 * This method is a utility for everybody who wants to work on the graph obtained from HASCO's reduction but without using the search logic of HASCO
+	 *
+	 * @param plannerFactory
+	 * @return
 	 */
 	public <T, A> IGraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(final IHASCOPlanningReduction<T, A> transformer) {
 		return transformer.encodeProblem(this.getPlanningProblem()).getGraphGenerator();

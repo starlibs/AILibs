@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
@@ -18,7 +19,14 @@ import org.apache.commons.math3.geometry.partitioning.Region.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.model.*;
+import ai.libs.hasco.model.CategoricalParameterDomain;
+import ai.libs.hasco.model.Component;
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.model.Dependency;
+import ai.libs.hasco.model.IParameterDomain;
+import ai.libs.hasco.model.NumericParameterDomain;
+import ai.libs.hasco.model.Parameter;
+import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.logic.fol.structure.Literal;
@@ -195,10 +203,12 @@ public class Util {
 			String objectName = entry.getKey();
 			ComponentInstance object = entry.getValue();
 			for (Parameter p : object.getComponent().getParameters()) {
-
-				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName() + "!";
-				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined! State: "
-				+ state.stream().sorted().map(l -> "\n\t" + l).collect(Collectors.joining());
+				if (!parameterContainerMap.containsKey(objectName)) {
+					throw new IllegalStateException("No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName() + "!");
+				}
+				if (!parameterContainerMap.get(objectName).containsKey(p.getName())) {
+					throw new IllegalStateException("The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined! State: " + state.stream().sorted().map(l -> "\n\t" + l).collect(Collectors.joining()));
+				}
 				String paramContainerName = parameterContainerMap.get(objectName).get(p.getName());
 				if (overwrittenDatacontainers.contains(paramContainerName)) {
 					String assignedValue = parameterValues.get(paramContainerName);
@@ -258,8 +268,9 @@ public class Util {
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			components.add(curInstance);
-
-			List<String> requiredInterfaceNames = curInstance.getComponent().getRequiredInterfaceNames();
+			Map<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
+			// This set should be ordered
+			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
 				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
 				componentInstances.push(instance);
@@ -282,8 +293,9 @@ public class Util {
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			builder.append(curInstance.getComponent().getName());
-
-			List<String> requiredInterfaceNames = curInstance.getComponent().getRequiredInterfaceNames();
+			Map<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
+			// This set should be ordered
+			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
 				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
 				componentInstances.push(instance);
@@ -306,8 +318,9 @@ public class Util {
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			components.add(curInstance.getComponent());
-
-			List<String> requiredInterfaceNames = curInstance.getComponent().getRequiredInterfaceNames();
+			Map<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
+			// This set should be ordered
+			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
 				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
 				componentInstances.push(instance);
@@ -374,10 +387,9 @@ public class Util {
 				NumericParameterDomain np = (NumericParameterDomain) p.getDefaultDomain();
 				List<String> vals = SetUtil.unserializeList(assignedValue);
 				Interval interval = new Interval(Double.valueOf(vals.get(0)), Double.valueOf(vals.get(1)));
+				interpretedValue = String.valueOf(interval.checkPoint((double) p.getDefaultValue(), 0.001) == Location.OUTSIDE ? interval.getBarycenter() : (double) p.getDefaultValue());
 				if (np.isInteger()) {
-					interpretedValue = String.valueOf((int) Math.round(interval.getBarycenter()));
-				} else {
-					interpretedValue = String.valueOf(interval.checkPoint((double) p.getDefaultValue(), 0.001) == Location.INSIDE ? (double) p.getDefaultValue() : interval.getBarycenter());
+					interpretedValue = String.valueOf((int) Math.round(Double.parseDouble(interpretedValue)));
 				}
 			} else {
 				interpretedValue = assignedValue;

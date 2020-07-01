@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import ai.libs.hasco.model.Interface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +47,8 @@ public class HASCOModelStatisticsComponentSelector extends TreeItem<HASCOModelSt
 		this.componentSelector.valueProperty().addListener((observable, oldValue, newValue) -> {
 			HASCOModelStatisticsComponentSelector.this.getChildren().clear();
 			if (!newValue.equals("*")) {
-				List<String> requiredInterfacesOfThisChoice = model.getKnownComponents().get(newValue).getRequiredInterfaceIds();
-				for (String requiredInterfaceId : requiredInterfacesOfThisChoice) {
+				Map<String, String> requiredInterfacesOfThisChoice = model.getKnownComponents().get(newValue).getRequiredInterfaces();
+				for (String requiredInterfaceId : requiredInterfacesOfThisChoice.keySet()) {
 					HASCOModelStatisticsComponentSelector.this.getChildren().add(new HASCOModelStatisticsComponentSelector(rootView, HASCOModelStatisticsComponentSelector.this, requiredInterfaceId, model));
 				}
 			}

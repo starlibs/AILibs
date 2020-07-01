@@ -3,6 +3,7 @@ package ai.libs.hasco.model;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import ai.libs.hasco.core.Util;
 
@@ -42,6 +43,15 @@ public class ComponentInstanceUtil {
 			}
 		}
 		return true;
+	}
+
+	public static String toComponentNameString(final ComponentInstance ci) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(ci.getComponent().getName());
+		if (!ci.getSatisfactionOfRequiredInterfaces().isEmpty()) {
+			sb.append("(").append(ci.getSatisfactionOfRequiredInterfaces().values().stream().map(x -> toComponentNameString(x)).collect(Collectors.joining(", "))).append(")");
+		}
+		return sb.toString();
 	}
 
 }
