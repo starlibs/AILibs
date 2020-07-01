@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -35,6 +34,7 @@ import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanni
 import ai.libs.jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 import ai.libs.softwareconfiguration.model.Component;
 import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.softwareconfiguration.model.Interface;
 import ai.libs.softwareconfiguration.model.NumericParameterDomain;
 import ai.libs.softwareconfiguration.model.Parameter;
 import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
@@ -117,8 +117,9 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 					standardKnowledgeAboutNewComponent.add(new Literal("val", valParams));
 				}
 				int r = 0;
-				for (String requiredInterfaceID : c.getRequiredInterfaces().keySet()) {
+				for (Interface requiredInterface : c.getRequiredInterfaces()) {
 					String reqIntIdentifier = "r" + (++r);
+					String requiredInterfaceID = requiredInterface.getId();
 					opParams.add(new VariableParam(reqIntIdentifier));
 					List<LiteralParam> literalParams = new ArrayList<>();
 					literalParams.add(new ConstantParam(cName));
@@ -156,7 +157,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				VariableParam inputParam = new VariableParam("c1");
 				methodParams.add(inputParam);
 				methodParams.add(new VariableParam("c2"));
-				Map<String, String> requiredInterfaces = c.getRequiredInterfaces();
+				List<Interface> requiredInterfaces = c.getRequiredInterfaces();
 
 				/* create string for the arguments of this operation */
 				StringBuilder satisfyOpArgumentsSB = new StringBuilder();
@@ -166,7 +167,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 						satisfyOpArgumentsSB.append(", " + paramIdentifier);
 					}
 				}
-				for (int r = 1; r <= requiredInterfaces.entrySet().size(); r++) {
+				for (int r = 1; r <= requiredInterfaces.size(); r++) {
 					satisfyOpArgumentsSB.append(",r" + r);
 				}
 
@@ -174,10 +175,10 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				List<Literal> network = new ArrayList<>();
 				int r = 0;
 				network.add(new Literal(SATISFY_PREFIX + i + "With" + cName + "(c1, c2" + satisfyOpArgumentsSB.toString() + ")"));
-				for (Entry<String, String> requiredInterface : requiredInterfaces.entrySet()) {
+				for (Interface requiredInterface : requiredInterfaces) {
 					String paramName = "r" + (++r);
 					methodParams.add(new VariableParam(paramName));
-					network.add(new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + requiredInterface.getValue() + "(c2," + paramName + ")"));
+					network.add(new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + requiredInterface.getName() + "(c2," + paramName + ")"));
 				}
 				StringBuilder refinementArgumentsSB = new StringBuilder();
 				if (CONFIGURE_PARAMS) {

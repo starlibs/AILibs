@@ -22,10 +22,9 @@ import ai.libs.jaicore.basic.sets.PartialOrderedSet;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 /**
- * A <code>Component</code> is described by - a name - a collection of provided interfaces - a list of required interfaces - a set of parameters - a list of dependencies and can be used to describe
- * any kind of components and model complex multi-component systems. More specifically, <code>Component</code>s are used to model the search space of HASCO. By recursively resolving required
- * interfaces until there are no open choices left, HASCO may transform your component description automatically into an HTN planning problem to automatically optimize a component setup for a specific
- * task.
+ * A <code>Component</code> is described by - a name - a collection of provided interfaces - a list of required interfaces - a set of parameters - a list of dependencies and can be used to describe any kind of components and model complex
+ * multi-component systems. More specifically, <code>Component</code>s are used to model the search space of HASCO. By recursively resolving required interfaces until there are no open choices left, HASCO may transform your component
+ * description automatically into an HTN planning problem to automatically optimize a component setup for a specific task.
  *
  * @author fmohr, wever
  */
@@ -69,11 +68,8 @@ public class Component {
 	 *            A list of dependencies to constrain the values of parameters (may be empty).
 	 */
 	@JsonCreator
-	public Component(@JsonProperty("name") final String name,
-					 @JsonProperty("providedInterfaces") final Collection<String> providedInterfaces,
-					 @JsonProperty("requiredInterfaces") final List<Interface> requiredInterfaces,
-					 @JsonProperty("parameters") final PartialOrderedSet<Parameter> parameters,
-                     @JsonProperty("dependencies") final Collection<Dependency> dependencies) {
+	public Component(@JsonProperty("name") final String name, @JsonProperty("providedInterfaces") final Collection<String> providedInterfaces, @JsonProperty("requiredInterfaces") final List<Interface> requiredInterfaces,
+			@JsonProperty("parameters") final PartialOrderedSet<Parameter> parameters, @JsonProperty("dependencies") final Collection<Dependency> dependencies) {
 		this(name);
 		this.providedInterfaces = providedInterfaces;
 		this.requiredInterfaces.addAll(requiredInterfaces);
@@ -189,14 +185,16 @@ public class Component {
 	 * @param interfaceName
 	 *            The provided interface of another component.
 	 * @param min
-	 * 	          Minimun times the interface is required?
+	 *            Minimun times the interface is required?
 	 * @param max
 	 *            Maximum times the interface is required?
 	 */
-	public void addRequiredInterface(String interfaceID, String interfaceName, Integer min, Integer max) {
-		this.requiredInterfaces.add(
-				new Interface(interfaceID, interfaceName, min, max)
-		);
+	public void addRequiredInterface(final String interfaceID, final String interfaceName, final Integer min, final Integer max) {
+		this.requiredInterfaces.add(new Interface(interfaceID, interfaceName, min, max));
+	}
+
+	public void addRequiredInterface(final String interfaceID, final String interfaceName) {
+		this.addRequiredInterface(interfaceID, interfaceName, 1, 1);
 	}
 
 	/**
@@ -245,7 +243,7 @@ public class Component {
 		result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
 		result = prime * result + ((this.parameters == null) ? 0 : this.parameters.hashCode());
 		result = prime * result + ((this.providedInterfaces == null) ? 0 : this.providedInterfaces.hashCode());
-		result = prime * result + ((this.requiredInterfaces == null) ? 0 : this.requiredInterfaces.hashCode());
+		result = prime * result + this.requiredInterfaces.hashCode();
 		return result;
 	}
 
@@ -289,14 +287,7 @@ public class Component {
 		} else if (!this.providedInterfaces.equals(other.providedInterfaces)) {
 			return false;
 		}
-		if (this.requiredInterfaces == null) {
-			if (other.requiredInterfaces != null) {
-				return false;
-			}
-		} else if (!this.requiredInterfaces.equals(other.requiredInterfaces)) {
-			return false;
-		}
-		return true;
+		return this.requiredInterfaces.equals(other.requiredInterfaces);
 	}
 
 	@Override
