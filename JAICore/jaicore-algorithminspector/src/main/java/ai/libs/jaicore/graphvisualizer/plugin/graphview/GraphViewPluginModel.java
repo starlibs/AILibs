@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.api4.java.common.control.ILoggingCustomizable;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.IdAlreadyInUseException;
@@ -20,9 +19,9 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceUtil;
-import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginModel;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
-public class GraphViewPluginModel implements IGUIPluginModel, ILoggingCustomizable {
+public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginView, GraphViewPluginController> {
 
 	private Logger logger = LoggerFactory.getLogger(GraphViewPluginModel.class);
 
@@ -33,20 +32,17 @@ public class GraphViewPluginModel implements IGUIPluginModel, ILoggingCustomizab
 
 	private final AtomicInteger nodeIdCounter = new AtomicInteger(0);
 
-	private GraphViewPluginView view;
-
 	private Graph graph;
 	private ConcurrentMap<String, Node> searchGraphNodesToViewGraphNodesMap;
 	private ConcurrentMap<Node, String> viewGraphNodesToSearchGraphNodesMap;
 
 	private ConcurrentMap<Node, Set<Edge>> nodeToConnectedEdgesMap;
 
-	public GraphViewPluginModel(final GraphViewPluginView view) {
-		this(view, DEFAULT_STYLESHEET_FILE);
+	public GraphViewPluginModel() {
+		this(DEFAULT_STYLESHEET_FILE);
 	}
 
-	private GraphViewPluginModel(final GraphViewPluginView view, final File searchGraphCSSPath) {
-		this.view = view;
+	private GraphViewPluginModel(final File searchGraphCSSPath) {
 		this.searchGraphNodesToViewGraphNodesMap = new ConcurrentHashMap<>();
 		this.viewGraphNodesToSearchGraphNodesMap = new ConcurrentHashMap<>();
 		this.nodeToConnectedEdgesMap = new ConcurrentHashMap<>();
@@ -74,7 +70,7 @@ public class GraphViewPluginModel implements IGUIPluginModel, ILoggingCustomizab
 				this.createEdge(node, predecessorNode);
 			}
 			this.switchNodeType(viewNode, typeOfNode);
-			this.view.update();
+			this.getView().update();
 			this.logger.debug("Added node with external id {}. Internal id is {}", node, viewNode.getId());
 		} catch (IdAlreadyInUseException exception) {
 			throw new ViewGraphManipulationException("Cannot add node " + node + " as the id " + this.nodeIdCounter + " is already in use.");
@@ -118,7 +114,7 @@ public class GraphViewPluginModel implements IGUIPluginModel, ILoggingCustomizab
 			throw new ViewGraphManipulationException("Cannot switch type of node " + node + " without corresponding view node.");
 		}
 		this.switchNodeType(viewNode, newType);
-		this.view.update();
+		this.getView().update();
 	}
 
 	private void switchNodeType(final Node node, final String newType) {
@@ -151,19 +147,6 @@ public class GraphViewPluginModel implements IGUIPluginModel, ILoggingCustomizab
 		}
 	}
 
-	public void reset() {
-		this.graph.clear();
-		try {
-			this.graph.setAttribute("ui.stylesheet", ResourceUtil.readResourceFileToString(DEFAULT_STYLESHEET_FILE.getPath()));
-		} catch (IOException e) {
-			this.logger.warn("Could not load css stylesheet for graph view plugin. Continue without stylesheet", e);
-		}
-		this.searchGraphNodesToViewGraphNodesMap.clear();
-		this.viewGraphNodesToSearchGraphNodesMap.clear();
-		this.nodeToConnectedEdgesMap.clear();
-		this.view.update();
-	}
-
 	public Graph getGraph() {
 		return this.graph;
 	}
@@ -180,5 +163,19 @@ public class GraphViewPluginModel implements IGUIPluginModel, ILoggingCustomizab
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
+	}
+
+	@Override
+	public void clear() {
+		this.graph.clear();
+		try {
+			this.graph.setAttribute("ui.stylesheet", ResourceUtil.readResourceFileToString(DEFAULT_STYLESHEET_FILE.getPath()));
+		} catch (IOException e) {
+			this.logger.warn("Could not load css stylesheet for graph view plugin. Continue without stylesheet", e);
+		}
+		this.searchGraphNodesToViewGraphNodesMap.clear();
+		this.viewGraphNodesToSearchGraphNodesMap.clear();
+		this.nodeToConnectedEdgesMap.clear();
+		this.getView().update();
 	}
 }
