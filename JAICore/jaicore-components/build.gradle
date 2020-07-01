@@ -19,10 +19,10 @@ uploadArchives {
       		}
 
       		pom.project {
-        		name 'jaicore-component'
+        		name 'jaicore-components'
         		packaging 'jar'
         		// optionally artifactId can be defined here 
-        		description 'jaicore-component is a collection of classes to model and serialize/unserialize component configuration problems.'
+        		description 'jaicore-components is a collection of classes to model and serialize/unserialize component configuration problems.'
         		url 'https://libs.ai'
 
         		scm {
