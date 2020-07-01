@@ -3,6 +3,7 @@ package ai.libs.jaicore.experiments;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyStartedException;
@@ -30,6 +31,7 @@ public interface IExperimentDatabaseHandle {
 	 * @param key The key attribute
 	 * @throws ExperimentDBInteractionFailedException
 	 */
+	@Deprecated
 	public Collection<String> getConsideredValuesForKey(final String key) throws ExperimentDBInteractionFailedException;
 
 	/**
@@ -41,10 +43,11 @@ public interface IExperimentDatabaseHandle {
 	public List<ExperimentDBEntry> getAllExperiments() throws ExperimentDBInteractionFailedException;
 
 	/**
-	 * Returns a list of all experiments contained in the database
+	 * Returns the number of all experiments contained in the database
 	 *
 	 * @throws ExperimentDBInteractionFailedException
 	 */
+	@Deprecated
 	public int getNumberOfAllExperiments() throws ExperimentDBInteractionFailedException;
 
 	/**
@@ -94,7 +97,19 @@ public interface IExperimentDatabaseHandle {
 	 * @return List of all experiments conducted so far
 	 * @throws ExperimentDBInteractionFailedException
 	 */
+	@Deprecated
 	public List<ExperimentDBEntry> getRandomOpenExperiments(int limit) throws ExperimentDBInteractionFailedException;
+
+    /**
+     * Picks a random unstarted experiment, marks it as started and returns it.
+     * These operations happen atomically, so if a experiment is returned, then ownership on it can be assumed.
+     *
+     * If no experiment is returned, i.e. an empty optional, then no experiment is remaining.
+     *
+     * @return A started experiment if there are any left, or else an empty optional.
+     * @throws ExperimentDBInteractionFailedException
+     */
+	public Optional<ExperimentDBEntry> startRandomExperiment() throws ExperimentDBInteractionFailedException;
 
 	/**
 	 * Returns a list of all experiments that are currently being conducted.
@@ -124,15 +139,17 @@ public interface IExperimentDatabaseHandle {
 	 */
 	public ExperimentDBEntry createAndGetExperiment(final Experiment experiment) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException;
 
-	/**
-	 * Creates a new experiment entry and returns it.
+    /**
+     * Creates or fetches the experiment entries from the database.
+     * The "or" is exclusive, i.e. that if any entry exist it won't be created.
+     * In comparison to other createAndGet methods, this doesn't throw a ExperimentAlreadyExistsInDatabaseException.
 	 *
 	 * @param experiments the experiments to be created
 	 * @return The id of the created experiment
 	 * @throws ExperimentDBInteractionFailedException
 	 * @throws ExperimentAlreadyExistsInDatabaseException
 	 */
-	public List<ExperimentDBEntry> createAndGetExperiments(final List<Experiment> experiments) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException;
+	public List<ExperimentDBEntry> createOrGetExperiments(final List<Experiment> experiments) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException;
 
 	/**
 	 * Updates non-keyfield values of the experiment.

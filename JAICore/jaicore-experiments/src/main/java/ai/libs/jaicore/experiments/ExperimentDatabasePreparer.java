@@ -99,7 +99,7 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 		if (tmpPossibleKeyCombinations.isEmpty()) {
 			return new ArrayList<>(0);
 		}
-		List<ExperimentDBEntry> entries = this.handle.createAndGetExperiments(tmpPossibleKeyCombinations.stream().map(t -> new Experiment(this.memoryLimit, this.cpuLimit, t)).collect(Collectors.toList()));
+		List<ExperimentDBEntry> entries = this.handle.createOrGetExperiments(tmpPossibleKeyCombinations.stream().map(t -> new Experiment(this.memoryLimit, this.cpuLimit, t)).collect(Collectors.toList()));
 		this.logger.info("Ids of {} inserted entries: {}", entries.size(), entries.stream().map(ExperimentDBEntry::getId).collect(Collectors.toList()));
 		return entries;
 	}
