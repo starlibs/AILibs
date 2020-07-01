@@ -65,7 +65,7 @@ public class AlgorithmVisualizationWindow implements Runnable {
 		this.setup(this.historyRecorder.getHistory());
 	}
 
-	private AlgorithmVisualizationWindow(final AlgorithmEventHistory history) {
+	public AlgorithmVisualizationWindow(final AlgorithmEventHistory history) {
 		this.historyRecorder = null;
 		this.setup(history);
 	}
