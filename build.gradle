@@ -166,7 +166,7 @@ allprojects {
 	
 	//Define JUnit for running tests
 	test {
-    	useJUnitPlatform()
+    	useJUnit()
 	}
 
 	// This task creates a jar with test classes.
