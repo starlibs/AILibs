@@ -31,7 +31,6 @@ public interface IExperimentDatabaseHandle {
 	 * @param key The key attribute
 	 * @throws ExperimentDBInteractionFailedException
 	 */
-	@Deprecated
 	public Collection<String> getConsideredValuesForKey(final String key) throws ExperimentDBInteractionFailedException;
 
 	/**
@@ -47,7 +46,6 @@ public interface IExperimentDatabaseHandle {
 	 *
 	 * @throws ExperimentDBInteractionFailedException
 	 */
-	@Deprecated
 	public int getNumberOfAllExperiments() throws ExperimentDBInteractionFailedException;
 
 	/**
@@ -97,18 +95,17 @@ public interface IExperimentDatabaseHandle {
 	 * @return List of all experiments conducted so far
 	 * @throws ExperimentDBInteractionFailedException
 	 */
-	@Deprecated
 	public List<ExperimentDBEntry> getRandomOpenExperiments(int limit) throws ExperimentDBInteractionFailedException;
 
-    /**
-     * Picks an unstarted experiment, marks it as started and returns it.
-     * These operations happen atomically, so if a experiment is returned, then ownership on it can be assumed.
-     *
-     * If no experiment is returned, i.e. an empty optional, then no experiment is remaining.
-     *
-     * @return A started experiment if there are any left, or else an empty optional.
-     * @throws ExperimentDBInteractionFailedException
-     */
+	/**
+	 * Picks an unstarted experiment, marks it as started and returns it.
+	 * These operations happen atomically, so if a experiment is returned, then ownership on it can be assumed.
+	 *
+	 * If no experiment is returned, i.e. an empty optional, then no experiment is remaining.
+	 *
+	 * @return A started experiment if there are any left, or else an empty optional.
+	 * @throws ExperimentDBInteractionFailedException
+	 */
 	public Optional<ExperimentDBEntry> startNextExperiment() throws ExperimentDBInteractionFailedException;
 
 	/**
@@ -139,10 +136,10 @@ public interface IExperimentDatabaseHandle {
 	 */
 	public ExperimentDBEntry createAndGetExperiment(final Experiment experiment) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException;
 
-    /**
-     * Creates or fetches the experiment entries from the database.
-     * The "or" is exclusive, i.e. that if any entry exist it won't be created.
-     * In comparison to other createAndGet methods, this doesn't throw a ExperimentAlreadyExistsInDatabaseException.
+	/**
+	 * Creates or fetches the experiment entries from the database.
+	 * The "or" is exclusive, i.e. that if any entry exist it won't be created.
+	 * In comparison to other createAndGet methods, this doesn't throw a ExperimentAlreadyExistsInDatabaseException.
 	 *
 	 * @param experiments the experiments to be created
 	 * @return The id of the created experiment

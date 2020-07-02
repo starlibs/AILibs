@@ -51,24 +51,21 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	private static final String FIELD_EXCEPTION = "exception";
 	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	private static final String Q_AND = " AND ";
-	private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat(DATE_FORMAT);
-
-	private static final int POOL_SUB_TABLE_LIMIT = 200;
 
 	private final String cachedHost;
 
-    {
-        String hostName;
-        try {
-            hostName = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            logger.error("Couldn't retrieve Host name. No experiment can be started.", e);
-            hostName = null;
-        }
-        cachedHost = hostName;
-    }
+	{
+		String hostName;
+		try {
+			hostName = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			logger.error("Couldn't retrieve Host name. No experiment can be started.", e);
+			hostName = null;
+		}
+		cachedHost = hostName;
+	}
 
-    protected final IDatabaseAdapter adapter;
+	protected final IDatabaseAdapter adapter;
 
 	protected final String tablename;
 
@@ -265,67 +262,67 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	}
 
 	@Override
-    public Optional<ExperimentDBEntry> startNextExperiment() throws ExperimentDBInteractionFailedException {
-	    if(cachedHost == null) {
-	        // failed to retrieve  host information.
-            throw new ExperimentUpdateFailedException(new IllegalStateException("Host information is unavailable."));
-        }
+	public Optional<ExperimentDBEntry> startNextExperiment() throws ExperimentDBInteractionFailedException {
+		if(cachedHost == null) {
+			// failed to retrieve  host information.
+			throw new ExperimentUpdateFailedException(new IllegalStateException("Host information is unavailable."));
+		}
 
-	    /*
-	     * Build a query to update a random unstarted experiment and fetch the updated id:
-	     */
-	    StringBuilder sb = new StringBuilder();
-        sb.append("UPDATE ");
-            sb.append(this.tablename);
-        sb.append(" AS target_table ");
+		/*
+		 * Build a query to update a random unstarted experiment and fetch the updated id:
+		 */
+		StringBuilder sb = new StringBuilder();
+		sb.append("UPDATE ");
+			sb.append(this.tablename);
+		sb.append(" AS target_table ");
 
-        // Fields to be updated are `time_started`=(now) and `host`=(host name of this machine):
-        sb.append("SET target_table.");
-        sb.append(FIELD_TIME_START);
-        sb.append(" = '");
-        sb.append(DATE_FORMATTER.format(new Date()));
-        sb.append("', target_table.");
-        sb.append(FIELD_HOST);
-        sb.append(" = '");
-        sb.append(cachedHost);
-        sb.append("' ");
+		// Fields to be updated are `time_started`=(now) and `host`=(host name of this machine):
+		sb.append("SET target_table.");
+		sb.append(FIELD_TIME_START);
+		sb.append(" = '");
+		sb.append(new SimpleDateFormat(DATE_FORMAT).format(new Date()));
+		sb.append("', target_table.");
+		sb.append(FIELD_HOST);
+		sb.append(" = '");
+		sb.append(cachedHost);
+		sb.append("' ");
 
-        // We need the id of the updated row.
-        // The trick is to tell mysql to update the last insert id with the single affected row:
-        // See: https://stackoverflow.com/questions/1388025
-        // This is a MySQL specific solution.
-        // TODO: try to come up with a more general solution that works with SQL engines from arbitrary vendors.
-        sb.append("WHERE target_table.time_started IS NULL AND last_insert_id(target_table.experiment_id) LIMIT 1");
+		// We need the id of the updated row.
+		// The trick is to tell mysql to update the last insert id with the single affected row:
+		// See: https://stackoverflow.com/questions/1388025
+		// This is a MySQL specific solution.
+		// TODO: try to come up with a more general solution that works with SQL engines from arbitrary vendors.
+		sb.append("WHERE target_table.time_started IS NULL AND last_insert_id(target_table.experiment_id) LIMIT 1");
 //        adapter.insert()
 
-        int startedExperimentId;
-        try {
-            // Update and get the affected rows
-            // Use insert because we are interested in the `last_insert_id` field that is returned as a generated key.
-            int[] affectedKeys = adapter.insert(sb.toString(), new String[0]);
-            if(affectedKeys == null){
-                throw new Exception("The database adapter did not return the id of the updated experiment. The sql query executed was: \n" + sb.toString());
-            } else if(affectedKeys.length > 1) {
-                throw new RuntimeException("BUG: The sql query affected more than one row. It is supposed to only update a single row: \n" + sb.toString());
-            } else if (affectedKeys.length == 0) {
-                logger.info("No experiment with time_started=null could be found. So no experiment could be started.");
-                return Optional.empty();
-            }
-            else {
-                startedExperimentId = affectedKeys[0];
-            }
-        } catch (Exception ex) {
-            throw new ExperimentDBInteractionFailedException(ex);
-        }
-        ExperimentDBEntry experimentWithId = getExperimentWithId(startedExperimentId);
-        if(experimentWithId == null) {
-            throw new ExperimentDBInteractionFailedException(new RuntimeException(String.format("BUG: The updated experiment with id, `%d`, could not be fetched. ", startedExperimentId)));
-        }
-        return Optional.of(experimentWithId);
-    }
+		int startedExperimentId;
+		try {
+			// Update and get the affected rows
+			// Use insert because we are interested in the `last_insert_id` field that is returned as a generated key.
+			int[] affectedKeys = adapter.insert(sb.toString(), new String[0]);
+			if(affectedKeys == null){
+				throw new Exception("The database adapter did not return the id of the updated experiment. The sql query executed was: \n" + sb.toString());
+			} else if(affectedKeys.length > 1) {
+				throw new RuntimeException("BUG: The sql query affected more than one row. It is supposed to only update a single row: \n" + sb.toString());
+			} else if (affectedKeys.length == 0) {
+				logger.info("No experiment with time_started=null could be found. So no experiment could be started.");
+				return Optional.empty();
+			}
+			else {
+				startedExperimentId = affectedKeys[0];
+			}
+		} catch (Exception ex) {
+			throw new ExperimentDBInteractionFailedException(ex);
+		}
+		ExperimentDBEntry experimentWithId = getExperimentWithId(startedExperimentId);
+		if(experimentWithId == null) {
+			throw new ExperimentDBInteractionFailedException(new RuntimeException(String.format("BUG: The updated experiment with id, `%d`, could not be fetched. ", startedExperimentId)));
+		}
+		return Optional.of(experimentWithId);
+	}
 
 
-    @Override
+	@Override
 	public List<ExperimentDBEntry> getRunningExperiments() throws ExperimentDBInteractionFailedException {
 		StringBuilder queryStringSB = new StringBuilder();
 		queryStringSB.append(this.getSQLPrefixForKeySelectQuery());
@@ -417,9 +414,9 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 				this.logger.debug("{} objects have been built within {}ms.", i, System.currentTimeMillis() - startAll);
 			}
 			if(Thread.interrupted()) {
-			    Thread.currentThread().interrupt();
-			    throw new RuntimeException(new InterruptedException());
-            }
+				Thread.currentThread().interrupt();
+				throw new RuntimeException(new InterruptedException());
+			}
 		}
 		return experimentEntries;
 	}
