@@ -11,10 +11,10 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.serialization.ComponentNotFoundException;
-import ai.libs.hasco.serialization.ComponentUtils;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.serialization.ComponentNotFoundException;
+import ai.libs.jaicore.components.serialization.ComponentUtils;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.jaicore.ml.weka.classification.pipeline.SupervisedFilterSelector;
 import weka.core.OptionHandler;

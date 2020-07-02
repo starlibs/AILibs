@@ -6,13 +6,13 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.Parameter;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.Parameter;
 
 /**
  * Comparator which compares parameters according to their importance using the
  * FANOVAImportanceEstimator.
- * 
+ *
  * @author jmhansel
  *
  */
@@ -23,26 +23,26 @@ public class FANOVAWarmstartComparator implements Comparator<Parameter> {
 	private Map<String, Double> importanceValues;
 	private IParameterImportanceEstimator importanceEstimator;
 
-	public FANOVAWarmstartComparator(IParameterImportanceEstimator importanceEstimator, Component component) {
+	public FANOVAWarmstartComparator(final IParameterImportanceEstimator importanceEstimator, final Component component) {
 		this.importanceEstimator = importanceEstimator;
 		this.importanceValues = this.importanceEstimator.computeImportanceForSingleComponent(component);
-		LOGGER.debug("importance values: {}", importanceValues);
+		LOGGER.debug("importance values: {}", this.importanceValues);
 	}
 
 	/**
 	 * Compares parameters according to their importance values
 	 */
 	@Override
-	public int compare(Parameter o1, Parameter o2) {
-		if (importanceValues == null) {
+	public int compare(final Parameter o1, final Parameter o2) {
+		if (this.importanceValues == null) {
 			return 0;
 		}
-		LOGGER.debug("{} value: {}", o1, importanceValues.get(o1.toString()));
+		LOGGER.debug("{} value: {}", o1, this.importanceValues.get(o1.toString()));
 		// We want the parameters to be sorted in descending order according to their importance
-		if (importanceValues.get(o1.getName()) < importanceValues.get(o2.getName())) {
+		if (this.importanceValues.get(o1.getName()) < this.importanceValues.get(o2.getName())) {
 			return 1;
 		}
-		if (importanceValues.get(o1.getName()) > importanceValues.get(o2.getName())) {
+		if (this.importanceValues.get(o1.getName()) > this.importanceValues.get(o2.getName())) {
 			return -1;
 		}
 		return 0;

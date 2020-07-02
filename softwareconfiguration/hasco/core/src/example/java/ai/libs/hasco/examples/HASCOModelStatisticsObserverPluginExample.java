@@ -9,13 +9,13 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
-import ai.libs.hasco.serialization.CompositionSerializer;
-import ai.libs.hasco.serialization.UnresolvableRequiredInterfaceException;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirst;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.jaicore.components.serialization.CompositionSerializer;
+import ai.libs.jaicore.components.serialization.UnresolvableRequiredInterfaceException;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
