@@ -166,7 +166,7 @@ public class SetUtil {
 		/* |M| = 0 */
 		if (items.isEmpty()) {
 			Collection<Collection<T>> setWithEmptySet = new ArrayList<>();
-			setWithEmptySet.add(new ArrayList<T>());
+			setWithEmptySet.add(new ArrayList<>());
 			return setWithEmptySet;
 		}
 
@@ -202,7 +202,7 @@ public class SetUtil {
 		/* |M| = 0 */
 		if (items.isEmpty()) {
 			Collection<Collection<T>> setWithEmptySet = new ArrayList<>();
-			setWithEmptySet.add(new ArrayList<T>());
+			setWithEmptySet.add(new ArrayList<>());
 			return setWithEmptySet;
 		}
 
@@ -347,7 +347,7 @@ public class SetUtil {
 		ExecutorService pool = Executors.newFixedThreadPool(n);
 		Semaphore solutionSemaphore = new Semaphore(1);
 		solutionSemaphore.acquire();
-		pool.submit(new SubSetComputer<T>(new ArrayList<>(superSet), k, 0, new HashSet<T>(), res, pool, new Semaphore(n - 1), MathExt.binomial(superSet.size(), k), solutionSemaphore));
+		pool.submit(new SubSetComputer<>(new ArrayList<>(superSet), k, 0, new HashSet<>(), res, pool, new Semaphore(n - 1), MathExt.binomial(superSet.size(), k), solutionSemaphore));
 		solutionSemaphore.acquire();
 		pool.shutdown();
 		return res;
@@ -495,7 +495,7 @@ public class SetUtil {
 
 		for (S item1 : a) {
 			for (T item2 : b) {
-				product.add(new Pair<S, T>(item1, item2));
+				product.add(new Pair<>(item1, item2));
 			}
 		}
 		return product;

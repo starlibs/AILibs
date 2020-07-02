@@ -11,7 +11,7 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeri
  *         This class is used to compute Histograms for the found sfa words.
  *         This includes a numerosity reduction.
  *         (in form of double sequences which are used as key by using the Arrays class HashCode which are Integer).
- *         c.f. p. 1514 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
+ *         c.f. p. 1514 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schaefer
  */
 public class HistogramBuilder {
 	private Map<Integer, Integer> histogram = new HashMap<>();
@@ -26,7 +26,7 @@ public class HistogramBuilder {
 				/*
 				 * To the histogramm suczessiv duplicates are not added because of numerosity reduction.
 				 * c.f.p.1514
-				 * "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
+				 * "The BOSS is concerned with time series classification in the presence of noise by Patrick Schaefer"
 				 */
 				if (!Arrays.equals(d, lastWord)) {
 					this.histogram.replace(Arrays.hashCode(d), this.histogram.get(Arrays.hashCode(d)) + 1);

@@ -285,7 +285,7 @@ public class ComponentLoader {
 									} else if (param.isCategorical()) {
 										eqConditionItem = new Pair<>(param, new CategoricalParameterDomain(new String[] { target }));
 									} else {
-										throw new IllegalArgumentException(MSG_DOMAIN_NOT_SUPPORTED+ param.getDefaultDomain().getClass().getName() + "\"");
+										throw new IllegalArgumentException(MSG_DOMAIN_NOT_SUPPORTED + param.getDefaultDomain().getClass().getName() + "\"");
 									}
 									monomInPremise.add(eqConditionItem);
 									break;
@@ -374,8 +374,7 @@ public class ComponentLoader {
 
 					this.requiredInterfaces.addAll(c.getRequiredInterfaces().values());
 					this.providedInterfaces.addAll(c.getProvidedInterfaces());
-				}
-				catch (Exception e)  {
+        } catch (Exception e)  {
 					throw new IllegalStateException("Could not parse component " + component.get("name") + " due to exception.", e);
 				}
 			}
@@ -430,6 +429,7 @@ public class ComponentLoader {
 
 	/**
 	 * This method searches for a component with the given name. If such a component does not exist, a NoSuchElementException is thrown.
+	 *
 	 * @param name The name of the component in question.
 	 * @return The component for the given name.
 	 */

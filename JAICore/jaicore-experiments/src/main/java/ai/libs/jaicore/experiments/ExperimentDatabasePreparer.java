@@ -25,7 +25,7 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 	private final int memoryLimit;
 	private final int cpuLimit;
 
-	public ExperimentDatabasePreparer(final IExperimentSetConfig config, final IExperimentDatabaseHandle databaseHandle) throws ExperimentDBInteractionFailedException {
+	public ExperimentDatabasePreparer(final IExperimentSetConfig config, final IExperimentDatabaseHandle databaseHandle) {
 
 		if (config.getKeyFields() == null) {
 			throw new IllegalArgumentException("Configuration has not defined any key fields. Make sure to specify the " + IExperimentSetConfig.KEYFIELDS + " entry in the config file.");
@@ -69,7 +69,8 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 	 * @throws InterruptedException
 	 * @throws AlgorithmExecutionCanceledException
 	 */
-	public List<ExperimentDBEntry> synchronizeExperiments() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public List<ExperimentDBEntry> synchronizeExperiments()
+			throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 
 		/* setup the table */
 		this.logger.info("Creating experiment table if not existent.");
@@ -87,7 +88,7 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 		for (ExperimentDBEntry experiment : installedExperiments) {
 			if (tmpPossibleKeyCombinations.contains(experiment.getExperiment().getValuesOfKeyFields())) {
 				tmpPossibleKeyCombinations.remove(experiment.getExperiment().getValuesOfKeyFields());
-				removed ++;
+				removed++;
 			} else {
 				this.logger.warn("Experiment with id {} and keys {} seems outdated. The reason can be an illegal key name or an outdated value for one of the keys. Enable DEBUG mode for more details.", experiment.getId(),
 						experiment.getExperiment().getValuesOfKeyFields());

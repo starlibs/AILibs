@@ -1,0 +1,534 @@
+{
+  "repository": "sklearn-preprocessors",
+  "include": [
+    "./sklearn-regressors.json"
+  ],
+  "components": [
+    {
+      "name": "sklearn.preprocessing.Binarizer",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "threshold",
+          "type": "double",
+          "default": 0.505,
+          "min": 0.0,
+          "max": 1.01,
+          "minInterval": 0.05,
+          "refineSplits": 8
+        }
+      ]
+    },
+    {
+      "name": "sklearn.preprocessing.MaxAbsScaler",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+      ]
+    },
+    {
+      "name": "sklearn.preprocessing.MinMaxScaler",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+      ]
+    },
+    {
+      "name": "sklearn.preprocessing.Normalizer",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "norm",
+          "default": "l1",
+          "type": "cat",
+          "values": [
+            "l1",
+            "l2",
+            "max"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sklearn.preprocessing.PolynomialFeatures",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "degree",
+          "type": "int",
+          "default": 2,
+          "min": 1,
+          "max": 5,
+          "minInterval": 1,
+          "refineSplits": 8
+        },
+        {
+          "name": "include_bias",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "False",
+            "True"
+          ]
+        },
+        {
+          "name": "interaction_only",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "False",
+            "True"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sklearn.preprocessing.QuantileTransformer",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "n_quantiles",
+          "type": "int",
+          "default": 1000,
+          "min": 2,
+          "max": 10000,
+          "minInterval": 50,
+          "refineSplits": 8
+        },
+        {
+          "name": "output_distribution",
+          "type": "cat",
+          "values": [
+            "uniform",
+            "normal"
+          ],
+          "default": "uniform"
+        },
+        {
+          "name": "ignore_implicit_zeros",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "False",
+            "True"
+          ]
+        },
+        {
+          "name": "subsample",
+          "type": "int",
+          "default": 100000,
+          "min": 2,
+          "max": 1000000,
+          "minInterval": 10000,
+          "refineSplits": 8
+        }
+      ]
+    },
+    {
+      "name": "sklearn.preprocessing.RobustScaler",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "with_centering",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "False",
+            "True"
+          ]
+        },
+        {
+          "name": "with_scaling",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "False",
+            "True"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sklearn.preprocessing.StandardScaler",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "with_mean",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "False",
+            "True"
+          ]
+        },
+        {
+          "name": "with_std",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "False",
+            "True"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sklearn.cluster.FeatureAgglomeration",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "linkage",
+          "default": "ward",
+          "type": "cat",
+          "values": [
+            "ward",
+            "complete",
+            "average"
+          ]
+        },
+        {
+          "name": "affinity",
+          "default": "euclidean",
+          "type": "cat",
+          "values": [
+            "euclidean",
+            "l1",
+            "l2",
+            "manhattan",
+            "cosine"
+          ]
+        }
+      ],
+      "dependency": [
+        {
+          "pre": "linkage in {ward}",
+          "post": "affinity in {euclidean}"
+        }
+      ]
+    },
+    {
+      "name": "sklearn.decomposition.FastICA",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "n_components",
+          "default": "None",
+          "type": "cat",
+          "values": [
+            "None",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "15",
+            "20"
+          ]
+        },
+        {
+          "name": "algorithm",
+          "default": "parallel",
+          "type": "cat",
+          "values": [
+            "parallel",
+            "deflation"
+          ]
+        },
+        {
+          "name": "fun",
+          "default": "logcosh",
+          "type": "cat",
+          "values": [
+            "logcosh",
+            "exp",
+            "cube"
+          ]
+        },
+        {
+          "name": "tol",
+          "type": "double",
+          "default": 0.0001,
+          "min": 0.0,
+          "max": 1.01,
+          "minInterval": 0.0005,
+          "refineSplits": 8
+        }
+      ]
+    },
+    {
+      "name": "sklearn.decomposition.PCA",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "n_components",
+          "default": "None",
+          "type": "cat",
+          "values": [
+            "None",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "15",
+            "20"
+          ]
+        },
+        {
+          "name": "svd_solver",
+          "default": "auto",
+          "type": "cat",
+          "values": [
+            "randomized",
+            "auto",
+            "full",
+            "arpack"
+          ]
+        },
+        {
+          "name": "iterated_power",
+          "default": "auto",
+          "type": "cat",
+          "values": [
+            "auto",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "10",
+            "25",
+            "50",
+            "100",
+            "250",
+            "500",
+            "1000"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sklearn.decomposition.IncrementalPCA",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "n_components",
+          "default": "None",
+          "type": "cat",
+          "values": [
+            "None",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "15",
+            "20"
+          ]
+        },
+        {
+          "name": "batch_size",
+          "default": "None",
+          "type": "cat",
+          "values": [
+            "None",
+            "1",
+            "2",
+            "5",
+            "10",
+            "15",
+            "20",
+            "25",
+            "50",
+            "100",
+            "250",
+            "500"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sklearn.kernel_approximation.RBFSampler",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "gamma",
+          "type": "double",
+          "default": 1.0,
+          "min": 0.0,
+          "max": 5.0,
+          "minInterval": 0.05,
+          "refineSplits": 8
+        },
+        {
+          "name": "n_components",
+          "type": "int",
+          "default": 100,
+          "min": 1,
+          "max": 200,
+          "minInterval": 10,
+          "refineSplits": 8
+        }
+      ]
+    },
+    {
+      "name": "sklearn.feature_selection.SelectFromModel",
+      "providedInterface": [
+        "FeatureSelection",
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [
+        {
+          "id": "estimator",
+          "name": "FeatureImportanceEstimator"
+        }
+      ],
+      "parameter": [
+        {
+          "name": "threshold",
+          "default": "None",
+          "type": "cat",
+          "values": [
+            "None",
+            "median",
+            "mean"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sklearn.feature_selection.RFE",
+      "providedInterface": [
+        "FeatureSelection",
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [
+        {
+          "id": "estimator",
+          "name": "FeatureImportanceEstimator"
+        }
+      ],
+      "parameter": [
+        {
+          "name": "n_features_to_select",
+          "default": "None",
+          "type": "cat",
+          "values": [
+            "None",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "15",
+            "20",
+            "25",
+            "50",
+            "75",
+            "100"
+          ]
+        },
+        {
+          "name": "step",
+          "type": "double",
+          "default": 0.05,
+          "min": 0.01,
+          "max": 1.0,
+          "minInterval": 0.01,
+          "refineSplits": 8
+        }
+      ]
+    },
+    {
+      "name": "sklearn.feature_selection.VarianceThreshold",
+      "providedInterface": [
+        "FeatureSelection",
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "threshold",
+          "default": 0,
+          "type": "cat",
+          "values": [
+            0,
+            1.0E-4,
+            5.0E-4,
+            0.001,
+            0.005,
+            0.01,
+            0.05,
+            0.1,
+            0.2
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NoPreprocessor",
+      "providedInterface": [
+        "BasicPreprocessor"
+      ],
+      "requiredInterface": [],
+      "parameter": []
+    }
+  ]
+}

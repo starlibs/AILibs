@@ -1,0 +1,634 @@
+{
+  "repository": "sklearn-rul-timeseriestransformer",
+  "components": [
+    {
+      "name": "tsfresh.transformers.FeatureAugmenter",
+      "providedInterface": [
+        "TimeseriesTransformer"
+      ],
+      "requiredInterface": [
+        {
+          "id": "default_fc_parameters",
+          "name": "tsfreshFeatureSet"
+        }
+      ],
+      "parameter": [
+        {
+          "name": "disable_progressbar",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True"
+          ]
+        },
+        {
+          "name": "column_id",
+          "default": "instance_id",
+          "type": "cat",
+          "values": [
+            "instance_id"
+          ]
+        },
+        {
+          "name": "column_sort",
+          "default": "timestep",
+          "type": "cat",
+          "values": [
+            "timestep"
+          ]
+        },
+        {
+          "name": "column_kind",
+          "default": "sensor",
+          "type": "cat",
+          "values": [
+            "sensor"
+          ]
+        },
+        {
+          "name": "column_value",
+          "default": "value",
+          "type": "cat",
+          "values": [
+            "value"
+          ]
+        },
+        {
+          "name": "n_jobs",
+          "default": "0",
+          "type": "cat",
+          "values": [
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tsfresh",
+      "providedInterface": [
+        "tsfreshFeatureSet"
+      ],
+      "requiredInterface": [],
+      "parameter": [
+        {
+          "name": "has_duplicate_max",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "binned_entropy",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "last_location_of_maximum",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "abs_energy",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "c3",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "value_count",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "mean_second_derivative_central",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "first_location_of_minimum",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "standard_deviation",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "length",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "mean_abs_change",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "has_duplicate_min",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "mean_change",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "sum_values",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "percentage_of_reoccurring_datapoints_to_all_datapoints",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "range_count",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "absolute_sum_of_changes",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "energy_ratio_by_chunks",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "last_location_of_minimum",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "linear_trend",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "variance_larger_than_standard_deviation",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "spkt_welch_density",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "cid_ce",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "symmetry_looking",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "has_duplicate",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "skewness",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "count_above_mean",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "longest_strike_below_mean",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "mean",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "agg_autocorrelation",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "ratio_value_number_to_time_series_length",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "fft_aggregated",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "first_location_of_maximum",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "partial_autocorrelation",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "sum_of_reoccurring_data_points",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "count_below_mean",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "variance",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "longest_strike_above_mean",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "median",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "kurtosis",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "minimum",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "time_reversal_asymmetry_statistic",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "number_crossing_m",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "sum_of_reoccurring_values",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "maximum",
+          "default": "True",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "approximate_entropy",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "number_cwt_peaks",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "augmented_dickey_fuller",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "quantile",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "agg_linear_trend",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "max_langevin_fixed_point",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "friedrich_coefficients",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "fft_coefficient",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "large_standard_deviation",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "autocorrelation",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "cwt_coefficients",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "percentage_of_reoccurring_values_to_all_values",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "ar_coefficient",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "ratio_beyond_r_sigma",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "number_peaks",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "sample_entropy",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        },
+        {
+          "name": "change_quantiles",
+          "default": "False",
+          "type": "cat",
+          "values": [
+            "True",
+            "False"
+          ]
+        }
+      ]
+    }
+  ]
+}

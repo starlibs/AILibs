@@ -11,7 +11,7 @@ import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraph
 
 public class FDAndBestFirstWithRandomCompletionTransformer<V extends Comparable<V>> extends GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<TFDNode, String, V> implements IHascoAware {
 
-	private HASCO hasco;
+	private HASCO<?, ?, ?, ?> hasco;
 
 	public FDAndBestFirstWithRandomCompletionTransformer(final IPathEvaluator<TFDNode, String, V> preferredNodeEvaluator, final Predicate<TFDNode> preferredNodeEvaluatorForRandomCompletion, final long seed, final int numSamples,
 			final int timeoutForSingleCompletionEvaluationInMS, final int timeoutForNodeEvaluationInMS) {
@@ -21,13 +21,13 @@ public class FDAndBestFirstWithRandomCompletionTransformer<V extends Comparable<
 	@Override
 	public void setHascoReference(final HASCO hasco) {
 		if (this.getPrioritizedNodePredicatesForRandomCompletion() instanceof IHascoAware) {
-			((IHascoAware)this.getPrioritizedNodePredicatesForRandomCompletion()).setHascoReference(hasco);
+			((IHascoAware) this.getPrioritizedNodePredicatesForRandomCompletion()).setHascoReference(hasco);
 		}
 		this.hasco = hasco;
 	}
 
 	@Override
-	public HASCO getHASCOReference() {
+	public HASCO<?, ?, ?, ?> getHASCOReference() {
 		return this.hasco;
 	}
 }

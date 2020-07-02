@@ -15,6 +15,8 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluationCompletedEvent;
@@ -44,11 +46,11 @@ public class MLPlanSKLearnEvaluationListenerExample {
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan */
-		MLPlanSKLearnBuilder builder = new MLPlanSKLearnBuilder();
+		MLPlanSKLearnBuilder<SingleLabelClassification, SingleLabelClassificationPredictionBatch> builder = new MLPlanSKLearnBuilder<>();
 		builder.withNodeEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.SECONDS));
 		builder.withTimeOut(new Timeout(2, TimeUnit.MINUTES));
-		MLPlan<ScikitLearnWrapper> mlplan = builder.withDataset(split.get(0)).build();
+		MLPlan<ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>> mlplan = builder.withDataset(split.get(0)).build();
 
 		/* register a listener  */
 		mlplan.registerListener(new Object() {
@@ -69,7 +71,7 @@ public class MLPlanSKLearnEvaluationListenerExample {
 
 		try {
 			long start = System.currentTimeMillis();
-			ScikitLearnWrapper optimizedClassifier = mlplan.call();
+			ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.api4.java.ai.ml.classification.IClassifierEvaluator;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -54,12 +55,12 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 			List<ILearnerRunReport> reports = new ArrayList<>(n);
 			for (int i = 0; i < n; i++) {
 				List<ILabeledDataset<? extends ILabeledInstance>> folds = splitSet.getFolds(i);
-				this.logger.debug("Executing learner{} on folds of sizes {} (train) and {} (test) using {}.", learner, folds.get(0).size(), folds.get(1).size(), this.executor.getClass().getName());
+				this.logger.debug("Executing learner {} on folds of sizes {} (train) and {} (test) using {}.", learner, folds.get(0).size(), folds.get(1).size(), this.executor.getClass().getName());
 				ILearnerRunReport report;
 				try {
 					report = this.executor.execute(learner, folds.get(0), folds.get(1));
-					this.logger.trace("Obtained report. Training times was {}ms, testing time {}ms. Ground truth vector: {}, prediction vector: {}", report.getTrainEndTime() - report.getTrainStartTime(),
-							report.getTestEndTime() - report.getTestStartTime(), report.getPredictionDiffList().getGroundTruthAsList(), report.getPredictionDiffList().getPredictionsAsList());
+					this.logger.trace("Obtained report. Training times was {}ms, testing time {}ms. Ground truth vector: {}, prediction vector: {}. Pipeline: {}", report.getTrainEndTime() - report.getTrainStartTime(),
+							report.getTestEndTime() - report.getTestStartTime(), report.getPredictionDiffList().getGroundTruthAsList(), report.getPredictionDiffList().getPredictionsAsList(), learner);
 				} catch (LearnerExecutionInterruptedException e) {
 					this.logger.info("Received interrupt of training in iteration #{} after a total evaluation time of {}ms. Sending an event over the bus and forwarding the exception.", i + 1, System.currentTimeMillis() - evaluationStart);
 					ILabeledDataset<?> train = folds.get(0);
@@ -100,9 +101,10 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 			}
 			this.logger.debug("Compute metric ({}) for the diff of predictions and ground truth.", this.metric.getClass().getName());
 			double score = this.metric.loss(reports.stream().map(ILearnerRunReport::getPredictionDiffList).collect(Collectors.toList()));
-			this.logger.info("Computed value for metric {} of {} executions. Metric value is: {}", this.metric, n, score);
+			this.logger.info("Computed value for metric {} of {} executions. Metric value is: {}. Pipeline: {}", this.metric, n, score, learner);
 			return score;
 		} catch (LearnerExecutionFailedException | SplitFailedException e) {
+			this.logger.debug("Failed to evaluate the learner {}. Exception: {}", learner, ExceptionUtils.getStackTrace(e));
 			throw new ObjectEvaluationFailedException(e);
 		}
 	}
@@ -121,12 +123,12 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 		this.logger = LoggerFactory.getLogger(name);
 		if (this.splitGenerator instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) this.splitGenerator).setLoggerName(name + ".splitgen");
-			this.logger.info("Setting logger of split generator {} to {}.splitgen", this.splitGenerator.getClass().getName(), name);
+			this.logger.trace("Setting logger of split generator {} to {}.splitgen", this.splitGenerator.getClass().getName(), name);
 		} else {
-			this.logger.info("Split generator {} is not configurable for logging, so not configuring it.", this.splitGenerator.getClass().getName());
+			this.logger.trace("Split generator {} is not configurable for logging, so not configuring it.", this.splitGenerator.getClass().getName());
 		}
 		this.executor.setLoggerName(name + ".executor");
-		this.logger.info("Setting logger of learner executor {} to {}.executor", this.executor.getClass().getName(), name);
+		this.logger.trace("Setting logger of learner executor {} to {}.executor", this.executor.getClass().getName(), name);
 	}
 
 	@Override

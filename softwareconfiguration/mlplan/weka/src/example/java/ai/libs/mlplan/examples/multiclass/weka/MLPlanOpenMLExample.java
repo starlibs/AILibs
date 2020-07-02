@@ -44,7 +44,7 @@ public class MLPlanOpenMLExample {
 		builder.withTimeOut(new Timeout(30, TimeUnit.SECONDS));
 		builder.withNumCpus(4);
 		builder.withSeed(1);
-		builder.withMCCVBasedCandidateEvaluationInSearchPhase().withNumMCIterations(12);
+		builder.withMCCVBasedCandidateEvaluationInSearchPhase().withNumMCIterations(5);
 
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setRandomSeed(1);
