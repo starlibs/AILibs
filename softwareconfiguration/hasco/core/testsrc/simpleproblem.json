@@ -1,0 +1,49 @@
+{
+	"repository": "SimpleProblem",
+	"components": [
+		{
+			"name": "CMP1",
+			"requiredInterface": [
+				{
+					"id": "id1",
+					"name": "IFace",
+					"min": 0,
+					"max": 2
+				}
+			],
+			"providedInterface": [
+				"EntryPoint"
+			],
+			"parameter": [
+				{
+					"name": "a",
+					"type": "cat",
+					"default": "v1",
+					"values": [
+						"v1"
+					]
+				}
+			],
+			"dependencies": []
+		},
+		{
+			"name": "CMP2",
+			"requiredInterface": [],
+			"providedInterface": [
+				"IFace"
+			],
+			"parameter": [
+				{
+					"name": "b",
+					"type": "cat",
+					"default": "v1",
+					"values": [
+						"v1",
+						"v2"
+					]
+				}
+			],
+			"dependencies": []
+		}
+	]
+}
