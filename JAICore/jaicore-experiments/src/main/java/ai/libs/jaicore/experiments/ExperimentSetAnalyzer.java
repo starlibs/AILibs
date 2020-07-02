@@ -157,7 +157,7 @@ public class ExperimentSetAnalyzer {
 						try {
 							constraints.add((Predicate<List<String>>) Class.forName(p.substring(PROTOCOL_JAVA.length()).trim()).getConstructor().newInstance());
 						} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-							this.logger.error("Error in loading constraint {}: {}", p, e);
+							this.logger.error("Error in loading constraint {}: {}", p, LoggerUtil.getExceptionInfo(e));
 						}
 					}
 					else {
