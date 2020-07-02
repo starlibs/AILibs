@@ -62,12 +62,8 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	 *
 	 * @param maxNumberOfExperiments
 	 *            Limit for the number of experiments
-	 * @param reload
-	 *            Whether or not the experiment setup should be reloaded between two
-	 *            experiment runs.
 	 * @throws ExperimentDBInteractionFailedException
 	 * @throws InterruptedException
-	 * @throws IllegalExperimentSetupException
 	 */
 	public void randomlyConductExperiments(final int maxNumberOfExperiments) throws ExperimentDBInteractionFailedException, InterruptedException {
 		this.logger.info("Starting to run up to {} experiments.", maxNumberOfExperiments);
@@ -154,29 +150,34 @@ public class ExperimentRunner implements ILoggingCustomizable {
         this.logger.info("Successfully finished {} experiments.", numberOfConductedExperiments);
     }
 
-	/**
-	 * Conducts an unbound number of randomly chosen experiments from the grid.
-	 *
-	 * @param reload
-	 *            Whether or not the experiment setup should be reloaded between two
-	 *            experiment runs.
-	 * @throws IllegalExperimentSetupException
-	 * @throws ExperimentDBInteractionFailedException
-	 * @throws InterruptedException
-	 */
-	public void randomlyConductExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
-		this.randomlyConductExperiments(-1);
-	}
+    /**
+     * Conducts an unbound number of randomly chosen experiments from the grid.
+     *
+     * @throws ExperimentDBInteractionFailedException
+     * @throws InterruptedException
+     */
+    public void randomlyConductExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
+        this.randomlyConductExperiments(-1);
+    }
+
+    /**
+     * Conducts an unbound number of experiments from the grid.
+     *
+     * @throws ExperimentDBInteractionFailedException
+     * @throws InterruptedException
+     */
+    public void sequentiallyConductExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
+        this.sequentiallyConductExperiments(-1);
+    }
 
 	/**
 	 * Conducts a single experiment
 	 *
-	 * @param exp
-	 * @throws ExperimentAlreadyExistsInDatabaseException
+	 * @param expEntry the experiment to be conducted
 	 * @throws ExperimentDBInteractionFailedException
 	 * @throws ExperimentAlreadyStartedException
 	 * @throws InterruptedException
-	 * @throws Exception.
+	 * @throws Exception
 	 *             These are not the exceptions thrown by the experiment itself,
 	 *             because these are logged into the database. Exceptions thrown
 	 *             here are technical exceptions that occur when arranging the
