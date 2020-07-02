@@ -180,8 +180,8 @@ public interface IExperimentDatabaseHandle {
 	 * Signals that an experiment has failed with an exception.
 	 * The timestamp and the exception will be stored with the experiment.
 	 *
-	 * @param exp
-	 * @param errror
+	 * @param exp Experiment to be marked as finished
+	 * @param errror If not null, the experiment
 	 * @throws ExperimentDBInteractionFailedException
 	 */
 	public void finishExperiment(final ExperimentDBEntry exp, final Throwable errror) throws ExperimentDBInteractionFailedException;
@@ -189,7 +189,7 @@ public interface IExperimentDatabaseHandle {
 	/**
 	 * Deletes an experiment from the database
 	 *
-	 * @param exp
+	 * @param exp Experiment to be deleted
 	 * @throws ExperimentDBInteractionFailedException
 	 */
 	public void deleteExperiment(final ExperimentDBEntry exp) throws ExperimentDBInteractionFailedException;
@@ -201,4 +201,15 @@ public interface IExperimentDatabaseHandle {
 	 * @throws ExperimentDBInteractionFailedException
 	 */
 	public void deleteDatabase() throws ExperimentDBInteractionFailedException;
+
+
+	/**
+	 * Checks if the given experiment has been started already.
+	 *
+	 * @param exp Experiment used for the query.
+	 * @return true iff experiment has been marked as started.
+	 * @throws ExperimentDBInteractionFailedException
+	 */
+	public boolean hasExperimentStarted(final ExperimentDBEntry exp) throws ExperimentDBInteractionFailedException;
+
 }

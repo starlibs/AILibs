@@ -131,12 +131,11 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			this.logger.info("Conduct experiment #{} with key values: {}", numberOfConductedExperiments + 1, exp.getExperiment().getValuesOfKeyFields());
 			Thread expThread = new Thread(() -> {
 				try {
-					this.handle.startExperiment(exp);
 					this.conductExperiment(exp);
 				} catch (InterruptedException e) {
 					this.logger.info("Experiment interrupted.");
 					Thread.currentThread().interrupt(); // interrupt myself to make Sonar happy
-				} catch (ExperimentDBInteractionFailedException | ExperimentAlreadyStartedException e) {
+				} catch (ExperimentDBInteractionFailedException e) {
 					this.logger.error(LoggerUtil.getExceptionInfo(e));
 				}
 			});
@@ -171,6 +170,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 
 	/**
 	 * Conducts a single experiment
+	 * The experiment is expected to be marked as started already.
 	 *
 	 * @param expEntry the experiment to be conducted
 	 * @throws ExperimentDBInteractionFailedException
@@ -182,12 +182,12 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	 *             here are technical exceptions that occur when arranging the
 	 *             experiment
 	 */
-	public void conductExperiment(final ExperimentDBEntry expEntry) throws ExperimentDBInteractionFailedException, ExperimentAlreadyStartedException, InterruptedException {
-
+	protected void conductExperiment(final ExperimentDBEntry expEntry) throws ExperimentDBInteractionFailedException, InterruptedException {
 		/* run experiment */
 		if (expEntry == null) {
 			throw new IllegalArgumentException("Cannot conduct NULL experiment!");
 		}
+		assert handle.hasExperimentStarted(expEntry);
 		Throwable error = null;
 		try {
 			if (this.checkMemory) {

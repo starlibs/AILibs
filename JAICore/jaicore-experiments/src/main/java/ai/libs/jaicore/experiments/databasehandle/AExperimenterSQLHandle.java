@@ -1,5 +1,6 @@
 package ai.libs.jaicore.experiments.databasehandle;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
@@ -152,6 +153,17 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		sqlMainTable.append("PRIMARY KEY (`" + FIELD_ID + "`)");
 		sqlMainTable.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
 		return sqlMainTable.toString();
+	}
+
+	/**
+	 * Checks if this instance has been configured.
+	 * That is it throws an exception iff the setup method hasn't been successfully called yet.
+	 * @throws IllegalStateException thrown if setup wasn't called.
+	 */
+	protected void assertSetup() throws IllegalStateException{
+		if (this.config == null || this.keyFields == null) {
+			throw new IllegalStateException(ERROR_NOSETUP);
+		}
 	}
 
 	@Override
@@ -571,7 +583,34 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	}
 
 	@Override
+	public boolean hasExperimentStarted(ExperimentDBEntry exp) throws ExperimentDBInteractionFailedException {
+		assertSetup();
+		StringBuilder queryStringSB = new StringBuilder();
+		int expId = exp.getId();
+		queryStringSB.append("SELECT ").append(FIELD_TIME_START).append(" FROM `");
+		queryStringSB.append(this.tablename);
+		queryStringSB.append("` WHERE `experiment_id` = ").append(expId);
+		try {
+			List<IKVStore> selectResult = this.adapter.query(queryStringSB.toString());
+			if(selectResult.isEmpty()) {
+				throw new IllegalArgumentException("The given experiment was not found: " + exp);
+			}
+			if(selectResult.size() > 1) {
+				throw new IllegalStateException("The experiment with primary id " + exp.getId() + " exists multiple times.");
+			}
+			IKVStore selectedRow = selectResult.get(0);
+			if(selectedRow.get(FIELD_TIME_START) != null) {
+				return true;
+			}
+		} catch (SQLException | IOException ex) {
+			throw new ExperimentDBInteractionFailedException(ex);
+		}
+		return false;
+	}
+
+	@Override
 	public void startExperiment(final ExperimentDBEntry exp) throws ExperimentUpdateFailedException, ExperimentAlreadyStartedException {
+		assertSetup();
 		Map<String, Object> initValues = new HashMap<>();
 		initValues.put(FIELD_TIME_START, new SimpleDateFormat(DATE_FORMAT).format(new Date()));
 		try {
@@ -599,9 +638,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public ExperimentDBEntry getExperimentWithId(final int id) throws ExperimentDBInteractionFailedException {
-		if (this.config == null || this.keyFields == null) {
-			throw new IllegalStateException(ERROR_NOSETUP);
-		}
+		assertSetup();
 		StringBuilder queryStringSB = new StringBuilder();
 		queryStringSB.append("SELECT * FROM `");
 		queryStringSB.append(this.tablename);
