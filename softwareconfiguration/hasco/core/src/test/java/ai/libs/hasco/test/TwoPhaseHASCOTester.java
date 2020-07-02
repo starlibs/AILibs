@@ -13,12 +13,12 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.builder.HASCOBuilder;
+import ai.libs.hasco.builder.forwarddecomposition.twophase.TwoPhaseHASCO;
+import ai.libs.hasco.builder.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
+import ai.libs.hasco.builder.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
-import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsFactory;
-import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
-import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
-import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 
@@ -30,9 +30,7 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 	public TwoPhaseHASCO getAlgorithmForSoftwareConfigurationProblem(final RefinementConfiguredSoftwareConfigurationProblem<Double> problem) {
 
 		/* produce an HASCO instance */
-		HASCOViaFDAndBestFirstWithRandomCompletionsFactory factory = new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(0, 3);
-		factory.withDefaultAlgorithmConfig();
-		HASCO hasco = factory.getAlgorithm(problem);
+		HASCO hasco = HASCOBuilder.get(problem).withBestFirst().viaRandomCompletions().withNumSamples(3).getAlgorithm();
 
 		/* produce two-phase HASCO */
 		TwoPhaseSoftwareConfigurationProblem prob = new TwoPhaseSoftwareConfigurationProblem(problem, problem.getParamRefinementConfig(), problem.getCompositionEvaluator());

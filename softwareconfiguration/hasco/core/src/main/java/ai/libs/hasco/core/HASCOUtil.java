@@ -11,10 +11,12 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.apache.commons.math3.geometry.partitioning.Region.Location;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
+import ai.libs.hasco.core.reduction.softcomp2planning.HASCOReduction;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
@@ -24,12 +26,16 @@ import ai.libs.jaicore.components.model.Dependency;
 import ai.libs.jaicore.components.model.IParameterDomain;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.LiteralParam;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.classical.algorithms.strips.forward.StripsUtil;
 import ai.libs.jaicore.planning.core.Action;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;
+import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
+import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
+import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitivePlanningToStandardSearchProblemReduction;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
@@ -50,6 +56,12 @@ public class HASCOUtil {
 
 	private HASCOUtil() {
 
+	}
+
+	public static <N, A, V extends Comparable<V>> IPathSearchWithPathEvaluationsInput<N, A, V> getSearchProblem(final RefinementConfiguredSoftwareConfigurationProblem<V> problem, final IHASCOPlanningReduction<N, A> plan2searchReduction){
+		HASCOReduction<V> hascoReduction = new HASCOReduction<>(null);
+		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> planningProblem = hascoReduction.encodeProblem(problem);
+		return new CostSensitivePlanningToStandardSearchProblemReduction<CEOCIPSTNPlanningProblem, N, A, V>(plan2searchReduction).encodeProblem(planningProblem);
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package ai.libs.hasco.variants.forwarddecomposition.twophase;
+package ai.libs.hasco.builder.forwarddecomposition.twophase;
 
 import ai.libs.hasco.core.HASCOConfig;
 import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;

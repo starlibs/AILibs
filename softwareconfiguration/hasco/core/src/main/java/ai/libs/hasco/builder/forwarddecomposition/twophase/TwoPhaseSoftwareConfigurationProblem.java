@@ -1,4 +1,4 @@
-package ai.libs.hasco.variants.forwarddecomposition.twophase;
+package ai.libs.hasco.builder.forwarddecomposition.twophase;
 
 import java.io.File;
 import java.io.IOException;

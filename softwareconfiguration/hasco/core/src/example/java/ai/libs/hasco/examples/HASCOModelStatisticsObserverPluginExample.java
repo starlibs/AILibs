@@ -9,10 +9,10 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.hasco.builder.HASCOBuilder;
+import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFD;
 import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
-import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirst;
-import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.serialization.CompositionSerializer;
 import ai.libs.jaicore.components.serialization.UnresolvableRequiredInterfaceException;
@@ -23,12 +23,12 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 
 public class HASCOModelStatisticsObserverPluginExample {
+
+	public static final String pathToExamples = "../../../JAICore/jaicore-components/";
+
 	public static void main(final String[] args) throws UnresolvableRequiredInterfaceException, IOException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		HASCOViaFDAndBestFirstFactory<Double> hascoFactory = new HASCOViaFDAndBestFirstFactory<>(n -> 0.0);
-		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(new File("testrsc/simpleproblemwithtwocomponents.json"), "IFace", n -> System.currentTimeMillis() * 1.0);
-		hascoFactory.setProblemInput(problem);
-		hascoFactory.withDefaultAlgorithmConfig();
-		HASCOViaFDAndBestFirst<Double> hasco = hascoFactory.getAlgorithm();
+		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(new File(pathToExamples + "testrsc/simpleproblemwithtwocomponents.json"), "IFace", n -> System.currentTimeMillis() * 1.0);
+		HASCOViaFD<Double> hasco = HASCOBuilder.get(problem).withBlindSearch().getAlgorithm();
 		hasco.setNumCPUs(1);
 		hasco.registerListener(new Object() {
 

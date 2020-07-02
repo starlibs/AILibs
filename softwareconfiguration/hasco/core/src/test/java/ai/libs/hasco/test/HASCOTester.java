@@ -38,33 +38,33 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 	private Logger logger = LoggerFactory.getLogger(HASCOTester.class);
 
 	@Override
-	public abstract HASCO<S, N, A, Double> getAlgorithmForSoftwareConfigurationProblem(RefinementConfiguredSoftwareConfigurationProblem<Double> problem);
+	public abstract HASCO<N, A, Double> getAlgorithmForSoftwareConfigurationProblem(RefinementConfiguredSoftwareConfigurationProblem<Double> problem);
 
 	@Override
 	public SoftwareConfigurationProblemSet getProblemSet() {
 		return (SoftwareConfigurationProblemSet) super.getProblemSet();
 	}
 
-	private HASCO<S, N, A, Double> getHASCOForSimpleProblem() throws AlgorithmTestProblemSetCreationException {
-		HASCO<S, N, A, Double> hasco = this.getAlgorithmForSoftwareConfigurationProblem(this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes());
+	private HASCO<N, A, Double> getHASCOForSimpleProblem() throws AlgorithmTestProblemSetCreationException {
+		HASCO<N, A, Double> hasco = this.getAlgorithmForSoftwareConfigurationProblem(this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes());
 		hasco.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		return hasco;
 	}
 
-	private HASCO<S, N, A, Double> getHASCOForDifficultProblem() throws AlgorithmTestProblemSetCreationException {
-		HASCO<S, N, A, Double> hasco = this.getAlgorithmForSoftwareConfigurationProblem(this.getProblemSet().getDifficultProblemInputForGeneralTestPurposes());
+	private HASCO<N, A, Double> getHASCOForDifficultProblem() throws AlgorithmTestProblemSetCreationException {
+		HASCO<N, A, Double> hasco = this.getAlgorithmForSoftwareConfigurationProblem(this.getProblemSet().getDifficultProblemInputForGeneralTestPurposes());
 		hasco.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		return hasco;
 	}
 
-	private HASCO<S, N, A, Double> getHASCOForProblemWithDependencies() throws AlgorithmTestProblemSetCreationException {
-		HASCO<S, N, A, Double> hasco = this.getAlgorithmForSoftwareConfigurationProblem(this.getProblemSet().getDependencyProblemInput());
+	private HASCO<N, A, Double> getHASCOForProblemWithDependencies() throws AlgorithmTestProblemSetCreationException {
+		HASCO<N, A, Double> hasco = this.getAlgorithmForSoftwareConfigurationProblem(this.getProblemSet().getDependencyProblemInput());
 		hasco.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		return hasco;
 	}
 
-	private Collection<Pair<HASCO<S, N, A, Double>, Integer>> getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems() throws AlgorithmTestProblemSetCreationException {
-		Collection<Pair<HASCO<S, N, A, Double>, Integer>> hascoObjects = new ArrayList<>();
+	private Collection<Pair<HASCO<N, A, Double>, Integer>> getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems() throws AlgorithmTestProblemSetCreationException {
+		Collection<Pair<HASCO<N, A, Double>, Integer>> hascoObjects = new ArrayList<>();
 		hascoObjects.add(new Pair<>(this.getHASCOForSimpleProblem(), 6));
 		hascoObjects.add(new Pair<>(this.getHASCOForDifficultProblem(), -1));
 		hascoObjects.add(new Pair<>(this.getHASCOForProblemWithDependencies(), 17));
@@ -73,8 +73,8 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 
 	@Test
 	public void sanityCheckOfSearchGraph() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmTestProblemSetCreationException {
-		for (Pair<HASCO<S, N, A, Double>, Integer> pairOfHASCOAndNumOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
-			HASCO<S, N, A, Double> hasco = pairOfHASCOAndNumOfSolutions.getX();
+		for (Pair<HASCO<N, A, Double>, Integer> pairOfHASCOAndNumOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
+			HASCO<N, A, Double> hasco = pairOfHASCOAndNumOfSolutions.getX();
 
 			/* check on dead end */
 			GraphSanityChecker<N, A> deadEndDetector = new GraphSanityChecker<>(hasco.getSearch().getInput(), 2000);
@@ -88,22 +88,22 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 
 	@Test
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmTestProblemSetCreationException {
-		for (Pair<HASCO<S, N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
-			HASCO<S, N, A, Double> hasco = pairOfHASCOAndExpectedNumberOfSolutions.getX();
+		for (Pair<HASCO<N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
+			HASCO<N, A, Double> hasco = pairOfHASCOAndExpectedNumberOfSolutions.getX();
 			this.checkNumberOfSolutionOnHASCO(hasco, pairOfHASCOAndExpectedNumberOfSolutions.getY());
 		}
 	}
 
 	@Test
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		for (Pair<HASCO<S, N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
-			HASCO<S, N, A, Double> hasco = pairOfHASCOAndExpectedNumberOfSolutions.getX();
+		for (Pair<HASCO<N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
+			HASCO<N, A, Double> hasco = pairOfHASCOAndExpectedNumberOfSolutions.getX();
 			hasco.setNumCPUs(Runtime.getRuntime().availableProcessors());
 			this.checkNumberOfSolutionOnHASCO(hasco, pairOfHASCOAndExpectedNumberOfSolutions.getY());
 		}
 	}
 
-	private void checkNumberOfSolutionOnHASCO(final HASCO<S, N, A, Double> hasco, final int numberOfExpectedSolutions) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	private void checkNumberOfSolutionOnHASCO(final HASCO<N, A, Double> hasco, final int numberOfExpectedSolutions) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		if (numberOfExpectedSolutions < 0) {
 			return;
 		}
@@ -125,8 +125,8 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testThatIteratorReturnsEachPossibleSolution() throws AlgorithmTestProblemSetCreationException {
-		for (Pair<HASCO<S, N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
-			HASCO<S, N, A, Double> hasco = pairOfHASCOAndExpectedNumberOfSolutions.getX();
+		for (Pair<HASCO<N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
+			HASCO<N, A, Double> hasco = pairOfHASCOAndExpectedNumberOfSolutions.getX();
 			int numberOfExpectedSolutions = pairOfHASCOAndExpectedNumberOfSolutions.getY();
 			this.logger.info("Starting HASCO on problem {} with {} solutions.", hasco, numberOfExpectedSolutions);
 			if (numberOfExpectedSolutions < 0) {

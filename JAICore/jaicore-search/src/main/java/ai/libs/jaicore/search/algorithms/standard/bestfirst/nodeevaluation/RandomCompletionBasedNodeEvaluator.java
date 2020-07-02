@@ -59,7 +59,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 import ai.libs.jaicore.timing.TimedComputation;
 
 public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, A, V>
-		implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V>, ICancelablePathEvaluator, IPotentiallyUncertaintyAnnotatingPathEvaluator<T, A, V>, ILoggingCustomizable {
+implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V>, ICancelablePathEvaluator, IPotentiallyUncertaintyAnnotatingPathEvaluator<T, A, V>, ILoggingCustomizable {
 
 	private static final IAlgorithm<?, ?> ALGORITHM = null;
 	private static final boolean LOG_FAILURES_AS_ERRORS = false;
@@ -438,7 +438,7 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 				throw new PathEvaluationException("Error in evaluating node!", e);
 			}
 			long duration = System.currentTimeMillis() - start;
-			if (duration >= this.timeoutForSingleCompletionEvaluationInMS) {
+			if (this.timeoutForSingleCompletionEvaluationInMS > 0 && duration >= this.timeoutForSingleCompletionEvaluationInMS) {
 				this.logger.warn("Evaluation took {}ms, but timeout is {}", duration, this.timeoutForSingleCompletionEvaluationInMS);
 				assert duration < this.timeoutForSingleCompletionEvaluationInMS + 10000 : "Evaluation took " + duration + "ms, but timeout is " + this.timeoutForSingleCompletionEvaluationInMS;
 			}

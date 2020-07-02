@@ -1,8 +1,8 @@
 ---
 layout: project
 logo: ailibs-logo.png
-title: ML-Plan
-subtitle: ML-Plan subtitle
+title: HASCO
+subtitle: HASCO subtitle
 navigation_mode: anchor
 version: 0.1.5
 navigation:
@@ -152,6 +152,60 @@ closeRefinementOfParamsOf<c>(c2, p1,..,pm)
 #### Problem Definition
 ```
 init task-network: tResolve<reqInterface>('request', 'solution')
+```
+
+
+#### Alternative Methods for the case of list interfaces
+```
+resolve<i>(c1; c2_1,..,c2_<max(I)>)
+	taskName: tResolve<i>(c1)
+	pre-condition: component(c1)
+	task-network:
+		tResolveSingle<i>(c1, c2_1) ->
+		..
+		tResolveSingle<i>(c1, c2_<min(I)>) -> 
+		tResolveSingleOptional<i>(c1, c2_<min(I) + 1> ->
+		..
+		tResolveSingleOptional<i>(c1, c2_<max(I)>) -> 
+	outputs: c2_1,..,c2_<max(I)>
+
+
+resolve<i>With<c>(c1, c2; p1,.., pm, r1,..,rn)
+	taskName: tResolveSingle<i>(c1, c2)
+	pre-condition: component(c1), !anyOmitted(c1,'<i>')
+	task-network:
+		satisfy<i>With<c>(c1, c2, p1,.., pm, r1,..,rn) ->
+		tResolve<i1>(c2, r1) ->
+		.. ->
+		tResolve<ik>(c2,..,rn) ->
+		tRefineParamsOf<c>(c1, c2, p1, .., pm)
+	outputs: p1,..,pm,r1,..,rn
+
+doResolve<i>(c1, c2)
+	taskName: tResolveSingleOptional<i>(c1, c2)
+	pre-condition: component(c1), !anyOmitted(c1,'<i>')
+	task-network: tResolveSingle<i>(c1, c2)
+	outputs: <empty>
+
+doNotResolve<i>(c1, c2)
+	taskName: tResolveSingleOptional<i>(c1, c2)
+	pre-condition: component(c1)
+	task-network: omitResolution(c1, '<i>', c2)
+	outputs: <empty>
+
+```
+
+The new operator is
+```
+omitResolution(c1, i, c2)
+	pre-condition: <empty>
+	add-list: anyOmitted(c1, i) & null(c2)
+	delete-list: <empty>
+```
+
+The initial problem changes to
+```
+init task-network: tResolveSingle<reqInterface>('request', 'solution')
 ```
 
 ### JavaDoc

@@ -29,15 +29,15 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.hasco.builder.HASCOBuilder;
+import ai.libs.hasco.builder.forwarddecomposition.twophase.TwoPhaseHASCO;
+import ai.libs.hasco.builder.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
+import ai.libs.hasco.builder.forwarddecomposition.twophase.TwoPhaseHASCOBuilder;
+import ai.libs.hasco.builder.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.hasco.core.HASCO;
-import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.hasco.events.TwoPhaseHASCOPhaseSwitchEvent;
-import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
-import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
-import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory;
-import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
@@ -70,7 +70,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	private ComponentInstance componentInstanceOfSelectedClassifier;
 
 	private final IMLPlanBuilder<L, ?> builder;
-	private TwoPhaseHASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String> twoPhaseHASCOFactory;
+	private TwoPhaseHASCOBuilder<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String> twoPhaseHASCOFactory;
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, L, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
 
 	private boolean buildSelectedClasifierOnGivenData = true;
@@ -260,8 +260,8 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			/* create 2-phase HASCO */
 			this.logger.info("Creating the twoPhaseHASCOFactory.");
 			OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, L, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(this.builder.getLearnerFactory(), problem);
-			HASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> hascoFactory = this.builder.getHASCOFactory();
-			this.twoPhaseHASCOFactory = new TwoPhaseHASCOFactory<>(hascoFactory);
+			HASCOBuilder<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> hascoFactory = this.builder.getHASCOFactory();
+			this.twoPhaseHASCOFactory = new TwoPhaseHASCOBuilder<>(hascoFactory);
 			this.twoPhaseHASCOFactory.setConfig(this.getConfig().copy(TwoPhaseHASCOConfig.class)); // instantiate 2-Phase-HASCO with a config COPY to not have config changes in 2-Phase-HASCO impacts on the MLPlan configuration
 			this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.twoPhaseHASCOFactory);
 			this.logger.info("Setting logger of {} to {}.optimizingfactory", this.optimizingFactory.getClass().getName(), this.loggerName);
@@ -434,7 +434,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 		this.post(e);
 	}
 
-	public TwoPhaseHASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String> getTwoPhaseHASCOFactory() {
+	public TwoPhaseHASCOBuilder<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String> getTwoPhaseHASCOFactory() {
 		return this.twoPhaseHASCOFactory;
 	}
 

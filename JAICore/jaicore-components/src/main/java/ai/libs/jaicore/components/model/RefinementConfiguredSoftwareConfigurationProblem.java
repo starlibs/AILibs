@@ -25,6 +25,7 @@ public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparab
 		/* check that parameter refinements are defined for all components */
 		for (Component c : this.getComponents()) {
 			if (!this.paramRefinementConfig.containsKey(c)) {
+				System.out.println(this.paramRefinementConfig.keySet());
 				throw new IllegalArgumentException("Error in parsing config file " + configurationFile.getAbsolutePath() + ". Component " + c.getName() + " has not parameter refinement configs associated.");
 			}
 			for (Parameter p : c.getParameters()) {

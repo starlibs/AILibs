@@ -1,4 +1,4 @@
-package ai.libs.hasco.variants.forwarddecomposition.twophase;
+package ai.libs.hasco.builder.forwarddecomposition.twophase;
 
 public interface TwoPhaseHASCOConfig extends HASCOWithRandomCompletionsConfig {
 	public static final String K_RANDOM_SEED = "hasco.seed";

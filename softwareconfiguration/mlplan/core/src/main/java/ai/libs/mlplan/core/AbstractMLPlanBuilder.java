@@ -22,10 +22,11 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
-import ai.libs.hasco.variants.forwarddecomposition.FDAndBestFirstWithRandomCompletionTransformer;
-import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDFactory;
-import ai.libs.hasco.variants.forwarddecomposition.twophase.HASCOWithRandomCompletionsConfig;
+import ai.libs.hasco.builder.HASCOBuilder;
+import ai.libs.hasco.builder.forwarddecomposition.DefaultPathPriorizingPredicate;
+import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsBuilder;
+import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFDBuilder;
+import ai.libs.hasco.builder.forwarddecomposition.twophase.HASCOWithRandomCompletionsConfig;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
@@ -40,9 +41,7 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEv
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
 
@@ -80,7 +79,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	private MLPlanClassifierConfig algorithmConfig;
 
 	@SuppressWarnings("rawtypes")
-	private HASCOViaFDFactory hascoFactory = new HASCOViaFDFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, Double>();
+	private HASCOViaFDAndBestFirstWithRandomCompletionsBuilder hascoBuilder = HASCOBuilder.get().withBestFirst().viaRandomCompletions();
 	private Predicate<TFDNode> priorizingPredicate = new DefaultPathPriorizingPredicate<>(); // by default, we prefer paths that lead to default parametrizations
 	private File searchSpaceFile;
 	private String requestedHASCOInterface;
@@ -127,7 +126,6 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		} else {
 			this.preferredNodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluator, this.preferredNodeEvaluator);
 		}
-		this.update();
 		return this.getSelf();
 	}
 
@@ -137,23 +135,22 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		}
 
 		this.preferredNodeEvaluator = preferredNodeEvaluator;
-		this.update();
 		return this.getSelf();
 	}
 
 	@SuppressWarnings("unchecked")
 	public B withSearchFactory(@SuppressWarnings("rawtypes") final IOptimalPathInORGraphSearchFactory searchFactory, @SuppressWarnings("rawtypes") final AlgorithmicProblemReduction transformer) {
-		this.hascoFactory.setSearchFactory(searchFactory);
-		this.hascoFactory.setSearchProblemTransformer(transformer);
+		this.hascoBuilder.setSearchFactory(searchFactory);
+		this.hascoBuilder.setSearchProblemTransformer(transformer);
 		return this.getSelf();
 	}
 
-	@SuppressWarnings("unchecked")
-	public B withRandomCompletionBasedBestFirstSearch() {
-		this.hascoFactory.setSearchFactory(new StandardBestFirstFactory<TFDNode, String, Double>());
-		this.update();
-		return this.getSelf();
-	}
+	//	@SuppressWarnings("unchecked")
+	//	public B withRandomCompletionBasedBestFirstSearch() {
+	//		this.hascoBuilder.setSearchFactory(new StandardBestFirstFactory<TFDNode, String, Double>());
+	//		this.update();
+	//		return this.getSelf();
+	//	}
 
 	public Collection<Component> getComponents() throws IOException {
 		return new ComponentLoader(this.searchSpaceFile).getComponents();
@@ -188,8 +185,6 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 */
 	public B withAlgorithmConfig(final MLPlanClassifierConfig config) {
 		this.algorithmConfig = config;
-		this.hascoFactory.withAlgorithmConfig(this.algorithmConfig);
-		this.update();
 		return this.getSelf();
 	}
 
@@ -223,7 +218,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		this.searchSpaceFile = searchSpaceConfig;
 		this.components.clear();
 		this.components.addAll(new ComponentLoader(this.searchSpaceFile).getComponents());
-		this.update();
+
 		this.logger.info("The search space configuration file has been set to {}.", searchSpaceConfig.getCanonicalPath());
 		return this.getSelf();
 	}
@@ -261,7 +256,6 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 */
 	public B withTimeOut(final Timeout timeout) {
 		this.algorithmConfig.setProperty(IOwnerBasedAlgorithmConfig.K_TIMEOUT, timeout.milliseconds() + "");
-		this.update();
 		return this.getSelf();
 	}
 
@@ -278,7 +272,6 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 */
 	public B withNodeEvaluationTimeOut(final Timeout timeout) {
 		this.algorithmConfig.setProperty(HASCOWithRandomCompletionsConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, timeout.milliseconds() + "");
-		this.update();
 		return this.getSelf();
 	}
 
@@ -295,7 +288,6 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 */
 	public B withCandidateEvaluationTimeOut(final Timeout timeout) {
 		this.algorithmConfig.setProperty(HASCOWithRandomCompletionsConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, timeout.milliseconds() + "");
-		this.update();
 		return this.getSelf();
 	}
 
@@ -364,13 +356,11 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 */
 	public B withNumCpus(final int numCpus) {
 		this.algorithmConfig.setProperty(IOwnerBasedAlgorithmConfig.K_CPUS, numCpus + "");
-		this.update();
 		return this.getSelf();
 	}
 
 	public B withSeed(final long seed) {
 		this.algorithmConfig.setProperty(IOwnerBasedRandomConfig.K_SEED, seed + "");
-		this.update();
 		this.logger.info("Seed has been set to {}", seed);
 		return this.getSelf();
 	}
@@ -383,8 +373,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	}
 
 	@Override
-	public HASCOViaFDFactory getHASCOFactory() {
-		return this.hascoFactory;
+	public HASCOViaFDBuilder getHASCOFactory() {
+		return this.hascoBuilder;
 	}
 
 	@Override
@@ -429,7 +419,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	}
 
 	public void prepareNodeEvaluatorInFactoryWithData() {
-		if (!(this.hascoFactory.getSearchFactory() instanceof BestFirstFactory)) {
+		if (!(this.hascoBuilder.getSearchFactory() instanceof BestFirstFactory)) {
 			return;
 		}
 		if (this.factoryPreparedWithData) {
@@ -456,17 +446,16 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 			actualNodeEvaluator = this.preferredNodeEvaluator;
 		}
 
-		/* update the preferred node evaluator in the HascoFactory */
+		/* update the preferred node evaluator */
 		this.preferredNodeEvaluator = actualNodeEvaluator;
-		this.update();
 	}
 
 	@SuppressWarnings("unchecked")
-	private void update() {
-		this.hascoFactory.setSearchProblemTransformer(new FDAndBestFirstWithRandomCompletionTransformer<Double>(this.preferredNodeEvaluator, this.priorizingPredicate, this.algorithmConfig.randomSeed(),
-				this.algorithmConfig.numberOfRandomCompletions(), this.algorithmConfig.timeoutForCandidateEvaluation(), this.algorithmConfig.timeoutForNodeEvaluation()));
-		this.hascoFactory.withAlgorithmConfig(this.getAlgorithmConfig());
-	}
+	//	private void update() {
+	//		this.hascoBuilder.setSearchProblemTransformer(new FDAndBestFirstWithRandomCompletionTransformer<Double>(this.preferredNodeEvaluator, this.priorizingPredicate, this.algorithmConfig.randomSeed(),
+	//				this.algorithmConfig.numberOfRandomCompletions(), this.algorithmConfig.timeoutForCandidateEvaluation(), this.algorithmConfig.timeoutForNodeEvaluation()));
+	//		this.hascoBuilder.withAlgorithmConfig(this.getAlgorithmConfig());
+	//	}
 
 	public B withPortionOfDataReservedForSelection(final double value) {
 		this.algorithmConfig.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, value + "");
@@ -512,6 +501,9 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	public MLPlan<L> build() {
 		this.checkPreconditionsForInitialization();
 		this.prepareNodeEvaluatorInFactoryWithData(); // inform node evaluator about data and create the MLPlan object
+		this.hascoBuilder.withPreferredNodeEvaluator(this.preferredNodeEvaluator);
+		this.hascoBuilder.withNumSamples(this.algorithmConfig.numberOfRandomCompletions());
+		this.hascoBuilder.withSeed(this.algorithmConfig.seed()).withTimeoutForNode(new Timeout(this.algorithmConfig.timeoutForNodeEvaluation(), TimeUnit.SECONDS));
 		return new MLPlan<>(this, this.dataset);
 	}
 }

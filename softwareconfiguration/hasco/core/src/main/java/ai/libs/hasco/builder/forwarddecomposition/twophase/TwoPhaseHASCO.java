@@ -1,4 +1,4 @@
-package ai.libs.hasco.variants.forwarddecomposition.twophase;
+package ai.libs.hasco.builder.forwarddecomposition.twophase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,11 +33,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.hasco.builder.forwarddecomposition.DefaultPathPriorizingPredicate;
 import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.hasco.events.TwoPhaseHASCOPhaseSwitchEvent;
-import ai.libs.hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.sets.SetUtil;
@@ -47,10 +47,9 @@ import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.concurrent.NamedTimerTask;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.timing.TimedComputation;
 
-public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
+public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
 
 	private static final String SUFFIX_HASCO = ".hasco";
 
@@ -59,7 +58,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 	private String loggerName;
 
 	/* HASCO configuration */
-	private HASCO<S, N, A, Double> hasco;
+	private HASCO<N, A, Double> hasco;
 	private NamedTimerTask phase1CancellationTask;
 
 	/** The solution selected during selection phase. */
@@ -87,12 +86,12 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 		this.logger.info("Created TwoPhaseHASCO object.");
 	}
 
-	public TwoPhaseHASCO(final TwoPhaseSoftwareConfigurationProblem problem, final TwoPhaseHASCOConfig config, final HASCO<S, N, A, Double> hasco) {
+	public TwoPhaseHASCO(final TwoPhaseSoftwareConfigurationProblem problem, final TwoPhaseHASCOConfig config, final HASCO<N, A, Double> hasco) {
 		this(problem, config);
 		this.setHasco(hasco);
 	}
 
-	public void setHasco(final HASCO<S, N, A, Double> hasco) {
+	public void setHasco(final HASCO<N, A, Double> hasco) {
 		this.hasco = hasco;
 		if (this.getLoggerName() != null) {
 			this.hasco.setLoggerName(this.getLoggerName() + SUFFIX_HASCO);
@@ -510,7 +509,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 		return selectedModel;
 	}
 
-	public HASCO<S, N, A, Double> getHasco() {
+	public HASCO<N, A, Double> getHasco() {
 		return this.hasco;
 	}
 

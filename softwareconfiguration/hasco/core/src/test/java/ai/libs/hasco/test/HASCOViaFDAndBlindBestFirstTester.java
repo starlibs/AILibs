@@ -1,7 +1,7 @@
 package ai.libs.hasco.test;
 
+import ai.libs.hasco.builder.HASCOBuilder;
 import ai.libs.hasco.core.HASCO;
-import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
@@ -9,10 +9,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 public class HASCOViaFDAndBlindBestFirstTester extends HASCOTester<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String> {
 
 	@Override
-	public HASCO<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> getAlgorithmForSoftwareConfigurationProblem(final RefinementConfiguredSoftwareConfigurationProblem<Double> problem) {
-		HASCOViaFDAndBestFirstFactory<Double> factory = new HASCOViaFDAndBestFirstFactory<>();
-		factory.setNodeEvaluator(n -> 0.0);
-		factory.withDefaultAlgorithmConfig();
-		return factory.getAlgorithm(problem);
+	public HASCO<TFDNode, String, Double> getAlgorithmForSoftwareConfigurationProblem(final RefinementConfiguredSoftwareConfigurationProblem<Double> problem) {
+		return HASCOBuilder.get(problem).withBlindSearch().getAlgorithm();
 	}
 }

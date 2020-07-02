@@ -1,4 +1,4 @@
-package ai.libs.hasco.variants.forwarddecomposition;
+package ai.libs.hasco.builder.forwarddecomposition;
 
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -21,7 +21,7 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
  */
 public class DefaultPathPriorizingPredicate<N, A> implements Predicate<N>, IHascoAware {
 
-	private HASCO<?, N, A, ?> hasco;
+	private HASCO<N, A, ?> hasco;
 
 	@Override
 	public boolean test(final N node) {
