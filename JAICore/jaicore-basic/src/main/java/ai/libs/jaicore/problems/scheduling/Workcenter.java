@@ -1,4 +1,4 @@
-package ai.libs.jaicore.problems.scheduling.openshop;
+package ai.libs.jaicore.problems.scheduling;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,9 +17,11 @@ public class Workcenter {
 	Workcenter(final String workcenterID,  final int[][] setupMatrix) {
 		super();
 		this.workcenterID = workcenterID;
-		for (int i = 0; i < setupMatrix.length; i++) {
-			if (setupMatrix[i][i] != 0) {
-				throw new IllegalArgumentException("The diagonal entries of the setup matrix must always be 0.");
+		if (setupMatrix != null) { // setup matrix is not mandatory (0-setup costs are assumed otherwise)
+			for (int i = 0; i < setupMatrix.length; i++) {
+				if (setupMatrix[i][i] != 0) {
+					throw new IllegalArgumentException("The diagonal entries of the setup matrix must always be 0.");
+				}
 			}
 		}
 		this.setupMatrix = setupMatrix;

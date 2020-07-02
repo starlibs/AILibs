@@ -1,19 +1,21 @@
-package ai.libs.jaicore.problems.scheduling.openshop;
+package ai.libs.jaicore.problems.scheduling;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
-public class OpenShopProblemBuilder {
+public class JobSchedulingProblemBuilder {
 
 	private final Map<String, Workcenter> workcenters = new HashMap<>();
 	private final Map<String, Job> jobs = new HashMap<>();
 	private final Map<String, Machine> machines = new HashMap<>();
 	private final Map<String, Operation> operations = new HashMap<>();
-	private OpenShopMetric metric;
+	private JobShopMetric metric;
+	private int latestArrivalTime = -1;
 
-	public OpenShopProblemBuilder fork() {
-		OpenShopProblemBuilder copy = new OpenShopProblemBuilder();
+	public JobSchedulingProblemBuilder fork() {
+		JobSchedulingProblemBuilder copy = new JobSchedulingProblemBuilder();
 		copy.workcenters.putAll(this.workcenters);
 		copy.jobs.putAll(this.jobs);
 		copy.machines.putAll(this.machines);
@@ -22,7 +24,7 @@ public class OpenShopProblemBuilder {
 		return copy;
 	}
 
-	public OpenShopProblemBuilder withWorkcenter(final String workcenterID, final int[][] setupMatrix) {
+	public JobSchedulingProblemBuilder withWorkcenter(final String workcenterID, final int[][] setupMatrix) {
 		if (this.workcenters.containsKey(workcenterID)) {
 			throw new IllegalArgumentException("Workcenter with id " + workcenterID + " already exists.");
 		}
@@ -30,7 +32,22 @@ public class OpenShopProblemBuilder {
 		return this;
 	}
 
-	public OpenShopProblemBuilder withJob(final String jobID, final int releaseDate, final int dueDate, final int weight) {
+	public JobSchedulingProblemBuilder singleStaged() {
+		return this.withWorkcenter("W", null);
+	}
+
+	public JobSchedulingProblemBuilder withParallelMachines(final int k) {
+		this.machines.clear();
+		for (Entry<String, Workcenter> wcEntry : this.workcenters.entrySet()) {
+			for (int i = 0; i < k; i++) {
+				String machineName = wcEntry.getKey() + "_M" + i;
+				this.withMachineForWorkcenter(machineName, wcEntry.getKey(), 0, 0);
+			}
+		}
+		return this;
+	}
+
+	public JobSchedulingProblemBuilder withJob(final String jobID, final int releaseDate, final int dueDate, final int weight) {
 		if (this.jobs.containsKey(jobID)) {
 			throw new IllegalArgumentException("A job with ID " + jobID + " has already been defined.");
 		}
@@ -38,7 +55,7 @@ public class OpenShopProblemBuilder {
 		return this;
 	}
 
-	public OpenShopProblemBuilder withOperationForJob(final String operationId, final String jobId, final int processTime, final int status, final String wcId) {
+	public JobSchedulingProblemBuilder withOperationForJob(final String operationId, final String jobId, final int processTime, final int status, final String wcId) {
 		Workcenter wc = this.workcenters.get(wcId);
 		Job job = this.jobs.get(jobId);
 		if (wc == null) {
@@ -54,7 +71,7 @@ public class OpenShopProblemBuilder {
 		return this;
 	}
 
-	public OpenShopProblemBuilder withMachineForWorkcenter(final String machineId, final String wcId, final int availability, final int initialState) {
+	public JobSchedulingProblemBuilder withMachineForWorkcenter(final String machineId, final String wcId, final int availability, final int initialState) {
 		Workcenter wc = this.workcenters.get(wcId);
 		if (wc == null) {
 			throw new IllegalArgumentException("No workcenter with id " + wcId + " has been defined!");
@@ -66,16 +83,21 @@ public class OpenShopProblemBuilder {
 		return this;
 	}
 
-	public OpenShopProblemBuilder withMetric(final OpenShopMetric metric) {
+	public JobSchedulingProblemBuilder withMetric(final JobShopMetric metric) {
 		this.metric = metric;
 		return this;
 	}
 
-	public OpenShopProblem build() {
+	public JobSchedulingProblemBuilder withLatestArrivalTime(final int latestArrivalTime) {
+		this.latestArrivalTime = latestArrivalTime;
+		return this;
+	}
+
+	public IJobSchedulingInput build() {
 		if (this.metric == null) {
 			throw new IllegalStateException("No metric for schedule evaluation has been defined.");
 		}
-		return new OpenShopProblem(new HashMap<>(this.jobs), new HashMap<>(this.workcenters), new HashMap<>(this.operations), new HashMap<>(this.machines), this.metric);
+		return new JobSchedulingProblemInput(new HashMap<>(this.jobs), new HashMap<>(this.workcenters), new HashMap<>(this.operations), new HashMap<>(this.machines), this.metric, this.latestArrivalTime);
 	}
 
 	public Map<String, Job> getJobs() {
