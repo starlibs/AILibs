@@ -10,12 +10,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Util;
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.ExtendedRandomForest;
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.featurespace.FeatureDomain;
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.featurespace.FeatureSpace;
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.Util;
 import weka.core.Instances;
 
 /**

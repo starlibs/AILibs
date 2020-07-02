@@ -2,7 +2,7 @@ package ai.libs.mlplan.safeguard;
 
 import org.api4.java.common.event.IEvent;
 
-import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentInstance;
 
 public class EvaluationSafeGuardFiredEvent implements IEvent {
 

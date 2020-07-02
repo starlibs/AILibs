@@ -42,7 +42,7 @@ public abstract class TimeAwareNodeEvaluator<T, A, V extends Comparable<V>> impl
 		this.fallbackNodeEvaluator = pFallbackNodeEvaluator;
 	}
 
-	protected abstract V fTimeouted(ILabeledPath<T, A> node, int timeoutInMS) throws PathEvaluationException, InterruptedException;
+	protected abstract V evaluateTimeouted(ILabeledPath<T, A> node, int timeoutInMS) throws PathEvaluationException, InterruptedException;
 
 	@Override
 	public final V evaluate(final ILabeledPath<T, A> path) throws PathEvaluationException, InterruptedException {
@@ -63,7 +63,7 @@ public abstract class TimeAwareNodeEvaluator<T, A, V extends Comparable<V>> impl
 
 		/* execute evaluation */
 		try {
-			return TimedComputation.compute(() -> this.fTimeouted(path, grantedTime), new Timeout(interruptionTime, TimeUnit.MILLISECONDS),
+			return TimedComputation.compute(() -> this.evaluateTimeouted(path, grantedTime), new Timeout(interruptionTime, TimeUnit.MILLISECONDS),
 					"Node evaluation has timed out (" + TimeAwareNodeEvaluator.class.getName() + "::" + Thread.currentThread() + "-" + System.currentTimeMillis() + ")");
 		} catch (AlgorithmTimeoutedException e) {
 			this.logger.warn("Computation of f-value for {} failed due to exception {} with message {}", path, e.getClass().getName(), e.getMessage());

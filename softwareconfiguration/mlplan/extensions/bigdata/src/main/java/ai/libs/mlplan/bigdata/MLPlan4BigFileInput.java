@@ -25,6 +25,7 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.basic.StatisticsUtil;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
+import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.MCCVSplitEvaluationEvent;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.ReservoirSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SimpleRandomSamplingFactory;
@@ -35,7 +36,6 @@ import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.Attribute;

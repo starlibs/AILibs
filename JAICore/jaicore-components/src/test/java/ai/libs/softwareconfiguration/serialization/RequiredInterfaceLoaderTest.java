@@ -3,7 +3,8 @@ package ai.libs.softwareconfiguration.serialization;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
-import ai.libs.softwareconfiguration.model.Interface;
+import ai.libs.jaicore.components.model.Interface;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;

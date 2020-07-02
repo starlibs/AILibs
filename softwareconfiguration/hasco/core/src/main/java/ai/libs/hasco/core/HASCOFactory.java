@@ -10,14 +10,14 @@ import org.api4.java.datastructure.graph.ILabeledPath;
 import ai.libs.hasco.core.reduction.planning2search.DefaultHASCOPlanningReduction;
 import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningToGraphSearchReduction;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
-import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.softwareconfiguration.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 
 public class HASCOFactory<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V, HASCO<S, N, A, V>> {
 

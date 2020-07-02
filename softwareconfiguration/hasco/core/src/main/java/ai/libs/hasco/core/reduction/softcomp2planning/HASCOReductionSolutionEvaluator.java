@@ -11,11 +11,11 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.planning.core.Action;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
 
 public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements IObjectEvaluator<IPlan, V>, ILoggingCustomizable {
 

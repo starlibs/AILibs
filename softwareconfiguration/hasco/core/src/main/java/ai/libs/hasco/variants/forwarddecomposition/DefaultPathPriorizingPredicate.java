@@ -6,10 +6,10 @@ import java.util.function.Predicate;
 import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.core.IHascoAware;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.ComponentUtil;
 
 /**
  * This is a node evaluator that assigns 0 to all nodes encoding (partial) compositions where each component refinement is with its default parameters.

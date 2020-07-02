@@ -8,10 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOUtil;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
 
 /**
  * A Comparator for {@link TFDNode}s that sorts based on meta information about the underlying {@link ComponentInstance} of the node and possibly application context.

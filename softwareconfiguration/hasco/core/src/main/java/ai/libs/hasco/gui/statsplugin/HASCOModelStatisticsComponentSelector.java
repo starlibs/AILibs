@@ -9,10 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Interface;
+import ai.libs.jaicore.components.model.UnparametrizedComponentInstance;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfo;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.Interface;
-import ai.libs.softwareconfiguration.model.UnparametrizedComponentInstance;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;

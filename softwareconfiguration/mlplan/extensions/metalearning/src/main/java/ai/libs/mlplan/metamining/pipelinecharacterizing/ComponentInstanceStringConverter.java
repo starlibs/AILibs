@@ -15,12 +15,12 @@ import org.apache.commons.math3.geometry.partitioning.Region.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.NumericParameterDomain;
-import ai.libs.softwareconfiguration.model.Parameter;
-import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
-import ai.libs.softwareconfiguration.model.Util;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.NumericParameterDomain;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.model.Util;
 import treeminer.util.TreeRepresentationUtils;
 
 public class ComponentInstanceStringConverter extends Thread {

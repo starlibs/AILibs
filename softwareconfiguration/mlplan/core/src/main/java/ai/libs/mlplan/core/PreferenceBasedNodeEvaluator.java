@@ -12,11 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOUtil;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.ml.scikitwrapper.EBasicProblemType;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
 
 public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, String, Double>, ILoggingCustomizable {
 

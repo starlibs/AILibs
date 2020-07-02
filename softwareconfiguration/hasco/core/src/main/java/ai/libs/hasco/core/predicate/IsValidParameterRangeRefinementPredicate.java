@@ -17,17 +17,17 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.model.CategoricalParameterDomain;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.IParameterDomain;
+import ai.libs.jaicore.components.model.NumericParameterDomain;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.logic.fol.theories.EvaluablePredicate;
-import ai.libs.softwareconfiguration.model.CategoricalParameterDomain;
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.IParameterDomain;
-import ai.libs.softwareconfiguration.model.NumericParameterDomain;
-import ai.libs.softwareconfiguration.model.Parameter;
-import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
 
 public class IsValidParameterRangeRefinementPredicate implements EvaluablePredicate {
 

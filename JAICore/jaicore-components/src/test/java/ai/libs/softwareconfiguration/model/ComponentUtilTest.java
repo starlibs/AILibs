@@ -13,12 +13,12 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.ComponentUtil;
-import ai.libs.softwareconfiguration.model.NumericParameterDomain;
-import ai.libs.softwareconfiguration.model.Parameter;
-import ai.libs.softwareconfiguration.serialization.ComponentLoader;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentUtil;
+import ai.libs.jaicore.components.model.NumericParameterDomain;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.serialization.ComponentLoader;
 
 /**
  * Tests whether the methods provided by the ComponentUtil work properly.

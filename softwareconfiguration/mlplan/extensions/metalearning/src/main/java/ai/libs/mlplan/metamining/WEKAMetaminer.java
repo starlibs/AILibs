@@ -12,16 +12,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.metamining.IMetaMiner;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.WEKAPipelineCharacterizer;
 import ai.libs.mlplan.metamining.similaritymeasures.F3Optimizer;
 import ai.libs.mlplan.metamining.similaritymeasures.IHeterogenousSimilarityMeasureComputer;
 import ai.libs.mlplan.metamining.similaritymeasures.IRelativeRankMatrixComputer;
 import ai.libs.mlplan.metamining.similaritymeasures.RelativeRankMatricComputer;
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.Parameter;
-import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
 import weka.core.Attribute;
 import weka.core.Instances;
 

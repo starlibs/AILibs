@@ -17,6 +17,13 @@ import org.slf4j.LoggerFactory;
 import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.model.CategoricalParameterDomain;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Dependency;
+import ai.libs.jaicore.components.model.IParameterDomain;
+import ai.libs.jaicore.components.model.NumericParameterDomain;
+import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.LiteralParam;
 import ai.libs.jaicore.logic.fol.structure.Monom;
@@ -25,13 +32,6 @@ import ai.libs.jaicore.planning.core.Action;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
-import ai.libs.softwareconfiguration.model.CategoricalParameterDomain;
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.Dependency;
-import ai.libs.softwareconfiguration.model.IParameterDomain;
-import ai.libs.softwareconfiguration.model.NumericParameterDomain;
-import ai.libs.softwareconfiguration.model.Parameter;
 
 /**
  * Utility functions in the context of HASCO algorithm selection and configurtion.
@@ -357,7 +357,7 @@ public class HASCOUtil {
 
 		/* update domains based on the dependencies defined for this component */
 		for (Dependency dependency : component.getDependencies()) {
-			if (ai.libs.softwareconfiguration.model.Util.isDependencyPremiseSatisfied(dependency, domains)) {
+			if (ai.libs.jaicore.components.model.Util.isDependencyPremiseSatisfied(dependency, domains)) {
 				logger.info("Premise of dependency {} is satisfied, applying its conclusions ...", dependency);
 				for (Pair<Parameter, IParameterDomain> newDomain : dependency.getConclusion()) {
 					/*

@@ -15,13 +15,13 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.ResourceFile;
-import ai.libs.softwareconfiguration.model.BooleanParameterDomain;
-import ai.libs.softwareconfiguration.model.CategoricalParameterDomain;
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.NumericParameterDomain;
-import ai.libs.softwareconfiguration.model.Parameter;
-import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
-import ai.libs.softwareconfiguration.serialization.ComponentLoader;
+import ai.libs.jaicore.components.model.BooleanParameterDomain;
+import ai.libs.jaicore.components.model.CategoricalParameterDomain;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.NumericParameterDomain;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.serialization.ComponentLoader;
 
 @SuppressWarnings("SimplifiableJUnitAssertion")
 public class ComponentLoaderTest {

@@ -11,12 +11,12 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.serialization.ComponentNotFoundException;
+import ai.libs.jaicore.components.serialization.ComponentUtils;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.jaicore.ml.weka.classification.pipeline.SupervisedFilterSelector;
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.serialization.ComponentNotFoundException;
-import ai.libs.softwareconfiguration.serialization.ComponentUtils;
 import weka.core.OptionHandler;
 
 /**

@@ -118,6 +118,7 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 							this.logger.debug("Tree policy recommended action {}.", action);
 						} else {
 							if (phase == 1) { // switch to next phase
+								this.logger.debug("Switching to roll-out phase 2.");
 								phase = 2;
 							}
 							if (phase == 2) {
@@ -142,6 +143,7 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 									this.logger.debug("Adding state {} to tree policy domain.", current);
 								}
 								phase = 3;
+								this.logger.debug("Switching to roll-out phase 3.");
 							} else if (phase == 3) {
 								this.logger.debug("Ask default policy to choose one action of: {}.", possibleActions);
 								action = this.defaultPolicy.getAction(current, possibleActions);

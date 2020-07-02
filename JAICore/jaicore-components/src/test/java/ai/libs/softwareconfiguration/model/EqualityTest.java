@@ -6,10 +6,10 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import ai.libs.softwareconfiguration.model.CategoricalParameterDomain;
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.NumericParameterDomain;
-import ai.libs.softwareconfiguration.model.Parameter;
+import ai.libs.jaicore.components.model.CategoricalParameterDomain;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.NumericParameterDomain;
+import ai.libs.jaicore.components.model.Parameter;
 
 public class EqualityTest {
 

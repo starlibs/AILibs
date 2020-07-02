@@ -3,8 +3,8 @@ package ai.libs.hasco.variants.forwarddecomposition.twophase;
 import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
+import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
-import ai.libs.softwareconfiguration.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 
 public class TwoPhaseHASCOFactory<S extends GraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> implements SoftwareConfigurationAlgorithmFactory<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double, TwoPhaseHASCO<S, N, A>> {
 

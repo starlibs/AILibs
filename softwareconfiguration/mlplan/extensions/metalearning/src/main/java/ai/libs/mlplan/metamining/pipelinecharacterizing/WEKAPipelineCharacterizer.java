@@ -13,10 +13,10 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.Parameter;
-import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import treeminer.FrequentSubtreeFinder;
 import treeminer.TreeMiner;
 import treeminer.util.TreeRepresentationUtils;

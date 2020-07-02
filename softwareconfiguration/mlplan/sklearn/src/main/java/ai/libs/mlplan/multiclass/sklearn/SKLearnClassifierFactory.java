@@ -14,14 +14,14 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
+import ai.libs.jaicore.components.model.CategoricalParameterDomain;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.NumericParameterDomain;
+import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.ml.scikitwrapper.EBasicProblemType;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.ILearnerFactory;
-import ai.libs.softwareconfiguration.exceptions.ComponentInstantiationFailedException;
-import ai.libs.softwareconfiguration.model.CategoricalParameterDomain;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.NumericParameterDomain;
-import ai.libs.softwareconfiguration.model.Parameter;
 
 /**
  * The SKLearnClassifierFactory takes a ground component instance and parses it into a <code>ScikitLearnWrapper</code> as defined in the project jaicore-ml.

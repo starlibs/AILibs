@@ -31,6 +31,15 @@ import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentUtil;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
+import ai.libs.jaicore.components.model.UnparametrizedComponentInstance;
+import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithm;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedGraphSearchBasedPlan;
@@ -43,15 +52,6 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSear
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.timing.TimeRecordingObjectEvaluator;
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.ComponentUtil;
-import ai.libs.softwareconfiguration.model.Parameter;
-import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
-import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.softwareconfiguration.model.SoftwareConfigurationProblem;
-import ai.libs.softwareconfiguration.model.UnparametrizedComponentInstance;
-import ai.libs.softwareconfiguration.optimizingfactory.SoftwareConfigurationAlgorithm;
 
 /**
  * Hierarchically create an object of type T

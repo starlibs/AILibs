@@ -11,10 +11,10 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import ai.libs.hasco.gui.statsplugin.HASCOSolutionCandidateRepresenter;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirst;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
-import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
 
 public class HASCOWithSolutionPerformanceVisualizationExample {
 	public static void main(final String[] args) throws IOException, InterruptedException, TimeoutException, AlgorithmException, AlgorithmExecutionCanceledException {

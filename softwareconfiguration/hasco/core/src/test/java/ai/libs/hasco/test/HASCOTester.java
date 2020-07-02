@@ -24,14 +24,14 @@ import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.jaicore.components.serialization.CompositionSerializer;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.util.CycleDetectedResult;
 import ai.libs.jaicore.search.util.DeadEndDetectedResult;
 import ai.libs.jaicore.search.util.GraphSanityChecker;
 import ai.libs.jaicore.search.util.SanityCheckResult;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.softwareconfiguration.serialization.CompositionSerializer;
 
 public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends SoftwareConfigurationAlgorithmTester {
 

@@ -16,6 +16,9 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedObjectEvaluator;
 import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
@@ -24,9 +27,6 @@ import ai.libs.mlplan.safeguard.AlwaysEvaluateSafeGuard;
 import ai.libs.mlplan.safeguard.EvaluationSafeGuardException;
 import ai.libs.mlplan.safeguard.EvaluationSafeGuardFiredEvent;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuard;
-import ai.libs.softwareconfiguration.exceptions.ComponentInstantiationFailedException;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.ComponentInstanceUtil;
 
 /**
  * Evaluator used in the search phase of mlplan.

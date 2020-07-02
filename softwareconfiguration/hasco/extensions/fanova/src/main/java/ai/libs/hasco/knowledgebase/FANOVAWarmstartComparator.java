@@ -6,8 +6,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.Parameter;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.Parameter;
 
 /**
  * Comparator which compares parameters according to their importance using the

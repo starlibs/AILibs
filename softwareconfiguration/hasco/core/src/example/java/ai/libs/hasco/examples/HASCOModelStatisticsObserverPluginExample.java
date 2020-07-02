@@ -13,14 +13,14 @@ import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirst;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.jaicore.components.serialization.CompositionSerializer;
+import ai.libs.jaicore.components.serialization.UnresolvableRequiredInterfaceException;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
-import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.softwareconfiguration.serialization.CompositionSerializer;
-import ai.libs.softwareconfiguration.serialization.UnresolvableRequiredInterfaceException;
 
 public class HASCOModelStatisticsObserverPluginExample {
 	public static void main(final String[] args) throws UnresolvableRequiredInterfaceException, IOException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {

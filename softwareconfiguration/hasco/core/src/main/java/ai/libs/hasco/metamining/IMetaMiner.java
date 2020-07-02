@@ -1,6 +1,6 @@
 package ai.libs.hasco.metamining;
 
-import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentInstance;
 
 /**
  * Used to to compute a score for a given {@link ComponentInstance} based on

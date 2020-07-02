@@ -9,9 +9,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.Util;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Util;
 
 public class UtilCompositionTest {
 

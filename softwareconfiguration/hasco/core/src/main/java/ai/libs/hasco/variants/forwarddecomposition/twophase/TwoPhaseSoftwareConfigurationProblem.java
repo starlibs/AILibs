@@ -6,12 +6,12 @@ import java.util.Map;
 
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.Parameter;
-import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
-import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.softwareconfiguration.model.SoftwareConfigurationProblem;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
 
 public class TwoPhaseSoftwareConfigurationProblem extends RefinementConfiguredSoftwareConfigurationProblem<Double> {
 	private final IObjectEvaluator<ComponentInstance, Double> selectionBenchmark;

@@ -31,6 +31,10 @@ import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.serialization.ComponentLoader;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
@@ -41,10 +45,6 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.Alter
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.Parameter;
-import ai.libs.softwareconfiguration.model.ParameterRefinementConfiguration;
-import ai.libs.softwareconfiguration.serialization.ComponentLoader;
 
 /**
  * The MLPlanBuilder helps to easily configure and initialize ML-Plan with specific parameter settings.

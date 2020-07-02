@@ -3,8 +3,8 @@ package ai.libs.mlplan.safeguard;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.Timeout;
 
+import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.mlplan.core.ITimeTrackingLearner;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
 
 /**
  * The AlwaysEvaluateSafeGuard is more of a dummy encoding of a safe guard that will always predict that any algorithm will be evaluated within the timeout and return a result in instant time. It thus can be employed to disable the safe guard feature of the {@link ai.libs.mlplan.core.PipelineEvaluator}.

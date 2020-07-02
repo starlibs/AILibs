@@ -18,6 +18,13 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.components.model.CategoricalParameterDomain;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentUtil;
+import ai.libs.jaicore.components.model.NumericParameterDomain;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.serialization.ComponentLoader;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
@@ -27,13 +34,6 @@ import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictio
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.multiclass.sklearn.EMLPlanSkLearnProblemType;
 import ai.libs.mlplan.multiclass.sklearn.SKLearnClassifierFactory;
-import ai.libs.softwareconfiguration.model.CategoricalParameterDomain;
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.ComponentUtil;
-import ai.libs.softwareconfiguration.model.NumericParameterDomain;
-import ai.libs.softwareconfiguration.model.Parameter;
-import ai.libs.softwareconfiguration.serialization.ComponentLoader;
 
 public class SearchSpaceConfigurationTest {
 

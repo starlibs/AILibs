@@ -8,11 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.classification.multilabel.learner.MekaClassifier;
-import ai.libs.softwareconfiguration.exceptions.ComponentInstantiationFailedException;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.model.NumericParameterDomain;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.MultipleClassifiersCombiner;

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentInstance;
 
 public class ComponentInstanceSerializer {
 

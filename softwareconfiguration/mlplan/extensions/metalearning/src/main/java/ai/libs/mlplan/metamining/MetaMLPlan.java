@@ -21,6 +21,8 @@ import com.google.common.eventbus.EventBus;
 
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.metamining.MetaMinerBasedSorter;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
@@ -38,8 +40,6 @@ import ai.libs.mlplan.multiclass.wekamlplan.MLPlan4Weka;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;

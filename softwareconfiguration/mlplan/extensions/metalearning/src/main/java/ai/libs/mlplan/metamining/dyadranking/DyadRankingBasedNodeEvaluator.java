@@ -49,6 +49,9 @@ import org.slf4j.LoggerFactory;
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.serialization.ComponentLoader;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.FixedSplitClassifierEvaluator;
@@ -71,9 +74,6 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.ComponentInstanceVectorFeatureGenerator;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
-import ai.libs.softwareconfiguration.model.Component;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.serialization.ComponentLoader;
 import weka.core.Instances;
 
 /**

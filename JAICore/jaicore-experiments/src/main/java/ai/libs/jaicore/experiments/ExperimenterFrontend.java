@@ -83,6 +83,9 @@ public class ExperimenterFrontend {
 	}
 
 	private void prepareEvaluator() {
+		if (this.evaluator != null)  {
+			throw new IllegalStateException("An evaluator has already been set manually. Preparing a domain specific one afterwards and overriding the manually set is not allowed!");
+		}
 		if (this.controller == null) {
 			throw new IllegalStateException("Cannot prepare evaluator, because no experiment controller has been set!");
 		}
@@ -95,7 +98,9 @@ public class ExperimenterFrontend {
 	}
 
 	public void randomlyConductExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
-		this.prepareEvaluator();
+		if (this.evaluator == null) {
+			this.prepareEvaluator();
+		}
 		new ExperimentRunner(this.config, this.evaluator, this.databaseHandle).randomlyConductExperiments();
 	}
 
@@ -106,7 +111,9 @@ public class ExperimenterFrontend {
 		if (this.databaseHandle == null) {
 			throw new IllegalStateException("Cannot conduct experiments. No database handle has been set, yet.");
 		}
-		this.prepareEvaluator();
+		if (this.evaluator == null) {
+			this.prepareEvaluator();
+		}
 		ExperimentRunner runner = new ExperimentRunner(this.config, this.evaluator, this.databaseHandle);
 		runner.setLoggerName(this.loggerNameForAlgorithm + ".runner");
 		runner.randomlyConductExperiments(limit);

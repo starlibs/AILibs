@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
@@ -24,7 +25,6 @@ import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.PipelineEvaluator;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
-import ai.libs.softwareconfiguration.model.RefinementConfiguredSoftwareConfigurationProblem;
 import weka.core.Instances;
 
 /**

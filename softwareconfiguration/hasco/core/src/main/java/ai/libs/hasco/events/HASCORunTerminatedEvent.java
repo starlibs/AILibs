@@ -1,6 +1,6 @@
 package ai.libs.hasco.events;
 
-import ai.libs.softwareconfiguration.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentInstance;
 
 public class HASCORunTerminatedEvent<T, V extends Comparable<V>> {
 

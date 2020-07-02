@@ -43,6 +43,10 @@ import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
+import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.optimizingfactory.OptimizingFactory;
+import ai.libs.jaicore.components.optimizingfactory.OptimizingFactoryProblem;
 import ai.libs.jaicore.ml.core.dataset.DatasetUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
@@ -54,10 +58,6 @@ import ai.libs.mlplan.core.events.MLPlanPhaseSwitchedEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuard;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
-import ai.libs.softwareconfiguration.exceptions.ComponentInstantiationFailedException;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
-import ai.libs.softwareconfiguration.optimizingfactory.OptimizingFactory;
-import ai.libs.softwareconfiguration.optimizingfactory.OptimizingFactoryProblem;
 
 public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> extends AAlgorithm<ILabeledDataset<?>, L> implements ILoggingCustomizable {
 

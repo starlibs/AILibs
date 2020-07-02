@@ -3,8 +3,8 @@ package ai.libs.mlplan.safeguard;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.Timeout;
 
+import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.mlplan.core.ITimeTrackingLearner;
-import ai.libs.softwareconfiguration.model.ComponentInstance;
 
 /**
  * An evaluation safe guard can be used to predict whether an evaluation is likely to succeed or not.
