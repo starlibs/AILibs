@@ -8,9 +8,11 @@ import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
 
+import ai.libs.jaicore.basic.ArrayUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.F1Measure;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 
-public class F1MacroAverageL extends AThresholdBasedMultiLabelClassificationMeasure {
+public class F1MacroAverageL extends AMultiLabelClassificationMeasure {
 
 	public F1MacroAverageL(final double threshold) {
 		super(threshold);
@@ -21,19 +23,16 @@ public class F1MacroAverageL extends AThresholdBasedMultiLabelClassificationMeas
 	}
 
 	@Override
-	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
-		return 1 - this.score(expected, predicted);
-	}
-
-	@Override
 	public double score(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
 		this.checkConsistency(expected, predicted);
-		int[][] expectedMatrix = this.transposeMatrix(this.listToMatrix(expected));
-		int[][] actualMatrix = this.transposeMatrix(this.listToThresholdedRelevanceMatrix(predicted));
+		int[][] expectedMatrix = ArrayUtil.transposeMatrix(this.listToMatrix(expected));
+		int[][] actualMatrix = ArrayUtil.transposeMatrix(this.listToThresholdedRelevanceMatrix(predicted));
 
 		F1Measure loss = new F1Measure(1);
 		OptionalDouble res = IntStream.range(0, expectedMatrix.length)
-				.mapToDouble(x -> loss.score(Arrays.stream(expectedMatrix[x]).mapToObj(Integer::valueOf).collect(Collectors.toList()), Arrays.stream(actualMatrix[x]).mapToObj(Integer::valueOf).collect(Collectors.toList()))).average();
+				.mapToDouble(
+						x -> loss.score(Arrays.stream(expectedMatrix[x]).mapToObj(Integer::valueOf).collect(Collectors.toList()), Arrays.stream(actualMatrix[x]).mapToObj(y -> new SingleLabelClassification(y)).collect(Collectors.toList())))
+				.average();
 		if (!res.isPresent()) {
 			throw new IllegalStateException("Could not determine average label-wise f measure.");
 		} else {

@@ -24,9 +24,4 @@ public class Hamming extends AMultiLabelClassificationMeasure {
 		return (double) IntStream.range(0, expected.size()).map(x -> SetUtil.getDisjointSet(this.getThresholdedPredictionAsSet(predicted.get(x)), ArrayUtil.argMax(expected.get(x))).size()).sum() / (expected.size() * expected.get(0).length);
 	}
 
-	@Override
-	public double score(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
-		return 1 - this.loss(expected, predicted);
-	}
-
 }

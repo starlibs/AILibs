@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
@@ -59,7 +60,7 @@ public class MLPlanEvaluationListenerExample {
 
 			@Subscribe
 			public void receiveEvent(final TrainTestSplitEvaluationCompletedEvent<?, ?> e) { // this event is fired whenever any pipeline is evaluated successfully
-				double errorRate = EClassificationPerformanceMeasure.ERRORRATE.loss(e.getReport().getPredictionDiffList());
+				double errorRate = EClassificationPerformanceMeasure.ERRORRATE.loss(e.getReport().getPredictionDiffList().getCastedView(Integer.class, ISingleLabelClassification.class));
 				IWekaClassifier classifier = ((WekaClassifier) e.getLearner());
 				LOGGER.info("Received single evaluation error rate for learner {} is {}", classifier, errorRate);
 			}
@@ -74,7 +75,7 @@ public class MLPlanEvaluationListenerExample {
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}", EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()));
+			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}", EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList().getCastedView(Integer.class, ISingleLabelClassification.class)));
 		} catch (NoSuchElementException e) {
 			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}

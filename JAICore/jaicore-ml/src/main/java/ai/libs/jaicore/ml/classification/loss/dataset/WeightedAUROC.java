@@ -2,6 +2,9 @@ package ai.libs.jaicore.ml.classification.loss.dataset;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 
 import ai.libs.jaicore.ml.classification.loss.ConfusionMatrix;
 
@@ -12,11 +15,11 @@ import ai.libs.jaicore.ml.classification.loss.ConfusionMatrix;
  *
  * @author mwever
  */
-public class WeightedAUROC extends AHomogeneousPredictionPerformanceMeasure<Object> {
+public class WeightedAUROC extends ASingleLabelPredictionPerformanceMeasure {
 
 	@Override
-	public double score(final List<?> expected, final List<?> predicted) {
-		ConfusionMatrix cmat = new ConfusionMatrix(expected, predicted);
+	public double score(final List<? extends Integer> expected, final List<? extends ISingleLabelClassification> predicted) {
+		ConfusionMatrix cmat = new ConfusionMatrix(expected, predicted.stream().map(x -> x.getPrediction()).collect(Collectors.toList()));
 		int[] classCounts = Arrays.stream(cmat.getConfusionMatrix()).mapToInt(x -> Arrays.stream(x).sum()).toArray();
 		double sum = 0;
 		for (int i = 0; i < classCounts.length; i++) {

@@ -68,7 +68,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	protected static final double DEFAULT_SEARCH_TRAIN_FOLD_SIZE = 0.7;
 	protected static final int DEFAULT_SELECTION_NUM_MC_ITERATIONS = 5;
 	protected static final double DEFAULT_SELECTION_TRAIN_FOLD_SIZE = 0.7;
-	protected static final IDeterministicPredictionPerformanceMeasure<Object, Object> DEFAULT_PERFORMANCE_MEASURE = EClassificationPerformanceMeasure.ERRORRATE;
+	protected static final IDeterministicPredictionPerformanceMeasure<?, ?> DEFAULT_PERFORMANCE_MEASURE = EClassificationPerformanceMeasure.ERRORRATE;
 
 	/* Default configuration values */
 	private static final File DEF_ALGORITHM_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_ALGORITHM_CONFIG, FS_ALGORITHM_CONFIG);

@@ -11,13 +11,13 @@ import org.api4.java.ai.ml.classification.multilabel.evaluation.loss.IMultiLabel
  * Measure combining exact match, hamming loss, f1macroavgL and rankloss. Here
  * implemented in inverse.
  *
- * de S�, Alex GC, Gisele L. Pappa, and Alex A. Freitas. "Towards a method for automatically selecting and configuring multi-label
+ * de Sa, Alex GC, Gisele L. Pappa, and Alex A. Freitas. "Towards a method for automatically selecting and configuring multi-label
  * classification algorithms." Proceedings of the Genetic and Evolutionary Computation Conference Companion. ACM, 2017.
  *
  * @author mwever
  *
  */
-public class AutoMEKAGGPFitnessMeasureLoss extends AThresholdBasedMultiLabelClassificationMeasure {
+public class AutoMEKAGGPFitnessMeasureLoss extends AMultiLabelClassificationMeasure {
 
 	private IMultiLabelClassificationPredictionPerformanceMeasure[] measures;
 

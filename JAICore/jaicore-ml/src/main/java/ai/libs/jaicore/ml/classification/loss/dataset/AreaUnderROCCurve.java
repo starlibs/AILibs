@@ -2,7 +2,9 @@ package ai.libs.jaicore.ml.classification.loss.dataset;
 
 import java.util.List;
 
-public class AreaUnderROCCurve extends AHomogeneousPredictionPerformanceMeasure<Object> {
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
+
+public class AreaUnderROCCurve extends ASingleLabelPredictionPerformanceMeasure {
 
 	private final Object positiveClass;
 
@@ -15,7 +17,7 @@ public class AreaUnderROCCurve extends AHomogeneousPredictionPerformanceMeasure<
 	}
 
 	@Override
-	public double score(final List<?> expected, final List<?> predicted) {
+	public double score(final List<? extends Integer> expected, final List<? extends ISingleLabelClassification> predicted) {
 		throw new UnsupportedOperationException("AUROC cannot be implemented as we do not have any class probabilities available");
 	}
 
