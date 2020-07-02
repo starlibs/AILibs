@@ -2,7 +2,7 @@ package ai.libs.hasco.test;
 
 import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOFactory;
-import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.SimpleForwardDecompositionReducer;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;

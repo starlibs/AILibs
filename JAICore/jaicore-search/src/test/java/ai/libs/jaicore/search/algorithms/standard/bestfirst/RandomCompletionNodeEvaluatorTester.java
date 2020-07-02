@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.util.CombinatoricsUtils;
@@ -233,6 +234,29 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 				assertEquals("There should be exactly " + k + " scores.", k, seenScores.size());
 			}
 		}
+	}
+
+	@Test
+	public void testThatASolutionEventIsEmittedForEveryRollout() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException, PathEvaluationException {
+		int numCities = 5;
+		int numRepetitions = 3;
+		StandardBestFirst<EnhancedTTSPState, String, Double> bf = this.getBF(numCities, node -> 0.0);
+		bf.initGraph();
+		BackPointerPath<EnhancedTTSPState, String, ?> root = bf.getOpen().get(0);
+
+		RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> ne = this.getNodeEvaluator(numCities, n -> n.getHead().getTime(), 0, numRepetitions, numRepetitions, 1000);
+		AtomicInteger observedSolutions = new AtomicInteger(0);
+		ne.registerSolutionListener(new Object() {
+
+			@Subscribe
+			public void receiveSolutionEvent(final EvaluatedSearchSolutionCandidateFoundEvent<?, ?, ?> e) {
+				observedSolutions.incrementAndGet();
+			}
+		});
+
+		/* start evaluation */
+		ne.evaluate(root);
+		assertEquals(numRepetitions, observedSolutions.get());
 	}
 
 	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> getNodeEvaluator(final int problemDifficulty, final IObjectEvaluator<ILabeledPath<EnhancedTTSPState, String>, Double> oe, final int seed,

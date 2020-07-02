@@ -5,16 +5,16 @@ import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTes
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
-import ai.libs.jaicore.problems.scheduling.openshop.OpenShopProblem;
-import ai.libs.jaicore.problems.scheduling.openshop.Operation;
-import ai.libs.jaicore.problems.scheduling.openshop.Schedule;
+import ai.libs.jaicore.problems.scheduling.JobSchedulingProblemInput;
+import ai.libs.jaicore.problems.scheduling.Operation;
+import ai.libs.jaicore.problems.scheduling.Schedule;
 
 public class OpenShopGraphSearchProblem implements IPathSearchWithPathEvaluationsInput<OpenShopState, String, Double> {
-	private final OpenShopProblem problem;
+	private final JobSchedulingProblemInput problem;
 	private final OpenShopGraphGenerator gg;
 	private final OpenShopGoalPredicate gp = new OpenShopGoalPredicate();
 
-	public OpenShopGraphSearchProblem(final OpenShopProblem problem) {
+	public OpenShopGraphSearchProblem(final JobSchedulingProblemInput problem) {
 		super();
 		this.problem = problem;
 		this.gg = new OpenShopGraphGenerator(problem);
@@ -38,7 +38,7 @@ public class OpenShopGraphSearchProblem implements IPathSearchWithPathEvaluation
 
 			/* penalize inactive operations */
 			int inActive = 0;
-			for (Operation o : this.problem.getOperations().values()) {
+			for (Operation o : this.problem.getOperations()) {
 				if (s.canOperationBeScheduledEarlierWithoutAnyOtherEffect(o)) {
 					inActive ++;
 				}
@@ -47,7 +47,7 @@ public class OpenShopGraphSearchProblem implements IPathSearchWithPathEvaluation
 		};
 	}
 
-	public OpenShopProblem getProblem() {
+	public JobSchedulingProblemInput getProblem() {
 		return this.problem;
 	}
 }

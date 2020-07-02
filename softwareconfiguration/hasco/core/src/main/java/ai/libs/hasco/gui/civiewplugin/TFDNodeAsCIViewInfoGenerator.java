@@ -3,10 +3,10 @@ package ai.libs.hasco.gui.civiewplugin;
 import java.util.Collection;
 import java.util.Map.Entry;
 
-import ai.libs.hasco.core.Util;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.Parameter;
+import ai.libs.hasco.core.HASCOUtil;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
@@ -26,7 +26,7 @@ public class TFDNodeAsCIViewInfoGenerator implements NodeInfoGenerator<BackPoint
 
 	@Override
 	public String generateInfoForNode(final BackPointerPath<TFDNode, String, Double> node) {
-		ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, node.getHead().getState(), true);
+		ComponentInstance ci = HASCOUtil.getSolutionCompositionFromState(this.components, node.getHead().getState(), true);
 		if (ci == null) {
 			return "<i>No component has been chosen, yet.</i>";
 		} else {

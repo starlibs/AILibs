@@ -1,7 +1,7 @@
 package ai.libs.hasco.core;
 
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.EvaluatedSoftwareConfigurationSolution;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.EvaluatedSoftwareConfigurationSolution;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedGraphSearchBasedPlan;
 
 /**

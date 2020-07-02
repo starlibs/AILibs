@@ -6,6 +6,7 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst.ParentDisc
 public interface IBestFirstConfig extends IOwnerBasedAlgorithmConfig {
 
 	public static final String K_PD = "bestfirst.parentdiscarding";
+	public static final String K_OE = "bestfirst.optimisticheuristic";
 
 	/**
 	 * @return Whether or not parent discarding should be used
@@ -13,4 +14,8 @@ public interface IBestFirstConfig extends IOwnerBasedAlgorithmConfig {
 	@Key(K_PD)
 	@DefaultValue("NONE")
 	public ParentDiscarding parentDiscarding();
+
+	@Key(K_OE)
+	@DefaultValue("false")
+	public boolean optimisticHeuristic();
 }

@@ -100,6 +100,10 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 			Pair<String, String> decomposition = this.analyzer.getNameTypeSplitForAttribute(key);
 			String fieldName = decomposition.getX();
 			String fieldType = decomposition.getY();
+			if (fieldType == null) {
+				fieldType = "varchar(500)";
+				this.logger.warn("No type definition given for field {}. Using varchar(500)", fieldName);
+			}
 			sqlMainTable.append("`" + fieldName + "` " + fieldType + " NOT NULL,");
 			keyFieldsSB.append("`" + fieldName + "`,");
 		}
@@ -116,6 +120,10 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 			Pair<String, String> decomposition = this.analyzer.getNameTypeSplitForAttribute(result);
 			String fieldName = decomposition.getX();
 			String fieldType = decomposition.getY();
+			if (fieldType == null) {
+				fieldType = "varchar(500)";
+				this.logger.warn("No type definition given for field {}. Using varchar(500)", fieldName);
+			}
 			sqlMainTable.append("`" + fieldName + "` " + fieldType + " NULL,");
 			if (this.config.getFieldsForWhichToIgnoreTime() == null || fieldsForWhichToIgnoreTime.stream().noneMatch(fieldName::matches)) {
 				sqlMainTable.append("`" + fieldName + "_" + FIELD_TIME + "` TIMESTAMP NULL,");

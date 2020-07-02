@@ -4,10 +4,10 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import ai.libs.hasco.core.HASCO;
+import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.core.IHascoAware;
-import ai.libs.hasco.core.Util;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.ComponentUtil;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 
@@ -35,11 +35,12 @@ public class DefaultPathPriorizingPredicate<N, A> implements Predicate<N>, IHasc
 		if (this.hasco.getInput() == null) {
 			throw new IllegalStateException("HASCO exists, but its problem input has not been defined yet.");
 		}
-		TFDNode tfd = (TFDNode) node;
+		TFDNode tfd = (TFDNode)node;
 		Monom stateAfterLastAction = tfd.getState();
 
 		/* now check whether the last edge was a method that will necessary induce a certain successor state  */
-		ComponentInstance inst = Util.getSolutionCompositionFromState(this.hasco.getInput().getComponents(), stateAfterLastAction, false);
+
+		ComponentInstance inst = HASCOUtil.getSolutionCompositionFromState(this.hasco.getInput().getComponents(), stateAfterLastAction, false);
 		if (inst == null) {
 			return true;
 		}

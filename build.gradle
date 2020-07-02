@@ -117,7 +117,7 @@ allprojects {
 		mavenCentral()
 		mavenLocal()
 		maven { url "https://jitpack.io" }
-		maven { url "http://clojars.org/repo/" }
+		maven { url "https://clojars.org/repo/" }
 		maven { url "https://plugins.gradle.org/m2/" }
 	}
 	//Dependencies for all(!) projects
@@ -205,6 +205,7 @@ allprojects {
 	}
 
 
+
 	test {
 		useJUnitPlatform()
      	reports {
@@ -246,6 +247,7 @@ dependencies{
 	compile project(":mlplan-ext-bigdata")
 	compile project(":mlplan-full")
 	compile project(":JAICore:jaicore-basic")
+	compile project(":JAICore:jaicore-components")
 	compile (project(":JAICore:jaicore-ea")) {
 		exclude group: 'commons-cli'
 	}

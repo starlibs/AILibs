@@ -1,5 +1,6 @@
 dependencies {
 	compile project(':JAICore:jaicore-basic')
+	compile project(':JAICore:jaicore-components')
 	compile project(':JAICore:jaicore-logic')
 	compile project(':JAICore:jaicore-algorithminspector')
 	compile project(':JAICore:jaicore-planning')
