@@ -46,12 +46,12 @@ import org.openml.webapplication.fantail.dc.LandmarkerCharacterizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.core.Util;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.serialization.ComponentLoader;
+import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.serialization.ComponentLoader;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.FixedSplitClassifierEvaluator;
@@ -345,7 +345,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 		// extract componentInstances that we can rank
 		for (List<T> randomPath : randomPaths) {
 			TFDNode goalNode = (TFDNode) randomPath.get(randomPath.size() - 1);
-			ComponentInstance cI = Util.getSolutionCompositionFromState(this.components, goalNode.getState(), true);
+			ComponentInstance cI = HASCOUtil.getSolutionCompositionFromState(this.components, goalNode.getState(), true);
 			this.pathToPipelines.put(randomPath, cI);
 			// fill the y with landmarkers
 			if (this.useLandmarkers) {

@@ -37,12 +37,12 @@ import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.hasco.events.TwoPhaseHASCOPhaseSwitchEvent;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import ai.libs.hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithm;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.concurrent.NamedTimerTask;
 import ai.libs.jaicore.logging.LoggerUtil;
@@ -144,7 +144,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 			this.logger.info("Initialized HASCO with start time {}.", this.timeOfStart);
 			return event;
 
-		/* active is only one step in this model; this could be refined */
+			/* active is only one step in this model; this could be refined */
 		case ACTIVE:
 
 			/* phase 1: gather solutions */

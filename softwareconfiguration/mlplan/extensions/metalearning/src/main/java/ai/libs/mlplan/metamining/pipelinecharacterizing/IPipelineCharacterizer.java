@@ -2,7 +2,7 @@ package ai.libs.mlplan.metamining.pipelinecharacterizing;
 
 import java.util.List;
 
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 
 /**

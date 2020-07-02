@@ -1,78 +1,63 @@
 package ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.featurespace;
 
+import ai.libs.jaicore.basic.sets.Interval;
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.ExtendedRandomTree;
 
 /**
- * Description of a numeric feature domain. Needed for fANOVA application in the
- * {@link ExtendedRandomTree}.
+ * Description of a numeric feature domain. Needed for fANOVA application in the {@link ExtendedRandomTree}.
  *
- * @author jmhansel
+ * @author Felix Mohr, jmhansel
  *
  */
 public class NumericFeatureDomain extends FeatureDomain {
-	private final boolean isInteger;
-	private double min;
-	private double max;
+
+	private static final long serialVersionUID = 7137323856374433244L;
+	private final Interval interval;
 
 	public NumericFeatureDomain(final boolean isInteger, final double min, final double max) {
 		super();
-		this.isInteger = isInteger;
-		this.min = min;
-		this.max = max;
+		this.interval = new Interval(isInteger, min, max);
 	}
 
 	public NumericFeatureDomain(final NumericFeatureDomain domain) {
-		super();
-		this.isInteger = domain.isInteger;
-		this.min = domain.min;
-		this.max = domain.max;
+		this(domain.isInteger(), domain.getMin(), domain.getMax());
 	}
 
-
 	public boolean isInteger() {
-		return this.isInteger;
+		return this.interval.isInteger();
 	}
 
 	public double getMin() {
-		return this.min;
+		return this.interval.getMin();
 	}
 
 	public double getMax() {
-		return this.max;
+		return this.interval.getMax();
 	}
 
 	public void setMin(final double min) {
-		this.min = min;
+		this.interval.setMin(min);
 	}
 
 	public void setMax(final double max) {
-		this.max = max;
+		this.interval.setMax(max);
 	}
 
 	@Override
 	public String toString() {
-		return "NumericFeatureDomain [isInteger=" + this.isInteger + ", min=" + this.min + ", max=" + this.max + "]";
+		return "NumericFeatureDomain [isInteger=" + this.isInteger() + ", min=" + this.getMin() + ", max=" + this.getMax() + "]";
 	}
 
 	@Override
 	public boolean contains(final Object item) {
-		if (!(item instanceof Number)) {
-			return false;
-		}
-		Double n = (Double) item;
-		return n >= this.min && n <= this.max;
+		return this.interval.contains(item);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (this.isInteger ? 1231 : 1237);
-		long temp;
-		temp = Double.doubleToLongBits(this.max);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(this.min);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((this.interval == null) ? 0 : this.interval.hashCode());
 		return result;
 	}
 
@@ -88,18 +73,19 @@ public class NumericFeatureDomain extends FeatureDomain {
 			return false;
 		}
 		NumericFeatureDomain other = (NumericFeatureDomain) obj;
-		if (this.isInteger != other.isInteger) {
+		if (this.interval == null) {
+			if (other.interval != null) {
+				return false;
+			}
+		} else if (!this.interval.equals(other.interval)) {
 			return false;
 		}
-		if (Double.doubleToLongBits(this.max) != Double.doubleToLongBits(other.max)) {
-			return false;
-		}
-		return (Double.doubleToLongBits(this.min) == Double.doubleToLongBits(other.min));
+		return true;
 	}
 
 	@Override
 	public double getRangeSize() {
-		double temp = this.max - this.min;
+		double temp = this.getMax() - this.getMin();
 		// For safety, if the interval is empty, it shouldn't effect the range size of the feature space
 		if (temp == 0.0d) {
 			return 1.0d;
@@ -109,11 +95,11 @@ public class NumericFeatureDomain extends FeatureDomain {
 
 	@Override
 	public boolean containsInstance(final double value) {
-		return ((value >= this.min) && (value <= this.max));
+		return this.contains(value);
 	}
 
 	@Override
 	public String compactString() {
-		return "[" + this.min + "," + this.max + "]";
+		return "[" + this.getMin() + "," + this.getMax() + "]";
 	}
 }
