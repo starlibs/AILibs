@@ -163,6 +163,11 @@ allprojects {
 			properties["sonar.java.target"] = project.targetCompatibility
 		}
 	}
+	
+	//Define JUnit for running tests
+	test {
+    	useJUnitPlatform()
+	}
 
 	// This task creates a jar with test classes.
 	task testClassesJar(type: Jar) {
