@@ -54,8 +54,8 @@ public class ArtificialExperiments {
         }
     }
 
-    @BeforeClass
-    public static void prepareDB() throws Exception{
+    @Before
+    public void prepareDB() throws Exception{
         ExperimenterMySQLHandle handle = new ExperimenterMySQLHandle(DB_CONFIG);
         // Delete the database:
         try {
@@ -106,12 +106,7 @@ public class ArtificialExperiments {
         List<Future> allJobs = new ArrayList<>();
         for (int i = 0; i < threadCount; i++) {
             Future<?> job = executorService.submit(() -> {
-                try {
-                    runMethod.accept(runner, experimentsPerThread);
-                    runner.randomlyConductExperiments(experimentsPerThread);
-                } catch (ExperimentDBInteractionFailedException | InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                runMethod.accept(runner, experimentsPerThread);
             });
             allJobs.add(job);
         }
@@ -149,7 +144,7 @@ public class ArtificialExperiments {
     }
 
     @Test
-    public void testStart10RandomExperiments() throws Exception {
+    public void testStart10Experiments() throws Exception {
         ExperimenterMySQLHandle handle = localHandle.get();
         for (int i = 0; i < 10; i++) {
             Optional<ExperimentDBEntry> experimentDBEntry = handle.startNextExperiment();
@@ -158,7 +153,7 @@ public class ArtificialExperiments {
     }
 
     @Test
-    public void testStartRandomExperimntsInParallel() throws Exception {
+    public void testStartExperimntsInParallel() throws Exception {
         // create a new handle for each thread:
         List<Future> allJobs = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
@@ -166,21 +161,22 @@ public class ArtificialExperiments {
             // THe job may fail if no random experiment could be started.
             // The job may also fail if it takes to long to start a new random experiment.
             Future<?> submit = executorService.submit(() -> {
-                ExperimenterMySQLHandle handle = localHandle.get();
-                Optional<ExperimentDBEntry> experimentDBEntry = null;
-                long startedTime = System.currentTimeMillis();
                 try {
-                    experimentDBEntry = handle.startNextExperiment();
+                    ExperimenterMySQLHandle handle = localHandle.get();
+                    Optional<ExperimentDBEntry> experimentDBEntry = null;
+                    long startedTime = System.currentTimeMillis();
+                        experimentDBEntry = handle.startNextExperiment();
 
-                } catch (ExperimentDBInteractionFailedException e) {
+                    long runtime = System.currentTimeMillis() - startedTime;
+                    Assert.assertTrue(String.format("Starting a random experiment should should take less than 1000 ms but took %d",
+                            runtime),
+                            runtime < 1000);
+                    Assert.assertTrue(experimentDBEntry.isPresent());
+
+                } catch (Exception e) {
                     logger.error("Error trying to get a random experiment.", e);
                     throw new RuntimeException(e);
                 }
-                long runtime = System.currentTimeMillis() - startedTime;
-                Assert.assertTrue(String.format("Starting a random experiment should should take less than 1000 ms but took %d",
-                        runtime),
-                        runtime < 1000);
-                Assert.assertTrue(experimentDBEntry.isPresent());
                 try {
                     Thread.sleep(new Random().nextInt(10));
                 } catch (InterruptedException e) {
@@ -201,15 +197,10 @@ public class ArtificialExperiments {
         }).filter(Optional::isPresent).map(Optional::get)
                 .collect(Collectors.toList());
         if(!unsuccessfulJobErros.isEmpty()) {
-            Assert.fail("Jobs failed: \n\t" + unsuccessfulJobErros.stream()
-                    .map(ex -> {
-                        Throwable e = (Throwable) ex;
-                        while(e.getCause() != null && e.getCause() != e) {
-                            e = e.getCause();
-                        }
-                        return e.getMessage();
-                    })
-                    .collect(Collectors.joining("\n\t")));
+            for (Object unsuccessfulJobErro : unsuccessfulJobErros) {
+                logger.error("Job failed:", (Exception) unsuccessfulJobErro);
+            }
+            Assert.fail("Jobs failed: \n\t" + unsuccessfulJobErros.size());
         }
     }
 

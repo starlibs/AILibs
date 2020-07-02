@@ -416,6 +416,10 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 			if (i % 1000 == 0) {
 				this.logger.debug("{} objects have been built within {}ms.", i, System.currentTimeMillis() - startAll);
 			}
+			if(Thread.interrupted()) {
+			    Thread.currentThread().interrupt();
+			    throw new RuntimeException(new InterruptedException());
+            }
 		}
 		return experimentEntries;
 	}
