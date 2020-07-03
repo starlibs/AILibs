@@ -1,6 +1,6 @@
 package ai.libs.mlplan.examples.multiclass.weka;
 
-import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -13,6 +13,7 @@ import org.api4.java.algorithm.Timeout;
 import ai.libs.hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import ai.libs.hasco.gui.statsplugin.HASCOSolutionCandidateRepresenter;
+import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.graphvisualizer.events.recorder.AlgorithmEventHistory;
 import ai.libs.jaicore.graphvisualizer.events.recorder.AlgorithmEventHistorySerializer;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
@@ -20,7 +21,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
-import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
+import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
@@ -35,12 +36,7 @@ import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 public class MLPlanGraphVisualizationExample {
 	public static void main(final String[] args) throws Exception {
 
-		// ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(346);
-		File datasetFile = new File("data/11.arff");
-		System.out.println(datasetFile.getAbsolutePath());
-
-		ILabeledDataset<?> ds = ArffDatasetAdapter.readDataset(datasetFile);
-
+		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(346);
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(1), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */
@@ -68,23 +64,27 @@ public class MLPlanGraphVisualizationExample {
 			System.out.println("Building the classifier failed: " + e.getMessage());
 		}
 
+		/* obtain the algorithm history from the window and create a serializer */
 		AlgorithmEventHistory history = window.getAlgorithmEventHistory();
-		AlgorithmEventHistorySerializer serializer = new AlgorithmEventHistorySerializer();
-		String s = serializer.serializeAlgorithmEventHistory(history);
-		// Files.write(s, new File("data/keks.txt"), StandardCharsets.UTF_8);
 
+		AlgorithmEventHistorySerializer serializer = new AlgorithmEventHistorySerializer();
+
+		/* serialize the obtained algorithm history and write it to a file */
+		String serializedHistory = serializer.serializeAlgorithmEventHistory(history);
+		FileUtil.writeFileAsList(Arrays.asList(serializedHistory), "history.json");
+
+		// read a serzialized history and start an algorithm inspector on this history
+
+		// AlgorithmEventHistorySerializer serializer = new AlgorithmEventHistorySerializer();
+		// AlgorithmEventHistory history = serializer.deserializeAlgorithmEventHistory(new File("data/keks.txt"));
+		//
+		// MLPlanWekaBuilder mlplanBuilder = new MLPlanWekaBuilder().withNumCpus(2).withTimeOut(new Timeout(120, TimeUnit.SECONDS)).withCandidateEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS))
+		// .withNodeEvaluationTimeOut(new Timeout(900, TimeUnit.SECONDS));
+		//
+		// AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(history);
+		// window.withMainPlugin(new GraphViewPlugin());
+		// window.withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin(), new NodeInfoGUIPlugin(new TFDNodeAsCIViewInfoGenerator(mlplanBuilder.getComponents())),
+		// new SolutionPerformanceTimelinePlugin(new HASCOSolutionCandidateRepresenter()));
 	}
 
-	// public static void main(final String[] args) throws Exception {
-	// AlgorithmEventHistorySerializer serializer = new AlgorithmEventHistorySerializer();
-	// AlgorithmEventHistory history = serializer.deserializeAlgorithmEventHistory(new File("data/keks.txt"));
-	//
-	// MLPlanWekaBuilder mlplanBuilder = new MLPlanWekaBuilder().withNumCpus(2).withTimeOut(new Timeout(120, TimeUnit.SECONDS)).withCandidateEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS))
-	// .withNodeEvaluationTimeOut(new Timeout(900, TimeUnit.SECONDS));
-	//
-	// AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(history);
-	// window.withMainPlugin(new GraphViewPlugin());
-	// window.withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin(), new NodeInfoGUIPlugin(new TFDNodeAsCIViewInfoGenerator(mlplanBuilder.getComponents())),
-	// new SolutionPerformanceTimelinePlugin(new HASCOSolutionCandidateRepresenter()));
-	// }
 }
