@@ -221,7 +221,19 @@ allprojects {
      	testLogging {
 			events "failed"
 			exceptionFormat "full"
-     	} 
+     	}
+     	ext.testFailures = 0
+     	afterSuite { desc, result ->
+            if (desc.getParent() == null) {
+                ext.testFailures += result.getFailedTestCount() //count failures
+            }
+        }
+         
+        gradle.buildFinished { //when it finishes check if there are any failures and blow up
+    		if (ext.testFailures > 0) {
+        		ant.fail("The build finished but ${ext.testFailures} tests failed - blowing up the build ! ")
+    		}
+    	}
 	}
 }
 
