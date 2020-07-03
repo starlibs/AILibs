@@ -1,29 +1,148 @@
 ---
 layout: project
-logo: ailibs-logo.png
 title: HASCO
 subtitle: HASCO subtitle
 navigation_mode: anchor
-version: 0.1.5
+version: 0.2.0
 navigation:
     - { id: "overview", link: "overview", title: "Overview" }
     - { id: "installation", link: "installation", title: "Installation" }
     - { id: "usage", link: "usage", title: "Usage" }
+    - { id: "the-hasco-reduction", link: "the-hasco-reduction", title: "The HASCO Reduction" }
     - { id: "javadoc", link: "javadoc", title: "JavaDoc" }
     - { id: "contribute", link: "contribute", title: "Contribute" }
-navigation_active: overview
 ---
-# HASCO
-## Overview
+# Overview
+HASCO is an algorithm to hierarchically configure component systems in which the components can have parameters.
+Components can have required interfaces, which, for any of its instances, must be satisfied to make it work properly.
+Components that provide the required interfaces can be used to resolve these needs.
+A component instance hence can be thought of a component in which the parameters assume concrete values and each required interface is satisfied with a component instance (note the recursion).
+We can hence think of a component instance as a tree of component groundings (one each for each required interface).
 
-## Under the Hood
+A problem is represented by
+* a collection of components
+* the name of a required interface
+* a function that assigns a score to each solution
+
+HASCO resolves such a problem by reducing it to hierarchical task network (HTN) planning, which is eventually resolved using a path search algorithm.
+
+# Installation
+You can bind in HASCO via a Maven dependency (using Maven central as repository).
+### Maven
+```
+<dependency>
+  <groupId>ai.libs</groupId>
+  <artifactId>hasco-core</artifactId>
+  <version>{{ page.version }}</version>
+</dependency>
+```
+
+### Gradle 
+```gradle
+dependencies {
+    implementation 'ai.libs:hasco-core:{{ page.version }}'
+}
+```
+
+# Usage
+## Obtaining an HASCO instance
+The easiest way to use HASCO is to use the HASCO builder.
+
+### Using a BF search with random completions (as e.g. in ML-Plan)
+```java
+HASCOViaFD<Double> hasco = HASCOBuilder.get().withProblem(problem).withBestFirst().viaRandomCompletions().withNumSamples(3).getAlgorithm()
+```
+The problem can even be specified in the `get` method, so you can also write
+```java
+HASCOViaFD<Double> hasco = HASCOBuilder.get(problem).withBestFirst().viaRandomCompletions().withNumSamples(3).getAlgorithm()
+```
+
+### Using a depth first search
+```java
+HASCOViaFD<Double> hasco = HASCOBuilder.get().withProblem(problem).withDFS().getAlgorithm();
+```
+
+## Configuring the algorithm beforehand
+You can setup the timeout
+```java
+builder.withTimeout(new Timeout(10, TimeUnit.SECONDS))
+```
+and the number of CPUs:
+```java
+builder.withCPUs(4)
+```
+
+## Getting Results
+One option is to listen to `HASCOSolutionEvent` objects:
+```java
+HASCOViaFD<Double> hasco = HASCOBuilder.get().withProblem(someProblem).withDFS().getAlgorithm();
+hasco.registerSolutionEventListener(e -> System.out.println("Received solution with score " + e.getScore() + ": " + e.getSolutionCandidate().getComponentInstance()));
+hasco.call();
+```
+
+If you need more flexibility in terms of a more sophisticated listener, you can create a separate object in which you subscribe to the relevant event
+```java
+/* register listener */
+hasco.registerListener(new Object() {
+
+	@Subscribe
+	public void receiveSolution(final HASCOSolutionEvent<Double> e) {
+		System.out.println("Received solution with score " + e.getScore() + ": " + e.getSolutionCandidate().getComponentInstance());
+	}
+});
+
+/* run HASCO */
+hasco.call();
+```
+
+If you want to have access to the control flow of HASCO while accessing the found solutions, you can use the step technique:
+```java
+/* create algorithm */
+HASCOViaFD<Double> hasco = HASCOBuilder.get().withProblem(problem).withDFS().getAlgorithm();
+
+/* step over events until algorithm finishes */
+while (hasco.hasNext()) {
+	IAlgorithmEvent event = hasco.nextWithException();
+	if (event instanceof HASCOSolutionEvent) {
+		HASCOSolutionCandidate<Double> s = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
+		System.out.println("Received solution with score " + s.getScore() + ": " + s.getComponentInstance());
+	}
+}
+```
+
+## Using Custom Search Algorithms
+If you want to use another search algorithm that is not covered in the builder, you can do that via setting the respective search algorithm factory.
+The only condition is that the factoy implements the interface `IOptimalPathInORGraphSearchFactory<IPathSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?>`,
+where typically `N = TFDNode`, `A = String`, `V = Double`.
+An example of such a customized search factory using Monte Carlo Tree Search (MCTS) in the path search variant is as follows:
+```java
+/* configure MCTS path search factory */
+MCTSPathSearchFactory<TFDNode, String> mctsPathSearchFactory = new MCTSPathSearchFactory<>();
+UCTFactory<TFDNode, String> uctFactory = new UCTFactory<>();
+mctsPathSearchFactory.withMCTSFactory(uctFactory);
+
+/* configure the builder with this factory */
+HASCOViaFDBuilder<Double, ?> builder = HASCOBuilder.get(problem);
+builder.withSearchFactory(mctsPathSearchFactory);
+HASCOViaFD<Double> hasco = builder.getAlgorithm();
+
+/* register listener */
+hasco.registerSolutionEventListener(e -> System.out.println("Received solution with score " + e.getScore() + ": " + e.getSolutionCandidate().getComponentInstance()));
+
+/* find all solutions */
+for (int i = 0; i < 10; i++) {
+	hasco.nextWithException(); // UCT draws the same paths multiple times, so we see solutions several times here
+}
+```
+
+# THE HASCO Reduction
 HASCO solves the software configuration problem by conducting a double reduction step.
 First, it reduces the original problem to an HTN planning problem.
 Second, it reduces the HTN problem to a path search problem.
 
-### The HTN Planning Problem
+## The HTN Planning Problem
 
-#### Tasks
+### Tasks
 ```
 Complex Tasks
 ----------------------------------------------------------------
@@ -38,7 +157,7 @@ redefValue(container, previousValue, newValue)	# changes the value in the parame
 declareClosed(container)			# declare in state that the container value will not be changed anymore
 ```
 
-#### Predicates and their Semantics
+### Predicates and their Semantics
 ```
 Uninterpreted Predicates
 -----------------------------------------------------------------
@@ -57,7 +176,7 @@ notRefinable(cName, c, pName, p, curval)				# it is allowed to further refine th
 ```
 
 
-#### Operations
+### Operations
 For each component `c` and each of its provided interfaces `c.i`, HASCO creates an operation
 ```
 satisfy<i>With<c>(c1, c2, p1,.., pm, r1,..,rn)
@@ -105,7 +224,7 @@ declareClosed(container)
 ```
 The `declaredClosed` operator seems to do nothing relevant, because the `closed` predicate is never used. In fact, it only serves to introduce an explicit state change; states are represented by the agenda and the literals.
 
-#### Methods
+### Methods
 
 ```
 resolve<i>With<c>(c1; c2, p1,.., pm, r1,..,rn)
@@ -149,13 +268,12 @@ closeRefinementOfParamsOf<c>(c2, p1,..,pm)
 	task-network: <empty>
 ```
 
-#### Problem Definition
+### Problem Definition
 ```
 init task-network: tResolve<reqInterface>('request', 'solution')
 ```
 
-
-#### Alternative Methods for the case of list interfaces
+### Alternative Methods for the case of list interfaces
 ```
 resolve<i>(c1; c2_1,..,c2_<max(I)>)
 	taskName: tResolve<i>(c1)
@@ -208,8 +326,8 @@ The initial problem changes to
 init task-network: tResolveSingle<reqInterface>('request', 'solution')
 ```
 
-### JavaDoc
+# JavaDoc
 JavaDoc is available [here](https://javadoc.io/doc/ai.libs/hasco-core/).
 
-### Contribute
+# Contribute
 ML-Plan is currently developed in the [softwareconfiguration folder of AILibs on github.com](https://github.com/fmohr/AILibs/tree/master/softwareconfiguration/mlplan).
