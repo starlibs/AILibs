@@ -52,6 +52,7 @@ addons:
 script:
   - echo $TEST_PROJECT
   - ./gradlew $TEST_PROJECT:test 
+  - ./gradlew sonarqube -x test
 
 jobs:
   include:
