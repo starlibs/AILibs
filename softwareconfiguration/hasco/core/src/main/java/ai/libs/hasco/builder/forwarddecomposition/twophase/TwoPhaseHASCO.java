@@ -26,18 +26,16 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.hasco.builder.forwarddecomposition.DefaultPathPriorizingPredicate;
 import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
-import ai.libs.hasco.events.HASCOSolutionEvent;
-import ai.libs.hasco.events.TwoPhaseHASCOPhaseSwitchEvent;
+import ai.libs.hasco.core.events.HASCOSolutionEvent;
+import ai.libs.hasco.core.events.TwoPhaseHASCOPhaseSwitchEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.sets.SetUtil;
@@ -135,10 +133,6 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 					"Starting 2-Phase HASCO with the following setup:\n\tCPUs:{},\n\tTimeout: {}s\n\tTimeout per node evaluation: {}ms\n\tTimeout per candidate: {}ms\n\tNumber of Random Completions: {}\n\tExpected blow-ups are {} (selection) and {} (post-processing).\nThe search factory is: {}",
 					this.getNumCPUs(), this.getTimeout().seconds(), this.getConfig().timeoutForNodeEvaluation(), this.getConfig().timeoutForCandidateEvaluation(), this.getConfig().numberOfRandomCompletions(),
 					this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing(), this.hasco.getSearchFactory());
-			DefaultPathPriorizingPredicate<N, A> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
-
-			/* set HASCO objects within the default path prioritizing node evaluator */
-			prioritizingPredicate.setHascoReference(this.hasco);
 			this.setHASCOLoggerNameIfPossible();
 			this.logger.info("Initialized HASCO with start time {}.", this.timeOfStart);
 			return event;
@@ -218,11 +212,6 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 				if (this.phase1ResultQueue.isEmpty()) {
 					this.logger.error("Not a single solution found in the first phase. Thus, exit with exception.");
 					throw new AlgorithmException("Not a single solution candidate could be found in the first phase. Please check your search space configuration and search phase benchmark carefully.");
-				}
-
-				if (selectionBenchmark instanceof IInformedObjectEvaluatorExtension) {
-					this.logger.debug("Setting best score for selection phase node evaluator to {}", this.phase1ResultQueue.peek().getScore());
-					((IInformedObjectEvaluatorExtension<Double>) selectionBenchmark).informAboutBestScore(this.phase1ResultQueue.peek().getScore());
 				}
 				this.checkAndConductTermination();
 

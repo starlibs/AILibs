@@ -8,6 +8,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.slf4j.Logger;
@@ -15,12 +16,20 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
 
-public class Util {
+public class CompositionProblemUtil {
 
-	private static final Logger logger = LoggerFactory.getLogger(Util.class);
+	private static final Logger logger = LoggerFactory.getLogger(CompositionProblemUtil.class);
 
-	private Util() {
+	private CompositionProblemUtil() {
 		/* avoid instantiation */
+	}
+
+	public static Collection<Component> getComponentsThatResolveProblem(final SoftwareConfigurationProblem<?> configurationProblem) {
+		return getComponentsThatProvideInterface(configurationProblem, configurationProblem.getRequiredInterface());
+	}
+
+	public static Collection<Component> getComponentsThatProvideInterface(final SoftwareConfigurationProblem<?> configurationProblem, final String requiredInterface){
+		return configurationProblem.getComponents().stream().filter(c -> c.getProvidedInterfaces().contains(requiredInterface)).collect(Collectors.toList());
 	}
 
 	/**

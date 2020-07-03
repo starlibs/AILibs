@@ -587,7 +587,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 	public String toString() {
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("solutionEvaluator", this.solutionEvaluator);
-		fields.put("visualizeSubSearch", this.visualizeSubSearch);
+		fields.put("priorizing predicate", this.priorityPredicateForRDFS);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 

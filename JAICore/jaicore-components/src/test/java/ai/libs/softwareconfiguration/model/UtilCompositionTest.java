@@ -1,7 +1,9 @@
-package ai.libs.hasco.test;
+package ai.libs.softwareconfiguration.model;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,12 +13,14 @@ import org.junit.Test;
 
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.Util;
+import ai.libs.jaicore.components.model.ComponentUtil;
+import ai.libs.jaicore.components.model.CompositionProblemUtil;
+import ai.libs.jaicore.components.serialization.ComponentLoader;
 
 public class UtilCompositionTest {
 
 	@Test
-	public void test() {
+	public void testNumberOfComponents() {
 		Component component1 = new Component("Component1");
 		Component component2 = new Component("Component2");
 		Component component3 = new Component("Component3");
@@ -41,9 +45,15 @@ public class UtilCompositionTest {
 		sat1.put("Interface1", instance2);
 		sat1.put("Interface2", instance4);
 		ComponentInstance instance1 = new ComponentInstance(component1, parameterValues, sat1);
-		List<Component> components = Util.getComponentsOfComposition(instance1);
+		List<Component> components = CompositionProblemUtil.getComponentsOfComposition(instance1);
 		for(int i = 0; i < groundTruth.size(); i++) {
 			assertEquals(components.get(i), groundTruth.get(i));
 		}
+	}
+
+	@Test
+	public void testNumberOfUnparametrizedCompositions() throws IOException {
+		ComponentLoader l = new ComponentLoader(new File("./testrsc/simplerecursiveproblem.json"));
+		assertEquals(4, ComponentUtil.getNumberOfUnparametrizedCompositions(l.getComponents(), "IFace"));
 	}
 }

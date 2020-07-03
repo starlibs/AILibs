@@ -21,7 +21,7 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
  */
 public class DefaultPathPriorizingPredicate<N, A> implements Predicate<N>, IHascoAware {
 
-	private HASCO<N, A, ?> hasco;
+	private HASCO<?, ?, ?> hasco;
 
 	@Override
 	public boolean test(final N node) {
@@ -48,12 +48,12 @@ public class DefaultPathPriorizingPredicate<N, A> implements Predicate<N>, IHasc
 	}
 
 	@Override
-	public void setHascoReference(final HASCO hasco) {
+	public void setHascoReference(final HASCO<?, ?, ?> hasco) {
 		this.hasco = hasco;
 	}
 
 	@Override
-	public HASCO getHASCOReference() {
+	public HASCO<?, ?, ?> getHASCOReference() {
 		return this.hasco;
 	}
 }

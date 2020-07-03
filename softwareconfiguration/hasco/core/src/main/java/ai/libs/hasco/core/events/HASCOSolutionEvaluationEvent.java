@@ -1,4 +1,4 @@
-package ai.libs.hasco.events;
+package ai.libs.hasco.core.events;
 
 import ai.libs.jaicore.components.model.ComponentInstance;
 

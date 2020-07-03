@@ -13,7 +13,6 @@ import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.apache.commons.math3.geometry.partitioning.Region.Location;
 import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
-import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,23 +58,19 @@ public class HASCOUtil {
 	private static final Logger logger = LoggerFactory.getLogger(HASCOUtil.class);
 
 	private HASCOUtil() {
-
+		/* avoid instantiation */
 	}
 
 	public static <N, A> IPathSearchInput<N, A> getSearchProblem(final Collection<Component> components, final String requiredInterface, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig, final IHASCOPlanningReduction<N, A> plan2searchReduction){
-		HASCOReduction<Double> hascoReduction = new HASCOReduction<>(null);
+		HASCOReduction<Double> hascoReduction = new HASCOReduction<>();
 		SoftwareConfigurationProblem<Double> coreProblem = new SoftwareConfigurationProblem<>(components, requiredInterface, n -> 0.0);
 		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(coreProblem, paramRefinementConfig);
 		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, Double> planningProblem = hascoReduction.encodeProblem(problem);
 		return new CostSensitivePlanningToStandardSearchProblemReduction<CEOCIPSTNPlanningProblem, N, A, Double>(plan2searchReduction).encodeProblem(planningProblem);
 	}
 
-	public static <N, A, V extends Comparable<V>> IPathEvaluator<N, A, V> getPathEvaluator() {
-
-	}
-
 	public static <N, A, V extends Comparable<V>> IPathSearchWithPathEvaluationsInput<N, A, V> getSearchProblemWithEvaluation(final RefinementConfiguredSoftwareConfigurationProblem<V> problem, final IHASCOPlanningReduction<N, A> plan2searchReduction){
-		HASCOReduction<V> hascoReduction = new HASCOReduction<>(null);
+		HASCOReduction<V> hascoReduction = new HASCOReduction<>();
 		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> planningProblem = hascoReduction.encodeProblem(problem);
 		return new CostSensitivePlanningToStandardSearchProblemReduction<CEOCIPSTNPlanningProblem, N, A, V>(plan2searchReduction).encodeProblem(planningProblem);
 	}
@@ -385,7 +380,7 @@ public class HASCOUtil {
 
 		/* update domains based on the dependencies defined for this component */
 		for (Dependency dependency : component.getDependencies()) {
-			if (ai.libs.jaicore.components.model.Util.isDependencyPremiseSatisfied(dependency, domains)) {
+			if (ai.libs.jaicore.components.model.CompositionProblemUtil.isDependencyPremiseSatisfied(dependency, domains)) {
 				logger.info("Premise of dependency {} is satisfied, applying its conclusions ...", dependency);
 				for (Pair<Parameter, IParameterDomain> newDomain : dependency.getConclusion()) {
 					/*

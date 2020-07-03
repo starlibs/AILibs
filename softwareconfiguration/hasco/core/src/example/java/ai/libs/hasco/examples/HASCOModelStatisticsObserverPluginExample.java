@@ -11,7 +11,7 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.builder.HASCOBuilder;
 import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFD;
-import ai.libs.hasco.events.HASCOSolutionEvent;
+import ai.libs.hasco.core.events.HASCOSolutionEvent;
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.serialization.CompositionSerializer;

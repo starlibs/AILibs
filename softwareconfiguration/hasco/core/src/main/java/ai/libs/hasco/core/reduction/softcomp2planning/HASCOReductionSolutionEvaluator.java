@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -35,15 +34,11 @@ public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements
 		return this.reduction;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public V evaluate(final IPlan plan) throws InterruptedException, ObjectEvaluationFailedException {
 		ComponentInstance solution = this.reduction.decodeSolution(plan);
 		if (solution == null) {
 			throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(Action::getEncoding).collect(Collectors.joining("\n\t")));
-		}
-		if (this.evaluator instanceof IInformedObjectEvaluatorExtension && this.reduction.getBestSolutionSupplier().get() != null) {
-			((IInformedObjectEvaluatorExtension<V>) this.evaluator).informAboutBestScore(this.reduction.getBestSolutionSupplier().get().getScore());
 		}
 		this.logger.info("Forwarding evaluation request to evaluator {}", this.evaluator.getClass().getName());
 		return this.evaluator.evaluate(solution);

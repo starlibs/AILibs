@@ -78,7 +78,6 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/* Data for initializing ML-Plan */
 	private MLPlanClassifierConfig algorithmConfig;
 
-	@SuppressWarnings("rawtypes")
 	private HASCOViaFDAndBestFirstWithRandomCompletionsBuilder hascoBuilder;
 	private Predicate<TFDNode> priorizingPredicate = new DefaultPathPriorizingPredicate<>(); // by default, we prefer paths that lead to default parametrizations
 	private File searchSpaceFile;
@@ -135,7 +134,6 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		return this.getSelf();
 	}
 
-	@SuppressWarnings("unchecked")
 	public B withSearchFactory(@SuppressWarnings("rawtypes") final IOptimalPathInORGraphSearchFactory searchFactory, @SuppressWarnings("rawtypes") final AlgorithmicProblemReduction transformer) {
 		throw new UnsupportedOperationException("Currently only support for BestFirst search");
 	}
@@ -435,13 +433,6 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		this.preferredNodeEvaluator = actualNodeEvaluator;
 	}
 
-	@SuppressWarnings("unchecked")
-	//	private void update() {
-	//		this.hascoBuilder.setSearchProblemTransformer(new FDAndBestFirstWithRandomCompletionTransformer<Double>(this.preferredNodeEvaluator, this.priorizingPredicate, this.algorithmConfig.randomSeed(),
-	//				this.algorithmConfig.numberOfRandomCompletions(), this.algorithmConfig.timeoutForCandidateEvaluation(), this.algorithmConfig.timeoutForNodeEvaluation()));
-	//		this.hascoBuilder.withAlgorithmConfig(this.getAlgorithmConfig());
-	//	}
-
 	public B withPortionOfDataReservedForSelection(final double value) {
 		this.algorithmConfig.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, value + "");
 		return this.getSelf();
@@ -478,7 +469,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		Objects.requireNonNull(this.requestedHASCOInterface, "No requested HASCO interface defined!");
 	}
 
-	private void configureHASCOBuilder() {
+	protected void configureHASCOBuilder() {
 		this.hascoBuilder = HASCOBuilder.get().withBestFirst().viaRandomCompletions();
 		this.hascoBuilder.withPreferredNodeEvaluator(this.preferredNodeEvaluator);
 		this.hascoBuilder.withNumSamples(this.algorithmConfig.numberOfRandomCompletions());

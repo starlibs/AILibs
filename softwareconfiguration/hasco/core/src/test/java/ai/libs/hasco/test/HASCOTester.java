@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.core.HASCO;
-import ai.libs.hasco.events.HASCOSolutionEvent;
+import ai.libs.hasco.core.events.HASCOSolutionEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.components.model.ComponentInstance;
@@ -144,5 +144,6 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 			assertEquals("Only found " + uniqueSolutions.size() + "/" + numberOfExpectedSolutions + " solutions", numberOfExpectedSolutions, uniqueSolutions.size());
 			assertEquals("All " + numberOfExpectedSolutions + " solutions were found, but " + solutions.size() + " solutions were returned in total, i.e. there are solutions returned twice", numberOfExpectedSolutions, solutions.size());
 		}
+
 	}
 }

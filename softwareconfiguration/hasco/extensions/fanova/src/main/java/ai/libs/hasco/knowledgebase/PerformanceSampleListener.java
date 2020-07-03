@@ -3,7 +3,7 @@ package ai.libs.hasco.knowledgebase;
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.core.HASCOSolutionCandidate;
-import ai.libs.hasco.events.HASCOSolutionEvent;
+import ai.libs.hasco.core.events.HASCOSolutionEvent;
 import ai.libs.jaicore.components.model.ComponentInstance;
 
 /**

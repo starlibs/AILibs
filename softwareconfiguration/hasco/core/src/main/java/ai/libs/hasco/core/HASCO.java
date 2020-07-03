@@ -1,7 +1,6 @@
 package ai.libs.hasco.core;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,18 +25,15 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.hasco.core.events.HASCOSolutionEvent;
 import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
 import ai.libs.hasco.core.reduction.softcomp2planning.HASCOReduction;
-import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
-import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
-import ai.libs.jaicore.components.model.Parameter;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.model.CompositionProblemUtil;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
 import ai.libs.jaicore.components.model.UnparametrizedComponentInstance;
 import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithm;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
@@ -64,10 +60,10 @@ import ai.libs.jaicore.timing.TimeRecordingObjectEvaluator;
 public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationAlgorithm<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V> {
 
 	private Logger logger = LoggerFactory.getLogger(HASCO.class);
-	private String loggerName;
+	private String loggerName; // this is a bit redundant in order to more easily configure sub-loggers
 
 	/* problem and algorithm setup */
-	private final IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver;
+	private final IHASCOPlanningReduction<N, A> planning2searchReduction;
 	private final IOptimalPathInORGraphSearchFactory<IPathSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory;
 
 	/* working constants of the algorithms */
@@ -88,7 +84,7 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 		this(ConfigFactory.create(HASCOConfig.class), configurationProblem, planningGraphGeneratorDeriver, searchFactory);
 	}
 
-	public HASCO(final HASCOConfig algorithmConfig, final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver,
+	public HASCO(final HASCOConfig algorithmConfig, final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningReduction<N, A> planning2searchReduction,
 			final IOptimalPathInORGraphSearchFactory<IPathSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory) {
 		super(algorithmConfig, configurationProblem);
 		if (configurationProblem == null) {
@@ -97,44 +93,27 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 		if (configurationProblem.getRequiredInterface() == null || configurationProblem.getRequiredInterface().isEmpty()) {
 			throw new IllegalArgumentException("Not required interface defined in the input");
 		}
-		this.planningGraphGeneratorDeriver = planningGraphGeneratorDeriver;
+		this.planning2searchReduction = planning2searchReduction;
 		this.searchFactory = searchFactory;
-		this.timeGrabbingEvaluationWrapper = new TimeRecordingObjectEvaluator<>(configurationProblem.getCompositionEvaluator());
-
-		/* check whether there is a refinement config for each numeric parameter */
-		Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig = this.getInput().getParamRefinementConfig();
-		for (Component c : this.getInput().getComponents()) {
-			for (Parameter p : c.getParameters()) {
-				if (p.isNumeric() && (!paramRefinementConfig.containsKey(c) || !paramRefinementConfig.get(c).containsKey(p))) {
-					throw new IllegalArgumentException("No refinement config was delivered for numeric parameter " + p.getName() + " of component " + c.getName());
-				}
-			}
-		}
 
 		/* check whether there is a component that satisfies the query */
-		final String requiredInterface = configurationProblem.getRequiredInterface();
-		Collection<Component> rootComponents = configurationProblem.getComponents().stream().filter(c -> c.getProvidedInterfaces().contains(requiredInterface)).collect(Collectors.toList());
-		if (rootComponents.isEmpty()) {
-			throw new IllegalArgumentException("There is no component that provides the required interface \"" + requiredInterface + "\"");
+		final int numberOfComponentsThatResolveRequest = CompositionProblemUtil.getComponentsThatResolveProblem(configurationProblem).size();
+		if (numberOfComponentsThatResolveRequest == 0) {
+			throw new IllegalArgumentException("There is no component that provides the required interface \"" + configurationProblem.getRequiredInterface() + "\"");
 		}
-		this.logger.info("Identified {} components that can be used to resolve the query.", rootComponents.size());
+		this.logger.info("Identified {} components that can be used to resolve the query.", numberOfComponentsThatResolveRequest);
 
 		/* derive planning problem and search problem */
 		this.logger.debug("Deriving search problem");
-		RefinementConfiguredSoftwareConfigurationProblem<V> refConfigSoftwareConfigurationProblem = new RefinementConfiguredSoftwareConfigurationProblem<>(
-				new SoftwareConfigurationProblem<>(this.getInput().getComponents(), this.getInput().getRequiredInterface(), this.timeGrabbingEvaluationWrapper), this.getInput().getParamRefinementConfig());
-		HASCOReduction<V> hascoReduction = new HASCOReduction<>(this::getBestSeenSolution);
-		this.planningProblem = hascoReduction.encodeProblem(refConfigSoftwareConfigurationProblem);
-		this.searchProblem = HASCOUtil.getSearchProblemWithEvaluation(refConfigSoftwareConfigurationProblem, planningGraphGeneratorDeriver);
+		this.timeGrabbingEvaluationWrapper = new TimeRecordingObjectEvaluator<>(configurationProblem.getCompositionEvaluator());
+		RefinementConfiguredSoftwareConfigurationProblem<V> cpWithTimeTrackedEvals = new RefinementConfiguredSoftwareConfigurationProblem<>(configurationProblem, this.timeGrabbingEvaluationWrapper);
+		HASCOReduction<V> hascoReduction = new HASCOReduction<>();
+		this.planningProblem = hascoReduction.encodeProblem(cpWithTimeTrackedEvals);
+		this.searchProblem = HASCOUtil.getSearchProblemWithEvaluation(cpWithTimeTrackedEvals, planning2searchReduction);
 
 		/* create search object */
 		this.logger.debug("Creating and initializing the search object");
 		this.search = this.searchFactory.getAlgorithm(this.searchProblem);
-
-		/* now tell some of the used components that they are used here */
-		if (planningGraphGeneratorDeriver instanceof IHascoAware) {
-			((IHascoAware) planningGraphGeneratorDeriver).setHascoReference(this);
-		}
 	}
 
 	@Override
@@ -148,12 +127,10 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 		/* act depending on state */
 		switch (this.getState()) {
 		case CREATED:
-			this.logger.info("Starting HASCO run. Enable DEBUG to get an overview of the considered HTN planning problem.");
 			if (this.logger.isInfoEnabled()) {
 				String reqInterface = this.getInput().getRequiredInterface();
-				this.logger.info("HASCO Configuration:\n\tRequired Interface: {}\n\tComponents: {}", reqInterface,
-						this.getInput().getComponents().stream().map(c -> "\n\t\t [" + (c.getProvidedInterfaces().contains(reqInterface) ? "*" : " ") + "]" + c.toString()).collect(Collectors.joining()));
-
+				String components = this.getInput().getComponents().stream().map(c -> "\n\t\t [" + (c.getProvidedInterfaces().contains(reqInterface) ? "*" : " ") + "]" + c.toString()).collect(Collectors.joining());
+				this.logger.info("Starting HASCO run. Parametrization:\n\tCPUs: {}\n\tTimeout: {}s\n\tNode evaluator: {}\nProblem:\n\tRequired Interface: {}\n\tComponents: {}\nEnable DEBUG to get an overview of the considered HTN planning problem.", this.getNumCPUs(), this.getTimeout().seconds(), this.search.getInput().getPathEvaluator(), reqInterface, components);
 			}
 			if (this.logger.isDebugEnabled()) {
 				String operations = this.planningProblem.getCorePlanningProblem().getDomain().getOperations().stream()
@@ -192,7 +169,7 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 				public void receiveSolutionCandidateFoundEvent(final EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent) throws InterruptedException, AlgorithmException {
 
 					EvaluatedSearchGraphPath<N, A, V> searchPath = solutionEvent.getSolutionCandidate();
-					IPlan plan = HASCO.this.planningGraphGeneratorDeriver.decodeSolution(searchPath);
+					IPlan plan = HASCO.this.planning2searchReduction.decodeSolution(searchPath);
 					ComponentInstance objectInstance;
 					if (HASCO.this.createComponentInstancesFromNodesInsteadOfPlans) {
 						objectInstance = HASCOUtil.getSolutionCompositionFromState(HASCO.this.getInput().getComponents(), ((TFDNode) searchPath.getNodes().get(searchPath.getNodes().size() - 1)).getState(), true);
@@ -251,7 +228,7 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 			else if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
 				HASCOSolutionEvent<V> hascoSolutionEvent = this.hascoSolutionEventCache.remove(searchEvent);
 				assert (hascoSolutionEvent != null) : "Hasco solution event has not been seen yet or cannot be retrieved from cache. " + this.hascoSolutionEventCache;
-				this.logger.info("Received new solution with score {} from search, communicating this solution to the HASCO listeners. Number of returned unparametrized solutions is now {}/{}.", hascoSolutionEvent.getScore(),
+				this.logger.info("Returning next solution delivered from search with score {}. Number of returned unparametrized solutions is now {}/{}.", hascoSolutionEvent.getScore(),
 						this.returnedUnparametrizedComponentInstances.size(), this.numUnparametrizedSolutions);
 				return hascoSolutionEvent;
 			} else {
@@ -290,7 +267,7 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 	}
 
 	public IHASCOPlanningReduction<N, A> getPlanningGraphGeneratorDeriver() {
-		return this.planningGraphGeneratorDeriver;
+		return this.planning2searchReduction;
 	}
 
 	public HASCORunReport<V> getReport() {
@@ -350,7 +327,7 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 	@Override
 	public String toString() {
 		Map<String, Object> fields = new HashMap<>();
-		fields.put("planningGraphGeneratorDeriver", this.planningGraphGeneratorDeriver);
+		fields.put("planningGraphGeneratorDeriver", this.planning2searchReduction);
 		fields.put("planningProblem", this.planningProblem);
 		fields.put("search", this.search);
 		fields.put("searchProblem", this.searchProblem);

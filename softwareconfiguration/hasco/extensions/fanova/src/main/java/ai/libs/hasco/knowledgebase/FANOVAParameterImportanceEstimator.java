@@ -12,7 +12,7 @@ import com.google.common.collect.Sets;
 
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.Util;
+import ai.libs.jaicore.components.model.CompositionProblemUtil;
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.ExtendedRandomForest;
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.featurespace.FeatureDomain;
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.featurespace.FeatureSpace;
@@ -66,7 +66,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	 */
 	@Override
 	public Set<String> extractImportantParameters(final ComponentInstance composition, final boolean recompute) throws ExtractionOfImportantParametersFailedException {
-		String pipelineIdentifier = Util.getComponentNamesOfComposition(composition);
+		String pipelineIdentifier = CompositionProblemUtil.getComponentNamesOfComposition(composition);
 		if (this.importantParameterMap.containsKey(pipelineIdentifier)) {
 			return this.importantParameterMap.get(pipelineIdentifier);
 		}
