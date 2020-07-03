@@ -46,7 +46,6 @@ public abstract class APredictionPerformanceMeasure<E, P> implements IDeterminis
 		return this.score(pairTable.getGroundTruthAsList(), pairTable.getPredictionsAsList());
 	}
 
-	@Deprecated // Needs to be adapted with the new api4 release
 	protected double averageInstanceWiseLoss(final List<? extends E> expected, final List<? extends P> predicted, final IDeterministicInstancePredictionPerformanceMeasure<P, E> subMeasure) {
 		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> subMeasure.loss(expected.get(x), predicted.get(x))).average();
 		if (res.isPresent()) {
@@ -56,7 +55,6 @@ public abstract class APredictionPerformanceMeasure<E, P> implements IDeterminis
 		}
 	}
 
-	@Deprecated // Needs to be adapted with the new api4 release
 	protected double averageInstanceWiseScore(final List<? extends E> expected, final List<? extends P> predicted, final IDeterministicInstancePredictionPerformanceMeasure<P, E> subMeasure) {
 		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> subMeasure.score(expected.get(x), predicted.get(x))).average();
 		if (res.isPresent()) {
