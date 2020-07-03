@@ -36,6 +36,11 @@ public class ExperimentSetAnalyzer {
 	private static final String PROTOCOL_JAVA = "java:";
 	private static final String LOGMESSAGE_CREATEINSTANCE = "Create a new instance of {} and ask it for the number of possible values.";
 
+	private static final ThreadLocal<ScriptEngine> scriptEngine = ThreadLocal.withInitial(() -> {
+		ScriptEngineManager mgr = new ScriptEngineManager();
+		return mgr.getEngineByName("JavaScript");
+	});
+
 	private Logger logger = LoggerFactory.getLogger(ExperimentSetAnalyzer.class);
 
 	private final IExperimentSetConfig config;
@@ -149,8 +154,6 @@ public class ExperimentSetAnalyzer {
 
 			/* get constraints */
 			List<Predicate<List<String>>> constraints = new ArrayList<>();
-			ScriptEngineManager mgr = new ScriptEngineManager();
-			ScriptEngine engine = mgr.getEngineByName("JavaScript");
 			if (this.config.getConstraints() != null) {
 				for (String p : this.config.getConstraints()) {
 					if (p.startsWith(PROTOCOL_JAVA)) {
@@ -177,7 +180,16 @@ public class ExperimentSetAnalyzer {
 									evaluatedConstraint = evaluatedConstraint.replace(ExperimentSetAnalyzer.this.keyFields.get(i), t.get(i));
 								}
 								try {
-									return (boolean)engine.eval(evaluatedConstraint);
+									ScriptEngine engine = scriptEngine.get();
+									Object evaluation = engine.eval(evaluatedConstraint);
+									if(evaluation instanceof Boolean) {
+										return (boolean) evaluation;
+									} else {
+										logger.error("The evaluation of constraint={} did not return a boolean but instead: {}. Predicate falls back to `false`."
+												+ " \nThe original constraint is: {}",
+												evaluatedConstraint, evaluation, p);
+										return false;
+									}
 								} catch (ScriptException e) {
 									ExperimentSetAnalyzer.this.logger.error(LoggerUtil.getExceptionInfo(e));
 									return false;

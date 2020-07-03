@@ -168,6 +168,14 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public void setup(final IExperimentSetConfig config) throws ExperimentDBInteractionFailedException {
+		if(this.config != null) {
+			if(this.config.equals(config)) {
+				this.logger.info("Setup was called repeatedly with the same configuration. Ignoring the subsequent call.", new IllegalStateException());
+				return;
+			} else {
+				throw new IllegalStateException("Setup was called a second time with an alternative experiment set configuration.");
+			}
+		}
 		this.logger.info("Setting up the experiment table {}", this.tablename);
 		this.config = config;
 		this.analyzer = new ExperimentSetAnalyzer(this.config);
