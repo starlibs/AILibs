@@ -27,9 +27,10 @@ public class HASCOViaFDAndBestFirstBuilder<V extends Comparable<V>, B extends HA
 
 	public HASCOViaFDAndBestFirstBuilder(final HASCOBuilder<TFDNode, String, V, ?> b) {
 		super(b);
-		this.setSearchFactory(new BestFirstFactory<>());
+		this.withSearchFactory(new BestFirstFactory<>());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public BestFirstFactory<IPathSearchWithPathEvaluationsInput<TFDNode, String, V>, TFDNode, String, V> getSearchFactory() {
 		return (BestFirstFactory<IPathSearchWithPathEvaluationsInput<TFDNode, String, V>, TFDNode, String, V>) super.getSearchFactory();
@@ -48,12 +49,15 @@ public class HASCOViaFDAndBestFirstBuilder<V extends Comparable<V>, B extends HA
 
 	@Override
 	public HASCOViaFD<V> getAlgorithm() {
+		this.requireThatProblemHasBeenDefined();
 		if (this.nodeEvaluator == null) {
 			throw new IllegalStateException("No node evaluator defined yet.");
 		}
 		BestFirstFactory<IPathSearchWithPathEvaluationsInput<TFDNode, String, V>, TFDNode, String, V> factory = new BestFirstFactory<>();
 		factory.setReduction(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<>(this.nodeEvaluator));
-		return new HASCOViaFD<>(super.getProblem(), factory);
+		HASCOViaFD<V> hasco = new HASCOViaFD<>(super.getProblem(), factory);
+		hasco.setConfig(this.getHascoConfig());
+		return hasco;
 	}
 
 	@SuppressWarnings("unchecked")

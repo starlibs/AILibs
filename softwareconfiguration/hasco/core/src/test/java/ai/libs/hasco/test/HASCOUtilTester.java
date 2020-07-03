@@ -24,7 +24,7 @@ import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 
-public class UtilTester {
+public class HASCOUtilTester {
 
 	private static final String pathToFiles = "../../../JAICore/jaicore-components/";
 

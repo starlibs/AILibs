@@ -1,10 +1,10 @@
 package ai.libs.jaicore.search.algorithms.mdp.mcts.uuct;
 
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTS;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSBuilder;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 
-public class UUCTFactory<N, A> extends MCTSFactory<N, A> {
+public class UUCTFactory<N, A> extends MCTSBuilder<N, A, UUCTFactory<N, A>> {
 
 	private IUCBUtilityFunction utility;
 

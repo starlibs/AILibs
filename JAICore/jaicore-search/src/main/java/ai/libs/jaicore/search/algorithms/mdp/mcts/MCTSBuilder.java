@@ -5,7 +5,7 @@ import java.util.Random;
 import ai.libs.jaicore.basic.algorithm.AAlgorithmFactory;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 
-public abstract class MCTSFactory<N, A> extends AAlgorithmFactory<IMDP<N, A, Double>, IPolicy<N, A>, MCTS<N, A>> {
+public abstract class MCTSBuilder<N, A, B extends MCTSBuilder<N, A, B>> extends AAlgorithmFactory<IMDP<N, A, Double>, IPolicy<N, A>, MCTS<N, A>> {
 
 	private int maxIterations = Integer.MAX_VALUE;
 	private double gamma = 1.0;
@@ -17,44 +17,54 @@ public abstract class MCTSFactory<N, A> extends AAlgorithmFactory<IMDP<N, A, Dou
 		return this.maxIterations;
 	}
 
-	public void setMaxIterations(final int maxIterations) {
+	public B withMaxIterations(final int maxIterations) {
 		this.maxIterations = maxIterations;
+		return this.getSelf();
 	}
 
 	public double getGamma() {
 		return this.gamma;
 	}
 
-	public void setGamma(final double gamma) {
+	public B withGamma(final double gamma) {
 		this.gamma = gamma;
+		return this.getSelf();
 	}
 
 	public double getEpsilon() {
 		return this.epsilon;
 	}
 
-	public void setEpsilon(final double epsilon) {
+	public B withEpsilon(final double epsilon) {
 		this.epsilon = epsilon;
+		return this.getSelf();
 	}
 
 	public Random getRandom() {
 		return this.random;
 	}
 
-	public void setRandom(final Random random) {
+	public B withRandom(final Random random) {
 		this.random = random;
+		return this.getSelf();
 	}
 
 	public boolean isTabooExhaustedNodes() {
 		return this.tabooExhaustedNodes;
 	}
 
-	public void setTabooExhaustedNodes(final boolean tabooExhaustedNodes) {
+	public B withTabooExhaustedNodes(final boolean tabooExhaustedNodes) {
 		this.tabooExhaustedNodes = tabooExhaustedNodes;
+		return this.getSelf();
 	}
 
 	@Override
 	public MCTS<N, A> getAlgorithm() {
 		throw new UnsupportedOperationException();
+	}
+
+	@SuppressWarnings("unchecked")
+	public B getSelf() {
+		return (B)this;
 	}
 }

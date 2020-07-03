@@ -1,4 +1,4 @@
-package ai.libs.hasco.examples;
+package ai.libs.hasco.examples.visualization;
 
 import java.io.File;
 import java.io.IOException;

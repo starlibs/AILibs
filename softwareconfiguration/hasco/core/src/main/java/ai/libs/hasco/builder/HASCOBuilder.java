@@ -10,6 +10,7 @@ import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
 import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.datastructure.graph.ILabeledPath;
 
@@ -20,6 +21,7 @@ import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.core.reduction.planning2search.DefaultHASCOPlanningReduction;
 import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.Parameter;
@@ -33,6 +35,15 @@ import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningT
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
+/**
+ *
+ * @author Felix Mohr
+ *
+ * @param <N> Type of nodes
+ * @param <A> Type of arcs
+ * @param <V> Type of Node scores
+ * @param <B> Type of the builder (for chaining)
+ */
 public abstract class HASCOBuilder<N, A, V extends Comparable<V>, B extends HASCOBuilder<N, A, V, B>>
 implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V, HASCO<N, A, V>> {
 
@@ -49,7 +60,6 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
 	private RefinementConfiguredSoftwareConfigurationProblem<V> problem;
 
-
 	private IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver;
 	private IOptimalPathInORGraphSearchFactory<IPathSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory;
 	private HASCOConfig hascoConfig;
@@ -60,6 +70,7 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 
 	public HASCOBuilder(final Class<V> scoreClass) {
 		this.scoreClass = scoreClass;
+		this.withDefaultAlgorithmConfig();
 	}
 
 	public static <V extends Comparable<V>> HASCOViaFDBuilder<V, ?> withForwardDecomposition(final Class<V> evaluationType) {
@@ -71,12 +82,10 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 	}
 
 	public static <V extends Comparable<V>> HASCOViaFDBuilder<V, ?> get(final Reduction reduction, final Class<V> scoreClass) {
-		switch (reduction) {
-		case FORWARD:
+		if (reduction == Reduction.FORWARD) {
 			return withForwardDecomposition(scoreClass);
-		default:
-			throw new IllegalArgumentException();
 		}
+		throw new IllegalArgumentException("Currently only support for forward decomposition.");
 	}
 
 	public static HASCOViaFDBuilder<Double, ?> get() {
@@ -129,10 +138,10 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 		this.problem = problemInput;
 	}
 
+	@SuppressWarnings("unchecked")
 	public B withPlanningGraphGeneratorDeriver(
-			final IHierarchicalPlanningToGraphSearchReduction<N, A, ? super CEOCIPSTNPlanningProblem, ? extends IPlan, ? extends GraphSearchInput<N, A>, ? super ILabeledPath<N, A>> planningGraphGeneratorDeriver) {
-		this.planningGraphGeneratorDeriver = (planningGraphGeneratorDeriver instanceof IHASCOPlanningReduction) ? (IHASCOPlanningReduction<N, A>) planningGraphGeneratorDeriver
-				: new DefaultHASCOPlanningReduction<>(planningGraphGeneratorDeriver);
+			final IHierarchicalPlanningToGraphSearchReduction<N, A, ? super CEOCIPSTNPlanningProblem, ? extends IPlan, ? extends GraphSearchInput<N, A>, ? super ILabeledPath<N, A>> planning2searchReduction) {
+		this.planningGraphGeneratorDeriver = (planning2searchReduction instanceof IHASCOPlanningReduction) ? (IHASCOPlanningReduction<N, A>) planning2searchReduction : new DefaultHASCOPlanningReduction<>(planning2searchReduction);
 		return this.getSelf();
 	}
 
@@ -140,8 +149,9 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 		return this.searchFactory;
 	}
 
-	public void setSearchFactory(final IOptimalPathInORGraphSearchFactory<IPathSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory) {
+	public B withSearchFactory(final IOptimalPathInORGraphSearchFactory<IPathSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory) {
 		this.searchFactory = searchFactory;
+		return this.getSelf();
 	}
 
 	public void withDefaultAlgorithmConfig() {
@@ -154,6 +164,10 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 
 	public void withAlgorithmConfigFile(final File hascoConfigFile) {
 		this.hascoConfig = (HASCOConfig) ConfigFactory.create(HASCOConfig.class).loadPropertiesFromFile(hascoConfigFile);
+	}
+
+	public HASCOConfig getHascoConfig() {
+		return this.hascoConfig;
 	}
 
 	public RefinementConfiguredSoftwareConfigurationProblem<V> getProblem() {
@@ -240,13 +254,24 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 		if (this.paramRefinementConfig == null) {
 			throw new IllegalStateException("Cannot create graph search input; no param refinement config defined yet.");
 		}
-		if (this.planningGraphGeneratorDeriver== null) {
+		if (this.planningGraphGeneratorDeriver == null) {
 			throw new IllegalStateException("Cannot create graph search input; no reduction from planning to graph search defined yet.");
 		}
 		return HASCOUtil.getSearchProblem(this.components, this.requiredInterface, this.paramRefinementConfig, this.planningGraphGeneratorDeriver);
 	}
 
+	public B withTimeout(final Timeout to) {
+		this.hascoConfig.setProperty(IOwnerBasedAlgorithmConfig.K_TIMEOUT, "" + to.milliseconds());
+		return this.getSelf();
+	}
+
+	public B withCPUs(final int numCPUs) {
+		this.hascoConfig.setProperty(IOwnerBasedAlgorithmConfig.K_CPUS, "" + numCPUs);
+		return this.getSelf();
+	}
+
+	@SuppressWarnings("unchecked")
 	public B getSelf() {
-		return (B)this;
+		return (B) this;
 	}
 }

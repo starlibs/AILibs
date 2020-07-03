@@ -16,6 +16,10 @@ public class HASCOViaFDBuilder<V extends Comparable<V>, B extends HASCOViaFDBuil
 		this.withPlanningGraphGeneratorDeriver(new SimpleForwardDecompositionReducer());
 	}
 
+	public HASCOViaFDAndDFSBuilder<V, ?> withDFS() {
+		return new HASCOViaFDAndDFSBuilder<>(this);
+	}
+
 	public HASCOViaFDAndBestFirstBuilder<V, ?> withBestFirst() {
 		return new HASCOViaFDAndBestFirstBuilder<>(this);
 	}
@@ -24,8 +28,17 @@ public class HASCOViaFDBuilder<V extends Comparable<V>, B extends HASCOViaFDBuil
 		if (!this.getScoreClass().equals(Double.class)) {
 			throw new IllegalStateException("Blind Best First is only possible for node values of type Double, but is " + this.getScoreClass().getName());
 		}
+		@SuppressWarnings("unchecked")
 		HASCOViaFDAndBestFirstBuilder<Double, ?> builder = (HASCOViaFDAndBestFirstBuilder<Double, ?>)this.withBestFirst();
 		builder.withNodeEvaluator(n -> 0.0);
 		return builder;
+	}
+
+	@Override
+	public HASCOViaFD<V> getAlgorithm() {
+		this.requireThatProblemHasBeenDefined();
+		HASCOViaFD<V> hasco = new HASCOViaFD<>(this.getProblem(), this.getSearchFactory());
+		hasco.setConfig(this.getHascoConfig());
+		return hasco;
 	}
 }

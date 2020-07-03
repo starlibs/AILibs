@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -52,10 +53,9 @@ import ai.libs.jaicore.timing.TimeRecordingObjectEvaluator;
  *
  * @author fmohr, wever
  *
- * @param <S>
- * @param <N>
- * @param <A>
- * @param <V>
+ * @param <N> Type of nodes in the search graph to which the problem is reduced
+ * @param <A> Type of arc labels in the search graph to which the problem is reduced
+ * @param <V> Type of scores of solutions
  */
 public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationAlgorithm<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V> {
 
@@ -332,5 +332,15 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 		fields.put("search", this.search);
 		fields.put("searchProblem", this.searchProblem);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
+	}
+
+	public void registerSolutionEventListener(final Consumer<HASCOSolutionEvent<V>> listener) {
+		this.registerListener(new Object() {
+
+			@Subscribe
+			public void receiveSolutionEvent(final HASCOSolutionEvent<V> e) {
+				listener.accept(e);
+			}
+		});
 	}
 }
