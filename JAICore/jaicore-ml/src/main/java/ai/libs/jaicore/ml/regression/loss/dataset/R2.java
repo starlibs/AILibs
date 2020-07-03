@@ -30,6 +30,11 @@ public class R2 extends ARegressionMeasure {
 			sumOfActualSquares += Math.pow(predicted.get(i) - meanExpected, 2);
 			sumOfExpectedSquares += Math.pow(expected.get(i) - meanExpected, 2);
 		}
+
+		if (sumOfExpectedSquares == 0.0) {
+			throw new IllegalStateException("Sum of expected squares must not be null.");
+		}
+
 		return sumOfActualSquares / sumOfExpectedSquares;
 	}
 

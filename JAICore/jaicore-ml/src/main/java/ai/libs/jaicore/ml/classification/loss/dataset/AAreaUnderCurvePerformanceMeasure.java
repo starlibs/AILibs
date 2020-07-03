@@ -2,7 +2,6 @@ package ai.libs.jaicore.ml.classification.loss.dataset;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -30,12 +29,7 @@ public abstract class AAreaUnderCurvePerformanceMeasure extends ASingleLabelPred
 	public List<Pair<Double, Integer>> getPredictionList(final List<? extends Integer> expected, final List<? extends ISingleLabelClassification> predicted) {
 		List<Pair<Double, Integer>> predictionsList = new ArrayList<>(expected.size());
 		IntStream.range(0, expected.size()).mapToObj(x -> new Pair<>(predicted.get(x).getProbabilityOfLabel(this.positiveClass), (int) expected.get(x))).forEach(predictionsList::add);
-		Collections.sort(predictionsList, new Comparator<Pair<Double, Integer>>() {
-			@Override
-			public int compare(final Pair<Double, Integer> o1, final Pair<Double, Integer> o2) {
-				return o2.getX().compareTo(o1.getX());
-			}
-		});
+		Collections.sort(predictionsList, (o1, o2) -> o2.getX().compareTo(o1.getX()));
 		return predictionsList;
 	}
 

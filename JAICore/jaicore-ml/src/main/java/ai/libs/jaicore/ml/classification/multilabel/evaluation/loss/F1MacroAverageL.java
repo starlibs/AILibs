@@ -30,8 +30,7 @@ public class F1MacroAverageL extends AMultiLabelClassificationMeasure {
 
 		F1Measure loss = new F1Measure(1);
 		OptionalDouble res = IntStream.range(0, expectedMatrix.length)
-				.mapToDouble(
-						x -> loss.score(Arrays.stream(expectedMatrix[x]).mapToObj(Integer::valueOf).collect(Collectors.toList()), Arrays.stream(actualMatrix[x]).mapToObj(y -> new SingleLabelClassification(y)).collect(Collectors.toList())))
+				.mapToDouble(x -> loss.score(Arrays.stream(expectedMatrix[x]).mapToObj(Integer::valueOf).collect(Collectors.toList()), Arrays.stream(actualMatrix[x]).mapToObj(SingleLabelClassification::new).collect(Collectors.toList())))
 				.average();
 		if (!res.isPresent()) {
 			throw new IllegalStateException("Could not determine average label-wise f measure.");

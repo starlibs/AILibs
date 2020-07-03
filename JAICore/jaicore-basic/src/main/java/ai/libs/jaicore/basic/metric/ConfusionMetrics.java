@@ -192,8 +192,8 @@ public class ConfusionMetrics {
 	 * @return The MCC.
 	 */
 	public static double getMatthewsCorrelationCoefficient(final int tp, final int fp, final int tn, final int fn) {
-		double nominator = tp * tn - fp * fn;
-		double denominator = Math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn));
+		double nominator = (double) tp * tn - fp * fn;
+		double denominator = Math.sqrt((double) (tp + fp) * (tp + fn) * (tn + fp) * (tn + fn));
 		return nominator / denominator;
 	}
 
