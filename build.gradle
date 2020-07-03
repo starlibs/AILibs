@@ -215,7 +215,7 @@ allprojects {
 
 		minHeapSize = "1g"
      	maxHeapSize = "2g"
-     	ignoreFailures = true
+     	ignoreFailures = false
 		forkEvery = 1		
 		maxParallelForks = 1
      	testLogging {
