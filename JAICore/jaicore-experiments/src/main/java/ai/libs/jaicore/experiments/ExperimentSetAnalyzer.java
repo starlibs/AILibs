@@ -316,7 +316,4 @@ public class ExperimentSetAnalyzer {
 		return new Pair<>(parts[0], type);
 	}
 
-	private ScriptEngine getJSEngine() {
-		return scriptEngine.get();
-	}
 }
