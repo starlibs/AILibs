@@ -54,6 +54,7 @@ public class ExperimentSetAnalyzer {
 	public ExperimentSetAnalyzer(final IExperimentSetConfig config) {
 		this.config = config;
 		this.reloadConfiguration();
+		scriptEngine.remove();
 	}
 
 	public void reloadConfiguration() {
@@ -313,5 +314,9 @@ public class ExperimentSetAnalyzer {
 		String[] parts = name.split(":");
 		String type = parts.length == 2 ? parts[1] : null;
 		return new Pair<>(parts[0], type);
+	}
+
+	private ScriptEngine getJSEngine() {
+		return scriptEngine.get();
 	}
 }

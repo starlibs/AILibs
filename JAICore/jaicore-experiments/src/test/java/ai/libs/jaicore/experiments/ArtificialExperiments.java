@@ -127,7 +127,8 @@ public class ArtificialExperiments {
 			try {
 				runner.randomlyConductExperiments(count);
 			} catch (ExperimentDBInteractionFailedException | InterruptedException e) {
-				throw new RuntimeException(e);
+				logger.error("Error random batch: ", e);
+				Assert.fail();
 			}
 		}, "random batch");
 	}
@@ -138,7 +139,8 @@ public class ArtificialExperiments {
 			try {
 				runner.sequentiallyConductExperiments(count);
 			} catch (ExperimentDBInteractionFailedException | InterruptedException e) {
-				throw new RuntimeException(e);
+				logger.error("Error sequentiall batch: ", e);
+				Assert.fail();
 			}
 		}, "sequential");
 	}
