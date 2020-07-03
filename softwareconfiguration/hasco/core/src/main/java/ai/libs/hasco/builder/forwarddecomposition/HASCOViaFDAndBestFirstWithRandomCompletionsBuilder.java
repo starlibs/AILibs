@@ -71,12 +71,13 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsBuilder extends HASCOVia
 
 		/* create node evaluator */
 		this.requireThatProblemHasBeenDefined();
-		IPathEvaluator<TFDNode, String, Double> pathEvaluator = HASCOUtil.getSearchProblem(this.getProblem(), this.getPlanningGraphGeneratorDeriver()).getPathEvaluator();
+		IPathEvaluator<TFDNode, String, Double> pathEvaluator = HASCOUtil.getSearchProblemWithEvaluation(this.getProblem(), this.getPlanningGraphGeneratorDeriver()).getPathEvaluator();
 		IPathEvaluator<TFDNode, String, Double> nodeEvaluator = new RandomCompletionBasedNodeEvaluator<>(this.random, this.numSamples, this.numSamples * 2, pathEvaluator,
 				this.timeoutForSingleCompletionEvaluationInMS, this.timeoutForNodeEvaluationInMS, n -> false);
 		this.withNodeEvaluator(nodeEvaluator);
 
 		/* now get algorithm */
-		return super.getAlgorithm();
+		HASCOViaFD<Double> hasco = super.getAlgorithm();
+		((RandomCompletionBasedNodeEvaluator<TFDNode, String, Double>)hasco.getSearch().getInput().getPathEvaluator()).getSolutionEvaluator();
 	}
 }

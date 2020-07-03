@@ -31,6 +31,10 @@ public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements
 		this.evaluator = this.configurationProblem.getCompositionEvaluator();
 	}
 
+	public HASCOReduction<V> getReduction() {
+		return this.reduction;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public V evaluate(final IPlan plan) throws InterruptedException, ObjectEvaluationFailedException {
@@ -63,8 +67,7 @@ public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements
 		if (this.evaluator instanceof ILoggingCustomizable) {
 			this.logger.info("Setting logger of evaluator {} to {}.be", this.evaluator.getClass().getName(), name);
 			((ILoggingCustomizable) this.evaluator).setLoggerName(name + ".be");
-		}
-		else {
+		} else {
 			this.logger.info("Evaluator {} cannot be customized for logging, so not configuring its logger.", this.evaluator.getClass().getName());
 		}
 	}

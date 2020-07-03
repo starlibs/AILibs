@@ -2,10 +2,13 @@ package ai.libs.hasco.builder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
 
 import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.datastructure.graph.ILabeledPath;
@@ -14,10 +17,15 @@ import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFDBuilder;
 import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOConfig;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
+import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.core.reduction.planning2search.DefaultHASCOPlanningReduction;
 import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
+import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
 import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
@@ -33,7 +41,15 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 	};
 
 	private final Class<V> scoreClass;
+
+	/* problem configuration */
+	private Collection<Component> components;
+	private String requiredInterface;
+	private IObjectEvaluator<ComponentInstance, V> evaluator;
+	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
 	private RefinementConfiguredSoftwareConfigurationProblem<V> problem;
+
+
 	private IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver;
 	private IOptimalPathInORGraphSearchFactory<IPathSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory;
 	private HASCOConfig hascoConfig;
@@ -146,6 +162,10 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 
 	public B withProblem(final RefinementConfiguredSoftwareConfigurationProblem<V> problem) {
 		this.setProblemInput(problem);
+		this.components = problem.getComponents();
+		this.evaluator = problem.getCompositionEvaluator();
+		this.requiredInterface = problem.getRequiredInterface();
+		this.paramRefinementConfig = problem.getParamRefinementConfig();
 		return this.getSelf();
 	}
 
@@ -161,6 +181,69 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 		if (this.problem == null) {
 			throw new IllegalStateException("Configuration Problem has not been set!");
 		}
+	}
+
+	public Collection<Component> getComponents() {
+		return this.components;
+	}
+
+	public B withComponents(final Collection<Component> components) {
+		this.components = components;
+		this.compileProblemIfPossible();
+		return this.getSelf();
+	}
+
+	public String getRequiredInterface() {
+		return this.requiredInterface;
+	}
+
+	public B withRequiredInterface(final String requiredInterface) {
+		this.requiredInterface = requiredInterface;
+		this.compileProblemIfPossible();
+		return this.getSelf();
+	}
+
+	public IObjectEvaluator<ComponentInstance, V> getEvaluator() {
+		return this.evaluator;
+	}
+
+	public B withEvaluator(final IObjectEvaluator<ComponentInstance, V> evaluator) {
+		this.evaluator = evaluator;
+		this.compileProblemIfPossible();
+		return this.getSelf();
+	}
+
+	public Map<Component, Map<Parameter, ParameterRefinementConfiguration>> getParamRefinementConfig() {
+		return this.paramRefinementConfig;
+	}
+
+	public B withParamRefinementConfig(final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig) {
+		this.paramRefinementConfig = paramRefinementConfig;
+		this.compileProblemIfPossible();
+		return this.getSelf();
+	}
+
+	private void compileProblemIfPossible() {
+		if (this.components != null && this.requiredInterface != null && this.paramRefinementConfig != null && this.evaluator != null) {
+			SoftwareConfigurationProblem<V> coreProblem = new SoftwareConfigurationProblem<>(this.components, this.requiredInterface, this.evaluator);
+			this.problem = new RefinementConfiguredSoftwareConfigurationProblem<>(coreProblem, this.paramRefinementConfig);
+		}
+	}
+
+	public IPathSearchInput<N, A> getGraphSearchInput() {
+		if (this.components == null) {
+			throw new IllegalStateException("Cannot create graph search input; no components defined yet.");
+		}
+		if (this.requiredInterface == null) {
+			throw new IllegalStateException("Cannot create graph search input; no required interface defined yet.");
+		}
+		if (this.paramRefinementConfig == null) {
+			throw new IllegalStateException("Cannot create graph search input; no param refinement config defined yet.");
+		}
+		if (this.planningGraphGeneratorDeriver== null) {
+			throw new IllegalStateException("Cannot create graph search input; no reduction from planning to graph search defined yet.");
+		}
+		return HASCOUtil.getSearchProblem(this.components, this.requiredInterface, this.paramRefinementConfig, this.planningGraphGeneratorDeriver);
 	}
 
 	public B getSelf() {

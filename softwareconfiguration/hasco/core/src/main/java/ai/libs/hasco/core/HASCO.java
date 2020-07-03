@@ -125,7 +125,7 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 				new SoftwareConfigurationProblem<>(this.getInput().getComponents(), this.getInput().getRequiredInterface(), this.timeGrabbingEvaluationWrapper), this.getInput().getParamRefinementConfig());
 		HASCOReduction<V> hascoReduction = new HASCOReduction<>(this::getBestSeenSolution);
 		this.planningProblem = hascoReduction.encodeProblem(refConfigSoftwareConfigurationProblem);
-		this.searchProblem = HASCOUtil.getSearchProblem(refConfigSoftwareConfigurationProblem, planningGraphGeneratorDeriver);
+		this.searchProblem = HASCOUtil.getSearchProblemWithEvaluation(refConfigSoftwareConfigurationProblem, planningGraphGeneratorDeriver);
 
 		/* create search object */
 		this.logger.debug("Creating and initializing the search object");

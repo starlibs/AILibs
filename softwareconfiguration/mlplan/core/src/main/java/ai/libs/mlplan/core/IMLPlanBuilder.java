@@ -7,11 +7,9 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
-import ai.libs.hasco.builder.HASCOBuilder;
+import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFDBuilder;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
-import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
 
@@ -52,7 +50,7 @@ public interface IMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, I
 
 	public ILearnerFactory<L> getLearnerFactory();
 
-	public HASCOBuilder<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> getHASCOFactory();
+	public HASCOViaFDBuilder<Double, ?> getHASCOFactory();
 
 	public MLPlanClassifierConfig getAlgorithmConfig();
 
