@@ -12,19 +12,21 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.hasco.core.Util;
-import ai.libs.hasco.model.CategoricalParameterDomain;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.IParameterDomain;
-import ai.libs.hasco.model.Parameter;
-import ai.libs.hasco.serialization.ComponentLoader;
+import ai.libs.hasco.core.HASCOUtil;
+import ai.libs.jaicore.components.model.CategoricalParameterDomain;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.IParameterDomain;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.jaicore.components.serialization.ComponentLoader;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 
 public class UtilTester {
+
+	private static final String pathToFiles = "../../../JAICore/jaicore-components/";
 
 	@Test
 	public void testComponentInstanceBuilder() throws Exception {
@@ -37,40 +39,40 @@ public class UtilTester {
 		params.add(new ConstantParam("newVar10"));
 		params.add(new ConstantParam("[0.5,1.0]"));
 		state.add(new Literal("val", params));
-		ComponentInstance instance = Util.getComponentInstanceFromState(new ComponentLoader(new File("testrsc/weka/weka-all-autoweka.json")).getComponents(), state, "solution", false);
+		ComponentInstance instance = HASCOUtil.getComponentInstanceFromState(new ComponentLoader(new File(pathToFiles + "testrsc/weka/weka-all-autoweka.json")).getComponents(), state, "solution", false);
 		assertEquals("[125.36470588235294, 253.74117647058824]", instance.getSatisfactionOfRequiredInterfaces().get("preprocessor").getSatisfactionOfRequiredInterfaces().get("eval").getParameterValue("A"));
-		instance = Util.getComponentInstanceFromState(new ComponentLoader(new File("testrsc/weka/weka-all-autoweka.json")).getComponents(), state, "solution", true);
+		instance = HASCOUtil.getComponentInstanceFromState(new ComponentLoader(new File(pathToFiles + "testrsc/weka/weka-all-autoweka.json")).getComponents(), state, "solution", true);
 		assertEquals("190", instance.getSatisfactionOfRequiredInterfaces().get("preprocessor").getSatisfactionOfRequiredInterfaces().get("eval").getParameterValue("A"));
 	}
-	
+
 	@Test
 	public void testParameterDomainUpdates() throws Exception {
-		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(new File("testrsc/problemwithdependencies.json"), "IFace", n -> 0.0);
+		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(new File(pathToFiles + "testrsc/problemwithdependencies.json"), "IFace", n -> 0.0);
 		Component bComponent = problem.getComponents().stream().filter(c -> c.getName().equals("B")).findFirst().get();
 		Parameter dParameter = bComponent.getParameterWithName("d");
 
 		/* first check that the domain is default if c is not set at all */
 		{
 			ComponentInstance inst = new ComponentInstance(bComponent, null, null);
-			Map<Parameter, IParameterDomain> newDomains = Util.getUpdatedDomainsOfComponentParameters(inst);
+			Map<Parameter, IParameterDomain> newDomains = HASCOUtil.getUpdatedDomainsOfComponentParameters(inst);
 			assertEquals(dParameter.getDefaultDomain(), newDomains.get(dParameter));
 		}
-		
+
 		/* now check that the domain remains default if c is explicitly set to false */
 		{
 			Map<String, String> parameterValues = new HashMap<>();
 			parameterValues.put("c", "false");
 			ComponentInstance inst = new ComponentInstance(bComponent, parameterValues, null);
-			Map<Parameter, IParameterDomain> newDomains = Util.getUpdatedDomainsOfComponentParameters(inst);
+			Map<Parameter, IParameterDomain> newDomains = HASCOUtil.getUpdatedDomainsOfComponentParameters(inst);
 			assertEquals(dParameter.getDefaultDomain(), newDomains.get(dParameter));
 		}
-		
+
 		/* now check that the domain is changed in the intended manner when c is true */
 		{
 			Map<String, String> parameterValues = new HashMap<>();
 			parameterValues.put("c", "true");
 			ComponentInstance inst = new ComponentInstance(bComponent, parameterValues, null);
-			Map<Parameter, IParameterDomain> newDomains = Util.getUpdatedDomainsOfComponentParameters(inst);
+			Map<Parameter, IParameterDomain> newDomains = HASCOUtil.getUpdatedDomainsOfComponentParameters(inst);
 			Set<String> expectedValues = new HashSet<>();
 			expectedValues.add("blue");
 			expectedValues.add("white");

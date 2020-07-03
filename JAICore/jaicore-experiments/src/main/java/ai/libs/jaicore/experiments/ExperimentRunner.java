@@ -31,11 +31,11 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	private boolean checkMemory = true;
 
 	private final IExperimentSetConfig config;
-	private final IExperimentSetEvaluator conductor;
+	private final IExperimentSetEvaluator evaluator;
 	private final IExperimentDatabaseHandle handle;
 	private final int availableMemoryInMB;
 
-	public ExperimentRunner(final IExperimentSetConfig config, final IExperimentSetEvaluator conductor, final IExperimentDatabaseHandle databaseHandle) throws ExperimentDBInteractionFailedException {
+	public ExperimentRunner(final IExperimentSetConfig config, final IExperimentSetEvaluator evaluator, final IExperimentDatabaseHandle databaseHandle) throws ExperimentDBInteractionFailedException {
 
 		if (databaseHandle == null) {
 			throw new IllegalArgumentException("Cannot create ExperimentRunner without database handle!");
@@ -43,7 +43,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 
 		/* check data base configuration */
 		this.config = config;
-		this.conductor = conductor;
+		this.evaluator = evaluator;
 		this.handle = databaseHandle;
 		this.logger.debug("Created ExperimentRunner. Now updating its configuration from the database.");
 		this.logger.info("Successfully created and initialized ExperimentRunner.");
@@ -158,7 +158,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 						"Cannot conduct experiment " + expEntry.getExperiment() + ", because only " + Runtime.getRuntime().availableProcessors() + " CPU cores are available where declared is " + expEntry.getExperiment().getNumCPUs());
 			}
 			this.handle.startExperiment(expEntry);
-			this.conductor.evaluate(expEntry, m -> {
+			this.evaluator.evaluate(expEntry, m -> {
 				try {
 					this.logger.info("Updating experiment with id {} with the following map: {}", expEntry.getId(), m);
 					this.handle.updateExperiment(expEntry, m);
@@ -167,10 +167,10 @@ public class ExperimentRunner implements ILoggingCustomizable {
 				}
 			});
 
-		} catch (ExperimentFailurePredictionException e) {
-			error = e;
 		} catch (ExperimentEvaluationFailedException e) {
 			error = e.getCause();
+		} catch (ExperimentFailurePredictionException e) {
+			error = e;
 		}
 		if (error != null) {
 			this.logger.error("Experiment failed due to {}. Message: {}. Detail info: {}", error.getClass().getName(), error.getMessage(), LoggerUtil.getExceptionInfo(error));

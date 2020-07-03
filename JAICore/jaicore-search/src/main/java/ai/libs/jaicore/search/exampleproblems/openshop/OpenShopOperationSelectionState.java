@@ -5,16 +5,16 @@ import java.util.Collection;
 import java.util.List;
 
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.problems.scheduling.openshop.Machine;
-import ai.libs.jaicore.problems.scheduling.openshop.OpenShopProblem;
-import ai.libs.jaicore.problems.scheduling.openshop.Operation;
+import ai.libs.jaicore.problems.scheduling.Machine;
+import ai.libs.jaicore.problems.scheduling.JobSchedulingProblemInput;
+import ai.libs.jaicore.problems.scheduling.Operation;
 
 public class OpenShopOperationSelectionState extends OpenShopState {
 	private final OpenShopMachineSelectionState parent;
 	private final Machine machineSelectedInParent;
 	private final Collection<String> unselectedOperations;
 
-	public OpenShopOperationSelectionState(final OpenShopProblem problem, final OpenShopMachineSelectionState parent, final Machine machineSelectedInParent, final Collection<String> unselectedOperations) {
+	public OpenShopOperationSelectionState(final JobSchedulingProblemInput problem, final OpenShopMachineSelectionState parent, final Machine machineSelectedInParent, final Collection<String> unselectedOperations) {
 		super(problem);
 		this.parent = parent;
 		this.machineSelectedInParent = machineSelectedInParent;

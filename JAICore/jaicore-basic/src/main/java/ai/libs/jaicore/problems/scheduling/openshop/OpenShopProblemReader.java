@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Queue;
 
 import ai.libs.jaicore.basic.FileUtil;
+import ai.libs.jaicore.problems.scheduling.IJobSchedulingInput;
+import ai.libs.jaicore.problems.scheduling.JobSchedulingProblemBuilder;
+import ai.libs.jaicore.problems.scheduling.JobShopMetric;
 
 /**
  * @author Felix Mohr
@@ -19,7 +22,7 @@ public class OpenShopProblemReader {
 		/* avoids instantiation */
 	}
 
-	public static OpenShopProblem getFromJobFileWithoutSetupTimesAndWithOneMachinePerWorkcenter(final File jobFile, final OpenShopMetric metric) throws IOException {
+	public static IJobSchedulingInput getFromJobFileWithoutSetupTimesAndWithOneMachinePerWorkcenter(final File jobFile, final JobShopMetric metric) throws IOException {
 
 		/* get number of work centers */
 		List<String> jobFileLines = FileUtil.readFileAsList(jobFile);
@@ -27,7 +30,7 @@ public class OpenShopProblemReader {
 		final int numWorkcenters = Integer.parseInt(jobFileLines.remove(0));
 
 		/* setup work centers with no setup times (assuming that the number of operations = number of jobs */
-		OpenShopProblemBuilder builder = new OpenShopProblemBuilder();
+		JobSchedulingProblemBuilder builder = new JobSchedulingProblemBuilder();
 		int[][] zeroSetupTimesArray = new int[numJobs + 1][numJobs + 1];
 		for (int i = 0; i <= numJobs; i++) {
 			for (int j = 0; j <= numJobs; j++) {
@@ -61,7 +64,7 @@ public class OpenShopProblemReader {
 	 * @return
 	 * @throws IOException
 	 */
-	public static OpenShopProblem mergeFromFiles(final File jobFile, final File setupTimesFile, final File parallelMachinesFile, final OpenShopMetric metric) throws IOException {
+	public static IJobSchedulingInput mergeFromFiles(final File jobFile, final File setupTimesFile, final File parallelMachinesFile, final JobShopMetric metric) throws IOException {
 
 		/* existence check for files */
 		if (setupTimesFile == null || !setupTimesFile.exists()) {
@@ -72,7 +75,7 @@ public class OpenShopProblemReader {
 		}
 
 		/* create builder */
-		OpenShopProblemBuilder builder = new OpenShopProblemBuilder();
+		JobSchedulingProblemBuilder builder = new JobSchedulingProblemBuilder();
 
 		/* read the setup times and create the work centers */
 		List<String> setupTimesFileLines = FileUtil.readFileAsList(setupTimesFile);
@@ -129,7 +132,7 @@ public class OpenShopProblemReader {
 		return builder.withMetric(metric).build();
 	}
 
-	private static void configureBuilderWithJobsFromJobFile(final OpenShopProblemBuilder builder, final File jobFile) throws IOException {
+	private static void configureBuilderWithJobsFromJobFile(final JobSchedulingProblemBuilder builder, final File jobFile) throws IOException {
 
 		final int numWorkcentersDefinedInBuilder = builder.getWorkcenters().size();
 

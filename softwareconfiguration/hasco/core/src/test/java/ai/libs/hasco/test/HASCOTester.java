@@ -21,12 +21,12 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.core.HASCO;
-import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.hasco.events.HASCOSolutionEvent;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.serialization.CompositionSerializer;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.jaicore.components.serialization.CompositionSerializer;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.util.CycleDetectedResult;
 import ai.libs.jaicore.search.util.DeadEndDetectedResult;

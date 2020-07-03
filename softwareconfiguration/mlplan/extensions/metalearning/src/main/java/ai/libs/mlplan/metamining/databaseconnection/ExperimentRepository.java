@@ -9,7 +9,7 @@ import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.db.sql.SQLAdapter;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
 import dataHandling.mySQL.MetaDataDataBaseConnection;

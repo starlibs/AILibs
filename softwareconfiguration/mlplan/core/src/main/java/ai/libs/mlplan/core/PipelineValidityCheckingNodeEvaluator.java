@@ -5,7 +5,7 @@ import java.util.Collection;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 
-import ai.libs.hasco.model.Component;
+import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 
 public abstract class PipelineValidityCheckingNodeEvaluator implements IPathEvaluator<TFDNode, String, Double> {

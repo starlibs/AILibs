@@ -19,15 +19,15 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
-import ai.libs.hasco.core.Util;
+import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.metamining.MetaMinerBasedSorter;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-//github.com/fmohr/AILibs.git
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.lds.BestFirstLimitedDiscrepancySearch;
 import ai.libs.jaicore.search.algorithms.standard.lds.BestFirstLimitedDiscrepancySearchFactory;
@@ -142,7 +142,7 @@ public class MetaMLPlan extends AbstractClassifier {
 				}
 
 				// Prepare pipeline
-				ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, solution.get(solution.size() - 1).getState(), true);
+				ComponentInstance ci = HASCOUtil.getSolutionCompositionFromState(this.components, solution.get(solution.size() - 1).getState(), true);
 				IWekaClassifier pl = this.factory.getComponentInstantiation(ci);
 
 				// Evaluate pipeline
@@ -169,7 +169,7 @@ public class MetaMLPlan extends AbstractClassifier {
 				this.logger.info("Finished search (Exhaustive search conducted).");
 				thereAreMoreElements = false;
 			} catch (Exception e) {
-				this.logger.warn("Continuing search despite error: {}", e);
+				this.logger.warn("Continuing search despite error: {}", LoggerUtil.getExceptionInfo(e));
 			}
 		}
 
@@ -182,7 +182,7 @@ public class MetaMLPlan extends AbstractClassifier {
 					MetaMLPlan.this.bestModel.getClassifier().buildClassifier(data);
 				} catch (Exception e) {
 					MetaMLPlan.this.bestModel = null;
-					MetaMLPlan.this.logger.error("Evaluation of best model failed with an exception: {}", e);
+					MetaMLPlan.this.logger.error("Evaluation of best model failed with an exception: {}", LoggerUtil.getExceptionInfo(e));
 				}
 			}
 		};

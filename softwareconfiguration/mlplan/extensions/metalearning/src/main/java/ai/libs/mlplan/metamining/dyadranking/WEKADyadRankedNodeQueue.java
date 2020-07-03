@@ -7,9 +7,9 @@ import org.api4.java.common.math.IVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.core.Util;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.core.HASCOUtil;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IDyadRanker;
 import ai.libs.jaicore.ml.ranking.dyad.learner.search.ADyadRankedNodeQueue;
@@ -59,7 +59,7 @@ public class WEKADyadRankedNodeQueue extends ADyadRankedNodeQueue<TFDNode, Doubl
 
 	@Override
 	protected IVector characterize(final IEvaluatedPath<TFDNode, ?, Double> path) {
-		ComponentInstance cI = Util.getComponentInstanceFromState(this.components, path.getHead().getState(), "solution", true);
+		ComponentInstance cI = HASCOUtil.getComponentInstanceFromState(this.components, path.getHead().getState(), "solution", true);
 		if (cI != null) {
 			this.logger.debug("Characterizing new node.");
 			return new DenseDoubleVector(this.characterizer.characterize(cI));

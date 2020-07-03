@@ -13,10 +13,10 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.Parameter;
-import ai.libs.hasco.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import treeminer.FrequentSubtreeFinder;
 import treeminer.TreeMiner;
 import treeminer.util.TreeRepresentationUtils;
@@ -29,14 +29,14 @@ import treeminer.util.TreeRepresentationUtils;
  * of training examples for pipelines are then used to find frequent patterns in
  * the pipelines. A new pipeline is then characterizes by which of these
  * patterns appear in it.
- * 
+ *
  * @author Helena Graf
  *
  */
 public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 
 	private static final Logger logger = LoggerFactory.getLogger(WEKAPipelineCharacterizer.class);
-	
+
 	/** The default path for pre computed algorithm patterns. */
 	private static final String ALGORITHM_PATTERNS_SUPPORT_5_PATH = "draco/patterns_support_5.csv";
 	/**
@@ -72,13 +72,13 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	/**
 	 * Creates a new pipeline characterizer that uses the given descriptions of
 	 * parameters to characterize MLPipelines.
-	 * 
+	 *
 	 * @param componentParameters
 	 *            The description of parameters in the current configuration
 	 *            together with their refinements.
 	 */
 	public WEKAPipelineCharacterizer(
-			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> componentParameters) {
+			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> componentParameters) {
 		TreeMiner miner = new TreeMiner();
 		miner.setCountMultipleOccurrences(false);
 		miner.setOnlySearchForPatternsThatStartWithTheRoot(true);
@@ -86,7 +86,7 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 		this.componentParameters = componentParameters;
 
 		try {
-			ontologyConnector = new WEKAOntologyConnector();
+			this.ontologyConnector = new WEKAOntologyConnector();
 		} catch (OWLOntologyCreationException e) {
 			logger.error("Cannot connect to Ontology!");
 			throw new OntologyNotFoundException(e);
@@ -96,11 +96,11 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	/**
 	 * Build this pipeline characterizer from a file of patterns. The pattern need
 	 * to be UTF-8 encoded strings and each line specifies exactly one pattern.
-	 * 
+	 *
 	 * @param file
 	 *            the file to read from
 	 */
-	public void buildFromFile(File file) {
+	public void buildFromFile(final File file) {
 		List<String> foundPatterns = new ArrayList<>();
 		try (Scanner scanner = new Scanner(file)) {
 			while (scanner.hasNextLine()) {
@@ -121,27 +121,27 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	public void buildFromFile() {
 		try {
 			this.buildFromFile(
-					Paths.get(getClass().getClassLoader().getResource(ALGORITHM_PATTERNS_SUPPORT_5_PATH).toURI()).toFile());
+					Paths.get(this.getClass().getClassLoader().getResource(ALGORITHM_PATTERNS_SUPPORT_5_PATH).toURI()).toFile());
 		} catch (URISyntaxException e) {
 			logger.error("Couldn't find default algorithm patterns!", e);
 		}
 	}
 
 	@Override
-	public void build(List<ComponentInstance> pipelines) throws InterruptedException {
+	public void build(final List<ComponentInstance> pipelines) throws InterruptedException {
 		// Convert the pipelines to String representations
-		logger.info("Converting training examples to trees. With support {}", patternMinSupport);
+		logger.info("Converting training examples to trees. With support {}", this.patternMinSupport);
 
-		int chunkSize = Math.floorDiv(pipelines.size(), cpus);
-		int lastchunkSize = pipelines.size() - (chunkSize * (cpus - 1));
+		int chunkSize = Math.floorDiv(pipelines.size(), this.cpus);
+		int lastchunkSize = pipelines.size() - (chunkSize * (this.cpus - 1));
 
-		ComponentInstanceStringConverter[] threads = new ComponentInstanceStringConverter[cpus];
+		ComponentInstanceStringConverter[] threads = new ComponentInstanceStringConverter[this.cpus];
 
 		for (int i = 0; i < threads.length; i++) {
-			threads[i] = new ComponentInstanceStringConverter(ontologyConnector,
+			threads[i] = new ComponentInstanceStringConverter(this.ontologyConnector,
 					pipelines.subList(i * chunkSize,
 							i == threads.length - 1 ? (i * chunkSize) + lastchunkSize : (i + 1) * chunkSize),
-					componentParameters);
+					this.componentParameters);
 			threads[i].start();
 		}
 
@@ -153,19 +153,19 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 
 		// Use the tree miner to find patterns
 		logger.info("Finding frequent subtrees");
-		foundPipelinePatterns = treeMiner.findFrequentSubtrees(pipelineRepresentations, patternMinSupport);
+		this.foundPipelinePatterns = this.treeMiner.findFrequentSubtrees(pipelineRepresentations, this.patternMinSupport);
 	}
 
 	@Override
-	public double[] characterize(ComponentInstance pipeline) {
+	public double[] characterize(final ComponentInstance pipeline) {
 		// Make tree representation from this pipeline
-		String treeRepresentation = new ComponentInstanceStringConverter(ontologyConnector, new ArrayList<>(),
-				componentParameters).makeStringTreeRepresentation(pipeline);
+		String treeRepresentation = new ComponentInstanceStringConverter(this.ontologyConnector, new ArrayList<>(),
+				this.componentParameters).makeStringTreeRepresentation(pipeline);
 
 		// Ask the treeMiner which of the patterns are included in this pipeline
-		double[] pipelineCharacterization = new double[foundPipelinePatterns.size()];
-		for (int i = 0; i < foundPipelinePatterns.size(); i++) {
-			if (TreeRepresentationUtils.containsSubtree(treeRepresentation, foundPipelinePatterns.get(i))) {
+		double[] pipelineCharacterization = new double[this.foundPipelinePatterns.size()];
+		for (int i = 0; i < this.foundPipelinePatterns.size(); i++) {
+			if (TreeRepresentationUtils.containsSubtree(treeRepresentation, this.foundPipelinePatterns.get(i))) {
 				pipelineCharacterization[i] = 1;
 			} else {
 				pipelineCharacterization[i] = 0;
@@ -176,14 +176,14 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 
 	@Override
 	public double[][] getCharacterizationsOfTrainingExamples() {
-		return treeMiner.getCharacterizationsOfTrainingExamples();
+		return this.treeMiner.getCharacterizationsOfTrainingExamples();
 	}
 
 	/**
 
 	 * Returns the amount of found pipeline patterns, which is the length of a
 	 * characterization.
-	 * 
+	 *
 	 * @return the length of any array produced by {@link #characterize(ComponentInstance)}.
 	 */
 	@Override
@@ -193,62 +193,62 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 
 	/**
 	 * Get the used ontology connector.
-	 * 
+	 *
 	 * @return The used ontology connector
 	 */
 	public IOntologyConnector getOntologyConnector() {
-		return ontologyConnector;
+		return this.ontologyConnector;
 	}
 
 	/**
 	 * Set the ontology connector to be used.
-	 * 
+	 *
 	 * @param ontologyConnector
 	 *            the ontologyConnector to be used
 	 */
-	public void setOntologyConnector(IOntologyConnector ontologyConnector) {
+	public void setOntologyConnector(final IOntologyConnector ontologyConnector) {
 		this.ontologyConnector = ontologyConnector;
 	}
 
 	/**
 	 * Get the minimum support required for a pattern to be considered frequent for
 	 * the tree mining algorithm.
-	 * 
+	 *
 	 * @return The minimum support a tree pattern must have to be considered
 	 *         frequent
 	 */
 	public int getMinSupport() {
-		return patternMinSupport;
+		return this.patternMinSupport;
 	}
 
 	/**
 	 * Set the minimum support required for a pattern to be considered frequent for
 	 * the tree mining algorithm.
-	 * 
+	 *
 	 * @param minSupport
 	 *            The minimum support a tree pattern must have to be considered
 	 *            frequent
 	 */
-	public void setMinSupport(int minSupport) {
+	public void setMinSupport(final int minSupport) {
 		this.patternMinSupport = minSupport;
 	}
 
 	/**
 	 * Inform the Characterizer about resource usage.
-	 * 
+	 *
 	 * @param cpus
 	 *            Maximum number of threads that will be used by the characterizer
 	 */
-	public void setCPUs(int cpus) {
+	public void setCPUs(final int cpus) {
 		this.cpus = cpus;
 	}
 
 	/**
 	 * Get the patterns found among the given training examples.
-	 * 
+	 *
 	 * @return A list of patterns
 	 */
 	public List<String> getFoundPipelinePatterns() {
-		return foundPipelinePatterns;
+		return this.foundPipelinePatterns;
 	}
 }
