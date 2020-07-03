@@ -4,16 +4,20 @@ import java.util.List;
 
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 
+import ai.libs.jaicore.basic.metric.ConfusionMetrics;
+
 public class FMeasure extends ASingleLabelPredictionPerformanceMeasure {
 
 	private final double beta;
-	private final Precision precision;
-	private final Recall recall;
+	private final TruePositives tp;
+	private final FalsePositives fp;
+	private final FalseNegatives fn;
 
 	public FMeasure(final double beta, final int positiveClass) {
 		this.beta = beta;
-		this.precision = new Precision(positiveClass);
-		this.recall = new Recall(positiveClass);
+		this.tp = new TruePositives(positiveClass);
+		this.fp = new FalsePositives(positiveClass);
+		this.fn = new FalseNegatives(positiveClass);
 	}
 
 	@Override
@@ -21,12 +25,7 @@ public class FMeasure extends ASingleLabelPredictionPerformanceMeasure {
 		if (expected.size() != predicted.size()) {
 			throw new IllegalArgumentException("Expected and actual must be of the same length.");
 		}
-
-		double vPrecision = this.precision.score(expected, predicted);
-		double vRecall = this.recall.score(expected, predicted);
-		double denominator = ((Math.pow(this.beta, 2) * vPrecision) + vRecall);
-
-		return denominator == 0.0 ? 0 : (1 + Math.pow(this.beta, 2)) * (vPrecision * vRecall) / denominator;
+		return ConfusionMetrics.getFMeasure(this.beta, (int) this.tp.score(expected, predicted), (int) this.fp.score(expected, predicted), (int) this.fn.score(expected, predicted));
 	}
 
 }

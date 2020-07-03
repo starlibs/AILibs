@@ -15,7 +15,7 @@ public class TrueNegatives extends ASingleLabelPredictionPerformanceMeasure {
 
 	@Override
 	public double score(final List<? extends Integer> expected, final List<? extends ISingleLabelClassification> predicted) {
-		return IntStream.range(0, expected.size()).filter(i -> !expected.get(i).equals(this.positiveClass) && expected.get(i).equals(predicted.get(i).getPrediction())).map(x -> 1).sum();
+		return IntStream.range(0, expected.size()).filter(i -> !expected.get(i).equals(this.positiveClass) && expected.get(i).equals(predicted.get(i).getPrediction())).count();
 	}
 
 }

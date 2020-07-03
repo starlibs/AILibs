@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 
+import ai.libs.jaicore.basic.metric.ConfusionMetrics;
+
 public class Recall extends ASingleLabelPredictionPerformanceMeasure {
 
 	private final TruePositives tp;
@@ -16,9 +18,7 @@ public class Recall extends ASingleLabelPredictionPerformanceMeasure {
 
 	@Override
 	public double score(final List<? extends Integer> expected, final List<? extends ISingleLabelClassification> predicted) {
-		double truePositives = this.tp.score(expected, predicted);
-		double denominator = (truePositives + this.fn.score(expected, predicted));
-		return denominator == 0.0 ? 0 : truePositives / denominator;
+		return ConfusionMetrics.getRecall((int) this.tp.score(expected, predicted), (int) this.fn.score(expected, predicted));
 	}
 
 }
