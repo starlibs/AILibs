@@ -92,7 +92,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 			throw new ExtractionOfImportantParametersFailedException("Could not build model", e);
 		}
 		if (!this.importanceDictionary.containsKey(pipelineIdentifier)) {
-			this.importanceDictionary.put(pipelineIdentifier, new HashMap<Set<Integer>, Double>());
+			this.importanceDictionary.put(pipelineIdentifier, new HashMap<>());
 		}
 		Set<Integer> parameterIndices = new HashSet<>();
 		for (int i = 0; i < data.numAttributes() - 1; i++) {

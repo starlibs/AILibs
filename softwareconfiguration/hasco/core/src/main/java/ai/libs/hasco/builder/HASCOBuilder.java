@@ -49,7 +49,7 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 
 	public enum Reduction {
 		FORWARD
-	};
+	}
 
 	private final Class<V> scoreClass;
 

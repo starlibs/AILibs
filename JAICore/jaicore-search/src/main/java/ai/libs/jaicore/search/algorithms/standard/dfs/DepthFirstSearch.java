@@ -127,7 +127,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchI
 
 				if (this.goalTester.isGoal(this.currentPath)) {
 					this.lastNodeWasTrueLeaf = true;
-					IAlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this, new SearchGraphPath<N, A>(this.currentPath));
+					IAlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this, new SearchGraphPath<>(this.currentPath));
 					this.post(event);
 					this.post(new NodeTypeSwitchEvent<>(this, leaf, "or_solution"));
 					this.logger.debug("The leaf node is a goal node. Returning goal path {}", this.currentPath);

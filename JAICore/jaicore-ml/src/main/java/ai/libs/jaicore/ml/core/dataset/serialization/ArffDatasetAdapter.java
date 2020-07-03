@@ -166,13 +166,6 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		String name = m.group(1);
 		String type = m.group(2);
 
-		// String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION));
-		// if (name.trim().startsWith("'") && !name.trim().endsWith("'")) {
-		// int cutIndex = attributeDefinitionSplit.indexOf('\'', name.length());
-		// name += attributeDefinitionSplit.substring(name.length(), name.length() + cutIndex + 1);
-		// }
-		// String type = attributeDefinitionSplit.substring(name.length() + 1).trim();
-
 		name = name.trim();
 		if ((name.startsWith("'") && name.endsWith("'")) || (name.startsWith("\"") && name.endsWith("\""))) {
 			name = name.substring(1, name.length() - 1);

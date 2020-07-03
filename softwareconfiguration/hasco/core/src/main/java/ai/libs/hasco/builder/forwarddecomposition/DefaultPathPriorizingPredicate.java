@@ -19,7 +19,7 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
  * @author fmohr
  *
  */
-public class DefaultPathPriorizingPredicate<N, A> implements Predicate<N>, IHascoAware {
+public class DefaultPathPriorizingPredicate<N> implements Predicate<N>, IHascoAware {
 
 	private HASCO<?, ?, ?> hasco;
 

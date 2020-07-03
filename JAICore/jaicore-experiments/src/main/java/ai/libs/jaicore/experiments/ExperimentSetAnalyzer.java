@@ -164,7 +164,7 @@ public class ExperimentSetAnalyzer {
 						this.logger.info("Parsing constraint {}", p);
 						Predicate<List<String>> predicate = new Predicate<List<String>>() {
 
-							private final int highestRequiredIndex = ExperimentSetAnalyzer.this.keyFields.stream().filter(k -> p.contains(k)).map(k -> ExperimentSetAnalyzer.this.keyFields.indexOf(k)).max(Integer::compare).get();
+							private final int highestRequiredIndex = ExperimentSetAnalyzer.this.keyFields.stream().filter(p::contains).map(k -> ExperimentSetAnalyzer.this.keyFields.indexOf(k)).max(Integer::compare).get();
 
 							@Override
 							public boolean test(final List<String> t) {
@@ -188,16 +188,13 @@ public class ExperimentSetAnalyzer {
 					}
 				}
 			}
-			Predicate<List<String>> jointConstraints = new Predicate<List<String>>() {
-				@Override
-				public boolean test(final List<String> t) {
-					for (Predicate<List<String>> c : constraints) {
-						if (!c.test(t)) {
-							return false;
-						}
+			Predicate<List<String>> jointConstraints = t -> {
+				for (Predicate<List<String>> c : constraints) {
+					if (!c.test(t)) {
+						return false;
 					}
-					return true;
 				}
+				return true;
 			};
 
 			/* create one experiment object from every tuple */
