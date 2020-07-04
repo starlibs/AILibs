@@ -36,12 +36,19 @@ public class ExperimentSetAnalyzer {
 	private static final String PROTOCOL_JAVA = "java:";
 	private static final String LOGMESSAGE_CREATEINSTANCE = "Create a new instance of {} and ask it for the number of possible values.";
 
+
+	/**
+	 * The ThreadLocal variable holds a unique instance of ScriptEngine for each thread that requests it.
+	 * We use a ThreadLocal variable instead of a local variable to speed up the creation of the ScriptEngine.
+	 * We use a ThreadLocal variable instead of a (static) instance variable because ScriptEngine generally isn't threadsafe
+	 * and can cause problems if multiple threads operate on it.
+	 */
 	private static final ThreadLocal<ScriptEngine> scriptEngine = ThreadLocal.withInitial(() -> {
 		ScriptEngineManager mgr = new ScriptEngineManager();
 		return mgr.getEngineByName("JavaScript");
 	});
 
-	private Logger logger = LoggerFactory.getLogger(ExperimentSetAnalyzer.class);
+	private final Logger logger = LoggerFactory.getLogger(ExperimentSetAnalyzer.class);
 
 	private final IExperimentSetConfig config;
 

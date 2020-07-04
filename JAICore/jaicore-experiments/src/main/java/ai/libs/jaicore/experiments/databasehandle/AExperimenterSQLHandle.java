@@ -318,9 +318,9 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		// The trick is to tell mysql to update the last insert id with the single affected row:
 		// See: https://stackoverflow.com/questions/1388025
 		// This is a MySQL specific solution.
-		// TODO: try to come up with a more general solution that works with SQL engines from arbitrary vendors.
-		sb.append("WHERE target_table.time_started IS NULL AND last_insert_id(target_table.experiment_id) LIMIT 1");
-//        adapter.insert()
+		sb.append(" WHERE target_table.time_started IS NULL"
+				+ " AND last_insert_id(target_table.experiment_id)"
+				+ " LIMIT 1");
 
 		int startedExperimentId;
 		try {
