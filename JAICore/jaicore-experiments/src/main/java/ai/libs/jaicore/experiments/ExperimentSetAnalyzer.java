@@ -36,7 +36,19 @@ public class ExperimentSetAnalyzer {
 	private static final String PROTOCOL_JAVA = "java:";
 	private static final String LOGMESSAGE_CREATEINSTANCE = "Create a new instance of {} and ask it for the number of possible values.";
 
-	private Logger logger = LoggerFactory.getLogger(ExperimentSetAnalyzer.class);
+
+	/**
+	 * The ThreadLocal variable holds a unique instance of ScriptEngine for each thread that requests it.
+	 * We use a ThreadLocal variable instead of a local variable to speed up the creation of the ScriptEngine.
+	 * We use a ThreadLocal variable instead of a (static) instance variable because ScriptEngine generally isn't threadsafe
+	 * and can cause problems if multiple threads operate on it.
+	 */
+	private static final ThreadLocal<ScriptEngine> scriptEngine = ThreadLocal.withInitial(() -> {
+		ScriptEngineManager mgr = new ScriptEngineManager();
+		return mgr.getEngineByName("JavaScript");
+	});
+
+	private final Logger logger = LoggerFactory.getLogger(ExperimentSetAnalyzer.class);
 
 	private final IExperimentSetConfig config;
 
@@ -49,6 +61,7 @@ public class ExperimentSetAnalyzer {
 	public ExperimentSetAnalyzer(final IExperimentSetConfig config) {
 		this.config = config;
 		this.reloadConfiguration();
+		scriptEngine.remove();
 	}
 
 	public void reloadConfiguration() {
@@ -149,8 +162,6 @@ public class ExperimentSetAnalyzer {
 
 			/* get constraints */
 			List<Predicate<List<String>>> constraints = new ArrayList<>();
-			ScriptEngineManager mgr = new ScriptEngineManager();
-			ScriptEngine engine = mgr.getEngineByName("JavaScript");
 			if (this.config.getConstraints() != null) {
 				for (String p : this.config.getConstraints()) {
 					if (p.startsWith(PROTOCOL_JAVA)) {
@@ -177,7 +188,16 @@ public class ExperimentSetAnalyzer {
 									evaluatedConstraint = evaluatedConstraint.replace(ExperimentSetAnalyzer.this.keyFields.get(i), t.get(i));
 								}
 								try {
-									return (boolean)engine.eval(evaluatedConstraint);
+									ScriptEngine engine = scriptEngine.get();
+									Object evaluation = engine.eval(evaluatedConstraint);
+									if(evaluation instanceof Boolean) {
+										return (boolean) evaluation;
+									} else {
+										logger.error("The evaluation of constraint={} did not return a boolean but instead: {}. Predicate falls back to `false`."
+												+ " \nThe original constraint is: {}",
+												evaluatedConstraint, evaluation, p);
+										return false;
+									}
 								} catch (ScriptException e) {
 									ExperimentSetAnalyzer.this.logger.error(LoggerUtil.getExceptionInfo(e));
 									return false;
@@ -299,4 +319,5 @@ public class ExperimentSetAnalyzer {
 		String type = parts.length == 2 ? parts[1] : null;
 		return new Pair<>(parts[0], type);
 	}
+
 }
