@@ -1,5 +1,6 @@
 package ai.libs.jaicore.experiments.databasehandle;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
@@ -50,10 +51,24 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	private static final String FIELD_TIME_END = FIELD_TIME + "_end";
 	private static final String FIELD_EXCEPTION = "exception";
 	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-
 	private static final String Q_AND = " AND ";
+	private static final String Q_FROM = " FROM ";
+
+	private final String cachedHost;
+
+	{
+		String hostName;
+		try {
+			hostName = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			logger.error("Couldn't retrieve Host name. No experiment can be started.", e);
+			hostName = null;
+		}
+		cachedHost = hostName;
+	}
 
 	protected final IDatabaseAdapter adapter;
+
 	protected final String tablename;
 
 	private IExperimentSetConfig config;
@@ -141,8 +156,27 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		return sqlMainTable.toString();
 	}
 
+	/**
+	 * Checks if this instance has been configured.
+	 * That is it throws an exception iff the setup method hasn't been successfully called yet.
+	 * @throws IllegalStateException thrown if setup wasn't called.
+	 */
+	protected void assertSetup() throws IllegalStateException{
+		if (this.config == null || this.keyFields == null) {
+			throw new IllegalStateException(ERROR_NOSETUP);
+		}
+	}
+
 	@Override
 	public void setup(final IExperimentSetConfig config) throws ExperimentDBInteractionFailedException {
+		if(this.config != null) {
+			if(this.config.equals(config)) {
+				this.logger.info("Setup was called repeatedly with the same configuration. Ignoring the subsequent call.", new IllegalStateException());
+				return;
+			} else {
+				throw new IllegalStateException("Setup was called a second time with an alternative experiment set configuration.");
+			}
+		}
 		this.logger.info("Setting up the experiment table {}", this.tablename);
 		this.config = config;
 		this.analyzer = new ExperimentSetAnalyzer(this.config);
@@ -166,17 +200,19 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	protected String getSQLPrefixForKeySelectQuery() {
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append("SELECT `" + FIELD_ID + "`, `" + FIELD_MEMORY_MAX + "`, `" + FIELD_NUMCPUS + "`, " + Arrays.stream(this.keyFields).map(this::getDatabaseFieldnameForConfigEntry).collect(Collectors.joining(", ")) + " FROM `");
-		queryStringSB.append(this.tablename);
-		queryStringSB.append("` ");
+		queryStringSB.append("SELECT `" + FIELD_ID + "`, `" + FIELD_MEMORY_MAX + "`, `" + FIELD_NUMCPUS + "`, " + Arrays.stream(this.keyFields).map(this::getDatabaseFieldnameForConfigEntry).collect(Collectors.joining(", ")));
+		queryStringSB.append(getSQLFromTable());
 		return queryStringSB.toString();
+	}
+
+	protected String getSQLFromTable() {
+		return Q_FROM + " `" + this.tablename + "` ";
 	}
 
 	protected String getSQLPrefixForSelectQuery() {
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append("SELECT * FROM `");
-		queryStringSB.append(this.tablename);
-		queryStringSB.append("` ");
+		queryStringSB.append("SELECT * ");
+		queryStringSB.append(getSQLFromTable());
 		return queryStringSB.toString();
 	}
 
@@ -186,8 +222,8 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 			throw new IllegalStateException(ERROR_NOSETUP);
 		}
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append("SELECT DISTINCT(`" + key + "`) as d FROM ");
-		queryStringSB.append(this.tablename);
+		queryStringSB.append("SELECT DISTINCT(`" + key + "`) as d ");
+		queryStringSB.append(getSQLFromTable());
 		try {
 			List<IKVStore> res = this.adapter.getRowsOfTable(queryStringSB.toString());
 			return res.stream().map(x -> x.getAsString("d")).collect(Collectors.toList());
@@ -202,8 +238,8 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 			throw new IllegalStateException(ERROR_NOSETUP);
 		}
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append("SELECT COUNT(*) as c FROM ");
-		queryStringSB.append(this.tablename);
+		queryStringSB.append("SELECT COUNT(*) as c ");
+		queryStringSB.append(getSQLFromTable());
 
 		try {
 			List<IKVStore> res = this.adapter.getResultsOfQuery(queryStringSB.toString());
@@ -235,7 +271,11 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	}
 
 	@Override
-	public List<ExperimentDBEntry> getRandomOpenExperiments(final int limit) throws ExperimentDBInteractionFailedException {
+	public List<ExperimentDBEntry> getRandomOpenExperiments(int limit) throws ExperimentDBInteractionFailedException {
+		if(limit == -1) {
+			// select a feasible limit:
+			limit = 10;
+		}
 		StringBuilder queryStringSB = new StringBuilder();
 		queryStringSB.append("SELECT * FROM ("); // open sub-query
 		queryStringSB.append(this.getSQLPrefixForKeySelectQuery());
@@ -247,6 +287,67 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 			throw new ExperimentDBInteractionFailedException(e);
 		}
 	}
+
+	@Override
+	public Optional<ExperimentDBEntry> startNextExperiment() throws ExperimentDBInteractionFailedException {
+		if(cachedHost == null) {
+			// failed to retrieve  host information.
+			throw new ExperimentUpdateFailedException(new IllegalStateException("Host information is unavailable."));
+		}
+
+		/*
+		 * Build a query to update a random unstarted experiment and fetch the updated id:
+		 */
+		StringBuilder sb = new StringBuilder();
+		sb.append("UPDATE ");
+			sb.append(this.tablename);
+		sb.append(" AS target_table ");
+
+		// Fields to be updated are `time_started`=(now) and `host`=(host name of this machine):
+		sb.append("SET target_table.");
+		sb.append(FIELD_TIME_START);
+		sb.append(" = '");
+		sb.append(new SimpleDateFormat(DATE_FORMAT).format(new Date()));
+		sb.append("', target_table.");
+		sb.append(FIELD_HOST);
+		sb.append(" = '");
+		sb.append(cachedHost);
+		sb.append("' ");
+
+		// We need the id of the updated row.
+		// The trick is to tell mysql to update the last insert id with the single affected row:
+		// See: https://stackoverflow.com/questions/1388025
+		// This is a MySQL specific solution.
+		sb.append(" WHERE target_table.time_started IS NULL"
+				+ " AND last_insert_id(target_table.experiment_id)"
+				+ " LIMIT 1");
+
+		int startedExperimentId;
+		try {
+			// Update and get the affected rows
+			// Use insert because we are interested in the `last_insert_id` field that is returned as a generated key.
+			int[] affectedKeys = adapter.insert(sb.toString(), new String[0]);
+			if(affectedKeys == null){
+				throw new IllegalStateException("The database adapter did not return the id of the updated experiment. The sql query executed was: \n" + sb.toString());
+			} else if(affectedKeys.length > 1) {
+				throw new IllegalStateException("BUG: The sql query affected more than one row. It is supposed to only update a single row: \n" + sb.toString());
+			} else if (affectedKeys.length == 0) {
+				logger.info("No experiment with time_started=null could be found. So no experiment could be started.");
+				return Optional.empty();
+			}
+			else {
+				startedExperimentId = affectedKeys[0];
+			}
+		} catch (Exception ex) {
+			throw new ExperimentDBInteractionFailedException(ex);
+		}
+		ExperimentDBEntry experimentWithId = getExperimentWithId(startedExperimentId);
+		if(experimentWithId == null) {
+			throw new ExperimentDBInteractionFailedException(new RuntimeException(String.format("BUG: The updated experiment with id, `%d`, could not be fetched. ", startedExperimentId)));
+		}
+		return Optional.of(experimentWithId);
+	}
+
 
 	@Override
 	public List<ExperimentDBEntry> getRunningExperiments() throws ExperimentDBInteractionFailedException {
@@ -291,7 +392,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		StringBuilder queryStringSB = new StringBuilder();
 		queryStringSB.append(
 				"SELECT " + FIELD_ID + ", " + FIELD_MEMORY_MAX + ", " + FIELD_NUMCPUS + ", " + Arrays.stream(this.keyFields).map(k -> this.analyzer.getNameTypeSplitForAttribute(k).getX()).collect(Collectors.joining(", ")) + ", exception");
-		queryStringSB.append(" FROM `" + this.tablename + "`");
+		queryStringSB.append(getSQLFromTable());
 		queryStringSB.append("WHERE exception IS NOT NULL");
 		if (!fieldFilter.isEmpty()) {
 			queryStringSB.append(Q_AND);
@@ -369,7 +470,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	}
 
 	@Override
-	public List<ExperimentDBEntry> createAndGetExperiments(final List<Experiment> experiments) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException {
+	public List<ExperimentDBEntry> createOrGetExperiments(final List<Experiment> experiments) throws ExperimentDBInteractionFailedException {
 		if (experiments == null || experiments.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
@@ -474,9 +575,9 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public void deleteExperiment(final ExperimentDBEntry exp) throws ExperimentDBInteractionFailedException {
-		String deleteExperimentQuery = "DELETE FROM `" + this.tablename + "` WHERE experiment_id = " + exp.getId();
+		String deleteExperimentQuery = "DELETE " + getSQLFromTable() + " WHERE experiment_id = " + exp.getId();
 		try {
-			this.adapter.query(deleteExperimentQuery);
+			this.adapter.update(deleteExperimentQuery);
 		} catch (Exception e) {
 			throw new ExperimentDBInteractionFailedException(e);
 		}
@@ -486,14 +587,41 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	public void deleteDatabase() throws ExperimentDBInteractionFailedException {
 		String dropTableQuery = "DROP TABLE `" + this.tablename + "`";
 		try {
-			this.adapter.query(dropTableQuery);
+			this.adapter.insert(dropTableQuery, new String[0]);
 		} catch (Exception e) {
 			throw new ExperimentDBInteractionFailedException(e);
 		}
 	}
 
 	@Override
+	public boolean hasExperimentStarted(ExperimentDBEntry exp) throws ExperimentDBInteractionFailedException {
+		assertSetup();
+		StringBuilder queryStringSB = new StringBuilder();
+		int expId = exp.getId();
+		queryStringSB.append("SELECT ").append(FIELD_TIME_START);
+		queryStringSB.append(getSQLFromTable());
+		queryStringSB.append(" WHERE `experiment_id` = ").append(expId);
+		try {
+			List<IKVStore> selectResult = this.adapter.query(queryStringSB.toString());
+			if(selectResult.isEmpty()) {
+				throw new IllegalArgumentException("The given experiment was not found: " + exp);
+			}
+			if(selectResult.size() > 1) {
+				throw new IllegalStateException("The experiment with primary id " + exp.getId() + " exists multiple times.");
+			}
+			IKVStore selectedRow = selectResult.get(0);
+			if(selectedRow.get(FIELD_TIME_START) != null) {
+				return true;
+			}
+		} catch (SQLException | IOException ex) {
+			throw new ExperimentDBInteractionFailedException(ex);
+		}
+		return false;
+	}
+
+	@Override
 	public void startExperiment(final ExperimentDBEntry exp) throws ExperimentUpdateFailedException, ExperimentAlreadyStartedException {
+		assertSetup();
 		Map<String, Object> initValues = new HashMap<>();
 		initValues.put(FIELD_TIME_START, new SimpleDateFormat(DATE_FORMAT).format(new Date()));
 		try {
@@ -521,13 +649,11 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public ExperimentDBEntry getExperimentWithId(final int id) throws ExperimentDBInteractionFailedException {
-		if (this.config == null || this.keyFields == null) {
-			throw new IllegalStateException(ERROR_NOSETUP);
-		}
+		assertSetup();
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append("SELECT * FROM `");
-		queryStringSB.append(this.tablename);
-		queryStringSB.append("` WHERE `experiment_id` = " + id);
+		queryStringSB.append("SELECT * ");
+		queryStringSB.append(getSQLFromTable());
+		queryStringSB.append(" WHERE `experiment_id` = " + id);
 		try {
 			return this.getExperimentsForSQLQuery(queryStringSB.toString()).get(0);
 		} catch (SQLException e) {
