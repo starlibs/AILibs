@@ -1,6 +1,7 @@
 package ai.libs.mlplan.examples.multiclass.weka;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -11,8 +12,14 @@ import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
 
 import ai.libs.hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
+import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
+import ai.libs.hasco.gui.statsplugin.HASCOSolutionCandidateRepresenter;
+import ai.libs.jaicore.basic.FileUtil;
+import ai.libs.jaicore.graphvisualizer.events.recorder.AlgorithmEventHistory;
+import ai.libs.jaicore.graphvisualizer.events.recorder.AlgorithmEventHistorySerializer;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
+import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
@@ -28,7 +35,7 @@ import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 public class MLPlanGraphVisualizationExample {
 	public static void main(final String[] args) throws Exception {
 
-//		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(346);
+		// ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(346);
 		File datasetFile = new File("testrsc/car.arff");
 		System.out.println(datasetFile.getAbsolutePath());
 
@@ -60,8 +67,8 @@ public class MLPlanGraphVisualizationExample {
 		} catch (NoSuchElementException e) {
 			System.out.println("Building the classifier failed: " + e.getMessage());
 		}
-    
-    		/* obtain the algorithm history from the window and create a serializer */
+
+		/* obtain the algorithm history from the window and create a serializer */
 		AlgorithmEventHistory history = window.getAlgorithmEventHistory();
 
 		AlgorithmEventHistorySerializer serializer = new AlgorithmEventHistorySerializer();
@@ -84,4 +91,3 @@ public class MLPlanGraphVisualizationExample {
 		// new SolutionPerformanceTimelinePlugin(new HASCOSolutionCandidateRepresenter()));
 	}
 }
-
