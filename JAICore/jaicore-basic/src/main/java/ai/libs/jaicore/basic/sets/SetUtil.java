@@ -166,7 +166,7 @@ public class SetUtil {
 		/* |M| = 0 */
 		if (items.isEmpty()) {
 			Collection<Collection<T>> setWithEmptySet = new ArrayList<>();
-			setWithEmptySet.add(new ArrayList<T>());
+			setWithEmptySet.add(new ArrayList<>());
 			return setWithEmptySet;
 		}
 
@@ -202,7 +202,7 @@ public class SetUtil {
 		/* |M| = 0 */
 		if (items.isEmpty()) {
 			Collection<Collection<T>> setWithEmptySet = new ArrayList<>();
-			setWithEmptySet.add(new ArrayList<T>());
+			setWithEmptySet.add(new ArrayList<>());
 			return setWithEmptySet;
 		}
 
@@ -347,7 +347,7 @@ public class SetUtil {
 		ExecutorService pool = Executors.newFixedThreadPool(n);
 		Semaphore solutionSemaphore = new Semaphore(1);
 		solutionSemaphore.acquire();
-		pool.submit(new SubSetComputer<T>(new ArrayList<>(superSet), k, 0, new HashSet<T>(), res, pool, new Semaphore(n - 1), MathExt.binomial(superSet.size(), k), solutionSemaphore));
+		pool.submit(new SubSetComputer<>(new ArrayList<>(superSet), k, 0, new HashSet<>(), res, pool, new Semaphore(n - 1), MathExt.binomial(superSet.size(), k), solutionSemaphore));
 		solutionSemaphore.acquire();
 		pool.shutdown();
 		return res;
@@ -495,7 +495,7 @@ public class SetUtil {
 
 		for (S item1 : a) {
 			for (T item2 : b) {
-				product.add(new Pair<S, T>(item1, item2));
+				product.add(new Pair<>(item1, item2));
 			}
 		}
 		return product;
@@ -1095,5 +1095,65 @@ public class SetUtil {
 	public static Type getGenericClass(final Collection<?> c) {
 		ParameterizedType stringListType = (ParameterizedType) c.getClass().getGenericSuperclass();
 		return stringListType.getActualTypeArguments()[0];
+	}
+
+	public static <T extends Comparable<T>> int argmax(final List<T> list) {
+		int n = list.size();
+		T best = null;
+		int index = -1;
+		for (int i = 0; i < n; i++) {
+			T x = list.get(i);
+			if (best == null || best.compareTo(x) > 0) {
+				best = x;
+				index = i;
+			}
+		}
+		return index;
+	}
+
+	public static <T extends Comparable<T>> int argmax(final T[] arr) {
+		return argmax(Arrays.asList(arr));
+	}
+
+	public static <T extends Comparable<T>> int argmin(final List<T> list) {
+		int n = list.size();
+		T best = null;
+		int index = -1;
+		for (int i = 0; i < n; i++) {
+			T x = list.get(i);
+			if (best == null || best.compareTo(x) < 0) {
+				best = x;
+				index = i;
+			}
+		}
+		return index;
+	}
+
+	public static <T extends Comparable<T>> int argmin(final T[] arr) {
+		return argmin(Arrays.asList(arr));
+	}
+
+	public static int argmin(final int[] arr) {
+		int minIndex = -1;
+		int min = Integer.MAX_VALUE;
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i] < min) {
+				min = arr[i];
+				minIndex = i;
+			}
+		}
+		return minIndex;
+	}
+
+	public static int argmax(final int[] arr) {
+		int maxIndex = -1;
+		int max = Integer.MIN_VALUE;
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i] > max) {
+				max = arr[i];
+				maxIndex = i;
+			}
+		}
+		return maxIndex;
 	}
 }

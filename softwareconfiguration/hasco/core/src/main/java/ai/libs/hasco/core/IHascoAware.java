@@ -8,7 +8,8 @@ package ai.libs.hasco.core;
  */
 public interface IHascoAware {
 
-	public void setHascoReference(HASCO hasco);
+	public void setHascoReference(HASCO<?, ?, ?, ?> hasco);
 
-	public HASCO getHASCOReference();
+	public HASCO<?, ?, ?, ?> getHASCOReference();
+
 }

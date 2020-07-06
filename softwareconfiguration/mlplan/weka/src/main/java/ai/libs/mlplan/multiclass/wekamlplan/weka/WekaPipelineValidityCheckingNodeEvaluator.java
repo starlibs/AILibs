@@ -9,9 +9,9 @@ import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.core.Util;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.core.HASCOUtil;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -87,7 +87,7 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 		}
 
 		/* get partial component */
-		ComponentInstance instance = Util.getSolutionCompositionFromState(this.getComponents(), path.getHead().getState(), false);
+		ComponentInstance instance = HASCOUtil.getSolutionCompositionFromState(this.getComponents(), path.getHead().getState(), false);
 		if (instance != null) {
 
 			/* check invalid preprocessor combinations */

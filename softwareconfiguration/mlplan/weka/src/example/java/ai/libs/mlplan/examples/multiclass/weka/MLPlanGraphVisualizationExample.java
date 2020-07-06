@@ -1,6 +1,6 @@
 package ai.libs.mlplan.examples.multiclass.weka;
 
-import java.util.Arrays;
+import java.io.File;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -11,44 +11,41 @@ import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
 
 import ai.libs.hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
-import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
-import ai.libs.hasco.gui.statsplugin.HASCOSolutionCandidateRepresenter;
-import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.graphvisualizer.events.recorder.AlgorithmEventHistory;
-import ai.libs.jaicore.graphvisualizer.events.recorder.AlgorithmEventHistorySerializer;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
-import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
-import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
+import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
-import ai.libs.jaicore.search.gui.plugins.rolloutboxplots.SearchRolloutBoxplotPlugin;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 
 public class MLPlanGraphVisualizationExample {
 	public static void main(final String[] args) throws Exception {
 
-		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(346);
+//		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(346);
+		File datasetFile = new File("testrsc/car.arff");
+		System.out.println(datasetFile.getAbsolutePath());
+
+		ILabeledDataset<?> ds = ArffDatasetAdapter.readDataset(datasetFile);
+
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(1), .7);
 
-		/* initialize mlplan, and let it run for 1 hour */
-		MLPlanWekaBuilder mlplanBuilder = new MLPlanWekaBuilder().withNumCpus(2).withTimeOut(new Timeout(120, TimeUnit.SECONDS)).withCandidateEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS))
-				.withNodeEvaluationTimeOut(new Timeout(900, TimeUnit.SECONDS)).withDataset(split.get(0));
+		/* initialize mlplan, and let it run for 5 minute */
+		MLPlanWekaBuilder mlplanBuilder = new MLPlanWekaBuilder().withNumCpus(4).withTimeOut(new Timeout(5, TimeUnit.MINUTES)).withCandidateEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS))
+				.withNodeEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS)).withDataset(split.get(0));
 		MLPlan<IWekaClassifier> mlplan = mlplanBuilder.build();
 
 		/* create visualization */
 		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan);
 		window.withMainPlugin(new GraphViewPlugin());
 		window.withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin(), new NodeInfoGUIPlugin(new TFDNodeAsCIViewInfoGenerator(mlplanBuilder.getComponents())),
-				new SolutionPerformanceTimelinePlugin(new HASCOSolutionCandidateRepresenter()), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)), new SearchRolloutBoxplotPlugin());
+				new SolutionPerformanceTimelinePlugin(new HASCOSolutionCandidateRepresenter()), new HASCOModelStatisticsPlugin());
 
 		try {
 			long start = System.currentTimeMillis();
@@ -63,8 +60,8 @@ public class MLPlanGraphVisualizationExample {
 		} catch (NoSuchElementException e) {
 			System.out.println("Building the classifier failed: " + e.getMessage());
 		}
-
-		/* obtain the algorithm history from the window and create a serializer */
+    
+    		/* obtain the algorithm history from the window and create a serializer */
 		AlgorithmEventHistory history = window.getAlgorithmEventHistory();
 
 		AlgorithmEventHistorySerializer serializer = new AlgorithmEventHistorySerializer();
@@ -86,5 +83,5 @@ public class MLPlanGraphVisualizationExample {
 		// window.withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin(), new NodeInfoGUIPlugin(new TFDNodeAsCIViewInfoGenerator(mlplanBuilder.getComponents())),
 		// new SolutionPerformanceTimelinePlugin(new HASCOSolutionCandidateRepresenter()));
 	}
-
 }
+

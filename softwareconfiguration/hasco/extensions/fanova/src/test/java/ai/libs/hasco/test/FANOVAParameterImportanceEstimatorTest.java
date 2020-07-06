@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 import ai.libs.hasco.knowledgebase.ExtractionOfImportantParametersFailedException;
 import ai.libs.hasco.knowledgebase.FANOVAParameterImportanceEstimator;
 import ai.libs.hasco.knowledgebase.PerformanceKnowledgeBase;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
 

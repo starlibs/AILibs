@@ -11,9 +11,10 @@ import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.core.Util;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.core.HASCOUtil;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.ml.scikitwrapper.EBasicProblemType;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
@@ -23,10 +24,11 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 	private final List<String> orderingOfComponents;
 	private Logger logger = LoggerFactory.getLogger(PreferenceBasedNodeEvaluator.class);
 	private boolean sentLogMessageForHavingEnteredSecondSubPhase = false;
-	private String methodPrefix = "resolveAbstractClassifierWith";
+	private EBasicProblemType problemType;
 
 	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> orderingOfComponents) {
 		super();
+		this.problemType = EBasicProblemType.CLASSIFICATION;
 		this.components = components;
 		this.orderingOfComponents = orderingOfComponents;
 	}
@@ -37,7 +39,7 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 
 	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> orderingOfComponents, final String methodPrefix) {
 		this(components, orderingOfComponents);
-		this.methodPrefix = methodPrefix;
+		this.problemType = EBasicProblemType.getProblemType(methodPrefix);
 	}
 
 	@Override
@@ -52,7 +54,7 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 		this.logger.debug("Determined {} applied methods: {}", appliedMethods.size(), appliedMethods);
 
 		/* get partial component */
-		ComponentInstance instance = Util.getSolutionCompositionFromState(this.components, n.getHead().getState(), false);
+		ComponentInstance instance = HASCOUtil.getSolutionCompositionFromState(this.components, n.getHead().getState(), false);
 		boolean isPipeline = appliedMethods.stream().anyMatch(x -> x.toLowerCase().contains("pipeline"));
 		boolean lastMethod = false;
 		String classifierName = null;
@@ -61,16 +63,18 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 		this.logger.debug("The associated component instance is {}. Constitutes a pipeline? {}", instance, isPipeline ? "yes" : "no");
 		if (instance != null) {
 			if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
-				lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith("resolvePipelineClassifierWith");
+				lastMethod = appliedMethods.get(appliedMethods.size() - 1).startsWith(this.problemType.getPreferredBasicProblemComponentName());
 
 				if (instance.getSatisfactionOfRequiredInterfaces().containsKey("classifier")) {
 					classifierName = instance.getSatisfactionOfRequiredInterfaces().get("classifier").getComponent().getName();
+				} else if (instance.getSatisfactionOfRequiredInterfaces().containsKey("regressor")) {
+					classifierName = instance.getSatisfactionOfRequiredInterfaces().get("regressor").getComponent().getName();
 				} else {
 					return 0.0;
 				}
 			} else {
 				classifierName = instance.getComponent().getName();
-				lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith(this.methodPrefix);
+				lastMethod = appliedMethods.get(appliedMethods.size() - 1).startsWith(this.problemType.getPreferredComponentName());
 			}
 
 			if (lastMethod) {

@@ -22,7 +22,7 @@ import org.api4.java.ai.ml.ranking.learner.IRanker;
  * attributes."
  *
  * <p>
- * Schäfer, D., & Hüllermeier, E. (2018). Dyad ranking using Plackett--Luce
+ * Schaefer, D., & Huellermeier, E. (2018). Dyad ranking using Plackett--Luce
  * models based on joint feature representations. Machine Learning, 107(5),
  * 903â€“941. https://doi.org/10.1007/s10994-017-5694-9
  *

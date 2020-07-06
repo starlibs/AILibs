@@ -1,6 +1,7 @@
 package ai.libs.jaicore.db.sql.rest;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -10,12 +11,15 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,10 +90,8 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 			ArrayNode array = (ArrayNode) res;
 			return IntStream.range(0, array.size()).map(i -> array.get(i).asInt()).toArray();
 		} else {
-			if (res.get("status").asInt() == 500) {
-				if (res.get("message").textValue().matches("(.*)Duplicate entry(.*) for key(.*)")) {
-					throw new SQLException(res.get("message").textValue());
-				}
+			if ((res.get("status").asInt() == 500) && (res.get("message").textValue().matches("(.*)Duplicate entry(.*) for key(.*)"))) {
+				throw new SQLException(res.get("message").textValue());
 			}
 			throw new IllegalStateException("Cannot parse result for insert query. Result is:\n" + res);
 		}
@@ -122,7 +124,19 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 			this.logger.info("Waiting for response.");
 			CloseableHttpResponse response = client.execute(post);
 			this.logger.info("Received response. Now processing the result.");
-			return mapper.readTree(response.getEntity().getContent());
+			int statusCode = response.getStatusLine().getStatusCode();
+			if(statusCode/100 == 4 || statusCode/100 == 5) {
+				// status code is 4xx or 5xx
+				String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+				logger.error("SQLasRESTServer returned status code: {}."
+								+ " \nThe sql query was: {}."
+								+ " \nThe response body is: {}",
+						statusCode, query, responseBody);
+				throw new SQLException("SQL Server error: " + responseBody);
+			}
+			assert (statusCode == HttpStatus.SC_OK);
+			HttpEntity entity = response.getEntity();
+			return mapper.readTree(entity.getContent());
 		} catch (UnsupportedOperationException | IOException e) {
 			throw new SQLException(e);
 		}

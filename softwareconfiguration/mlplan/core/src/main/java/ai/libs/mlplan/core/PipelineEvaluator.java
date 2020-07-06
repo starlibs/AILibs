@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.ComponentInstanceUtil;
+import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedObjectEvaluator;
 import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
@@ -92,9 +92,7 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 				this.eventBus.post(new EvaluationSafeGuardFiredEvent(c));
 				throw new EvaluationSafeGuardException("Evaluation safe guard prevents evaluation of component instance.", c);
 			}
-		} catch (EvaluationSafeGuardException e) {
-			throw e;
-		} catch (InterruptedException e) {
+		} catch (EvaluationSafeGuardException | InterruptedException e) {
 			throw e;
 		} catch (Exception e) {
 			this.logger.error("Could not use evaluation safe guard for component instance of {}. Continue with business as usual. Here is the stacktrace:", ComponentInstanceUtil.toComponentNameString(c), e);
@@ -128,7 +126,6 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 			this.safeGuard.updateWithActualInformation(c, trackableLearner);
 			return score;
 		} catch (ComponentInstantiationFailedException e) {
-			this.logger.warn("Component instantiation failed for {}", c, e);
 			throw new ObjectEvaluationFailedException("Evaluation of composition failed as the component instantiation could not be built.", e);
 		}
 	}

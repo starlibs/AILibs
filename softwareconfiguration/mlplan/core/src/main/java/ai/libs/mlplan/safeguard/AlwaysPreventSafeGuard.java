@@ -3,7 +3,7 @@ package ai.libs.mlplan.safeguard;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.Timeout;
 
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.mlplan.core.ITimeTrackingLearner;
 
 public class AlwaysPreventSafeGuard implements IEvaluationSafeGuard {
@@ -27,12 +27,12 @@ public class AlwaysPreventSafeGuard implements IEvaluationSafeGuard {
 
 	@Override
 	public void updateWithActualInformation(final ComponentInstance ci, final ITimeTrackingLearner wrappedLearner) {
-		return;
+		// intentionally do nothing
 	}
 
 	@Override
 	public void registerListener(final Object listener) {
-		return;
+		// intentionally do nothing
 	}
 
 }

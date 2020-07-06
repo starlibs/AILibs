@@ -68,6 +68,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 
 				/* only if the roll-out is a goal path, emit a success event */
 				if (this.getGoalTester().isGoal(path)) {
+					this.updateBestSeenSolution(path);
 					ISolutionCandidateFoundEvent<EvaluatedSearchGraphPath<N, A, Double>> event = new GraphSearchSolutionCandidateFoundEvent<>(this, path);
 					this.post(event);
 					return event;

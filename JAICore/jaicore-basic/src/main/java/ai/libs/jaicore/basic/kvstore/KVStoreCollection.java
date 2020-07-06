@@ -75,13 +75,13 @@ public class KVStoreCollection extends LinkedList<IKVStore> {
 							this.add(kvStore);
 						}
 					} catch (Exception e) {
-						logger.error("An exception occurred while parsing the directory collecting the chunk: {}", e);
+						logger.error("An exception occurred while parsing the directory collecting the chunk: {}", subFile, e);
 					}
 				} else {
 					try {
 						this.readFrom(FileUtil.readFileAsString(file));
 					} catch (Exception e) {
-						logger.error("An exception occurred while reading the chunk from the given file: {}", e);
+						logger.error("An exception occurred while reading the chunk from the given file: {}", subFile, e);
 					}
 				}
 			}
@@ -102,9 +102,7 @@ public class KVStoreCollection extends LinkedList<IKVStore> {
 		KVStoreCollection selectedCollection = new KVStoreCollection();
 		for (IKVStore store : this) {
 			long count = containsSelect.entrySet().stream().filter(x -> x.getValue().contains(store.getAsString(x.getKey()))).count();
-			if (or && count > 0) {
-				selectedCollection.add(store);
-			} else if (!or && count == containsSelect.size()) {
+			if ((or && count > 0) || (!or && count == containsSelect.size())) {
 				selectedCollection.add(store);
 			}
 		}
