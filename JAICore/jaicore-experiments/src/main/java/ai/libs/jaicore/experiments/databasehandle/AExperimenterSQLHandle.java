@@ -1,7 +1,5 @@
 package ai.libs.jaicore.experiments.databasehandle;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,6 +42,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	private static final String FIELD_MEMORY = "memory";
 	private static final String FIELD_MEMORY_MAX = FIELD_MEMORY + "_max";
 	private static final String FIELD_HOST = "host";
+	private static final String FIELD_JOB = "job";
 	private static final String FIELD_NUMCPUS = "cpus";
 	private static final String FIELD_TIME = "time";
 	private static final String FIELD_TIME_START = FIELD_TIME + "_started";
@@ -111,6 +110,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		sqlMainTable.append("`" + FIELD_MEMORY + "_max` int(6) NOT NULL,");
 		sqlMainTable.append("`" + FIELD_TIME + "_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,");
 		sqlMainTable.append("`" + FIELD_HOST + "` varchar(255) NULL,");
+		sqlMainTable.append("`" + FIELD_JOB + "` varchar(60) NULL,");
 		sqlMainTable.append("`" + FIELD_TIME + "_started` TIMESTAMP NULL,");
 
 		/* add columns for result fields */
@@ -493,14 +493,11 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	}
 
 	@Override
-	public void startExperiment(final ExperimentDBEntry exp) throws ExperimentUpdateFailedException, ExperimentAlreadyStartedException {
+	public void startExperiment(final ExperimentDBEntry exp, final String host, final String jobInfo) throws ExperimentUpdateFailedException, ExperimentAlreadyStartedException {
 		Map<String, Object> initValues = new HashMap<>();
 		initValues.put(FIELD_TIME_START, new SimpleDateFormat(DATE_FORMAT).format(new Date()));
-		try {
-			initValues.put(FIELD_HOST, InetAddress.getLocalHost().getHostName());
-		} catch (UnknownHostException e) {
-			throw new ExperimentUpdateFailedException(e);
-		}
+		initValues.put(FIELD_HOST, host);
+		initValues.put(FIELD_JOB, jobInfo);
 		Map<String, String> condition = new HashMap<>();
 		condition.put(FIELD_TIME_START, null);
 		if (!this.updateExperimentConditionally(exp, condition, initValues)) {

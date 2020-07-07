@@ -135,12 +135,14 @@ public interface IExperimentDatabaseHandle {
 	public List<ExperimentDBEntry> createAndGetExperiments(final List<Experiment> experiments) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException;
 
 	/**
-	 * Updates non-keyfield values of the experiment.
+	 * Starts the given experiment
 	 *
 	 * @param exp The experiment that is started on the current machine
+	 * @param host The host on which the experiment is executed
+	 * @param jobIdentifier The name of the job that executes this experiment; important for tracking of experiments in compute centers
 	 * @throws ExperimentUpdateFailedException
 	 */
-	public void startExperiment(final ExperimentDBEntry exp) throws ExperimentAlreadyStartedException, ExperimentUpdateFailedException;
+	public void startExperiment(final ExperimentDBEntry exp, String host, String jobIdentifier) throws ExperimentAlreadyStartedException, ExperimentUpdateFailedException;
 
 	/**
 	 * Updates non-keyfield values of the experiment.

@@ -1,5 +1,7 @@
 package ai.libs.jaicore.experiments;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,7 +37,13 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	private final IExperimentDatabaseHandle handle;
 	private final int availableMemoryInMB;
 
+	private final String jobInfo;
+
 	public ExperimentRunner(final IExperimentSetConfig config, final IExperimentSetEvaluator evaluator, final IExperimentDatabaseHandle databaseHandle) throws ExperimentDBInteractionFailedException {
+		this (config, evaluator, databaseHandle, "");
+	}
+
+	public ExperimentRunner(final IExperimentSetConfig config, final IExperimentSetEvaluator evaluator, final IExperimentDatabaseHandle databaseHandle, final String jobInfo) throws ExperimentDBInteractionFailedException {
 
 		if (databaseHandle == null) {
 			throw new IllegalArgumentException("Cannot create ExperimentRunner without database handle!");
@@ -49,6 +57,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		this.logger.info("Successfully created and initialized ExperimentRunner.");
 		this.handle.setup(config);
 		this.availableMemoryInMB = (int) (Runtime.getRuntime().maxMemory() / 1024 / 1024);
+		this.jobInfo = jobInfo;
 	}
 
 	public void setCheckMemory(final boolean checkMemory) {
@@ -157,7 +166,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 				throw new IllegalStateException(
 						"Cannot conduct experiment " + expEntry.getExperiment() + ", because only " + Runtime.getRuntime().availableProcessors() + " CPU cores are available where declared is " + expEntry.getExperiment().getNumCPUs());
 			}
-			this.handle.startExperiment(expEntry);
+			this.handle.startExperiment(expEntry, InetAddress.getLocalHost().getHostName(), this.jobInfo);
 			this.evaluator.evaluate(expEntry, m -> {
 				try {
 					this.logger.info("Updating experiment with id {} with the following map: {}", expEntry.getId(), m);
@@ -169,7 +178,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 
 		} catch (ExperimentEvaluationFailedException e) {
 			error = e.getCause();
-		} catch (ExperimentFailurePredictionException e) {
+		} catch (UnknownHostException | ExperimentFailurePredictionException e) {
 			error = e;
 		}
 		if (error != null) {
