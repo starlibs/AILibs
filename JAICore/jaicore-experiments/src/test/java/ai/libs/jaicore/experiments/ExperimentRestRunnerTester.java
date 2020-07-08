@@ -133,7 +133,7 @@ public class ExperimentRestRunnerTester implements IExperimentSetEvaluator {
 	@Test
 	public void test2ThatAllExperimentsAreConducted() throws ExperimentDBInteractionFailedException, InterruptedException {
 		/* check that running the experiments works */
-		ExperimentRunner runner = new ExperimentRunner(this.config, this, this.handle);
+		ExperimentRunner runner = new ExperimentRunner(this.config, this, this.handle, "");
 		runner.randomlyConductExperiments();
 		Collection<ExperimentDBEntry> conductedExperiments = this.handle.getConductedExperiments();
 		assertEquals(this.numberOfTotalExperiments, conductedExperiments.size());

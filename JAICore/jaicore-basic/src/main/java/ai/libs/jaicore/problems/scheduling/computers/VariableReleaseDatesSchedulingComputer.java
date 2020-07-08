@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.problems.scheduling.ASchedulingComputer;
 import ai.libs.jaicore.problems.scheduling.IJobSchedulingInput;
 import ai.libs.jaicore.problems.scheduling.Job;
 import ai.libs.jaicore.problems.scheduling.JobSchedulingProblemInput;
@@ -17,7 +18,7 @@ import ai.libs.jaicore.problems.scheduling.Operation;
  * @author Felix Mohr
  *
  */
-public class VariableReleaseDatesSchedulingComputer extends DefaultSchedulingComputer {
+public class VariableReleaseDatesSchedulingComputer extends ASchedulingComputer {
 
 	private int latestArrivalTime;
 
@@ -30,13 +31,19 @@ public class VariableReleaseDatesSchedulingComputer extends DefaultSchedulingCom
 		}
 		JobSchedulingProblemInput cProblemInput = (JobSchedulingProblemInput)problemInput;
 		this.latestArrivalTime = cProblemInput.getLatestArrivalTime();
+
 		super.fillTimes(cProblemInput, assignments, arrivalTimes, startTimes, endTimes, setupStartTimes, setupEndTimes);
+	}
+
+	@Override
+	public int getTimeWhenMachineBecomesAvailableForOperation(final Map<Job, Integer> arrivalTimes, final Map<Machine, Integer> machineReadiness, final Machine m) {
+		return machineReadiness.computeIfAbsent(m, Machine::getAvailableDate);
 	}
 
 	@Override
 	public int timeWhenOperationArrivesAtMachine(final Map<Job, Integer> arrivalTimes, final Map<Machine, Integer> machineReadiness, final Map<Job, Integer> jobReadyness, final Operation o, final Machine m) {
 		Job job = o.getJob();
-		int timeWhenMachineBecomesAvailableForOperation = super.getTimeWhenMachineBecomesAvailableForOperation(arrivalTimes, machineReadiness, m);
+		int timeWhenMachineBecomesAvailableForOperation = this.getTimeWhenMachineBecomesAvailableForOperation(arrivalTimes, machineReadiness, m);
 		int timeWhenJobArrivesAtMachine;
 		if (!arrivalTimes.containsKey(job)) { // this is the first operation of assigned for this job (then use it as the arrival time for the job)
 			timeWhenJobArrivesAtMachine = Math.min(timeWhenMachineBecomesAvailableForOperation, this.latestArrivalTime);
