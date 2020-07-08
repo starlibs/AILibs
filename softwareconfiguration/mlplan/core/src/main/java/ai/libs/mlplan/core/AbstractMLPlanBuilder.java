@@ -2,10 +2,13 @@ package ai.libs.mlplan.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -15,6 +18,7 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.IPredictionPerformanceMetricConfigurable;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.Timeout;
@@ -33,11 +37,17 @@ import ai.libs.hasco.variants.forwarddecomposition.twophase.HASCOWithRandomCompl
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
+import ai.libs.jaicore.basic.MathExt;
+import ai.libs.jaicore.basic.ResourceFile;
+import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
+import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
+import ai.libs.jaicore.ml.regression.loss.dataset.RootMeanSquaredError;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
@@ -70,6 +80,14 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	protected static final double DEFAULT_SELECTION_TRAIN_FOLD_SIZE = 0.7;
 	protected static final IDeterministicPredictionPerformanceMeasure<Object, Object> DEFAULT_PERFORMANCE_MEASURE = EClassificationPerformanceMeasure.ERRORRATE;
 
+	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS)
+			.withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE).withMeasure(new RootMeanSquaredError());
+	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS)
+			.withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE).withMeasure(new RootMeanSquaredError());
+
+	private static final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> DEF_SEARCH_SELECT_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE,
+			new Random(0));
+
 	/* Default configuration values */
 	private static final File DEF_ALGORITHM_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_ALGORITHM_CONFIG, FS_ALGORITHM_CONFIG);
 
@@ -99,13 +117,81 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	private Collection<Component> components = new LinkedList<>();
 
 	/* The problem input for ML-Plan. */
+	protected IProblemType problemType;
 	private ILabeledDataset<?> dataset;
 
-	protected AbstractMLPlanBuilder() {
+	protected AbstractMLPlanBuilder(final IProblemType problemType) throws IOException {
 		super();
 		this.withAlgorithmConfigFile(DEF_ALGORITHM_CONFIG);
 		this.withRandomCompletionBasedBestFirstSearch();
+		this.withProblemType(problemType);
 		this.withSeed(0);
+
+		// /* configure blow-ups for MCCV */
+		double blowUpInSelectionPhase = MathExt.round(1f / DEFAULT_SEARCH_TRAIN_FOLD_SIZE * DEFAULT_SELECTION_NUM_MC_ITERATIONS / DEFAULT_SEARCH_NUM_MC_ITERATIONS, 2);
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
+		double blowUpInPostprocessing = MathExt.round((1 / (1 - this.getAlgorithmConfig().dataPortionForSelection())) / DEFAULT_SELECTION_NUM_MC_ITERATIONS, 2);
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
+	}
+
+	public AbstractMLPlanBuilder<L, B> withProblemType(final IProblemType problemType) throws IOException {
+		if (this.problemType != problemType) {
+			this.problemType = problemType;
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info("Setting problem type to {}.", this.problemType.getName());
+			}
+			if (this.getLearnerFactory() != null) {
+				this.getLearnerFactory().setProblemType(this.problemType);
+				if (this.logger.isInfoEnabled()) {
+					this.logger.info("Setting factory for the problem type {}: {}", this.problemType.getName(), this.getLearnerFactory().getClass().getSimpleName());
+				}
+			}
+			this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(this.problemType.getSearchSpaceConfigFileFromResource(), this.problemType.getSearchSpaceConfigFromFileSystem()));
+			this.withRequestedInterface(problemType.getRequestedInterface());
+			this.withSearchPhaseEvaluatorFactory(DEF_SEARCH_PHASE_EVALUATOR);
+			this.withSelectionPhaseEvaluatorFactory(DEF_SELECTION_PHASE_EVALUATOR);
+			this.withPortionOfDataReservedForSelection(this.problemType.getPortionOfDataReservedForSelectionPhase());
+			this.withDatasetSplitterForSearchSelectionSplit(DEF_SEARCH_SELECT_SPLITTER);
+		}
+		return this.getSelf();
+	}
+
+	public IProblemType getProblemType() {
+		return this.problemType;
+	}
+
+	/**
+	 * Creates a preferred node evaluator that can be used to prefer components over other components.
+	 *
+	 * @param preferredComponentsFile The file containing a priority list of component names.
+	 * @param preferableCompnentMethodPrefix The prefix of a method's name for refining a complex task to preferable components.
+	 * @return The builder object.
+	 * @throws IOException Thrown if a problem occurs while trying to read the file containing the priority list.
+	 */
+	public AbstractMLPlanBuilder<L, B> withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix, final boolean replaceCurrentPreferences) throws IOException {
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
+		List<String> ordering;
+		if (preferredComponentsFile instanceof ResourceFile) {
+			ordering = ResourceUtil.readResourceFileToStringList((ResourceFile) preferredComponentsFile);
+		} else if (!preferredComponentsFile.exists()) {
+			this.logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", preferredComponentsFile.getAbsolutePath());
+			ordering = new ArrayList<>();
+		} else {
+			ordering = FileUtil.readFileAsList(preferredComponentsFile);
+		}
+		if (replaceCurrentPreferences) {
+			return this.withOnePreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.problemType, this.getComponents(), ordering));
+		} else {
+			return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.problemType, this.getComponents(), ordering));
+		}
+	}
+
+	public AbstractMLPlanBuilder<L, B> withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
+		return this.withPreferredComponentsFile(preferredComponentsFile, preferableCompnentMethodPrefix, false);
+	}
+
+	public String getPreferredComponentsFiles() {
+		return this.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS);
 	}
 
 	/**
@@ -145,6 +231,30 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	public B withSearchFactory(@SuppressWarnings("rawtypes") final IOptimalPathInORGraphSearchFactory searchFactory, @SuppressWarnings("rawtypes") final AlgorithmicProblemReduction transformer) {
 		this.hascoFactory.setSearchFactory(searchFactory);
 		this.hascoFactory.setSearchProblemTransformer(transformer);
+		return this.getSelf();
+	}
+
+	public B withPerformanceMeasureForSearchPhase(final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMeasure) {
+		if (this.getLearnerEvaluationFactoryForSearchPhase() instanceof IPredictionPerformanceMetricConfigurable) {
+			((IPredictionPerformanceMetricConfigurable) this.getLearnerEvaluationFactoryForSearchPhase()).setMeasure(performanceMeasure);
+		} else {
+			throw new UnsupportedOperationException("The evaluator (" + this.getLearnerEvaluationFactoryForSearchPhase() + ") for search phase does not support setting a metric.");
+		}
+		return this.getSelf();
+	}
+
+	public B withPerformanceMeasureForSelectionPhase(final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMeasure) {
+		if (this.getLearnerEvaluationFactoryForSelectionPhase() instanceof IPredictionPerformanceMetricConfigurable) {
+			((IPredictionPerformanceMetricConfigurable) this.getLearnerEvaluationFactoryForSelectionPhase()).setMeasure(performanceMeasure);
+		} else {
+			throw new UnsupportedOperationException("The evaluator (" + this.getLearnerEvaluationFactoryForSelectionPhase() + ") for selection phase does not support setting a metric.");
+		}
+		return this.getSelf();
+	}
+
+	public B withPerformanceMeasure(final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMeasure) {
+		this.withPerformanceMeasureForSearchPhase(performanceMeasure);
+		this.withPerformanceMeasureForSelectionPhase(performanceMeasure);
 		return this.getSelf();
 	}
 
@@ -223,7 +333,13 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		this.searchSpaceFile = searchSpaceConfig;
 		this.components.clear();
 		this.components.addAll(new ComponentLoader(this.searchSpaceFile).getComponents());
-		this.update();
+		File preferredComponentsFile;
+		if (this.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS) != null) {
+			preferredComponentsFile = new File(this.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS));
+		} else {
+			preferredComponentsFile = FileUtil.getExistingFileWithHighestPriority(this.problemType.getPreferredComponentListFromResource(), this.problemType.getPreferredComponentListFromFileSystem());
+		}
+		this.withPreferredComponentsFile(preferredComponentsFile, this.problemType.getPreferredComponentName(), true);
 		this.logger.info("The search space configuration file has been set to {}.", searchSpaceConfig.getCanonicalPath());
 		return this.getSelf();
 	}
@@ -334,8 +450,10 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 * @param evaluatorFactory The evaluator factory for the search phase.
 	 * @return The builder object.
 	 */
-	public void withSearchPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluatorFactory) {
+	public B withSearchPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluatorFactory) {
 		this.factoryForPipelineEvaluationInSearchPhase = evaluatorFactory;
+		this.withPerformanceMeasureForSearchPhase(this.problemType.getPerformanceMetricForSearchPhase());
+		return this.getSelf();
 	}
 
 	/**
@@ -353,6 +471,7 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 */
 	public B withSelectionPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluatorFactory) {
 		this.factoryForPipelineEvaluationInSelectionPhase = evaluatorFactory;
+		this.withPerformanceMeasureForSelectionPhase(this.problemType.getPerformanceMetricForSelectionPhase());
 		return this.getSelf();
 	}
 

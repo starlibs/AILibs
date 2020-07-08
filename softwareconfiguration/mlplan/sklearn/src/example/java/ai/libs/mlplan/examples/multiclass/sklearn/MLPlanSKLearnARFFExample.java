@@ -7,15 +7,18 @@ import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
+import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.logging.LoggerUtil;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
@@ -48,26 +51,16 @@ public class MLPlanSKLearnARFFExample {
 			start = System.currentTimeMillis();
 			ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
-			LOGGER.info("Finished build of the classifier.");
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));
-			}
-			LOGGER.info("Training time was {}s.", trainTime);
-
-			IPredictionBatch batch = optimizedClassifier.predict(split.get(1));
-
-			double error = 0.0;
-			for (int i = 0; i < batch.getNumPredictions(); i++) {
-				if ((int) batch.get(i).getPrediction() != (int) split.get(1).get(i).getLabel()) {
-					error += 1;
-				}
-			}
-			error /= batch.getNumPredictions();
+			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
+			LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));
 
 			/* evaluate solution produced by mlplan */
-			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}", error, mlplan.getInternalValidationErrorOfSelectedClassifier());
+			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
+			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
+			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}", EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()),
+					mlplan.getInternalValidationErrorOfSelectedClassifier());
 		} catch (NoSuchElementException e) {
-			LOGGER.error("Building the classifier failed.", e);
+			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}
 	}
 

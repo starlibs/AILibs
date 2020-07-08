@@ -11,6 +11,7 @@ import ai.libs.automl.AutoMLAlgorithmCoreFunctionalityTester;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.mlplan.core.MLPlan;
+import ai.libs.mlplan.multiclass.wekamlplan.EMLPlanWekaProblemType;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 
 public class MLPlanCoreFunctionalityTester extends AutoMLAlgorithmCoreFunctionalityTester {
@@ -18,7 +19,8 @@ public class MLPlanCoreFunctionalityTester extends AutoMLAlgorithmCoreFunctional
 	@Override
 	public IAlgorithm<ILabeledDataset<?>, IWekaClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws AlgorithmCreationException {
 		try {
-			MLPlanWekaBuilder builder = new MLPlanWekaBuilder().withTinyWekaSearchSpace();
+			MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
+			builder.withProblemType(EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS_TINY);
 			builder.withNodeEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
 			builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.SECONDS));
 			builder.withNumCpus(1);

@@ -13,10 +13,8 @@ public interface MLPlanClassifierConfig extends TwoPhaseHASCOConfig {
 	public static final String SELECTION_PORTION = "mlplan.selectionportion";
 
 	@Key(SELECTION_PORTION)
-	@DefaultValue("0.3")
 	public double dataPortionForSelection();
 
 	@Key(PREFERRED_COMPONENTS)
-	@DefaultValue("conf/mlplan/precedenceList.txt")
 	public File preferredComponents();
 }

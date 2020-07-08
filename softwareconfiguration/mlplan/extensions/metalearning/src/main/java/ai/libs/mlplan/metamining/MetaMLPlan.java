@@ -27,7 +27,7 @@ import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetri
 import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-//github.com/fmohr/AILibs.git
+// github.com/fmohr/AILibs.git
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.lds.BestFirstLimitedDiscrepancySearch;
 import ai.libs.jaicore.search.algorithms.standard.lds.BestFirstLimitedDiscrepancySearchFactory;
@@ -36,6 +36,7 @@ import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.model.travesaltree.ReducedGraphGenerator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
 import ai.libs.mlplan.metamining.databaseconnection.ExperimentRepository;
+import ai.libs.mlplan.multiclass.wekamlplan.EMLPlanWekaProblemType;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlan4Weka;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
@@ -56,7 +57,7 @@ public class MetaMLPlan extends AbstractClassifier {
 	// Search components
 	private transient BestFirstLimitedDiscrepancySearch<GraphSearchWithNodeRecommenderInput<TFDNode, String>, TFDNode, String, NodeOrderList> lds;
 	private transient WEKAMetaminer metaMiner;
-	private transient WekaPipelineFactory factory = new WekaPipelineFactory();
+	private transient WekaPipelineFactory factory = new WekaPipelineFactory(EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS);
 
 	// Search configuration
 	private long timeoutInSeconds = 60;

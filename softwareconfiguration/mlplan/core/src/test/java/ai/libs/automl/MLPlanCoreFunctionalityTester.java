@@ -2,6 +2,7 @@ package ai.libs.automl;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,12 +26,12 @@ import ai.libs.mlplan.core.events.MLPlanPhaseSwitchedEvent;
 public class MLPlanCoreFunctionalityTester extends AutoMLAlgorithmCoreFunctionalityTester {
 
 	@Override
-	public IAlgorithm getAutoMLAlgorithm(final ILabeledDataset data) {
+	public IAlgorithm getAutoMLAlgorithm(final ILabeledDataset data) throws IOException {
 		return new MLPlanSimpleBuilder().withDataset(data).build();
 	}
 
 	@Test
-	public void testThatPhaseSwitchEventIsSent() throws DatasetDeserializationFailedException, AlgorithmTimeoutedException, AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException {
+	public void testThatPhaseSwitchEventIsSent() throws DatasetDeserializationFailedException, AlgorithmTimeoutedException, AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, IOException {
 		MLPlan<IClassifier> mlplan = new MLPlanSimpleBuilder().withDataset(OpenMLDatasetReader.deserializeDataset(3)).build();
 		mlplan.setTimeout(new Timeout(20, TimeUnit.SECONDS));
 		AtomicBoolean eventSeen = new AtomicBoolean(false);

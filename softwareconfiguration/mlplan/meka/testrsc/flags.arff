@@ -1,4 +1,4 @@
-@relation 'flags_ml: -C -12'
+@relation "flags_ml: -C -12"
 
 @attribute landmass	{1, 2, 3, 4, 5, 6}
 @attribute zone	{1, 2, 3, 4}

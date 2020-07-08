@@ -16,6 +16,9 @@ import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.mlplan.core.ILearnerFactory;
+import ai.libs.mlplan.core.IProblemType;
+import ai.libs.mlplan.exception.UnsupportedProblemTypeException;
+import ai.libs.mlplan.multiclass.wekamlplan.EMLPlanWekaProblemType;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
@@ -31,6 +34,12 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 	private Logger logger = LoggerFactory.getLogger(WekaPipelineFactory.class);
 
 	private static final String L_CLASSIFIER = "classifier";
+
+	private EMLPlanWekaProblemType problemType;
+
+	public WekaPipelineFactory(final EMLPlanWekaProblemType problemType) {
+		this.problemType = problemType;
+	}
 
 	@Override
 	public IWekaClassifier getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
@@ -136,6 +145,17 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 		}
 
 		return parameters;
+	}
+
+	@Override
+	public void setProblemType(final IProblemType problemType) {
+		if (problemType != this.problemType) {
+			if (problemType instanceof EMLPlanWekaProblemType) {
+				this.problemType = (EMLPlanWekaProblemType) problemType;
+			} else {
+				throw new UnsupportedProblemTypeException("Setting the problem type " + problemType.getName() + " failed, as this is not " + EMLPlanWekaProblemType.class.getName() + ".");
+			}
+		}
 	}
 
 }

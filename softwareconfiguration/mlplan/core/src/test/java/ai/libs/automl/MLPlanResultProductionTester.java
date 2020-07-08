@@ -1,5 +1,7 @@
 package ai.libs.automl;
 
+import java.io.IOException;
+
 import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
@@ -7,10 +9,10 @@ import org.api4.java.algorithm.IAlgorithm;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanSimpleBuilder;
 
-public class MLPlanResultProductionTester extends AutoMLAlgorithmResultProductionTester{
+public class MLPlanResultProductionTester extends AutoMLAlgorithmResultProductionTester {
 
 	@Override
-	public IAlgorithm<ILabeledDataset<?>, IClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) {
+	public IAlgorithm<ILabeledDataset<?>, IClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws IOException {
 		this.logger.info("Creating ML-Plan instance.");
 		MLPlan<IClassifier> mlplan = new MLPlanSimpleBuilder().withDataset(data).build();
 		this.logger.info("done");

@@ -19,9 +19,10 @@ import ai.libs.hasco.model.CategoricalParameterDomain;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.NumericParameterDomain;
 import ai.libs.hasco.model.Parameter;
-import ai.libs.jaicore.ml.scikitwrapper.EBasicProblemType;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.ILearnerFactory;
+import ai.libs.mlplan.core.IProblemType;
+import ai.libs.mlplan.exception.UnsupportedProblemTypeException;
 
 /**
  * The SKLearnClassifierFactory takes a ground component instance and parses it into a <code>ScikitLearnWrapper</code> as defined in the project jaicore-ml.
@@ -39,11 +40,15 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 	private Logger logger = LoggerFactory.getLogger(SKLearnClassifierFactory.class);
 	private String loggerName;
 
-	private EBasicProblemType problemType;
+	private EMLPlanSkLearnProblemType problemType;
 	private String pathVariable;
 	private String anacondaEnvironment;
 	private long seed;
 	private Timeout timeout;
+
+	public SKLearnClassifierFactory(final EMLPlanSkLearnProblemType problemType) {
+		this.problemType = problemType;
+	}
 
 	@Override
 	public ScikitLearnWrapper<P, B> getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
@@ -59,7 +64,7 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 		this.logger.info("Created construction string: {}", constructionString);
 
 		try {
-			ScikitLearnWrapper<P, B> wrapper = new ScikitLearnWrapper<>(constructionString, imports.toString(), true, this.problemType);
+			ScikitLearnWrapper<P, B> wrapper = new ScikitLearnWrapper<>(constructionString, imports.toString(), true, this.problemType.getSkLearnProblemType());
 			wrapper.setPathVariable(this.pathVariable);
 			wrapper.setAnacondaEnvironment(this.anacondaEnvironment);
 			wrapper.setSeed(this.seed);
@@ -99,11 +104,11 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 		sb.append(className);
 		sb.append("(");
 		if (groundComponent.getComponent().getName().contains("make_pipeline")) {
-			if (this.problemType == EBasicProblemType.CLASSIFICATION) {
+			if (this.problemType == EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS) {
 				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get(N_PREPROCESSOR), importSet));
 				sb.append(",");
 				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("classifier"), importSet));
-			} else if (this.problemType == EBasicProblemType.RUL) {
+			} else if (this.problemType == EMLPlanSkLearnProblemType.RUL) {
 				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("timeseries_transformer"), importSet));
 				sb.append(",");
 				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("data_cleaner"), importSet));
@@ -189,8 +194,15 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 		this.logger.debug("Switched SKLearnClassifierFactory logger to {}", name);
 	}
 
-	public void setProblemType(final EBasicProblemType problemType) {
-		this.problemType = problemType;
+	@Override
+	public void setProblemType(final IProblemType problemType) {
+		if (problemType != this.problemType) {
+			if (problemType instanceof EMLPlanSkLearnProblemType) {
+				this.problemType = (EMLPlanSkLearnProblemType) problemType;
+			} else {
+				throw new UnsupportedProblemTypeException("Setting the problem type " + problemType.getName() + " failed, as this is not " + EMLPlanSkLearnProblemType.class.getName() + ".");
+			}
+		}
 	}
 
 	public void setPathVariable(final String path) {

@@ -41,7 +41,9 @@ import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogr
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
+import ai.libs.mlplan.multiclass.sklearn.EMLPlanSkLearnProblemType;
 import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
+import ai.libs.mlplan.multiclass.wekamlplan.EMLPlanWekaProblemType;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
 import meka.classifiers.multilabel.MultiLabelClassifier;
@@ -196,13 +198,14 @@ public class MLPlanCLI {
 				builder = new MLPlanWekaBuilder();
 				break;
 			case "weka-tiny":
-				builder = new MLPlanWekaBuilder().withTinyWekaSearchSpace();
+				builder = new MLPlanWekaBuilder();
+				builder.withProblemType(EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS_TINY);
 				break;
 			case "sklearn":
 				builder = new MLPlanSKLearnBuilder();
 				break;
 			case "sklearn-ul":
-				builder = new MLPlanSKLearnBuilder().withUnlimitedLengthPipelineSearchSpace();
+				builder = new MLPlanSKLearnBuilder().withProblemType(EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES);
 				break;
 			case "meka":
 				builder = new ML2PlanMekaBuilder();

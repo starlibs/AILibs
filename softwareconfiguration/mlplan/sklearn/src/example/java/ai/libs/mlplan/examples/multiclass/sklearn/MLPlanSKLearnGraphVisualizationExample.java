@@ -8,10 +8,13 @@ import java.util.concurrent.TimeUnit;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
@@ -26,6 +29,9 @@ import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
 
 public class MLPlanSKLearnGraphVisualizationExample {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger("example");
+
 	public static void main(final String[] args) throws Exception {
 
 		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(346);
@@ -34,11 +40,11 @@ public class MLPlanSKLearnGraphVisualizationExample {
 		/* initialize mlplan, and let it run for 1 hour */
 		MLPlanSKLearnBuilder<SingleLabelClassification, SingleLabelClassificationPredictionBatch> builder = new MLPlanSKLearnBuilder<>();
 		builder.withNumCpus(4);
+		builder.withSeed(42);
 		builder.withTimeOut(new Timeout(1, TimeUnit.HOURS));
 		builder.withDataset(split.get(0));
 
 		MLPlan<ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>> mlplan = builder.build();
-		mlplan.setRandomSeed(1);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setLoggerName("testedalgorithm");
 
@@ -51,14 +57,16 @@ public class MLPlanSKLearnGraphVisualizationExample {
 			long start = System.currentTimeMillis();
 			ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
-			System.out.println("Finished build of the classifier. Training time was " + trainTime + "s.");
+			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
+			LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));
 
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			System.out.println("Error Rate of the solution produced by ML-Plan: " + EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()));
+			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}", EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()),
+					mlplan.getInternalValidationErrorOfSelectedClassifier());
 		} catch (NoSuchElementException e) {
-			System.out.println("Building the classifier failed: " + e.getMessage());
+			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}
 	}
 }
