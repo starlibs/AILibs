@@ -7,6 +7,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryEntryDeliverer;
+
 public class DefaultGUIEventBus implements GUIEventBus {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultGUIEventBus.class);
@@ -14,9 +16,15 @@ public class DefaultGUIEventBus implements GUIEventBus {
 	private static DefaultGUIEventBus singletonInstance;
 
 	private List<GUIEventListener> guiEventListeners;
+	private AlgorithmEventHistoryEntryDeliverer historyEntryDeliverer;
 
 	private DefaultGUIEventBus() {
 		guiEventListeners = Collections.synchronizedList(new LinkedList<>());
+	}
+
+	@Override
+	public void registerAlgorithmEventHistoryEntryDeliverer(AlgorithmEventHistoryEntryDeliverer historyEntryDeliverer) {
+		this.historyEntryDeliverer = historyEntryDeliverer;
 	}
 
 	@Override
@@ -35,6 +43,7 @@ public class DefaultGUIEventBus implements GUIEventBus {
 			for (GUIEventListener listener : guiEventListeners) {
 				passEventToListener(guiEvent, listener);
 			}
+			passEventToListener(guiEvent, historyEntryDeliverer);
 		}
 	}
 

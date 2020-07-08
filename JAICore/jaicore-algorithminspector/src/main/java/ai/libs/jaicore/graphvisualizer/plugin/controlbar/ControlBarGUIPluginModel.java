@@ -4,7 +4,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
 public class ControlBarGUIPluginModel extends ASimpleMVCPluginModel<ControlBarGUIPluginView, ControlBarGUIPluginController> {
 
-	private boolean visualizationPaused;
+	private boolean visualizationPaused = true;
 
 	public void setPaused() {
 		this.visualizationPaused = true;
