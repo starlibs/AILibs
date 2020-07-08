@@ -154,12 +154,16 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 		this.setMeasure(measure);
 		return this.getSelf();
 	}
-	
-	public F withCacheSplitSets(boolean cacheSplitSets) {
+
+	public IDeterministicPredictionPerformanceMeasure<?, ?> getMeasure() {
+		return this.metric;
+	}
+
+	public F withCacheSplitSets(final boolean cacheSplitSets) {
 		this.cacheSplitSets = cacheSplitSets;
 		return this.getSelf();
 	}
-	
+
 	public boolean getCacheSplitSets() {
 		return this.cacheSplitSets;
 	}

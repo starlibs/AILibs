@@ -56,11 +56,13 @@ public class MLPlanOpenMLExample {
 			IWekaClassifier optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
+			LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));
 
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}", EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()));
+			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}", EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()),
+					mlplan.getInternalValidationErrorOfSelectedClassifier());
 		} catch (NoSuchElementException e) {
 			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}

@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import ai.libs.hasco.core.Util;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.jaicore.ml.scikitwrapper.EBasicProblemType;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
@@ -24,22 +23,17 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 	private final List<String> orderingOfComponents;
 	private Logger logger = LoggerFactory.getLogger(PreferenceBasedNodeEvaluator.class);
 	private boolean sentLogMessageForHavingEnteredSecondSubPhase = false;
-	private EBasicProblemType problemType;
+	private IProblemType problemType;
 
-	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> orderingOfComponents) {
+	public PreferenceBasedNodeEvaluator(final IProblemType problemType, final Collection<Component> components, final List<String> orderingOfComponents) {
 		super();
-		this.problemType = EBasicProblemType.CLASSIFICATION;
+		this.problemType = problemType;
 		this.components = components;
 		this.orderingOfComponents = orderingOfComponents;
 	}
 
-	public PreferenceBasedNodeEvaluator(final Collection<Component> components) {
-		this(components, new ArrayList<>());
-	}
-
-	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> orderingOfComponents, final String methodPrefix) {
-		this(components, orderingOfComponents);
-		this.problemType = EBasicProblemType.getProblemType(methodPrefix);
+	public PreferenceBasedNodeEvaluator(final IProblemType problemType, final Collection<Component> components) {
+		this(problemType, components, new ArrayList<>());
 	}
 
 	@Override

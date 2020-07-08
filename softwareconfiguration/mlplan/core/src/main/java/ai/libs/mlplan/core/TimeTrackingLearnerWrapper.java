@@ -139,4 +139,9 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 		return this.score;
 	}
 
+	@Override
+	public ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getLearner() {
+		return this.wrappedSLClassifier;
+	}
+
 }

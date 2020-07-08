@@ -45,11 +45,10 @@ public class MLPlanSKLearnOpenMLExample {
 		builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.SECONDS));
 		builder.withTimeOut(new Timeout(2, TimeUnit.MINUTES));
 		builder.withNumCpus(4);
-		builder.withSeed(1);
+		builder.withSeed(42);
 		builder.withMCCVBasedCandidateEvaluationInSearchPhase().withNumMCIterations(12);
 
 		MLPlan<ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>> mlplan = builder.withDataset(split.get(0)).build();
-		mlplan.setRandomSeed(1);
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setLoggerName("testedalgorithm");
 
@@ -58,11 +57,13 @@ public class MLPlanSKLearnOpenMLExample {
 			ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
+			LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));
 
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}", EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()));
+			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}", EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()),
+					mlplan.getInternalValidationErrorOfSelectedClassifier());
 		} catch (NoSuchElementException e) {
 			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}

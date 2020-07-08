@@ -34,6 +34,7 @@ import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
+import ai.libs.jaicore.ml.core.ESkLearnProblemType;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
@@ -83,7 +84,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	private static final File TMP_FOLDER = new File("tmp"); // Folder to put the serialized arff files and the scripts in.
 
 	private static final File MODEL_DUMPS_DIRECTORY = new File(TMP_FOLDER, "model_dumps");
-	private static final boolean VERBOSE = true; // If true the output stream of the python process is printed.
+	private static final boolean VERBOSE = false; // If true the output stream of the python process is printed.
 	private boolean listenToPidFromProcess; // If true, the PID is obtained from the python process being started by listening to according output.
 	private static final boolean DELETE_TEMPORARY_FILES_ON_EXIT = false;
 
@@ -91,7 +92,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	private ILabeledDataset<ILabeledInstance> dataset;
 
 	/* Problem definition fields */
-	private EBasicProblemType problemType;
+	private ESkLearnProblemType problemType;
 	private String pathVariable;
 	private int[] targetColumns = new int[0]; // Defines which of the columns in the arff file represent the target vectors. If not set, the last column is assumed to be the target vector.
 
@@ -120,7 +121,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * @param imports Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
 	 * @throws IOException The script could not be created.
 	 */
-	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withoutModelDump, final EBasicProblemType problemType) throws IOException {
+	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withoutModelDump, final ESkLearnProblemType problemType) throws IOException {
 		if (ProcessUtil.getOS() == OS.MAC || ProcessUtil.getOS() == OS.LINUX) {
 			this.listenToPidFromProcess = true;
 		} else {
@@ -160,13 +161,17 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * @param imports Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
 	 * @throws IOException The script could not be created.
 	 */
-	public ScikitLearnWrapper(final String constructInstruction, final String imports, final EBasicProblemType problemType) throws IOException {
+	public ScikitLearnWrapper(final String constructInstruction, final String imports, final ESkLearnProblemType problemType) throws IOException {
 		this(constructInstruction, imports, false, problemType);
 	}
 
-	public ScikitLearnWrapper(final String constructInstruction, final String imports, final File trainedModelPath, final EBasicProblemType problemType) throws IOException {
+	public ScikitLearnWrapper(final String constructInstruction, final String imports, final File trainedModelPath, final ESkLearnProblemType problemType) throws IOException {
 		this(constructInstruction, imports, false, problemType);
 		this.modelFile = trainedModelPath;
+	}
+
+	public ESkLearnProblemType getProblemType() {
+		return this.problemType;
 	}
 
 	/**
@@ -333,9 +338,9 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		 * The structured results of the last classifyInstances call is accessable over
 		 * getRawLastClassificationResults().
 		 * */
-		if (this.problemType == EBasicProblemType.CLASSIFICATION) {
+		if (this.problemType == ESkLearnProblemType.CLASSIFICATION) {
 			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification((int) (double) x)).collect(Collectors.toList()));
-		} else if (this.problemType == EBasicProblemType.RUL) {
+		} else if (this.problemType == ESkLearnProblemType.RUL) {
 			if (L.isInfoEnabled()) {
 				L.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()));
 			}
@@ -414,7 +419,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		return this.rawLastClassificationResults;
 	}
 
-	public void setProblemType(final EBasicProblemType problemType) {
+	public void setProblemType(final ESkLearnProblemType problemType) {
 		if (this.problemType != problemType) {
 			this.problemType = problemType;
 			this.scikitTemplate = new File(ResourceUtil.getResourceAsTempFile(this.problemType.getRessourceScikitTemplate()));

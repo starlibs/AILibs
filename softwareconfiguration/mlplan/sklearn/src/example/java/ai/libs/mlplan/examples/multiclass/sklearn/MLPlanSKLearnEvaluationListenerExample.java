@@ -5,7 +5,9 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
@@ -19,13 +21,14 @@ import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluationCompletedEvent;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluationFailedEvent;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
+import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
+import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
-import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
-import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
 import ai.libs.mlplan.core.MLPlan;
+import ai.libs.mlplan.core.TimeTrackingLearnerWrapper;
+import ai.libs.mlplan.core.events.ClassifierFoundEvent;
 import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
 
 /**
@@ -41,7 +44,7 @@ public class MLPlanSKLearnEvaluationListenerExample {
 	private static final Logger LOGGER = LoggerFactory.getLogger("example");
 
 	public static void main(final String[] args) throws Exception {
-
+		/* load data for segment dataset and create a train-test-split */
 		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(60);
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
@@ -50,22 +53,37 @@ public class MLPlanSKLearnEvaluationListenerExample {
 		builder.withNodeEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.SECONDS));
 		builder.withTimeOut(new Timeout(2, TimeUnit.MINUTES));
+		builder.withSeed(42);
+
 		MLPlan<ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>> mlplan = builder.withDataset(split.get(0)).build();
+		mlplan.setPortionOfDataForPhase2(0f);
+		mlplan.setLoggerName("testedalgorithm");
 
 		/* register a listener  */
 		mlplan.registerListener(new Object() {
 
+			@SuppressWarnings("unchecked")
 			@Subscribe
-			public void receiveEvent(final TrainTestSplitEvaluationFailedEvent<?, ?> e) { // this event is fired whenever any pipeline is evaluated successfully
-				IWekaClassifier classifier = ((WekaClassifier) e.getLearner());
-				LOGGER.info("Received exception for learner {}: {}", classifier, e.getReport().getException().getClass().getName());
+			public void receiveEvent(final ClassifierFoundEvent event) {
+				@SuppressWarnings("rawtypes")
+				ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> learner = (ScikitLearnWrapper) event.getSolutionCandidate();
+				LOGGER.info("Received successful evaluation with error={} within {}ms for pipeline: {}", event.getInSampleError(), event.getTimeToEvaluate(), learner.toString());
 			}
 
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Subscribe
-			public void receiveEvent(final TrainTestSplitEvaluationCompletedEvent<?, ?> e) { // this event is fired whenever any pipeline is evaluated successfully
-				double errorRate = EClassificationPerformanceMeasure.ERRORRATE.loss(e.getReport().getPredictionDiffList());
-				IWekaClassifier classifier = ((WekaClassifier) e.getLearner());
-				LOGGER.info("Received single evaluation error rate for learner {} is {}", classifier, errorRate);
+			public void receiveEvent(final TrainTestSplitEvaluationFailedEvent<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> event) {
+				ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> learner = null;
+				if (event.getLearner() instanceof TimeTrackingLearnerWrapper) {
+					TimeTrackingLearnerWrapper wrapper = ((TimeTrackingLearnerWrapper) event.getLearner());
+					learner = (ScikitLearnWrapper) wrapper.getLearner();
+				}
+				if (learner != null) {
+					ILearnerRunReport report = event.getReport();
+					String exceptionStackTrace = ExceptionUtils.getStackTrace(report.getException());
+					long candidateRuntime = (report.getTrainEndTime() - report.getTrainStartTime()) + (report.getTestEndTime() - report.getTestStartTime());
+					LOGGER.info("Received failed evaluation within {}ms for pipeline: {}", candidateRuntime, learner.toString(), exceptionStackTrace);
+				}
 			}
 		});
 
@@ -74,11 +92,13 @@ public class MLPlanSKLearnEvaluationListenerExample {
 			ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
+			LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));
 
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}", EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()));
+			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}", EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()),
+					mlplan.getInternalValidationErrorOfSelectedClassifier());
 		} catch (NoSuchElementException e) {
 			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}

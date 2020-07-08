@@ -21,6 +21,7 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.ComponentUtil;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.mlplan.multiclass.sklearn.EMLPlanSkLearnProblemType;
 import ai.libs.mlplan.multiclass.sklearn.SKLearnClassifierFactory;
 import weka.core.Instances;
 
@@ -56,8 +57,8 @@ public class SKLearnClassifierFactoryTest {
 
 	private static final String MAKE_FORWARD_NAME = "mlplan.util.model.make_forward";
 
-	private static final String EXPECTED_CLASSIFIER = "RandomForestClassifier(max_features=0.53,criterion=\"gini\",min_samples_split=11.0,n_estimators=100.0,bootstrap=True,min_samples_leaf=11.0)";
-	private static final String EXPECTED_PREPROCESSOR = "Nystroem(n_components=6.0,kernel=\"rbf\",gamma=0.505)";
+	private static final String EXPECTED_CLASSIFIER = "RandomForestClassifier(max_features=0.53,criterion=\"gini\",min_samples_split=11,n_estimators=100,bootstrap=True,min_samples_leaf=11)";
+	private static final String EXPECTED_PREPROCESSOR = "Nystroem(n_components=6,kernel=\"rbf\",gamma=0.505)";
 	private static final String EXPECTED_TWO_STEP_PIPE = "make_pipeline(" + EXPECTED_PREPROCESSOR + "," + EXPECTED_CLASSIFIER + ")";
 	private static final String EXPECTED_SIMPLE_MAKE_UNION_PIPE = "make_pipeline(make_union(" + EXPECTED_PREPROCESSOR + "," + EXPECTED_PREPROCESSOR + ")," + EXPECTED_CLASSIFIER + ")";
 	private static final String EXPECTED_SIMPLE_MAKE_FORWARD_PIPE = "make_pipeline(" + EXPECTED_PREPROCESSOR + "," + EXPECTED_PREPROCESSOR + "," + EXPECTED_CLASSIFIER + ")";
@@ -76,7 +77,7 @@ public class SKLearnClassifierFactoryTest {
 		cl = new ComponentLoader(COMPONENT_REPO);
 
 		/* init factory */
-		factory = new SKLearnClassifierFactory();
+		factory = new SKLearnClassifierFactory(EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS);
 	}
 
 	@Test

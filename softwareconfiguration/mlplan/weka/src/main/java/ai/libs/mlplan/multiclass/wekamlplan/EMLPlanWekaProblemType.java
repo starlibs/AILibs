@@ -1,23 +1,23 @@
-package ai.libs.mlplan.multiclass.sklearn;
+package ai.libs.mlplan.multiclass.wekamlplan;
 
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
-import ai.libs.jaicore.ml.core.ESkLearnProblemType;
-import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
+import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.InstanceWiseF1;
 import ai.libs.mlplan.core.IProblemType;
 
-public enum EMLPlanSkLearnProblemType implements IProblemType {
+public enum EMLPlanWekaProblemType implements IProblemType {
 
-	CLASSIFICATION_MULTICLASS(ESkLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/sklearn-mlplan.json", "conf/mlplan-sklearn.json", "automl/searchmodels/sklearn/sklearn-preferenceList.txt", "conf/sklearn-preferenceList.txt", "MLPipeline",
-			"BasicClassifier", EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, 0.0), //
-	CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES(ESkLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/ml-plan-ul.json", EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
-			EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), "AbstractClassifier", "BasicClassifier",
+	CLASSIFICATION_MULTICLASS("automl/searchmodels/weka/weka-all-autoweka.json", "conf/mlplan-weka.json", "mlplan/weka-preferenceList.txt", "conf/mlpan-weka-preferenceList.txt", "AbstractClassifier", "BasicClassifier",
 			EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, 0.0), //
-	RUL(ESkLearnProblemType.RUL, "automl/searchmodels/sklearn/sklearn-rul.json", "conf/sklearn-rul.json", "automl/searchmodels/sklearn/sklearn-preferenceList.txt", "conf/sklearn-preferenceList.txt", "MLPipeline", "BasicRegressor",
-			ERulPerformanceMeasure.ASYMMETRIC_LOSS, ERulPerformanceMeasure.ASYMMETRIC_LOSS, 0.0);
-
-	private final ESkLearnProblemType problemType;
+	CLASSIFICATION_MULTICLASS_TINY("automl/searchmodels/weka/tinytest.json", EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
+			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(),
+			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getRequestedInterface(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredBasicProblemComponentName(),
+			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPerformanceMetricForSearchPhase(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPerformanceMetricForSelectionPhase(),
+			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPortionOfDataReservedForSelectionPhase()), //
+	CLASSIFICATION_MULTILABEL("automl/searchmodels/meka/mlplan-meka.json", "conf/searchmodels/mlplan-meka.json", "mlplan/meka-preferenceList.txt", "conf/mlpan-meka-preferenceList.txt", "MLClassifier",
+			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredBasicProblemComponentName(), new InstanceWiseF1(), new InstanceWiseF1(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPortionOfDataReservedForSelectionPhase());
+	;
 
 	private final String searchSpaceConfigFileFromResource;
 	private final String systemSearchSpaceConfigFromFileSystem;
@@ -27,15 +27,15 @@ public enum EMLPlanSkLearnProblemType implements IProblemType {
 
 	private final String requestedHascoInterface;
 	private final String requestedBasicProblemInterface;
+	//	private final String requestedBaseLearnerInterface;
 
 	private final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSearchPhase;
 	private final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase;
 	private final double portionOfDataReservedForSelectionPhase;
 
-	private EMLPlanSkLearnProblemType(final ESkLearnProblemType problemType, final String searchSpaceConfigFileFromResource, final String systemSearchSpaceConfigFromFileSystem, final String preferedComponentsListFromResource,
-			final String preferedComponentsListFromFileSystem, final String requestedHascoInterface, final String requestedBasicProblemInterface, final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSearchPhase,
+	private EMLPlanWekaProblemType(final String searchSpaceConfigFileFromResource, final String systemSearchSpaceConfigFromFileSystem, final String preferedComponentsListFromResource, final String preferedComponentsListFromFileSystem,
+			final String requestedHascoInterface, final String requestedBasicProblemInterface, final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSearchPhase,
 			final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase, final double portionOfDataReservedForSelectionPhase) {
-		this.problemType = problemType;
 
 		this.searchSpaceConfigFileFromResource = searchSpaceConfigFileFromResource;
 		this.systemSearchSpaceConfigFromFileSystem = systemSearchSpaceConfigFromFileSystem;
@@ -45,14 +45,11 @@ public enum EMLPlanSkLearnProblemType implements IProblemType {
 
 		this.requestedHascoInterface = requestedHascoInterface;
 		this.requestedBasicProblemInterface = requestedBasicProblemInterface;
+		//		this.requestedBaseLearnerInterface = requestedBaseLearnerInterface;
 
 		this.performanceMetricForSearchPhase = performanceMetricForSearchPhase;
 		this.performanceMetricForSelectionPhase = performanceMetricForSelectionPhase;
 		this.portionOfDataReservedForSelectionPhase = portionOfDataReservedForSelectionPhase;
-	}
-
-	public ESkLearnProblemType getSkLearnProblemType() {
-		return this.problemType;
 	}
 
 	@Override
@@ -94,6 +91,11 @@ public enum EMLPlanSkLearnProblemType implements IProblemType {
 		return "resolve" + requestedInterface + "With";
 	}
 
+	//	@Override
+	//	public String getRequestedBaseLearnerInterface() {
+	//		return this.requestedBaseLearnerInterface;
+	//	}
+
 	@Override
 	public IDeterministicPredictionPerformanceMeasure<?, ?> getPerformanceMetricForSearchPhase() {
 		return this.performanceMetricForSearchPhase;
@@ -107,15 +109,6 @@ public enum EMLPlanSkLearnProblemType implements IProblemType {
 	@Override
 	public double getPortionOfDataReservedForSelectionPhase() {
 		return this.portionOfDataReservedForSelectionPhase;
-	}
-
-	public static IProblemType getProblemType(final String preferredComponentName) {
-		for (EMLPlanSkLearnProblemType problemType : EMLPlanSkLearnProblemType.values()) {
-			if (problemType.getPreferredComponentName().equals(preferredComponentName)) {
-				return problemType;
-			}
-		}
-		throw new IllegalArgumentException("No " + ESkLearnProblemType.class.getSimpleName() + " found for preferredComponentName=" + preferredComponentName);
 	}
 
 	@Override

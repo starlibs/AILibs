@@ -6,4 +6,5 @@ import ai.libs.hasco.optimizingfactory.BaseFactory;
 
 public interface ILearnerFactory<L extends ISupervisedLearner<?, ?>> extends BaseFactory<L> {
 
+	public void setProblemType(final IProblemType problemType);
 }
