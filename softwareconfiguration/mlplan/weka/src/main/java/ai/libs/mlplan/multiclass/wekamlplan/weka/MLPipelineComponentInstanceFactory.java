@@ -1,6 +1,5 @@
 package ai.libs.mlplan.multiclass.wekamlplan.weka;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,7 +32,6 @@ public class MLPipelineComponentInstanceFactory {
 	 * Creates a new factory object using the given configuration file
 	 *
 	 * @param components
-	 * @throws IOException
 	 */
 	public MLPipelineComponentInstanceFactory(final Collection<Component> components) {
 		this.components = components;

@@ -16,7 +16,7 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.GraphBasedMDP;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTS;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSBuilder;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSIterationCompletedEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
@@ -36,7 +36,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 	private final IMDP<N, A, Double> mdp;
 	private final MCTS<N, A> mcts;
 
-	public MCTSPathSearch(final I problem, final MCTSBuilder<N, A, ?> mctsFactory) {
+	public MCTSPathSearch(final I problem, final MCTSFactory<N, A, ?> mctsFactory) {
 		super(problem);
 		this.mdp = new GraphBasedMDP<>(problem);
 		this.mcts = mctsFactory.getAlgorithm(this.mdp);

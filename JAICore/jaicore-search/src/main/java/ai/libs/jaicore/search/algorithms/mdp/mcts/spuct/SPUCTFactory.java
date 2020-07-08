@@ -1,11 +1,11 @@
 package ai.libs.jaicore.search.algorithms.mdp.mcts.spuct;
 
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTS;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSBuilder;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.UniformRandomPolicy;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 
-public class SPUCTFactory<N, A> extends MCTSBuilder<N, A, SPUCTFactory<N, A>> {
+public class SPUCTFactory<N, A> extends MCTSFactory<N, A, SPUCTFactory<N, A>> {
 
 	private double bigD = 1000;
 

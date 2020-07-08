@@ -5,7 +5,7 @@ import java.util.Random;
 import ai.libs.jaicore.basic.algorithm.AAlgorithmFactory;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 
-public abstract class MCTSBuilder<N, A, B extends MCTSBuilder<N, A, B>> extends AAlgorithmFactory<IMDP<N, A, Double>, IPolicy<N, A>, MCTS<N, A>> {
+public abstract class MCTSFactory<N, A, B extends MCTSFactory<N, A, B>> extends AAlgorithmFactory<IMDP<N, A, Double>, IPolicy<N, A>, MCTS<N, A>> {
 
 	private int maxIterations = Integer.MAX_VALUE;
 	private double gamma = 1.0;

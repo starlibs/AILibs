@@ -11,7 +11,7 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluated
 import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
 import ai.libs.jaicore.experiments.Experiment;
 import ai.libs.jaicore.experiments.configurations.IAlgorithmNameConfig;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSBuilder;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.brue.BRUEFactory;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.comparison.FixedCommitmentMCTSFactory;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.comparison.PlackettLuceMCTSFactory;
@@ -36,7 +36,7 @@ import ai.libs.jaicore.search.problemtransformers.GraphSearchWithPathEvaluations
 
 public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearchWithPathEvaluationsInput<N, A, Double>> {
 
-	private MCTSPathSearch<I, N, A> getMCTS(final I input, final MCTSBuilder<N, A, ?> factory, final int maxiter, final int seed) {
+	private MCTSPathSearch<I, N, A> getMCTS(final I input, final MCTSFactory<N, A, ?> factory, final int maxiter, final int seed) {
 		factory.withRandom(new Random(seed));
 		factory.withMaxIterations(maxiter);
 		return new MCTSPathSearch<>(input, factory);

@@ -3,7 +3,7 @@ package ai.libs.jaicore.search.algorithms.standard.mcts;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 
-import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSBuilder;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 
 
@@ -18,7 +18,7 @@ public class MCTSPathSearchFactory<N, A>
 implements IOptimalPathInORGraphSearchFactory<IPathSearchWithPathEvaluationsInput<N, A, Double>, EvaluatedSearchGraphPath<N, A, Double>, N, A, Double, MCTSPathSearch<IPathSearchWithPathEvaluationsInput<N, A, Double>, N, A>> {
 
 	private IPathSearchWithPathEvaluationsInput<N, A, Double> problem;
-	private MCTSBuilder<N, A, ?> mctsFactory;
+	private MCTSFactory<N, A, ?> mctsFactory;
 
 	@Override
 	public MCTSPathSearch<IPathSearchWithPathEvaluationsInput<N, A, Double>, N, A> getAlgorithm() {
@@ -45,11 +45,11 @@ implements IOptimalPathInORGraphSearchFactory<IPathSearchWithPathEvaluationsInpu
 		return this;
 	}
 
-	public MCTSBuilder<N, A, ?> getMctsFactory() {
+	public MCTSFactory<N, A, ?> getMctsFactory() {
 		return this.mctsFactory;
 	}
 
-	public MCTSPathSearchFactory<N, A> withMCTSFactory(final MCTSBuilder<N, A, ?> mctsFactory) {
+	public MCTSPathSearchFactory<N, A> withMCTSFactory(final MCTSFactory<N, A, ?> mctsFactory) {
 		this.mctsFactory = mctsFactory;
 		return this;
 	}

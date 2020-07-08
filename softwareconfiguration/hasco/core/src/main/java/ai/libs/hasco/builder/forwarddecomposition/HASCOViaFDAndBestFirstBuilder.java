@@ -19,7 +19,7 @@ import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraph
  *
  * @author Felix Mohr
  *
- * @param <V>
+ * @param <V> The node evaluation type (must be Comparable, typically Double)
  */
 public class HASCOViaFDAndBestFirstBuilder<V extends Comparable<V>, B extends HASCOViaFDAndBestFirstBuilder<V, B>> extends HASCOViaFDBuilder<V, B> {
 

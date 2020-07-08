@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import ai.libs.jaicore.search.algorithms.mdp.mcts.IPathUpdatablePolicy;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSBuilder;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 
-public class EnsembleMCTSFactory<N, A> extends MCTSBuilder<N, A, EnsembleMCTSFactory<N, A>> {
+public class EnsembleMCTSFactory<N, A> extends MCTSFactory<N, A, EnsembleMCTSFactory<N, A>> {
 
 	private Collection<IPathUpdatablePolicy<N, A, Double>> treePolicies = new ArrayList<>();
 
