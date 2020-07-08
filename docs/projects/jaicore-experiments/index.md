@@ -185,7 +185,7 @@ This includes the preparation of the database,
 how to define the evaluator that is called for each experiment,
 and finally how to run the experiments.
 
-It assumes that the db configuration file is located at `configs/db.cfg` 
+It assumes that the db configuration file is located at `configs/db.properties` 
 and the experiment set config file is located at `configs/experiments.cfg`.
 
 
@@ -196,7 +196,7 @@ Load the configuration files:
 ```java
 IExperimentSetConfig expConfig = (IExperimentSetConfig) ConfigFactory
         .create(IExperimentSetConfig.class)
-        .loadPropertiesFromFile(new File("configs/experiments.config"));
+        .loadPropertiesFromFile(new File("configs/experiments.cnf"));
 
 IDatabaseConfig dbConfig = (IDatabaseConfig) ConfigFactory
         .create(IDatabaseConfig.class)
@@ -230,10 +230,10 @@ try {
 }
 ```
 
-| experiment_id 	| A1 	|  A2 	| A3   	| B1   	| B2                     	| C 	| cpus 	| memory_max 	| time_created         	| host 	| time_started 	| R1   	| R1_time 	| R1_memory 	| R2   	| R2_time 	| R2_memory 	| R3   	| R3_time 	| R3_memory 	| exception 	| time_end 	|
-|:-------------:	|----	|:---:	|------	|------	|------------------------	|---	|------	|------------	|----------------------	|------	|--------------	|------	|---------	|-----------	|------	|---------	|-----------	|------	|---------	|-----------	|-----------	|----------	|
-| 1             	| 1  	| 100 	| 1.25 	| this 	| value1 with whitespace 	| 1 	| 2    	| 2000       	| Fri Jul 03 2020 ...  	| null 	| null         	| null 	| null    	| null      	| null 	| null    	| null      	| null 	| null    	| null      	| null      	| null     	|
-| 2             	| 1  	| 100 	| 2.5  	| this 	| value1 with whitespace 	| 0 	| 2    	| 2000       	| Fri Jul 03 2020 ...  	| null 	| null         	| null 	| null    	| null      	| null 	| null    	| null      	| null 	| null    	| null      	| null      	| null     	|
+| experiment_id 	| A1 	|  A2 	| A3   	| B1   	| B2                     	| C 	| cpus 	| memory_max 	| time_created         	| host 	| executor | time_started 	| R1   	| R1_time 	| R1_memory 	| R2   	| R2_time 	| R2_memory 	| R3   	| R3_time 	| R3_memory 	| exception 	| time_end 	|
+|:-------------:	|----	|:---:	|------	|------	|------------------------	|---	|------	|------------	|----------------------	|------	| -------- | --------------	|------	|---------	|-----------	|------	|---------	|-----------	|------	|---------	|-----------	|-----------	|----------	|
+| 1             	| 1  	| 100 	| 1.25 	| this 	| value1 with whitespace 	| 1 	| 2    	| 2000       	| Fri Jul 03 2020 ...  	| null 	| null     | null         	| null 	| null    	| null      	| null 	| null    	| null      	| null 	| null    	| null      	| null      	| null     	|
+| 2             	| 1  	| 100 	| 2.5  	| this 	| value1 with whitespace 	| 0 	| 2    	| 2000       	| Fri Jul 03 2020 ...  	| null 	| null     | null         	| null 	| null    	| null      	| null 	| null    	| null      	| null 	| null    	| null      	| null      	| null     	|
 | ...           	|    	|     	|      	|      	|                        	|   	|      	|            	|                      	|      	|              	|      	|         	|           	|      	|         	|           	|      	|         	|           	|           	|          	|
 
 As can be seen te result fields are all still set to null.
