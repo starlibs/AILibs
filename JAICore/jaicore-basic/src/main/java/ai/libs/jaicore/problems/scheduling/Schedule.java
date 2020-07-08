@@ -30,6 +30,11 @@ public class Schedule implements ISchedule {
 		this.assignments = assignments;
 		this.assignments.forEach(p -> this.assignmentPerMachine.computeIfAbsent(p.getY(), m -> new ArrayList<>()).add(p.getX()));
 		schedulingComputer.fillTimes(problemInput, assignments, this.arrivalTimes, this.startTimes, this.endTimes, this.setupStartTimes, this.setupEndTimes);
+		for (Operation o : problemInput.getOperations()) {
+			if (!this.arrivalTimes.containsKey(o.getJob())) {
+				throw new IllegalStateException("No arrival time defined for job " + o.getJob().getJobID());
+			}
+		}
 	}
 
 	@Override

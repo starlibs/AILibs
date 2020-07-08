@@ -114,6 +114,13 @@ public class ExperimenterFrontend {
 		new ExperimentRunner(this.config, this.evaluator, this.databaseHandle, this.jobInfo).randomlyConductExperiments();
 	}
 
+	public void sequentiallyConductExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
+		if (this.evaluator == null) {
+			this.prepareEvaluator();
+		}
+		new ExperimentRunner(this.config, this.evaluator, this.databaseHandle).sequentiallyConductExperiments();
+	}
+
 	public ExperimenterFrontend randomlyConductExperiments(final int limit) throws ExperimentDBInteractionFailedException, InterruptedException {
 		if (this.config == null) {
 			throw new IllegalStateException("Cannot conduct experiments. No experiment config has been set, yet.");

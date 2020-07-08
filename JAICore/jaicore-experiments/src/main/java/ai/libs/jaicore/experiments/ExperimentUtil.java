@@ -6,7 +6,7 @@ import java.util.List;
 public class ExperimentUtil {
 
 	public static String getProgressQuery(final String tablename) {
-		return getProgressQuery(tablename, 1);
+		return getProgressQuery(tablename, 0);
 	}
 
 	public static String getProgressQuery(final String tablename, final int numberOfParallelJobs) {
@@ -21,7 +21,7 @@ public class ExperimentUtil {
 
 		/* create main query */
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT open, CONCAT(ROUND(100 * open / total, 2), \"%\") as \"open (rel)\", running, CONCAT(ROUND(100 * running / total, 2), \"%\") as \"running (rel)\", finished, CONCAT(ROUND(100 * finished / total, 2), \"%\") as \"finished (rel)\", failed, total, CONCAT(ROUND(avgRuntimeFinished), \"s\") as \"Average Time of Finished\", CONCAT(ROUND(avgRuntimeFinished * open / " + numberOfParallelJobs + "), \"s\") as \"ETA\" FROM ");
+		sb.append("SELECT open, CONCAT(ROUND(100 * open / total, 2), \"%\") as \"open (rel)\", running, CONCAT(ROUND(100 * running / total, 2), \"%\") as \"running (rel)\", finished, CONCAT(ROUND(100 * finished / total, 2), \"%\") as \"finished (rel)\", failed, total, CONCAT(ROUND(avgRuntimeFinished), \"s\") as \"Average Time of Finished\", CONCAT(ROUND(avgRuntimeFinished * open / " + (numberOfParallelJobs > 0 ? numberOfParallelJobs : "running") + "), \"s\") as \"ETA\" FROM ");
 		for (int t = 1; t < subQueries.size(); t++) {
 			sb.append("(");
 			sb.append(subQueries.get(t - 1));
@@ -35,7 +35,11 @@ public class ExperimentUtil {
 		return sb.toString();
 	}
 
-	public static void main(final String[] args) {
-		System.out.println(getProgressQuery("jobscheduling", 500));
+	public static String getQueryToIdentifyCorruptRuns(final String tablename) {
+		return "SELECT * FROM (SELECT job, COUNT(*) as n FROM `" + tablename + "` WHERE time_started is not null and time_end is null group by job) as t where n > 1";
+	}
+
+	public static String getQueryToListAllCorruptJobRuns(final String tablename) {
+		return "SELECT t1.* FROM `" + tablename + "` as t1 join `" + tablename + "` as t2 USING(job) WHERE t1.time_started is not null and t1.time_end is null and t2.time_started > t1.time_started and t2.time_end is null";
 	}
 }
