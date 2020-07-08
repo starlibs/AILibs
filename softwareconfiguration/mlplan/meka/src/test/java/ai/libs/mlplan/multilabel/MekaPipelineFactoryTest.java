@@ -12,11 +12,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.ComponentUtil;
-import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.basic.FileUtil;
+import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentUtil;
+import ai.libs.jaicore.components.serialization.ComponentLoader;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;

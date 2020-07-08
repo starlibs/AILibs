@@ -23,17 +23,18 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 
 	private Logger logger = LoggerFactory.getLogger(SolutionPerformanceTimelinePluginView.class);
 
-	private final Series<Number, Number> performanceSeries;
+	private Series<Number, Number> performanceSeries;
 	private int nextIndexToDisplay = 0;
 
 	public SolutionPerformanceTimelinePluginView(final SolutionPerformanceTimelinePluginModel model) {
 		super(model, new LineChart<>(new NumberAxis(), new NumberAxis()));
 
 		// defining the axes
-		this.getNode().getXAxis().setLabel("elapsed time (s)");
+		this.getNode().getXAxis().setLabel("Elapsed time (s)");
 
 		// creating the chart
 		this.getNode().setTitle(this.getTitle());
+		this.getNode().setAnimated(false);
 		// defining a series
 		this.performanceSeries = new Series<>();
 		this.getNode().getData().add(this.performanceSeries);
@@ -65,6 +66,12 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 	public void clear() {
 		this.nextIndexToDisplay = 0;
 		this.performanceSeries.getData().clear();
+
+		// remove the series completely due to a bug in rendering the line chart. This is a workaround.
+		this.getNode().getData().remove(0);
+		this.performanceSeries = new Series<>();
+		this.getNode().getData().add(this.performanceSeries);
+
 	}
 
 	public int getNextIndexToDisplay() {

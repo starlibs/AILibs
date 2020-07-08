@@ -14,11 +14,11 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
-import ai.libs.hasco.model.CategoricalParameterDomain;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.NumericParameterDomain;
-import ai.libs.hasco.model.Parameter;
+import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
+import ai.libs.jaicore.components.model.CategoricalParameterDomain;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.NumericParameterDomain;
+import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.core.IProblemType;

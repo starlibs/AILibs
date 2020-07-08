@@ -161,8 +161,11 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 				this.logger.debug("{} nodes have been added to the local model. Now checking prioritization.", addedSuccessors);
 
 				/* if the node has successors but none of them is prioritized, remove the node from the priority list */
-				if (!this.exploredGraph.getSuccessors(node).isEmpty() && this.prioritizedNodes.contains(node)) {
+				if (this.prioritizedNodes.contains(node) && SetUtil.intersection(this.exploredGraph.getSuccessors(node), this.prioritizedNodes).isEmpty()) {
 					this.prioritizedNodes.remove(node);
+					if (this.logger.isDebugEnabled()) {
+						this.logger.debug("Removed node with code {} from set of prioritized nodes.", node.hashCode());
+					}
 					this.updateExhaustedAndPrioritizedState(node);
 				}
 				closeNodeAfterwards = true;
@@ -185,9 +188,11 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		N from = path.getHead();
 		assert from != null;
 		assert to != null;
-		assert !this.exploredGraph.hasItem(to);
+		if (this.exploredGraph.hasItem(to)) {
+			throw new IllegalArgumentException("Cannot add node " + to + " to local model, because it is already contained in it.\n\tThe most probable explanation for this exception is that the underlying graph is not a tree!");
+		}
 		assert this.exploredGraph.hasItem(from) : "The head " + from + " of the path with " + path.getNumberOfNodes() + " nodes is not part of the explored graph! Here is the path: \n\t"
-				+ path.getNodes().stream().map(Object::toString).collect(Collectors.joining("\n\t"));
+		+ path.getNodes().stream().map(Object::toString).collect(Collectors.joining("\n\t"));
 		this.exploredGraph.addItem(to);
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug("Added node with hash code {} to graph.", to.hashCode());
@@ -270,9 +275,19 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		}
 	}
 
+	/**
+	 * Returns a completion of the given path so that the whole path is a goal path. The given path is then a prefix of the returned path.
+	 *
+	 * @param path
+	 * @return
+	 * @throws InterruptedException
+	 * @throws AlgorithmExecutionCanceledException
+	 * @throws AlgorithmTimeoutedException
+	 */
 	public SearchGraphPath<N, A> nextSolutionUnderSubPath(final ILabeledPath<N, A> path) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		if (this.logger.isInfoEnabled()) {
-			this.logger.info("Looking for next solution under node with hash code {}. Remaining time is {}.", path.getHead().hashCode(), this.getRemainingTimeToDeadline());
+			this.logger.info("Looking for next solution under node with hash code {}. Remaining time is {}. Enable TRACE for concrete node description.", path.getHead().hashCode(), this.getRemainingTimeToDeadline());
+			this.logger.trace("Description of node under which we search: {}", path.getHead());
 		}
 		this.checkAndConductTermination();
 		assert this.exploredGraph.isGraphSane();
@@ -294,6 +309,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		synchronized (this.exploredGraph) {
 			while (!this.goalTester.isGoal(cPath)) {
 				this.checkAndConductTermination();
+				assert RandomSearchUtil.checkValidityOfPathCompletion(path, cPath) : "Completion has become invalid!";
 				assert this.checkThatNodeExistsInExploredGraph(head);
 				assert this.exploredGraph.isGraphSane();
 
@@ -308,7 +324,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 				/* get unexhausted successors */
 				List<N> successors = this.exploredGraph.getSuccessors(head).stream().filter(n -> !this.exhausted.contains(n)).collect(Collectors.toList());
 				assert this.exploredGraph.getSuccessors(head).stream().filter(n -> !this.exploredGraph.hasItem(n)).collect(Collectors.toList()).isEmpty() : "Corrupt exploration graph: Some successors cannot be found again in the graph: "
-						+ this.exploredGraph.getSuccessors(head).stream().filter(n -> !this.exploredGraph.hasItem(n)).collect(Collectors.toList());
+				+ this.exploredGraph.getSuccessors(head).stream().filter(n -> !this.exploredGraph.hasItem(n)).collect(Collectors.toList());
 
 				/* if we are in a dead end, mark the node as exhausted and remove the head again */
 				if (successors.isEmpty()) {
@@ -319,7 +335,11 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 						this.logger.debug("The graph has been exhausted.");
 						return null;
 					}
+					if (head == path.getHead()) { // do not go above the given path
+						return null;
+					}
 					cPath = cPath.getPathToParentOfHead();
+					assert RandomSearchUtil.checkValidityOfPathCompletion(path, cPath) : "Completion has become invalid!";
 					head = cPath.getHead();
 					this.logger.debug("Reset head due to dead-end to parent. New head: {}.", head);
 					continue;
@@ -327,12 +347,15 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 
 				/* if at least one of the successors is prioritized, choose one of those; otherwise choose one at random */
 				assert SetUtil.intersection(this.exhausted, this.prioritizedNodes).isEmpty() : "There are nodes that are both exhausted and prioritized, which must not be the case:"
-						+ SetUtil.intersection(this.exhausted, this.prioritizedNodes).stream().map(n -> "\n\t" + n).collect(Collectors.joining());
+				+ SetUtil.intersection(this.exhausted, this.prioritizedNodes).stream().map(n -> "\n\t" + n).collect(Collectors.joining());
 				Collection<N> prioritizedSuccessors = SetUtil.intersection(successors, this.prioritizedNodes);
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("Number of prioritized successors of node {} is {}", head.hashCode(), prioritizedSuccessors.size());
+				}
 				N lastHead = head;
 				if (!prioritizedSuccessors.isEmpty()) {
 					head = prioritizedSuccessors.iterator().next();
-					this.logger.debug("Following prioritized node {}", head);
+					this.logger.debug("Following arc {} to prioritized node {}", this.exploredGraph.getEdgeLabel(lastHead, head), head);
 
 					/* we now know that there exist prioritizes paths. That means that we also want to chase them as long as possible */
 					if (!hasCheckedWhetherPrioritizedPathExists) {
@@ -358,7 +381,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 						chasePrioritizedPath = false;
 						continue; // this will make the RandomSearch try the same node again (now not chasing prioritized nodes anymore)
 					}
-				} else {
+				}
+
+				else {
 					int n = successors.size();
 					assert n != 0 : "Ended up in a situation where only exhausted nodes can be chosen.";
 					int k = this.random.nextInt(n);
@@ -368,9 +393,10 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 					this.logger.trace("Selected {} as new head.", head);
 					assert this.checkThatNodeExistsInExploredGraph(head);
 				}
-				cPath = new SearchGraphPath<>(cPath, head, this.exploredGraph.getEdgeLabel(lastHead, head));
+				cPath.extend(head, this.exploredGraph.getEdgeLabel(lastHead, head));
 			}
 		}
+		assert RandomSearchUtil.checkValidityOfPathCompletion(path, cPath);
 
 		/* propagate exhausted state */
 		this.logger.trace("Head node {} has been exhausted.", head);
@@ -379,6 +405,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		this.updateExhaustedAndPrioritizedState(head);
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug("Returning next solution path. Hash code is {}", cPath.hashCode());
+		}
+		if (cPath.getRoot() != path.getRoot()) {
+			throw new IllegalStateException("Root got lost over the path!");
 		}
 		return head == this.root ? null : cPath;
 	}
@@ -428,6 +457,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 				}
 				if (currentIsPrioritized && allPrioritizedChildrenExhausted) {
 					int sizeBefore = this.prioritizedNodes.size();
+					if (this.logger.isDebugEnabled()) {
+						this.logger.debug("Removing node {} from set of prioritized nodes.", current.hashCode());
+					}
 					this.prioritizedNodes.remove(current);
 					this.post(new NodeTypeSwitchEvent<N>(this, current, "or_closed"));
 					int sizeAfter = this.prioritizedNodes.size();

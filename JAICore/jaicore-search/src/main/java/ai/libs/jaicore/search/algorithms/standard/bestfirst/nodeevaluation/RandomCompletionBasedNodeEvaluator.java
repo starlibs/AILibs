@@ -51,6 +51,7 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.RCNEPathCompletionFailedException;
 import ai.libs.jaicore.search.algorithms.standard.gbf.SolutionEventBus;
 import ai.libs.jaicore.search.algorithms.standard.random.RandomSearch;
+import ai.libs.jaicore.search.algorithms.standard.random.RandomSearchUtil;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
@@ -58,7 +59,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 import ai.libs.jaicore.timing.TimedComputation;
 
 public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, A, V>
-		implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V>, ICancelablePathEvaluator, IPotentiallyUncertaintyAnnotatingPathEvaluator<T, A, V>, ILoggingCustomizable {
+implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V>, ICancelablePathEvaluator, IPotentiallyUncertaintyAnnotatingPathEvaluator<T, A, V>, ILoggingCustomizable {
 
 	private static final IAlgorithm<?, ?> ALGORITHM = null;
 	private static final boolean LOG_FAILURES_AS_ERRORS = false;
@@ -151,7 +152,7 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected V fTimeouted(final ILabeledPath<T, A> path, final int timeout) throws InterruptedException, PathEvaluationException {
+	protected V evaluateTimeouted(final ILabeledPath<T, A> path, final int timeout) throws InterruptedException, PathEvaluationException {
 		assert this.generator != null : "Cannot compute f as no generator has been set!";
 		if (!(path instanceof BackPointerPath)) {
 			throw new IllegalArgumentException("Random Completer currently can only work with backpointer-based paths.");
@@ -284,7 +285,7 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 								if (LOG_FAILURES_AS_ERRORS) {
 									this.logger.error("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
 								} else {
-									this.logger.debug("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
+									this.logger.warn("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
 								}
 							}
 						}
@@ -353,6 +354,8 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 	public ILabeledPath<T, A> getNextRandomPathCompletionForNode(final BackPointerPath<T, A, ?> n) throws InterruptedException, RCNEPathCompletionFailedException {
 
 		/* make sure that the completer has the path from the root to the node in question and that the f-values of the nodes above are added to the map */
+		this.logger.debug("Starting completion for path of size {}. Enable TRACE for exact path.", n.getNumberOfNodes());
+		this.logger.trace("Path for which completion is drawn: {}", n.getNodes());
 		if (!this.completer.knowsNode(n.getHead())) {
 			synchronized (this.completer) {
 				this.completer.appendPathToNode(n);
@@ -366,7 +369,6 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 		}
 
 		/* now draw random completion */
-		ILabeledPath<T, A> pathCompletion = null;
 		ILabeledPath<T, A> completedPath = null;
 		synchronized (this.completer) {
 			long startCompletion = System.currentTimeMillis();
@@ -375,30 +377,30 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 				throw new RCNEPathCompletionFailedException("Completer has been canceled.");
 			}
 			this.logger.debug("Starting search for next solution ...");
-			SearchGraphPath<T, A> solutionPathFromN = null;
 			try {
 				if (!this.completer.getExploredGraph().hasItem(n.getHead())) {
 					throw new IllegalStateException("The completer does not know hte head.");
 				}
-				solutionPathFromN = this.completer.nextSolutionUnderSubPath(n);
+				completedPath = this.completer.nextSolutionUnderSubPath(n);
 			} catch (AlgorithmExecutionCanceledException | TimeoutException e) {
 				this.logger.info("Completer has been canceled or timeouted. Returning control.");
 				throw new RCNEPathCompletionFailedException(e);
 			}
-			if (solutionPathFromN == null) {
+			if (completedPath == null) {
 				this.logger.info("No completion was found for path {}.", n.getNodes());
 				throw new RCNEPathCompletionFailedException("No completion found for path " + n.getNodes());
 			}
-			assert solutionPathFromN.getArcs() != null : "The RandomSearch has returned a solution path with a null pointer for the edges.";
-			assert solutionPathFromN.getNumberOfNodes() == solutionPathFromN.getArcs().size() + 1;
+			assert completedPath.getArcs() != null : "The RandomSearch has returned a solution path with a null pointer for the edges.";
+			assert completedPath.getNumberOfNodes() == completedPath.getArcs().size() + 1;
+			assert RandomSearchUtil.checkValidityOfPathCompletion(n, completedPath);
 			long finishedCompletion = System.currentTimeMillis();
-			this.logger.debug("Found solution of length {} in {}ms. Enable TRACE for details.", solutionPathFromN.getNodes().size(), finishedCompletion - startCompletion);
-			this.logger.trace("Solution path is {}", solutionPathFromN);
-			pathCompletion = solutionPathFromN.getPathFromChildOfRoot();
-			completedPath = new SearchGraphPath<>(n, pathCompletion, solutionPathFromN.getArcs() != null ? solutionPathFromN.getArcs().get(0) : null);
+			this.logger.debug("Found completion of length {} in {}ms. Enable TRACE for details.", completedPath.getNumberOfNodes(), finishedCompletion - startCompletion);
+			this.logger.trace("Completion is {}", completedPath);
 		}
 		return completedPath;
 	}
+
+
 
 	private void updateMapOfBestScoreFoundSoFar(final ILabeledPath<T, A> nodeInCompleterGraph, final V scoreOnOriginalBenchmark) {
 		V bestKnownScore = this.bestKnownScoreUnderNodeInCompleterGraph.get(nodeInCompleterGraph.getNodes());
@@ -436,7 +438,7 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 				throw new PathEvaluationException("Error in evaluating node!", e);
 			}
 			long duration = System.currentTimeMillis() - start;
-			if (duration >= this.timeoutForSingleCompletionEvaluationInMS) {
+			if (this.timeoutForSingleCompletionEvaluationInMS > 0 && duration >= this.timeoutForSingleCompletionEvaluationInMS) {
 				this.logger.warn("Evaluation took {}ms, but timeout is {}", duration, this.timeoutForSingleCompletionEvaluationInMS);
 				assert duration < this.timeoutForSingleCompletionEvaluationInMS + 10000 : "Evaluation took " + duration + "ms, but timeout is " + this.timeoutForSingleCompletionEvaluationInMS;
 			}
@@ -585,7 +587,7 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 	public String toString() {
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("solutionEvaluator", this.solutionEvaluator);
-		fields.put("visualizeSubSearch", this.visualizeSubSearch);
+		fields.put("priorizing predicate", this.priorityPredicateForRDFS);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 

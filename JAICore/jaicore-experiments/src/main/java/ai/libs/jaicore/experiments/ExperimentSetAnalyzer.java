@@ -13,6 +13,10 @@ import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.slf4j.Logger;
@@ -32,7 +36,19 @@ public class ExperimentSetAnalyzer {
 	private static final String PROTOCOL_JAVA = "java:";
 	private static final String LOGMESSAGE_CREATEINSTANCE = "Create a new instance of {} and ask it for the number of possible values.";
 
-	private Logger logger = LoggerFactory.getLogger(ExperimentSetAnalyzer.class);
+
+	/**
+	 * The ThreadLocal variable holds a unique instance of ScriptEngine for each thread that requests it.
+	 * We use a ThreadLocal variable instead of a local variable to speed up the creation of the ScriptEngine.
+	 * We use a ThreadLocal variable instead of a (static) instance variable because ScriptEngine generally isn't threadsafe
+	 * and can cause problems if multiple threads operate on it.
+	 */
+	private static final ThreadLocal<ScriptEngine> scriptEngine = ThreadLocal.withInitial(() -> {
+		ScriptEngineManager mgr = new ScriptEngineManager();
+		return mgr.getEngineByName("JavaScript");
+	});
+
+	private final Logger logger = LoggerFactory.getLogger(ExperimentSetAnalyzer.class);
 
 	private final IExperimentSetConfig config;
 
@@ -45,13 +61,14 @@ public class ExperimentSetAnalyzer {
 	public ExperimentSetAnalyzer(final IExperimentSetConfig config) {
 		this.config = config;
 		this.reloadConfiguration();
+		scriptEngine.remove();
 	}
 
 	public void reloadConfiguration() {
 
 		/* reload configuration */
-		// FIXME this reload yields empty config object.
-//		this.config.reload();
+		//FIXME this reload yields empty config object.
+		//		this.config.reload();
 
 		/* erase laze fields */
 		synchronized (this.config) {
@@ -64,7 +81,7 @@ public class ExperimentSetAnalyzer {
 			/* create map of possible values for each key field */
 			this.numExperimentsTotal = 1;
 			this.valuesForKeyFieldsInConfig = new HashMap<>();
-			for (String key : this.keyFields) {
+			for (String key: this.keyFields) {
 				String propertyVals = this.config.removeProperty(key);
 				if (propertyVals == null) {
 					throw new IllegalArgumentException("Invalid experiment set configuration! No property values defined for key field \"" + key + "\"");
@@ -94,7 +111,7 @@ public class ExperimentSetAnalyzer {
 		}
 		this.checkThatKeyOnlyAllowsOneValue(key);
 		try {
-			Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
+			Class<?> c = Class.forName(possibleValues.get(0).substring(PROTOCOL_JAVA.length()).trim());
 			this.checkKeyGenerator(c);
 			this.logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
 			return ((IExperimentKeyGenerator<?>) c.getConstructor().newInstance()).isValueValid(value);
@@ -131,7 +148,7 @@ public class ExperimentSetAnalyzer {
 		if (this.possibleKeyCombinations == null) {
 			this.logger.debug("Computing all possible experiments.");
 
-			/* build cartesian product over all possible key-value */
+			/* build cartesian product over all possible key-values */
 			List<List<String>> values = new ArrayList<>();
 			for (String key : this.keyFields) {
 				if (!this.valuesForKeyFieldsInConfig.containsKey(key)) {
@@ -147,23 +164,64 @@ public class ExperimentSetAnalyzer {
 			List<Predicate<List<String>>> constraints = new ArrayList<>();
 			if (this.config.getConstraints() != null) {
 				for (String p : this.config.getConstraints()) {
-					if (!p.startsWith(PROTOCOL_JAVA)) {
-						this.logger.warn("Ignoring constraint {} since currently only java constraints are allowed.", p);
-						continue;
+					if (p.startsWith(PROTOCOL_JAVA)) {
+						try {
+							constraints.add((Predicate<List<String>>) Class.forName(p.substring(PROTOCOL_JAVA.length()).trim()).getConstructor().newInstance());
+						} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+							this.logger.error("Error in loading constraint {}: {}", p, LoggerUtil.getExceptionInfo(e));
+						}
 					}
-					try {
-						constraints.add((Predicate<List<String>>) Class.forName(p.substring(PROTOCOL_JAVA.length()).trim()).getConstructor().newInstance());
-					} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-						this.logger.error("Error in loading constraint {}.", p, e);
+					else {
+						this.logger.info("Parsing constraint {}", p);
+						Predicate<List<String>> predicate = new Predicate<List<String>>() {
+
+							private final int highestRequiredIndex = ExperimentSetAnalyzer.this.keyFields.stream().filter(p::contains).map(k -> ExperimentSetAnalyzer.this.keyFields.indexOf(k)).max(Integer::compare).get();
+
+							@Override
+							public boolean test(final List<String> t) {
+								String evaluatedConstraint = p;
+								int n = t.size(); // n is the number of key fields considered in t (grows over time)
+								if (n <= this.highestRequiredIndex) { // only filter conditions in which all necessary variables have been defined
+									return true;
+								}
+								for (int i = 0; i < n; i++) {
+									evaluatedConstraint = evaluatedConstraint.replace(ExperimentSetAnalyzer.this.keyFields.get(i), t.get(i));
+								}
+								try {
+									ScriptEngine engine = scriptEngine.get();
+									Object evaluation = engine.eval(evaluatedConstraint);
+									if(evaluation instanceof Boolean) {
+										return (boolean) evaluation;
+									} else {
+										ExperimentSetAnalyzer.this.logger.error("The evaluation of constraint={} did not return a boolean but instead: {}. Predicate falls back to `false`."
+												+ " \nThe original constraint is: {}",
+												evaluatedConstraint, evaluation, p);
+										return false;
+									}
+								} catch (ScriptException e) {
+									ExperimentSetAnalyzer.this.logger.error(LoggerUtil.getExceptionInfo(e));
+									return false;
+								}
+							}
+						};
+						constraints.add(predicate);
 					}
 				}
 			}
+			Predicate<List<String>> jointConstraints = t -> {
+				for (Predicate<List<String>> c : constraints) {
+					if (!c.test(t)) {
+						return false;
+					}
+				}
+				return true;
+			};
 
 			/* create one experiment object from every tuple */
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Building relation from {} cartesian product with {} constraints.", values.stream().map(l -> "" + l.size()).collect(Collectors.joining(" x ")), constraints.size());
 			}
-			RelationComputationProblem<String> problem = constraints.isEmpty() ? new RelationComputationProblem<>(values) : new RelationComputationProblem<>(values, constraints.get(0));
+			RelationComputationProblem<String> problem = constraints.isEmpty() ? new RelationComputationProblem<>(values) : new RelationComputationProblem<>(values, jointConstraints);
 			LDSRelationComputer<String> lc = new LDSRelationComputer<>(problem);
 			lc.setLoggerName(this.logger.getName() + ".relationcomputer");
 			List<List<String>> combinationsAsList = lc.call();
@@ -193,7 +251,7 @@ public class ExperimentSetAnalyzer {
 		this.checkThatKeyOnlyAllowsOneValue(key);
 
 		try {
-			Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
+			Class<?> c = Class.forName(possibleValues.get(0).substring(PROTOCOL_JAVA.length()).trim());
 			this.checkKeyGenerator(c);
 			this.logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
 			return ((IExperimentKeyGenerator<?>) c.getConstructor().newInstance()).getNumberOfValues();
@@ -215,7 +273,7 @@ public class ExperimentSetAnalyzer {
 		/* determine the generator for this key if this has not happened before */
 		IExperimentKeyGenerator<?> keyGenerator = this.valueGeneratorsPerKey.computeIfAbsent(key, k -> {
 			try {
-				Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
+				Class<?> c = Class.forName(possibleValues.get(0).substring(PROTOCOL_JAVA.length()).trim());
 				this.checkKeyGenerator(c);
 				this.logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
 				return (IExperimentKeyGenerator<?>) c.getConstructor().newInstance();
@@ -258,7 +316,8 @@ public class ExperimentSetAnalyzer {
 
 	public Pair<String, String> getNameTypeSplitForAttribute(final String name) {
 		String[] parts = name.split(":");
-		String type = parts.length == 2 ? parts[1] : "varchar(500)";
+		String type = parts.length == 2 ? parts[1] : null;
 		return new Pair<>(parts[0], type);
 	}
+
 }

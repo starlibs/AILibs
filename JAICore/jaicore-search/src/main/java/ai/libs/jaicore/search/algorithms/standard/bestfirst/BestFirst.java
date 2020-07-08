@@ -104,6 +104,10 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 	private int timeoutForComputationOfF;
 	private IPathEvaluator<N, A, V> timeoutNodeEvaluator;
 
+	/* solutions bounds. If node evaluator is optimistic and we have lower bounds, the algorithm will use the maximum over them to assign an f-score */
+	private final boolean considerNodeEvaluationOptimistic; // if this is set to true, then every node with a score worst than the currently best will be pruned (B&B)
+	private final IPathEvaluator<N, A, V> lowerBoundEvaluator; // if this is set, it is used to compute lower bounds prior to truly evaluating the node and to possible prune the node.
+
 	/* automatically derived auxiliary variables */
 	private final boolean solutionReportingNodeEvaluator;
 	private final boolean cancelableNodeEvaluator;
@@ -136,15 +140,25 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 	private final Condition numberOfActiveJobsHasChanged = this.activeJobsCounterLock.newCondition(); // condition that is signaled whenever a node is added to the open queue
 
 	public BestFirst(final I problem) {
-		this(ConfigFactory.create(IBestFirstConfig.class), problem);
+		this(problem, null);
+	}
+
+	public BestFirst(final I problem, final IPathEvaluator<N, A, V> lowerBoundEvaluator) {
+		this(ConfigFactory.create(IBestFirstConfig.class), problem, lowerBoundEvaluator);
 	}
 
 	public BestFirst(final IBestFirstConfig config, final I problem) {
+		this(config, problem, null);
+	}
+
+	public BestFirst(final IBestFirstConfig config, final I problem, final IPathEvaluator<N, A, V> lowerBoundEvaluator) {
 		super(config, problem);
 		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = this.graphGenerator.getRootGenerator();
 		this.successorGenerator = this.graphGenerator.getSuccessorGenerator();
 		this.pathGoalTester = problem.getGoalTester();
+		this.considerNodeEvaluationOptimistic = config.optimisticHeuristic();
+		this.lowerBoundEvaluator = lowerBoundEvaluator;
 
 		/* if the node evaluator is graph dependent, communicate the generator to it */
 		this.nodeEvaluator = problem.getPathEvaluator();
@@ -238,7 +252,19 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 				}
 				BestFirst.this.lastExpansion.add(this.successorDescription);
 
+				/* create node */
 				BackPointerPath<N, A, V> newNode = BestFirst.this.newNode(this.expandedNodeInternal, this.successorDescription.getTo(), this.successorDescription.getArcLabel());
+
+				/* check whether the node can be pruned based on a lower bound */
+				final V lowerBound = (BestFirst.this.lowerBoundEvaluator != null) ? BestFirst.this.lowerBoundEvaluator.evaluate(newNode) : null;
+				if (lowerBound != null) {
+					V currentUpperBound = BestFirst.this.getBestScoreKnownToExist();
+					if (currentUpperBound != null && lowerBound.compareTo(currentUpperBound) >= 0) {
+						BestFirst.this.bfLogger.debug("Pruning node due to lower bound {} >= {}", lowerBound, currentUpperBound);
+						BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this, newNode, ENodeType.OR_PRUNED.toString()));
+						return;
+					}
+				}
 
 				/* update creation counter */
 				BestFirst.this.createdCounter++;
@@ -280,6 +306,14 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this, newNode, ENodeType.OR_PRUNED.toString()));
 
 					BestFirst.this.post(new NodeInfoAlteredEvent<>(BestFirst.this, newNode));
+					return;
+				}
+
+				/* if the node labeling is optimistic and worse than the best currently known solution, then we prune the node */
+				V bestKnownAchievableScore = BestFirst.this.getBestScoreKnownToExist();
+				if (BestFirst.this.considerNodeEvaluationOptimistic && bestKnownAchievableScore != null && bestKnownAchievableScore.compareTo(newNode.getScore()) <= 0) {
+					BestFirst.this.bfLogger.info("Pruning newly generated node, since its optimistic estimate is {} and hence not better than the best already known solution score {}.", newNode.getScore(), bestKnownAchievableScore);
+					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this, newNode, ENodeType.OR_PRUNED.toString()));
 					return;
 				}
 
@@ -545,7 +579,9 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 	 */
 	protected void initGraph() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
 		if (!this.initialized) {
+			this.bfLogger.info("Start graph initialization.");
 			this.initialized = true;
+			this.bfLogger.debug("Compute labels of root node(s)");
 			for (N n0 : this.rootGenerator.getRoots()) {
 				BackPointerPath<N, A, V> root = this.newNode(null, n0, null);
 				if (root == null) {
@@ -568,6 +604,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 					this.openLock.unlock();
 				}
 			}
+			this.bfLogger.info("Finished graph initialization.");
 		}
 	}
 
@@ -1013,7 +1050,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 			switch (this.getState()) {
 			case CREATED:
 				AlgorithmInitializedEvent initEvent = this.activate();
-				this.bfLogger.info("Initializing BestFirst search {} with the following configuration:\n\tCPUs: {}\n\tTimeout: {}ms\n\tNode Evaluator: {}", this, this.getConfig().cpus(), this.getConfig().timeout(), this.nodeEvaluator);
+				this.bfLogger.info("Initializing BestFirst search {} with the following configuration:\n\tCPUs: {}\n\tTimeout: {}ms\n\tNode Evaluator: {}\n\tConsidering node evaluator optimistic: {}\n\tListening to solutions delivered by node evaluator: {}\n\tInitial score upper bound: {}", this, this.getConfig().cpus(), this.getConfig().timeout(), this.nodeEvaluator, this.considerNodeEvaluationOptimistic, this.solutionReportingNodeEvaluator, this.getBestScoreKnownToExist());
 				int additionalCPUs = this.getConfig().cpus() - 1;
 				if (additionalCPUs > 0) {
 					this.parallelizeNodeExpansion(additionalCPUs);

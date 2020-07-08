@@ -13,7 +13,7 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 
 public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, IPrediction, IPredictionBatch> implements ITimeTrackingLearner {

@@ -13,9 +13,9 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
+import ai.libs.hasco.builder.forwarddecomposition.twophase.TwoPhaseHASCO;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
@@ -58,7 +58,7 @@ public class MLPlanConfigConsistencyTester {
 		RandomCompletionBasedNodeEvaluator rcne = (RandomCompletionBasedNodeEvaluator) ((AlternativeNodeEvaluator) search.getNodeEvaluator()).getEvaluator();
 		PipelineEvaluator pe = (PipelineEvaluator) problem.getCompositionEvaluator();
 		assertEquals(this.timeoutForNodeEvaluation.milliseconds(), rcne.getTimeoutForNodeEvaluationInMS());
-		assertEquals(this.timeoutForSingleSolutionEvaluation.milliseconds(), pe.getTimeout(null));
+		assertEquals(this.timeoutForSingleSolutionEvaluation.milliseconds(), pe.getTimeout(null).milliseconds());
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class MLPlanConfigConsistencyTester {
 		RandomCompletionBasedNodeEvaluator rcne = (RandomCompletionBasedNodeEvaluator) ((AlternativeNodeEvaluator) search.getNodeEvaluator()).getEvaluator();
 		PipelineEvaluator pe = (PipelineEvaluator) problem.getCompositionEvaluator();
 		assertEquals(this.timeoutForNodeEvaluation.milliseconds(), rcne.getTimeoutForNodeEvaluationInMS());
-		assertEquals(this.timeoutForSingleSolutionEvaluation.milliseconds(), pe.getTimeout(null));
+		assertEquals(this.timeoutForSingleSolutionEvaluation.milliseconds(), pe.getTimeout(null).milliseconds());
 	}
 
 	@Test
@@ -86,7 +86,7 @@ public class MLPlanConfigConsistencyTester {
 		assertTrue(event instanceof AlgorithmInitializedEvent);
 		TwoPhaseHASCO twoPhaseHasco = (TwoPhaseHASCO) mlplan.getOptimizingFactory().getOptimizer();
 		PipelineEvaluator evaluator = (PipelineEvaluator) ((RefinementConfiguredSoftwareConfigurationProblem) twoPhaseHasco.getHasco().getInput()).getCompositionEvaluator();
-		assertEquals(this.timeoutForSingleSolutionEvaluation.milliseconds(), evaluator.getTimeout(null));
+		assertEquals(this.timeoutForSingleSolutionEvaluation.milliseconds(), evaluator.getTimeout(null).milliseconds());
 	}
 
 	@Test

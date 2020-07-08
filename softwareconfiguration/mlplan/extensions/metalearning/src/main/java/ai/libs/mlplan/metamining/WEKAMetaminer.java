@@ -12,10 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.metamining.IMetaMiner;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.Parameter;
-import ai.libs.hasco.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.WEKAPipelineCharacterizer;
 import ai.libs.mlplan.metamining.similaritymeasures.F3Optimizer;

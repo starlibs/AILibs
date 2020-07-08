@@ -6,8 +6,8 @@ import java.util.Random;
 import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 
-import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
+import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;

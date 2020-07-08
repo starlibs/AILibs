@@ -3,15 +3,15 @@ package ai.libs.jaicore.search.exampleproblems.openshop;
 import java.util.List;
 
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.problems.scheduling.openshop.Machine;
-import ai.libs.jaicore.problems.scheduling.openshop.OpenShopProblem;
-import ai.libs.jaicore.problems.scheduling.openshop.Operation;
+import ai.libs.jaicore.problems.scheduling.Machine;
+import ai.libs.jaicore.problems.scheduling.JobSchedulingProblemInput;
+import ai.libs.jaicore.problems.scheduling.Operation;
 
 public class OpenShopMachineSelectionState extends OpenShopState {
 	private final OpenShopOperationSelectionState parent;
 	private final Operation operationSelectedInParent;
 
-	public OpenShopMachineSelectionState(final OpenShopProblem problem, final OpenShopOperationSelectionState parent, final Operation operationSelectedInParent) {
+	public OpenShopMachineSelectionState(final JobSchedulingProblemInput problem, final OpenShopOperationSelectionState parent, final Operation operationSelectedInParent) {
 		super(problem);
 		this.parent = parent;
 		this.operationSelectedInParent = operationSelectedInParent;

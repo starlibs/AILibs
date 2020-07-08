@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
-import ai.libs.hasco.core.Util;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.CompositionProblemUtil;
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.ExtendedRandomForest;
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.featurespace.FeatureDomain;
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.featurespace.FeatureSpace;
@@ -66,7 +66,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	 */
 	@Override
 	public Set<String> extractImportantParameters(final ComponentInstance composition, final boolean recompute) throws ExtractionOfImportantParametersFailedException {
-		String pipelineIdentifier = Util.getComponentNamesOfComposition(composition);
+		String pipelineIdentifier = CompositionProblemUtil.getComponentNamesOfComposition(composition);
 		if (this.importantParameterMap.containsKey(pipelineIdentifier)) {
 			return this.importantParameterMap.get(pipelineIdentifier);
 		}
@@ -92,7 +92,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 			throw new ExtractionOfImportantParametersFailedException("Could not build model", e);
 		}
 		if (!this.importanceDictionary.containsKey(pipelineIdentifier)) {
-			this.importanceDictionary.put(pipelineIdentifier, new HashMap<Set<Integer>, Double>());
+			this.importanceDictionary.put(pipelineIdentifier, new HashMap<>());
 		}
 		Set<Integer> parameterIndices = new HashSet<>();
 		for (int i = 0; i < data.numAttributes() - 1; i++) {

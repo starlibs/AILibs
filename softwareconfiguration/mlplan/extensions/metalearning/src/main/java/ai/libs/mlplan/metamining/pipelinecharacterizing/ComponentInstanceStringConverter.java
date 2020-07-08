@@ -15,12 +15,12 @@ import org.apache.commons.math3.geometry.partitioning.Region.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.core.Util;
-import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.NumericParameterDomain;
-import ai.libs.hasco.model.Parameter;
-import ai.libs.hasco.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.NumericParameterDomain;
+import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.model.CompositionProblemUtil;
 import treeminer.util.TreeRepresentationUtils;
 
 public class ComponentInstanceStringConverter extends Thread {
@@ -208,7 +208,7 @@ public class ComponentInstanceStringConverter extends Thread {
 			currentInterval = nextInterval;
 			parameterRefinement.add(this.serializeInterval(currentInterval));
 
-			List<Interval> refinement = Util.getNumericParameterRefinement(nextInterval, parameterValue, parameterDomain.isInteger(), parameterRefinementConfiguration);
+			List<Interval> refinement = CompositionProblemUtil.getNumericParameterRefinement(nextInterval, parameterValue, parameterDomain.isInteger(), parameterRefinementConfiguration);
 
 			if (refinement.isEmpty()) {
 				break;

@@ -7,6 +7,10 @@ import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
 
+import ai.libs.jaicore.problems.scheduling.IJobSchedulingInput;
+import ai.libs.jaicore.problems.scheduling.JobSchedulingProblemBuilder;
+import ai.libs.jaicore.problems.scheduling.JobShopMetric;
+
 public class OpenShopProblemGenerator {
 
 	private int seed = 0;
@@ -20,9 +24,9 @@ public class OpenShopProblemGenerator {
 	private AbstractRealDistribution distributionOfJobReleases= new UniformRealDistribution(0, 20);
 	private AbstractRealDistribution distributionOfJobDuration = new UniformRealDistribution(10, 20);
 	private AbstractRealDistribution distributionOfOperationProcessTime = new UniformRealDistribution(1, 20);
-	private OpenShopMetric metric;
+	private JobShopMetric metric;
 
-	public OpenShopProblem generate() {
+	public IJobSchedulingInput generate() {
 
 		/* sanity check */
 		if (this.numWorkcenters <= 0) {
@@ -34,7 +38,7 @@ public class OpenShopProblemGenerator {
 		if (this.metric == null) {
 			throw new UnsupportedOperationException("Metric must be set.");
 		}
-		OpenShopProblemBuilder builder = new OpenShopProblemBuilder();
+		JobSchedulingProblemBuilder builder = new JobSchedulingProblemBuilder();
 
 		/* seed all the distributions */
 		Random rand = new Random(this.seed);
@@ -104,11 +108,11 @@ public class OpenShopProblemGenerator {
 		this.numJobs = numJobs;
 	}
 
-	public OpenShopMetric getMetric() {
+	public JobShopMetric getMetric() {
 		return this.metric;
 	}
 
-	public void setMetric(final OpenShopMetric metric) {
+	public void setMetric(final JobShopMetric metric) {
 		this.metric = metric;
 	}
 

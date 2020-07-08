@@ -3,15 +3,15 @@ package ai.libs.hasco.gui.statsplugin;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.hasco.model.UnparametrizedComponentInstance;
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.Interface;
+import ai.libs.jaicore.components.model.UnparametrizedComponentInstance;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfo;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -47,8 +47,9 @@ public class HASCOModelStatisticsComponentSelector extends TreeItem<HASCOModelSt
 		this.componentSelector.valueProperty().addListener((observable, oldValue, newValue) -> {
 			HASCOModelStatisticsComponentSelector.this.getChildren().clear();
 			if (!newValue.equals("*")) {
-				Map<String, String> requiredInterfacesOfThisChoice = model.getKnownComponents().get(newValue).getRequiredInterfaces();
-				for (String requiredInterfaceId : requiredInterfacesOfThisChoice.keySet()) {
+				List<Interface> requiredInterfacesOfThisChoice = model.getKnownComponents().get(newValue).getRequiredInterfaces();
+				for (Interface reqInterface : requiredInterfacesOfThisChoice) {
+					String requiredInterfaceId = reqInterface.getId();
 					HASCOModelStatisticsComponentSelector.this.getChildren().add(new HASCOModelStatisticsComponentSelector(rootView, HASCOModelStatisticsComponentSelector.this, requiredInterfaceId, model));
 				}
 			}

@@ -10,13 +10,13 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
 public abstract class MCTSForGraphSearchTester extends GraphSearchSolutionIteratorTester {
 
-	public abstract <N, A> MCTSFactory<N, A> getFactory();
+	public abstract <N, A> MCTSFactory<N, A, ?> getFactory();
 
 	@Override
 	public <N, A> IPathSearch<?, ?, N, A> getSearchAlgorithm(final GraphSearchInput<N, A> problem) {
 		GraphSearchWithPathEvaluationsInput<N, A, Double> newProblem = new GraphSearchWithPathEvaluationsInput<>(problem, new AgnosticPathEvaluator<>());
-		MCTSFactory<N, A> factory = this.getFactory();
-		factory.setTabooExhaustedNodes(true);
+		MCTSFactory<N, A, ?> factory = this.getFactory();
+		factory.withTabooExhaustedNodes(true);
 		return new MCTSPathSearch<>(newProblem, factory);
 	}
 

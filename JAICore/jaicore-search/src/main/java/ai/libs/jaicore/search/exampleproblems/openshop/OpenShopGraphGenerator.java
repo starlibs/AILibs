@@ -10,21 +10,21 @@ import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 
-import ai.libs.jaicore.problems.scheduling.openshop.Machine;
-import ai.libs.jaicore.problems.scheduling.openshop.OpenShopProblem;
-import ai.libs.jaicore.problems.scheduling.openshop.Operation;
+import ai.libs.jaicore.problems.scheduling.JobSchedulingProblemInput;
+import ai.libs.jaicore.problems.scheduling.Machine;
+import ai.libs.jaicore.problems.scheduling.Operation;
 import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
 public class OpenShopGraphGenerator implements IGraphGenerator<OpenShopState, String> {
 
-	private final OpenShopProblem problem;
+	private final JobSchedulingProblemInput problem;
 	private final boolean pruneInactiveNodes;
 
-	public OpenShopGraphGenerator(final OpenShopProblem problem) {
+	public OpenShopGraphGenerator(final JobSchedulingProblemInput problem) {
 		this(problem, false);
 	}
 
-	public OpenShopGraphGenerator(final OpenShopProblem problem, final boolean pruneInactiveNodes) {
+	public OpenShopGraphGenerator(final JobSchedulingProblemInput problem, final boolean pruneInactiveNodes) {
 		super();
 		this.problem = problem;
 		this.pruneInactiveNodes = pruneInactiveNodes;
@@ -32,7 +32,7 @@ public class OpenShopGraphGenerator implements IGraphGenerator<OpenShopState, St
 
 	@Override
 	public ISingleRootGenerator<OpenShopState> getRootGenerator() {
-		return () -> new OpenShopOperationSelectionState(this.problem, null, null, this.problem.getOperations().values().stream().map(Operation::getName).collect(Collectors.toList()));
+		return () -> new OpenShopOperationSelectionState(this.problem, null, null, this.problem.getOperations().stream().map(Operation::getName).collect(Collectors.toList()));
 	}
 
 	@Override
