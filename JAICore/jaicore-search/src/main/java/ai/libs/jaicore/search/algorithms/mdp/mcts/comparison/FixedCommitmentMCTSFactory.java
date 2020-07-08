@@ -8,7 +8,7 @@ import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTS;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 
-public class FixedCommitmentMCTSFactory<N, A> extends MCTSFactory<N, A> {
+public class FixedCommitmentMCTSFactory<N, A> extends MCTSFactory<N, A, FixedCommitmentMCTSFactory<N, A>> {
 
 	private ToDoubleFunction<DescriptiveStatistics> metric;
 	private int k = 10;

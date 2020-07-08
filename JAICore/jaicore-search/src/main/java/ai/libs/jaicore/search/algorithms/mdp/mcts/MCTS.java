@@ -24,6 +24,13 @@ import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 import ai.libs.jaicore.search.probleminputs.MDPUtils;
 
+/**
+ *
+ * @author Felix Mohr
+ *
+ * @param <N> Type of states (nodes)
+ * @param <A> Type of actions
+ */
 public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 
 	private final IMDP<N, A, Double> mdp;

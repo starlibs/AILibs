@@ -140,6 +140,7 @@ public class MLPlanWekaBuilder extends AbstractMLPlanBuilder<IWekaClassifier, ML
 	@Override
 	public MLPlan4Weka build() {
 		this.checkPreconditionsForInitialization();
+		this.configureHASCOBuilder();
 		this.prepareNodeEvaluatorInFactoryWithData(); // inform node evaluator about data and create the MLPlan object
 		return new MLPlan4Weka(this, this.getDataset());
 	}

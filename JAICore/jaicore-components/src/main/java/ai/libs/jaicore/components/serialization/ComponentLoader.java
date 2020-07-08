@@ -284,7 +284,12 @@ public class ComponentLoader {
 							} else {
 								L.error("Warning: Categorical parameter {} in component {} without value list.", name, c.getName());
 							}
-							p = new Parameter(name, new CategoricalParameterDomain(values), stringParamValues[2]);
+							try {
+								p = new Parameter(name, new CategoricalParameterDomain(values), stringParamValues[2]);
+							}
+							catch (Exception e) {
+								throw new IllegalArgumentException("Error in parsing definition of component " + c.getName() + ".", e);
+							}
 						}
 						break;
 					default:

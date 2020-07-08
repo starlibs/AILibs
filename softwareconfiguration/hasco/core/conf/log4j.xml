@@ -68,6 +68,15 @@
     <appender-ref ref="traceFileAppender" />
 	</logger>
 	
+	<logger name="tester">
+	  <level value="debug" />
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+	</logger>
+	
   <logger name="ai.libs.hasco.core.HASCO">
     <level value="warn" />
   </logger>
@@ -103,6 +112,14 @@
   </logger>
   
   <logger name="testedalgorithm.search">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="testedalgorithm.search._algorithm">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="testedalgorithm.search.nodeevaluator.randomsearch._algorithm">
     <level value="warn" />
   </logger>
 </log4j:configuration>

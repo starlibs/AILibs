@@ -5,7 +5,6 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.Timeout;
-import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.common.event.IEvent;
@@ -33,7 +32,7 @@ import ai.libs.mlplan.safeguard.IEvaluationSafeGuard;
  *
  * @author fmohr
  */
-public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, Double> implements IInformedObjectEvaluatorExtension<Double>, ILoggingCustomizable {
+public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, Double> implements ILoggingCustomizable {
 
 	private static final String DEFAULT_PIPELINE_EVALUATOR_ID = "PipelineEvaluator";
 
@@ -44,7 +43,6 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 	private final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> learnerFactory;
 	private final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> benchmark;
 	private final Timeout timeoutForEvaluation;
-	private Double bestScore = 1.0;
 
 	private IEvaluationSafeGuard safeGuard;
 
@@ -99,9 +97,6 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 		}
 
 		try {
-			if (this.benchmark instanceof IInformedObjectEvaluatorExtension) {
-				((IInformedObjectEvaluatorExtension<Double>) this.benchmark).informAboutBestScore(this.bestScore);
-			}
 
 			this.logger.debug("Instantiate learner from component instance.");
 			ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner = this.learnerFactory.getComponentInstantiation(c);
@@ -128,11 +123,6 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 		} catch (ComponentInstantiationFailedException e) {
 			throw new ObjectEvaluationFailedException("Evaluation of composition failed as the component instantiation could not be built.", e);
 		}
-	}
-
-	@Override
-	public void informAboutBestScore(final Double bestScore) {
-		this.bestScore = bestScore;
 	}
 
 	@Override
