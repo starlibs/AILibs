@@ -17,9 +17,6 @@ public abstract class ASchedulingComputer implements IScheduleComputer {
 		setupStartTimes.clear();
 		setupEndTimes.clear();
 
-		/* set all arrival times to the ones set in the job definitions */
-		problemInput.getJobs().forEach(j -> arrivalTimes.put(j, j.getReleaseDate()));
-
 		/* compute stats for the operations */
 		Map<Job, Integer> jobReadyness = new HashMap<>();
 		Map<Machine, Integer> machineReadyness = new HashMap<>();
@@ -54,5 +51,6 @@ public abstract class ASchedulingComputer implements IScheduleComputer {
 	}
 
 	public abstract int getTimeWhenMachineBecomesAvailableForOperation(final Map<Job, Integer> arrivalTimes, Map<Machine, Integer> machineReadiness, Machine m);
+
 	public abstract int timeWhenOperationArrivesAtMachine(final Map<Job, Integer> arrivalTimes, Map<Machine, Integer> machineReadiness, Map<Job, Integer> jobReadyness, Operation o, Machine m);
 }

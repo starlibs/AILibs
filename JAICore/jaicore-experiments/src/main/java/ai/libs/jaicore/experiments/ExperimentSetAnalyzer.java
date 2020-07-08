@@ -111,7 +111,7 @@ public class ExperimentSetAnalyzer {
 		}
 		this.checkThatKeyOnlyAllowsOneValue(key);
 		try {
-			Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
+			Class<?> c = Class.forName(possibleValues.get(0).substring(PROTOCOL_JAVA.length()).trim());
 			this.checkKeyGenerator(c);
 			this.logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
 			return ((IExperimentKeyGenerator<?>) c.getConstructor().newInstance()).isValueValid(value);
@@ -193,7 +193,7 @@ public class ExperimentSetAnalyzer {
 									if(evaluation instanceof Boolean) {
 										return (boolean) evaluation;
 									} else {
-										logger.error("The evaluation of constraint={} did not return a boolean but instead: {}. Predicate falls back to `false`."
+										ExperimentSetAnalyzer.this.logger.error("The evaluation of constraint={} did not return a boolean but instead: {}. Predicate falls back to `false`."
 												+ " \nThe original constraint is: {}",
 												evaluatedConstraint, evaluation, p);
 										return false;
@@ -254,7 +254,7 @@ public class ExperimentSetAnalyzer {
 		this.checkThatKeyOnlyAllowsOneValue(key);
 
 		try {
-			Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
+			Class<?> c = Class.forName(possibleValues.get(0).substring(PROTOCOL_JAVA.length()).trim());
 			this.checkKeyGenerator(c);
 			this.logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
 			return ((IExperimentKeyGenerator<?>) c.getConstructor().newInstance()).getNumberOfValues();
@@ -276,7 +276,7 @@ public class ExperimentSetAnalyzer {
 		/* determine the generator for this key if this has not happened before */
 		IExperimentKeyGenerator<?> keyGenerator = this.valueGeneratorsPerKey.computeIfAbsent(key, k -> {
 			try {
-				Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
+				Class<?> c = Class.forName(possibleValues.get(0).substring(PROTOCOL_JAVA.length()).trim());
 				this.checkKeyGenerator(c);
 				this.logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
 				return (IExperimentKeyGenerator<?>) c.getConstructor().newInstance();
