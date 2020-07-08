@@ -272,6 +272,7 @@ IExperimentSetEvaluator evaluator =
     };
 ```
 
+### Running Experiments
 Now it is possible to run experiments. To do so simply create an `ExperimentRunner` and run a number of desired experiments: 
 
 ```java
@@ -288,6 +289,19 @@ try {
 This will run through the database and conduct 100 experiments one after another by calling the evaluator defined above and pushing the results after each evaluation.
 If the evaluation for some experiments fails, and an exception is thrown, the runner will log the error and continue with the next experiment.
 The runner will also mark the start time and finish time, in addition to memory consumption after each experiment.
+
+### Using the Experimenter Frontend
+The experimenter frontend is not a GUI but a simple handle to conveniently manage the experimenter behavior.
+```java
+ExperimenterFrontend fe = new ExperimenterFrontend().withEvaluator(<your evaluator>).withExperimentsConfig(expConfig).withDatabaseConfig(dbconfig);
+
+/* you can set up a logger name for the evaluator (only makes sense if the evaluator implement ILoggingCustomizable) */
+fe.withLoggerNameForAlgorithm("<logger name>");
+
+/* conduct experiments */
+fe.randomlyConductExperiments(1);
+```
+The frontend currently does not work with REST-based evaluations.
 
 ### Parallelizing experiments
 Experiments are assumed to be independent of each other.
@@ -319,6 +333,9 @@ This is achieved by a field `executor` in the experiments table, which is by def
 To change this behavior, the executor must be configured respectively at time of initialization:
 ```java
 new ExperimentRunner(expConfig, evaluator, handle, "<executorinformation>");
+
+/* if you use the experimenter frontend, you can specify the executor info there */
+fe.withExecutorInfo("<executorinformation>");
 ```
 `<executorinformation>` is an optional parameter, which is empty by default.
 It defines an identifier of the experiment executor.

@@ -25,7 +25,7 @@ public class ExperimenterFrontend {
 	private ExperimentDomain<?, ?, ?> domain;
 	private IExperimentRunController<?> controller;
 	private String loggerNameForAlgorithm;
-	private String jobInfo; // information about the job of the compute center executing this in order to ease tracking
+	private String executorInfo; // information about the job of the compute center executing this in order to ease tracking
 
 	public ExperimenterFrontend withLoggerNameForAlgorithm(final String loggerName) {
 		this.loggerNameForAlgorithm = loggerName;
@@ -64,13 +64,13 @@ public class ExperimenterFrontend {
 		return this;
 	}
 
-	public ExperimenterFrontend withJobInfo(final String jobInfo) {
-		this.jobInfo = jobInfo;
+	public ExperimenterFrontend withExecutorInfo(final String executorInfo) {
+		this.executorInfo = executorInfo;
 		return this;
 	}
 
-	public String getJobInfo() {
-		return this.jobInfo;
+	public String getExecutorInfo() {
+		return this.executorInfo;
 	}
 
 	public <B extends IExperimentBuilder, I, A extends IAlgorithm<? extends I,?>> ExperimenterFrontend withDomain(final ExperimentDomain<B, I, A> domain) {
@@ -111,7 +111,7 @@ public class ExperimenterFrontend {
 		if (this.evaluator == null) {
 			this.prepareEvaluator();
 		}
-		new ExperimentRunner(this.config, this.evaluator, this.databaseHandle, this.jobInfo).randomlyConductExperiments();
+		new ExperimentRunner(this.config, this.evaluator, this.databaseHandle, this.executorInfo).randomlyConductExperiments();
 	}
 
 	public void sequentiallyConductExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
@@ -131,7 +131,7 @@ public class ExperimenterFrontend {
 		if (this.evaluator == null) {
 			this.prepareEvaluator();
 		}
-		ExperimentRunner runner = new ExperimentRunner(this.config, this.evaluator, this.databaseHandle, this.jobInfo);
+		ExperimentRunner runner = new ExperimentRunner(this.config, this.evaluator, this.databaseHandle, this.executorInfo);
 		runner.setLoggerName(this.loggerNameForAlgorithm + ".runner");
 		runner.randomlyConductExperiments(limit);
 		return this;
