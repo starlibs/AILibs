@@ -5,12 +5,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
-import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.core.predicate.IsNotRefinablePredicate;
 import ai.libs.hasco.core.predicate.IsRefinementCompletedPredicate;
@@ -69,12 +67,6 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 	/* working variables */
 	private Collection<Component> components;
 	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
-
-	private Supplier<HASCOSolutionCandidate<V>> bestSolutionSupplier;
-
-	public HASCOReduction(final Supplier<HASCOSolutionCandidate<V>> bestSolutionSupplier) {
-		this.bestSolutionSupplier = bestSolutionSupplier;
-	}
 
 	public static Monom getInitState() {
 		return new Monom("component('request')");
@@ -287,9 +279,5 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 
 	public ComponentInstance decodeSolution(final IPlan plan) {
 		return HASCOUtil.getSolutionCompositionForPlan(HASCOReduction.this.components, getInitState(), plan, true);
-	}
-
-	public Supplier<HASCOSolutionCandidate<V>> getBestSolutionSupplier() {
-		return this.bestSolutionSupplier;
 	}
 }

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.hasco.events.HASCOSolutionEvaluationEvent;
+import ai.libs.hasco.core.events.HASCOSolutionEvaluationEvent;
 import ai.libs.jaicore.db.sql.SQLAdapter;
 
 /**

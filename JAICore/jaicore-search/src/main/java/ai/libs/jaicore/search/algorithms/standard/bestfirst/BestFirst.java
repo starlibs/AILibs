@@ -579,7 +579,9 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 	 */
 	protected void initGraph() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
 		if (!this.initialized) {
+			this.bfLogger.info("Start graph initialization.");
 			this.initialized = true;
+			this.bfLogger.debug("Compute labels of root node(s)");
 			for (N n0 : this.rootGenerator.getRoots()) {
 				BackPointerPath<N, A, V> root = this.newNode(null, n0, null);
 				if (root == null) {
@@ -602,6 +604,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 					this.openLock.unlock();
 				}
 			}
+			this.bfLogger.info("Finished graph initialization.");
 		}
 	}
 

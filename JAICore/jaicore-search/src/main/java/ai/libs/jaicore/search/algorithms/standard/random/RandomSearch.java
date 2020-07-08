@@ -161,8 +161,11 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 				this.logger.debug("{} nodes have been added to the local model. Now checking prioritization.", addedSuccessors);
 
 				/* if the node has successors but none of them is prioritized, remove the node from the priority list */
-				if (!this.exploredGraph.getSuccessors(node).isEmpty() && this.prioritizedNodes.contains(node)) {
+				if (this.prioritizedNodes.contains(node) && SetUtil.intersection(this.exploredGraph.getSuccessors(node), this.prioritizedNodes).isEmpty()) {
 					this.prioritizedNodes.remove(node);
+					if (this.logger.isDebugEnabled()) {
+						this.logger.debug("Removed node with code {} from set of prioritized nodes.", node.hashCode());
+					}
 					this.updateExhaustedAndPrioritizedState(node);
 				}
 				closeNodeAfterwards = true;
@@ -346,10 +349,13 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 				assert SetUtil.intersection(this.exhausted, this.prioritizedNodes).isEmpty() : "There are nodes that are both exhausted and prioritized, which must not be the case:"
 				+ SetUtil.intersection(this.exhausted, this.prioritizedNodes).stream().map(n -> "\n\t" + n).collect(Collectors.joining());
 				Collection<N> prioritizedSuccessors = SetUtil.intersection(successors, this.prioritizedNodes);
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("Number of prioritized successors of node {} is {}", head.hashCode(), prioritizedSuccessors.size());
+				}
 				N lastHead = head;
 				if (!prioritizedSuccessors.isEmpty()) {
 					head = prioritizedSuccessors.iterator().next();
-					this.logger.debug("Following prioritized node {}", head);
+					this.logger.debug("Following arc {} to prioritized node {}", this.exploredGraph.getEdgeLabel(lastHead, head), head);
 
 					/* we now know that there exist prioritizes paths. That means that we also want to chase them as long as possible */
 					if (!hasCheckedWhetherPrioritizedPathExists) {
@@ -451,6 +457,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 				}
 				if (currentIsPrioritized && allPrioritizedChildrenExhausted) {
 					int sizeBefore = this.prioritizedNodes.size();
+					if (this.logger.isDebugEnabled()) {
+						this.logger.debug("Removing node {} from set of prioritized nodes.", current.hashCode());
+					}
 					this.prioritizedNodes.remove(current);
 					this.post(new NodeTypeSwitchEvent<N>(this, current, "or_closed"));
 					int sizeAfter = this.prioritizedNodes.size();
