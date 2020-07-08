@@ -80,7 +80,7 @@ public class AlgorithmVisualizationWindow implements Runnable {
 
 		/* initialize controls and launch the window */
 		this.initializeControls();
-		DefaultGUIEventBus.getInstance().registerListener(this.algorithmEventHistoryPuller);
+		DefaultGUIEventBus.getInstance().registerAlgorithmEventHistoryEntryDeliverer(this.algorithmEventHistoryPuller);
 		Platform.runLater(this);
 	}
 

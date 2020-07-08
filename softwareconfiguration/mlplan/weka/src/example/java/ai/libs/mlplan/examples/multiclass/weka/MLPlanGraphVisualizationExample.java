@@ -77,7 +77,7 @@ public class MLPlanGraphVisualizationExample {
 		String serializedHistory = serializer.serializeAlgorithmEventHistory(history);
 		FileUtil.writeFileAsList(Arrays.asList(serializedHistory), "history.json");
 
-		// read a serzialized history and start an algorithm inspector on this history
+		// read a serialized history and start an algorithm inspector on this history
 
 		// AlgorithmEventHistorySerializer serializer = new AlgorithmEventHistorySerializer();
 		// AlgorithmEventHistory history = serializer.deserializeAlgorithmEventHistory(new File("data/keks.txt"));
