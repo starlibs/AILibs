@@ -33,8 +33,13 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	private final IExperimentSetEvaluator evaluator;
 	private final IExperimentDatabaseHandle handle;
 	private final int availableMemoryInMB;
+	private final String executorInfo;
 
 	public ExperimentRunner(final IExperimentSetConfig config, final IExperimentSetEvaluator evaluator, final IExperimentDatabaseHandle databaseHandle) throws ExperimentDBInteractionFailedException {
+		this(config, evaluator, databaseHandle, null);
+	}
+
+	public ExperimentRunner(final IExperimentSetConfig config, final IExperimentSetEvaluator evaluator, final IExperimentDatabaseHandle databaseHandle, final String executorInfo) throws ExperimentDBInteractionFailedException {
 
 		if (databaseHandle == null) {
 			throw new IllegalArgumentException("Cannot create ExperimentRunner without database handle!");
@@ -48,6 +53,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		this.logger.info("Successfully created and initialized ExperimentRunner.");
 		this.handle.setup(config);
 		this.availableMemoryInMB = (int) (Runtime.getRuntime().maxMemory() / 1024 / 1024);
+		this.executorInfo = executorInfo;
 	}
 
 	public void setCheckMemory(final boolean checkMemory) {
@@ -88,7 +94,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			this.logger.info("Conduct experiment #{} with key values: {}", numberOfConductedExperiments + 1, exp.getExperiment().getValuesOfKeyFields());
 			Thread expThread = new Thread(() -> {
 				try {
-					this.handle.startExperiment(exp);
+					this.handle.startExperiment(exp, this.executorInfo);
 					this.conductExperiment(exp);
 				} catch (InterruptedException e) {
 					this.logger.info("Experiment interrupted.");
@@ -111,9 +117,9 @@ public class ExperimentRunner implements ILoggingCustomizable {
 
 		int numberOfConductedExperiments = 0;
 		while ((maxNumberOfExperiments <= 0 || numberOfConductedExperiments < maxNumberOfExperiments)) {
-			Optional<ExperimentDBEntry> nextExperiment = this.handle.startNextExperiment();
+			Optional<ExperimentDBEntry> nextExperiment = this.handle.startNextExperiment(this.executorInfo);
 			if(!nextExperiment.isPresent()) {
-				logger.info("After running {}/{} experiments, no more un-started experiments were found.", numberOfConductedExperiments, maxNumberOfExperiments);
+				this.logger.info("After running {}/{} experiments, no more un-started experiments were found.", numberOfConductedExperiments, maxNumberOfExperiments);
 				break;
 			}
 
@@ -187,7 +193,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		if (expEntry == null) {
 			throw new IllegalArgumentException("Cannot conduct NULL experiment!");
 		}
-		assert handle.hasExperimentStarted(expEntry);
+		assert this.handle.hasExperimentStarted(expEntry);
 		Throwable error = null;
 		try {
 			if (this.checkMemory) {

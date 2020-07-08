@@ -93,8 +93,12 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 
 	@Override
 	public void setTimeout(final Timeout to) {
+		long toInSeconds = to.seconds();
+		if (toInSeconds < 2) {
+			throw new IllegalArgumentException("Cannot run MCTS with a timeout of less than 2 seconds.");
+		}
 		super.setTimeout(to);
-		this.mcts.setTimeout(new Timeout(to.seconds() - 5, TimeUnit.SECONDS));
+		this.mcts.setTimeout(new Timeout(to.seconds() - 1, TimeUnit.SECONDS));
 	}
 
 	@Override

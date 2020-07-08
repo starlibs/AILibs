@@ -129,6 +129,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	@Override
 	public final void setTimeout(final long timeout, final TimeUnit timeUnit) {
 		this.setTimeout(new Timeout(timeout, timeUnit));
+		this.logger.info("Timeout set to {}s", this.getTimeout().seconds());
 	}
 
 	@Override
