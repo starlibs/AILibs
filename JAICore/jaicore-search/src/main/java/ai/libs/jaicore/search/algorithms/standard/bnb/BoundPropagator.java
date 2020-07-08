@@ -34,7 +34,7 @@ public class BoundPropagator<N, A> implements IPathEvaluator<N, A, Double>, IPot
 	@Override
 	public Double evaluate(final ILabeledPath<N, A> path) throws PathEvaluationException, InterruptedException {
 		double bound = this.lowerBoundComputer.evaluate(path);
-		this.bus.post(new EvaluatedSearchSolutionCandidateFoundEvent<N, A, Double>(null, new EvaluatedSearchGraphPath<>(new SearchGraphPath<N, A>(path.getRoot()), bound)));
+		this.bus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(null, new EvaluatedSearchGraphPath<>(new SearchGraphPath<>(path.getRoot()), bound)));
 		return bound;
 	}
 

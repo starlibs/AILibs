@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.components.model.BooleanParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.Component;
@@ -66,9 +65,18 @@ public class ComponentLoaderTest {
 	}
 
 	@Test
-	public void testEqualityOfTwoLoadingProcedures() throws IOException {
-		ComponentLoader loader1 = new ComponentLoader(new File("testrsc/difficultproblem.json"));
-		ComponentLoader loader2 = new ComponentLoader(new File("testrsc/difficultproblem.json"));
+	public void testEqualityOfTwoLoadingProceduresOnDifficultProblem() throws IOException {
+		this.testEqualityOfTwoLoadingProcedures("testrsc/difficultproblem.json");
+	}
+
+	@Test
+	public void testEqualityOfTwoLoadingProceduresOnAutoWekaSearchSpace() throws IOException {
+		this.testEqualityOfTwoLoadingProcedures("testrsc/weka/weka-all-autoweka.json");
+	}
+
+	public void testEqualityOfTwoLoadingProcedures(final String filename) throws IOException {
+		ComponentLoader loader1 = new ComponentLoader(new File(filename));
+		ComponentLoader loader2 = new ComponentLoader(new File(filename));
 		List<Component> components1 = new ArrayList<>(loader1.getComponents());
 		List<Component> components2 = new ArrayList<>(loader2.getComponents());
 		int n = components1.size();

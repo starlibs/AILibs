@@ -36,9 +36,9 @@ import ai.libs.jaicore.search.problemtransformers.GraphSearchWithPathEvaluations
 
 public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearchWithPathEvaluationsInput<N, A, Double>> {
 
-	private MCTSPathSearch<I, N, A> getMCTS(final I input, final MCTSFactory<N, A> factory, final int maxiter, final int seed) {
-		factory.setRandom(new Random(seed));
-		factory.setMaxIterations(maxiter);
+	private MCTSPathSearch<I, N, A> getMCTS(final I input, final MCTSFactory<N, A, ?> factory, final int maxiter, final int seed) {
+		factory.withRandom(new Random(seed));
+		factory.withMaxIterations(maxiter);
 		return new MCTSPathSearch<>(input, factory);
 	}
 

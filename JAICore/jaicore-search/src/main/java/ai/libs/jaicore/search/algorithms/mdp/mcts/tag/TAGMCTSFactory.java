@@ -3,7 +3,7 @@ package ai.libs.jaicore.search.algorithms.mdp.mcts.tag;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 
-public class TAGMCTSFactory<N, A> extends MCTSFactory<N, A> {
+public class TAGMCTSFactory<N, A> extends MCTSFactory<N, A, TAGMCTSFactory<N, A>> {
 
 	private double explorationConstant = Math.sqrt(2);
 	private int s = 10;

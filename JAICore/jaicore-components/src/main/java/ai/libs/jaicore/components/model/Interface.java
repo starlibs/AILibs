@@ -46,11 +46,11 @@ public class Interface implements Serializable {
 		return this.name;
 	}
 
-	public Integer getMin() {
+	public int getMin() {
 		return this.min;
 	}
 
-	public Integer getMax() {
+	public int getMax() {
 		return this.max;
 	}
 

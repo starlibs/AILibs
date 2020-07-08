@@ -18,7 +18,7 @@ public class LearnerRunReport implements ILearnerRunReport {
 	private final long testStartTime;
 	private final long testEndTime;
 	private final Throwable exception;
-	private final IPredictionAndGroundTruthTable diff;
+	private final IPredictionAndGroundTruthTable<?, ?> diff;
 
 	public LearnerRunReport(final ILabeledDataset<?> trainSet, final ILabeledDataset<?> testSet, final long trainStartTime, final long trainEndTime, final Throwable exception) {
 		super();
@@ -45,7 +45,7 @@ public class LearnerRunReport implements ILearnerRunReport {
 	}
 
 	public LearnerRunReport(final ILabeledDataset<?> trainSet, final ILabeledDataset<?> testSet, final long trainStartTime, final long trainEndTime, final long testStartTime, final long testEndTime,
-			final IPredictionAndGroundTruthTable diff) {
+			final IPredictionAndGroundTruthTable<?, ?> diff) {
 		super();
 		this.trainSet = trainSet;
 		this.testSet = testSet;
@@ -88,7 +88,7 @@ public class LearnerRunReport implements ILearnerRunReport {
 	}
 
 	@Override
-	public IPredictionAndGroundTruthTable getPredictionDiffList() {
+	public IPredictionAndGroundTruthTable<?, ?> getPredictionDiffList() {
 		return this.diff;
 	}
 

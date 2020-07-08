@@ -2,7 +2,7 @@ package ai.libs.hasco.gui.statsplugin;
 
 import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 
-import ai.libs.hasco.events.HASCOSolutionEvent;
+import ai.libs.hasco.core.events.HASCOSolutionEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfo;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
