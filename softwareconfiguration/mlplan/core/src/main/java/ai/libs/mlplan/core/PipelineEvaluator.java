@@ -80,7 +80,6 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Double evaluateSupervised(final ComponentInstance c) throws InterruptedException, ObjectEvaluationFailedException {
 		this.logger.debug("Received request to evaluate component instance {}", c);
@@ -135,7 +134,7 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 		return "Pipeline evaluation phase";
 	}
 
-	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> getBenchmark() {
+	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getBenchmark() {
 		return this.benchmark;
 	}
 
@@ -153,6 +152,10 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 
 	public String getPipelineEvaluatorID() {
 		return this.pipelineEvaluatorID;
+	}
+
+	public IEvaluationSafeGuard getSafeGuard() {
+		return this.safeGuard;
 	}
 
 	/**

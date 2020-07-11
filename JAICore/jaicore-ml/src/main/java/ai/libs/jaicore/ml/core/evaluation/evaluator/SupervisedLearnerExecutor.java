@@ -26,7 +26,7 @@ public class SupervisedLearnerExecutor implements ISupervisedLearnerExecutor, IL
 			throws LearnerExecutionFailedException, LearnerExecutionInterruptedException {
 		long startTrainTime = System.currentTimeMillis();
 		try {
-			this.logger.info("Fitting the learner (class: {}) {} with {} instances, each of which with {} attributes", learner.getClass().getName(), learner, train.size(), train.getNumAttributes());
+			this.logger.info("Fitting the learner ({}) {} with {} instances, each of which with {} attributes", learner, learner, train.size(), train.getNumAttributes());
 			learner.fit(train);
 		} catch (InterruptedException e) {
 			long now = System.currentTimeMillis();

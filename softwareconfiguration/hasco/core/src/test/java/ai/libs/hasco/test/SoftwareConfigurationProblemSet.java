@@ -21,7 +21,7 @@ public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<Re
 	@Override
 	public RefinementConfiguredSoftwareConfigurationProblem<Double> getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
 		try {
-			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/simpleproblem.json"), "IFace", n -> this.random.nextDouble());
+			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/simpleproblem.json"), "IFace", n -> this.random.nextDouble() * 0.1);
 		} catch (UnresolvableRequiredInterfaceException | IOException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
@@ -29,7 +29,7 @@ public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<Re
 
 	public RefinementConfiguredSoftwareConfigurationProblem<Double> getDependencyProblemInput() throws AlgorithmTestProblemSetCreationException {
 		try {
-			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/problemwithdependencies.json"), "IFace", n -> this.random.nextDouble());
+			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/problemwithdependencies.json"), "IFace", n -> this.random.nextDouble() * 0.1);
 		} catch (UnresolvableRequiredInterfaceException | IOException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
@@ -37,7 +37,7 @@ public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<Re
 
 	public RefinementConfiguredSoftwareConfigurationProblem<Double> getSimpleProblemInputWithTwoComponents() throws AlgorithmTestProblemSetCreationException {
 		try {
-			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/simpleproblemwithtwocomponents.json"), "IFace", n -> this.random.nextDouble());
+			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/simpleproblemwithtwocomponents.json"), "IFace", n -> this.random.nextDouble() * 0.1);
 		} catch (UnresolvableRequiredInterfaceException | IOException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
@@ -45,7 +45,7 @@ public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<Re
 
 	public RefinementConfiguredSoftwareConfigurationProblem<Double> getSimpleRecursiveProblemInput() throws AlgorithmTestProblemSetCreationException {
 		try {
-			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/simplerecursiveproblem.json"), "IFace", n -> this.random.nextDouble());
+			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/simplerecursiveproblem.json"), "IFace", n -> this.random.nextDouble() * 0.1);
 		} catch (UnresolvableRequiredInterfaceException | IOException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
@@ -54,7 +54,7 @@ public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<Re
 	@Override
 	public RefinementConfiguredSoftwareConfigurationProblem<Double> getDifficultProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
 		try {
-			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/difficultproblem.json"), "IFace", n -> this.random.nextDouble());
+			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/difficultproblem.json"), "IFace", n -> this.random.nextDouble() * 0.1);
 		} catch (UnresolvableRequiredInterfaceException | IOException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}

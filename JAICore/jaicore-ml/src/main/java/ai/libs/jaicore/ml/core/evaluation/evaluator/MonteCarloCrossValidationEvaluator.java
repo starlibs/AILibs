@@ -18,7 +18,6 @@ public class MonteCarloCrossValidationEvaluator extends TrainPredictionBasedClas
 	private final IRandomDatasetSplitter<ILabeledDataset<? extends ILabeledInstance>> datasetSplitter;
 	private final int repeats;
 	private final Random random;
-	private final IAggregatedPredictionPerformanceMeasure<?, ?> metric;
 
 	public MonteCarloCrossValidationEvaluator(final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random) {
 		this(false, data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, EAggregatedClassifierMetric.MEAN_ERRORRATE);
@@ -36,7 +35,6 @@ public class MonteCarloCrossValidationEvaluator extends TrainPredictionBasedClas
 		this.datasetSplitter = datasetSplitter;
 		this.repeats = repeats;
 		this.random = random;
-		this.metric = metric;
 	}
 
 	public int getRepeats() {
@@ -45,6 +43,6 @@ public class MonteCarloCrossValidationEvaluator extends TrainPredictionBasedClas
 
 	@Override
 	public String toString() {
-		return "MonteCarloCrossValidationEvaluator [splitter = " + this.datasetSplitter + ", repeats = " + this.repeats + ", Random = " + this.random + ", metric = " + this.metric.getBaseMeasure() + "]";
+		return "MonteCarloCrossValidationEvaluator [splitter = " + this.datasetSplitter + ", repeats = " + this.repeats + ", Random = " + this.random + ", metric = " + this.getMetric().getBaseMeasure() + "]";
 	}
 }

@@ -25,8 +25,10 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
@@ -51,6 +53,7 @@ import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
  *
  */
 @RunWith(Parameterized.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 
 	// creates the test data
@@ -164,7 +167,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 			assertTrue("At least 10 instances must be classified!", test.size() >= 10);
 			IClassifierEvaluator evaluator = new PreTrainedPredictionBasedClassifierEvaluator(test, EClassificationPerformanceMeasure.ERRORRATE);
 			double score = evaluator.evaluate(c);
-			Thread.sleep(5000);
+			Thread.sleep(algorithm.getTimeout().seconds() / 20);
 			assertTrue("There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks(), GlobalTimer.getInstance().getActiveTasks().isEmpty());
 			this.logger.info("Error rate of solution {} on {} is: {}", c.getClass().getName(), datasetname, score);
 		} catch (AlgorithmTimeoutedException e) {

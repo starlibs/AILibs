@@ -36,7 +36,6 @@ import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.model.travesaltree.ReducedGraphGenerator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
 import ai.libs.mlplan.metamining.databaseconnection.ExperimentRepository;
-import ai.libs.mlplan.multiclass.wekamlplan.EMLPlanWekaProblemType;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlan4Weka;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
@@ -57,7 +56,7 @@ public class MetaMLPlan extends AbstractClassifier {
 	// Search components
 	private transient BestFirstLimitedDiscrepancySearch<GraphSearchWithNodeRecommenderInput<TFDNode, String>, TFDNode, String, NodeOrderList> lds;
 	private transient WEKAMetaminer metaMiner;
-	private transient WekaPipelineFactory factory = new WekaPipelineFactory(EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS);
+	private transient WekaPipelineFactory factory = new WekaPipelineFactory();
 
 	// Search configuration
 	private long timeoutInSeconds = 60;

@@ -72,13 +72,13 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 	public MLPlanSKLearnBuilder(final boolean skipSetupCheck) throws IOException {
 		super(DEF_PROBLEM_TYPE);
 		this.skipSetupCheck = skipSetupCheck;
-		this.withClassifierFactory(DEF_CLASSIFIER_FACTORY);
+		this.withLearnerFactory(DEF_CLASSIFIER_FACTORY);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public MLPlanSKLearnBuilder<P, B> withClassifierFactory(final ILearnerFactory<ScikitLearnWrapper<P, B>> factory) {
-		super.withClassifierFactory(factory);
+	public MLPlanSKLearnBuilder<P, B> withLearnerFactory(final ILearnerFactory<ScikitLearnWrapper<P, B>> factory) {
+		super.withLearnerFactory(factory);
 		if (this.logger.isInfoEnabled()) {
 			this.logger.info("Setting factory for the problem type {}: {}", this.problemType.getName(), factory.getClass().getSimpleName());
 		}
@@ -224,9 +224,9 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 		super.withSearchSpaceConfigFile(searchSpaceConfig);
 		if (this.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS) == null) {
 			this.withPreferredComponentsFile(FileUtil.getExistingFileWithHighestPriority(this.problemType.getPreferredComponentListFromResource(), this.problemType.getPreferredComponentListFromFileSystem()),
-					this.problemType.getPreferredComponentName(), true);
+					this.problemType.getLastHASCOMethodPriorToParameterRefinementOfBareLearner(), true);
 		} else {
-			this.withPreferredComponentsFile(new File(this.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS)), this.problemType.getPreferredComponentName(), true);
+			this.withPreferredComponentsFile(new File(this.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS)), this.problemType.getLastHASCOMethodPriorToParameterRefinementOfBareLearner(), true);
 		}
 		return this.getSelf();
 	}

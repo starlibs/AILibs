@@ -25,6 +25,7 @@ public class MLPlanCoreFunctionalityTester extends AutoMLAlgorithmCoreFunctional
 			builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.SECONDS));
 			builder.withNumCpus(1);
 			builder.withTimeOut(new Timeout(5, TimeUnit.SECONDS));
+			builder.withTimeoutPrecautionOffsetInSeconds(1);
 			MLPlan<IWekaClassifier> mlplan = builder.withDataset(data).build();
 			mlplan.setRandomSeed(1);
 			mlplan.setPortionOfDataForPhase2(0f);

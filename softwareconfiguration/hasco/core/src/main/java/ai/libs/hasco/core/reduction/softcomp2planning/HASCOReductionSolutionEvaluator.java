@@ -40,7 +40,7 @@ public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements
 		if (solution == null) {
 			throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(Action::getEncoding).collect(Collectors.joining("\n\t")));
 		}
-		this.logger.info("Forwarding evaluation request to evaluator {}", this.evaluator.getClass().getName());
+		this.logger.info("Forwarding evaluation request for CI {} to evaluator {}", solution, this.evaluator.getClass().getName());
 		return this.evaluator.evaluate(solution);
 	}
 

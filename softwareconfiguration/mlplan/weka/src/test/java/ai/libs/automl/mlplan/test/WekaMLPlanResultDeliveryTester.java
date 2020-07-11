@@ -22,7 +22,6 @@ import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.wekamlplan.EMLPlanWekaProblemType;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
 
@@ -35,16 +34,13 @@ public class WekaMLPlanResultDeliveryTester extends AutoMLAlgorithmResultProduct
 			MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 			int baseTime = Math.max(5, (int) Math.ceil(1.2 * this.getTrainTimeOfMajorityClassifier(data) / 1000.0));
 			assertTrue("The majority classifier already needs too much time: " + baseTime, baseTime < 60);
-			builder.withProblemType(EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS_TINY);
-			builder.withNodeEvaluationTimeOut(new Timeout(baseTime * (long) 12, TimeUnit.SECONDS));
-			builder.withCandidateEvaluationTimeOut(new Timeout(baseTime * (long) 6, TimeUnit.SECONDS));
-			builder.withNumCpus(4);
-			builder.withTimeOut(new Timeout(Math.min(90, 5 * (int) Math.pow(baseTime, 2)), TimeUnit.SECONDS)); // time out at most 90 seconds
-			builder.withSeed(1);
-			builder.withPortionOfDataReservedForSelection(.3);
-			builder.withMCCVBasedCandidateEvaluationInSearchPhase().withNumMCIterations(3);
+			Timeout totalTimeout = new Timeout(Math.min(90, (data.size() + data.getNumAttributes()) / 1000 + 10 * baseTime), TimeUnit.SECONDS);
+			builder.withTimeOut(totalTimeout); // time out at most 90 seconds
+			builder.withCandidateEvaluationTimeOut(new Timeout(totalTimeout.seconds() / 2, TimeUnit.SECONDS));
+			builder.withNodeEvaluationTimeOut(new Timeout(totalTimeout.seconds(), TimeUnit.SECONDS));
+
 			MLPlan<IWekaClassifier> mlplan = builder.withDataset(data).build();
-			this.logger.info("Done");
+			this.logger.info("Built of ML-Plan complete");
 			return mlplan;
 		} catch (IOException | TrainingException | DatasetDeserializationFailedException e) {
 			throw new AlgorithmCreationException(e);
@@ -61,7 +57,7 @@ public class WekaMLPlanResultDeliveryTester extends AutoMLAlgorithmResultProduct
 		BestFirst<?, ?, ?, ?> bf = ((BestFirst<?, ?, ?, ?>) mlplan.getSearch());
 		assertNotNull(bf);
 		IPathEvaluator<?, ?, ?> pe = bf.getNodeEvaluator();
-		assertTrue(pe instanceof AlternativeNodeEvaluator);
+		assertTrue("Expecting the node evaluator to be an alternative node evaluator, but is of type: " + pe.getClass(), pe instanceof AlternativeNodeEvaluator);
 		AlternativeNodeEvaluator<?, ?, ?> ape = (AlternativeNodeEvaluator<?, ?, ?>) pe;
 		while (ape.getPrimaryNodeEvaluator() instanceof AlternativeNodeEvaluator<?, ?, ?>) {
 			ape = (AlternativeNodeEvaluator<?, ?, ?>) ape.getPrimaryNodeEvaluator();

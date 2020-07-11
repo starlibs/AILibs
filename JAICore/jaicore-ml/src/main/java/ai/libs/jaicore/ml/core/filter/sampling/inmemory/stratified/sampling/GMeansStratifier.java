@@ -3,10 +3,8 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling;
 import java.util.List;
 
 import org.apache.commons.math3.ml.clustering.Clusterable;
-import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
-import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.api4.java.ai.ml.core.dataset.IDataset;
 
 import ai.libs.jaicore.basic.sets.ListView;
@@ -30,7 +28,7 @@ import ai.libs.jaicore.ml.clustering.learner.GMeans;
  *
  * @author Lukas Brandt
  */
-public class GMeansStratiAmountSelectorAndAssigner extends ClusterStratiAssigner implements IStratiAmountSelector {
+public class GMeansStratifier extends ClusterStratiAssigner implements IStratifier {
 
 	private GMeans<Clusterable> clusterer;
 
@@ -41,7 +39,7 @@ public class GMeansStratiAmountSelectorAndAssigner extends ClusterStratiAssigner
 	 * @param randomSeed
 	 *            Seed for random numbers.
 	 */
-	public GMeansStratiAmountSelectorAndAssigner(final int randomSeed) {
+	public GMeansStratifier(final int randomSeed) {
 		this.randomSeed = randomSeed;
 		this.distanceMeasure = new ManhattanDistance();
 	}
@@ -56,31 +54,17 @@ public class GMeansStratiAmountSelectorAndAssigner extends ClusterStratiAssigner
 	 * @param randomSeed
 	 *            Seed for random numbers.
 	 */
-	public GMeansStratiAmountSelectorAndAssigner(final DistanceMeasure distanceMeasure, final int randomSeed) {
+	public GMeansStratifier(final DistanceMeasure distanceMeasure, final int randomSeed) {
 		this.randomSeed = randomSeed;
 		this.distanceMeasure = distanceMeasure;
 	}
 
 	@Override
-	public int selectStratiAmount(final IDataset<?> dataset) {
+	public int createStrati(final IDataset<?> dataset) {
 		// Perform g-means to get a fitting k and the corresponding clusters.
 		List<Clusterable> cDataset = new ListView<>(dataset);
 		this.clusterer = new GMeans<>(cDataset, this.distanceMeasure, this.randomSeed);
 		this.setClusters(this.clusterer.cluster());
 		return this.getClusters().size();
 	}
-
-	@Override
-	public void init(final IDataset<?> dataset, final int stratiAmount) {
-		this.setDataset(dataset);
-		if (this.clusterer == null || this.getClusters() == null) {
-			// This object was not used for strati amount selection.
-			// Perform k-means clustering to get the correct strati amounts.
-			JDKRandomGenerator rand = new JDKRandomGenerator();
-			rand.setSeed(this.randomSeed);
-			KMeansPlusPlusClusterer<Clusterable> kmeans = new KMeansPlusPlusClusterer<>(stratiAmount, -1, this.distanceMeasure, rand);
-			this.setClusters(kmeans.cluster(new ListView<Clusterable>(dataset)));
-		}
-	}
-
 }

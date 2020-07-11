@@ -81,12 +81,12 @@ public enum EMLPlanSkLearnProblemType implements IProblemType {
 	}
 
 	@Override
-	public String getPreferredComponentName() {
+	public String getLastHASCOMethodPriorToParameterRefinementOfBareLearner() {
 		return this.getPreferredComponentName(this.requestedHascoInterface);
 	}
 
 	@Override
-	public String getPreferredBasicProblemComponentName() {
+	public String getLastHASCOMethodPriorToParameterRefinementOfPipeline() {
 		return this.getPreferredComponentName(this.requestedBasicProblemInterface);
 	}
 
@@ -111,7 +111,7 @@ public enum EMLPlanSkLearnProblemType implements IProblemType {
 
 	public static IProblemType getProblemType(final String preferredComponentName) {
 		for (EMLPlanSkLearnProblemType problemType : EMLPlanSkLearnProblemType.values()) {
-			if (problemType.getPreferredComponentName().equals(preferredComponentName)) {
+			if (problemType.getLastHASCOMethodPriorToParameterRefinementOfBareLearner().equals(preferredComponentName)) {
 				return problemType;
 			}
 		}

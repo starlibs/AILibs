@@ -261,6 +261,9 @@ public class FileUtil {
 	 */
 	public static void requireFileExists(final File file) throws FileIsDirectoryException, FileNotFoundException {
 		Objects.requireNonNull(file);
+		if (file.getAbsolutePath().trim().isEmpty()) {
+			throw new IllegalArgumentException("The given file objects encodes an empty path.");
+		}
 		if (file instanceof ResourceFile) {
 			return;
 		}
@@ -292,7 +295,6 @@ public class FileUtil {
 				}
 			}
 		}
-
 		return ResourceUtil.getResourceAsFile(resourcePath);
 	}
 

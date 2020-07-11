@@ -136,4 +136,8 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 		this.eventBus.register(listener);
 		this.hasListeners = true;
 	}
+
+	public IAggregatedPredictionPerformanceMeasure getMetric() {
+		return this.metric;
+	}
 }

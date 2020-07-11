@@ -16,21 +16,18 @@ import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
 
 public class MLPlanWekaBuilder extends AbstractMLPlanBuilder<IWekaClassifier, MLPlanWekaBuilder> {
 
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaBuilder.class);
 
-	/* DEFAULT VALUES FOR THE WEKA SETTING */
-	private static final EMLPlanWekaProblemType DEF_PROBLEM_TYPE = EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS;
-	private static final WekaPipelineFactory DEF_CLASSIFIER_FACTORY = new WekaPipelineFactory(DEF_PROBLEM_TYPE);
-
 	public MLPlanWekaBuilder() throws IOException {
-		super(DEF_PROBLEM_TYPE);
-		this.withClassifierFactory(DEF_CLASSIFIER_FACTORY);
-		this.withPipelineValidityCheckingNodeEvaluator(new WekaPipelineValidityCheckingNodeEvaluator());
+		this(EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS);
+	}
+
+	public MLPlanWekaBuilder(final EMLPlanWekaProblemType problemType) throws IOException {
+		super(problemType);
 	}
 
 	/**
@@ -65,9 +62,14 @@ public class MLPlanWekaBuilder extends AbstractMLPlanBuilder<IWekaClassifier, ML
 
 	@Override
 	public MLPlan4Weka build() {
+		if (this.getPipelineValidityCheckingNodeEvaluator() == null) {
+			try {
+				this.withPipelineValidityCheckingNodeEvaluator(new WekaPipelineValidityCheckingNodeEvaluator(this.getComponents(), this.getDataset()));
+			} catch (IOException e) {
+				throw new IllegalStateException("Could not create pipeline validator, because components could not be loaded.", e);
+			}
+		}
 		this.checkPreconditionsForInitialization();
-		this.configureHASCOBuilder();
-		this.prepareNodeEvaluatorInFactoryWithData(); // inform node evaluator about data and create the MLPlan object
 		return new MLPlan4Weka(this, this.getDataset());
 	}
 

@@ -1,4 +1,4 @@
-package ai.libs.hasco.builder.forwarddecomposition.twophase;
+package ai.libs.hasco.twophase;
 
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 

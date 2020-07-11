@@ -144,4 +144,9 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 		return this.wrappedSLClassifier;
 	}
 
+	@Override
+	public String toString() {
+		return this.getClass().getName() + " -> " + this.wrappedSLClassifier.toString();
+	}
+
 }

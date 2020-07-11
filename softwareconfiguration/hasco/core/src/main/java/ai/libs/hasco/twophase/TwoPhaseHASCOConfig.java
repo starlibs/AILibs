@@ -1,4 +1,4 @@
-package ai.libs.hasco.builder.forwarddecomposition.twophase;
+package ai.libs.hasco.twophase;
 
 public interface TwoPhaseHASCOConfig extends HASCOWithRandomCompletionsConfig {
 	public static final String K_RANDOM_SEED = "hasco.seed";
@@ -26,14 +26,14 @@ public interface TwoPhaseHASCOConfig extends HASCOWithRandomCompletionsConfig {
 	 * @return Expected multiplication in time for each solution candidate that will be required for evaluation
 	 */
 	@Key(K_BLOWUP_SELECTION)
-	@DefaultValue("NaN")
+	@DefaultValue("1.0")
 	public double expectedBlowupInSelection();
 
 	/**
 	 * @return Expected multiplication in time for each solution candidate that will be required for a postprocessing that should be considered when computing the timeout
 	 */
 	@Key(K_BLOWUP_POSTPROCESS)
-	@DefaultValue("NaN")
+	@DefaultValue("1.0")
 	public double expectedBlowupInPostprocessing();
 
 	/**

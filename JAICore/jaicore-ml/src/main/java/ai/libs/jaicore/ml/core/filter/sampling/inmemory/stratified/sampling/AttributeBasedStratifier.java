@@ -27,9 +27,9 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.Disc
  * @author Felix Weiland
  *
  */
-public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmountSelector, IStratiAssigner, ILoggingCustomizable {
+public class AttributeBasedStratifier implements IStratifier, ILoggingCustomizable {
 
-	private Logger logger = LoggerFactory.getLogger(AttributeBasedStratiAmountSelectorAndAssigner.class);
+	private Logger logger = LoggerFactory.getLogger(AttributeBasedStratifier.class);
 
 	/** Default strategy for discretization */
 	private static final DiscretizationStrategy DEFAULT_DISCRETIZATION_STRATEGY = DiscretizationStrategy.EQUAL_SIZE;
@@ -67,30 +67,25 @@ public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmo
 	/** The number of categories for discretization selected by the user */
 	private int numberOfCategories;
 
-	private boolean initialized;
-
-	/**
-	 * SCALE-54: Explicitly allow to not provide an attribute list
-	 */
-	public AttributeBasedStratiAmountSelectorAndAssigner() {
+	public AttributeBasedStratifier() {
 		super();
 		this.discretizationStrategy = DEFAULT_DISCRETIZATION_STRATEGY;
 		this.numberOfCategories = DEFAULT_DISCRETIZATION_CATEGORY_AMOUNT;
 	}
 
-	public AttributeBasedStratiAmountSelectorAndAssigner(final List<Integer> attributeIndices) {
+	public AttributeBasedStratifier(final List<Integer> attributeIndices) {
 		this(attributeIndices, null);
 		this.discretizationStrategy = DEFAULT_DISCRETIZATION_STRATEGY;
 		this.numberOfCategories = DEFAULT_DISCRETIZATION_CATEGORY_AMOUNT;
 	}
 
-	public AttributeBasedStratiAmountSelectorAndAssigner(final List<Integer> attributeIndices, final DiscretizationStrategy discretizationStrategy, final int numberOfCategories) {
+	public AttributeBasedStratifier(final List<Integer> attributeIndices, final DiscretizationStrategy discretizationStrategy, final int numberOfCategories) {
 		this(attributeIndices, null);
 		this.discretizationStrategy = discretizationStrategy;
 		this.numberOfCategories = numberOfCategories;
 	}
 
-	public AttributeBasedStratiAmountSelectorAndAssigner(final List<Integer> attributeIndices, final Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies) {
+	public AttributeBasedStratifier(final List<Integer> attributeIndices, final Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies) {
 		super();
 		// Validate attribute indices
 		if (attributeIndices == null || attributeIndices.isEmpty()) {
@@ -102,62 +97,15 @@ public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmo
 	}
 
 	@Override
-	public int selectStratiAmount(final IDataset<?> dataset) {
+	public int createStrati(final IDataset<?> dataset) {
 		this.logger.debug("Selecting number of strati for dataset with {} items.", dataset.size());
-		if (this.dataset == null) {
-			this.init(dataset, -1); // the strati amount is ignored here anyway since being computed automatically
-		} else if (!this.dataset.equals(dataset)) {
-			throw new IllegalArgumentException("Can only select strati amount for a dataset provided before.");
+		if (this.dataset != null) {
+			throw new IllegalStateException("Creating strati more than once is forbidden!");
 		}
-		return this.stratumIDs.size();
-	}
-
-	private void discretizeAttributeValues(final Map<Integer, Set<Object>> attributeValues) {
-		if (this.discretizationPolicies == null) {
-			this.logger.info("No discretization policies provided. Computing defaults.");
-			this.discretizationPolicies = this.discretizationHelper.createDefaultDiscretizationPolicies(this.dataset, this.attributeIndices, attributeValues, this.discretizationStrategy, this.numberOfCategories);
-		}
-
-		if (!this.discretizationPolicies.isEmpty()) {
-			if (this.logger.isInfoEnabled()) {
-				this.logger.info("Discretizing numeric attributes using policies: {}", this.discretizationPolicies);
-			}
-			this.discretizationHelper.discretizeAttributeValues(this.discretizationPolicies, attributeValues);
-		}
-
-		this.logger.info("computeAttributeValues(): leave");
-	}
-
-	@Override
-	public void setNumCPUs(final int numberOfCPUs) {
-		if (numberOfCPUs < 1) {
-			throw new IllegalArgumentException("Number of CPU cores must be nonnegative");
-		}
-		this.numCPUs = numberOfCPUs;
-	}
-
-	@Override
-	public int getNumCPUs() {
-		return this.numCPUs;
-	}
-
-	public void init(final IDataset<?> dataset) {
-		this.init(dataset, -1);
-	}
-
-	@Override
-	public void init(final IDataset<?> dataset, final int stratiAmount) {
-
 		this.logger.debug("init(): enter");
 
 		/* first, conduct some consistency checks */
-		if (this.initialized) {
-			this.logger.warn("Ignoring further initialization.");
-			return;
-		}
-		if (dataset == null) {
-			throw new IllegalArgumentException("Cannot set dataset to NULL");
-		}
+		Objects.requireNonNull(dataset, "Cannot create strati. Dataset is null.");
 		this.dataset = dataset;
 		this.numAttributes = dataset.getNumAttributes();
 
@@ -192,13 +140,42 @@ public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmo
 		}
 
 		this.logger.info("Initialized strati assigner with {} strati.", this.stratumIDs.size());
-		this.initialized = true;
+		return this.stratumIDs.size();
+	}
+
+	private void discretizeAttributeValues(final Map<Integer, Set<Object>> attributeValues) {
+		if (this.discretizationPolicies == null) {
+			this.logger.info("No discretization policies provided. Computing defaults.");
+			this.discretizationPolicies = this.discretizationHelper.createDefaultDiscretizationPolicies(this.dataset, this.attributeIndices, attributeValues, this.discretizationStrategy, this.numberOfCategories);
+		}
+
+		if (!this.discretizationPolicies.isEmpty()) {
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info("Discretizing numeric attributes using policies: {}", this.discretizationPolicies);
+			}
+			this.discretizationHelper.discretizeAttributeValues(this.discretizationPolicies, attributeValues);
+		}
+
+		this.logger.info("computeAttributeValues(): leave");
 	}
 
 	@Override
-	public int assignToStrati(final IInstance datapoint) {
-		if (!this.initialized) {
-			throw new IllegalStateException("Assigner has not been initialized yet.");
+	public void setNumCPUs(final int numberOfCPUs) {
+		if (numberOfCPUs < 1) {
+			throw new IllegalArgumentException("Number of CPU cores must be nonnegative");
+		}
+		this.numCPUs = numberOfCPUs;
+	}
+
+	@Override
+	public int getNumCPUs() {
+		return this.numCPUs;
+	}
+
+	@Override
+	public int getStratum(final IInstance datapoint) {
+		if (this.dataset == null) {
+			throw new IllegalStateException("The technique has not been initialized yet.");
 		}
 
 		// Compute concrete attribute values relevant for the stratum for the particular instance

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Random;
 
 import org.api4.java.ai.ml.classification.IClassifier;
+import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
@@ -16,16 +18,16 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStra
 public class MLPlanSimpleBuilder extends AbstractMLPlanBuilder<IClassifier, MLPlanSimpleBuilder> {
 
 	public MLPlanSimpleBuilder() throws IOException {
-		super(new IProblemType() {
+		super(new IProblemType<IClassifier>() {
 
 			@Override
 			public String getSearchSpaceConfigFromFileSystem() {
-				return "mlplan/mlplan-simple.searchspace.json";
+				return "";
 			}
 
 			@Override
 			public String getSearchSpaceConfigFileFromResource() {
-				return "";
+				return "mlplan/mlplan-simple.searchspace.json";
 			}
 
 			@Override
@@ -34,28 +36,28 @@ public class MLPlanSimpleBuilder extends AbstractMLPlanBuilder<IClassifier, MLPl
 			}
 
 			@Override
-			public String getPreferredComponentName() {
-				return "";
+			public String getLastHASCOMethodPriorToParameterRefinementOfBareLearner() {
+				return null;
 			}
 
 			@Override
 			public String getPreferredComponentListFromResource() {
-				return "";
+				return null;
 			}
 
 			@Override
 			public String getPreferredComponentListFromFileSystem() {
-				return "";
+				return null;
 			}
 
 			@Override
-			public String getPreferredBasicProblemComponentName() {
-				return "";
+			public String getLastHASCOMethodPriorToParameterRefinementOfPipeline() {
+				return null;
 			}
 
 			@Override
-			public double getPortionOfDataReservedForSelectionPhase() {
-				return 0;
+			public IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> getSearchSelectionDatasetSplitter() {
+				return new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>());
 			}
 
 			@Override
@@ -72,26 +74,24 @@ public class MLPlanSimpleBuilder extends AbstractMLPlanBuilder<IClassifier, MLPl
 			public String getName() {
 				return "SimpleProblemType";
 			}
-		});
-
-		/* configure classifier factory */
-		this.withClassifierFactory(new ILearnerFactory<IClassifier>() {
 
 			@Override
-			public IClassifier getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
-				return new MajorityClassifier();
-			}
+			public ILearnerFactory<IClassifier> getLearnerFactory() {
+				return new ILearnerFactory<IClassifier>() {
 
-			@Override
-			public void setProblemType(final IProblemType problemType) {
+					@Override
+					public IClassifier getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
+						return new MajorityClassifier();
+					}
+				};
 			}
 		});
 
 		/* configure dataset splitter */
 		this.withDatasetSplitterForSearchSelectionSplit(new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), .9, new Random(0)));
 
-		this.withMCCVBasedCandidateEvaluationInSearchPhase().withNumMCIterations(3).withTrainFoldSize(.7);
-		this.withMCCVBasedCandidateEvaluationInSelectionPhase().withNumMCIterations(3).withTrainFoldSize(.7);
+		this.withMCCVBasedCandidateEvaluationInSearchPhase(3, .7);
+		this.withMCCVBasedCandidateEvaluationInSelectionPhase(3, .7);
 
 	}
 

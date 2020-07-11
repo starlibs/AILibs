@@ -44,12 +44,12 @@ public class MLPlanOpenMLExample {
 		builder.withTimeOut(new Timeout(30, TimeUnit.SECONDS));
 		builder.withNumCpus(4);
 		builder.withSeed(1);
-		builder.withMCCVBasedCandidateEvaluationInSearchPhase().withNumMCIterations(5);
+		builder.withMCCVBasedCandidateEvaluationInSearchPhase(3, .8);
 
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setRandomSeed(1);
 		mlplan.setPortionOfDataForPhase2(.3f);
-		mlplan.setLoggerName("testedalgorithm");
+		mlplan.setLoggerName("example");
 
 		try {
 			long start = System.currentTimeMillis();

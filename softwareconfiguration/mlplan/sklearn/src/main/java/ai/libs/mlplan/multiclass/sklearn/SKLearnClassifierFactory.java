@@ -21,8 +21,6 @@ import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.ILearnerFactory;
-import ai.libs.mlplan.core.IProblemType;
-import ai.libs.mlplan.exception.UnsupportedProblemTypeException;
 
 /**
  * The SKLearnClassifierFactory takes a ground component instance and parses it into a <code>ScikitLearnWrapper</code> as defined in the project jaicore-ml.
@@ -40,15 +38,11 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 	private Logger logger = LoggerFactory.getLogger(SKLearnClassifierFactory.class);
 	private String loggerName;
 
-	private EMLPlanSkLearnProblemType problemType;
+	//	private EMLPlanSkLearnProblemType problemType;
 	private String pathVariable;
 	private String anacondaEnvironment;
 	private long seed;
 	private Timeout timeout;
-
-	public SKLearnClassifierFactory(final EMLPlanSkLearnProblemType problemType) {
-		this.problemType = problemType;
-	}
 
 	@Override
 	public ScikitLearnWrapper<P, B> getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
@@ -192,17 +186,6 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 		this.logger.debug("Switching logger name to {}", name);
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.debug("Switched SKLearnClassifierFactory logger to {}", name);
-	}
-
-	@Override
-	public void setProblemType(final IProblemType problemType) {
-		if (problemType != this.problemType) {
-			if (problemType instanceof EMLPlanSkLearnProblemType) {
-				this.problemType = (EMLPlanSkLearnProblemType) problemType;
-			} else {
-				throw new UnsupportedProblemTypeException("Setting the problem type " + problemType.getName() + " failed, as this is not " + EMLPlanSkLearnProblemType.class.getName() + ".");
-			}
-		}
 	}
 
 	public void setPathVariable(final String path) {

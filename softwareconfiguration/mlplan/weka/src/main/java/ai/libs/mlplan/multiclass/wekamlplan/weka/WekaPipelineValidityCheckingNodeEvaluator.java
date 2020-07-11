@@ -2,8 +2,8 @@ package ai.libs.mlplan.multiclass.wekamlplan.weka;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Objects;
 
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
@@ -33,14 +33,8 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 	private boolean multiValuedNominalAttributes;
 	private boolean containsNegativeValues;
 
-	public WekaPipelineValidityCheckingNodeEvaluator() {
-		super();
-	}
-
-	public WekaPipelineValidityCheckingNodeEvaluator(final Collection<Component> components, final Instances data) {
-		super(components, new WekaInstances(data));
-		Objects.requireNonNull(components);
-		Objects.requireNonNull(data);
+	public WekaPipelineValidityCheckingNodeEvaluator(final Collection<Component> components, final ILabeledDataset<?> data) {
+		super(components, data);
 		components.forEach(c -> this.logger.info("Considering component {}", c));
 	}
 

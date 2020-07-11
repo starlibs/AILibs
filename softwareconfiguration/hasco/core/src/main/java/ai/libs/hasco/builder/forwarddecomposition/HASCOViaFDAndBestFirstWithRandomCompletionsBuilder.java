@@ -10,6 +10,7 @@ import ai.libs.hasco.builder.HASCOBuilder;
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.core.IHascoAware;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 
 public class HASCOViaFDAndBestFirstWithRandomCompletionsBuilder extends HASCOViaFDAndBestFirstBuilder<Double, HASCOViaFDAndBestFirstWithRandomCompletionsBuilder> {
@@ -79,7 +80,7 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsBuilder extends HASCOVia
 		IPathEvaluator<TFDNode, String, Double> pathEvaluator = HASCOUtil.getSearchProblemWithEvaluation(this.getProblem(), this.getPlanningGraphGeneratorDeriver()).getPathEvaluator();
 		IPathEvaluator<TFDNode, String, Double> nodeEvaluator = new RandomCompletionBasedNodeEvaluator<>(this.random, this.numSamples, this.numSamples * 2, pathEvaluator,
 				this.timeoutForSingleCompletionEvaluationInMS, this.timeoutForNodeEvaluationInMS, this.priorizingPredicate);
-		this.withNodeEvaluator(nodeEvaluator);
+		this.withNodeEvaluator(this.preferredNodeEvaluator != null ? new AlternativeNodeEvaluator<>(this.preferredNodeEvaluator, nodeEvaluator) : nodeEvaluator);
 
 		/* now get algorithm and tell some of its components about it */
 		HASCOViaFD<Double> hasco = super.getAlgorithm();

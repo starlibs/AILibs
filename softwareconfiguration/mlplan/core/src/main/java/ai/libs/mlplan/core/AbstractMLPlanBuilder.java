@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -17,7 +17,6 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.evaluation.IPredictionPerformanceMetricConfigurable;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.Timeout;
@@ -25,11 +24,9 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.builder.HASCOBuilder;
 import ai.libs.hasco.builder.forwarddecomposition.DefaultPathPriorizingPredicate;
-import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsBuilder;
 import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFDBuilder;
-import ai.libs.hasco.builder.forwarddecomposition.twophase.HASCOWithRandomCompletionsConfig;
+import ai.libs.hasco.twophase.HASCOWithRandomCompletionsConfig;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
@@ -37,29 +34,20 @@ import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
+import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
-import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.serialization.ComponentLoader;
-import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
-import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
-import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
-import ai.libs.jaicore.ml.regression.loss.dataset.RootMeanSquaredError;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
 
 /**
- * The MLPlanBuilder helps to easily configure and initialize ML-Plan with specific parameter settings.
- * For convenient use, the MLPlanBuilder also offers methods for initializing ML-Plan with default
- * configuration to use ML-Plan for single label classification in combination with WEKA or scikit-learn
- * or for multi-label classification in combination with MEKA and consequently with WEKA (for baselearners
- * of multi-label reduction strategies).
+ * The MLPlanBuilder helps to easily configure and initialize ML-Plan with specific parameter settings. For convenient use, the MLPlanBuilder also offers methods for initializing ML-Plan with default configuration to use ML-Plan for single
+ * label classification in combination with WEKA or scikit-learn or for multi-label classification in combination with MEKA and consequently with WEKA (for baselearners of multi-label reduction strategies).
  *
  * @author mwever, fmohr
  */
@@ -72,48 +60,32 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	private static final String RES_ALGORITHM_CONFIG = "mlplan/mlplan.properties";
 	private static final String FS_ALGORITHM_CONFIG = "conf/mlplan.properties";
 
-	protected static final int DEFAULT_SEARCH_NUM_MC_ITERATIONS = 5;
-	protected static final double DEFAULT_SEARCH_TRAIN_FOLD_SIZE = 0.7;
-	protected static final int DEFAULT_SELECTION_NUM_MC_ITERATIONS = 5;
-	protected static final double DEFAULT_SELECTION_TRAIN_FOLD_SIZE = 0.7;
-	protected static final IDeterministicPredictionPerformanceMeasure<Object, Object> DEFAULT_PERFORMANCE_MEASURE = EClassificationPerformanceMeasure.ERRORRATE;
-
-	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS)
-			.withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE).withMeasure(new RootMeanSquaredError());
-	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS)
-			.withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE).withMeasure(new RootMeanSquaredError());
-
-	private static final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> DEF_SEARCH_SELECT_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE,
-			new Random(0));
-
 	/* Default configuration values */
 	private static final File DEF_ALGORITHM_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_ALGORITHM_CONFIG, FS_ALGORITHM_CONFIG);
 
-	/* Builder (self) status variables */
-	private boolean factoryPreparedWithData = false;
-
-	/* Data for initializing ML-Plan */
-	private MLPlanClassifierConfig algorithmConfig;
-
-	private HASCOViaFDAndBestFirstWithRandomCompletionsBuilder hascoBuilder;
-	private Predicate<TFDNode> priorizingPredicate = new DefaultPathPriorizingPredicate<>(); // by default, we prefer paths that lead to default parametrizations
+	/* problem description aspects */
 	private File searchSpaceFile;
 	private String requestedHASCOInterface;
+	private String nameOfHASCOMethod1;
+	private String nameOfHASCOMethod2;
 	private ILearnerFactory<L> learnerFactory;
+	private ILabeledDataset<?> dataset;
 
-	/* Node Evaluation */
-	private IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator = null;
+	/* other general properties of ML-Plan */
+	private MLPlanClassifierConfig algorithmConfig;
+
+	/* node evaluation and search guidance */
+	private Predicate<TFDNode> priorizingPredicate = new DefaultPathPriorizingPredicate<>(); // by default, we prefer paths that lead to default parametrizations
+	private List<IPathEvaluator<TFDNode, String, Double>> preferredNodeEvaluators = new ArrayList<>();
 	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
 
 	/* Candidate Evaluation (if no other node evaluation is used) */
-	private IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter = DEF_SEARCH_SELECT_SPLITTER;
-	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factoryForPipelineEvaluationInSearchPhase = DEF_SEARCH_PHASE_EVALUATOR;
-	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factoryForPipelineEvaluationInSelectionPhase = DEF_SELECTION_PHASE_EVALUATOR;
+	private IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter;
+	private IDeterministicPredictionPerformanceMeasure<?, ?> metricForSearchPhase;
+	private IDeterministicPredictionPerformanceMeasure<?, ?> metricForSelectionPhase;
+	private ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factoryForPipelineEvaluationInSearchPhase = this.getMCCVFactory(3, .7);
+	private ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factoryForPipelineEvaluationInSelectionPhase = this.getMCCVFactory(3, .7);
 	private IEvaluationSafeGuardFactory safeGuard = null;
-
-	/* The problem input for ML-Plan. */
-	protected IProblemType problemType;
-	private ILabeledDataset<?> dataset;
 
 	protected AbstractMLPlanBuilder() {
 		super();
@@ -121,51 +93,43 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		this.withSeed(0);
 	}
 
-	protected AbstractMLPlanBuilder(final IProblemType problemType) throws IOException {
+	protected AbstractMLPlanBuilder(final IProblemType<L> problemType) throws IOException {
 		super();
 		this.withAlgorithmConfigFile(DEF_ALGORITHM_CONFIG);
 		this.withProblemType(problemType);
 		this.withSeed(0);
 	}
 
-	public AbstractMLPlanBuilder<L, B> withProblemType(final IProblemType problemType) throws IOException {
-		if (this.problemType != problemType) {
-			this.problemType = problemType;
-			if (this.logger.isInfoEnabled()) {
-				this.logger.info("Setting problem type to {}.", this.problemType.getName());
-			}
-			if (this.getLearnerFactory() != null) {
-				this.getLearnerFactory().setProblemType(this.problemType);
-				if (this.logger.isInfoEnabled()) {
-					this.logger.info("Setting factory for the problem type {}: {}", this.problemType.getName(), this.getLearnerFactory().getClass().getSimpleName());
-				}
-			}
-			this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(this.problemType.getSearchSpaceConfigFileFromResource(), this.problemType.getSearchSpaceConfigFromFileSystem()));
-			this.withRequestedInterface(problemType.getRequestedInterface());
-			this.withPortionOfDataReservedForSelection(this.problemType.getPortionOfDataReservedForSelectionPhase());
+	public AbstractMLPlanBuilder<L, B> withProblemType(final IProblemType<L> problemType) throws IOException {
+
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("Setting problem type to {}.", problemType.getName());
 		}
+		this.withSearchSpaceConfigFile(FileUtil.getExistingFileWithHighestPriority(problemType.getSearchSpaceConfigFileFromResource(), problemType.getSearchSpaceConfigFromFileSystem()));
+		this.withRequestedInterface(problemType.getRequestedInterface());
+		this.withLearnerFactory(problemType.getLearnerFactory());
+
+		/* setup everything for preferred components */
+		if (problemType.getPreferredComponentListFromResource() != null || problemType.getPreferredComponentListFromFileSystem() != null) {
+			this.withPreferredComponentsFile(FileUtil.getExistingFileWithHighestPriority(problemType.getPreferredComponentListFromResource(), problemType.getPreferredComponentListFromFileSystem()));
+			this.nameOfHASCOMethod1 = problemType.getLastHASCOMethodPriorToParameterRefinementOfBareLearner();
+			this.nameOfHASCOMethod2 = problemType.getLastHASCOMethodPriorToParameterRefinementOfPipeline();
+		}
+
+		/* configure the metric defined in the problem type */
+		this.withPerformanceMeasureForSearchPhase(problemType.getPerformanceMetricForSearchPhase());
+		this.withPerformanceMeasureForSelectionPhase(problemType.getPerformanceMetricForSelectionPhase());
+		this.searchSelectionDatasetSplitter = problemType.getSearchSelectionDatasetSplitter();
 		return this.getSelf();
 	}
 
-	public IProblemType getProblemType() {
-		return this.problemType;
-	}
-
 	public B withPerformanceMeasureForSearchPhase(final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMeasure) {
-		if (this.getLearnerEvaluationFactoryForSearchPhase() instanceof IPredictionPerformanceMetricConfigurable) {
-			((IPredictionPerformanceMetricConfigurable) this.getLearnerEvaluationFactoryForSearchPhase()).setMeasure(performanceMeasure);
-		} else {
-			throw new UnsupportedOperationException("The evaluator (" + this.getLearnerEvaluationFactoryForSearchPhase() + ") for search phase does not support setting a metric.");
-		}
+		this.metricForSearchPhase = performanceMeasure;
 		return this.getSelf();
 	}
 
 	public B withPerformanceMeasureForSelectionPhase(final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMeasure) {
-		if (this.getLearnerEvaluationFactoryForSelectionPhase() instanceof IPredictionPerformanceMetricConfigurable) {
-			((IPredictionPerformanceMetricConfigurable) this.getLearnerEvaluationFactoryForSelectionPhase()).setMeasure(performanceMeasure);
-		} else {
-			throw new UnsupportedOperationException("The evaluator (" + this.getLearnerEvaluationFactoryForSelectionPhase() + ") for selection phase does not support setting a metric.");
-		}
+		this.metricForSelectionPhase = performanceMeasure;
 		return this.getSelf();
 	}
 
@@ -175,42 +139,53 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		return this.getSelf();
 	}
 
+	@Override
+	public IDeterministicPredictionPerformanceMeasure<?, ?> getMetricForSearchPhase() {
+		return this.metricForSearchPhase;
+	}
+
+	@Override
+	public IDeterministicPredictionPerformanceMeasure<?, ?> getMetricForSelectionPhase() {
+		return this.metricForSelectionPhase;
+	}
+
 	/**
 	 * Creates a preferred node evaluator that can be used to prefer components over other components.
 	 *
-	 * @param preferredComponentsFile The file containing a priority list of component names.
-	 * @param preferableCompnentMethodPrefix The prefix of a method's name for refining a complex task to preferable components.
+	 * @param preferredComponentsFile
+	 *            The file containing a priority list of component names.
 	 * @return The builder object.
-	 * @throws IOException Thrown if a problem occurs while trying to read the file containing the priority list.
+	 * @throws IOException
+	 *             Thrown if a problem occurs while trying to read the file containing the priority list.
 	 */
-	public AbstractMLPlanBuilder<L, B> withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix, final boolean replaceCurrentPreferences) throws IOException {
+	public B withPreferredComponentsFile(final File preferredComponentsFile) throws IOException {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
-		List<String> ordering;
+		;
+		List<String> namesOfPreferredComponents = null; // the order is important!
 		if (preferredComponentsFile instanceof ResourceFile) {
-			ordering = ResourceUtil.readResourceFileToStringList((ResourceFile) preferredComponentsFile);
+			namesOfPreferredComponents = ResourceUtil.readResourceFileToStringList((ResourceFile) preferredComponentsFile);
 		} else if (!preferredComponentsFile.exists()) {
 			this.logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", preferredComponentsFile.getAbsolutePath());
-			ordering = new ArrayList<>();
 		} else {
-			ordering = FileUtil.readFileAsList(preferredComponentsFile);
+			namesOfPreferredComponents = FileUtil.readFileAsList(preferredComponentsFile);
 		}
-		if (replaceCurrentPreferences) {
-			return this.withOnePreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.problemType, this.getComponents(), ordering));
-		} else {
-			return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.problemType, this.getComponents(), ordering));
+		if (namesOfPreferredComponents != null) {
+			this.withPreferredComponents(namesOfPreferredComponents);
 		}
+		return this.getSelf();
 	}
 
-	public AbstractMLPlanBuilder<L, B> withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
-		return this.withPreferredComponentsFile(preferredComponentsFile, preferableCompnentMethodPrefix, false);
+	public B withPreferredComponents(final List<String> preferredComponents) {
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, "" + SetUtil.implode(preferredComponents, ", "));
+		return this.getSelf();
 	}
 
-	public String getPreferredComponentsFiles() {
-		return this.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS);
+	public List<String> getPreferredComponents() {
+		return this.getAlgorithmConfig().preferredComponents();
 	}
 
 	/**
-	 * This ADDs a new preferred node evaluator; requires that the search will be a best-first search.
+	 * This adds a new preferred node evaluator
 	 *
 	 * It is possible to specify several preferred node evaluators, which will be ordered by the order in which they are specified. The latest given evaluator is the most preferred one.
 	 *
@@ -218,30 +193,16 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 * @return
 	 */
 	public B withPreferredNodeEvaluator(final IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator) {
-		if (this.factoryPreparedWithData) {
-			throw new IllegalStateException("The method prepareNodeEvaluatorInFactoryWithData has already been called. No changes to the preferred node evaluator possible anymore");
-		}
-
-		/* first update the preferred node evaluator */
-		if (this.preferredNodeEvaluator == null) {
-			this.preferredNodeEvaluator = preferredNodeEvaluator;
-		} else {
-			this.preferredNodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluator, this.preferredNodeEvaluator);
-		}
+		this.preferredNodeEvaluators.add(preferredNodeEvaluator);
 		return this.getSelf();
 	}
 
-	public B withOnePreferredNodeEvaluator(final IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator) {
-		if (this.factoryPreparedWithData) {
-			throw new IllegalStateException("The method prepareNodeEvaluatorInFactoryWithData has already been called. No changes to the preferred node evaluator possible anymore");
-		}
-
-		this.preferredNodeEvaluator = preferredNodeEvaluator;
-		return this.getSelf();
+	public List<IPathEvaluator<TFDNode, String, Double>> getPreferredNodeEvaluators() {
+		return Collections.unmodifiableList(this.preferredNodeEvaluators);
 	}
 
 	public B withSearchFactory(@SuppressWarnings("rawtypes") final IOptimalPathInORGraphSearchFactory searchFactory, @SuppressWarnings("rawtypes") final AlgorithmicProblemReduction transformer) {
-		throw new UnsupportedOperationException("Currently only support for BestFirst search");
+		throw new UnsupportedOperationException("Currently only support for BestFirst search. Will be extended in the upcoming release.");
 	}
 
 	public Collection<Component> getComponents() throws IOException {
@@ -255,9 +216,11 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/**
 	 * Loads the MLPlanClassifierConfig with default values and replaces all properties according to the properties defined in the given config file.
 	 *
-	 * @param algorithmConfigFile The file specifying the property values to replace the default configuration.
+	 * @param algorithmConfigFile
+	 *            The file specifying the property values to replace the default configuration.
 	 * @return The MLPlanBuilder object.
-	 * @throws IOException An IOException is thrown if there are issues reading the config file.
+	 * @throws IOException
+	 *             An IOException is thrown if there are issues reading the config file.
 	 */
 	public B withAlgorithmConfigFile(final File algorithmConfigFile) {
 		return this.withAlgorithmConfig((MLPlanClassifierConfig) ConfigFactory.create(MLPlanClassifierConfig.class).loadPropertiesFromFile(algorithmConfigFile));
@@ -266,9 +229,11 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/**
 	 * Loads the MLPlanClassifierConfig with default values and replaces all properties according to the properties defined in the given config file.
 	 *
-	 * @param config The algorithm configuration.
+	 * @param config
+	 *            The algorithm configuration.
 	 * @return The MLPlanBuilder object.
-	 * @throws IOException An IOException is thrown if there are issues reading the config file.
+	 * @throws IOException
+	 *             An IOException is thrown if there are issues reading the config file.
 	 */
 	public B withAlgorithmConfig(final MLPlanClassifierConfig config) {
 		this.algorithmConfig = config;
@@ -278,7 +243,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/**
 	 * Set the data for which ML-Plan is supposed to find the best pipeline.
 	 *
-	 * @param dataset The dataset for which ML-Plan is to be run.
+	 * @param dataset
+	 *            The dataset for which ML-Plan is to be run.
 	 * @return The builder object.
 	 */
 	public B withDataset(final ILabeledDataset<?> dataset) {
@@ -296,9 +262,11 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/**
 	 * Specify the search space in which ML-Plan is required to work.
 	 *
-	 * @param searchSpaceConfig The file of the search space configuration.
+	 * @param searchSpaceConfig
+	 *            The file of the search space configuration.
 	 * @return The builder object.
-	 * @throws IOException Thrown if the given file does not exist.
+	 * @throws IOException
+	 *             Thrown if the given file does not exist.
 	 */
 	public B withSearchSpaceConfigFile(final File searchSpaceConfig) throws IOException {
 		FileUtil.requireFileExists(searchSpaceConfig);
@@ -310,10 +278,11 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/**
 	 * Set the classifier factory that translates <code>CompositionInstance</code> objects to classifiers that can be evaluated.
 	 *
-	 * @param classifierFactory The classifier factory to be used to translate CompositionInstance objects to classifiers.
+	 * @param classifierFactory
+	 *            The classifier factory to be used to translate CompositionInstance objects to classifiers.
 	 * @return The builder object.
 	 */
-	public B withClassifierFactory(final ILearnerFactory<L> classifierFactory) {
+	public B withLearnerFactory(final ILearnerFactory<L> classifierFactory) {
 		this.learnerFactory = classifierFactory;
 		return this.getSelf();
 	}
@@ -321,7 +290,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/**
 	 * Set the dataset splitter that is used for generating the holdout data portion that is put aside during search.
 	 *
-	 * @param datasetSplitter The dataset splitter to be used.
+	 * @param datasetSplitter
+	 *            The dataset splitter to be used.
 	 * @return The builder obect.
 	 */
 	public B withDatasetSplitterForSearchSelectionSplit(final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> datasetSplitter) {
@@ -335,7 +305,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	}
 
 	/**
-	 * @param timeout The timeout for ML-Plan to search for the best classifier.
+	 * @param timeout
+	 *            The timeout for ML-Plan to search for the best classifier.
 	 * @return The builder object.
 	 */
 	public B withTimeOut(final Timeout timeout) {
@@ -350,8 +321,18 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		return new Timeout(this.algorithmConfig.timeout(), TimeUnit.MILLISECONDS);
 	}
 
+	public B withTimeoutPrecautionOffsetInSeconds(final int seconds) {
+		this.algorithmConfig.setProperty(MLPlanClassifierConfig.PRECAUTION_OFFSET, "" + seconds);
+		return this.getSelf();
+	}
+
+	public int getTimeoutPrecautionOffsetInSeconds() {
+		return this.algorithmConfig.precautionOffset();
+	}
+
 	/**
-	 * @param timeout The timeout for a single candidate evaluation.
+	 * @param timeout
+	 *            The timeout for a single candidate evaluation.
 	 * @return The builder object.
 	 */
 	public B withNodeEvaluationTimeOut(final Timeout timeout) {
@@ -367,7 +348,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	}
 
 	/**
-	 * @param timeout The timeout for a single candidate evaluation.
+	 * @param timeout
+	 *            The timeout for a single candidate evaluation.
 	 * @return The builder object.
 	 */
 	public B withCandidateEvaluationTimeOut(final Timeout timeout) {
@@ -382,16 +364,20 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		return new Timeout(this.algorithmConfig.timeoutForCandidateEvaluation(), TimeUnit.MILLISECONDS);
 	}
 
-	public MonteCarloCrossValidationEvaluatorFactory withMCCVBasedCandidateEvaluationInSearchPhase() {
-		this.factoryForPipelineEvaluationInSearchPhase = new MonteCarloCrossValidationEvaluatorFactory();
-		return ((MonteCarloCrossValidationEvaluatorFactory) this.factoryForPipelineEvaluationInSearchPhase).withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE)
-				.withMeasure(DEFAULT_PERFORMANCE_MEASURE);
+	public B withMCCVBasedCandidateEvaluationInSearchPhase(final int numIterations, final double trainPortion) {
+		this.factoryForPipelineEvaluationInSearchPhase = this.getMCCVFactory(numIterations, trainPortion);
+		return this.getSelf();
 	}
 
-	public MonteCarloCrossValidationEvaluatorFactory withMCCVBasedCandidateEvaluationInSelectionPhase() {
-		this.factoryForPipelineEvaluationInSelectionPhase = new MonteCarloCrossValidationEvaluatorFactory();
-		return ((MonteCarloCrossValidationEvaluatorFactory) this.factoryForPipelineEvaluationInSelectionPhase).withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE)
-				.withMeasure(DEFAULT_PERFORMANCE_MEASURE);
+	public B withMCCVBasedCandidateEvaluationInSelectionPhase(final int numIterations, final double trainPortion) {
+		this.factoryForPipelineEvaluationInSelectionPhase = this.getMCCVFactory(numIterations, trainPortion);
+		return this.getSelf();
+	}
+
+	private MonteCarloCrossValidationEvaluatorFactory getMCCVFactory(final int numIterations, final double trainPortion) {
+		MonteCarloCrossValidationEvaluatorFactory factory = new MonteCarloCrossValidationEvaluatorFactory();
+		factory.withNumMCIterations(numIterations).withTrainFoldSize(trainPortion);
+		return factory;
 	}
 
 	@Override
@@ -407,7 +393,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/**
 	 * Sets the evaluator factory for the search phase.
 	 *
-	 * @param evaluatorFactory The evaluator factory for the search phase.
+	 * @param evaluatorFactory
+	 *            The evaluator factory for the search phase.
 	 * @return The builder object.
 	 */
 	public void withSearchPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluatorFactory) {
@@ -424,7 +411,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/**
 	 * Sets the evaluator factory for the selection phase.
 	 *
-	 * @param evaluatorFactory The evaluator factory for the selection phase.
+	 * @param evaluatorFactory
+	 *            The evaluator factory for the selection phase.
 	 * @return The builder object.
 	 */
 	public B withSelectionPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluatorFactory) {
@@ -435,7 +423,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/**
 	 * Sets the number of cpus that may be used by ML-Plan.
 	 *
-	 * @param numCpus The number of cpus to use.
+	 * @param numCpus
+	 *            The number of cpus to use.
 	 * @return The builder object.
 	 */
 	public B withNumCpus(final int numCpus) {
@@ -458,7 +447,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 
 	@Override
 	public HASCOViaFDBuilder<Double, ?> getHASCOFactory() {
-		return this.hascoBuilder;
+		return MLPlan.getHASCOBuilder(this.algorithmConfig, this.dataset, this.searchSpaceFile, this.requestedHASCOInterface, this.priorizingPredicate, this.preferredNodeEvaluators, this.pipelineValidityCheckingNodeEvaluator,
+				this.nameOfHASCOMethod1, this.nameOfHASCOMethod2);
 	}
 
 	@Override
@@ -502,36 +492,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 		return this.getSelf();
 	}
 
-	protected void prepareNodeEvaluatorInFactoryWithData() {
-		if (!(this.hascoBuilder.getSearchFactory() instanceof BestFirstFactory)) {
-			return;
-		}
-		if (this.factoryPreparedWithData) {
-			throw new IllegalStateException("Factory has already been prepared with data. This can only be done once!");
-		}
-		this.factoryPreparedWithData = true;
-
-		/* nothing to do if there are no preferred node evaluators */
-		if (this.pipelineValidityCheckingNodeEvaluator == null && this.preferredNodeEvaluator == null) {
-			return;
-		}
-
-		/* now determine the real node evaluator to be used. A semantic node evaluator has highest priority */
-		IPathEvaluator<TFDNode, String, Double> actualNodeEvaluator;
-		if (this.pipelineValidityCheckingNodeEvaluator != null) {
-			this.pipelineValidityCheckingNodeEvaluator.setComponents(this.hascoBuilder.getComponents());
-			this.pipelineValidityCheckingNodeEvaluator.setData(this.dataset);
-			if (this.preferredNodeEvaluator != null) {
-				actualNodeEvaluator = new AlternativeNodeEvaluator<>(this.pipelineValidityCheckingNodeEvaluator, this.preferredNodeEvaluator);
-			} else {
-				actualNodeEvaluator = this.pipelineValidityCheckingNodeEvaluator;
-			}
-		} else {
-			actualNodeEvaluator = this.preferredNodeEvaluator;
-		}
-
-		/* update the preferred node evaluator */
-		this.preferredNodeEvaluator = actualNodeEvaluator;
+	public PipelineValidityCheckingNodeEvaluator getPipelineValidityCheckingNodeEvaluator() {
+		return this.pipelineValidityCheckingNodeEvaluator;
 	}
 
 	public B withPortionOfDataReservedForSelection(final double value) {
@@ -557,7 +519,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/**
 	 * Builds an ML-Plan object for the given dataset as input.
 	 *
-	 * @param dataset The dataset for which an ML-Plan object is to be built.
+	 * @param dataset
+	 *            The dataset for which an ML-Plan object is to be built.
 	 * @return The ML-Plan object configured with this builder.
 	 */
 	public MLPlan<L> build(final ILabeledDataset<?> dataset) {
@@ -565,24 +528,19 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	}
 
 	public void checkPreconditionsForInitialization() {
-		Objects.requireNonNull(this.dataset, "A dataset needs to be provided as input to ML-Plan");
-		Objects.requireNonNull(this.searchSelectionDatasetSplitter, "Dataset splitter for search phase must be set!");
-		Objects.requireNonNull(this.requestedHASCOInterface, "No requested HASCO interface defined!");
-	}
 
-	protected void configureHASCOBuilder() {
-		this.hascoBuilder = HASCOBuilder.get().withBestFirst().viaRandomCompletions();
-		this.hascoBuilder.withPreferredNodeEvaluator(this.preferredNodeEvaluator);
-		this.hascoBuilder.withNumSamples(this.algorithmConfig.numberOfRandomCompletions());
-		this.hascoBuilder.withSeed(this.algorithmConfig.seed());
-		this.hascoBuilder.withTimeoutForNode(new Timeout(this.algorithmConfig.timeoutForNodeEvaluation(), TimeUnit.SECONDS));
-		this.hascoBuilder.withTimeoutForSingleEvaluation(new Timeout(this.algorithmConfig.timeoutForCandidateEvaluation(), TimeUnit.SECONDS));
-		try {
-			this.hascoBuilder.withProblem(new RefinementConfiguredSoftwareConfigurationProblem<>(this.searchSpaceFile, this.requestedHASCOInterface, null));
-		} catch (IOException e) {
-			throw new IllegalArgumentException("Invalid configuration file " + this.searchSpaceFile, e);
-		}
-		this.hascoBuilder.withPriorizingPredicate(this.priorizingPredicate);
+		/* check proper problem definition */
+		Objects.requireNonNull(this.searchSpaceFile, "No search space file defined.");
+		Objects.requireNonNull(this.requestedHASCOInterface, "No requested HASCO interface defined!");
+
+		/* check that data is available */
+		Objects.requireNonNull(this.dataset, "A dataset needs to be provided as input to ML-Plan");
+
+		/* check that the evaluation factories and the search/selection splitter are defined  */
+		Objects.requireNonNull(this.learnerFactory, "The learner factory has not been set.");
+		Objects.requireNonNull(this.factoryForPipelineEvaluationInSearchPhase, "Factory for pipeline evaluation in search phase is not set!");
+		Objects.requireNonNull(this.factoryForPipelineEvaluationInSelectionPhase, "Factory for pipeline evaluation in selection phase is not set!");
+		Objects.requireNonNull(this.searchSelectionDatasetSplitter, "Dataset splitter for search phase must be set!");
 	}
 
 	/**
@@ -592,8 +550,6 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 */
 	public MLPlan<L> build() {
 		this.checkPreconditionsForInitialization();
-		this.configureHASCOBuilder();
-		this.prepareNodeEvaluatorInFactoryWithData(); // inform node evaluator about data and create the MLPlan object
 		return new MLPlan<>(this, this.dataset);
 	}
 }

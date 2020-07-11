@@ -1,8 +1,10 @@
-package ai.libs.hasco.builder.forwarddecomposition.twophase;
+package ai.libs.hasco.builder;
 
-import ai.libs.hasco.builder.HASCOBuilder;
 import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
+import ai.libs.hasco.twophase.TwoPhaseHASCO;
+import ai.libs.hasco.twophase.TwoPhaseHASCOConfig;
+import ai.libs.hasco.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 
 public class TwoPhaseHASCOBuilder<N, A> implements SoftwareConfigurationAlgorithmFactory<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double, TwoPhaseHASCO<N, A>> {

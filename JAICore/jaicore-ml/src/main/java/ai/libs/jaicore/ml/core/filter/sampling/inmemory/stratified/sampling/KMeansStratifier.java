@@ -11,42 +11,43 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Cluster the data set with k-means into k Clusters, where each cluster stands
- * for one stratum. The datapoint assignment is performed with a lookup in the
- * clusters.
+ * Cluster the data set with k-means into k Clusters, where each cluster stands for one stratum. The datapoint assignment is performed with a lookup in the clusters.
  *
  * @author Lukas Brandt
  */
-public class KMeansStratiAssigner extends ClusterStratiAssigner {
+public class KMeansStratifier extends ClusterStratiAssigner {
 
-	private Logger logger = LoggerFactory.getLogger(KMeansStratiAssigner.class);
+	private Logger logger = LoggerFactory.getLogger(KMeansStratifier.class);
+	private final int numberOfStrati;
 
 	/**
 	 * Constructor for KMeansStratiAssigner.
 	 *
 	 * @param distanceMeasure
-	 *            Distance measure for datapoints, for example Manhattan or
-	 *            Euclidian.
+	 *            Distance measure for datapoints, for example Manhattan or Euclidian.
 	 * @param randomSeed
 	 *            Seed for random numbers.
 	 */
-	public KMeansStratiAssigner(final DistanceMeasure distanceMeasure, final int randomSeed) {
+	public KMeansStratifier(final int numberOfStrati, final DistanceMeasure distanceMeasure, final int randomSeed) {
+		this.numberOfStrati = numberOfStrati;
 		this.randomSeed = randomSeed;
 		this.distanceMeasure = distanceMeasure;
 	}
 
 	@Override
-	public void init(final IDataset<?> dataset, final int stratiAmount) {
+	public int createStrati(final IDataset<?> dataset) {
 		this.setDataset(dataset);
 
 		// Perform initial Clustering of the dataset.
 		JDKRandomGenerator rand = new JDKRandomGenerator();
 		rand.setSeed(this.randomSeed);
-		List<Clusterable> cDataset = (List<Clusterable>)dataset;
-		KMeansPlusPlusClusterer<Clusterable> clusterer = new KMeansPlusPlusClusterer<>(stratiAmount, -1, this.distanceMeasure, rand);
+		@SuppressWarnings("unchecked")
+		List<Clusterable> cDataset = (List<Clusterable>) dataset;
+		KMeansPlusPlusClusterer<Clusterable> clusterer = new KMeansPlusPlusClusterer<>(this.numberOfStrati, -1, this.distanceMeasure, rand);
 		this.logger.info("Clustering dataset with {} instances.", dataset.size());
 		this.setClusters(clusterer.cluster(cDataset));
 		this.logger.info("Finished clustering");
+		return this.numberOfStrati;
 	}
 
 }

@@ -13,7 +13,6 @@ import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.classification.multilabel.learner.MekaClassifier;
-import ai.libs.mlplan.core.IProblemType;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.MultipleClassifiersCombiner;
@@ -154,10 +153,4 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 
 		return optionsList;
 	}
-
-	@Override
-	public void setProblemType(final IProblemType problemType) {
-		// currently not needed
-	}
-
 }

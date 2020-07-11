@@ -1,18 +1,24 @@
 package ai.libs.mlplan.core;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.ml.core.IDataConfigurable;
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.IPredictionPerformanceMetricConfigurable;
 import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.Timeout;
@@ -29,28 +35,33 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.hasco.builder.HASCOBuilder;
+import ai.libs.hasco.builder.TwoPhaseHASCOBuilder;
+import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsBuilder;
 import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFDBuilder;
-import ai.libs.hasco.builder.forwarddecomposition.twophase.TwoPhaseHASCO;
-import ai.libs.hasco.builder.forwarddecomposition.twophase.TwoPhaseHASCOBuilder;
-import ai.libs.hasco.builder.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
-import ai.libs.hasco.builder.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.core.events.HASCOSolutionEvent;
 import ai.libs.hasco.core.events.TwoPhaseHASCOPhaseSwitchEvent;
+import ai.libs.hasco.twophase.TwoPhaseHASCO;
+import ai.libs.hasco.twophase.TwoPhaseHASCOConfig;
+import ai.libs.hasco.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.optimizingfactory.OptimizingFactory;
 import ai.libs.jaicore.components.optimizingfactory.OptimizingFactoryProblem;
 import ai.libs.jaicore.ml.core.dataset.DatasetUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
 import ai.libs.mlplan.core.events.MLPlanPhaseSwitchedEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
@@ -71,11 +82,139 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	private TwoPhaseHASCOBuilder<TFDNode, String> twoPhaseHASCOFactory;
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, L, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
 
+	private PipelineEvaluator classifierEvaluatorForSearch;
+	private PipelineEvaluator classifierEvaluatorForSelection;
+
 	private boolean buildSelectedClasifierOnGivenData = true;
 	private final long seed;
 
 	private long timestampAlgorithmStart;
 	private boolean maintainReconstructibility = true;
+
+	public static Pair<ILabeledDataset<?>, ILabeledDataset<?>> getDataForSearchAndSelection(final ILabeledDataset<?> dataset, final double dataPortionUsedForSelection, final Random random,
+			final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> splitter, final Logger logger) throws InterruptedException, AlgorithmException {
+		ILabeledDataset<?> dataShownToSearch;
+		ILabeledDataset<?> dataShownToSelection;
+		if (dataPortionUsedForSelection > 0) {
+			try {
+				if (splitter == null) {
+					throw new IllegalArgumentException("The builder does not specify a dataset splitter for the separation between search and selection phase data.");
+				}
+				logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%) with splitter {}.", dataset.size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2),
+						MathExt.round(dataPortionUsedForSelection * 100, 2), splitter.getClass().getName());
+				if (splitter instanceof ILoggingCustomizable) {
+					((ILoggingCustomizable) splitter).setLoggerName(logger.getName() + ".searchselectsplitter");
+				}
+				List<ILabeledDataset<?>> split = splitter.split(dataset, random, dataPortionUsedForSelection);
+				final int expectedSearchSize = (int) Math.round(dataset.size() * (1 - dataPortionUsedForSelection)); // attention; this is a bit tricky (data portion for selection is in 0)
+				final int expectedSelectionSize = dataset.size() - expectedSearchSize;
+				if (Math.abs(expectedSearchSize - split.get(1).size()) > 1 || Math.abs(expectedSelectionSize - split.get(0).size()) > 1) {
+					throw new IllegalStateException("Invalid split produced by " + splitter.getClass().getName() + "! Split sizes are " + split.get(1).size() + "/" + split.get(0).size() + " but expected sizes were " + expectedSearchSize
+							+ "/" + expectedSelectionSize);
+				}
+				dataShownToSearch = split.get(1); // attention; this is a bit tricky (data portion for selection is in 0)
+				dataShownToSelection = dataset;
+				logger.debug("Search/Selection split completed. Using {} data points in search and {} in selection.", dataShownToSearch.size(), dataShownToSelection.size());
+			} catch (SplitFailedException e) {
+				throw new AlgorithmException("Error in ML-Plan execution.", e);
+			}
+		} else {
+			dataShownToSearch = dataset;
+			dataShownToSelection = null;
+			logger.debug("Selection phase de-activated. Not splitting the data and giving everything to the search.");
+		}
+		if (dataShownToSearch.isEmpty()) {
+			throw new IllegalStateException("Cannot search on no data.");
+		}
+		if (dataShownToSelection != null && dataShownToSelection.size() < dataShownToSearch.size()) {
+			throw new IllegalStateException("The search data (" + dataShownToSearch.size() + " data points) are bigger than the selection data (" + dataShownToSelection.size() + " data points)!");
+		}
+		return new Pair<>(dataShownToSearch, dataShownToSelection);
+	}
+
+	public static Pair<PipelineEvaluator, PipelineEvaluator> getPipelineEvaluators(final ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluatorFactoryForSearch,
+			final IDeterministicPredictionPerformanceMeasure<?, ?> metricForSearch, final ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluatorFactoryForSelection,
+			final IDeterministicPredictionPerformanceMeasure<?, ?> metricForSelection, final Random random, final ILabeledDataset<?> dataShownToSearch, final ILabeledDataset<?> dataShownToSelection,
+			final IEvaluationSafeGuardFactory safeGuardFactory, final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> learnerFactory, final Timeout timeoutForCandidateEvaluation)
+					throws InterruptedException, AlgorithmException, LearnerEvaluatorConstructionFailedException {
+
+		/* set random source and data for the evaluator factories */
+		if (evaluatorFactoryForSearch instanceof IPredictionPerformanceMetricConfigurable) {
+			((IPredictionPerformanceMetricConfigurable) evaluatorFactoryForSearch).setMeasure(metricForSearch);
+		}
+		if (evaluatorFactoryForSearch instanceof IRandomConfigurable) {
+			((IRandomConfigurable) evaluatorFactoryForSearch).setRandom(random);
+		}
+		if (evaluatorFactoryForSearch instanceof IDataConfigurable) {
+			((IDataConfigurable) evaluatorFactoryForSearch).setData(dataShownToSearch);
+		}
+		if (evaluatorFactoryForSelection instanceof IPredictionPerformanceMetricConfigurable) {
+			((IPredictionPerformanceMetricConfigurable) evaluatorFactoryForSelection).setMeasure(metricForSelection);
+		}
+		if (evaluatorFactoryForSelection instanceof IRandomConfigurable) {
+			((IRandomConfigurable) evaluatorFactoryForSelection).setRandom(random);
+		}
+		if (evaluatorFactoryForSelection instanceof IDataConfigurable && dataShownToSelection != null) {
+			((IDataConfigurable) evaluatorFactoryForSelection).setData(dataShownToSelection);
+		}
+
+		/* create pipeline evaluator for search phase */
+		ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> searchEvaluator = evaluatorFactoryForSearch.getLearnerEvaluator();
+		PipelineEvaluator classifierEvaluatorForSearch = new PipelineEvaluator(learnerFactory, searchEvaluator, timeoutForCandidateEvaluation);
+		if (safeGuardFactory != null) {
+			safeGuardFactory.withEvaluator(searchEvaluator);
+			try {
+				IEvaluationSafeGuard safeGuard = safeGuardFactory.build();
+				classifierEvaluatorForSearch.setSafeGuard(safeGuard);
+			} catch (InterruptedException e) {
+				throw e;
+			} catch (Exception e) {
+				throw new AlgorithmException("Could not build safe guard.", e);
+			}
+		}
+
+		/* create pipeline evaluator for selection phase */
+		PipelineEvaluator classifierEvaluatorForSelection = dataShownToSelection != null ? new PipelineEvaluator(learnerFactory, evaluatorFactoryForSelection.getLearnerEvaluator(), timeoutForCandidateEvaluation) : null;
+		return new Pair<>(classifierEvaluatorForSearch, classifierEvaluatorForSelection);
+	}
+
+	public static HASCOViaFDAndBestFirstWithRandomCompletionsBuilder getHASCOBuilder(final MLPlanClassifierConfig algorithmConfig, final ILabeledDataset<?> dataset, final File searchSpaceFile, final String requestedHASCOInterface,
+			final Predicate<TFDNode> priorizingPredicate, final List<IPathEvaluator<TFDNode, String, Double>> preferredNodeEvaluators, final PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator, final String nameOfMethod1, final String nameOfMethod2) {
+
+		/* compile software composition problem and create the builder */
+		RefinementConfiguredSoftwareConfigurationProblem<Double> problem;
+		try {
+			problem = new RefinementConfiguredSoftwareConfigurationProblem<>(searchSpaceFile, requestedHASCOInterface, null);
+		} catch (IOException e) {
+			throw new IllegalArgumentException("Invalid configuration file " + searchSpaceFile, e);
+		}
+		HASCOViaFDAndBestFirstWithRandomCompletionsBuilder hascoBuilder = HASCOBuilder.get(problem).withBestFirst().viaRandomCompletions();
+
+		/* now configure the chain of preferred node evaluators (taking in account that the ones about checking validity and preferred components are the most important one) */
+		List<IPathEvaluator<TFDNode, String, Double>> neChain = new ArrayList<>();
+		if (pipelineValidityCheckingNodeEvaluator != null) {
+			neChain.add(pipelineValidityCheckingNodeEvaluator);
+		}
+		if (algorithmConfig.preferredComponents() != null && !algorithmConfig.preferredComponents().isEmpty()) {
+			Objects.requireNonNull(nameOfMethod1, "First HASCO method must not be null!");
+			Objects.requireNonNull(nameOfMethod2, "Second HASCO method must not be null!");
+			neChain.add(new PreferenceBasedNodeEvaluator(problem.getComponents(), algorithmConfig.preferredComponents(), nameOfMethod1, nameOfMethod2));
+		}
+		neChain.addAll(preferredNodeEvaluators);
+		if (!neChain.isEmpty()) {
+			IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator = neChain.remove(0);
+			for (IPathEvaluator<TFDNode, String, Double> ne : neChain) {
+				preferredNodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluator, ne);
+			}
+			hascoBuilder.withPreferredNodeEvaluator(preferredNodeEvaluator);
+		}
+		hascoBuilder.withNumSamples(algorithmConfig.numberOfRandomCompletions());
+		hascoBuilder.withSeed(algorithmConfig.seed());
+		hascoBuilder.withTimeoutForNode(new Timeout(algorithmConfig.timeoutForNodeEvaluation(), TimeUnit.SECONDS));
+		hascoBuilder.withTimeoutForSingleEvaluation(new Timeout(algorithmConfig.timeoutForCandidateEvaluation(), TimeUnit.SECONDS));
+		hascoBuilder.withPriorizingPredicate(priorizingPredicate);
+		return hascoBuilder;
+	}
 
 	protected MLPlan(final IMLPlanBuilder<L, ?> builder, final ILabeledDataset<?> data) { // ML-Plan has a package visible constructor, because it should only be constructed using a builder
 		super(builder.getAlgorithmConfig(), data);
@@ -84,16 +223,17 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 		if (builder.getSearchSpaceConfigFile() == null || !builder.getSearchSpaceConfigFile().exists()) {
 			throw new IllegalArgumentException("The search space configuration file must be set in MLPlanBuilder, and it must be set to a file that exists!");
 		}
-		if (builder.getLearnerFactory() == null) {
-			throw new IllegalArgumentException("ClassifierFactory must be set in MLPlanBuilder!");
-		}
+		Objects.requireNonNull(builder.getLearnerFactory(), "The learner factory must be set in MLPlanBuilder!");
 		if (builder.getRequestedInterface() == null || builder.getRequestedInterface().isEmpty()) {
 			throw new IllegalArgumentException("No requested HASCO interface defined!");
 		}
 
+		if (this.getConfig().getTimeout().seconds() <= this.getConfig().precautionOffset()) {
+			throw new IllegalArgumentException("Illegal timeout configuration. The precaution offset must be strictly smaller than the specified timeout.");
+		}
+
 		/* store builder and data for main algorithm */
 		this.builder = builder;
-		this.setTimeout(new Timeout(builder.getAlgorithmConfig().timeout(), TimeUnit.MILLISECONDS));
 		Objects.requireNonNull(this.getInput());
 		if (this.getInput().isEmpty()) {
 			throw new IllegalArgumentException("Cannot run ML-Plan on empty dataset.");
@@ -109,12 +249,11 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
 		case CREATED:
-			this.setTimeoutPrecautionOffset(Math.max(5000, this.getTimeoutPrecautionOffset())); // minimum 5 seconds precaution offset for timeouts
+			this.setTimeoutPrecautionOffset(1000); // for this routine, only consider a precaution of 1s
 			this.logger.info("Starting an ML-Plan instance. Timeout precaution is {}ms", this.getTimeoutPrecautionOffset());
 			this.timestampAlgorithmStart = System.currentTimeMillis();
 			this.setDeadline(); // algorithm execution starts NOW, set deadline
@@ -125,45 +264,10 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			}
 
 			/* set up exact splits */
-			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
-			ILabeledDataset<?> dataShownToSearch;
-			ILabeledDataset<?> dataShownToSelection;
-			if (dataPortionUsedForSelection > 0) {
-				try {
-					int seed = this.getConfig().randomSeed();
-					IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> splitter = this.builder.getSearchSelectionDatasetSplitter();
-					if (splitter == null) {
-						throw new IllegalArgumentException("The builder does not specify a dataset splitter for the separation between search and selection phase data.");
-					}
-					this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%) with splitter {}.", this.getInput().size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2),
-							MathExt.round(dataPortionUsedForSelection * 100, 2), splitter.getClass().getName());
-					if (splitter instanceof ILoggingCustomizable) {
-						((ILoggingCustomizable) splitter).setLoggerName(this.getLoggerName() + ".searchselectsplitter");
-					}
-					List<ILabeledDataset<?>> split = splitter.split(this.getInput(), new Random(seed), dataPortionUsedForSelection);
-					final int expectedSearchSize = (int) Math.round(this.getInput().size() * (1 - dataPortionUsedForSelection)); // attention; this is a bit tricky (data portion for selection is in 0)
-					final int expectedSelectionSize = this.getInput().size() - expectedSearchSize;
-					if (Math.abs(expectedSearchSize - split.get(1).size()) > 1 || Math.abs(expectedSelectionSize - split.get(0).size()) > 1) {
-						throw new IllegalStateException("Invalid split produced by " + splitter.getClass().getName() + "! Split sizes are " + split.get(1).size() + "/" + split.get(0).size() + " but expected sizes were " + expectedSearchSize
-								+ "/" + expectedSelectionSize);
-					}
-					dataShownToSearch = split.get(1); // attention; this is a bit tricky (data portion for selection is in 0)
-					dataShownToSelection = this.getInput();
-					this.logger.debug("Search/Selection split completed. Using {} data points in search and {} in selection.", dataShownToSearch.size(), dataShownToSelection.size());
-				} catch (SplitFailedException e) {
-					throw new AlgorithmException("Error in ML-Plan execution.", e);
-				}
-			} else {
-				dataShownToSearch = this.getInput();
-				dataShownToSelection = null;
-				this.logger.debug("Selection phase de-activated. Not splitting the data and giving everything to the search.");
-			}
-			if (dataShownToSearch.isEmpty()) {
-				throw new IllegalStateException("Cannot search on no data.");
-			}
-			if (dataShownToSelection != null && dataShownToSelection.size() < dataShownToSearch.size()) {
-				throw new IllegalStateException("The search data (" + dataShownToSearch.size() + " data points) are bigger than the selection data (" + dataShownToSelection.size() + " data points)!");
-			}
+			Pair<ILabeledDataset<?>, ILabeledDataset<?>> split = getDataForSearchAndSelection(this.getInput(), this.getConfig().dataPortionForSelection(), new Random(this.getConfig().seed()),
+					this.builder.getSearchSelectionDatasetSplitter(), this.logger);
+			ILabeledDataset<?> dataShownToSearch = split.getX();
+			ILabeledDataset<?> dataShownToSelection = split.getY();
 
 			/* check that class proportions are maintained */
 			if (this.logger.isDebugEnabled()) {
@@ -192,57 +296,30 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 
 			/* setup the pipeline evaluators */
 			this.logger.debug("Setting up the pipeline evaluators.");
-			ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluatorFactoryForSearch = this.builder.getLearnerEvaluationFactoryForSearchPhase();
-			if (evaluatorFactoryForSearch instanceof IRandomConfigurable) {
-				((IRandomConfigurable) evaluatorFactoryForSearch).setRandom(new Random(this.seed));
-			}
-			if (evaluatorFactoryForSearch instanceof IDataConfigurable) {
-				((IDataConfigurable) evaluatorFactoryForSearch).setData(dataShownToSearch);
-			}
-			ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> evaluatorFactoryForSelection = this.builder.getLearnerEvaluationFactoryForSelectionPhase();
-			if (evaluatorFactoryForSelection instanceof IRandomConfigurable) {
-				((IRandomConfigurable) evaluatorFactoryForSelection).setRandom(new Random(this.seed));
-			}
-			if (evaluatorFactoryForSelection instanceof IDataConfigurable && dataShownToSelection != null) {
-				((IDataConfigurable) evaluatorFactoryForSelection).setData(dataShownToSelection);
-			}
-			PipelineEvaluator classifierEvaluatorForSearch;
-			PipelineEvaluator classifierEvaluatorForSelection;
+			Pair<PipelineEvaluator, PipelineEvaluator> evaluators;
 			try {
-				ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> searchEvaluator = evaluatorFactoryForSearch.getLearnerEvaluator();
-				classifierEvaluatorForSearch = new PipelineEvaluator(this.builder.getLearnerFactory(), searchEvaluator, new Timeout(this.getConfig().timeoutForCandidateEvaluation(), TimeUnit.MILLISECONDS));
-				if (this.builder.getSafeGuardFactory() != null) {
-					IEvaluationSafeGuardFactory safeGuardFactory = this.builder.getSafeGuardFactory();
-					safeGuardFactory.withEvaluator(searchEvaluator);
-					try {
-						IEvaluationSafeGuard safeGuard = safeGuardFactory.build();
-						safeGuard.registerListener(this);
-						classifierEvaluatorForSearch.setSafeGuard(safeGuard);
-					} catch (InterruptedException e) {
-						throw e;
-					} catch (Exception e) {
-						throw new AlgorithmException("Could not build safe guard.", e);
-					}
-				}
-
-				classifierEvaluatorForSelection = dataShownToSelection != null
-						? new PipelineEvaluator(this.builder.getLearnerFactory(), evaluatorFactoryForSelection.getLearnerEvaluator(), new Timeout(this.getConfig().timeoutForCandidateEvaluation(), TimeUnit.MILLISECONDS))
-								: null;
+				evaluators = getPipelineEvaluators(this.builder.getLearnerEvaluationFactoryForSearchPhase(), this.builder.getMetricForSearchPhase(), this.builder.getLearnerEvaluationFactoryForSelectionPhase(),
+						this.builder.getMetricForSelectionPhase(), new Random(this.seed), dataShownToSearch, dataShownToSelection, this.builder.getSafeGuardFactory(), this.builder.getLearnerFactory(), this.getConfig().getTimeout());
 			} catch (LearnerEvaluatorConstructionFailedException e2) {
-				throw new AlgorithmException("Could not create the pipeline evaluator", e2);
+				throw new AlgorithmException("Could not create the evaluators.", e2);
 			}
-			classifierEvaluatorForSearch.registerListener(this); // events will be forwarded
-			if (classifierEvaluatorForSelection != null) {
-				classifierEvaluatorForSelection.registerListener(this); // events will be forwarded
+			this.classifierEvaluatorForSearch = evaluators.getX();
+			this.classifierEvaluatorForSelection = evaluators.getY();
+			this.classifierEvaluatorForSearch.registerListener(this); // events will be forwarded
+			if (this.classifierEvaluatorForSearch.getSafeGuard() != null) {
+				this.classifierEvaluatorForSearch.getSafeGuard().registerListener(this);
+			}
+			if (this.classifierEvaluatorForSelection != null) {
+				this.classifierEvaluatorForSelection.registerListener(this); // events will be forwarded
 			}
 
 			/* communicate the parameters with which ML-Plan will run */
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info(
-						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tData points used during search: {}\n\tData points used during selection: {}\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
-						this.getInput().getRelationName(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000, this.getConfig().timeoutForNodeEvaluation() / 1000,
+						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tRemaining Time after initialization: {}s\n\tTimeout Precaution Offset: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tData points used during search: {}\n\tData points used during selection: {}\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
+						this.getInput().getRelationName(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getRemainingTimeToDeadline().seconds(), this.getConfig().precautionOffset(), this.getConfig().timeoutForCandidateEvaluation() / 1000, this.getConfig().timeoutForNodeEvaluation() / 1000,
 						this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), dataShownToSearch.size(), dataShownToSelection != null ? dataShownToSelection.size() : 0,
-								classifierEvaluatorForSearch.getBenchmark(), classifierEvaluatorForSelection != null ? classifierEvaluatorForSelection.getBenchmark() : null, this.getConfig().expectedBlowupInSelection(),
+								this.classifierEvaluatorForSearch.getBenchmark(), this.classifierEvaluatorForSelection != null ? this.classifierEvaluatorForSelection.getBenchmark() : null, this.getConfig().expectedBlowupInSelection(),
 										this.getConfig().expectedBlowupInPostprocessing());
 			}
 
@@ -250,9 +327,10 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			this.logger.debug("Creating 2-phase software configuration problem.");
 			TwoPhaseSoftwareConfigurationProblem problem = null;
 			try {
-				problem = new TwoPhaseSoftwareConfigurationProblem(this.builder.getSearchSpaceConfigFile(), this.builder.getRequestedInterface(), classifierEvaluatorForSearch, classifierEvaluatorForSelection);
+				problem = new TwoPhaseSoftwareConfigurationProblem(this.builder.getSearchSpaceConfigFile(), this.builder.getRequestedInterface(), this.classifierEvaluatorForSearch, this.classifierEvaluatorForSelection);
 			} catch (IOException e1) {
-				throw new AlgorithmException("Could not activate ML-Plan!", e1);
+				throw new AlgorithmException("Could not create the 2-phase configuration problem with search space file \"" + this.builder.getSearchSpaceConfigFile() + "\" and required interface " + this.builder.getRequestedInterface(),
+						e1);
 			}
 
 			/* create 2-phase HASCO */
@@ -264,6 +342,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.twoPhaseHASCOFactory);
 			this.logger.info("Setting logger of {} to {}.optimizingfactory", this.optimizingFactory.getClass().getName(), this.loggerName);
 			this.optimizingFactory.setLoggerName(this.loggerName + ".optimizingfactory");
+			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
 			this.optimizingFactory.registerListener(new Object() {
 				@Subscribe
 				public void receiveEventFromFactory(final IEvent event) {
@@ -302,9 +381,9 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 					}
 				}
 			});
-
-			this.optimizingFactory.setTimeout(this.getRemainingTimeToDeadline());
-			this.logger.info("Initializing the optimization factory.");
+			Timeout remainingTimeConsideringPrecaution = new Timeout(this.getRemainingTimeToDeadline().seconds() - this.getConfig().precautionOffset(), TimeUnit.SECONDS);
+			this.logger.info("Initializing the optimization factory with timeout {}.", remainingTimeConsideringPrecaution);
+			this.optimizingFactory.setTimeout(remainingTimeConsideringPrecaution);
 			this.optimizingFactory.init();
 			AlgorithmInitializedEvent event = this.activate();
 			this.logger.info("Started and activated ML-Plan.");
@@ -356,6 +435,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	@Override
 	public void setLoggerName(final String name) {
 		this.loggerName = name;
+		super.setLoggerName(name + "._algorithm");
 		this.logger.info("Switching logger name to {}", name);
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated ML-Plan logger {}. Now setting logger of twoPhaseHASCO to {}.2phasehasco", name, name);
@@ -423,6 +503,14 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 
 	public IAlgorithm<?, ?> getSearch() {
 		return this.getHASCO().getSearch();
+	}
+
+	public PipelineEvaluator getClassifierEvaluatorForSearch() {
+		return this.classifierEvaluatorForSearch;
+	}
+
+	public PipelineEvaluator getClassifierEvaluatorForSelection() {
+		return this.classifierEvaluatorForSelection;
 	}
 
 	@Subscribe

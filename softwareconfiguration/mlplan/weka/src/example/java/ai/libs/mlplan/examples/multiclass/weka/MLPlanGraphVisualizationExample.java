@@ -43,7 +43,7 @@ public class MLPlanGraphVisualizationExample {
 		MLPlanWekaBuilder mlplanBuilder = new MLPlanWekaBuilder().withNumCpus(4).withTimeOut(new Timeout(60, TimeUnit.SECONDS)).withCandidateEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS))
 				.withNodeEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS)).withDataset(split.get(0));
 		MLPlan<IWekaClassifier> mlplan = mlplanBuilder.build();
-		mlplan.setLoggerName("testedalgorithm");
+		mlplan.setLoggerName("example");
 
 		/* create visualization */
 		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan);

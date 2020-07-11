@@ -1,6 +1,7 @@
 package ai.libs.mlplan.core;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -10,23 +11,13 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 
 public abstract class PipelineValidityCheckingNodeEvaluator implements IPathEvaluator<TFDNode, String, Double> {
 
-	private ILabeledDataset<?> data;
-	private Collection<Component> components;
-
-	public PipelineValidityCheckingNodeEvaluator() {
-
-	}
+	private final ILabeledDataset<?> data;
+	private final Collection<Component> components;
 
 	public PipelineValidityCheckingNodeEvaluator(final Collection<Component> components, final ILabeledDataset<?> data) {
+		Objects.requireNonNull(components);
+		Objects.requireNonNull(data);
 		this.data = data;
-		this.components = components;
-	}
-
-	public void setData(final ILabeledDataset<?> data) {
-		this.data = data;
-	}
-
-	public void setComponents(final Collection<Component> components) {
 		this.components = components;
 	}
 
