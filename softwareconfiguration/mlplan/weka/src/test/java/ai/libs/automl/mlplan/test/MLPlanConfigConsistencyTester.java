@@ -43,7 +43,6 @@ public class MLPlanConfigConsistencyTester {
 	public void init() throws IOException {
 		this.data = new Instances(new FileReader(new File("testrsc/car.arff"))); // read the file intentionally into the Instances format!
 		this.data.setClassIndex(this.data.numAttributes() - 1);
-		System.out.println("Loaded dataset with " + this.data.size() + " instances.");
 	}
 
 	@Test
@@ -65,13 +64,14 @@ public class MLPlanConfigConsistencyTester {
 	public void testEvaluationTimeoutsForRCNEIfSetInMLPlan() throws IOException {
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder().withNodeEvaluationTimeOut(this.timeoutForNodeEvaluation).withCandidateEvaluationTimeOut(this.timeoutForSingleSolutionEvaluation);
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(new WekaInstances(this.data)).build();
+		mlplan.setLoggerName("testedalgorithm");
 		mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, "" + this.timeoutForNodeEvaluation.milliseconds());
 		mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, "" + this.timeoutForSingleSolutionEvaluation.milliseconds());
-		IAlgorithmEvent event = mlplan.next();
+		IAlgorithmEvent event = mlplan.next(); // now initialize
 		assertTrue(event instanceof AlgorithmInitializedEvent);
 		TwoPhaseHASCO twoPhaseHasco = (TwoPhaseHASCO) mlplan.getOptimizingFactory().getOptimizer();
 		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = (RefinementConfiguredSoftwareConfigurationProblem<Double>) twoPhaseHasco.getHasco().getInput();
-		BestFirst search = (BestFirst) twoPhaseHasco.getHasco().getSearch();
+		BestFirst search = (BestFirst) mlplan.getSearch();
 		RandomCompletionBasedNodeEvaluator rcne = (RandomCompletionBasedNodeEvaluator) ((AlternativeNodeEvaluator) search.getNodeEvaluator()).getEvaluator();
 		PipelineEvaluator pe = (PipelineEvaluator) problem.getCompositionEvaluator();
 		assertEquals(this.timeoutForNodeEvaluation.milliseconds(), rcne.getTimeoutForNodeEvaluationInMS());

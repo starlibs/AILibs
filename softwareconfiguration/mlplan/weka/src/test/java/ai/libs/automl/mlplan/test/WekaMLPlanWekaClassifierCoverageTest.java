@@ -11,7 +11,7 @@ import org.junit.Test;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 
-public class WekaMLPlanWekaClassifierTest {
+public class WekaMLPlanWekaClassifierCoverageTest {
 
 	@Test
 	public void testClassifierCoverage() throws IOException {

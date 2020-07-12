@@ -50,6 +50,7 @@ import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
@@ -210,8 +211,8 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 		}
 		hascoBuilder.withNumSamples(algorithmConfig.numberOfRandomCompletions());
 		hascoBuilder.withSeed(algorithmConfig.seed());
-		hascoBuilder.withTimeoutForNode(new Timeout(algorithmConfig.timeoutForNodeEvaluation(), TimeUnit.SECONDS));
-		hascoBuilder.withTimeoutForSingleEvaluation(new Timeout(algorithmConfig.timeoutForCandidateEvaluation(), TimeUnit.SECONDS));
+		hascoBuilder.withTimeoutForNode(new Timeout(algorithmConfig.timeoutForNodeEvaluation(), TimeUnit.MILLISECONDS));
+		hascoBuilder.withTimeoutForSingleEvaluation(new Timeout(algorithmConfig.timeoutForCandidateEvaluation(), TimeUnit.MILLISECONDS));
 		hascoBuilder.withPriorizingPredicate(priorizingPredicate);
 		return hascoBuilder;
 	}
@@ -476,6 +477,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	}
 
 	public IPathSearchInput<TFDNode, String> getSearchProblemInputGenerator() {
+		this.initializeIfNotDone();
 		return ((TwoPhaseHASCO<TFDNode, String>) this.optimizingFactory.getOptimizer()).getGraphSearchInput();
 	}
 
@@ -498,11 +500,19 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	}
 
 	public HASCO<?, ?, ?> getHASCO() {
+		this.initializeIfNotDone();
 		return ((TwoPhaseHASCO<?, ?>) this.optimizingFactory.getOptimizer()).getHasco();
 	}
 
 	public IAlgorithm<?, ?> getSearch() {
+		this.initializeIfNotDone();
 		return this.getHASCO().getSearch();
+	}
+
+	private void initializeIfNotDone() {
+		if (this.getState() == EAlgorithmState.CREATED) {
+			this.next(); // initialize
+		}
 	}
 
 	public PipelineEvaluator getClassifierEvaluatorForSearch() {

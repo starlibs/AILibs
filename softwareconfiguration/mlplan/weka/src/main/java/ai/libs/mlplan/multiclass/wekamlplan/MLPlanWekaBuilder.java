@@ -42,6 +42,7 @@ public class MLPlanWekaBuilder extends AbstractMLPlanBuilder<IWekaClassifier, ML
 		this.withSearchPhaseEvaluatorFactory(new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod));
 		this.withSelectionPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(3).withTrainFoldSize(.7));
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + 10);
+		throw new UnsupportedOperationException("Learning Curve Prediction based ML-Plan runs are not supported in this release. They will be activated again in the upcoming release.");
 	}
 
 	@Override
