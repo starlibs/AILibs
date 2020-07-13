@@ -29,7 +29,7 @@ import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictio
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedComputation;
 import ai.libs.mlplan.multiclass.sklearn.EMLPlanSkLearnProblemType;
-import ai.libs.mlplan.multiclass.sklearn.SKLearnClassifierFactory;
+import ai.libs.mlplan.multiclass.sklearn.ASKLearnClassifierFactory;
 
 public class SearchSpaceConfigurationTester {
 
@@ -40,7 +40,7 @@ public class SearchSpaceConfigurationTester {
 	private static final String DATA = "testrsc/rul_smallExample.arff";
 
 	private static List<ComponentInstance> allComponentInstances;
-	private static SKLearnClassifierFactory<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> factory;
+	private static ASKLearnClassifierFactory<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> factory;
 	private static MonteCarloCrossValidationEvaluator evaluator;
 	private static int numberOfPipelinesFound;
 	private static int numberOfErrorsFound;
@@ -48,7 +48,7 @@ public class SearchSpaceConfigurationTester {
 	public static void main(final String[] args) throws Exception {
 		allComponentInstances = new ArrayList<>(ComponentUtil.getAllAlgorithmSelectionInstances(PROBLEM_TYPE.getRequestedInterface(),
 				new ComponentLoader(FileUtil.getExistingFileWithHighestPriority(PROBLEM_TYPE.getSearchSpaceConfigFileFromResource(), PROBLEM_TYPE.getSearchSpaceConfigFromFileSystem())).getComponents()));
-		factory = new SKLearnClassifierFactory<>(EMLPlanSkLearnProblemType.RUL);
+		factory = new ASKLearnClassifierFactory<>(EMLPlanSkLearnProblemType.RUL);
 
 		factory.setAnacondaEnvironment("pdm");
 		factory.setPathVariable("/Users/tanja/anaconda3/bin:/Users/tanja/anaconda3/condabin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/TeX/texbin");

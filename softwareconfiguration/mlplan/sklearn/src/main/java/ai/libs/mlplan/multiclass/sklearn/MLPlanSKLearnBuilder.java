@@ -1,7 +1,6 @@
 package ai.libs.mlplan.multiclass.sklearn;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
@@ -17,18 +16,15 @@ import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.SystemRequirementsNotMetException;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
-import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 
-public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBatch> extends AbstractMLPlanBuilder<ScikitLearnWrapper<P, B>, MLPlanSKLearnBuilder<P, B>> {
+public abstract class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBatch> extends AbstractMLPlanBuilder<ScikitLearnWrapper<P, B>, MLPlanSKLearnBuilder<P, B>> {
 
 	private Logger logger = LoggerFactory.getLogger(MLPlanSKLearnBuilder.class);
 
@@ -47,7 +43,7 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 
 	/* DEFAULT VALUES FOR THE SCIKIT-LEARN SETTING */
 	private static final EMLPlanSkLearnProblemType DEF_PROBLEM_TYPE = EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS;
-	private static final SKLearnClassifierFactory DEF_CLASSIFIER_FACTORY = new SKLearnClassifierFactory(DEF_PROBLEM_TYPE);
+	private static final ASKLearnClassifierFactory DEF_CLASSIFIER_FACTORY = new ASKLearnClassifierFactory();
 	private static final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> DEF_SEARCH_SELECT_SPLITTER = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), DEFAULT_SEARCH_TRAIN_FOLD_SIZE,
 			new Random(0));
 
@@ -73,19 +69,6 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 		super(DEF_PROBLEM_TYPE);
 		this.skipSetupCheck = skipSetupCheck;
 		this.withLearnerFactory(DEF_CLASSIFIER_FACTORY);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public MLPlanSKLearnBuilder<P, B> withLearnerFactory(final ILearnerFactory<ScikitLearnWrapper<P, B>> factory) {
-		super.withLearnerFactory(factory);
-		if (this.logger.isInfoEnabled()) {
-			this.logger.info("Setting factory for the problem type {}: {}", this.problemType.getName(), factory.getClass().getSimpleName());
-		}
-		if (this.problemType != null) {
-			this.getLearnerFactory().setProblemType(this.problemType);
-		}
-		return this.getSelf();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -219,22 +202,22 @@ public class MLPlanSKLearnBuilder<P extends IPrediction, B extends IPredictionBa
 				|| (rel == PYTHON_MINIMUM_REQUIRED_VERSION_REL && maj == PYTHON_MINIMUM_REQUIRED_VERSION_MAJ && min >= PYTHON_MINIMUM_REQUIRED_VERSION_MIN));
 	}
 
-	@Override
-	public MLPlanSKLearnBuilder<P, B> withSearchSpaceConfigFile(final File searchSpaceConfig) throws IOException {
-		super.withSearchSpaceConfigFile(searchSpaceConfig);
-		if (this.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS) == null) {
-			this.withPreferredComponentsFile(FileUtil.getExistingFileWithHighestPriority(this.problemType.getPreferredComponentListFromResource(), this.problemType.getPreferredComponentListFromFileSystem()),
-					this.problemType.getLastHASCOMethodPriorToParameterRefinementOfBareLearner(), true);
-		} else {
-			this.withPreferredComponentsFile(new File(this.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS)), this.problemType.getLastHASCOMethodPriorToParameterRefinementOfBareLearner(), true);
-		}
-		return this.getSelf();
-	}
+	//	@Override
+	//	public MLPlanSKLearnBuilder<P, B> withSearchSpaceConfigFile(final File searchSpaceConfig) throws IOException {
+	//		super.withSearchSpaceConfigFile(searchSpaceConfig);
+	//		if (this.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS) == null) {
+	//			this.withPreferredComponentsFile(FileUtil.getExistingFileWithHighestPriority(this.problemType.getPreferredComponentListFromResource(), this.problemType.getPreferredComponentListFromFileSystem()),
+	//					this.problemType.getLastHASCOMethodPriorToParameterRefinementOfBareLearner(), true);
+	//		} else {
+	//			this.withPreferredComponentsFile(new File(this.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS)), this.problemType.getLastHASCOMethodPriorToParameterRefinementOfBareLearner(), true);
+	//		}
+	//		return this.getSelf();
+	//	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public SKLearnClassifierFactory getLearnerFactory() {
-		return (SKLearnClassifierFactory) super.getLearnerFactory();
+	public ASKLearnClassifierFactory getLearnerFactory() {
+		return (ASKLearnClassifierFactory) super.getLearnerFactory();
 	}
 
 	@Override

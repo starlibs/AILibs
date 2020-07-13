@@ -22,7 +22,7 @@ import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.serialization.ComponentLoader;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.mlplan.multiclass.sklearn.EMLPlanSkLearnProblemType;
-import ai.libs.mlplan.multiclass.sklearn.SKLearnClassifierFactory;
+import ai.libs.mlplan.multiclass.sklearn.ASKLearnClassifierFactory;
 import weka.core.Instances;
 
 /**
@@ -65,7 +65,7 @@ public class SKLearnClassifierFactoryTest {
 
 	/* Objects for tests */
 	private static List<Instances> stratSplit;
-	private static SKLearnClassifierFactory factory;
+	private static ASKLearnClassifierFactory factory;
 
 	@BeforeClass
 	public static void setup() throws FileNotFoundException, IOException, InterruptedException, SplitFailedException {
@@ -77,7 +77,7 @@ public class SKLearnClassifierFactoryTest {
 		cl = new ComponentLoader(COMPONENT_REPO);
 
 		/* init factory */
-		factory = new SKLearnClassifierFactory(EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS);
+		factory = new ASKLearnClassifierFactory(EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS);
 	}
 
 	@Test

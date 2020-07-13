@@ -1,13 +1,19 @@
 package ai.libs.mlplan.multiclass.sklearn;
 
+import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.ESkLearnProblemType;
 import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
+import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
+import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.core.IProblemType;
 
-public enum EMLPlanSkLearnProblemType implements IProblemType {
+public enum EMLPlanSkLearnProblemType implements IProblemType<ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>> {
 
 	CLASSIFICATION_MULTICLASS(ESkLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/sklearn-mlplan.json", "conf/mlplan-sklearn.json", "automl/searchmodels/sklearn/sklearn-preferenceList.txt", "conf/sklearn-preferenceList.txt", "MLPipeline",
 			"BasicClassifier", EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, 0.0), //
@@ -104,11 +110,6 @@ public enum EMLPlanSkLearnProblemType implements IProblemType {
 		return this.performanceMetricForSelectionPhase;
 	}
 
-	@Override
-	public double getPortionOfDataReservedForSelectionPhase() {
-		return this.portionOfDataReservedForSelectionPhase;
-	}
-
 	public static IProblemType getProblemType(final String preferredComponentName) {
 		for (EMLPlanSkLearnProblemType problemType : EMLPlanSkLearnProblemType.values()) {
 			if (problemType.getLastHASCOMethodPriorToParameterRefinementOfBareLearner().equals(preferredComponentName)) {
@@ -121,6 +122,18 @@ public enum EMLPlanSkLearnProblemType implements IProblemType {
 	@Override
 	public String getName() {
 		return this.getClass().getSimpleName() + "." + this.toString();
+	}
+
+	@Override
+	public ILearnerFactory<ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>> getLearnerFactory() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> getSearchSelectionDatasetSplitter() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

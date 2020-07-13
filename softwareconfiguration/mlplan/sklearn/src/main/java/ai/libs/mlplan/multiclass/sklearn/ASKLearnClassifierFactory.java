@@ -28,17 +28,15 @@ import ai.libs.mlplan.core.ILearnerFactory;
  *
  * @author wever
  */
-public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredictionBatch> implements ILearnerFactory<ScikitLearnWrapper<P, B>>, ILoggingCustomizable {
+public abstract class ASKLearnClassifierFactory<P extends IPrediction, B extends IPredictionBatch> implements ILearnerFactory<ScikitLearnWrapper<P, B>>, ILoggingCustomizable {
 
-	private static final String N_PREPROCESSOR = "preprocessor";
+	public static final String N_PREPROCESSOR = "preprocessor";
 
 	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList("True", "False"));
 	private static final List<String> EXCEPTIONS = Arrays.asList("None", "np.inf", "f_regression");
 
-	private Logger logger = LoggerFactory.getLogger(SKLearnClassifierFactory.class);
+	private Logger logger = LoggerFactory.getLogger(ASKLearnClassifierFactory.class);
 	private String loggerName;
-
-	//	private EMLPlanSkLearnProblemType problemType;
 	private String pathVariable;
 	private String anacondaEnvironment;
 	private long seed;
@@ -70,6 +68,8 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 		}
 	}
 
+	public abstract String getPipelineBuildString(final ComponentInstance groundComponent, final Set<String> importSet);
+
 	public String extractSKLearnConstructInstruction(final ComponentInstance groundComponent, final Set<String> importSet) {
 		StringBuilder sb = new StringBuilder();
 		if (groundComponent.getComponent().getName().startsWith("mlplan.util.model.make_forward")) {
@@ -98,25 +98,7 @@ public class SKLearnClassifierFactory<P extends IPrediction, B extends IPredicti
 		sb.append(className);
 		sb.append("(");
 		if (groundComponent.getComponent().getName().contains("make_pipeline")) {
-			if (this.problemType == EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS) {
-				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get(N_PREPROCESSOR), importSet));
-				sb.append(",");
-				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("classifier"), importSet));
-			} else if (this.problemType == EMLPlanSkLearnProblemType.RUL) {
-				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("timeseries_transformer"), importSet));
-				sb.append(",");
-				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("data_cleaner"), importSet));
-				sb.append(",");
-				int i = 0;
-				while (groundComponent.getSatisfactionOfRequiredInterfaces().get(N_PREPROCESSOR + i) != null) {
-					if (!groundComponent.getSatisfactionOfRequiredInterfaces().get(N_PREPROCESSOR + i).getComponent().getName().equals("NoPreprocessor")) {
-						sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get(N_PREPROCESSOR + i), importSet));
-						sb.append(",");
-					}
-					i++;
-				}
-				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("regressor"), importSet));
-			}
+			sb.append(this.getPipelineBuildString(groundComponent, importSet));
 		} else if (groundComponent.getComponent().getName().contains("make_union"))
 
 		{
