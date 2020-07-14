@@ -42,35 +42,33 @@ import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictio
 import ai.libs.jaicore.processes.OS;
 import ai.libs.jaicore.processes.ProcessIDNotRetrievableException;
 import ai.libs.jaicore.processes.ProcessUtil;
+import ai.libs.python.IPythonConfig;
 
 /**
  * Wraps a Scikit-Learn Python process by utilizing a template to start a classifier in Scikit with the given classifier.
  *
- * Usage:
- * Set the constructInstruction to exactly the command how the classifier should be instantiated. E.g. "LinearRegression()" or "MLPRegressor(solver = 'lbfg')".
+ * Usage: Set the constructInstruction to exactly the command how the classifier should be instantiated. E.g. "LinearRegression()" or "MLPRegressor(solver = 'lbfg')".
  *
- * Set the imports to exactly what the additional imports lines that are necessary to run the construction command must look like. It is up to the user to decide whether fully
- * qualified names or only the class name themself are used as long as the import is on par with the construct call.
- * E.g (without namespace in construct call) "from sklearn.linear_model import LinearRegression" or (without namespace) "import sklearn.linear_model"
- * createImportStatementFromImportFolder might help to import an own folder of modules. It initializes the folder to be utilizable as a source of modules.
- * Depending on the shape of the construct call the keepNamespace flag must be set (as described above).
+ * Set the imports to exactly what the additional imports lines that are necessary to run the construction command must look like. It is up to the user to decide whether fully qualified names or only the class name themself are used as long
+ * as the import is on par with the construct call. E.g (without namespace in construct call) "from sklearn.linear_model import LinearRegression" or (without namespace) "import sklearn.linear_model" createImportStatementFromImportFolder
+ * might help to import an own folder of modules. It initializes the folder to be utilizable as a source of modules. Depending on the shape of the construct call the keepNamespace flag must be set (as described above).
  *
  * Before starting the classification it must be set whether the given dataset is a categorical or a regression task (setIsRegression).
  *
- * If the task is a multi target prediction, setTargets must be used to define which columns of the dataset are the targets.
- * If no targets are defined it is assumed that only the last column is the target vector.
+ * If the task is a multi target prediction, setTargets must be used to define which columns of the dataset are the targets. If no targets are defined it is assumed that only the last column is the target vector.
  *
  * Moreover, the outputFolder might be set to something else but the default (setOutputFolder).
  *
  * Now buildClassifier can be run.
  *
- * If classifyInstances is run with the same ScikitLearnWrapper instance after training, the previously trained model is used for testing.
- * If another model shall be used or there was no training prior to classifyInstances, the model must be set with setModelPath.
+ * If classifyInstances is run with the same ScikitLearnWrapper instance after training, the previously trained model is used for testing. If another model shall be used or there was no training prior to classifyInstances, the model must be
+ * set with setModelPath.
  *
- * After a multi target prediction the results might be more accessible with the unflattened representation that can be obtained with getRawLastClassificationResults.
- * For debug purposes the wrapper might be set to be verbose with setIsVerbose.
+ * After a multi target prediction the results might be more accessible with the unflattened representation that can be obtained with getRawLastClassificationResults. For debug purposes the wrapper might be set to be verbose with
+ * setIsVerbose.
  *
  * @author wever
+ * @author fmohr
  * @author scheiblm
  */
 public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B>
@@ -93,7 +91,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 
 	/* Problem definition fields */
 	private ESkLearnProblemType problemType;
-	private String pathVariable;
+	private IPythonConfig pythonConfig;
 	private int[] targetColumns = new int[0]; // Defines which of the columns in the arff file represent the target vectors. If not set, the last column is assumed to be the target vector.
 
 	/* Identifying the wrapped sklearn instance. */
@@ -117,9 +115,12 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	/**
 	 * Starts a new wrapper and creates its underlying script with the given parameters.
 	 *
-	 * @param constructInstruction String that defines what constructor to call for the classifier and with which parameters to call it.
-	 * @param imports Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
-	 * @throws IOException The script could not be created.
+	 * @param constructInstruction
+	 *            String that defines what constructor to call for the classifier and with which parameters to call it.
+	 * @param imports
+	 *            Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
+	 * @throws IOException
+	 *             The script could not be created.
 	 */
 	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withoutModelDump, final ESkLearnProblemType problemType) throws IOException {
 		if (ProcessUtil.getOS() == OS.MAC || ProcessUtil.getOS() == OS.LINUX) {
@@ -157,9 +158,12 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	/**
 	 * Starts a new wrapper and creates its underlying script with the given parameters.
 	 *
-	 * @param constructInstruction String that defines what constructor to call for the classifier and with which parameters to call it.
-	 * @param imports Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
-	 * @throws IOException The script could not be created.
+	 * @param constructInstruction
+	 *            String that defines what constructor to call for the classifier and with which parameters to call it.
+	 * @param imports
+	 *            Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
+	 * @throws IOException
+	 *             The script could not be created.
 	 */
 	public ScikitLearnWrapper(final String constructInstruction, final String imports, final ESkLearnProblemType problemType) throws IOException {
 		this(constructInstruction, imports, false, problemType);
@@ -174,6 +178,14 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		return this.problemType;
 	}
 
+	public IPythonConfig getPythonConfig() {
+		return this.pythonConfig;
+	}
+
+	public void setPythonConfig(final IPythonConfig pythonConfig) {
+		this.pythonConfig = pythonConfig;
+	}
+
 	/**
 	 * @return The file holding the python script for the wrapper.
 	 */
@@ -183,7 +195,8 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	}
 
 	/**
-	 * @param arffName The name of the test arff file.
+	 * @param arffName
+	 *            The name of the test arff file.
 	 * @return The file where the results are to be stored.
 	 */
 	private File getResultFile(final String arffName) {
@@ -194,6 +207,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	@Override
 	public void fit(final ILabeledDataset<? extends ILabeledInstance> data) throws TrainingException, InterruptedException {
 		try {
+
 			/* Ensure model dump directory exists and get the name of the dump */
 			MODEL_DUMPS_DIRECTORY.mkdirs();
 			String arffName = this.getArffName(data);
@@ -231,10 +245,13 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	/**
 	 * Dumps given Instances in an arff file if this hash does not already exist.
 	 *
-	 * @param data Instances to be serialized.
-	 * @param fileName Name of the created file.
+	 * @param data
+	 *            Instances to be serialized.
+	 * @param fileName
+	 *            Name of the created file.
 	 * @return File object corresponding to the arff file.
-	 * @throws IOException During the serialization of the data as an arff file something went wrong.
+	 * @throws IOException
+	 *             During the serialization of the data as an arff file something went wrong.
 	 */
 	private File getArffFile(final ILabeledDataset<? extends ILabeledInstance> data, final String arffName) throws IOException {
 		File arffOutputFile = new File(TMP_FOLDER, arffName + ".arff");
@@ -353,11 +370,14 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	/**
 	 * Makes the given folder a module to be usable as an import for python and creates a string that adds the folder to the python environment and then imports the folder itself as a module.
 	 *
-	 * @param importsFolder Folder to be added as a module.
-	 * @param keepNamespace If true, a class must be called by the modules' name plus the class name. This is only important if multiple modules are imported and the classes' names are
-	 *            ambiguous. Keep in mind that the constructor call for the classifier must be created accordingly.
+	 * @param importsFolder
+	 *            Folder to be added as a module.
+	 * @param keepNamespace
+	 *            If true, a class must be called by the modules' name plus the class name. This is only important if multiple modules are imported and the classes' names are ambiguous. Keep in mind that the constructor call for the
+	 *            classifier must be created accordingly.
 	 * @return String which can be appended to other imports to care for the folder to be added as a module.
-	 * @throws IOException The __init__.py couldn't be created in the given folder (which is necessary to declare it as a module).
+	 * @throws IOException
+	 *             The __init__.py couldn't be created in the given folder (which is necessary to declare it as a module).
 	 */
 	public static String createImportStatementFromImportFolder(final File importsFolder, final boolean keepNamespace) throws IOException {
 		if (importsFolder == null || !importsFolder.exists() || importsFolder.list().length == 0) {
@@ -397,8 +417,10 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	/**
 	 * Returns a map with the values for the script template.
 	 *
-	 * @param constructInstruction String that defines what constructor to call for the classifier and with which parameters to call it.
-	 * @param imports Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
+	 * @param constructInstruction
+	 *            String that defines what constructor to call for the classifier and with which parameters to call it.
+	 * @param imports
+	 *            Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
 	 * @return A map to call the template engine with.
 	 */
 	private Map<String, Object> getTemplateValueMap(final String constructInstruction, final String imports) {
@@ -424,10 +446,6 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 			this.problemType = problemType;
 			this.scikitTemplate = new File(ResourceUtil.getResourceAsTempFile(this.problemType.getRessourceScikitTemplate()));
 		}
-	}
-
-	public void setPathVariable(final String pathVariable) {
-		this.pathVariable = pathVariable;
 	}
 
 	public void setAnacondaEnvironment(final String env) {
@@ -457,7 +475,8 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	/**
 	 * Returns a hash for the given Instances based on the Weka implementation of hashCode(). Additionally the sign is replaces by an additional 0/1.
 	 *
-	 * @param data Instances to get a hash code for.
+	 * @param data
+	 *            Instances to get a hash code for.
 	 * @return A hash for the given Instances.
 	 */
 	private String getArffName(final ILabeledDataset<? extends ILabeledInstance> data) {
@@ -467,8 +486,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	}
 
 	/**
-	 * Starts a process with the given attributes. The first String in the array is
-	 * the executed program.
+	 * Starts a process with the given attributes. The first String in the array is the executed program.
 	 */
 	private void runProcess(final String[] parameters, final AProcessListener listener) throws InterruptedException, IOException {
 		if (L.isDebugEnabled()) {
@@ -476,9 +494,6 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 			L.debug("Starting process {}", call.substring(1, call.length() - 1));
 		}
 		ProcessBuilder processBuilder = new ProcessBuilder(parameters).directory(TMP_FOLDER);
-		if (this.pathVariable != null) {
-			processBuilder.environment().put("PATH", this.pathVariable);
-		}
 		Process process = processBuilder.start();
 		try {
 			L.debug("Started process with PID: {}", ProcessUtil.getPID(process));
@@ -513,8 +528,8 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	}
 
 	/**
-	 * This class is a utility for building commands for the process builder in order to run the wrapped python script for sklearn.
-	 * Furthermore, it will require the relevant information to be set before successfully returning a command list.
+	 * This class is a utility for building commands for the process builder in order to run the wrapped python script for sklearn. Furthermore, it will require the relevant information to be set before successfully returning a command
+	 * list.
 	 *
 	 * @author wever
 	 */
@@ -627,7 +642,12 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 				processParameters.add("timeout");
 				processParameters.add(this.timeout.seconds() - 5 + "");
 			}
-			processParameters.add("python");
+			if (ScikitLearnWrapper.this.pythonConfig != null && ScikitLearnWrapper.this.pythonConfig.getPath() != null) {
+				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getPath() + File.separator + "python");
+			}
+			else {
+				processParameters.add("python");
+			}
 			processParameters.add("-u"); // Force python to run stdout and stderr unbuffered.
 			processParameters.add(scriptFile.getAbsolutePath()); // Script to be executed.
 
@@ -638,7 +658,9 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 				processParameters.addAll(Arrays.asList(TEST_ARFF_FLAG, this.testArffFile));
 			}
 			processParameters.addAll(Arrays.asList(OUTPUT_FLAG, this.outputFile));
-			processParameters.add(ScikitLearnWrapper.this.problemType.getScikitLearnCommandLineFlag());
+			if (!ScikitLearnWrapper.this.problemType.getScikitLearnCommandLineFlag().isEmpty()) {
+				processParameters.add(ScikitLearnWrapper.this.problemType.getScikitLearnCommandLineFlag());
+			}
 			processParameters.addAll(Arrays.asList(SEED_FLAG, String.valueOf(this.seed)));
 
 			if (this.mode == WrapperExecutionMode.TEST) {

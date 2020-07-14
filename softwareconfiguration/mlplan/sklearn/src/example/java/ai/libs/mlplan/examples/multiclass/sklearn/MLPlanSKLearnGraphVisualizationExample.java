@@ -6,6 +6,8 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
+import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
@@ -16,8 +18,6 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
-import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
-import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
@@ -26,7 +26,7 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
+import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanSKLearnBuilder;
 
 public class MLPlanSKLearnGraphVisualizationExample {
 
@@ -38,13 +38,13 @@ public class MLPlanSKLearnGraphVisualizationExample {
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */
-		MLPlanSKLearnBuilder<SingleLabelClassification, SingleLabelClassificationPredictionBatch> builder = new MLPlanSKLearnBuilder<>();
+		MLPlanSKLearnBuilder builder = MLPlanSKLearnBuilder.forClassification();
 		builder.withNumCpus(4);
 		builder.withSeed(42);
 		builder.withTimeOut(new Timeout(1, TimeUnit.HOURS));
 		builder.withDataset(split.get(0));
 
-		MLPlan<ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>> mlplan = builder.build();
+		MLPlan<ScikitLearnWrapper<IPrediction, IPredictionBatch>> mlplan = builder.build();
 		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setLoggerName("testedalgorithm");
 
@@ -55,7 +55,7 @@ public class MLPlanSKLearnGraphVisualizationExample {
 
 		try {
 			long start = System.currentTimeMillis();
-			ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> optimizedClassifier = mlplan.call();
+			ScikitLearnWrapper<IPrediction, IPredictionBatch> optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
 			LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));

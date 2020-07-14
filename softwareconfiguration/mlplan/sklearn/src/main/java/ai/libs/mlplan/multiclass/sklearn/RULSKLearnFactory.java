@@ -3,10 +3,13 @@ package ai.libs.mlplan.multiclass.sklearn;
 import java.util.Set;
 
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
-import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
+import ai.libs.jaicore.ml.core.ESkLearnProblemType;
 
-public class RULSKLearnFactory extends ASKLearnClassifierFactory<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch>{
+public class RULSKLearnFactory extends ASKLearnClassifierFactory {
+
+	public RULSKLearnFactory() {
+		super(ESkLearnProblemType.RUL);
+	}
 
 	@Override
 	public String getPipelineBuildString(final ComponentInstance groundComponent, final Set<String> importSet) {

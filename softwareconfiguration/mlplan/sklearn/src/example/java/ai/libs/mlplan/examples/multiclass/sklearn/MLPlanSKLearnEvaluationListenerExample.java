@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
+import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
@@ -17,8 +19,6 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
-import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
-import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluationFailedEvent;
@@ -29,7 +29,7 @@ import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.TimeTrackingLearnerWrapper;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
-import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
+import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanSKLearnBuilder;
 
 /**
  * This is an example class that illustrates the usage of ML-Plan on the segment dataset of OpenML. It is configured to run for 30 seconds and to use 70% of the data for search and 30% for selection in its second phase.
@@ -49,13 +49,13 @@ public class MLPlanSKLearnEvaluationListenerExample {
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan */
-		MLPlanSKLearnBuilder<SingleLabelClassification, SingleLabelClassificationPredictionBatch> builder = new MLPlanSKLearnBuilder<>();
+		MLPlanSKLearnBuilder builder = MLPlanSKLearnBuilder.forClassification();
 		builder.withNodeEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.SECONDS));
 		builder.withTimeOut(new Timeout(2, TimeUnit.MINUTES));
 		builder.withSeed(42);
 
-		MLPlan<ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>> mlplan = builder.withDataset(split.get(0)).build();
+		MLPlan<ScikitLearnWrapper<IPrediction, IPredictionBatch>> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("testedalgorithm");
 
@@ -89,7 +89,7 @@ public class MLPlanSKLearnEvaluationListenerExample {
 
 		try {
 			long start = System.currentTimeMillis();
-			ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> optimizedClassifier = mlplan.call();
+			ScikitLearnWrapper<IPrediction, IPredictionBatch> optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
 			LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));

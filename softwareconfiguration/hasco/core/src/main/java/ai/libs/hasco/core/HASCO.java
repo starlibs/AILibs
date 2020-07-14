@@ -236,6 +236,8 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 			else if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
 				HASCOSolutionEvent<V> hascoSolutionEvent = this.hascoSolutionEventCache.remove(searchEvent);
 				assert (hascoSolutionEvent != null) : "Hasco solution event has not been seen yet or cannot be retrieved from cache. " + this.hascoSolutionEventCache;
+				System.out.println(hascoSolutionEvent);
+				System.out.println(this.returnedUnparametrizedComponentInstances);
 				this.logger.info("Returning next solution delivered from search with score {}. Number of returned unparametrized solutions is now {}/{}.", hascoSolutionEvent.getScore(), this.returnedUnparametrizedComponentInstances.size(),
 						this.numUnparametrizedSolutions);
 				return hascoSolutionEvent;

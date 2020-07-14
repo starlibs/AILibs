@@ -15,7 +15,7 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.Rando
 
 public class HASCOViaFDAndBestFirstWithRandomCompletionsBuilder extends HASCOViaFDAndBestFirstBuilder<Double, HASCOViaFDAndBestFirstWithRandomCompletionsBuilder> {
 
-	private IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator = n -> null;
+	private IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator = null;
 	private Predicate<TFDNode> priorizingPredicate;
 	private Random random = new Random();
 	private int numSamples = 10;

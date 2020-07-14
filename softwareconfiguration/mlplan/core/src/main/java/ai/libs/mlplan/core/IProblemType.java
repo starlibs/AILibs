@@ -24,6 +24,8 @@ public interface IProblemType<L extends ISupervisedLearner<ILabeledInstance, ILa
 
 	public String getLastHASCOMethodPriorToParameterRefinementOfPipeline();
 
+	public PipelineValidityCheckingNodeEvaluator getValidityCheckingNodeEvaluator();
+
 	public ILearnerFactory<L> getLearnerFactory();
 
 	public IDeterministicPredictionPerformanceMeasure<?, ?> getPerformanceMetricForSearchPhase();

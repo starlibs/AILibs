@@ -3,10 +3,13 @@ package ai.libs.mlplan.multiclass.sklearn;
 import java.util.Set;
 
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
-import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
+import ai.libs.jaicore.ml.core.ESkLearnProblemType;
 
-public class DefaultSKLearnClassifierFactory  extends ASKLearnClassifierFactory<SingleLabelClassification, SingleLabelClassificationPredictionBatch> {
+public class DefaultSKLearnClassifierFactory  extends ASKLearnClassifierFactory {
+
+	public DefaultSKLearnClassifierFactory() {
+		super(ESkLearnProblemType.CLASSIFICATION);
+	}
 
 	@Override
 	public String getPipelineBuildString(final ComponentInstance groundComponent, final Set<String> importSet) {

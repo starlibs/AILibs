@@ -11,13 +11,25 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 
 public abstract class PipelineValidityCheckingNodeEvaluator implements IPathEvaluator<TFDNode, String, Double> {
 
-	private final ILabeledDataset<?> data;
-	private final Collection<Component> components;
+	private ILabeledDataset<?> data;
+	private Collection<Component> components;
 
 	public PipelineValidityCheckingNodeEvaluator(final Collection<Component> components, final ILabeledDataset<?> data) {
-		Objects.requireNonNull(components);
+		this.setComponents(components);
+		this.setData(data);
+	}
+
+	public PipelineValidityCheckingNodeEvaluator() {
+
+	}
+
+	public void setData(final ILabeledDataset<?> data) {
 		Objects.requireNonNull(data);
 		this.data = data;
+	}
+
+	public void setComponents(final Collection<Component> components) {
+		Objects.requireNonNull(components);
 		this.components = components;
 	}
 

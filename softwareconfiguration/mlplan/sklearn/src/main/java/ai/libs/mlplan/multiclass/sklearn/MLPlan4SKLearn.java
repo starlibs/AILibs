@@ -6,11 +6,11 @@ import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.MLPlan;
+import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanSKLearnBuilder;
 
-public class MLPlan4SKLearn<P extends IPrediction, B extends IPredictionBatch> extends MLPlan<ScikitLearnWrapper<P, B>> {
+public class MLPlan4SKLearn extends MLPlan<ScikitLearnWrapper<IPrediction, IPredictionBatch>> {
 
-	public MLPlan4SKLearn(final MLPlanSKLearnBuilder<P, B> builder, final ILabeledDataset<?> data) {
+	public MLPlan4SKLearn(final MLPlanSKLearnBuilder builder, final ILabeledDataset<?> data) {
 		super(builder, data);
 	}
-
 }

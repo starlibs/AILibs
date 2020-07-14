@@ -49,13 +49,13 @@ import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
  * The MLPlanBuilder helps to easily configure and initialize ML-Plan with specific parameter settings. For convenient use, the MLPlanBuilder also offers methods for initializing ML-Plan with default configuration to use ML-Plan for single
  * label classification in combination with WEKA or scikit-learn or for multi-label classification in combination with MEKA and consequently with WEKA (for baselearners of multi-label reduction strategies).
  *
- * @author mwever, fmohr
+ * @author Felix Mohr, Marcel Wever
  */
-public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, B extends AbstractMLPlanBuilder<L, B>> implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
+public abstract class MLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, B extends MLPlanBuilder<L, B>> implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 
 	/* Logging */
-	private Logger logger = LoggerFactory.getLogger(AbstractMLPlanBuilder.class);
-	private String loggerName = AbstractMLPlanBuilder.class.getName();
+	private Logger logger = LoggerFactory.getLogger(MLPlanBuilder.class);
+	private String loggerName = MLPlanBuilder.class.getName();
 
 	private static final String RES_ALGORITHM_CONFIG = "mlplan/mlplan.properties";
 	private static final String FS_ALGORITHM_CONFIG = "conf/mlplan.properties";
@@ -66,8 +66,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	/* problem description aspects */
 	private File searchSpaceFile;
 	private String requestedHASCOInterface;
-	private String nameOfHASCOMethod1;
-	private String nameOfHASCOMethod2;
+	private String nameOfHASCOMethodToResolveBareLearner;
+	private String nameOfHASCOMethodToResolverLearnerInPipeline;
 	private ILearnerFactory<L> learnerFactory;
 	private ILabeledDataset<?> dataset;
 
@@ -87,20 +87,20 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	private ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factoryForPipelineEvaluationInSelectionPhase = this.getMCCVFactory(3, .7);
 	private IEvaluationSafeGuardFactory safeGuard = null;
 
-	protected AbstractMLPlanBuilder() {
+	protected MLPlanBuilder() {
 		super();
 		this.withAlgorithmConfigFile(DEF_ALGORITHM_CONFIG);
 		this.withSeed(0);
 	}
 
-	protected AbstractMLPlanBuilder(final IProblemType<L> problemType) throws IOException {
+	protected MLPlanBuilder(final IProblemType<L> problemType) throws IOException {
 		super();
 		this.withAlgorithmConfigFile(DEF_ALGORITHM_CONFIG);
 		this.withProblemType(problemType);
 		this.withSeed(0);
 	}
 
-	public AbstractMLPlanBuilder<L, B> withProblemType(final IProblemType<L> problemType) throws IOException {
+	public MLPlanBuilder<L, B> withProblemType(final IProblemType<L> problemType) throws IOException {
 
 		if (this.logger.isInfoEnabled()) {
 			this.logger.info("Setting problem type to {}.", problemType.getName());
@@ -111,10 +111,17 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 
 		/* setup everything for preferred components */
 		if (problemType.getPreferredComponentListFromResource() != null || problemType.getPreferredComponentListFromFileSystem() != null) {
-			this.withPreferredComponentsFile(FileUtil.getExistingFileWithHighestPriority(problemType.getPreferredComponentListFromResource(), problemType.getPreferredComponentListFromFileSystem()));
-			this.nameOfHASCOMethod1 = problemType.getLastHASCOMethodPriorToParameterRefinementOfBareLearner();
-			this.nameOfHASCOMethod2 = problemType.getLastHASCOMethodPriorToParameterRefinementOfPipeline();
+			boolean relevantFileAvailable = true;
+			if (problemType.getPreferredComponentListFromResource() == null) {
+				relevantFileAvailable = new File(problemType.getPreferredComponentListFromFileSystem()).exists();
+			}
+			if (relevantFileAvailable) {
+				this.withPreferredComponentsFile(FileUtil.getExistingFileWithHighestPriority(problemType.getPreferredComponentListFromResource(), problemType.getPreferredComponentListFromFileSystem()));
+				this.nameOfHASCOMethodToResolveBareLearner = problemType.getLastHASCOMethodPriorToParameterRefinementOfBareLearner();
+				this.nameOfHASCOMethodToResolverLearnerInPipeline = problemType.getLastHASCOMethodPriorToParameterRefinementOfPipeline();
+			}
 		}
+		this.withPipelineValidityCheckingNodeEvaluator(problemType.getValidityCheckingNodeEvaluator());
 
 		/* configure the metric defined in the problem type */
 		this.withPerformanceMeasureForSearchPhase(problemType.getPerformanceMetricForSearchPhase());
@@ -160,7 +167,6 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 	 */
 	public B withPreferredComponentsFile(final File preferredComponentsFile) throws IOException {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
-		;
 		List<String> namesOfPreferredComponents = null; // the order is important!
 		if (preferredComponentsFile instanceof ResourceFile) {
 			namesOfPreferredComponents = ResourceUtil.readResourceFileToStringList((ResourceFile) preferredComponentsFile);
@@ -447,8 +453,8 @@ public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabele
 
 	@Override
 	public HASCOViaFDBuilder<Double, ?> getHASCOFactory() {
-		return MLPlan.getHASCOBuilder(this.algorithmConfig, this.dataset, this.searchSpaceFile, this.requestedHASCOInterface, this.priorizingPredicate, this.preferredNodeEvaluators, this.pipelineValidityCheckingNodeEvaluator,
-				this.nameOfHASCOMethod1, this.nameOfHASCOMethod2);
+		return MLPlanUtil.getHASCOBuilder(this.algorithmConfig, this.dataset, this.searchSpaceFile, this.requestedHASCOInterface, this.priorizingPredicate, this.preferredNodeEvaluators, this.pipelineValidityCheckingNodeEvaluator,
+				this.nameOfHASCOMethodToResolveBareLearner, this.nameOfHASCOMethodToResolverLearnerInPipeline);
 	}
 
 	@Override

@@ -33,9 +33,12 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 	private boolean multiValuedNominalAttributes;
 	private boolean containsNegativeValues;
 
+	public WekaPipelineValidityCheckingNodeEvaluator() {
+		super();
+	}
+
 	public WekaPipelineValidityCheckingNodeEvaluator(final Collection<Component> components, final ILabeledDataset<?> data) {
 		super(components, data);
-		components.forEach(c -> this.logger.info("Considering component {}", c));
 	}
 
 	private boolean multiValuedNominalAttributesExist() {

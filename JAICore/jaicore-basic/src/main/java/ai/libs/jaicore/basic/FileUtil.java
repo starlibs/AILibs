@@ -295,6 +295,7 @@ public class FileUtil {
 				}
 			}
 		}
+		Objects.requireNonNull(resourcePath, "The file was not found on any of the given paths in the file system, and no resource has been specified.");
 		return ResourceUtil.getResourceAsFile(resourcePath);
 	}
 

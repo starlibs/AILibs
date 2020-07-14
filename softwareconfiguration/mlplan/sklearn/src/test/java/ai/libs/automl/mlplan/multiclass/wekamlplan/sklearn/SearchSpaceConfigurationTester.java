@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
+import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +26,10 @@ import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
-import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
-import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedComputation;
 import ai.libs.mlplan.multiclass.sklearn.EMLPlanSkLearnProblemType;
-import ai.libs.mlplan.multiclass.sklearn.ASKLearnClassifierFactory;
+import ai.libs.mlplan.multiclass.sklearn.RULSKLearnFactory;
 
 public class SearchSpaceConfigurationTester {
 
@@ -40,7 +40,7 @@ public class SearchSpaceConfigurationTester {
 	private static final String DATA = "testrsc/rul_smallExample.arff";
 
 	private static List<ComponentInstance> allComponentInstances;
-	private static ASKLearnClassifierFactory<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> factory;
+	private static RULSKLearnFactory factory;
 	private static MonteCarloCrossValidationEvaluator evaluator;
 	private static int numberOfPipelinesFound;
 	private static int numberOfErrorsFound;
@@ -48,10 +48,7 @@ public class SearchSpaceConfigurationTester {
 	public static void main(final String[] args) throws Exception {
 		allComponentInstances = new ArrayList<>(ComponentUtil.getAllAlgorithmSelectionInstances(PROBLEM_TYPE.getRequestedInterface(),
 				new ComponentLoader(FileUtil.getExistingFileWithHighestPriority(PROBLEM_TYPE.getSearchSpaceConfigFileFromResource(), PROBLEM_TYPE.getSearchSpaceConfigFromFileSystem())).getComponents()));
-		factory = new ASKLearnClassifierFactory<>(EMLPlanSkLearnProblemType.RUL);
-
-		factory.setAnacondaEnvironment("pdm");
-		factory.setPathVariable("/Users/tanja/anaconda3/bin:/Users/tanja/anaconda3/condabin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/TeX/texbin");
+		factory = new RULSKLearnFactory();
 
 		ILabeledDataset<ILabeledInstance> data = ArffDatasetAdapter.readDataset(new File(DATA));
 		evaluator = new MonteCarloCrossValidationEvaluatorFactory().withData(data).withNumMCIterations(1).withTrainFoldSize(0.7).withMeasure(PERFORMANCE_MEASURE).withRandom(new Random(42)).getLearnerEvaluator();
@@ -202,14 +199,14 @@ public class SearchSpaceConfigurationTester {
 	}
 
 	private static void tryExecution(final ComponentInstance componentInstance) throws ComponentInstantiationFailedException, InterruptedException {
-		ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> model = factory.getComponentInstantiation(componentInstance);
+		ScikitLearnWrapper<IPrediction, IPredictionBatch> model = factory.getComponentInstantiation(componentInstance);
 		try {
 			numberOfPipelinesFound++;
 			LOGGER.info("{}", model);
 			TimedComputation.compute(new Callable<Double>() {
 				@Override
 				public Double call() throws Exception {
-					return SearchSpaceConfigurationTester.this.evaluator.evaluate(model);
+					return SearchSpaceConfigurationTester.evaluator.evaluate(model);
 				}
 			}, new Timeout(30, TimeUnit.SECONDS), "Evaluation timed out.");
 

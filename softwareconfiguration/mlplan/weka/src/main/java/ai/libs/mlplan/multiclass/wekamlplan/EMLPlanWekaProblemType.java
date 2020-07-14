@@ -10,7 +10,9 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStra
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.core.IProblemType;
+import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
+import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
 
 public enum EMLPlanWekaProblemType implements IProblemType<IWekaClassifier> {
 
@@ -116,5 +118,10 @@ public enum EMLPlanWekaProblemType implements IProblemType<IWekaClassifier> {
 	@Override
 	public ILearnerFactory<IWekaClassifier> getLearnerFactory() {
 		return this.learnerFactory;
+	}
+
+	@Override
+	public PipelineValidityCheckingNodeEvaluator getValidityCheckingNodeEvaluator() {
+		return new WekaPipelineValidityCheckingNodeEvaluator();
 	}
 }

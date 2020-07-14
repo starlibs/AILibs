@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.algorithm.Timeout;
@@ -19,31 +20,39 @@ import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.ml.core.ESkLearnProblemType;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.ILearnerFactory;
+import ai.libs.python.IPythonConfig;
 
 /**
- * The SKLearnClassifierFactory takes a ground component instance and parses it into a <code>ScikitLearnWrapper</code> as defined in the project jaicore-ml.
- * This factory may be used in the context of HASCO, especially for ML-Plan.
+ * The SKLearnClassifierFactory takes a ground component instance and parses it into a <code>ScikitLearnWrapper</code> as defined in the project jaicore-ml. This factory may be used in the context of HASCO, especially for ML-Plan.
  *
  * @author wever
  */
-public abstract class ASKLearnClassifierFactory<P extends IPrediction, B extends IPredictionBatch> implements ILearnerFactory<ScikitLearnWrapper<P, B>>, ILoggingCustomizable {
+public abstract class ASKLearnClassifierFactory implements ILearnerFactory<ScikitLearnWrapper<IPrediction, IPredictionBatch>>, ILoggingCustomizable {
 
 	public static final String N_PREPROCESSOR = "preprocessor";
 
 	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList("True", "False"));
 	private static final List<String> EXCEPTIONS = Arrays.asList("None", "np.inf", "f_regression");
 
+	private final ESkLearnProblemType sklearnProblemType;
+
 	private Logger logger = LoggerFactory.getLogger(ASKLearnClassifierFactory.class);
 	private String loggerName;
-	private String pathVariable;
+	private IPythonConfig pythonConfig = ConfigFactory.create(IPythonConfig.class);
 	private String anacondaEnvironment;
 	private long seed;
 	private Timeout timeout;
 
+	public ASKLearnClassifierFactory(final ESkLearnProblemType sklearnProblemType) {
+		super();
+		this.sklearnProblemType = sklearnProblemType;
+	}
+
 	@Override
-	public ScikitLearnWrapper<P, B> getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
+	public ScikitLearnWrapper<IPrediction, IPredictionBatch> getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
 		this.logger.debug("Parse ground component instance {} to ScikitLearnWrapper object.", groundComponent);
 
 		StringBuilder constructInstruction = new StringBuilder();
@@ -56,8 +65,10 @@ public abstract class ASKLearnClassifierFactory<P extends IPrediction, B extends
 		this.logger.info("Created construction string: {}", constructionString);
 
 		try {
-			ScikitLearnWrapper<P, B> wrapper = new ScikitLearnWrapper<>(constructionString, imports.toString(), true, this.problemType.getSkLearnProblemType());
-			wrapper.setPathVariable(this.pathVariable);
+			ScikitLearnWrapper<IPrediction, IPredictionBatch> wrapper = new ScikitLearnWrapper<>(constructionString, imports.toString(), true, this.sklearnProblemType);
+			if (this.pythonConfig != null) {
+				wrapper.setPythonConfig(this.pythonConfig);
+			}
 			wrapper.setAnacondaEnvironment(this.anacondaEnvironment);
 			wrapper.setSeed(this.seed);
 			wrapper.setTimeout(this.timeout);
@@ -170,8 +181,8 @@ public abstract class ASKLearnClassifierFactory<P extends IPrediction, B extends
 		this.logger.debug("Switched SKLearnClassifierFactory logger to {}", name);
 	}
 
-	public void setPathVariable(final String path) {
-		this.pathVariable = path;
+	public void setPythonConfig(final IPythonConfig pythonConfig) {
+		this.pythonConfig = pythonConfig;
 	}
 
 	public void setAnacondaEnvironment(final String env) {

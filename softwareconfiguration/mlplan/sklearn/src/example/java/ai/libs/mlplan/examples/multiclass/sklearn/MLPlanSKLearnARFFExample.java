@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
+import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
@@ -14,14 +16,12 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
-import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
-import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
+import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanSKLearnBuilder;
 
 public class MLPlanSKLearnARFFExample {
 
@@ -37,19 +37,19 @@ public class MLPlanSKLearnARFFExample {
 		List<ILabeledDataset<ILabeledInstance>> split = RandomHoldoutSplitter.createSplit(dataset, 42, .7);
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
-		MLPlanSKLearnBuilder<SingleLabelClassification, SingleLabelClassificationPredictionBatch> builder = new MLPlanSKLearnBuilder<>();
+		MLPlanSKLearnBuilder builder = MLPlanSKLearnBuilder.forClassification();
 		builder.withNodeEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
 		builder.withTimeOut(new Timeout(3, TimeUnit.MINUTES));
 		builder.withNumCpus(4);
 
-		MLPlan<ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>> mlplan = builder.withDataset(split.get(0)).build();
+		MLPlan<ScikitLearnWrapper<IPrediction, IPredictionBatch>> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("testedalgorithm");
 
 		try {
 			start = System.currentTimeMillis();
-			ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> optimizedClassifier = mlplan.call();
+			ScikitLearnWrapper<IPrediction, IPredictionBatch> optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
 			LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));

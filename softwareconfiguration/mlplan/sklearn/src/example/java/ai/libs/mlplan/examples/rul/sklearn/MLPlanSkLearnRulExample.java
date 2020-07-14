@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
+import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +19,10 @@ import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.LearnerRunReport;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
-import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
-import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.sklearn.EMLPlanSkLearnProblemType;
-import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
+import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanSKLearnBuilder;
 
 public class MLPlanSkLearnRulExample {
 
@@ -39,7 +39,7 @@ public class MLPlanSkLearnRulExample {
 		List<ILabeledDataset<ILabeledInstance>> splits = RandomHoldoutSplitter.createSplit(dataset, 42, .7);
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
-		MLPlanSKLearnBuilder<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> builder = new MLPlanSKLearnBuilder<>();
+		MLPlanSKLearnBuilder builder = MLPlanSKLearnBuilder.forRUL();
 		builder.withProblemType(EMLPlanSkLearnProblemType.RUL);
 		builder.withNodeEvaluationTimeOut(new Timeout(60, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new Timeout(45, TimeUnit.SECONDS));
@@ -47,12 +47,12 @@ public class MLPlanSkLearnRulExample {
 		builder.withNumCpus(4);
 		builder.withSeed(42);
 
-		MLPlan<ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch>> mlplan = builder.withDataset(splits.get(0)).build();
+		MLPlan<ScikitLearnWrapper<IPrediction, IPredictionBatch>> mlplan = builder.withDataset(splits.get(0)).build();
 		mlplan.setLoggerName("testedalgorithm");
 
 		try {
 			start = System.currentTimeMillis();
-			ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> optimizedRegressor = mlplan.call();
+			ScikitLearnWrapper<IPrediction, IPredictionBatch> optimizedRegressor = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
 			LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));

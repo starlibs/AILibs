@@ -21,8 +21,8 @@ import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.serialization.ComponentLoader;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.mlplan.multiclass.sklearn.EMLPlanSkLearnProblemType;
 import ai.libs.mlplan.multiclass.sklearn.ASKLearnClassifierFactory;
+import ai.libs.mlplan.multiclass.sklearn.DefaultSKLearnClassifierFactory;
 import weka.core.Instances;
 
 /**
@@ -77,7 +77,7 @@ public class SKLearnClassifierFactoryTest {
 		cl = new ComponentLoader(COMPONENT_REPO);
 
 		/* init factory */
-		factory = new ASKLearnClassifierFactory(EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS);
+		factory = new DefaultSKLearnClassifierFactory();
 	}
 
 	@Test

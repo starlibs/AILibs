@@ -15,7 +15,7 @@ import ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
 
-public class MLPlanSimpleBuilder extends AbstractMLPlanBuilder<IClassifier, MLPlanSimpleBuilder> {
+public class MLPlanSimpleBuilder extends MLPlanBuilder<IClassifier, MLPlanSimpleBuilder> {
 
 	public MLPlanSimpleBuilder() throws IOException {
 		super(new IProblemType<IClassifier>() {
@@ -84,6 +84,11 @@ public class MLPlanSimpleBuilder extends AbstractMLPlanBuilder<IClassifier, MLPl
 						return new MajorityClassifier();
 					}
 				};
+			}
+
+			@Override
+			public PipelineValidityCheckingNodeEvaluator getValidityCheckingNodeEvaluator() {
+				return null;
 			}
 		});
 

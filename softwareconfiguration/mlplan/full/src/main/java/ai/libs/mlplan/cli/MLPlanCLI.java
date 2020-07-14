@@ -39,10 +39,10 @@ import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
-import ai.libs.mlplan.core.AbstractMLPlanBuilder;
+import ai.libs.mlplan.core.MLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.sklearn.EMLPlanSkLearnProblemType;
-import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
+import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanSKLearnBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.EMLPlanWekaProblemType;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
@@ -191,7 +191,7 @@ public class MLPlanCLI {
 			trainData.setClassIndex(trainData.numAttributes() - 1);
 		}
 
-		AbstractMLPlanBuilder builder;
+		MLPlanBuilder builder;
 		if (commandLine.hasOption(searchSpaceConfigurationOption)) {
 			switch (commandLine.getOptionValue(searchSpaceConfigurationOption)) {
 			case "weka":

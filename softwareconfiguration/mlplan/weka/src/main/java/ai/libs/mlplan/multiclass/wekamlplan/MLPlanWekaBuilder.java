@@ -14,11 +14,10 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISa
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-import ai.libs.mlplan.core.AbstractMLPlanBuilder;
+import ai.libs.mlplan.core.MLPlanBuilder;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
 
-public class MLPlanWekaBuilder extends AbstractMLPlanBuilder<IWekaClassifier, MLPlanWekaBuilder> {
+public class MLPlanWekaBuilder extends MLPlanBuilder<IWekaClassifier, MLPlanWekaBuilder> {
 
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaBuilder.class);
 
@@ -63,13 +62,6 @@ public class MLPlanWekaBuilder extends AbstractMLPlanBuilder<IWekaClassifier, ML
 
 	@Override
 	public MLPlan4Weka build() {
-		if (this.getPipelineValidityCheckingNodeEvaluator() == null) {
-			try {
-				this.withPipelineValidityCheckingNodeEvaluator(new WekaPipelineValidityCheckingNodeEvaluator(this.getComponents(), this.getDataset()));
-			} catch (IOException e) {
-				throw new IllegalStateException("Could not create pipeline validator, because components could not be loaded.", e);
-			}
-		}
 		this.checkPreconditionsForInitialization();
 		return new MLPlan4Weka(this, this.getDataset());
 	}

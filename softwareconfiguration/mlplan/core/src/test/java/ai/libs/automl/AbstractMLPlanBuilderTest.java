@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,9 +29,9 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
-import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.IProblemType;
 import ai.libs.mlplan.core.MLPlan;
+import ai.libs.mlplan.core.MLPlanBuilder;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
 import ai.libs.mlplan.core.PreferenceBasedNodeEvaluator;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
@@ -38,7 +39,7 @@ import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 @RunWith(Parameterized.class)
 public abstract class AbstractMLPlanBuilderTest {
 
-	public abstract AbstractMLPlanBuilder<?, ?> getBuilder() throws Exception;
+	public abstract MLPlanBuilder<?, ?> getBuilder() throws Exception;
 
 	@Parameter(0)
 	public IProblemType<?> problemType;
@@ -47,12 +48,12 @@ public abstract class AbstractMLPlanBuilderTest {
 		return this.getMLPlanForBuilder(this.getBuilder());
 	}
 
-	protected MLPlan<?> getMLPlanForBuilder(final AbstractMLPlanBuilder<?, ?> builder) throws DatasetDeserializationFailedException, Exception {
+	protected MLPlan<?> getMLPlanForBuilder(final MLPlanBuilder<?, ?> builder) throws DatasetDeserializationFailedException, Exception {
 		return builder.withDataset(OpenMLDatasetReader.deserializeDataset(3)).build(); // test builds with the kr-vs-kp dataset
 	}
 
 	protected BestFirst<?, TFDNode, String, Double> getSearch(final MLPlan<?> mlplan) {
-		return (BestFirst<?, TFDNode, String, Double>)mlplan.getSearch();
+		return (BestFirst<?, TFDNode, String, Double>) mlplan.getSearch();
 	}
 
 	protected List<IPathEvaluator<TFDNode, String, Double>> getNodeEvaluatorChain(final AlternativeNodeEvaluator<TFDNode, String, Double> ane) {
@@ -60,7 +61,7 @@ public abstract class AbstractMLPlanBuilderTest {
 		AlternativeNodeEvaluator<TFDNode, String, Double> current = ane;
 		while (current.getPrimaryNodeEvaluator() instanceof AlternativeNodeEvaluator) {
 			list.add(0, current.getEvaluator());
-			current = (AlternativeNodeEvaluator<TFDNode, String, Double>)current.getPrimaryNodeEvaluator();
+			current = (AlternativeNodeEvaluator<TFDNode, String, Double>) current.getPrimaryNodeEvaluator();
 		}
 		list.add(0, current.getEvaluator());
 		list.add(0, current.getPrimaryNodeEvaluator());
@@ -69,34 +70,68 @@ public abstract class AbstractMLPlanBuilderTest {
 
 	@Test
 	public void testProblemTypeCompleteness() {
-		assertNotNull(this.problemType.getLearnerFactory());
+		assertNotNull("No learner factory defined for problem type " + this.problemType, this.problemType.getLearnerFactory());
+		assertNotNull("No search/select splitter defined for problem type " + this.problemType, this.problemType.getSearchSelectionDatasetSplitter());
+		assertNotNull("No search space config (resource) defined for problem type " + this.problemType, this.problemType.getSearchSpaceConfigFileFromResource());
+		assertNotNull("No HASCO method 1 defined for problem type " + this.problemType, this.problemType.getLastHASCOMethodPriorToParameterRefinementOfBareLearner());
+		assertNotNull("No HASCO method 2 defined for problem type " + this.problemType, this.problemType.getLastHASCOMethodPriorToParameterRefinementOfPipeline());
+		assertNotNull("No required interface defined for problem type " + this.problemType, this.problemType.getRequestedInterface());
 	}
 
 	@Test
 	public void testProperBuilderInitialization() throws Exception {
-		AbstractMLPlanBuilder<?, ?> builder = this.getBuilder();
+		MLPlanBuilder<?, ?> builder = this.getBuilder();
 		assertEquals(this.problemType.getLearnerFactory(), builder.getLearnerFactory());
 		assertEquals(this.problemType.getPerformanceMetricForSearchPhase(), builder.getMetricForSearchPhase());
 		assertEquals(this.problemType.getPerformanceMetricForSelectionPhase(), builder.getMetricForSelectionPhase());
-		assertEquals(FileUtil.readFileAsList(FileUtil.getExistingFileWithHighestPriority(this.problemType.getPreferredComponentListFromResource())), this.getBuilder().getPreferredComponents());
+		if (this.doesProblemTypeAdoptAvailablePreferredComponents()) {
+			assertEquals(FileUtil.readFileAsList(FileUtil.getExistingFileWithHighestPriority(this.problemType.getPreferredComponentListFromResource())), this.getBuilder().getPreferredComponents());
+		}
 		Collection<Component> components = this.getBuilder().getComponents();
-		for (String cName : this.getBuilder().getPreferredComponents()) {
-			assertTrue("Preferred component with name " + cName + " does not exist in component repository.", components.stream().anyMatch(c -> c.getName().equals(cName)));
+		if (this.getBuilder().getPreferredComponents() != null) {
+			for (String cName : this.getBuilder().getPreferredComponents()) {
+				assertTrue("Preferred component with name " + cName + " does not exist in component repository.", components.stream().anyMatch(c -> c.getName().equals(cName)));
+			}
 		}
 		assertEquals(this.problemType.getRequestedInterface(), builder.getRequestedInterface());
 		assertEquals(this.problemType.getSearchSelectionDatasetSplitter(), builder.getSearchSelectionDatasetSplitter());
 		assertTrue("There should be no preferred node evaluators by default.", builder.getPreferredNodeEvaluators().isEmpty());
 	}
 
+	protected boolean doesProblemTypeAdoptAvailablePreferredComponents() {
+		return this.problemType.getPreferredComponentListFromResource() != null || (this.problemType.getPreferredComponentListFromFileSystem() != null && new File(this.problemType.getPreferredComponentListFromFileSystem()).exists());
+	}
+
 	protected void checkThatFirstAndLastAreProperlyConfigured(final List<IPathEvaluator<TFDNode, String, Double>> nodeEvaluators) {
-		assertTrue(nodeEvaluators.get(0) instanceof PipelineValidityCheckingNodeEvaluator);
-		if (this.problemType.getPreferredComponentListFromFileSystem() != null || this.problemType.getPreferredComponentListFromResource() != null) {
-			assertEquals(PreferenceBasedNodeEvaluator.class, nodeEvaluators.get(1).getClass());
+		int indexWherePreferredNodeEvaluatorIsExpected;
+		if (this.problemType.getValidityCheckingNodeEvaluator() != null) {
+			assertTrue(nodeEvaluators.get(0) instanceof PipelineValidityCheckingNodeEvaluator);
+			indexWherePreferredNodeEvaluatorIsExpected = 1;
+		} else {
+			indexWherePreferredNodeEvaluatorIsExpected = 0;
 		}
-		else {
+		if (this.doesProblemTypeAdoptAvailablePreferredComponents()) {
+			assertEquals(PreferenceBasedNodeEvaluator.class, nodeEvaluators.get(indexWherePreferredNodeEvaluatorIsExpected).getClass());
+		} else {
 			assertTrue(nodeEvaluators.stream().noneMatch(ne -> ne.getClass() == PreferenceBasedNodeEvaluator.class)); // if the problem type does not specify preferred components, we do not want to see them here
 		}
 		assertEquals(RandomCompletionBasedNodeEvaluator.class, nodeEvaluators.get(nodeEvaluators.size() - 1).getClass());
+	}
+
+	/**
+	 * Potential core node evaluators: validity checker, component preferences, and the RCNE
+	 *
+	 * @return
+	 */
+	public int getNumberOfCoreNodeEvaluators() {
+		int numOfExpectedNodeEvaluators = 1; // random completion based is always there
+		if (this.problemType.getValidityCheckingNodeEvaluator() != null) {
+			numOfExpectedNodeEvaluators++;
+		}
+		if (this.doesProblemTypeAdoptAvailablePreferredComponents()) {
+			numOfExpectedNodeEvaluators++;
+		}
+		return numOfExpectedNodeEvaluators;
 	}
 
 	@Test
@@ -104,52 +139,61 @@ public abstract class AbstractMLPlanBuilderTest {
 		MLPlan<?> mlplan = this.getMLPlanDefinedByBuilderAndProblemType();
 		assertNotNull(mlplan);
 		mlplan.next(); // initialize ML-Plan
-		AlternativeNodeEvaluator<TFDNode, String, Double> mainNodeEvaluator = (AlternativeNodeEvaluator<TFDNode, String, Double>)this.getSearch(mlplan).getNodeEvaluator();
-		assertEquals(AlternativeNodeEvaluator.class, mainNodeEvaluator.getClass());
-		List<IPathEvaluator<TFDNode, String, Double>> nodeEvaluators = this.getNodeEvaluatorChain(mainNodeEvaluator);
-		assertEquals(3, nodeEvaluators.size());
-		this.checkThatFirstAndLastAreProperlyConfigured(nodeEvaluators);
+
+		/* check node evaluators */
+		int numOfExpectedNodeEvaluators = this.getNumberOfCoreNodeEvaluators();
+		IPathEvaluator<TFDNode, String, Double> ne = this.getSearch(mlplan).getNodeEvaluator();
+		if (numOfExpectedNodeEvaluators == 1) {
+			assertEquals(RandomCompletionBasedNodeEvaluator.class, ne.getClass());
+		} else {
+			assertEquals(AlternativeNodeEvaluator.class, ne.getClass());
+			AlternativeNodeEvaluator<TFDNode, String, Double> mainNodeEvaluator = (AlternativeNodeEvaluator<TFDNode, String, Double>) ne;
+			assertEquals(AlternativeNodeEvaluator.class, mainNodeEvaluator.getClass());
+			List<IPathEvaluator<TFDNode, String, Double>> nodeEvaluators = this.getNodeEvaluatorChain(mainNodeEvaluator);
+			assertEquals(numOfExpectedNodeEvaluators, nodeEvaluators.size());
+			this.checkThatFirstAndLastAreProperlyConfigured(nodeEvaluators);
+		}
 	}
 
 	@Test
 	public void testSettingSeed() throws Exception {
 		long seed = 99;
-		AbstractMLPlanBuilder<?, ?> builder = this.getBuilder().withSeed(seed);
+		MLPlanBuilder<?, ?> builder = this.getBuilder().withSeed(seed);
 		assertEquals(seed, Long.parseLong(builder.getAlgorithmConfig().getProperty(IOwnerBasedRandomConfig.K_SEED)), 0.00001);
 	}
 
 	@Test
 	public void testSettingPortionOfDataReservedForSelection() throws Exception {
 		double portionOfDataReservedForSelection = 0.456;
-		AbstractMLPlanBuilder<?, ?> builder = this.getBuilder().withPortionOfDataReservedForSelection(portionOfDataReservedForSelection);
+		MLPlanBuilder<?, ?> builder = this.getBuilder().withPortionOfDataReservedForSelection(portionOfDataReservedForSelection);
 		assertEquals(portionOfDataReservedForSelection, Double.parseDouble(builder.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.SELECTION_PORTION)), 0.00001);
 	}
 
 	@Test
 	public void testSettingPerformanceMeasureForSearchPhase() throws Exception {
-		AbstractMLPlanBuilder<?, ?> builder = this.getBuilder();
+		MLPlanBuilder<?, ?> builder = this.getBuilder();
 		IDeterministicPredictionPerformanceMeasure<?, ?> customMeasure = new AsymmetricLoss();
 		builder.withPerformanceMeasureForSearchPhase(customMeasure);
 		assertEquals(customMeasure, builder.getMetricForSearchPhase());
 		MLPlan<?> mlplan = this.getMLPlanForBuilder(builder);
 		mlplan.next(); // initialize
-		assertEquals(customMeasure, ((MonteCarloCrossValidationEvaluator)mlplan.getClassifierEvaluatorForSearch().getBenchmark()).getMetric().getBaseMeasure());
+		assertEquals(customMeasure, ((MonteCarloCrossValidationEvaluator) mlplan.getClassifierEvaluatorForSearch().getBenchmark()).getMetric().getBaseMeasure());
 	}
 
 	@Test
 	public void testSettingPerformanceMeasureForSelectionPhase() throws Exception {
-		AbstractMLPlanBuilder<?, ?> builder = this.getBuilder();
+		MLPlanBuilder<?, ?> builder = this.getBuilder();
 		IDeterministicPredictionPerformanceMeasure<?, ?> customMeasure = new AsymmetricLoss();
 		builder.withPerformanceMeasureForSelectionPhase(customMeasure);
 		assertEquals(customMeasure, builder.getMetricForSelectionPhase());
 		MLPlan<?> mlplan = this.getMLPlanForBuilder(builder);
 		mlplan.next(); // initialize
-		assertEquals(customMeasure, ((MonteCarloCrossValidationEvaluator)mlplan.getClassifierEvaluatorForSelection().getBenchmark()).getMetric().getBaseMeasure());
+		assertEquals(customMeasure, ((MonteCarloCrossValidationEvaluator) mlplan.getClassifierEvaluatorForSelection().getBenchmark()).getMetric().getBaseMeasure());
 	}
 
 	@Test
 	public void testSettingTimeout() throws Exception {
-		AbstractMLPlanBuilder<?, ?> builder = this.getBuilder();
+		MLPlanBuilder<?, ?> builder = this.getBuilder();
 		Timeout to = new Timeout(4711, TimeUnit.SECONDS);
 		builder.withTimeOut(to);
 		assertEquals(to.milliseconds(), builder.getTimeOut().milliseconds());
@@ -165,7 +209,7 @@ public abstract class AbstractMLPlanBuilderTest {
 
 	@Test
 	public void testSettingCPUs() throws Exception {
-		AbstractMLPlanBuilder<?, ?> builder = this.getBuilder();
+		MLPlanBuilder<?, ?> builder = this.getBuilder();
 		int numCPUs = 99;
 		builder.withNumCpus(numCPUs);
 		assertEquals(numCPUs, builder.getAlgorithmConfig().cpus());
@@ -174,7 +218,7 @@ public abstract class AbstractMLPlanBuilderTest {
 
 	@Test
 	public void testSettingOnePreferredNodeEvaluator() throws Exception {
-		AbstractMLPlanBuilder<?, ?> builder = this.getBuilder();
+		MLPlanBuilder<?, ?> builder = this.getBuilder();
 		IPathEvaluator<TFDNode, String, Double> ne1 = n -> 0.0;
 
 		/* test that the preferred node evaluators is set in the builder */
@@ -188,18 +232,19 @@ public abstract class AbstractMLPlanBuilderTest {
 
 		/* now check the node evaluators */
 		@SuppressWarnings("unchecked")
-		BestFirst<?, TFDNode, String, Double> bf = (BestFirst<?, TFDNode, String, Double>)mlplan.getSearch();
-		AlternativeNodeEvaluator<TFDNode, String, Double> mainNodeEvaluator = (AlternativeNodeEvaluator<TFDNode, String, Double>)bf.getNodeEvaluator();
+		BestFirst<?, TFDNode, String, Double> bf = (BestFirst<?, TFDNode, String, Double>) mlplan.getSearch();
+		AlternativeNodeEvaluator<TFDNode, String, Double> mainNodeEvaluator = (AlternativeNodeEvaluator<TFDNode, String, Double>) bf.getNodeEvaluator();
 		assertEquals(AlternativeNodeEvaluator.class, mainNodeEvaluator.getClass());
 		List<IPathEvaluator<TFDNode, String, Double>> nodeEvaluators = this.getNodeEvaluatorChain(mainNodeEvaluator);
-		assertEquals(4, nodeEvaluators.size());
+		int numCoreNEs = this.getNumberOfCoreNodeEvaluators();
+		assertEquals(numCoreNEs + 1, nodeEvaluators.size());
 		this.checkThatFirstAndLastAreProperlyConfigured(nodeEvaluators);
-		assertEquals(ne1, nodeEvaluators.get(2));
+		assertEquals(ne1, nodeEvaluators.get(nodeEvaluators.size() - 2));
 	}
 
 	@Test
 	public void testSettingTwoPreferredNodeEvaluators() throws Exception {
-		AbstractMLPlanBuilder<?, ?> builder = this.getBuilder();
+		MLPlanBuilder<?, ?> builder = this.getBuilder();
 		IPathEvaluator<TFDNode, String, Double> ne1 = n -> 0.0;
 		IPathEvaluator<TFDNode, String, Double> ne2 = n -> 1.0;
 
@@ -217,13 +262,14 @@ public abstract class AbstractMLPlanBuilderTest {
 		mlplan.next(); // initialize
 
 		/* check node evaluators */
-		BestFirst<?, TFDNode, String, Double> bf = (BestFirst<?, TFDNode, String, Double>)mlplan.getSearch();
-		AlternativeNodeEvaluator<TFDNode, String, Double> mainNodeEvaluator = (AlternativeNodeEvaluator<TFDNode, String, Double>)bf.getNodeEvaluator();
+		BestFirst<?, TFDNode, String, Double> bf = (BestFirst<?, TFDNode, String, Double>) mlplan.getSearch();
+		AlternativeNodeEvaluator<TFDNode, String, Double> mainNodeEvaluator = (AlternativeNodeEvaluator<TFDNode, String, Double>) bf.getNodeEvaluator();
 		assertEquals(AlternativeNodeEvaluator.class, mainNodeEvaluator.getClass());
 		List<IPathEvaluator<TFDNode, String, Double>> nodeEvaluators = this.getNodeEvaluatorChain(mainNodeEvaluator);
-		assertEquals(5, nodeEvaluators.size());
+		int numCoreNEs = this.getNumberOfCoreNodeEvaluators();
+		assertEquals(numCoreNEs + 2, nodeEvaluators.size());
 		this.checkThatFirstAndLastAreProperlyConfigured(nodeEvaluators);
-		assertEquals(ne1, nodeEvaluators.get(2));
-		assertEquals(ne2, nodeEvaluators.get(3));
+		assertEquals(ne1, nodeEvaluators.get(nodeEvaluators.size() - 3));
+		assertEquals(ne2, nodeEvaluators.get(nodeEvaluators.size() - 2));
 	}
 }
