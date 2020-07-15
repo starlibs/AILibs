@@ -8,7 +8,7 @@ import org.apache.commons.cli.CommandLine;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 
-import ai.libs.mlplan.core.AbstractMLPlanBuilder;
+import ai.libs.mlplan.core.AMLPlanBuilder;
 
 public class MLPlan4MekaMultiLabelCLIModule implements IMLPlanCLIModule {
 
@@ -16,7 +16,7 @@ public class MLPlan4MekaMultiLabelCLIModule implements IMLPlanCLIModule {
 	}
 
 	@Override
-	public AbstractMLPlanBuilder getMLPlanBuilderForSetting(final CommandLine cl, final ILabeledDataset fitDataset) throws IOException {
+	public AMLPlanBuilder getMLPlanBuilderForSetting(final CommandLine cl, final ILabeledDataset fitDataset) throws IOException {
 		return null;
 	}
 

@@ -14,10 +14,10 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISa
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-import ai.libs.mlplan.core.MLPlanBuilder;
+import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 
-public class MLPlanWekaBuilder extends MLPlanBuilder<IWekaClassifier, MLPlanWekaBuilder> {
+public class MLPlanWekaBuilder extends AMLPlanBuilder<IWekaClassifier, MLPlanWekaBuilder> {
 
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaBuilder.class);
 

@@ -10,10 +10,10 @@ import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.AutoMEKAGGPF
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
-import ai.libs.mlplan.core.MLPlanBuilder;
+import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.core.IProblemType;
 
-public class ML2PlanMekaBuilder extends MLPlanBuilder<IMekaClassifier, ML2PlanMekaBuilder> {
+public class ML2PlanMekaBuilder extends AMLPlanBuilder<IMekaClassifier, ML2PlanMekaBuilder> {
 
 	public ML2PlanMekaBuilder() throws IOException {
 		this (EMLPlanMekaProblemType.CLASSIFICATION_MULTILABEL);

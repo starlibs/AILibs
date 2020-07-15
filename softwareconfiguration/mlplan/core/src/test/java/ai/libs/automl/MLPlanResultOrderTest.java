@@ -27,7 +27,7 @@ import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 import ai.libs.jaicore.components.serialization.CompositionSerializer;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.mlplan.core.MLPlanBuilder;
+import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
 import ai.libs.mlplan.core.TimeTrackingLearnerWrapper;
@@ -41,11 +41,11 @@ import ai.libs.mlplan.core.events.ClassifierFoundEvent;
  */
 public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> {
 
-	public abstract MLPlanBuilder<L, ?> getMLPlanBuilder() throws Exception;
+	public abstract AMLPlanBuilder<L, ?> getMLPlanBuilder() throws Exception;
 
 	private MLPlan<L> mlplan;
 
-	private MLPlan<L> prepare(final MLPlanBuilder<L, ?> builder) throws DatasetDeserializationFailedException, IOException{
+	private MLPlan<L> prepare(final AMLPlanBuilder<L, ?> builder) throws DatasetDeserializationFailedException, IOException{
 		builder.withDataset(OpenMLDatasetReader.deserializeDataset(39));
 		List<String> preferredComponents = builder.getPreferredComponents().stream().limit(10).collect(Collectors.toList());
 		final AtomicInteger observedIndex = new AtomicInteger(-1);

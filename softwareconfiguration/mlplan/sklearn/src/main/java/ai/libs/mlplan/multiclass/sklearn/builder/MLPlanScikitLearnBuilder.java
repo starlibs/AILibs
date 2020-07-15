@@ -10,13 +10,13 @@ import org.api4.java.algorithm.Timeout;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.IProblemType;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.core.MLPlanBuilder;
+import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.multiclass.sklearn.AScikitLearnLearnerFactory;
 import ai.libs.mlplan.multiclass.sklearn.EMLPlanScikitLearnProblemType;
 import ai.libs.python.IPythonConfig;
 import ai.libs.python.PythonRequirementDefinition;
 
-public class MLPlanScikitLearnBuilder extends MLPlanBuilder<ScikitLearnWrapper<IPrediction, IPredictionBatch>, MLPlanScikitLearnBuilder> {
+public class MLPlanScikitLearnBuilder extends AMLPlanBuilder<ScikitLearnWrapper<IPrediction, IPredictionBatch>, MLPlanScikitLearnBuilder> {
 
 	private static final int PYTHON_MINIMUM_REQUIRED_VERSION_REL = 3;
 	private static final int PYTHON_MINIMUM_REQUIRED_VERSION_MAJ = 5;

@@ -51,11 +51,11 @@ import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
  *
  * @author Felix Mohr, Marcel Wever
  */
-public abstract class MLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, B extends MLPlanBuilder<L, B>> implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
+public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, B extends AMLPlanBuilder<L, B>> implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 
 	/* Logging */
-	private Logger logger = LoggerFactory.getLogger(MLPlanBuilder.class);
-	private String loggerName = MLPlanBuilder.class.getName();
+	private Logger logger = LoggerFactory.getLogger(AMLPlanBuilder.class);
+	private String loggerName = AMLPlanBuilder.class.getName();
 
 	private static final String RES_ALGORITHM_CONFIG = "mlplan/mlplan.properties";
 	private static final String FS_ALGORITHM_CONFIG = "conf/mlplan.properties";
@@ -87,20 +87,20 @@ public abstract class MLPlanBuilder<L extends ISupervisedLearner<ILabeledInstanc
 	private ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factoryForPipelineEvaluationInSelectionPhase = this.getMCCVFactory(3, .7);
 	private IEvaluationSafeGuardFactory safeGuard = null;
 
-	protected MLPlanBuilder() {
+	protected AMLPlanBuilder() {
 		super();
 		this.withAlgorithmConfigFile(DEF_ALGORITHM_CONFIG);
 		this.withSeed(0);
 	}
 
-	protected MLPlanBuilder(final IProblemType<L> problemType) throws IOException {
+	protected AMLPlanBuilder(final IProblemType<L> problemType) throws IOException {
 		super();
 		this.withAlgorithmConfigFile(DEF_ALGORITHM_CONFIG);
 		this.withProblemType(problemType);
 		this.withSeed(0);
 	}
 
-	public MLPlanBuilder<L, B> withProblemType(final IProblemType<L> problemType) throws IOException {
+	public AMLPlanBuilder<L, B> withProblemType(final IProblemType<L> problemType) throws IOException {
 
 		if (this.logger.isInfoEnabled()) {
 			this.logger.info("Setting problem type to {}.", problemType.getName());

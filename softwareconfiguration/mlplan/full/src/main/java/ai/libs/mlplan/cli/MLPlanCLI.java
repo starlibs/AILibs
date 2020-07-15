@@ -36,8 +36,8 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
 import ai.libs.mlplan.cli.module.MLPlan4WekaClassificationCLIModule;
 import ai.libs.mlplan.cli.report.OpenMLAutoMLBenchmarkReport;
-import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
+import ai.libs.mlplan.core.AMLPlanBuilder;
 
 /**
  * Enables command-line usage of ML-Plan.
@@ -186,7 +186,7 @@ public class MLPlanCLI {
 		ILabeledDataset fitDataset = ArffDatasetAdapter.readDataset(new File(cl.getOptionValue(O_FIT_DATASET)));
 
 		// retrieve builder from module
-		AbstractMLPlanBuilder builder = module.getMLPlanBuilderForSetting(cl, fitDataset);
+		AMLPlanBuilder builder = module.getMLPlanBuilderForSetting(cl, fitDataset);
 
 		// set common configs
 		builder.withNumCpus(Integer.parseInt(cl.getOptionValue(O_NUM_CPUS, getDefault(O_NUM_CPUS))));

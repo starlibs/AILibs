@@ -31,7 +31,7 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.Alter
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import ai.libs.mlplan.core.IProblemType;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.core.MLPlanBuilder;
+import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
 import ai.libs.mlplan.core.PreferenceBasedNodeEvaluator;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
@@ -39,7 +39,7 @@ import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 @RunWith(Parameterized.class)
 public abstract class AbstractMLPlanBuilderTest {
 
-	public abstract MLPlanBuilder<?, ?> getBuilder() throws Exception;
+	public abstract AMLPlanBuilder<?, ?> getBuilder() throws Exception;
 
 	@Parameter(0)
 	public IProblemType<?> problemType;
@@ -48,7 +48,7 @@ public abstract class AbstractMLPlanBuilderTest {
 		return this.getMLPlanForBuilder(this.getBuilder());
 	}
 
-	protected MLPlan<?> getMLPlanForBuilder(final MLPlanBuilder<?, ?> builder) throws DatasetDeserializationFailedException, Exception {
+	protected MLPlan<?> getMLPlanForBuilder(final AMLPlanBuilder<?, ?> builder) throws DatasetDeserializationFailedException, Exception {
 		return builder.withDataset(OpenMLDatasetReader.deserializeDataset(3)).build(); // test builds with the kr-vs-kp dataset
 	}
 
@@ -80,7 +80,7 @@ public abstract class AbstractMLPlanBuilderTest {
 
 	@Test
 	public void testProperBuilderInitialization() throws Exception {
-		MLPlanBuilder<?, ?> builder = this.getBuilder();
+		AMLPlanBuilder<?, ?> builder = this.getBuilder();
 		assertEquals(this.problemType.getLearnerFactory(), builder.getLearnerFactory());
 		assertEquals(this.problemType.getPerformanceMetricForSearchPhase(), builder.getMetricForSearchPhase());
 		assertEquals(this.problemType.getPerformanceMetricForSelectionPhase(), builder.getMetricForSelectionPhase());
@@ -158,20 +158,20 @@ public abstract class AbstractMLPlanBuilderTest {
 	@Test
 	public void testSettingSeed() throws Exception {
 		long seed = 99;
-		MLPlanBuilder<?, ?> builder = this.getBuilder().withSeed(seed);
+		AMLPlanBuilder<?, ?> builder = this.getBuilder().withSeed(seed);
 		assertEquals(seed, Long.parseLong(builder.getAlgorithmConfig().getProperty(IOwnerBasedRandomConfig.K_SEED)), 0.00001);
 	}
 
 	@Test
 	public void testSettingPortionOfDataReservedForSelection() throws Exception {
 		double portionOfDataReservedForSelection = 0.456;
-		MLPlanBuilder<?, ?> builder = this.getBuilder().withPortionOfDataReservedForSelection(portionOfDataReservedForSelection);
+		AMLPlanBuilder<?, ?> builder = this.getBuilder().withPortionOfDataReservedForSelection(portionOfDataReservedForSelection);
 		assertEquals(portionOfDataReservedForSelection, Double.parseDouble(builder.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.SELECTION_PORTION)), 0.00001);
 	}
 
 	@Test
 	public void testSettingPerformanceMeasureForSearchPhase() throws Exception {
-		MLPlanBuilder<?, ?> builder = this.getBuilder();
+		AMLPlanBuilder<?, ?> builder = this.getBuilder();
 		IDeterministicPredictionPerformanceMeasure<?, ?> customMeasure = new AsymmetricLoss();
 		builder.withPerformanceMeasureForSearchPhase(customMeasure);
 		assertEquals(customMeasure, builder.getMetricForSearchPhase());
@@ -182,7 +182,7 @@ public abstract class AbstractMLPlanBuilderTest {
 
 	@Test
 	public void testSettingPerformanceMeasureForSelectionPhase() throws Exception {
-		MLPlanBuilder<?, ?> builder = this.getBuilder();
+		AMLPlanBuilder<?, ?> builder = this.getBuilder();
 		IDeterministicPredictionPerformanceMeasure<?, ?> customMeasure = new AsymmetricLoss();
 		builder.withPerformanceMeasureForSelectionPhase(customMeasure);
 		assertEquals(customMeasure, builder.getMetricForSelectionPhase());
@@ -193,7 +193,7 @@ public abstract class AbstractMLPlanBuilderTest {
 
 	@Test
 	public void testSettingTimeout() throws Exception {
-		MLPlanBuilder<?, ?> builder = this.getBuilder();
+		AMLPlanBuilder<?, ?> builder = this.getBuilder();
 		Timeout to = new Timeout(4711, TimeUnit.SECONDS);
 		builder.withTimeOut(to);
 		assertEquals(to.milliseconds(), builder.getTimeOut().milliseconds());
@@ -209,7 +209,7 @@ public abstract class AbstractMLPlanBuilderTest {
 
 	@Test
 	public void testSettingCPUs() throws Exception {
-		MLPlanBuilder<?, ?> builder = this.getBuilder();
+		AMLPlanBuilder<?, ?> builder = this.getBuilder();
 		int numCPUs = 99;
 		builder.withNumCpus(numCPUs);
 		assertEquals(numCPUs, builder.getAlgorithmConfig().cpus());
@@ -218,7 +218,7 @@ public abstract class AbstractMLPlanBuilderTest {
 
 	@Test
 	public void testSettingOnePreferredNodeEvaluator() throws Exception {
-		MLPlanBuilder<?, ?> builder = this.getBuilder();
+		AMLPlanBuilder<?, ?> builder = this.getBuilder();
 		IPathEvaluator<TFDNode, String, Double> ne1 = n -> 0.0;
 
 		/* test that the preferred node evaluators is set in the builder */
@@ -244,7 +244,7 @@ public abstract class AbstractMLPlanBuilderTest {
 
 	@Test
 	public void testSettingTwoPreferredNodeEvaluators() throws Exception {
-		MLPlanBuilder<?, ?> builder = this.getBuilder();
+		AMLPlanBuilder<?, ?> builder = this.getBuilder();
 		IPathEvaluator<TFDNode, String, Double> ne1 = n -> 0.0;
 		IPathEvaluator<TFDNode, String, Double> ne2 = n -> 1.0;
 
