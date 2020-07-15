@@ -11,7 +11,7 @@ public class SquaredError extends ARegressionMeasure {
 	private static final ai.libs.jaicore.ml.regression.loss.instance.SquaredError SQUARED_ERROR_LOSS = new ai.libs.jaicore.ml.regression.loss.instance.SquaredError();
 
 	@Override
-	public double loss(final List<? extends Double> expected, final List<? extends Double> actual) {
-		return StatisticsUtil.mean(IntStream.range(0, expected.size()).mapToObj(x -> Double.valueOf(SQUARED_ERROR_LOSS.loss(expected.get(x), actual.get(x)))).collect(Collectors.toList()));
+	public double loss(final List<? extends Double> expected, final List<? extends Double> predicted) {
+		return StatisticsUtil.mean(IntStream.range(0, expected.size()).mapToObj(x -> Double.valueOf(SQUARED_ERROR_LOSS.loss(expected.get(x), predicted.get(x)))).collect(Collectors.toList()));
 	}
 }

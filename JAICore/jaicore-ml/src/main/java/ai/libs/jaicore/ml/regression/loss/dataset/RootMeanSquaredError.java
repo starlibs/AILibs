@@ -15,9 +15,8 @@ public class RootMeanSquaredError extends ARegressionMeasure {
 	private static final MeanSquaredError MEAN_SQUARED_ERROR_LOSS = new MeanSquaredError();
 
 	@Override
-	public double loss(final List<? extends Double> actual, final List<? extends Double> expected) {
-		this.checkConsistency(expected, actual);
-		return Math.sqrt(MEAN_SQUARED_ERROR_LOSS.loss(expected, actual));
+	public double loss(final List<? extends Double> expected, final List<? extends Double> predicted) {
+		return Math.sqrt(MEAN_SQUARED_ERROR_LOSS.loss(expected, predicted));
 	}
 
 }

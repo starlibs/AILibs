@@ -5,8 +5,8 @@ import ai.libs.jaicore.ml.classification.loss.instance.AInstanceMeasure;
 public class AbsoluteError extends AInstanceMeasure<Double, Double> {
 
 	@Override
-	public double loss(final Double actual, final Double expected) {
-		return Math.abs(actual - expected);
+	public double loss(final Double expected, final Double predicted) {
+		return Math.abs(expected - predicted);
 	}
 
 }

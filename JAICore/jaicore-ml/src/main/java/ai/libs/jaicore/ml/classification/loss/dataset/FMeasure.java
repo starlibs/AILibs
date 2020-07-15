@@ -2,29 +2,30 @@ package ai.libs.jaicore.ml.classification.loss.dataset;
 
 import java.util.List;
 
-public class FMeasure extends AHomogeneousPredictionPerformanceMeasure<Object> {
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
+
+import ai.libs.jaicore.basic.metric.ConfusionMetrics;
+
+public class FMeasure extends ASingleLabelPredictionPerformanceMeasure {
 
 	private final double beta;
-	private final Precision precision;
-	private final Recall recall;
+	private final TruePositives tp;
+	private final FalsePositives fp;
+	private final FalseNegatives fn;
 
-	public FMeasure(final double beta, final Object positiveClass) {
+	public FMeasure(final double beta, final int positiveClass) {
 		this.beta = beta;
-		this.precision = new Precision(positiveClass);
-		this.recall = new Recall(positiveClass);
+		this.tp = new TruePositives(positiveClass);
+		this.fp = new FalsePositives(positiveClass);
+		this.fn = new FalseNegatives(positiveClass);
 	}
 
 	@Override
-	public double score(final List<?> expected, final List<?> actual) {
-		if (expected.size() != actual.size()) {
+	public double score(final List<? extends Integer> expected, final List<? extends ISingleLabelClassification> predicted) {
+		if (expected.size() != predicted.size()) {
 			throw new IllegalArgumentException("Expected and actual must be of the same length.");
 		}
-
-		double vPrecision = this.precision.score(expected, actual);
-		double vRecall = this.recall.score(expected, actual);
-		double denominator = ((Math.pow(this.beta, 2) * vPrecision) + vRecall);
-
-		return denominator == 0.0 ? 0 : (1 + Math.pow(this.beta, 2)) * (vPrecision * vRecall) / denominator;
+		return ConfusionMetrics.getFMeasure(this.beta, (int) this.tp.score(expected, predicted), (int) this.fp.score(expected, predicted), (int) this.fn.score(expected, predicted));
 	}
 
 }
