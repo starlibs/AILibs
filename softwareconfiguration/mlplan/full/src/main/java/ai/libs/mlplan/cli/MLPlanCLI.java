@@ -39,11 +39,9 @@ import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
-import ai.libs.mlplan.core.MLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.sklearn.EMLPlanSkLearnProblemType;
+import ai.libs.mlplan.core.MLPlanBuilder;
 import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanSKLearnBuilder;
-import ai.libs.mlplan.multiclass.wekamlplan.EMLPlanWekaProblemType;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
 import meka.classifiers.multilabel.MultiLabelClassifier;
@@ -195,17 +193,16 @@ public class MLPlanCLI {
 		if (commandLine.hasOption(searchSpaceConfigurationOption)) {
 			switch (commandLine.getOptionValue(searchSpaceConfigurationOption)) {
 			case "weka":
-				builder = new MLPlanWekaBuilder();
+				builder = MLPlanWekaBuilder.forClassification();
 				break;
 			case "weka-tiny":
-				builder = new MLPlanWekaBuilder();
-				builder.withProblemType(EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS_TINY);
+				builder = MLPlanWekaBuilder.forClassificationWithTinySearchSpace();
 				break;
 			case "sklearn":
-				builder = new MLPlanSKLearnBuilder();
+				builder = MLPlanSKLearnBuilder.forClassification();
 				break;
 			case "sklearn-ul":
-				builder = new MLPlanSKLearnBuilder().withProblemType(EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES);
+				builder = MLPlanSKLearnBuilder.forClassificationWithUnlimitedLength();
 				break;
 			case "meka":
 				builder = new ML2PlanMekaBuilder();
