@@ -21,10 +21,10 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.sklearn.EMLPlanSkLearnProblemType;
-import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanSKLearnBuilder;
+import ai.libs.mlplan.multiclass.sklearn.EMLPlanScikitLearnProblemType;
+import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
 
-public class MLPlanSkLearnRulExample {
+public class MLPlanScikitLearnRulExample {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger("example");
 
@@ -40,8 +40,8 @@ public class MLPlanSkLearnRulExample {
 		List<ILabeledDataset<ILabeledInstance>> splits = RandomHoldoutSplitter.createSplit(dataset, 42, .7);
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
-		MLPlanSKLearnBuilder builder = MLPlanSKLearnBuilder.forRUL();
-		builder.withProblemType(EMLPlanSkLearnProblemType.RUL);
+		MLPlanScikitLearnBuilder builder = MLPlanScikitLearnBuilder.forRUL();
+		builder.withProblemType(EMLPlanScikitLearnProblemType.RUL);
 		builder.withNodeEvaluationTimeOut(new Timeout(60, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new Timeout(45, TimeUnit.SECONDS));
 		builder.withTimeOut(new Timeout(3, TimeUnit.MINUTES));

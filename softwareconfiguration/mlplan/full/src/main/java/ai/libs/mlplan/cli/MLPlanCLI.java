@@ -41,7 +41,7 @@ import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogr
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanBuilder;
-import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanSKLearnBuilder;
+import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
 import meka.classifiers.multilabel.MultiLabelClassifier;
@@ -199,10 +199,10 @@ public class MLPlanCLI {
 				builder = MLPlanWekaBuilder.forClassificationWithTinySearchSpace();
 				break;
 			case "sklearn":
-				builder = MLPlanSKLearnBuilder.forClassification();
+				builder = MLPlanScikitLearnBuilder.forClassification();
 				break;
 			case "sklearn-ul":
-				builder = MLPlanSKLearnBuilder.forClassificationWithUnlimitedLength();
+				builder = MLPlanScikitLearnBuilder.forClassificationWithUnlimitedLength();
 				break;
 			case "meka":
 				builder = new ML2PlanMekaBuilder();

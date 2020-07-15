@@ -34,7 +34,7 @@ import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
-import ai.libs.jaicore.ml.core.ESkLearnProblemType;
+import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
@@ -90,7 +90,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	private ILabeledDataset<ILabeledInstance> dataset;
 
 	/* Problem definition fields */
-	private ESkLearnProblemType problemType;
+	private EScikitLearnProblemType problemType;
 	private IPythonConfig pythonConfig;
 	private int[] targetColumns = new int[0]; // Defines which of the columns in the arff file represent the target vectors. If not set, the last column is assumed to be the target vector.
 
@@ -121,7 +121,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * @throws IOException
 	 *             The script could not be created.
 	 */
-	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withoutModelDump, final ESkLearnProblemType problemType) throws IOException {
+	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withoutModelDump, final EScikitLearnProblemType problemType) throws IOException {
 		if (ProcessUtil.getOS() == OS.MAC || ProcessUtil.getOS() == OS.LINUX) {
 			this.listenToPidFromProcess = true;
 		} else {
@@ -164,16 +164,16 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * @throws IOException
 	 *             The script could not be created.
 	 */
-	public ScikitLearnWrapper(final String constructInstruction, final String imports, final ESkLearnProblemType problemType) throws IOException {
+	public ScikitLearnWrapper(final String constructInstruction, final String imports, final EScikitLearnProblemType problemType) throws IOException {
 		this(constructInstruction, imports, false, problemType);
 	}
 
-	public ScikitLearnWrapper(final String constructInstruction, final String imports, final File trainedModelPath, final ESkLearnProblemType problemType) throws IOException {
+	public ScikitLearnWrapper(final String constructInstruction, final String imports, final File trainedModelPath, final EScikitLearnProblemType problemType) throws IOException {
 		this(constructInstruction, imports, false, problemType);
 		this.modelFile = trainedModelPath;
 	}
 
-	public ESkLearnProblemType getProblemType() {
+	public EScikitLearnProblemType getProblemType() {
 		return this.problemType;
 	}
 
@@ -215,7 +215,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 
 			if (!this.withoutModelDump) {
 				this.modelFile = new File(MODEL_DUMPS_DIRECTORY, this.configurationUID + "_" + arffName + MODEL_DUMP_FILE_EXT);
-				ScikitLearnWrapper<P, B>.SKLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new SKLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff).withOutputFile(this.modelFile);
+				ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff).withOutputFile(this.modelFile);
 				skLearnWrapperCommandBuilder.withSeed(this.seed);
 				skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 				String[] trainCommand = skLearnWrapperCommandBuilder.toCommandArray();
@@ -292,7 +292,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		outputFile.getParentFile().mkdirs();
 
 		if (!this.withoutModelDump) {
-			ScikitLearnWrapper<P, B>.SKLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new SKLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff).withModelFile(this.modelFile).withOutputFile(outputFile);
+			ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff).withModelFile(this.modelFile).withOutputFile(outputFile);
 			skLearnWrapperCommandBuilder.withSeed(this.seed);
 			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
@@ -307,7 +307,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				throw new PredictionException("Could not run scikit-learn classifier.", e);
 			}
 		} else {
-			ScikitLearnWrapper<P, B>.SKLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new SKLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff).withTestArffFile(testArff).withOutputFile(outputFile);
+			ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff).withTestArffFile(testArff).withOutputFile(outputFile);
 			skLearnWrapperCommandBuilder.withSeed(this.seed);
 			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
@@ -345,9 +345,9 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		 * The structured results of the last classifyInstances call is accessable over
 		 * getRawLastClassificationResults().
 		 * */
-		if (this.problemType == ESkLearnProblemType.CLASSIFICATION) {
+		if (this.problemType == EScikitLearnProblemType.CLASSIFICATION) {
 			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification((int) (double) x)).collect(Collectors.toList()));
-		} else if (this.problemType == ESkLearnProblemType.RUL) {
+		} else if (this.problemType == EScikitLearnProblemType.RUL) {
 			if (L.isInfoEnabled()) {
 				L.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()));
 			}
@@ -431,7 +431,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		return this.rawLastClassificationResults;
 	}
 
-	public void setProblemType(final ESkLearnProblemType problemType) {
+	public void setProblemType(final EScikitLearnProblemType problemType) {
 		if (this.problemType != problemType) {
 			this.problemType = problemType;
 			this.scikitTemplate = new File(ResourceUtil.getResourceAsTempFile(this.problemType.getRessourceScikitTemplate()));
@@ -519,7 +519,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 *
 	 * @author wever
 	 */
-	private class SKLearnWrapperCommandBuilder {
+	private class ScikitLearnWrapperCommandBuilder {
 
 		private static final String ARFF_FLAG = "--arff";
 		private static final String TEST_ARFF_FLAG = "--testarff";
@@ -536,33 +536,33 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		private long seed;
 		private Timeout timeout;
 
-		private SKLearnWrapperCommandBuilder() {
+		private ScikitLearnWrapperCommandBuilder() {
 
 		}
 
-		public SKLearnWrapperCommandBuilder withTestArffFile(final File testArffFile) {
+		public ScikitLearnWrapperCommandBuilder withTestArffFile(final File testArffFile) {
 			this.testArffFile = testArffFile.getAbsolutePath();
 			return this;
 		}
 
-		public SKLearnWrapperCommandBuilder withTrainMode() {
+		public ScikitLearnWrapperCommandBuilder withTrainMode() {
 			return this.withMode(WrapperExecutionMode.TRAIN);
 		}
 
-		public SKLearnWrapperCommandBuilder withTestMode() {
+		public ScikitLearnWrapperCommandBuilder withTestMode() {
 			return this.withMode(WrapperExecutionMode.TEST);
 		}
 
-		public SKLearnWrapperCommandBuilder withTrainTestMode() {
+		public ScikitLearnWrapperCommandBuilder withTrainTestMode() {
 			return this.withMode(WrapperExecutionMode.TRAIN_TEST);
 		}
 
-		private SKLearnWrapperCommandBuilder withMode(final WrapperExecutionMode execMode) {
+		private ScikitLearnWrapperCommandBuilder withMode(final WrapperExecutionMode execMode) {
 			this.mode = execMode;
 			return this;
 		}
 
-		private SKLearnWrapperCommandBuilder withModelFile(final File modelFile) {
+		private ScikitLearnWrapperCommandBuilder withModelFile(final File modelFile) {
 			if (!modelFile.exists()) {
 				throw new IllegalArgumentException("Model dump does not exist");
 			}
@@ -570,12 +570,12 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			return this;
 		}
 
-		private SKLearnWrapperCommandBuilder withOutputFile(final File outputFile) {
+		private ScikitLearnWrapperCommandBuilder withOutputFile(final File outputFile) {
 			this.outputFile = outputFile.getAbsolutePath();
 			return this;
 		}
 
-		private SKLearnWrapperCommandBuilder withArffFile(final File arffFile) {
+		private ScikitLearnWrapperCommandBuilder withArffFile(final File arffFile) {
 			if (!arffFile.exists()) {
 				throw new IllegalArgumentException("Arff File does not exist.");
 			}
@@ -583,12 +583,12 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			return this;
 		}
 
-		private SKLearnWrapperCommandBuilder withSeed(final long seed) {
+		private ScikitLearnWrapperCommandBuilder withSeed(final long seed) {
 			this.seed = seed;
 			return this;
 		}
 
-		private SKLearnWrapperCommandBuilder withTimeout(final Timeout timeout) {
+		private ScikitLearnWrapperCommandBuilder withTimeout(final Timeout timeout) {
 			this.timeout = timeout;
 			return this;
 		}

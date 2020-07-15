@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.core;
 
-public enum ESkLearnProblemType {
+public enum EScikitLearnProblemType {
 
 	REGRESSION("--regression", ""), CLASSIFICATION("", "sklearn/scikit_template_classification.twig.py", "tpot"), RUL("--rul", "sklearn/scikit_template_rul.twig.py");
 
@@ -8,7 +8,7 @@ public enum ESkLearnProblemType {
 	private final String scikitLearnCommandLineFlag;
 	private final String ressourceScikitTemplate;
 
-	private ESkLearnProblemType(final String scikitLearnCommandLineFlag, final String ressourceScikitTemplate, final String... pythonRequiredModules) {
+	private EScikitLearnProblemType(final String scikitLearnCommandLineFlag, final String ressourceScikitTemplate, final String... pythonRequiredModules) {
 		this.scikitLearnCommandLineFlag = scikitLearnCommandLineFlag;
 		this.ressourceScikitTemplate = ressourceScikitTemplate;
 		this.pythonRequiredModules = pythonRequiredModules;

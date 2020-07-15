@@ -3,12 +3,12 @@ package ai.libs.mlplan.multiclass.sklearn;
 import java.util.Set;
 
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.ml.core.ESkLearnProblemType;
+import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 
-public class RULSKLearnFactory extends ASKLearnClassifierFactory {
+public class ScikitLearnRULFactory extends AScikitLearnLearnerFactory {
 
-	public RULSKLearnFactory() {
-		super(ESkLearnProblemType.RUL);
+	public ScikitLearnRULFactory() {
+		super(EScikitLearnProblemType.RUL);
 	}
 
 	@Override

@@ -21,14 +21,14 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanSKLearnBuilder;
+import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
 
-public class MLPlanSKLearnResultDeliveryTester extends AutoMLAlgorithmResultProductionTester {
+public class MLPlanScikitLearnResultDeliveryTester extends AutoMLAlgorithmResultProductionTester {
 
 	@Override
 	public IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws AlgorithmCreationException, IOException {
 		this.logger.info("Creating ML-Plan instance.");
-		MLPlanSKLearnBuilder builder = MLPlanSKLearnBuilder.forClassification();
+		MLPlanScikitLearnBuilder builder = MLPlanScikitLearnBuilder.forClassification();
 		int baseTime;
 		try {
 			baseTime = Math.max(5, (int) Math.ceil(1.2 * this.getTrainTimeOfMajorityClassifier(data) / 1000.0));

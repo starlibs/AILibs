@@ -27,25 +27,25 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEva
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedComputation;
-import ai.libs.mlplan.multiclass.sklearn.ASKLearnClassifierFactory;
-import ai.libs.mlplan.multiclass.sklearn.EMLPlanSkLearnProblemType;
+import ai.libs.mlplan.multiclass.sklearn.AScikitLearnLearnerFactory;
+import ai.libs.mlplan.multiclass.sklearn.EMLPlanScikitLearnProblemType;
 
 @RunWith(Parameterized.class)
-public class MLPlanSkLearnSearchSpaceConfigurationTest extends AbstractSearchSpaceConfigurationTest {
+public class MLPlanScikitLearnSearchSpaceConfigurationTest extends AbstractSearchSpaceConfigurationTest {
 
 	@Parameters
 	public static Collection<Object[]> data() {
 		return Arrays.asList(new Object[][] { //
-				{ EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS, "testrsc/car.arff" }, //
-				{ EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES, "testrsc/car.arff" }, //
-				{ EMLPlanSkLearnProblemType.RUL, "testrsc/rul_smallExample.arff" } //
+				{ EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS, "testrsc/car.arff" }, //
+				{ EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES, "testrsc/car.arff" }, //
+				{ EMLPlanScikitLearnProblemType.RUL, "testrsc/rul_smallExample.arff" } //
 		});
 	}
 
-	private ASKLearnClassifierFactory factory;
+	private AScikitLearnLearnerFactory factory;
 	private MonteCarloCrossValidationEvaluator evaluator;
 
-	public MLPlanSkLearnSearchSpaceConfigurationTest(final EMLPlanSkLearnProblemType problemType, final String dataPath) throws DatasetDeserializationFailedException, IOException {
+	public MLPlanScikitLearnSearchSpaceConfigurationTest(final EMLPlanScikitLearnProblemType problemType, final String dataPath) throws DatasetDeserializationFailedException, IOException {
 		super(problemType);
 		ILabeledDataset<ILabeledInstance> data = ArffDatasetAdapter.readDataset(new File(dataPath));
 
@@ -61,7 +61,7 @@ public class MLPlanSkLearnSearchSpaceConfigurationTest extends AbstractSearchSpa
 			TimedComputation.compute(new Callable<Double>() {
 				@Override
 				public Double call() throws Exception {
-					return MLPlanSkLearnSearchSpaceConfigurationTest.this.evaluator.evaluate(model);
+					return MLPlanScikitLearnSearchSpaceConfigurationTest.this.evaluator.evaluate(model);
 				}
 			}, new Timeout(30, TimeUnit.SECONDS), "Evaluation timed out.");
 

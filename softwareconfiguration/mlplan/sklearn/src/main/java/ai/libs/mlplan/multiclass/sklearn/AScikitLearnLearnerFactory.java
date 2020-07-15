@@ -20,7 +20,7 @@ import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
-import ai.libs.jaicore.ml.core.ESkLearnProblemType;
+import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.python.IPythonConfig;
@@ -30,22 +30,22 @@ import ai.libs.python.IPythonConfig;
  *
  * @author wever
  */
-public abstract class ASKLearnClassifierFactory implements ILearnerFactory<ScikitLearnWrapper<IPrediction, IPredictionBatch>>, ILoggingCustomizable {
+public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<ScikitLearnWrapper<IPrediction, IPredictionBatch>>, ILoggingCustomizable {
 
 	public static final String N_PREPROCESSOR = "preprocessor";
 
 	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList("True", "False"));
 	private static final List<String> EXCEPTIONS = Arrays.asList("None", "np.inf", "f_regression");
 
-	private final ESkLearnProblemType sklearnProblemType;
+	private final EScikitLearnProblemType sklearnProblemType;
 
-	private Logger logger = LoggerFactory.getLogger(ASKLearnClassifierFactory.class);
+	private Logger logger = LoggerFactory.getLogger(AScikitLearnLearnerFactory.class);
 	private String loggerName;
 	private IPythonConfig pythonConfig = ConfigFactory.create(IPythonConfig.class);
 	private long seed;
 	private Timeout timeout;
 
-	public ASKLearnClassifierFactory(final ESkLearnProblemType sklearnProblemType) {
+	public AScikitLearnLearnerFactory(final EScikitLearnProblemType sklearnProblemType) {
 		super();
 		this.sklearnProblemType = sklearnProblemType;
 	}

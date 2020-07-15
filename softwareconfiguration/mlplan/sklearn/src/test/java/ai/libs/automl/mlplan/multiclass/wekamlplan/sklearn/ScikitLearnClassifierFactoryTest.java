@@ -21,8 +21,8 @@ import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.serialization.ComponentLoader;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.mlplan.multiclass.sklearn.ASKLearnClassifierFactory;
-import ai.libs.mlplan.multiclass.sklearn.DefaultSKLearnClassifierFactory;
+import ai.libs.mlplan.multiclass.sklearn.AScikitLearnLearnerFactory;
+import ai.libs.mlplan.multiclass.sklearn.ScikitLearnClassifierFactory;
 import weka.core.Instances;
 
 /**
@@ -32,7 +32,7 @@ import weka.core.Instances;
  *
  * @author wever
  */
-public class SKLearnClassifierFactoryTest {
+public class ScikitLearnClassifierFactoryTest {
 
 	/* Constants for the tests */
 	private static final File TEST_DATASET = new File("testrsc/car.arff");
@@ -65,7 +65,7 @@ public class SKLearnClassifierFactoryTest {
 
 	/* Objects for tests */
 	private static List<Instances> stratSplit;
-	private static ASKLearnClassifierFactory factory;
+	private static AScikitLearnLearnerFactory factory;
 
 	@BeforeClass
 	public static void setup() throws FileNotFoundException, IOException, InterruptedException, SplitFailedException {
@@ -77,7 +77,7 @@ public class SKLearnClassifierFactoryTest {
 		cl = new ComponentLoader(COMPONENT_REPO);
 
 		/* init factory */
-		factory = new DefaultSKLearnClassifierFactory();
+		factory = new ScikitLearnClassifierFactory();
 	}
 
 	@Test

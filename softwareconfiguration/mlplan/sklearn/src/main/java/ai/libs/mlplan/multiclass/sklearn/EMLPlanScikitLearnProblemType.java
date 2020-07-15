@@ -7,7 +7,7 @@ import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
-import ai.libs.jaicore.ml.core.ESkLearnProblemType;
+import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
 import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
@@ -15,18 +15,18 @@ import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.IProblemType;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
 
-public enum EMLPlanSkLearnProblemType implements IProblemType<ScikitLearnWrapper<IPrediction, IPredictionBatch>> {
+public enum EMLPlanScikitLearnProblemType implements IProblemType<ScikitLearnWrapper<IPrediction, IPredictionBatch>> {
 
-	CLASSIFICATION_MULTICLASS(ESkLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/sklearn-mlplan.json", "conf/mlplan-sklearn.json", "automl/searchmodels/sklearn/sklearn-preferenceList.txt", "conf/sklearn-preferenceList.txt",
-			"MLPipeline", "BasicClassifier", EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new DefaultSKLearnClassifierFactory(),
+	CLASSIFICATION_MULTICLASS(EScikitLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/sklearn-mlplan.json", "conf/mlplan-sklearn.json", "automl/searchmodels/sklearn/sklearn-preferenceList.txt", "conf/sklearn-preferenceList.txt",
+			"MLPipeline", "BasicClassifier", EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new ScikitLearnClassifierFactory(),
 			new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //
-	CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES(ESkLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/ml-plan-ul.json", EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
-			EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), "AbstractClassifier", "BasicClassifier",
+	CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES(EScikitLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/ml-plan-ul.json", EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
+			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), "AbstractClassifier", "BasicClassifier",
 			EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, CLASSIFICATION_MULTICLASS.getLearnerFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter()), //
-	RUL(ESkLearnProblemType.RUL, "automl/searchmodels/sklearn/sklearn-rul.json", "conf/sklearn-rul.json", null, "conf/sklearn-preferenceList.txt", "MLPipeline", "BasicRegressor", ERulPerformanceMeasure.ASYMMETRIC_LOSS,
-			ERulPerformanceMeasure.ASYMMETRIC_LOSS, new RULSKLearnFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter());
+	RUL(EScikitLearnProblemType.RUL, "automl/searchmodels/sklearn/sklearn-rul.json", "conf/sklearn-rul.json", null, "conf/sklearn-preferenceList.txt", "MLPipeline", "BasicRegressor", ERulPerformanceMeasure.ASYMMETRIC_LOSS,
+			ERulPerformanceMeasure.ASYMMETRIC_LOSS, new ScikitLearnRULFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter());
 
-	private final ESkLearnProblemType problemType;
+	private final EScikitLearnProblemType problemType;
 
 	private final String searchSpaceConfigFileFromResource;
 	private final String systemSearchSpaceConfigFromFileSystem;
@@ -40,13 +40,13 @@ public enum EMLPlanSkLearnProblemType implements IProblemType<ScikitLearnWrapper
 	private final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSearchPhase;
 	private final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase;
 
-	private final ASKLearnClassifierFactory learnerFactory;
+	private final AScikitLearnLearnerFactory learnerFactory;
 
 	private final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter;
 
-	private EMLPlanSkLearnProblemType(final ESkLearnProblemType problemType, final String searchSpaceConfigFileFromResource, final String systemSearchSpaceConfigFromFileSystem, final String preferedComponentsListFromResource,
+	private EMLPlanScikitLearnProblemType(final EScikitLearnProblemType problemType, final String searchSpaceConfigFileFromResource, final String systemSearchSpaceConfigFromFileSystem, final String preferedComponentsListFromResource,
 			final String preferedComponentsListFromFileSystem, final String requestedHascoInterface, final String requestedBasicProblemInterface, final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSearchPhase,
-			final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase, final ASKLearnClassifierFactory learnerFactory,
+			final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase, final AScikitLearnLearnerFactory learnerFactory,
 			final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter) {
 		this.problemType = problemType;
 
@@ -66,7 +66,7 @@ public enum EMLPlanSkLearnProblemType implements IProblemType<ScikitLearnWrapper
 		this.searchSelectionDatasetSplitter = searchSelectionDatasetSplitter;
 	}
 
-	public ESkLearnProblemType getSkLearnProblemType() {
+	public EScikitLearnProblemType getSkLearnProblemType() {
 		return this.problemType;
 	}
 
@@ -125,7 +125,7 @@ public enum EMLPlanSkLearnProblemType implements IProblemType<ScikitLearnWrapper
 	}
 
 	@Override
-	public ASKLearnClassifierFactory getLearnerFactory() {
+	public AScikitLearnLearnerFactory getLearnerFactory() {
 		return this.learnerFactory;
 	}
 

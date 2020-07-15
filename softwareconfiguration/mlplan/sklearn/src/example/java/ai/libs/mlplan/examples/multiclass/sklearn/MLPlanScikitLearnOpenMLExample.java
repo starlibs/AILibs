@@ -20,7 +20,7 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanSKLearnBuilder;
+import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
 
 /**
  * This is an example class that illustrates the usage of ML-Plan on the segment dataset of OpenML. It is configured to run for 30 seconds and to use 70% of the data for search and 30% for selection in its second phase.
@@ -30,7 +30,7 @@ import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanSKLearnBuilder;
  * @author fmohr, mwever
  *
  */
-public class MLPlanSKLearnOpenMLExample {
+public class MLPlanScikitLearnOpenMLExample {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger("example");
 
@@ -41,7 +41,7 @@ public class MLPlanSKLearnOpenMLExample {
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 30 seconds */
-		MLPlanSKLearnBuilder builder = MLPlanSKLearnBuilder.forClassification();
+		MLPlanScikitLearnBuilder builder = MLPlanScikitLearnBuilder.forClassification();
 		builder.withNodeEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.SECONDS));
 		builder.withTimeOut(new Timeout(2, TimeUnit.MINUTES));
