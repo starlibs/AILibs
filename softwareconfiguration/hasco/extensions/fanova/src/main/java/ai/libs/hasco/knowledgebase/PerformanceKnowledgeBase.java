@@ -29,7 +29,7 @@ import ai.libs.jaicore.components.model.Dependency;
 import ai.libs.jaicore.components.model.IParameterDomain;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
-import ai.libs.jaicore.components.model.Util;
+import ai.libs.jaicore.components.model.CompositionProblemUtil;
 import ai.libs.jaicore.components.serialization.ParameterDeserializer;
 import ai.libs.jaicore.components.serialization.ParameterDomainDeserializer;
 import ai.libs.jaicore.db.sql.SQLAdapter;
@@ -70,7 +70,7 @@ public class PerformanceKnowledgeBase {
 
 		public ParameterConfiguration(final ComponentInstance composition) {
 			ArrayList<Pair<Parameter, String>> temp = new ArrayList<>();
-			List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(composition);
+			List<ComponentInstance> componentInstances = CompositionProblemUtil.getComponentInstancesOfComposition(composition);
 			for (ComponentInstance compInst : componentInstances) {
 				List<Parameter> parameters = compInst.getComponent().getParameters().getTotalOrder();
 				for (Parameter parameter : parameters) {
@@ -172,7 +172,7 @@ public class PerformanceKnowledgeBase {
 	}
 
 	public void addPerformanceSample(final String benchmarkName, final ComponentInstance componentInstance, final double score, final boolean addToDB) {
-		String identifier = Util.getComponentNamesOfComposition(componentInstance);
+		String identifier = CompositionProblemUtil.getComponentNamesOfComposition(componentInstance);
 
 		if (this.performanceInstancesByIdentifier.get(benchmarkName) == null) {
 			HashMap<String, Instances> newMap = new HashMap<>();
@@ -184,10 +184,10 @@ public class PerformanceKnowledgeBase {
 
 		if (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier)) {
 			// Add parameter domains as attributes
-			List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(componentInstance);
+			List<ComponentInstance> componentInstances = CompositionProblemUtil.getComponentInstancesOfComposition(componentInstance);
 			this.performanceInstancesByIdentifier.get(benchmarkName).put(identifier, this.getInstancesForCIList(componentInstances));
 		}
-		List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(componentInstance);
+		List<ComponentInstance> componentInstances = CompositionProblemUtil.getComponentInstancesOfComposition(componentInstance);
 		for (ComponentInstance ci : componentInstances) {
 			if (!this.performanceInstancesIndividualComponents.get(benchmarkName).containsKey(ci.getComponent().getName())) {
 				this.performanceInstancesIndividualComponents.get(benchmarkName).put(ci.getComponent().getName(), this.getInstancesForCI(ci));
@@ -421,7 +421,7 @@ public class PerformanceKnowledgeBase {
 		if (!this.performanceInstancesByIdentifier.containsKey(benchmarkName)) {
 			return false;
 		}
-		String identifier = Util.getComponentNamesOfComposition(composition);
+		String identifier = CompositionProblemUtil.getComponentNamesOfComposition(composition);
 		if (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier)) {
 			return false;
 		}
@@ -459,7 +459,7 @@ public class PerformanceKnowledgeBase {
 		if (!this.performanceInstancesByIdentifier.containsKey(benchmarkName)) {
 			return false;
 		}
-		String identifier = Util.getComponentNamesOfComposition(composition);
+		String identifier = CompositionProblemUtil.getComponentNamesOfComposition(composition);
 		if (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier)) {
 			return false;
 		}
@@ -497,7 +497,7 @@ public class PerformanceKnowledgeBase {
 	}
 
 	public Instances getPerformanceSamples(final String benchmarkName, final ComponentInstance composition) {
-		String identifier = Util.getComponentNamesOfComposition(composition);
+		String identifier = CompositionProblemUtil.getComponentNamesOfComposition(composition);
 		return this.performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
 	}
 
@@ -520,7 +520,7 @@ public class PerformanceKnowledgeBase {
 	}
 
 	public void setPerformanceSamples(final Instances instances, final ComponentInstance composition, final String benchmarkName) {
-		String identifier = Util.getComponentNamesOfComposition(composition);
+		String identifier = CompositionProblemUtil.getComponentNamesOfComposition(composition);
 
 		if (!this.performanceInstancesByIdentifier.containsKey(benchmarkName)) {
 			HashMap<String, Instances> newMap = new HashMap<>();

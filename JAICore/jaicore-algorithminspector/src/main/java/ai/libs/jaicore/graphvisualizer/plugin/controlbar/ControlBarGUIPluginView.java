@@ -18,12 +18,9 @@ public class ControlBarGUIPluginView extends ASimpleMVCPluginView<ControlBarGUIP
 
 			ToolBar topButtonToolBar = this.getNode();
 			this.startButton = new Button("Play");
-			this.startButton.setOnMouseClicked(event -> this.handleStartButtonClick());
+			this.startButton.setMinWidth(70); // this is the size which we need for the "resume" text
+			this.startButton.setOnMouseClicked(event -> this.handleStartResumePauseButtonClick());
 			topButtonToolBar.getItems().add(this.startButton);
-
-			Button pauseButton = new Button("Pause");
-			pauseButton.setOnMouseClicked(event -> this.handlePauseButtonClick());
-			topButtonToolBar.getItems().add(pauseButton);
 
 			Button resetButton = new Button("Reset");
 			resetButton.setOnMouseClicked(event -> this.handleResetButtonClick());
@@ -33,12 +30,12 @@ public class ControlBarGUIPluginView extends ASimpleMVCPluginView<ControlBarGUIP
 		});
 	}
 
-	public void handleStartButtonClick() {
-		DefaultGUIEventBus.getInstance().postEvent(new PlayEvent());
-	}
-
-	public void handlePauseButtonClick() {
-		DefaultGUIEventBus.getInstance().postEvent(new PauseEvent());
+	public void handleStartResumePauseButtonClick() {
+		if (this.getModel().isPaused()) {
+			DefaultGUIEventBus.getInstance().postEvent(new PlayEvent());
+		} else {
+			DefaultGUIEventBus.getInstance().postEvent(new PauseEvent());
+		}
 	}
 
 	public void handleResetButtonClick() {
@@ -49,10 +46,10 @@ public class ControlBarGUIPluginView extends ASimpleMVCPluginView<ControlBarGUIP
 	public void update() {
 		if (this.getModel().isPaused()) {
 			this.startButton.setText("Resume");
-			this.startButton.setDisable(false);
+			// this.startButton.setDisable(false);
 		} else {
-			this.startButton.setText("Play");
-			this.startButton.setDisable(true);
+			this.startButton.setText("Pause ");
+			// this.startButton.setDisable(true);
 		}
 	}
 

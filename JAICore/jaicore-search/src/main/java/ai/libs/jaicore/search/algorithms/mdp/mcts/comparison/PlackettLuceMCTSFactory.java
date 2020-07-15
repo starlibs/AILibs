@@ -6,7 +6,7 @@ import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTS;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 
-public class PlackettLuceMCTSFactory<N, A> extends MCTSFactory<N, A> {
+public class PlackettLuceMCTSFactory<N, A> extends MCTSFactory<N, A, PlackettLuceMCTSFactory<N, A>> {
 
 	private IPreferenceKernel<N, A> preferenceKernel;
 

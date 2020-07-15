@@ -10,6 +10,7 @@ dependencies {
 		exclude group: 'edu.stanford.nlp'
 	}
 	compile project(':mlplan-core')
+	compile project(':mlplan-gui')
 	
 	/* dependencies to the test sources of other projects */
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')

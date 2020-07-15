@@ -35,6 +35,22 @@ public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<Re
 		}
 	}
 
+	public RefinementConfiguredSoftwareConfigurationProblem<Double> getSimpleProblemInputWithTwoComponents() throws AlgorithmTestProblemSetCreationException {
+		try {
+			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/simpleproblemwithtwocomponents.json"), "IFace", n -> this.random.nextDouble());
+		} catch (UnresolvableRequiredInterfaceException | IOException e) {
+			throw new AlgorithmTestProblemSetCreationException(e);
+		}
+	}
+
+	public RefinementConfiguredSoftwareConfigurationProblem<Double> getSimpleRecursiveProblemInput() throws AlgorithmTestProblemSetCreationException {
+		try {
+			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/simplerecursiveproblem.json"), "IFace", n -> this.random.nextDouble());
+		} catch (UnresolvableRequiredInterfaceException | IOException e) {
+			throw new AlgorithmTestProblemSetCreationException(e);
+		}
+	}
+
 	@Override
 	public RefinementConfiguredSoftwareConfigurationProblem<Double> getDifficultProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
 		try {

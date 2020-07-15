@@ -53,8 +53,7 @@ public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel
 				this.handleAlgorithmEventInternally(event);
 			} catch (InterruptedException e1) {
 				Thread.currentThread().interrupt();
-			}
-			catch (HandleAlgorithmEventException e) {
+			} catch (HandleAlgorithmEventException e) {
 				STATIC_LOGGER.error("An error occurred while handling event {}.", event, e);
 			}
 		}
