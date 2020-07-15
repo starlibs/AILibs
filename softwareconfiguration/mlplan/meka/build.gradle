@@ -5,4 +5,5 @@ dependencies {
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
 	testCompile project(path: ':JAICore:jaicore-ml', configuration: 'testArtifacts')
+	testCompile project(path: ':mlplan-core', configuration: 'testArtifacts')
 }
