@@ -58,7 +58,9 @@ public class SingleLabelClassification extends Prediction implements ISingleLabe
 
 	@Override
 	public Map<Integer, Double> getClassConfidence() {
-		throw new UnsupportedOperationException("Not yet implemented.");
+		Map<Integer, Double> confidenceMap = new HashMap<>();
+		IntStream.range(0, this.labelProbabilities.length).forEach(x -> confidenceMap.put(x, this.labelProbabilities[x]));
+		return confidenceMap;
 	}
 
 	private static int labelWithHighestProbability(final Map<Integer, Double> labelProbabilities) {
