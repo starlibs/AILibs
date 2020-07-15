@@ -72,7 +72,7 @@ import ai.libs.python.IPythonConfig;
  * @author scheiblm
  */
 public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B>
-implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
+		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 	private static final String PYTHON_FILE_EXT = ".py";
 	private static final String MODEL_DUMP_FILE_EXT = ".pcl";
 	private static final String RESULT_FILE_EXT = ".json";
@@ -108,7 +108,6 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	 * The outer list represents the rows whilst the inner list represents the x target values in this row.
 	 */
 	private List<List<Double>> rawLastClassificationResults = null;
-	private String anacondaEnvironment;
 	private long seed;
 	private Timeout timeout;
 
@@ -217,9 +216,6 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 			if (!this.withoutModelDump) {
 				this.modelFile = new File(MODEL_DUMPS_DIRECTORY, this.configurationUID + "_" + arffName + MODEL_DUMP_FILE_EXT);
 				ScikitLearnWrapper<P, B>.SKLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new SKLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff).withOutputFile(this.modelFile);
-				if (this.anacondaEnvironment != null) {
-					skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
-				}
 				skLearnWrapperCommandBuilder.withSeed(this.seed);
 				skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 				String[] trainCommand = skLearnWrapperCommandBuilder.toCommandArray();
@@ -297,9 +293,6 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 
 		if (!this.withoutModelDump) {
 			ScikitLearnWrapper<P, B>.SKLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new SKLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff).withModelFile(this.modelFile).withOutputFile(outputFile);
-			if (this.anacondaEnvironment != null) {
-				skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
-			}
 			skLearnWrapperCommandBuilder.withSeed(this.seed);
 			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
@@ -315,9 +308,6 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 			}
 		} else {
 			ScikitLearnWrapper<P, B>.SKLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new SKLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff).withTestArffFile(testArff).withOutputFile(outputFile);
-			if (this.anacondaEnvironment != null) {
-				skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
-			}
 			skLearnWrapperCommandBuilder.withSeed(this.seed);
 			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
@@ -448,10 +438,6 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		}
 	}
 
-	public void setAnacondaEnvironment(final String env) {
-		this.anacondaEnvironment = env;
-	}
-
 	public void setSeed(final long seed) {
 		this.seed = seed;
 	}
@@ -547,7 +533,6 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		private WrapperExecutionMode mode;
 		private String modelFile;
 		private String outputFile;
-		private String anacondaEnvironment;
 		private long seed;
 		private Timeout timeout;
 
@@ -598,11 +583,6 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 			return this;
 		}
 
-		private SKLearnWrapperCommandBuilder withAnacondaEnvironment(final String env) {
-			this.anacondaEnvironment = env;
-			return this;
-		}
-
 		private SKLearnWrapperCommandBuilder withSeed(final long seed) {
 			this.seed = seed;
 			return this;
@@ -626,7 +606,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 
 			List<String> processParameters = new ArrayList<>();
 			OS os = ProcessUtil.getOS();
-			if (this.anacondaEnvironment != null) {
+			if (ScikitLearnWrapper.this.pythonConfig != null && ScikitLearnWrapper.this.pythonConfig.getAnacondaEnvironment() != null) {
 				if (os == OS.MAC) {
 					processParameters.add("source");
 					processParameters.add("~/anaconda3/etc/profile.d/conda.sh");
@@ -634,7 +614,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 				}
 				processParameters.add("conda");
 				processParameters.add("activate");
-				processParameters.add(this.anacondaEnvironment);
+				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getAnacondaEnvironment());
 				processParameters.add("&&");
 			}
 			if (this.timeout != null && os == OS.LINUX) {
@@ -644,8 +624,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 			}
 			if (ScikitLearnWrapper.this.pythonConfig != null && ScikitLearnWrapper.this.pythonConfig.getPath() != null) {
 				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getPath() + File.separator + "python");
-			}
-			else {
+			} else {
 				processParameters.add("python");
 			}
 			processParameters.add("-u"); // Force python to run stdout and stderr unbuffered.

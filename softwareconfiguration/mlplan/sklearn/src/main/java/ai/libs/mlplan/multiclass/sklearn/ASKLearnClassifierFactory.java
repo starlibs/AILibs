@@ -42,7 +42,6 @@ public abstract class ASKLearnClassifierFactory implements ILearnerFactory<Sciki
 	private Logger logger = LoggerFactory.getLogger(ASKLearnClassifierFactory.class);
 	private String loggerName;
 	private IPythonConfig pythonConfig = ConfigFactory.create(IPythonConfig.class);
-	private String anacondaEnvironment;
 	private long seed;
 	private Timeout timeout;
 
@@ -69,7 +68,6 @@ public abstract class ASKLearnClassifierFactory implements ILearnerFactory<Sciki
 			if (this.pythonConfig != null) {
 				wrapper.setPythonConfig(this.pythonConfig);
 			}
-			wrapper.setAnacondaEnvironment(this.anacondaEnvironment);
 			wrapper.setSeed(this.seed);
 			wrapper.setTimeout(this.timeout);
 			return wrapper;
@@ -183,10 +181,6 @@ public abstract class ASKLearnClassifierFactory implements ILearnerFactory<Sciki
 
 	public void setPythonConfig(final IPythonConfig pythonConfig) {
 		this.pythonConfig = pythonConfig;
-	}
-
-	public void setAnacondaEnvironment(final String env) {
-		this.anacondaEnvironment = env;
 	}
 
 	public void setSeed(final long seed) {
