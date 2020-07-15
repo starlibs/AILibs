@@ -21,6 +21,14 @@ public class MLPlanWekaBuilder extends MLPlanBuilder<IWekaClassifier, MLPlanWeka
 
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaBuilder.class);
 
+	public static MLPlanWekaBuilder forClassification() throws IOException {
+		return new MLPlanWekaBuilder(EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS);
+	}
+
+	public static MLPlanWekaBuilder forClassificationWithTinySearchSpace() throws IOException {
+		return new MLPlanWekaBuilder(EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS_TINY);
+	}
+
 	public MLPlanWekaBuilder() throws IOException {
 		this(EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS);
 	}
