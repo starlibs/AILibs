@@ -1,5 +1,8 @@
 package ai.libs.jaicore.basic.algorithm;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -396,7 +399,9 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		}
 		if (this.getTimeout().milliseconds() > 0) {
 			this.deadline = System.currentTimeMillis() + this.getTimeout().milliseconds() - this.timeoutPrecautionOffset;
-			this.logger.info("Timeout is {}. Setting deadline to timestamp {}. Remaining time: {}", this.getTimeout(), this.deadline, this.getRemainingTimeToDeadline());
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info("Timeout is {}. Setting deadline to timestamp {}. Remaining time: {}", this.getTimeout(), Instant.ofEpochMilli(this.deadline).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss")), this.getRemainingTimeToDeadline());
+			}
 		} else {
 			this.deadline = System.currentTimeMillis() + 86400 * 1000 * 365;
 			this.logger.info("No timeout defined. Setting deadline to timestamp {}. Remaining time: {}", this.deadline, this.getRemainingTimeToDeadline());

@@ -32,7 +32,10 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 	private ExperimentDomain<?, ?, ?> domain;
 	private IExperimentRunController<?> controller;
 	private String loggerNameForAlgorithm;
+	private ExperimentRunner runner;
 	private String executorInfo; // information about the job of the compute center executing this in order to ease tracking
+
+	private boolean allExperimentsFinished = false;
 
 	private Logger logger = LoggerFactory.getLogger("expfe");
 
@@ -131,31 +134,46 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 	}
 
 	private ExperimentRunner getExperimentRunner() throws ExperimentDBInteractionFailedException {
-		if (this.config == null) {
-			throw new IllegalStateException("Cannot conduct experiments. No experiment config has been set, yet.");
+		if (this.runner == null) {
+			if (this.config == null) {
+				throw new IllegalStateException("Cannot conduct experiments. No experiment config has been set, yet.");
+			}
+			if (this.databaseHandle == null) {
+				throw new IllegalStateException("Cannot conduct experiments. No database handle has been set, yet.");
+			}
+			if (this.evaluator == null) {
+				this.prepareEvaluator();
+			}
+			this.runner = new ExperimentRunner(this.config, this.evaluator, this.databaseHandle, this.executorInfo);
+			this.runner.setLoggerName(this.getLoggerName() + ".runner");
 		}
-		if (this.databaseHandle == null) {
-			throw new IllegalStateException("Cannot conduct experiments. No database handle has been set, yet.");
-		}
-		if (this.evaluator == null) {
-			this.prepareEvaluator();
-		}
-		ExperimentRunner runner = new ExperimentRunner(this.config, this.evaluator, this.databaseHandle, this.executorInfo);
-		runner.setLoggerName(this.getLoggerName() + ".runner");
-		return runner;
+		return this.runner;
 	}
 
 	public void randomlyConductExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
+		if (!this.getExperimentRunner().mightHaveMoreExperiments()) {
+			throw new IllegalStateException("No more experiments to conduct.");
+		}
 		this.getExperimentRunner().randomlyConductExperiments();
 	}
 
 	public void sequentiallyConductExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
+		if (!this.getExperimentRunner().mightHaveMoreExperiments()) {
+			throw new IllegalStateException("No more experiments to conduct.");
+		}
 		this.getExperimentRunner().sequentiallyConductExperiments();
 	}
 
 	public ExperimenterFrontend randomlyConductExperiments(final int limit) throws ExperimentDBInteractionFailedException, InterruptedException {
+		if (!this.getExperimentRunner().mightHaveMoreExperiments()) {
+			throw new IllegalStateException("No more experiments to conduct.");
+		}
 		this.getExperimentRunner().randomlyConductExperiments(limit);
 		return this;
+	}
+
+	public boolean mightHaveMoreExperiments() throws ExperimentDBInteractionFailedException {
+		return this.getExperimentRunner().mightHaveMoreExperiments();
 	}
 
 	public <O> O simulateExperiment(final Experiment experiment, final IExperimentRunController<O> controller) throws ExperimentEvaluationFailedException, InterruptedException, ExperimentFailurePredictionException {
