@@ -3,10 +3,8 @@ package ai.libs.jaicore.search.algorithms.mdp.mcts;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
@@ -27,7 +25,6 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double> {
 	private final ISuccessorGenerator<N, A> succGen;
 	private final IPathGoalTester<N, A> goalTester;
 	private final Map<N, Pair<N, A>> backPointers = new HashMap<>();
-	private final Set<N> goalNodes = new HashSet<>();
 
 	public GraphBasedMDP(final IPathSearchWithPathEvaluationsInput<N, A, Double> graph) {
 		super();

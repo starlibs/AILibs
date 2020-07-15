@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -41,7 +41,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchI
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(DepthFirstSearch.class);
 
-	private final INodeGoalTester<N, A> goalTester;
+	private final IPathGoalTester<N, A> goalTester;
 
 	/* state of the algorithm */
 	private SearchGraphPath<N, A> currentPath;
@@ -51,7 +51,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchI
 
 	public DepthFirstSearch(final IPathSearchInput<N, A> problem) {
 		super(problem);
-		this.goalTester = (INodeGoalTester<N, A>)problem.getGoalTester();
+		this.goalTester = problem.getGoalTester();
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchI
 						}
 					}
 					N leaf = this.currentPath.getHead();
-					if (this.goalTester.isGoal(leaf)) {
+					if (this.goalTester.isGoal(this.currentPath)) {
 						this.post(new NodeTypeSwitchEvent<>(this, this.currentPath.getHead(), "or_solution"));
 						this.lastNodeWasTrueLeaf = true;
 					} else if (this.getInput().getGraphGenerator().getSuccessorGenerator().generateSuccessors(leaf).isEmpty()) {
@@ -125,9 +125,9 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchI
 				}
 				this.logger.debug("Relevant leaf node is {}.", leaf);
 
-				if (this.goalTester.isGoal(leaf)) {
+				if (this.goalTester.isGoal(this.currentPath)) {
 					this.lastNodeWasTrueLeaf = true;
-					IAlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this, new SearchGraphPath<N, A>(this.currentPath));
+					IAlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this, new SearchGraphPath<>(this.currentPath));
 					this.post(event);
 					this.post(new NodeTypeSwitchEvent<>(this, leaf, "or_solution"));
 					this.logger.debug("The leaf node is a goal node. Returning goal path {}", this.currentPath);

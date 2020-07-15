@@ -3,6 +3,7 @@ package ai.libs.jaicore.search.util;
 import java.util.List;
 import java.util.Stack;
 
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
@@ -15,9 +16,8 @@ import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
-public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphSearchInput<N, A>, N, A, Double> {
+public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<IPathSearchInput<N, A>, N, A, Double> {
 
 	private Logger logger = LoggerFactory.getLogger(GraphSanityChecker.class);
 	private String loggerName;
@@ -27,7 +27,7 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 	private boolean detectCycles = true;
 	private boolean detectDeadEnds = true;
 
-	public GraphSanityChecker(final GraphSearchInput<N, A> problem, final int maxNodesToExpand) {
+	public GraphSanityChecker(final IPathSearchInput<N, A> problem, final int maxNodesToExpand) {
 		super(problem);
 		this.maxNodesToExpand = maxNodesToExpand;
 	}

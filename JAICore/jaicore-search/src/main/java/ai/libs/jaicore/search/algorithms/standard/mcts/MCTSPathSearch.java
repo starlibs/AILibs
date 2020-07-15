@@ -18,17 +18,25 @@ import ai.libs.jaicore.search.algorithms.mdp.mcts.GraphBasedMDP;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTS;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSIterationCompletedEvent;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 
+/**
+ *
+ * @author Felix Mohr
+ *
+ * @param <I> Problem type
+ * @param <N> Type of states (nodes)
+ * @param <A> Type of actions
+ */
 public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends AOptimalPathInORGraphSearch<I, N, A, Double> {
 
 	private final IMDP<N, A, Double> mdp;
 	private final MCTS<N, A> mcts;
 
-	public MCTSPathSearch(final I problem, final MCTSFactory<N, A> mctsFactory) {
+	public MCTSPathSearch(final I problem, final MCTSFactory<N, A, ?> mctsFactory) {
 		super(problem);
 		this.mdp = new GraphBasedMDP<>(problem);
 		this.mcts = mctsFactory.getAlgorithm(this.mdp);
@@ -69,7 +77,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 				/* only if the roll-out is a goal path, emit a success event */
 				if (this.getGoalTester().isGoal(path)) {
 					this.updateBestSeenSolution(path);
-					ISolutionCandidateFoundEvent<EvaluatedSearchGraphPath<N, A, Double>> event = new GraphSearchSolutionCandidateFoundEvent<>(this, path);
+					ISolutionCandidateFoundEvent<EvaluatedSearchGraphPath<N, A, Double>> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this, path);
 					this.post(event);
 					return event;
 				}
@@ -85,8 +93,12 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 
 	@Override
 	public void setTimeout(final Timeout to) {
+		long toInSeconds = to.seconds();
+		if (toInSeconds < 2) {
+			throw new IllegalArgumentException("Cannot run MCTS with a timeout of less than 2 seconds.");
+		}
 		super.setTimeout(to);
-		this.mcts.setTimeout(new Timeout(to.seconds() - 5, TimeUnit.SECONDS));
+		this.mcts.setTimeout(new Timeout(to.seconds() - 1, TimeUnit.SECONDS));
 	}
 
 	@Override

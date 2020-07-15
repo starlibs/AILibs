@@ -25,7 +25,8 @@ public class JobSchedulingProblemInput implements IJobSchedulingInput {
 	private final JobShopMetric metric;
 	private final int latestArrivalTime; // this is for problems in which the arrival time is a decision variable. Then we typically have an upper bound on the arrival time
 
-	public JobSchedulingProblemInput(final Collection<Job> jobs, final Collection<Workcenter> workcenters, final Collection<Operation> operations, final Collection<Machine> machines, final JobShopMetric metric,final int latestArrivalTime) {
+	public JobSchedulingProblemInput(final Collection<Job> jobs, final Collection<Workcenter> workcenters, final Collection<Operation> operations, final Collection<Machine> machines, final JobShopMetric metric,
+			final int latestArrivalTime) {
 		this.jobs = new HashMap<>();
 		jobs.forEach(j -> this.jobs.put(j.getJobID(), j));
 		this.workcenters = new HashMap<>();
@@ -105,7 +106,7 @@ public class JobSchedulingProblemInput implements IJobSchedulingInput {
 	}
 
 	public int getTotalProcessingTime() {
-		return this.operations.values().stream().map(o -> o.getProcessTime()).reduce((a, b) -> a+b).get();
+		return this.operations.values().stream().map(Operation::getProcessTime).reduce((a, b) -> a + b).get();
 	}
 
 	public void printWorkcenters(final OutputStream out) throws IOException {
