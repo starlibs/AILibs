@@ -8,12 +8,14 @@ import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.InstanceWise
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.core.IProblemType;
+import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
 import ai.libs.mlplan.multiclass.wekamlplan.EMLPlanWekaProblemType;
 
 public enum EMLPlanMekaProblemType implements IProblemType<IMekaClassifier> {
 
 	CLASSIFICATION_MULTILABEL("automl/searchmodels/meka/mlplan-meka.json", "conf/searchmodels/mlplan-meka.json", "mlplan/meka-preferenceList.txt", "conf/mlpan-meka-preferenceList.txt", "MLClassifier",
-			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getLastHASCOMethodPriorToParameterRefinementOfPipeline(), new MekaPipelineFactory(), new InstanceWiseF1(), new InstanceWiseF1(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter());
+			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getLastHASCOMethodPriorToParameterRefinementOfPipeline(), new MekaPipelineFactory(), new InstanceWiseF1(), new InstanceWiseF1(),
+			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter());
 
 	private final String searchSpaceConfigFileFromResource;
 	private final String systemSearchSpaceConfigFromFileSystem;
@@ -23,7 +25,6 @@ public enum EMLPlanMekaProblemType implements IProblemType<IMekaClassifier> {
 
 	private final String requestedHascoInterface;
 	private final String requestedBasicProblemInterface;
-	//	private final String requestedBaseLearnerInterface;
 
 	private final ILearnerFactory<IMekaClassifier> learnerFactory;
 
@@ -33,7 +34,7 @@ public enum EMLPlanMekaProblemType implements IProblemType<IMekaClassifier> {
 
 	private EMLPlanMekaProblemType(final String searchSpaceConfigFileFromResource, final String systemSearchSpaceConfigFromFileSystem, final String preferedComponentsListFromResource, final String preferedComponentsListFromFileSystem,
 			final String requestedHascoInterface, final String requestedBasicProblemInterface, final ILearnerFactory<IMekaClassifier> learnerFactory, final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSearchPhase,
-			final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase, final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>>  searchSelectionDatasetSplitter) {
+			final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase, final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter) {
 
 		this.searchSpaceConfigFileFromResource = searchSpaceConfigFileFromResource;
 		this.systemSearchSpaceConfigFromFileSystem = systemSearchSpaceConfigFromFileSystem;
@@ -43,7 +44,6 @@ public enum EMLPlanMekaProblemType implements IProblemType<IMekaClassifier> {
 
 		this.requestedHascoInterface = requestedHascoInterface;
 		this.requestedBasicProblemInterface = requestedBasicProblemInterface;
-		//		this.requestedBaseLearnerInterface = requestedBaseLearnerInterface;
 
 		this.learnerFactory = learnerFactory;
 
@@ -91,11 +91,6 @@ public enum EMLPlanMekaProblemType implements IProblemType<IMekaClassifier> {
 		return "resolve" + requestedInterface + "With";
 	}
 
-	//	@Override
-	//	public String getRequestedBaseLearnerInterface() {
-	//		return this.requestedBaseLearnerInterface;
-	//	}
-
 	@Override
 	public IDeterministicPredictionPerformanceMeasure<?, ?> getPerformanceMetricForSearchPhase() {
 		return this.performanceMetricForSearchPhase;
@@ -119,5 +114,10 @@ public enum EMLPlanMekaProblemType implements IProblemType<IMekaClassifier> {
 	@Override
 	public ILearnerFactory<IMekaClassifier> getLearnerFactory() {
 		return this.learnerFactory;
+	}
+
+	@Override
+	public PipelineValidityCheckingNodeEvaluator getValidityCheckingNodeEvaluator() {
+		return null; // we do not have such a checker for meka pipelines
 	}
 }

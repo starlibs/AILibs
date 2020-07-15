@@ -12,19 +12,19 @@ import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
 import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
-import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.core.IProblemType;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
 
 public enum EMLPlanSkLearnProblemType implements IProblemType<ScikitLearnWrapper<IPrediction, IPredictionBatch>> {
 
-	CLASSIFICATION_MULTICLASS(ESkLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/sklearn-mlplan.json", "conf/mlplan-sklearn.json", "automl/searchmodels/sklearn/sklearn-preferenceList.txt", "conf/sklearn-preferenceList.txt", "MLPipeline",
-			"BasicClassifier", EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new DefaultSKLearnClassifierFactory(), new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //
+	CLASSIFICATION_MULTICLASS(ESkLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/sklearn-mlplan.json", "conf/mlplan-sklearn.json", "automl/searchmodels/sklearn/sklearn-preferenceList.txt", "conf/sklearn-preferenceList.txt",
+			"MLPipeline", "BasicClassifier", EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new DefaultSKLearnClassifierFactory(),
+			new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //
 	CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES(ESkLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/ml-plan-ul.json", EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
 			EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanSkLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), "AbstractClassifier", "BasicClassifier",
 			EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, CLASSIFICATION_MULTICLASS.getLearnerFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter()), //
-	RUL(ESkLearnProblemType.RUL, "automl/searchmodels/sklearn/sklearn-rul.json", "conf/sklearn-rul.json", null, "conf/sklearn-preferenceList.txt", "MLPipeline", "BasicRegressor",
-			ERulPerformanceMeasure.ASYMMETRIC_LOSS, ERulPerformanceMeasure.ASYMMETRIC_LOSS, new RULSKLearnFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter());
+	RUL(ESkLearnProblemType.RUL, "automl/searchmodels/sklearn/sklearn-rul.json", "conf/sklearn-rul.json", null, "conf/sklearn-preferenceList.txt", "MLPipeline", "BasicRegressor", ERulPerformanceMeasure.ASYMMETRIC_LOSS,
+			ERulPerformanceMeasure.ASYMMETRIC_LOSS, new RULSKLearnFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter());
 
 	private final ESkLearnProblemType problemType;
 
@@ -40,13 +40,14 @@ public enum EMLPlanSkLearnProblemType implements IProblemType<ScikitLearnWrapper
 	private final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSearchPhase;
 	private final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase;
 
-	private final ILearnerFactory<ScikitLearnWrapper<IPrediction, IPredictionBatch>> learnerFactory;
+	private final ASKLearnClassifierFactory learnerFactory;
 
 	private final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter;
 
 	private EMLPlanSkLearnProblemType(final ESkLearnProblemType problemType, final String searchSpaceConfigFileFromResource, final String systemSearchSpaceConfigFromFileSystem, final String preferedComponentsListFromResource,
 			final String preferedComponentsListFromFileSystem, final String requestedHascoInterface, final String requestedBasicProblemInterface, final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSearchPhase,
-			final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase, final ILearnerFactory<ScikitLearnWrapper<IPrediction, IPredictionBatch>> learnerFactory, final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter) {
+			final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase, final ASKLearnClassifierFactory learnerFactory,
+			final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter) {
 		this.problemType = problemType;
 
 		this.searchSpaceConfigFileFromResource = searchSpaceConfigFileFromResource;
@@ -124,7 +125,7 @@ public enum EMLPlanSkLearnProblemType implements IProblemType<ScikitLearnWrapper
 	}
 
 	@Override
-	public ILearnerFactory<ScikitLearnWrapper<IPrediction, IPredictionBatch>> getLearnerFactory() {
+	public ASKLearnClassifierFactory getLearnerFactory() {
 		return this.learnerFactory;
 	}
 
