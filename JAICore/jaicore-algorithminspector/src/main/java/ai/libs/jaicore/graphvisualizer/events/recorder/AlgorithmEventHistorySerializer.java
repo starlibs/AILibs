@@ -1,8 +1,12 @@
 package ai.libs.jaicore.graphvisualizer.events.recorder;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -73,6 +77,24 @@ public class AlgorithmEventHistorySerializer {
 		PropertyProcessedAlgorithmEventHistory serializableAlgorithmEventHistory = objectMapper.readValue(serializedAlgorithmEventHistory, PropertyProcessedAlgorithmEventHistory.class);
 
 		return new AlgorithmEventHistory(serializableAlgorithmEventHistory.getEntries());
+	}
+
+	/**
+	 * Deserializes the given JSON {@link File} into an {@link AlgorithmEventHistory} assuming it represents such an {@link AlgorithmEventHistory}.
+	 * 
+	 * @param serializedAlgorithmEventHistory A JSON {@link String} representing an {@link AlgorithmEventHistory}.
+	 * @return An {@link AlgorithmEventHistory} constructed from the given serialized algorithm event history.
+	 * @throws JsonParseException If something went wrong during the transformation to JSON.
+	 * @throws JsonMappingException If something went wrong during the transformation to JSON.
+	 * @throws IOException If something went wrong during the transformation to JSON.
+	 */
+	public AlgorithmEventHistory deserializeAlgorithmEventHistory(File serializedAlgorithmEventHistory) throws JsonParseException, JsonMappingException, IOException {
+		List<String> lines = Files.readAllLines(Paths.get(serializedAlgorithmEventHistory.toURI()));
+		StringJoiner joiner = new StringJoiner(" ");
+		for (String line : lines) {
+			joiner.add(line);
+		}
+		return deserializeAlgorithmEventHistory(joiner.toString());
 	}
 
 }

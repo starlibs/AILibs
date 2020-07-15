@@ -11,10 +11,13 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.apache.commons.math3.geometry.partitioning.Region.Location;
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
+import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
+import ai.libs.hasco.core.reduction.softcomp2planning.HASCOReduction;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
@@ -24,12 +27,18 @@ import ai.libs.jaicore.components.model.Dependency;
 import ai.libs.jaicore.components.model.IParameterDomain;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.LiteralParam;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.classical.algorithms.strips.forward.StripsUtil;
 import ai.libs.jaicore.planning.core.Action;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;
+import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
+import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
+import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitivePlanningToStandardSearchProblemReduction;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
@@ -49,7 +58,21 @@ public class HASCOUtil {
 	private static final Logger logger = LoggerFactory.getLogger(HASCOUtil.class);
 
 	private HASCOUtil() {
+		/* avoid instantiation */
+	}
 
+	public static <N, A> IPathSearchInput<N, A> getSearchProblem(final Collection<Component> components, final String requiredInterface, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig, final IHASCOPlanningReduction<N, A> plan2searchReduction){
+		HASCOReduction<Double> hascoReduction = new HASCOReduction<>();
+		SoftwareConfigurationProblem<Double> coreProblem = new SoftwareConfigurationProblem<>(components, requiredInterface, n -> 0.0);
+		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(coreProblem, paramRefinementConfig);
+		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, Double> planningProblem = hascoReduction.encodeProblem(problem);
+		return new CostSensitivePlanningToStandardSearchProblemReduction<CEOCIPSTNPlanningProblem, N, A, Double>(plan2searchReduction).encodeProblem(planningProblem);
+	}
+
+	public static <N, A, V extends Comparable<V>> IPathSearchWithPathEvaluationsInput<N, A, V> getSearchProblemWithEvaluation(final RefinementConfiguredSoftwareConfigurationProblem<V> problem, final IHASCOPlanningReduction<N, A> plan2searchReduction){
+		HASCOReduction<V> hascoReduction = new HASCOReduction<>();
+		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> planningProblem = hascoReduction.encodeProblem(problem);
+		return new CostSensitivePlanningToStandardSearchProblemReduction<CEOCIPSTNPlanningProblem, N, A, V>(plan2searchReduction).encodeProblem(planningProblem);
 	}
 
 	/**
@@ -357,7 +380,7 @@ public class HASCOUtil {
 
 		/* update domains based on the dependencies defined for this component */
 		for (Dependency dependency : component.getDependencies()) {
-			if (ai.libs.jaicore.components.model.Util.isDependencyPremiseSatisfied(dependency, domains)) {
+			if (ai.libs.jaicore.components.model.CompositionProblemUtil.isDependencyPremiseSatisfied(dependency, domains)) {
 				logger.info("Premise of dependency {} is satisfied, applying its conclusions ...", dependency);
 				for (Pair<Parameter, IParameterDomain> newDomain : dependency.getConclusion()) {
 					/*

@@ -18,8 +18,6 @@ public class SensorTimeSeriesAttribute extends AGenericObjectAttribute<SensorTim
 	private static final String SPLIT_MULTIPLE_WHITESPACES = "\\s+";
 	private static final String TIMESTEP_VALUE_SEPARATOR = "#";
 
-	// TODO: add ranges for values (min/max)
-
 	public SensorTimeSeriesAttribute(final String name) {
 		super(name);
 	}
@@ -52,8 +50,8 @@ public class SensorTimeSeriesAttribute extends AGenericObjectAttribute<SensorTim
 	}
 
 	/**
-	* {@inheritDoc} Returns format: "t1:v1 t2:v2 ... tn:vn"
-	*/
+	 * {@inheritDoc} Returns format: "t1:v1 t2:v2 ... tn:vn"
+	 */
 	@Override
 	public String serializeAttributeValue(final Object value) {
 		StringJoiner sj = new StringJoiner(DATA_POINT_SEPARATOR);
@@ -67,8 +65,8 @@ public class SensorTimeSeriesAttribute extends AGenericObjectAttribute<SensorTim
 	}
 
 	/**
-	* {@inheritDoc} Given format:: "t1:v1 t2:v2 ... tn:vn"
-	*/
+	 * {@inheritDoc} Given format:: "t1:v1 t2:v2 ... tn:vn"
+	 */
 	@Override
 	public Object deserializeAttributeValue(String string) {
 		string = string.replace(SENSOR_TIME_SERIES_BORDER_FLAG, EMPTY_STRING);

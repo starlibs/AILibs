@@ -20,7 +20,7 @@ import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
-import ai.libs.jaicore.components.model.Util;
+import ai.libs.jaicore.components.model.CompositionProblemUtil;
 import treeminer.util.TreeRepresentationUtils;
 
 public class ComponentInstanceStringConverter extends Thread {
@@ -208,7 +208,7 @@ public class ComponentInstanceStringConverter extends Thread {
 			currentInterval = nextInterval;
 			parameterRefinement.add(this.serializeInterval(currentInterval));
 
-			List<Interval> refinement = Util.getNumericParameterRefinement(nextInterval, parameterValue, parameterDomain.isInteger(), parameterRefinementConfiguration);
+			List<Interval> refinement = CompositionProblemUtil.getNumericParameterRefinement(nextInterval, parameterValue, parameterDomain.isInteger(), parameterRefinementConfiguration);
 
 			if (refinement.isEmpty()) {
 				break;

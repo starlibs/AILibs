@@ -1,5 +1,6 @@
 package ai.libs.jaicore.components.model;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -7,7 +8,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import ai.libs.jaicore.basic.sets.Pair;
 
-public class Dependency {
+public class Dependency implements Serializable {
+	private static final long serialVersionUID = -954852106121507946L;
 	private final Collection<Collection<Pair<Parameter, IParameterDomain>>> premise; // semantics are DNF (every entry is an AND-connected constraint)
 	private final Collection<Pair<Parameter, IParameterDomain>> conclusion;
 

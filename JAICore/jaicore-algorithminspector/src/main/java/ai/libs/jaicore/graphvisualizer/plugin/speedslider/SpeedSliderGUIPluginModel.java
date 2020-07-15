@@ -7,7 +7,7 @@ public class SpeedSliderGUIPluginModel extends ASimpleMVCPluginModel<SpeedSlider
 	private int currentSpeedPercentage;
 
 	public SpeedSliderGUIPluginModel() {
-		this.currentSpeedPercentage = 85;
+		this.currentSpeedPercentage = 95;
 	}
 
 	public int getCurrentSpeedPercentage() {

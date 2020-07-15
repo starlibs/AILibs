@@ -36,7 +36,7 @@ public class ComponentInstanceUtil {
 		}
 
 		for (Dependency dependency : ci.getComponent().getDependencies()) {
-			if (Util.isDependencyPremiseSatisfied(dependency, refinedDomainMap) && !Util.isDependencyConditionSatisfied(dependency.getConclusion(), refinedDomainMap)) {
+			if (CompositionProblemUtil.isDependencyPremiseSatisfied(dependency, refinedDomainMap) && !CompositionProblemUtil.isDependencyConditionSatisfied(dependency.getConclusion(), refinedDomainMap)) {
 				return false;
 			}
 		}
