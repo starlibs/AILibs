@@ -84,8 +84,8 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 	public TwoPhaseHASCO(final TwoPhaseSoftwareConfigurationProblem problem, final TwoPhaseHASCOConfig config) {
 		super(config != null ? config : ConfigFactory.create(TwoPhaseHASCOConfig.class), problem);
 		this.logger.info("Created TwoPhaseHASCO object.");
-		this.blowupInSelection = config.expectedBlowupInSelection();
-		this.blowupInPostProcessing = config.expectedBlowupInPostprocessing();
+		this.blowupInSelection = this.getConfig().expectedBlowupInSelection();
+		this.blowupInPostProcessing = this.getConfig().expectedBlowupInPostprocessing();
 		if (Double.isNaN(this.blowupInSelection)) {
 			throw new IllegalArgumentException("Blow-Up for selection phase not configured properly.");
 		}
