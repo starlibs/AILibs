@@ -7,9 +7,9 @@ import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelCla
 
 public class FalseNegatives extends ASingleLabelPredictionPerformanceMeasure {
 
-	private final Object positiveClass;
+	private final int positiveClass;
 
-	public FalseNegatives(final Object positiveClass) {
+	public FalseNegatives(final int positiveClass) {
 		this.positiveClass = positiveClass;
 	}
 

@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -36,8 +35,8 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
 import ai.libs.mlplan.cli.module.MLPlan4WekaClassificationCLIModule;
 import ai.libs.mlplan.cli.report.OpenMLAutoMLBenchmarkReport;
-import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.AMLPlanBuilder;
+import ai.libs.mlplan.core.MLPlan;
 
 /**
  * Enables command-line usage of ML-Plan.
@@ -155,14 +154,7 @@ public class MLPlanCLI {
 		System.out.println("Help printed");
 	}
 
-	private static Map<String, IMLPlanCLIModule> loadCLIModuleRegistry() {
-		List<IMLPlanCLIModule> moduleList = new ArrayList<>();
-		moduleList.add(new MLPlan4WekaClassificationCLIModule());
-		Map<String, IMLPlanCLIModule> modules = new HashMap<>();
-		return modules;
-	}
-
-	private static String getDefault(final String key) {
+	public static String getDefault(final String key) {
 		return defaults.get(key);
 	}
 
@@ -174,7 +166,7 @@ public class MLPlanCLI {
 		}
 
 		// Load CLI modules and identify module responsible for the requested ml-plan configuration
-		Map<String, IMLPlanCLIModule> moduleRegistry = loadCLIModuleRegistry();
+		Map<String, IMLPlanCLIModule> moduleRegistry = getModuleRegistry();
 		String moduleName = cl.getOptionValue(O_MODULE, getDefault(O_MODULE));
 		if (!moduleRegistry.containsKey(moduleName)) {
 			System.err.println("There is no module registered for handling the requested mode " + moduleName);

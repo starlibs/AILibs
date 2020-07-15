@@ -1,8 +1,11 @@
 package ai.libs.jaicore.ml.classification.loss.instance;
 
+import java.util.Map;
 import java.util.stream.IntStream;
 
-public class CrossEntropyLoss extends AInstanceMeasure<double[], double[]> {
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
+
+public class CrossEntropyLoss extends AInstanceMeasure<double[], ISingleLabelClassification> {
 
 	public static final double DEF_EPSILON = 1E-15;
 
@@ -17,8 +20,11 @@ public class CrossEntropyLoss extends AInstanceMeasure<double[], double[]> {
 	}
 
 	@Override
-	public double loss(final double[] expected, final double[] predicted) {
-		return -IntStream.range(0, expected.length).mapToDouble(i -> expected[i] * Math.log(this.minMax(predicted[i]))).sum();
+	public double loss(final double[] expected, final ISingleLabelClassification predicted) {
+		Map<Integer, Double> distributionMap = predicted.getClassDistribution();
+		double[] predictedArr = new double[distributionMap.size()];
+		IntStream.range(0, distributionMap.size()).forEach(x -> predictedArr[x] = distributionMap.get(x));
+		return -IntStream.range(0, expected.length).mapToDouble(i -> expected[i] * Math.log(this.minMax(predictedArr[i]))).sum();
 	}
 
 	private double minMax(final double value) {
