@@ -2,6 +2,7 @@ package ai.libs.mlplan.multiclass.sklearn.builder;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.algorithm.Timeout;
@@ -20,9 +21,10 @@ public class MLPlanSKLearnBuilder extends MLPlanBuilder<ScikitLearnWrapper<IPred
 	private static final int PYTHON_MINIMUM_REQUIRED_VERSION_REL = 3;
 	private static final int PYTHON_MINIMUM_REQUIRED_VERSION_MAJ = 5;
 	private static final int PYTHON_MINIMUM_REQUIRED_VERSION_MIN = 0;
-	private static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn", "tpot" };
+	private static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn" };
 
 	private IPythonConfig pythonConfig;
+	private String[] pythonAdditionalRequiredModules;
 	private final boolean skipSetupCheck;
 
 	public static MLPlanSKLearnBuilder forClassification() throws IOException {
@@ -43,8 +45,9 @@ public class MLPlanSKLearnBuilder extends MLPlanBuilder<ScikitLearnWrapper<IPred
 	 * @throws IOException
 	 *             Thrown if configuration files cannot be read.
 	 */
-	protected MLPlanSKLearnBuilder(final IProblemType<ScikitLearnWrapper<IPrediction, IPredictionBatch>> problemType) throws IOException {
+	protected MLPlanSKLearnBuilder(final EMLPlanSkLearnProblemType problemType) throws IOException {
 		this(problemType, false);
+		this.pythonAdditionalRequiredModules = problemType.getSkLearnProblemType().getPythonRequiredModules();
 	}
 
 	/**
@@ -55,13 +58,15 @@ public class MLPlanSKLearnBuilder extends MLPlanBuilder<ScikitLearnWrapper<IPred
 	 * @throws IOException
 	 *             Thrown if configuration files cannot be read.
 	 */
-	public MLPlanSKLearnBuilder(final IProblemType<ScikitLearnWrapper<IPrediction, IPredictionBatch>> problemType, final boolean skipSetupCheck) throws IOException {
+	public MLPlanSKLearnBuilder(final EMLPlanSkLearnProblemType problemType, final boolean skipSetupCheck) throws IOException {
 		super(problemType);
 		this.skipSetupCheck = skipSetupCheck;
 	}
 
-	public MLPlanSKLearnBuilder withAnacondaEnvironment(final String env) {
-		this.getLearnerFactory().setAnacondaEnvironment(env);
+	@Override
+	public MLPlanSKLearnBuilder withProblemType(final IProblemType<ScikitLearnWrapper<IPrediction, IPredictionBatch>> problemType) throws IOException {
+		super.withProblemType(problemType);
+		this.pythonAdditionalRequiredModules = ((EMLPlanSkLearnProblemType) problemType).getSkLearnProblemType().getPythonRequiredModules();
 		return this.getSelf();
 	}
 
@@ -96,7 +101,8 @@ public class MLPlanSKLearnBuilder extends MLPlanBuilder<ScikitLearnWrapper<IPred
 	@Override
 	public MLPlan<ScikitLearnWrapper<IPrediction, IPredictionBatch>> build() {
 		if (!this.skipSetupCheck) {
-			new PythonRequirementDefinition(PYTHON_MINIMUM_REQUIRED_VERSION_REL, PYTHON_MINIMUM_REQUIRED_VERSION_MAJ, PYTHON_MINIMUM_REQUIRED_VERSION_MIN, PYTHON_REQUIRED_MODULES).check(this.pythonConfig);
+			new PythonRequirementDefinition(PYTHON_MINIMUM_REQUIRED_VERSION_REL, PYTHON_MINIMUM_REQUIRED_VERSION_MAJ, PYTHON_MINIMUM_REQUIRED_VERSION_MIN, ArrayUtils.addAll(PYTHON_REQUIRED_MODULES, this.pythonAdditionalRequiredModules))
+					.check(this.pythonConfig);
 		}
 		return super.build();
 	}
