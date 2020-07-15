@@ -142,7 +142,7 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 				String operations = this.planningProblem.getCorePlanningProblem().getDomain().getOperations().stream()
 						.map(o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: " + o.getPrecondition() + "\n\t\t\tAdd List: " + o.getAddLists() + "\n\t\t\tDelete List: " + o.getDeleteLists()).collect(Collectors.joining());
 				String methods = this.planningProblem.getCorePlanningProblem().getDomain().getMethods().stream().map(m -> "\n\t\t" + m.getName() + "(" + m.getParameters() + ") for task " + m.getTask() + "\n\t\t\tPre: " + m.getPrecondition()
-				+ "\n\t\t\tPre Eval: " + m.getEvaluablePrecondition() + "\n\t\t\tNetwork: " + m.getNetwork().getLineBasedStringRepresentation()).collect(Collectors.joining());
+						+ "\n\t\t\tPre Eval: " + m.getEvaluablePrecondition() + "\n\t\t\tNetwork: " + m.getNetwork().getLineBasedStringRepresentation()).collect(Collectors.joining());
 				this.logger.debug("Derived the following HTN planning problem:\n\tOperations:{}\n\tMethods:{}", operations, methods);
 			}
 			AlgorithmInitializedEvent event = this.activate();
@@ -236,8 +236,6 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 			else if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
 				HASCOSolutionEvent<V> hascoSolutionEvent = this.hascoSolutionEventCache.remove(searchEvent);
 				assert (hascoSolutionEvent != null) : "Hasco solution event has not been seen yet or cannot be retrieved from cache. " + this.hascoSolutionEventCache;
-				System.out.println(hascoSolutionEvent);
-				System.out.println(this.returnedUnparametrizedComponentInstances);
 				this.logger.info("Returning next solution delivered from search with score {}. Number of returned unparametrized solutions is now {}/{}.", hascoSolutionEvent.getScore(), this.returnedUnparametrizedComponentInstances.size(),
 						this.numUnparametrizedSolutions);
 				return hascoSolutionEvent;

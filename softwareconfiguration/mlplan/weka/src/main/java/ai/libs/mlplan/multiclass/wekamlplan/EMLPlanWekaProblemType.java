@@ -16,11 +16,11 @@ import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNod
 
 public enum EMLPlanWekaProblemType implements IProblemType<IWekaClassifier> {
 
-	CLASSIFICATION_MULTICLASS("automl/searchmodels/weka/weka-all-autoweka.json", "conf/mlplan-weka.json", "mlplan/weka-preferenceList-autoweka.txt", "conf/preferenceList.txt", "AbstractClassifier", "BasicClassifier",
-			new WekaPipelineFactory(), EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //
+	CLASSIFICATION_MULTICLASS("automl/searchmodels/weka/weka-all-autoweka.json", "conf/mlplan-weka.json", "mlplan/weka-preferenceList-autoweka.txt", "conf/preferenceList.txt", "AbstractClassifier", new WekaPipelineFactory(),
+			EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //
 	CLASSIFICATION_MULTICLASS_TINY("automl/searchmodels/weka/tinytest.json", EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(), "mlplan/weka-preferenceList-tiny.txt",
 			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getRequestedInterface(),
-			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getLastHASCOMethodPriorToParameterRefinementOfPipeline(), new WekaPipelineFactory(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPerformanceMetricForSearchPhase(),
+			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getLearnerFactory(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPerformanceMetricForSearchPhase(),
 			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPerformanceMetricForSelectionPhase(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter());
 
 	private final String searchSpaceConfigFileFromResource;
@@ -38,7 +38,7 @@ public enum EMLPlanWekaProblemType implements IProblemType<IWekaClassifier> {
 	private final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter;
 
 	private EMLPlanWekaProblemType(final String searchSpaceConfigFileFromResource, final String systemSearchSpaceConfigFromFileSystem, final String preferedComponentsListFromResource, final String preferedComponentsListFromFileSystem,
-			final String requestedHascoInterface, final String requestedBasicProblemInterface, final ILearnerFactory<IWekaClassifier> learnerFactory, final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSearchPhase,
+			final String requestedHascoInterface, final ILearnerFactory<IWekaClassifier> learnerFactory, final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSearchPhase,
 			final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase, final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter) {
 
 		this.searchSpaceConfigFileFromResource = searchSpaceConfigFileFromResource;
