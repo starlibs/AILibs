@@ -33,21 +33,16 @@ import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
-import ai.libs.mlplan.cli.module.MLPlan4WekaClassificationCLIModule;
+import ai.libs.mlplan.cli.module.slc.MLPlan4ScikitLearnClassificationCLIModule;
+import ai.libs.mlplan.cli.module.slc.MLPlan4WekaClassificationCLIModule;
 import ai.libs.mlplan.cli.report.OpenMLAutoMLBenchmarkReport;
 import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 
-/**
- * Enables command-line usage of ML-Plan.
- *
- * @author Helena Graf
- *
- */
 public class MLPlanCLI {
 
 	// CLI variables
-	private static Logger logger = LoggerFactory.getLogger("MLPlanCLI");
+	private static Logger logger = LoggerFactory.getLogger(MLPlanCLI.class);
 	private static final String CLI_SYNTAX = "";
 
 	private static final IMLPlanCLIConfig CONFIG = ConfigFactory.create(IMLPlanCLIConfig.class);
@@ -72,7 +67,7 @@ public class MLPlanCLI {
 
 	/** OPTIONAL PARAMETERS' DEFAULT VALUES */
 	// Communication options standard values
-	private static final List<IMLPlanCLIModule> MODULES_TO_REGISTER = Arrays.asList(new MLPlan4WekaClassificationCLIModule());
+	private static final List<IMLPlanCLIModule> MODULES_TO_REGISTER = Arrays.asList(new MLPlan4WekaClassificationCLIModule(), new MLPlan4ScikitLearnClassificationCLIModule());
 	private static Map<String, IMLPlanCLIModule> moduleRegistry = null;
 	private static Map<String, String> defaults = new HashMap<>();
 
@@ -203,13 +198,18 @@ public class MLPlanCLI {
 		// call ml-plan to obtain the optimal supervised learner
 		logger.info("Build mlplan classifier");
 		ISupervisedLearner optimizedLearner = mlplan.call();
+		System.out.println("JUHU1");
 
 		if (cl.hasOption(O_PREDICT_DATASET)) {
+			System.out.println("JUHU2");
 			File predictDatasetFile = new File(cl.getOptionValue(O_PREDICT_DATASET));
 			logger.info("Load test data file: {}", predictDatasetFile.getAbsolutePath());
 			ILabeledDataset dataset = ArffDatasetAdapter.readDataset(predictDatasetFile);
+
+			System.out.println("JUHU3");
 			ILearnerRunReport runReport = new SupervisedLearnerExecutor().execute(optimizedLearner, dataset);
-			logger.info("{}", module.getRunReportAsString(runReport));
+			logger.info("Run report of the module: {}", module.getRunReportAsString(mlplan.getSelectedClassifier(), runReport));
+			System.out.println("JUHU4");
 
 			if (cl.hasOption(O_OUT_OPENML_BENCHMARK)) {
 				String outputFile = cl.getOptionValue(O_OUT_OPENML_BENCHMARK, getDefault(O_OUT_OPENML_BENCHMARK));
@@ -228,10 +228,7 @@ public class MLPlanCLI {
 	}
 
 	public static void main(final String[] args) throws Exception {
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File("mlplan-log.txt"), true))) {
-			bw.write(Arrays.toString(args) + "\n");
-		}
-
+		logger.info("Called ML-Plan CLI with the following params: {}", Arrays.toString(args));
 		final Options options = generateOptions();
 		if (args.length == 0) {
 			printUsage(options);

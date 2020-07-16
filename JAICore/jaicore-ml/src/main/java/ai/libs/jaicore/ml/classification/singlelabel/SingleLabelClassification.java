@@ -14,8 +14,10 @@ public class SingleLabelClassification extends Prediction implements ISingleLabe
 
 	private double[] labelProbabilities;
 
-	public SingleLabelClassification(final int predicted) {
+	public SingleLabelClassification(final int numClasses, final int predicted) {
 		super(predicted);
+		this.labelProbabilities = new double[numClasses];
+		this.labelProbabilities[predicted] = 1.0;
 	}
 
 	public SingleLabelClassification(final Map<Integer, Double> labelProbabilities) {

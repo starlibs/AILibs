@@ -1,8 +1,7 @@
-package ai.libs.mlplan.cli.module;
+package ai.libs.mlplan.cli.module.slc;
 
 import static ai.libs.mlplan.cli.MLPlanCLI.getDefault;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,6 +10,7 @@ import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelCla
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
+import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.AreaUnderROCCurve;
 import ai.libs.jaicore.ml.classification.loss.dataset.AveragedInstanceLoss;
@@ -21,33 +21,28 @@ import ai.libs.jaicore.ml.classification.loss.dataset.Precision;
 import ai.libs.jaicore.ml.classification.loss.dataset.Recall;
 import ai.libs.jaicore.ml.classification.loss.instance.LogLoss;
 import ai.libs.mlplan.cli.MLPlanCLI;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
+import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
+import ai.libs.mlplan.cli.module.UnsupportedModuleConfigurationException;
+import ai.libs.mlplan.core.AMLPlanBuilder;
 
-public class MLPlan4WekaClassificationCLIModule implements IMLPlanCLIModule {
+public abstract class AMLPlan4ClassificationCLIModule implements IMLPlanCLIModule {
 
-	public MLPlan4WekaClassificationCLIModule() {
+	// binary only
+	private static final String L_AUC = "AUC";
+	private static final String L_F1 = "F1";
+	private static final String L_PRECISION = "PRECISION";
+	private static final String L_RECALL = "RECALL";
+	// binary + multinomial
+	private static final String L_ERRORRATE = "ERRORRATE";
+	private static final String L_LOGLOSS = "LOGLOSS";
 
+	private static final List<String> BINARY_ONLY_MEASURES = Arrays.asList(L_AUC, L_F1, L_PRECISION, L_RECALL);
+
+	protected AMLPlan4ClassificationCLIModule() {
+		// TODO Auto-generated constructor stub
 	}
 
-	@Override
-	public MLPlanWekaBuilder getMLPlanBuilderForSetting(final CommandLine cl, final ILabeledDataset fitDataset) throws IOException {
-		MLPlanWekaBuilder builder;
-		if (!(fitDataset.getLabelAttribute() instanceof ICategoricalAttribute)) {
-			throw new UnsupportedModuleConfigurationException("ML-Plan for classification requires a categorical target attribute.");
-		}
-		ICategoricalAttribute labelAtt = (ICategoricalAttribute) fitDataset.getLabelAttribute();
-
-		switch (cl.getOptionValue(MLPlanCLI.O_MODULE, getDefault(MLPlanCLI.O_MODULE))) {
-		case "weka":
-			builder = MLPlanWekaBuilder.forClassification();
-			break;
-		case "weka-tiny":
-			builder = MLPlanWekaBuilder.forClassificationWithTinySearchSpace();
-			break;
-		default:
-			throw new UnsupportedModuleConfigurationException("The selected module is not available via this CLI module.");
-		}
-
+	protected void configureLoss(final CommandLine cl, final ICategoricalAttribute labelAtt, final AMLPlanBuilder builder) {
 		int positiveClassIndex = Integer.parseInt(cl.getOptionValue(MLPlanCLI.O_POS_CLASS_INDEX, getDefault(MLPlanCLI.O_POS_CLASS_INDEX)));
 		if (cl.hasOption(MLPlanCLI.O_POS_CLASS_NAME)) {
 			positiveClassIndex = labelAtt.getLabels().indexOf(cl.getOptionValue(MLPlanCLI.O_POS_CLASS_NAME));
@@ -57,13 +52,11 @@ public class MLPlan4WekaClassificationCLIModule implements IMLPlanCLIModule {
 		}
 
 		if (cl.hasOption(MLPlanCLI.O_LOSS)) {
-			String performanceMeasure = cl.getOptionValue(MLPlanCLI.O_LOSS, "ERRORRATE");
-			List<String> binaryMeasures = Arrays.asList("AUC", "PRECISION", "F1", "RECALL");
-			if (binaryMeasures.contains(performanceMeasure) && labelAtt.getLabels().size() > 2) {
+			String performanceMeasure = cl.getOptionValue(MLPlanCLI.O_LOSS, L_ERRORRATE);
+			if (BINARY_ONLY_MEASURES.contains(performanceMeasure) && labelAtt.getLabels().size() > 2) {
 				throw new UnsupportedModuleConfigurationException("Cannot use binary performance measure for non-binary classification dataset.");
 			}
-
-			switch (cl.getOptionValue(MLPlanCLI.O_LOSS, "ERRORRATE")) {
+			switch (performanceMeasure) {
 			case "ERRORRATE":
 				builder.withPerformanceMeasure(EClassificationPerformanceMeasure.ERRORRATE);
 				break;
@@ -82,20 +75,23 @@ public class MLPlan4WekaClassificationCLIModule implements IMLPlanCLIModule {
 			case "RECALL":
 				builder.withPerformanceMeasure(new Recall(positiveClassIndex));
 				break;
+			default:
+				throw new UnsupportedModuleConfigurationException("Unsupported measure " + performanceMeasure);
 			}
 		}
+	}
 
-		return builder;
+	public ICategoricalAttribute getLabelAttribute(final ILabeledDataset fitDataset) {
+		if (!(fitDataset.getLabelAttribute() instanceof ICategoricalAttribute)) {
+			throw new UnsupportedModuleConfigurationException("ML-Plan for classification requires a categorical target attribute.");
+		}
+		return (ICategoricalAttribute) fitDataset.getLabelAttribute();
 	}
 
 	@Override
-	public List<String> getSettingOptionValues() {
-		return Arrays.asList("weka", "weka-tiny");
-	}
-
-	@Override
-	public String getRunReportAsString(final ILearnerRunReport runReport) {
+	public String getRunReportAsString(final ISupervisedLearner learner, final ILearnerRunReport runReport) {
 		StringBuilder sb = new StringBuilder();
+		sb.append(learner).append("\n");
 		sb.append("Error-Rate: ").append(new ErrorRate().loss(runReport.getPredictionDiffList().getCastedView(Integer.class, ISingleLabelClassification.class)));
 		return sb.toString();
 	}

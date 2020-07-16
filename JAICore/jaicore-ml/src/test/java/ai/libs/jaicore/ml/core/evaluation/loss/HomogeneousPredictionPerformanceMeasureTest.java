@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 import org.junit.Test;
@@ -16,9 +17,10 @@ public class HomogeneousPredictionPerformanceMeasureTest {
 
 	private static final double DELTA = 1E-8;
 
-	private static final List<Integer> VEC_EXP = getIntArrayAsIntList(new int[] { 1, 0, 0, 1, 1, 1, 0, 1 });
-	private static final List<ISingleLabelClassification> VEC_ACT = Arrays.asList(new SingleLabelClassification(1), new SingleLabelClassification(0), new SingleLabelClassification(1), new SingleLabelClassification(0),
-			new SingleLabelClassification(1), new SingleLabelClassification(0), new SingleLabelClassification(1), new SingleLabelClassification(1));
+	private static final int[] vector = new int[] { 1, 0, 0, 1, 1, 1, 0, 1 };
+	private static final List<Integer> VEC_EXP = getIntArrayAsIntList(vector);
+	private static final int[] pred = new int[] { 1, 0, 1, 0, 1, 0, 1, 1 };
+	private static final List<ISingleLabelClassification> VEC_ACT = Arrays.stream(pred).mapToObj(x -> new SingleLabelClassification(2, x)).collect(Collectors.toList());
 
 	private static List<Integer> getIntArrayAsIntList(final int[] array) {
 		List<Integer> list = new ArrayList<>();

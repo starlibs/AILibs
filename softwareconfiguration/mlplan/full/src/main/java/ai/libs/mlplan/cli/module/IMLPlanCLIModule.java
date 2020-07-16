@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
+import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
 import ai.libs.mlplan.core.AMLPlanBuilder;
 
@@ -13,7 +14,7 @@ public interface IMLPlanCLIModule {
 
 	public AMLPlanBuilder getMLPlanBuilderForSetting(CommandLine cl, ILabeledDataset fitDataset) throws IOException;
 
-	public String getRunReportAsString(ILearnerRunReport runReport);
+	public String getRunReportAsString(ISupervisedLearner learner, ILearnerRunReport runReport);
 
 	public List<String> getSettingOptionValues();
 

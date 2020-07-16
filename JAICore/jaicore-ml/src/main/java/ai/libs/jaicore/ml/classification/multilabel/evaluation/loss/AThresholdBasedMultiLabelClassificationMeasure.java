@@ -84,17 +84,10 @@ public abstract class AThresholdBasedMultiLabelClassificationMeasure extends APr
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
+		if (obj == null || this.getClass() != obj.getClass()) {
 			return false;
 		}
-		if (this.getClass() != obj.getClass()) {
-			return false;
-		}
-		AThresholdBasedMultiLabelClassificationMeasure other = (AThresholdBasedMultiLabelClassificationMeasure) obj;
-		if (Double.doubleToLongBits(this.threshold) != Double.doubleToLongBits(other.threshold)) {
-			return false;
-		}
-		return true;
+		return Double.doubleToLongBits(this.threshold) == Double.doubleToLongBits(((AThresholdBasedMultiLabelClassificationMeasure) obj).threshold);
 	}
 
 }

@@ -36,10 +36,8 @@ public class InstanceWiseF1 extends AMultiLabelClassificationMeasure {
 		int[][] expectedMatrix = this.listToMatrix(expected);
 		int[][] actualMatrix = this.listToThresholdedRelevanceMatrix(predicted);
 		F1Measure baseMeasure = new F1Measure(1);
-		OptionalDouble res = IntStream.range(0, expectedMatrix.length)
-				.mapToDouble(
-						x -> baseMeasure.score(Arrays.stream(expectedMatrix[x]).mapToObj(Integer::valueOf).collect(Collectors.toList()), Arrays.stream(actualMatrix[x]).mapToObj(SingleLabelClassification::new).collect(Collectors.toList())))
-				.average();
+		OptionalDouble res = IntStream.range(0, expectedMatrix.length).mapToDouble(x -> baseMeasure.score(Arrays.stream(expectedMatrix[x]).mapToObj(Integer::valueOf).collect(Collectors.toList()),
+				Arrays.stream(actualMatrix[x]).mapToObj(y -> new SingleLabelClassification(2, y)).collect(Collectors.toList()))).average();
 
 		if (!res.isPresent()) {
 			throw new IllegalStateException("Could not determine average instance-wise f measure.");

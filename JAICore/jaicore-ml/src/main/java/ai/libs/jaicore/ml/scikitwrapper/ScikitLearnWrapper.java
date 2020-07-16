@@ -14,6 +14,7 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
@@ -39,7 +40,7 @@ import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
-import ai.libs.jaicore.processes.OS;
+import ai.libs.jaicore.processes.EOperatingSystem;
 import ai.libs.jaicore.processes.ProcessIDNotRetrievableException;
 import ai.libs.jaicore.processes.ProcessUtil;
 import ai.libs.python.IPythonConfig;
@@ -122,7 +123,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 *             The script could not be created.
 	 */
 	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withoutModelDump, final EScikitLearnProblemType problemType) throws IOException {
-		if (ProcessUtil.getOS() == OS.MAC || ProcessUtil.getOS() == OS.LINUX) {
+		if (ProcessUtil.getOS() == EOperatingSystem.MAC || ProcessUtil.getOS() == EOperatingSystem.LINUX) {
 			this.listenToPidFromProcess = true;
 		} else {
 			this.listenToPidFromProcess = false;
@@ -307,7 +308,8 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				throw new PredictionException("Could not run scikit-learn classifier.", e);
 			}
 		} else {
-			ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff).withTestArffFile(testArff).withOutputFile(outputFile);
+			ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff).withTestArffFile(testArff)
+					.withOutputFile(outputFile);
 			skLearnWrapperCommandBuilder.withSeed(this.seed);
 			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
@@ -346,7 +348,8 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		 * getRawLastClassificationResults().
 		 * */
 		if (this.problemType == EScikitLearnProblemType.CLASSIFICATION) {
-			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification((int) (double) x)).collect(Collectors.toList()));
+			int numClasses = ((ICategoricalAttribute) data.getLabelAttribute()).getLabels().size();
+			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification(numClasses, (int) (double) x)).collect(Collectors.toList()));
 		} else if (this.problemType == EScikitLearnProblemType.RUL) {
 			if (L.isInfoEnabled()) {
 				L.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()));
@@ -605,9 +608,9 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			}
 
 			List<String> processParameters = new ArrayList<>();
-			OS os = ProcessUtil.getOS();
+			EOperatingSystem os = ProcessUtil.getOS();
 			if (ScikitLearnWrapper.this.pythonConfig != null && ScikitLearnWrapper.this.pythonConfig.getAnacondaEnvironment() != null) {
-				if (os == OS.MAC) {
+				if (os == EOperatingSystem.MAC) {
 					processParameters.add("source");
 					processParameters.add("~/anaconda3/etc/profile.d/conda.sh");
 					processParameters.add("&&");
@@ -617,7 +620,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getAnacondaEnvironment());
 				processParameters.add("&&");
 			}
-			if (this.timeout != null && os == OS.LINUX) {
+			if (this.timeout != null && os == EOperatingSystem.LINUX) {
 				L.info("Executing with timeout {}s", this.timeout.seconds());
 				processParameters.add("timeout");
 				processParameters.add(this.timeout.seconds() - 5 + "");
@@ -658,7 +661,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			for (String parameter : processParameters) {
 				stringJoiner.add(parameter);
 			}
-			if (os == OS.MAC) {
+			if (os == EOperatingSystem.MAC) {
 				return new String[] { "sh", "-c", stringJoiner.toString() };
 			} else {
 				return processParameters.toArray(new String[] {});
