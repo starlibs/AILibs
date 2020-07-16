@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
+import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
@@ -24,6 +25,7 @@ import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -136,6 +138,21 @@ public abstract class AWekaLearner<P extends IPrediction, B extends IPredictionB
 			predictions.add(this.predict(inst));
 		}
 		return this.getPredictionListAsBatch(predictions);
+	}
+
+	protected WekaInstance getWekaInstance(final ILabeledInstance xTest) throws PredictionException {
+		if (this.schema == null) {
+			throw new IllegalStateException("Cannot conduct predictions with the classifier, because the dataset scheme has not been defined.");
+		}
+		if (xTest instanceof WekaInstance) {
+			return (WekaInstance) xTest;
+		} else {
+			try {
+				return new WekaInstance(this.schema, xTest);
+			} catch (UnsupportedAttributeTypeException e) {
+				throw new PredictionException("Could not create WekaInstance object from given instance.");
+			}
+		}
 	}
 
 	protected abstract B getPredictionListAsBatch(List<P> predictionList);

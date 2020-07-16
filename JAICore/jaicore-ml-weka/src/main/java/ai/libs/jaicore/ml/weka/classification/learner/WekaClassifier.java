@@ -7,14 +7,12 @@ import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassificationPredictionBatch;
-import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
-import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
@@ -46,23 +44,9 @@ public class WekaClassifier extends AWekaLearner<ISingleLabelClassification, ISi
 
 	@Override
 	public ISingleLabelClassification predict(final ILabeledInstance xTest) throws PredictionException, InterruptedException {
-		if (this.schema == null) {
-			throw new IllegalStateException("Cannot conduct predictions with the classifier, because the dataset scheme has not been defined.");
-		}
-		WekaInstance instance;
-		if (xTest instanceof WekaInstance) {
-			instance = (WekaInstance) xTest;
-		} else {
-			try {
-				instance = new WekaInstance(this.schema, xTest);
-			} catch (UnsupportedAttributeTypeException e) {
-				throw new PredictionException("Could not create WekaInstance object from given instance.");
-			}
-		}
-
 		try {
 			Map<Integer, Double> distribution = new HashMap<>();
-			double[] dist = this.wrappedLearner.distributionForInstance(instance.getElement());
+			double[] dist = this.wrappedLearner.distributionForInstance(this.getWekaInstance(xTest).getElement());
 			IntStream.range(0, dist.length).forEach(x -> distribution.put(x, dist[x]));
 			return new SingleLabelClassification(distribution);
 		} catch (InterruptedException e) {
