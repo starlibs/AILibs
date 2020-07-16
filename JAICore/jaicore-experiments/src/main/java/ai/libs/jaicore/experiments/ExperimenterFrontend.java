@@ -24,6 +24,7 @@ import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
 
 public class ExperimenterFrontend implements ILoggingCustomizable {
 
+	private static final String MSG_NO_MORE_EXPERIMENTS = "No more experiments to conduct.";
 	private static final String MSG_NOTABLE = "No table set in the database configuration!";
 
 	private IExperimentSetConfig config;
@@ -34,8 +35,6 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 	private String loggerNameForAlgorithm;
 	private ExperimentRunner runner;
 	private String executorInfo; // information about the job of the compute center executing this in order to ease tracking
-
-	private boolean allExperimentsFinished = false;
 
 	private Logger logger = LoggerFactory.getLogger("expfe");
 
@@ -152,21 +151,21 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 
 	public void randomlyConductExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
 		if (!this.getExperimentRunner().mightHaveMoreExperiments()) {
-			throw new IllegalStateException("No more experiments to conduct.");
+			throw new IllegalStateException(MSG_NO_MORE_EXPERIMENTS);
 		}
 		this.getExperimentRunner().randomlyConductExperiments();
 	}
 
 	public void sequentiallyConductExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
 		if (!this.getExperimentRunner().mightHaveMoreExperiments()) {
-			throw new IllegalStateException("No more experiments to conduct.");
+			throw new IllegalStateException(MSG_NO_MORE_EXPERIMENTS);
 		}
 		this.getExperimentRunner().sequentiallyConductExperiments();
 	}
 
 	public ExperimenterFrontend randomlyConductExperiments(final int limit) throws ExperimentDBInteractionFailedException, InterruptedException {
 		if (!this.getExperimentRunner().mightHaveMoreExperiments()) {
-			throw new IllegalStateException("No more experiments to conduct.");
+			throw new IllegalStateException(MSG_NO_MORE_EXPERIMENTS);
 		}
 		this.getExperimentRunner().randomlyConductExperiments(limit);
 		return this;
