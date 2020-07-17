@@ -20,6 +20,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.Timeout;
@@ -31,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
+import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
 import ai.libs.mlplan.cli.module.slc.MLPlan4ScikitLearnClassificationCLIModule;
@@ -62,6 +64,7 @@ public class MLPlanCLI {
 	public static final String O_NODE_EVAL_TIMEOUT = "tn";
 	public static final String O_POS_CLASS_INDEX = "pci";
 	public static final String O_POS_CLASS_NAME = "pcn";
+	public static final String O_OPENML_TASK = "openMLTask";
 
 	public static final String O_OUT_OPENML_BENCHMARK = "ooab";
 
@@ -111,6 +114,8 @@ public class MLPlanCLI {
 					.hasArg(isFlag(option, "hasArg"))
 					// set a flag whether the argument is optional
 					.optionalArg(isFlag(option, "argOptional"))
+					// set the number of args
+					.numberOfArgs(option.has("numArgs") ? option.get("numArgs").asInt() : (isFlag(option, "hasArg") ? 1 : 0))
 					// set the description
 					.desc(option.get("description").asText() + (option.has("default") ? "(Default: " + option.get("default").asText() + ")" : "")).build());
 			if (option.has("default")) {
@@ -155,9 +160,11 @@ public class MLPlanCLI {
 
 	private static void runMLPlan(final CommandLine cl) throws Exception {
 		// check whether a dataset is provided for fitting.
-		if (!cl.hasOption(O_FIT_DATASET)) {
-			System.err.println("Missing required option " + O_FIT_DATASET + " providing a dataset for fitting a learner.");
+		if (!cl.hasOption(O_FIT_DATASET) && !cl.hasOption(O_OPENML_TASK)) {
+			System.err.println("Either need a training dataset provided via " + O_FIT_DATASET + " or a task and fold of an OpenML task provided via " + O_OPENML_TASK);
 			System.exit(1);
+		} else if (cl.hasOption(O_FIT_DATASET) && cl.hasOption(O_OPENML_TASK)) {
+			System.err.println("Cannot use both: local dataset and openml task. Only one option either " + O_FIT_DATASET + " or " + O_OPENML_TASK + " may be given.");
 		}
 
 		// Load CLI modules and identify module responsible for the requested ml-plan configuration
@@ -170,7 +177,16 @@ public class MLPlanCLI {
 		IMLPlanCLIModule module = moduleRegistry.get(moduleName);
 
 		// load training data
-		ILabeledDataset fitDataset = ArffDatasetAdapter.readDataset(new File(cl.getOptionValue(O_FIT_DATASET)));
+		ILabeledDataset fitDataset;
+		ILabeledDataset predictDataset = null;
+		if (cl.hasOption(O_OPENML_TASK)) {
+			String[] taskSpec = cl.getOptionValues(O_OPENML_TASK);
+			List<ILabeledDataset<ILabeledInstance>> split = OpenMLDatasetReader.loadTaskFold(Integer.parseInt(taskSpec[0]), Integer.parseInt(taskSpec[1]));
+			fitDataset = split.get(0);
+			predictDataset = split.get(1);
+		} else {
+			fitDataset = ArffDatasetAdapter.readDataset(new File(cl.getOptionValue(O_FIT_DATASET)));
+		}
 
 		// retrieve builder from module
 		AMLPlanBuilder builder = module.getMLPlanBuilderForSetting(cl, fitDataset);
@@ -198,18 +214,16 @@ public class MLPlanCLI {
 		// call ml-plan to obtain the optimal supervised learner
 		logger.info("Build mlplan classifier");
 		ISupervisedLearner optimizedLearner = mlplan.call();
-		System.out.println("JUHU1");
 
-		if (cl.hasOption(O_PREDICT_DATASET)) {
-			System.out.println("JUHU2");
-			File predictDatasetFile = new File(cl.getOptionValue(O_PREDICT_DATASET));
-			logger.info("Load test data file: {}", predictDatasetFile.getAbsolutePath());
-			ILabeledDataset dataset = ArffDatasetAdapter.readDataset(predictDatasetFile);
+		if (predictDataset != null || cl.hasOption(O_PREDICT_DATASET)) {
+			if (cl.hasOption(O_PREDICT_DATASET)) {
+				File predictDatasetFile = new File(cl.getOptionValue(O_PREDICT_DATASET));
+				logger.info("Load test data file: {}", predictDatasetFile.getAbsolutePath());
+				predictDataset = ArffDatasetAdapter.readDataset(predictDatasetFile);
+			}
 
-			System.out.println("JUHU3");
-			ILearnerRunReport runReport = new SupervisedLearnerExecutor().execute(optimizedLearner, dataset);
+			ILearnerRunReport runReport = new SupervisedLearnerExecutor().execute(optimizedLearner, predictDataset);
 			logger.info("Run report of the module: {}", module.getRunReportAsString(mlplan.getSelectedClassifier(), runReport));
-			System.out.println("JUHU4");
 
 			if (cl.hasOption(O_OUT_OPENML_BENCHMARK)) {
 				String outputFile = cl.getOptionValue(O_OUT_OPENML_BENCHMARK, getDefault(O_OUT_OPENML_BENCHMARK));

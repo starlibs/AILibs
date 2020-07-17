@@ -14,7 +14,6 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
@@ -348,8 +347,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		 * getRawLastClassificationResults().
 		 * */
 		if (this.problemType == EScikitLearnProblemType.CLASSIFICATION) {
-			int numClasses = ((ICategoricalAttribute) data.getLabelAttribute()).getLabels().size();
-			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification(numClasses, (int) (double) x)).collect(Collectors.toList()));
+			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().map(x -> x.stream().mapToDouble(y -> y).toArray()).map(x -> new SingleLabelClassification(x)).collect(Collectors.toList()));
 		} else if (this.problemType == EScikitLearnProblemType.RUL) {
 			if (L.isInfoEnabled()) {
 				L.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()));

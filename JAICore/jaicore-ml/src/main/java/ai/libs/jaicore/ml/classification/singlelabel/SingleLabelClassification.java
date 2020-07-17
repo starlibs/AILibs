@@ -27,7 +27,7 @@ public class SingleLabelClassification extends Prediction implements ISingleLabe
 	}
 
 	public SingleLabelClassification(final double[] labelProbabilities) {
-		super(ArrayUtil.argMax(labelProbabilities));
+		super(ArrayUtil.argMax(labelProbabilities).get(0));
 		this.labelProbabilities = labelProbabilities;
 	}
 

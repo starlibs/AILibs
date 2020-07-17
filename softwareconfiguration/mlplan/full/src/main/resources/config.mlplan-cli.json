@@ -28,6 +28,13 @@
 			"default": "4"
 		},
 		{
+			"shortOpt": "openMLTask",
+			"longOpt": "openMLTask",
+			"description": "The OpenML task and the fold to run ML-Plan on.",
+			"hasArg": "true",
+			"numArgs": "2"
+		},
+		{
 			"shortOpt": "t",
 			"longOpt": "timeout",
 			"description": "The timeout for the entire ML-Plan run in seconds.",
