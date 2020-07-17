@@ -44,7 +44,7 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 			}
 
 			File arffFile = connector.datasetGet(dsd);
-			Dataset ds = (Dataset) (new ArffDatasetAdapter().deserializeDataset(new FileDatasetDescriptor(arffFile), dsd.getDefault_target_attribute()));
+			Dataset ds = (Dataset) (new ArffDatasetAdapter().deserializeDataset(new FileDatasetDescriptor(arffFile), targetAttribute));
 			ds.addInstruction(new ReconstructionInstruction(OpenMLDatasetReader.class.getMethod("deserializeDataset", int.class), openMLId));
 			return ds;
 		} catch (Exception e) {
@@ -84,16 +84,17 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 				case "TEST":
 					predictFold.add(instanceIndex);
 					break;
+				default:
+					/* ignore this case */
+					break;
 				}
 			}
 		}
 
 		ILabeledDataset<ILabeledInstance> dataset = null;
 		for (Input input : task.getInputs()) {
-			switch (input.getName()) {
-			case "source_data":
+			if (input.getName().equals("source_data")) {
 				dataset = deserializeDataset(input.getData_set().getData_set_id(), input.getData_set().getTarget_feature());
-				break;
 			}
 		}
 		return SplitterUtil.getRealizationOfSplitSpecification(dataset, Arrays.asList(fitFold, predictFold));

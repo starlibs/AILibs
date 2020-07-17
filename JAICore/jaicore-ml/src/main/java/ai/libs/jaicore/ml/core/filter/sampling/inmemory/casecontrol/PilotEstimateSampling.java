@@ -11,11 +11,15 @@ import org.api4.java.ai.ml.core.filter.unsupervised.sampling.ISamplingAlgorithm;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 
 public abstract class PilotEstimateSampling<D extends ILabeledDataset<? extends ILabeledInstance>> extends CaseControlLikeSampling<D> {
+
+	private Logger logger = LoggerFactory.getLogger(PilotEstimateSampling.class);
 
 	private final ISamplingAlgorithm<D> subSampler;
 	protected int preSampleSize;
@@ -59,5 +63,16 @@ public abstract class PilotEstimateSampling<D extends ILabeledDataset<? extends 
 
 	public IClassifier getPilotEstimator() {
 		return this.pilotEstimator;
+	}
+
+	@Override
+	public void setLoggerName(final String loggerName) {
+		this.logger = LoggerFactory.getLogger(loggerName);
+		super.setLoggerName(loggerName + ".ccsampling");
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
 	}
 }

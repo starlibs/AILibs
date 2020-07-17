@@ -8,6 +8,8 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
@@ -22,6 +24,8 @@ import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
  * @author jnowack
  */
 public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorithm<D, D> implements ISamplingAlgorithm<D> {
+
+	private Logger logger = LoggerFactory.getLogger(ASamplingAlgorithm.class);
 
 	protected int sampleSize = -1;
 	protected D sample = null;
@@ -145,5 +149,15 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 
 	public int getSampleSize() {
 		return this.sampleSize;
+	}
+
+	@Override
+	public void setLoggerName(final String loggerName) {
+		this.logger = LoggerFactory.getLogger(loggerName);
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
 	}
 }

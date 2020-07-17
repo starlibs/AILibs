@@ -29,7 +29,7 @@ import ai.libs.jaicore.timing.TimedComputation;
 public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable {
 
 	/* Logger variables */
-	protected Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
+	private Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
 	private String loggerName;
 
 	/* Parameters of the algorithm. */

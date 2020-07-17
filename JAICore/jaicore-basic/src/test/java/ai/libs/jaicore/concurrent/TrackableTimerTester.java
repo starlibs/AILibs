@@ -3,10 +3,10 @@ package ai.libs.jaicore.concurrent;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.time.Duration;
 import java.util.TimerTask;
 
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.Tester;
@@ -146,7 +146,7 @@ public class TrackableTimerTester extends Tester {
 			@Override
 			public void run() {
 				while (!Thread.interrupted()) {
-					Awaitility.await().atLeast(Duration.ONE_HUNDRED_MILLISECONDS);
+					Awaitility.await().atLeast(Duration.ofMillis(100));
 				}
 			}
 		};
@@ -157,7 +157,7 @@ public class TrackableTimerTester extends Tester {
 		assertTrue(tt.hasOpenTasks());
 
 		/* conduct several tests on execution */
-		Thread.sleep(1500);
+		Awaitility.await().until(() -> it.isFinished());
 		assertFalse(it.isCanceled());
 		assertTrue(tt.hasTaskBeenExecutedInPast(it));
 		assertFalse(tt.willTaskBeExecutedInFuture(it));

@@ -1,8 +1,7 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotEquals;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -84,18 +83,12 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		}
 		// Number of strati must be 3
 		assertEquals(3, new HashSet<>(stratiAssignment).size());
-
-		assertTrue("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0) == stratiAssignment.getInt(2));
-
-		assertFalse("Instances 1 and 2 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(1));
-
-		assertFalse("Instances 1 and 4 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(3));
-
-		assertFalse("Instances 2 and 3 need to be in the different strati", stratiAssignment.getInt(1) == stratiAssignment.getInt(2));
-
-		assertFalse("Instances 2 and 4 need to be in the different strati", stratiAssignment.getInt(1) == stratiAssignment.getInt(3));
-
-		assertFalse("Instances 3 and 4 need to be in the different strati", stratiAssignment.getInt(2) == stratiAssignment.getInt(3));
+		assertEquals("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0), stratiAssignment.getInt(2));
+		assertNotEquals("Instances 1 and 2 need to be in the different strati.",stratiAssignment.getInt(0), stratiAssignment.getInt(1));
+		assertNotEquals("Instances 1 and 4 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(3));
+		assertNotEquals("Instances 2 and 3 need to be in the different strati", stratiAssignment.getInt(1), stratiAssignment.getInt(2));
+		assertNotEquals("Instances 2 and 4 need to be in the different strati", stratiAssignment.getInt(1), stratiAssignment.getInt(3));
+		assertNotEquals("Instances 3 and 4 need to be in the different strati", stratiAssignment.getInt(2), stratiAssignment.getInt(3));
 	}
 
 	@Test
@@ -112,18 +105,12 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		}
 		// Number of strati must be 3
 		assertEquals(3, new HashSet<>(stratiAssignment).size());
-
-		assertTrue("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0) == stratiAssignment.getInt(2));
-
-		assertFalse("Instances 1 and 2 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(1));
-
-		assertFalse("Instances 1 and 4 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(3));
-
-		assertFalse("Instances 2 and 3 need to be in the different strati", stratiAssignment.getInt(1) == stratiAssignment.getInt(2));
-
-		assertFalse("Instances 2 and 4 need to be in the different strati", stratiAssignment.getInt(1) == stratiAssignment.getInt(3));
-
-		assertFalse("Instances 3 and 4 need to be in the different strati", stratiAssignment.getInt(2) == stratiAssignment.getInt(3));
+		assertEquals("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0), stratiAssignment.getInt(2));
+		assertNotEquals("Instances 1 and 2 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(1));
+		assertNotEquals("Instances 1 and 4 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(3));
+		assertNotEquals("Instances 2 and 3 need to be in the different strati", stratiAssignment.getInt(1), stratiAssignment.getInt(2));
+		assertNotEquals("Instances 2 and 4 need to be in the different strati", stratiAssignment.getInt(1), stratiAssignment.getInt(3));
+		assertNotEquals("Instances 3 and 4 need to be in the different strati", stratiAssignment.getInt(2), stratiAssignment.getInt(3));
 	}
 
 	@Test
@@ -189,16 +176,11 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		}
 		// Number of strati must be 2
 		assertEquals(2, new HashSet<>(stratiAssignment).size());
-
-		assertTrue("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0) == stratiAssignment.getInt(2));
-
-		assertTrue("Instances 1 and 4 need to be in the same stratum", stratiAssignment.getInt(0) == stratiAssignment.getInt(3));
-
-		assertFalse("Instances 1 and 2 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(1));
-
-		assertFalse("Instances 1 and 5 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(4));
-
-		assertFalse("Instances 1 and 6 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(5));
+		assertEquals("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0), stratiAssignment.getInt(2));
+		assertEquals("Instances 1 and 4 need to be in the same stratum", stratiAssignment.getInt(0), stratiAssignment.getInt(3));
+		assertNotEquals("Instances 1 and 2 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(1));
+		assertNotEquals("Instances 1 and 5 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(4));
+		assertNotEquals("Instances 1 and 6 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(5));
 	}
 
 	@Test
@@ -216,16 +198,11 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		}
 		// Number of strati must be 2
 		assertEquals(2, new HashSet<>(stratiAssignment).size());
-
-		assertTrue("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0) == stratiAssignment.getInt(2));
-
-		assertTrue("Instances 1 and 4 need to be in the same stratum", stratiAssignment.getInt(0) == stratiAssignment.getInt(3));
-
-		assertFalse("Instances 1 and 2 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(1));
-
-		assertFalse("Instances 1 and 5 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(4));
-
-		assertFalse("Instances 1 and 6 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(5));
+		assertEquals("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0), stratiAssignment.getInt(2));
+		assertEquals("Instances 1 and 4 need to be in the same stratum", stratiAssignment.getInt(0), stratiAssignment.getInt(3));
+		assertNotEquals("Instances 1 and 2 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(1));
+		assertNotEquals("Instances 1 and 5 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(4));
+		assertNotEquals("Instances 1 and 6 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(5));
 	}
 
 	public ILabeledDataset<ILabeledInstance> createToyDatasetOnlyCategorical() {
