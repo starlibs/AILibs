@@ -21,7 +21,7 @@ public class AsymmetricLoss extends ARegressionMeasure {
 	}
 
 	@Override
-	public double score(final List<? extends Double> expected, final List<? extends IRegressionPrediction> predicted) {
+	public double loss(final List<? extends Double> expected, final List<? extends IRegressionPrediction> predicted) {
 		this.checkConsistency(expected, predicted);
 		List<Double> accuracyList = new ArrayList<>();
 		for (int i = 0; i < expected.size(); i++) {
@@ -34,7 +34,8 @@ public class AsymmetricLoss extends ARegressionMeasure {
 			}
 			accuracyList.add(accuracy);
 		}
-		return StatisticsUtil.mean(accuracyList);
+		return 1 - StatisticsUtil.mean(accuracyList);
+
 	}
 
 }
