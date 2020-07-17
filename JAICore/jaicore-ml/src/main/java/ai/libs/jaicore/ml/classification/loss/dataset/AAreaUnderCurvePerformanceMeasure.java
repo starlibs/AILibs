@@ -9,7 +9,7 @@ import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelCla
 
 import ai.libs.jaicore.basic.sets.Pair;
 
-public abstract class AAreaUnderCurvePerformanceMeasure extends ASingleLabelPredictionPerformanceMeasure {
+public abstract class AAreaUnderCurvePerformanceMeasure extends ASingleLabelClassificationPerformanceMeasure {
 
 	private final int positiveClass;
 

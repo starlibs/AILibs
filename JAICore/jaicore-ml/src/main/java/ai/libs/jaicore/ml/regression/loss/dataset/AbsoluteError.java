@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.api4.java.ai.ml.regression.evaluation.IRegressionPrediction;
+
 import ai.libs.jaicore.basic.StatisticsUtil;
 
 public class AbsoluteError extends ARegressionMeasure {
@@ -11,8 +13,8 @@ public class AbsoluteError extends ARegressionMeasure {
 	private static final ai.libs.jaicore.ml.regression.loss.instance.AbsoluteError ABSOLUTE_ERROR_LOSS = new ai.libs.jaicore.ml.regression.loss.instance.AbsoluteError();
 
 	@Override
-	public double loss(final List<? extends Double> expected, final List<? extends Double> predicted) {
-		return StatisticsUtil.sum(IntStream.range(0, expected.size()).mapToObj(x -> Double.valueOf(ABSOLUTE_ERROR_LOSS.loss(expected.get(x), predicted.get(x)))).collect(Collectors.toList()));
+	public double loss(final List<? extends Double> expected, final List<? extends IRegressionPrediction> predicted) {
+		return StatisticsUtil.sum(IntStream.range(0, expected.size()).mapToObj(x -> Double.valueOf(ABSOLUTE_ERROR_LOSS.loss(expected.get(x), predicted.get(x).getPrediction()))).collect(Collectors.toList()));
 	}
 
 }

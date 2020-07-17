@@ -16,7 +16,7 @@ import ai.libs.jaicore.basic.Maps;
  *
  * @author mwever
  */
-public class WeightedAUROC extends ASingleLabelPredictionPerformanceMeasure {
+public class WeightedAUROC extends ASingleLabelClassificationPerformanceMeasure {
 
 	@Override
 	public double score(final List<? extends Integer> expected, final List<? extends ISingleLabelClassification> predicted) {

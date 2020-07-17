@@ -5,7 +5,7 @@ import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 
-public class TruePositives extends ASingleLabelPredictionPerformanceMeasure {
+public class TruePositives extends ASingleLabelClassificationPerformanceMeasure {
 
 	private final int positiveClass;
 

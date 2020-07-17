@@ -6,7 +6,7 @@ import java.util.stream.IntStream;
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicInstancePredictionPerformanceMeasure;
 
-public class AveragedInstanceLoss extends ASingleLabelPredictionPerformanceMeasure {
+public class AveragedInstanceLoss extends ASingleLabelClassificationPerformanceMeasure {
 
 	private IDeterministicInstancePredictionPerformanceMeasure<ISingleLabelClassification, Integer> instanceMeasure;
 

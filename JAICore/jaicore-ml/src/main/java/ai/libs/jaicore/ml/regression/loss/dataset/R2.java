@@ -2,6 +2,8 @@ package ai.libs.jaicore.ml.regression.loss.dataset;
 
 import java.util.List;
 
+import org.api4.java.ai.ml.regression.evaluation.IRegressionPrediction;
+
 /**
  * The R^2, aka. the coefficient of determination describes the proportion of the variance in the target variable and the predicted values.
  * The formula of R^2 is as follows:
@@ -20,14 +22,14 @@ public class R2 extends ARegressionMeasure {
 	}
 
 	@Override
-	public double score(final List<? extends Double> expected, final List<? extends Double> predicted) {
+	public double score(final List<? extends Double> expected, final List<? extends IRegressionPrediction> predicted) {
 		this.checkConsistency(expected, predicted);
 		double meanExpected = expected.stream().mapToDouble(x -> x).average().getAsDouble();
 		double sumOfActualSquares = 0.0;
 		double sumOfExpectedSquares = 0.0;
 
 		for (int i = 0; i < predicted.size(); i++) {
-			sumOfActualSquares += Math.pow(predicted.get(i) - meanExpected, 2);
+			sumOfActualSquares += Math.pow(predicted.get(i).getPrediction() - meanExpected, 2);
 			sumOfExpectedSquares += Math.pow(expected.get(i) - meanExpected, 2);
 		}
 

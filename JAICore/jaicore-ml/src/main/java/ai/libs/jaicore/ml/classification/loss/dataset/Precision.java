@@ -6,7 +6,7 @@ import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelCla
 
 import ai.libs.jaicore.basic.metric.ConfusionMetrics;
 
-public class Precision extends ASingleLabelPredictionPerformanceMeasure {
+public class Precision extends ASingleLabelClassificationPerformanceMeasure {
 
 	private final TruePositives tp;
 	private final FalsePositives fp;

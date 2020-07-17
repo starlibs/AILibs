@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 
-public class ErrorRate extends ASingleLabelPredictionPerformanceMeasure {
+public class ErrorRate extends ASingleLabelClassificationPerformanceMeasure {
 
 	public ErrorRate() {
 		/* empty constructor to avoid direct instantiation. Use the enum instead. */
