@@ -2,7 +2,6 @@ package ai.libs.mlplan.multiclass.wekamlplan;
 
 import java.io.IOException;
 
-import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +22,10 @@ public class MLPlanWekaBuilder extends AMLPlanBuilder<IWekaClassifier, MLPlanWek
 
 	public static MLPlanWekaBuilder forClassification() throws IOException {
 		return new MLPlanWekaBuilder(EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS);
+	}
+
+	public static MLPlanWekaBuilder forRegression() throws IOException {
+		return new MLPlanWekaBuilder(EMLPlanWekaProblemType.REGRESSION);
 	}
 
 	public static MLPlanWekaBuilder forClassificationWithTinySearchSpace() throws IOException {
@@ -54,9 +57,9 @@ public class MLPlanWekaBuilder extends AMLPlanBuilder<IWekaClassifier, MLPlanWek
 
 	@Override
 	public MLPlanWekaBuilder withDataset(final ILabeledDataset<?> dataset) {
-		if (!(dataset.getLabelAttribute() instanceof ICategoricalAttribute)) {
-			throw new IllegalArgumentException("MLPlanWeka currently only support categorically labeled data!");
-		}
+//		if (!(dataset.getLabelAttribute() instanceof ICategoricalAttribute)) {
+//			throw new IllegalArgumentException("MLPlanWeka currently only support categorically labeled data!");
+//		}
 		WekaInstances instances = dataset instanceof WekaInstances ? (WekaInstances) dataset : new WekaInstances(dataset);
 		super.withDataset(instances);
 		this.logger.info("Setting dataset as WekaInstances object.");

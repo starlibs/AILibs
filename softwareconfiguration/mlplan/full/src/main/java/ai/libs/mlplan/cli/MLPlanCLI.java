@@ -50,7 +50,13 @@ public class MLPlanCLI {
 
 	// CLI variables
 	private static Logger logger = LoggerFactory.getLogger(MLPlanCLI.class);
-	private static final String CLI_SYNTAX = "";
+	private static final String CLI_SYNTAX = "java -jar <mlplan.jar>";
+	private static final String K_SHORT_OPT = "shortOpt";
+	private static final String K_DEFAULT = "default";
+	private static final String K_DESCRIPTION = "description";
+	private static final String K_LONG_OPT = "longOpt";
+	private static final String K_HAS_ARG = "hasArg";
+	private static final String K_NUM_ARGS = "numArgs";
 
 	private static final IMLPlanCLIConfig CONFIG = ConfigFactory.create(IMLPlanCLIConfig.class);
 	private static final TimeUnit DEF_TIME_UNIT = TimeUnit.valueOf(CONFIG.getDefaultTimeUnit());
@@ -107,25 +113,25 @@ public class MLPlanCLI {
 
 		final Options options = new Options();
 		for (JsonNode option : root.get("options")) {
-			if (!option.has("shortOpt")) {
+			if (!option.has(K_SHORT_OPT)) {
 				throw new IllegalArgumentException("Error in the cli configuration file. " + mapper.writeValueAsString(option) + " has no shortOpt field.");
 			}
 
-			options.addOption(Option.builder(option.get("shortOpt").asText())
+			options.addOption(Option.builder(option.get(K_SHORT_OPT).asText())
 					// set the long name of the option
-					.longOpt(option.get("longOpt").asText())
+					.longOpt(option.get(K_LONG_OPT).asText())
 					// set a flag whether this option is required
 					.required(isFlag(option, "required"))
 					// set a flag whether the option has an argument
-					.hasArg(isFlag(option, "hasArg"))
+					.hasArg(isFlag(option, K_HAS_ARG))
 					// set a flag whether the argument is optional
 					.optionalArg(isFlag(option, "argOptional"))
 					// set the number of args
-					.numberOfArgs(option.has("numArgs") ? option.get("numArgs").asInt() : (isFlag(option, "hasArg") ? 1 : 0))
+					.numberOfArgs(option.has(K_NUM_ARGS) ? option.get(K_NUM_ARGS).asInt() : (isFlag(option, K_HAS_ARG) ? 1 : 0))
 					// set the description
 					.desc(getDescription(option)).build());
-			if (option.has("default")) {
-				defaults.put(option.get("shortOpt").asText(), option.get("default").asText());
+			if (option.has(K_DEFAULT)) {
+				defaults.put(option.get(K_SHORT_OPT).asText(), option.get(K_DEFAULT).asText());
 			}
 		}
 		return options;
@@ -133,23 +139,20 @@ public class MLPlanCLI {
 
 	private static String getDescription(final JsonNode option) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(option.get("description").asText());
-		if (option.has("default")) {
-			sb.append("(Default: ").append(option.get("default").asText()).append(")");
+		sb.append(option.get(K_DESCRIPTION).asText());
+		if (option.has(K_DEFAULT)) {
+			sb.append("(Default: ").append(option.get(K_DEFAULT).asText()).append(")");
 		}
 
-		if (option.get("shortOpt").asText().equals(O_LOSS)) {
+		if (option.get(K_SHORT_OPT).asText().equals(O_LOSS)) {
 			sb.append("\n");
 			for (Entry<String, IMLPlanCLIModule> entry : getModuleRegistry().entrySet()) {
 				sb.append(entry.getKey()).append(": ").append(entry.getValue().getPerformanceMeasures().stream().collect(Collectors.joining(", "))).append("\n");
 			}
 		}
 
-		if (option.get("shortOpt").asText().equals(O_MODULE)) {
-			sb.append("\n");
-			for (Entry<String, IMLPlanCLIModule> entry : getModuleRegistry().entrySet()) {
-				sb.append(entry.getKey()).append(": ").append(entry.getValue().getPerformanceMeasures().stream().collect(Collectors.joining(", "))).append("\n");
-			}
+		if (option.get(K_SHORT_OPT).asText().equals(O_MODULE)) {
+			sb.append("\n").append(getModuleRegistry().keySet().stream().collect(Collectors.joining(", ")));
 		}
 
 		return sb.toString();
@@ -161,7 +164,7 @@ public class MLPlanCLI {
 		try {
 			commandLine = cmdLineParser.parse(options, commandLineArguments);
 		} catch (ParseException parseException) {
-			logger.error("ERROR: Unable to parse command-line arguments {} due to {}", Arrays.toString(commandLineArguments), parseException);
+			logger.error("ERROR: Unable to parse command-line arguments {} due to exception.", Arrays.toString(commandLineArguments), parseException);
 		}
 
 		return commandLine;
@@ -169,18 +172,15 @@ public class MLPlanCLI {
 
 	private static void printUsage(final Options options) {
 		final HelpFormatter formatter = new HelpFormatter();
-		final String syntax = "java -jar <mlplan.jar>";
 		final PrintWriter pw = new PrintWriter(System.out);
-		formatter.printUsage(pw, 400, syntax, options);
+		formatter.printUsage(pw, 400, CLI_SYNTAX, options);
 		pw.println("use -h or --help for more detailed information about possible options.");
 		pw.flush();
 	}
 
 	private static void printHelp(final Options options) {
-		System.out.println("Print help!");
 		final HelpFormatter formatter = new HelpFormatter();
-		final String syntax = "mlplan [options]";
-		formatter.printHelp(600, syntax, "ML-Plan CLI v0.0.1-alpha\n================================\n", options, "===============================\nVisit us at: https://mlplan.org");
+		formatter.printHelp(600, CLI_SYNTAX, "ML-Plan CLI v0.0.1-alpha\n================================\n", options, "===============================\nVisit us at: https://mlplan.org");
 	}
 
 	public static String getDefault(final String key) {
@@ -271,8 +271,9 @@ public class MLPlanCLI {
 	}
 
 	public static void main(final String[] args) throws Exception {
-		System.out.println("juhu: " + Arrays.toString(args));
-		logger.info("Called ML-Plan CLI with the following params: {}", Arrays.toString(args));
+		if (logger.isInfoEnabled()) {
+			logger.info("Called ML-Plan CLI with the following params: {}", Arrays.toString(args));
+		}
 		final Options options = generateOptions();
 		if (args.length == 0) {
 			printUsage(options);

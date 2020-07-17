@@ -6,6 +6,7 @@ import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredict
 
 import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.InstanceWiseF1;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
+import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
 import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.core.IProblemType;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
@@ -14,8 +15,7 @@ import ai.libs.mlplan.multiclass.wekamlplan.EMLPlanWekaProblemType;
 public enum EMLPlanMekaProblemType implements IProblemType<IMekaClassifier> {
 
 	CLASSIFICATION_MULTILABEL("automl/searchmodels/meka/mlplan-meka.json", "conf/searchmodels/mlplan-meka.json", "mlplan/meka-preferenceList.txt", "conf/mlpan-meka-preferenceList.txt", "MLClassifier",
-			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getLastHASCOMethodPriorToParameterRefinementOfPipeline(), new MekaPipelineFactory(), new InstanceWiseF1(), new InstanceWiseF1(),
-			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter());
+			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getLastHASCOMethodPriorToParameterRefinementOfPipeline(), new MekaPipelineFactory(), new InstanceWiseF1(), new InstanceWiseF1(), new RandomHoldoutSplitter());
 
 	private final String searchSpaceConfigFileFromResource;
 	private final String systemSearchSpaceConfigFromFileSystem;

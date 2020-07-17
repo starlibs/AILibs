@@ -138,10 +138,6 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 			throw new ControlledNodeEvaluationException(classifierName + " cannot be adopted on multinomial classification dataset.");
 		}
 
-		if (this.regression && !classifierName.matches("(.*)(additiveregression|m5p|m5rules|simplelinearregression)(.*)")) {
-			throw new ControlledNodeEvaluationException(classifierName + " cannot be adopted on regression problems.");
-		}
-
 		if (this.containsNegativeValues && classifierName.matches("(.*)(naivebayesmultinomial)(.*)")) {
 			throw new ControlledNodeEvaluationException("Negative numeric attribute values are not supported by the classifier.");
 		}
@@ -149,7 +145,7 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 
 	@Override
 	public WekaInstances getData() {
-		return (WekaInstances)super.getData();
+		return (WekaInstances) super.getData();
 	}
 
 	public Instances getInstancesInWekaFormat() {

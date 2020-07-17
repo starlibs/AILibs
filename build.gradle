@@ -230,7 +230,6 @@ task showDirs {
     }
 }
 
-
 dependencies{
 	compile project(":hasco-core")
 	compile project(":hasco-fanova")

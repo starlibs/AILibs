@@ -17,6 +17,7 @@ import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.JaccardScore
 import ai.libs.mlplan.cli.MLPlanCLI;
 import ai.libs.mlplan.cli.module.AMLPlanCLIModule;
 import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
+import ai.libs.mlplan.cli.module.UnsupportedModuleConfigurationException;
 import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
 
 // Multi-Label: EXACT_MATCH, INSTANCE_F1, LABEL_F1, MICRO_F1, HAMMING, JACCARD, RANK
@@ -60,6 +61,8 @@ public class MLPlan4MekaMultiLabelCLIModule extends AMLPlanCLIModule implements 
 		case L_JACCARD:
 			builder.withPerformanceMeasure(new JaccardScore());
 			break;
+		default:
+			throw new UnsupportedModuleConfigurationException("Performance measure is not available for ML2-Plan");
 		}
 
 		return builder;

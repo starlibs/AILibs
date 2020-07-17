@@ -72,7 +72,7 @@
 			"shortOpt": "l",
 			"longOpt": "evaluationMeasure",
 			"hasArg": "true",
-			"description": "The loss function to be used for internally assessing a candidate's performance.\nNote that loss functions are problem specific, i.e. for single-label classification, regression or multi-label classification allow for different loss functions respectively. Score functions are automatically transformed into a loss function.\nThe following options are available to be configured:\nStandard (single-label) classification (weighted if originally for binary): ERRORRATE, AUC, LOGLOSS, F1, PRECISION, RECALL\nRegression: MEAN_SQUARED_ERROR, ROOT_MEAN_SQUARED_ERROR\nMulti-Label: EXACT_MATCH, INSTANCE_F1, LABEL_F1, MICRO_F1, HAMMING, JACCARD, RANK"
+			"description": "The loss function to be used for internally assessing a candidate's performance.\nNote that loss functions are problem specific, i.e. for single-label classification, regression or multi-label classification allow for different loss functions respectively. Score functions are automatically transformed into a loss function.\n Depending on the chosen module, the following options are available to be configured."
 		},
 		{
 			"shortOpt": "ssc",

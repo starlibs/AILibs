@@ -47,7 +47,7 @@
   </appender>
   
   <logger name="mlplan">
-    <level value="info" />
+    <level value="debug" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
@@ -101,19 +101,19 @@
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco">
-    <level value="warn" />
+    <level value="debug" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
-    <level value="info" />
+    <level value="debug" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
-    <level value="warn" />
+    <level value="debug" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search">
-    <level value="warn" />
+    <level value="debug" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search._orgraphsearch._algorithm">

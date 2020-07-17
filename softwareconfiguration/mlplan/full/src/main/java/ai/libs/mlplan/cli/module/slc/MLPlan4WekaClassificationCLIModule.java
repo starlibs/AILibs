@@ -25,7 +25,7 @@ public class MLPlan4WekaClassificationCLIModule extends AMLPlan4ClassificationCL
 		// try to get label attribute (also checks whether the dataset is really a classification dataset).
 		ICategoricalAttribute labelAtt = this.getLabelAttribute(fitDataset);
 
-		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
+		MLPlanWekaBuilder builder;
 
 		switch (cl.getOptionValue(MLPlanCLI.O_MODULE, this.getDefaultSettingOptionValue())) {
 		case M_WEKA:

@@ -10,6 +10,7 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
 import ai.libs.mlplan.cli.MLPlanCLI;
 import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
+import ai.libs.mlplan.cli.module.UnsupportedModuleConfigurationException;
 import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
 
 public class MLPlan4ScikitLearnRegressionCLIModule extends AMLPlan4RegressionCLIModule implements IMLPlanCLIModule {
@@ -24,9 +25,11 @@ public class MLPlan4ScikitLearnRegressionCLIModule extends AMLPlan4RegressionCLI
 	public MLPlanScikitLearnBuilder getMLPlanBuilderForSetting(final CommandLine cl, final ILabeledDataset fitDataset) throws IOException {
 		MLPlanScikitLearnBuilder builder = null;
 		switch (cl.getOptionValue(MLPlanCLI.O_MODULE)) {
-		case "sklearn-rul":
+		case M_RUL:
 			builder = MLPlanScikitLearnBuilder.forRUL();
 			break;
+		default:
+			throw new UnsupportedModuleConfigurationException("The chosen sub-module is not available in module " + this.getClass().getName());
 		}
 		this.configureLoss(cl, builder);
 		return builder;

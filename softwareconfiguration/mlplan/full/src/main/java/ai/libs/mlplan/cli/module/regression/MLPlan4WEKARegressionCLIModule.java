@@ -9,6 +9,7 @@ import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
 import ai.libs.mlplan.cli.MLPlanCLI;
+import ai.libs.mlplan.cli.module.UnsupportedModuleConfigurationException;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 
 public class MLPlan4WEKARegressionCLIModule extends AMLPlan4RegressionCLIModule {
@@ -24,8 +25,10 @@ public class MLPlan4WEKARegressionCLIModule extends AMLPlan4RegressionCLIModule 
 		MLPlanWekaBuilder builder = null;
 		switch (cl.getOptionValue(MLPlanCLI.O_MODULE)) {
 		case M_WEKA:
-			builder = MLPlanWekaBuilder.forClassification();
+			builder = MLPlanWekaBuilder.forRegression();
 			break;
+		default:
+			throw new UnsupportedModuleConfigurationException("Chosen sub-module not available in module " + this.getClass().getName());
 		}
 		this.configureLoss(cl, builder);
 		return builder;
