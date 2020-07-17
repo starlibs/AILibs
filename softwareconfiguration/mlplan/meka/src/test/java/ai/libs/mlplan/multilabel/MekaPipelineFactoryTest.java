@@ -20,13 +20,14 @@ import ai.libs.jaicore.components.serialization.ComponentLoader;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaPathConfig;
+import ai.libs.mlplan.multilabel.mekamlplan.EMLPlanMekaProblemType;
 import ai.libs.mlplan.multilabel.mekamlplan.MekaPipelineFactory;
 import meka.core.MLUtils;
 import weka.core.Instances;
 
 public class MekaPipelineFactoryTest {
-	private static final File SSC = FileUtil.getExistingFileWithHighestPriority(ML2PlanMekaPathConfig.RES_SSC, ML2PlanMekaPathConfig.FS_SSC);
+	private static final File SSC = FileUtil.getExistingFileWithHighestPriority(EMLPlanMekaProblemType.CLASSIFICATION_MULTILABEL.getSearchSpaceConfigFileFromResource(),
+			EMLPlanMekaProblemType.CLASSIFICATION_MULTILABEL.getSearchSpaceConfigFromFileSystem());
 
 	private static ComponentLoader cl;
 	private static MekaPipelineFactory mpf;

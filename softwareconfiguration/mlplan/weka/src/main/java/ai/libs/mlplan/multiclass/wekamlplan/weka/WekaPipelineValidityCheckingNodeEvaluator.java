@@ -2,8 +2,8 @@ package ai.libs.mlplan.multiclass.wekamlplan.weka;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Objects;
 
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
@@ -37,11 +37,8 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 		super();
 	}
 
-	public WekaPipelineValidityCheckingNodeEvaluator(final Collection<Component> components, final Instances data) {
-		super(components, new WekaInstances(data));
-		Objects.requireNonNull(components);
-		Objects.requireNonNull(data);
-		components.forEach(c -> this.logger.info("Considering component {}", c));
+	public WekaPipelineValidityCheckingNodeEvaluator(final Collection<Component> components, final ILabeledDataset<?> data) {
+		super(components, data);
 	}
 
 	private boolean multiValuedNominalAttributesExist() {
@@ -141,10 +138,6 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 			throw new ControlledNodeEvaluationException(classifierName + " cannot be adopted on multinomial classification dataset.");
 		}
 
-		if (this.regression && !classifierName.matches("(.*)(additiveregression|m5p|m5rules|simplelinearregression)(.*)")) {
-			throw new ControlledNodeEvaluationException(classifierName + " cannot be adopted on regression problems.");
-		}
-
 		if (this.containsNegativeValues && classifierName.matches("(.*)(naivebayesmultinomial)(.*)")) {
 			throw new ControlledNodeEvaluationException("Negative numeric attribute values are not supported by the classifier.");
 		}
@@ -152,7 +145,7 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 
 	@Override
 	public WekaInstances getData() {
-		return (WekaInstances)super.getData();
+		return (WekaInstances) super.getData();
 	}
 
 	public Instances getInstancesInWekaFormat() {

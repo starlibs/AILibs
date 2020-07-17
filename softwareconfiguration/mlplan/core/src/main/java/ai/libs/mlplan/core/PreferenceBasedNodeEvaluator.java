@@ -1,6 +1,5 @@
 package ai.libs.mlplan.core;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.ml.scikitwrapper.EBasicProblemType;
+import ai.libs.jaicore.components.serialization.CompositionSerializer;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
@@ -22,24 +21,17 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 
 	private final Collection<Component> components;
 	private final List<String> orderingOfComponents;
+	private final String nameOfMethodToResolveBareLearner;
+	private final String nameOfMethodToResolveLearnerInPipeline;
 	private Logger logger = LoggerFactory.getLogger(PreferenceBasedNodeEvaluator.class);
 	private boolean sentLogMessageForHavingEnteredSecondSubPhase = false;
-	private EBasicProblemType problemType;
 
-	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> orderingOfComponents) {
+	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> orderingOfComponents, final String nameOfMethodToResolveBareLearner, final String nameOfMethodToResolveLearnerInPipeline) {
 		super();
-		this.problemType = EBasicProblemType.CLASSIFICATION;
 		this.components = components;
 		this.orderingOfComponents = orderingOfComponents;
-	}
-
-	public PreferenceBasedNodeEvaluator(final Collection<Component> components) {
-		this(components, new ArrayList<>());
-	}
-
-	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> orderingOfComponents, final String methodPrefix) {
-		this(components, orderingOfComponents);
-		this.problemType = EBasicProblemType.getProblemType(methodPrefix);
+		this.nameOfMethodToResolveBareLearner = nameOfMethodToResolveBareLearner;
+		this.nameOfMethodToResolveLearnerInPipeline = nameOfMethodToResolveLearnerInPipeline;
 	}
 
 	@Override
@@ -53,48 +45,61 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 		}
 		this.logger.debug("Determined {} applied methods: {}", appliedMethods.size(), appliedMethods);
 
+		//		resolveAbstractClassifierWith
+		//		resolveAbstractClassifierWithweka.classifiers.functions.SMO
+
 		/* get partial component */
 		ComponentInstance instance = HASCOUtil.getSolutionCompositionFromState(this.components, n.getHead().getState(), false);
 		boolean isPipeline = appliedMethods.stream().anyMatch(x -> x.toLowerCase().contains("pipeline"));
-		boolean lastMethod = false;
 		String classifierName = null;
 
-		Double score = 0.0;
-		this.logger.debug("The associated component instance is {}. Constitutes a pipeline? {}", instance, isPipeline ? "yes" : "no");
-		if (instance != null) {
-			if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
-				lastMethod = appliedMethods.get(appliedMethods.size() - 1).startsWith(this.problemType.getPreferredBasicProblemComponentName());
+		/* first check whether any decision about an instance is recognizable. If not, return 0.0 */
+		if (instance == null) {
+			this.logger.info("No decision recognizable *in state* yet, returning 0.0");
+			return 0.0;
+		}
 
-				if (instance.getSatisfactionOfRequiredInterfaces().containsKey("classifier")) {
-					classifierName = instance.getSatisfactionOfRequiredInterfaces().get("classifier").getComponent().getName();
-				} else if (instance.getSatisfactionOfRequiredInterfaces().containsKey("regressor")) {
-					classifierName = instance.getSatisfactionOfRequiredInterfaces().get("regressor").getComponent().getName();
-				} else {
-					return 0.0;
-				}
+		/* now check whether this is a pipeline */
+		String nameOfLastAppliedMethod = appliedMethods.get(appliedMethods.size() - 1);
+		String compactStringOfCI = CompositionSerializer.serializeComponentInstance(instance).toString();
+		this.logger.debug("The associated component instance is {}. Constitutes a pipeline? {}. Name of last applied method: {}", compactStringOfCI, isPipeline ? "yes" : "no", nameOfLastAppliedMethod);
+		Double score = 0.0;
+		boolean lastMethodBeforeSteppingToRandomCompletions = false;
+		if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
+			lastMethodBeforeSteppingToRandomCompletions = nameOfLastAppliedMethod.startsWith(this.nameOfMethodToResolveLearnerInPipeline);
+
+			if (instance.getSatisfactionOfRequiredInterfaces().containsKey("classifier")) {
+				classifierName = instance.getSatisfactionOfRequiredInterfaces().get("classifier").getComponent().getName();
+			} else if (instance.getSatisfactionOfRequiredInterfaces().containsKey("regressor")) {
+				classifierName = instance.getSatisfactionOfRequiredInterfaces().get("regressor").getComponent().getName();
 			} else {
-				classifierName = instance.getComponent().getName();
-				lastMethod = appliedMethods.get(appliedMethods.size() - 1).startsWith(this.problemType.getPreferredComponentName());
+				this.logger.debug("Exact decision about pipeline fillup not recognizable in state yet. Returning 0.0.");
+				return 0.0;
+			}
+		} else {
+			classifierName = instance.getComponent().getName();
+			lastMethodBeforeSteppingToRandomCompletions = nameOfLastAppliedMethod.startsWith(this.nameOfMethodToResolveBareLearner);
+		}
+		this.logger.debug("Identified classifier {}.", classifierName);
+
+		if (lastMethodBeforeSteppingToRandomCompletions) {
+			if (isPipeline) {
+				score += this.orderingOfComponents.size() + 1;
 			}
 
-			if (lastMethod) {
-				if (isPipeline) {
-					score += this.orderingOfComponents.size() + 1;
-				}
-
-				score += (this.orderingOfComponents.contains(classifierName) ? this.orderingOfComponents.indexOf(classifierName) + 1 : this.orderingOfComponents.size() + 1);
-				score *= 1.0e-10;
-			} else {
-				score = null;
-				if (!this.sentLogMessageForHavingEnteredSecondSubPhase) {
-					double scoreOfParent;
-					if ((scoreOfParent = ((BackPointerPath<TFDNode, String, Double>) n.getPathToParentOfHead()).getScore()) > 1.0e-6) {
-						this.sentLogMessageForHavingEnteredSecondSubPhase = true;
-						this.logger.info("Entering phase 1b! Breadth first search ends here, because the search is asking for the f-value of a node whose parent has been truely evaluated with an f-value of {}", scoreOfParent);
-					}
+			score += (this.orderingOfComponents.contains(classifierName) ? this.orderingOfComponents.indexOf(classifierName) + 1 : this.orderingOfComponents.size() + 1);
+			score *= 1.0e-10;
+		} else {
+			score = null;
+			if (!this.sentLogMessageForHavingEnteredSecondSubPhase) {
+				double scoreOfParent;
+				if ((scoreOfParent = ((BackPointerPath<TFDNode, String, Double>) n.getPathToParentOfHead()).getScore()) > 1.0e-6) {
+					this.sentLogMessageForHavingEnteredSecondSubPhase = true;
+					this.logger.info("Entering phase 1b! Breadth first search ends here, because the search is asking for the f-value of a node whose parent has been truely evaluated with an f-value of {}", scoreOfParent);
 				}
 			}
 		}
+		this.logger.info("Returning score {} for instance {}", score, compactStringOfCI);
 		return score;
 
 	}

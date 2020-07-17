@@ -7,12 +7,13 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.learningcurve.ILearningCurve;
-import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicHomogeneousPredictionPerformanceMeasure;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -71,10 +72,9 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 	 * @throws DatasetCreationException
 	 * @throws InterruptedException
 	 */
-	public LearningCurveExtrapolator(final LearningCurveExtrapolationMethod extrapolationMethod, final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner,
-			final ILabeledDataset<?> dataset, final double trainsplit, final int[] anchorPoints,
-			final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> samplingAlgorithmFactory, final long seed)
-					throws DatasetCreationException, InterruptedException {
+	public LearningCurveExtrapolator(final LearningCurveExtrapolationMethod extrapolationMethod, final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<?> dataset,
+			final double trainsplit, final int[] anchorPoints, final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> samplingAlgorithmFactory, final long seed)
+			throws DatasetCreationException, InterruptedException {
 		this.extrapolationMethod = extrapolationMethod;
 		this.learner = learner;
 		this.dataset = dataset;
@@ -109,7 +109,7 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 
 			// Create subsamples at the anchorpoints and measure the accuracy there.
 			SupervisedLearnerExecutor learnerExecutor = new SupervisedLearnerExecutor();
-			IDeterministicHomogeneousPredictionPerformanceMeasure<Object> metric = EClassificationPerformanceMeasure.ERRORRATE;
+			IDeterministicPredictionPerformanceMeasure<Integer, ISingleLabelClassification> metric = EClassificationPerformanceMeasure.ERRORRATE;
 			for (int i = 0; i < this.anchorPoints.length; i++) {
 
 				// If it is a rerunnable factory, set the previous run.
@@ -122,10 +122,10 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 				// Train classifier on subsample.
 				this.logger.debug("Running classifier with {} data points.", this.anchorPoints[i]);
 				ILearnerRunReport report = learnerExecutor.execute(this.learner, subsampledDataset, testInstances);
-				this.trainingTimes[i] = (int)(report.getTrainEndTime() - report.getTrainStartTime());
+				this.trainingTimes[i] = (int) (report.getTrainEndTime() - report.getTrainStartTime());
 
 				// Measure accuracy of the trained learner on test split.
-				this.yValues[i] = metric.loss(report.getPredictionDiffList());
+				this.yValues[i] = metric.loss(report.getPredictionDiffList().getCastedView(Integer.class, ISingleLabelClassification.class));
 				this.logger.debug("Training finished. Observed learning curve value (accuracy) of {}.", this.yValues[i]);
 			}
 			if (this.logger.isInfoEnabled()) {

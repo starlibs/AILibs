@@ -54,7 +54,7 @@ public class WekaInstancesUtil {
 			DenseInstance iNew = new DenseInstance(1, pointWithLabel);
 			iNew.setDataset(wekaInstances);
 			if (dataset.getLabelAttribute() instanceof ICategoricalAttribute) {
-				iNew.setClassValue(((ICategoricalAttribute) dataset.getLabelAttribute()).getLabelOfCategory((int)inst.getLabel()));
+				iNew.setClassValue(((ICategoricalAttribute) dataset.getLabelAttribute()).getLabelOfCategory((int) inst.getLabel()));
 			} else {
 				iNew.setClassValue(Double.parseDouble(inst.getLabel().toString()));
 			}
@@ -66,15 +66,14 @@ public class WekaInstancesUtil {
 	public static Instances createDatasetFromSchema(final ILabeledInstanceSchema schema) throws UnsupportedAttributeTypeException {
 		Objects.requireNonNull(schema);
 		List<Attribute> attributes = new LinkedList<>();
-
 		for (int i = 0; i < schema.getNumAttributes(); i++) {
 			IAttribute attType = schema.getAttributeList().get(i);
-			if (attType instanceof NumericAttribute) {
+			if (attType instanceof INumericAttribute) {
 				attributes.add(new Attribute(attType.getName()));
-			} else if (attType instanceof IntBasedCategoricalAttribute) {
-				attributes.add(new Attribute(attType.getName(), ((IntBasedCategoricalAttribute) attType).getLabels()));
+			} else if (attType instanceof ICategoricalAttribute) {
+				attributes.add(new Attribute(attType.getName(), ((ICategoricalAttribute) attType).getLabels()));
 			} else {
-				throw new UnsupportedAttributeTypeException("The class attribute has an unsupported attribute type " + attType.getName() + ".");
+				throw new UnsupportedAttributeTypeException("The class attribute has an unsupported attribute type " + attType.getClass().getName() + " of attribute " + attType.getName() + ".");
 			}
 		}
 
@@ -127,16 +126,14 @@ public class WekaInstancesUtil {
 				INumericAttributeValue value = ((INumericAttribute) schema.getAttribute(i)).getAsAttributeValue(instance.getAttributeValue(i));
 				if (value != null) {
 					iNew.setValue(i, value.getValue());
-				}
-				else {
+				} else {
 					iNew.setMissing(i);
 				}
 			} else if (schema.getAttribute(i) instanceof ICategoricalAttribute) {
 				ICategoricalAttributeValue value = ((ICategoricalAttribute) schema.getAttribute(i)).getAsAttributeValue(instance.getAttributeValue(i));
 				if (value != null) {
 					iNew.setValue(i, value.getValue());
-				}
-				else {
+				} else {
 					iNew.setMissing(i);
 				}
 			} else {

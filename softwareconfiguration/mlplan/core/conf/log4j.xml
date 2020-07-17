@@ -161,7 +161,7 @@
   
   <!-- configuration for ML-Plan Test logging -->
   <logger name="testedalgorithm">
-    <level value="warn" />
+    <level value="debug" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -170,27 +170,31 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
+  <logger name="testedalgorithm.searchselectsplitter">
+    <level value="warn" />
+  </logger>
+  
   <logger name="testedalgorithm.optimizingfactory">
+    <level value="debug" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optimizer">
     <level value="warn" />
   </logger>
   
-  <logger name="testedalgorithm.optimizingfactory.optAlgo">
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco">
     <level value="warn" />
   </logger>
   
-  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco">
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco.search">
+    <level value="debug" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator">
     <level value="warn" />
   </logger>
   
-  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search">
-    <level value="warn" />
-  </logger>
-  
-  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
-    <level value="warn" />
-  </logger>
-  
-  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.randomsearch">
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator.randomsearch">
   	<level value="warn" />
   </logger>
   

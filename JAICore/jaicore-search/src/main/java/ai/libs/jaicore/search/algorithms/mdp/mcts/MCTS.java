@@ -18,6 +18,8 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.ILabeledPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
@@ -32,6 +34,8 @@ import ai.libs.jaicore.search.probleminputs.MDPUtils;
  * @param <A> Type of actions
  */
 public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
+
+	private Logger logger = LoggerFactory.getLogger(MCTS.class);
 
 	private final IMDP<N, A, Double> mdp;
 	private final int maxDepth;
@@ -244,7 +248,8 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 
 	@Override
 	public void setLoggerName(final String name) {
-		super.setLoggerName(name);
+		this.logger = LoggerFactory.getLogger(name);
+		super.setLoggerName(name + ".abstract");
 
 		/* set logger of tree policy */
 		if (this.treePolicy instanceof ILoggingCustomizable) {
@@ -268,4 +273,8 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 		throw new UnsupportedOperationException("Currently not implemented.");
 	}
 
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
 }

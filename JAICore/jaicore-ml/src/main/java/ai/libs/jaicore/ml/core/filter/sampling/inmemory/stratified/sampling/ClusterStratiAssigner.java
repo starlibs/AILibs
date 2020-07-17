@@ -12,7 +12,7 @@ import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class ClusterStratiAssigner implements IStratiAssigner {
+public abstract class ClusterStratiAssigner implements IStratifier {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ClusterStratiAssigner.class);
 
@@ -37,7 +37,7 @@ public abstract class ClusterStratiAssigner implements IStratiAssigner {
 	}
 
 	@Override
-	public int assignToStrati(final IInstance datapoint) {
+	public int getStratum(final IInstance datapoint) {
 		if (this.dataset == null) {
 			throw new IllegalStateException("ClusterStratiAssigner has not been initialized!");
 		}

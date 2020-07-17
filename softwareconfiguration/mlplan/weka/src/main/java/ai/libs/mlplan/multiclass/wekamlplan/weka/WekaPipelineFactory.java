@@ -137,5 +137,4 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 
 		return parameters;
 	}
-
 }

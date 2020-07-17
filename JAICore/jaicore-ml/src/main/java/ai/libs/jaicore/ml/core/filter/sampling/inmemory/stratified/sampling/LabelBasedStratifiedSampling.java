@@ -8,10 +8,10 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 public class LabelBasedStratifiedSampling<D extends ILabeledDataset<?>> extends StratifiedSampling<D> {
 
 	public LabelBasedStratifiedSampling(final Random random, final D input) {
-		this(new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(input.getNumAttributes())), random, input);
+		this(new AttributeBasedStratifier(Arrays.asList(input.getNumAttributes())), random, input);
 	}
 
-	private LabelBasedStratifiedSampling(final AttributeBasedStratiAmountSelectorAndAssigner assigner, final Random random, final D input) {
-		super(assigner, assigner, random, input);
+	private LabelBasedStratifiedSampling(final AttributeBasedStratifier assigner, final Random random, final D input) {
+		super(assigner, random, input);
 	}
 }

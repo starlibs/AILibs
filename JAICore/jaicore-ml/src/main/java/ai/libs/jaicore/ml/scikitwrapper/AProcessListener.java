@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 
-import ai.libs.jaicore.processes.OS;
+import ai.libs.jaicore.processes.EOperatingSystem;
 import ai.libs.jaicore.processes.ProcessUtil;
 
 /**
@@ -65,7 +65,7 @@ public abstract class AProcessListener implements IProcessListener {
 	}
 
 	private boolean checkReady(final BufferedReader inputReader) throws IOException {
-		if (ProcessUtil.getOS() == OS.MAC) {
+		if (ProcessUtil.getOS() == EOperatingSystem.MAC) {
 			return inputReader.ready();
 		} else {
 			return true;

@@ -29,7 +29,7 @@ import ai.libs.jaicore.timing.TimedComputation;
 public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable {
 
 	/* Logger variables */
-	protected Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
+	private Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
 	private String loggerName;
 
 	/* Parameters of the algorithm. */
@@ -396,7 +396,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		}
 		if (this.getTimeout().milliseconds() > 0) {
 			this.deadline = System.currentTimeMillis() + this.getTimeout().milliseconds() - this.timeoutPrecautionOffset;
-			this.logger.info("Timeout is {}. Setting deadline to timestamp {}. Remaining time: {}", this.getTimeout(), this.deadline, this.getRemainingTimeToDeadline());
+			this.logger.info("Timeout is {}, and precaution offset is {}. Setting deadline to timestamp {}. Remaining time: {}", this.getTimeout(), this.timeoutPrecautionOffset, this.deadline, this.getRemainingTimeToDeadline());
 		} else {
 			this.deadline = System.currentTimeMillis() + 86400 * 1000 * 365;
 			this.logger.info("No timeout defined. Setting deadline to timestamp {}. Remaining time: {}", this.deadline, this.getRemainingTimeToDeadline());

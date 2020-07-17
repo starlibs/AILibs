@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
@@ -44,23 +45,25 @@ public class MLPlanOpenMLExample {
 		builder.withTimeOut(new Timeout(30, TimeUnit.SECONDS));
 		builder.withNumCpus(4);
 		builder.withSeed(1);
-		builder.withMCCVBasedCandidateEvaluationInSearchPhase().withNumMCIterations(5);
+		builder.withMCCVBasedCandidateEvaluationInSearchPhase(3, .8);
 
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setRandomSeed(1);
 		mlplan.setPortionOfDataForPhase2(.3f);
-		mlplan.setLoggerName("testedalgorithm");
+		mlplan.setLoggerName("example");
 
 		try {
 			long start = System.currentTimeMillis();
 			IWekaClassifier optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
+			LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));
 
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}", EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()));
+			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}",
+					EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList().getCastedView(Integer.class, ISingleLabelClassification.class)), mlplan.getInternalValidationErrorOfSelectedClassifier());
 		} catch (NoSuchElementException e) {
 			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}

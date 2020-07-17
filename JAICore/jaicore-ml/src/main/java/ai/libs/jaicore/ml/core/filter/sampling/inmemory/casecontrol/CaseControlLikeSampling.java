@@ -11,6 +11,8 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.dataset.DatasetDeriver;
@@ -19,6 +21,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 
 public abstract class CaseControlLikeSampling<D extends ILabeledDataset<? extends ILabeledInstance>> extends ASamplingAlgorithm<D> {
 
+	private Logger logger = LoggerFactory.getLogger(CaseControlLikeSampling.class);
 	protected Random rand;
 	protected List<Pair<ILabeledInstance, Double>> acceptanceThresholds = null;
 	private final DatasetDeriver<D> deriver;
@@ -105,5 +108,16 @@ public abstract class CaseControlLikeSampling<D extends ILabeledDataset<? extend
 			}
 		}
 		return classOccurrences;
+	}
+
+	@Override
+	public void setLoggerName(final String loggerName) {
+		this.logger = LoggerFactory.getLogger(loggerName);
+		super.setLoggerName(loggerName + ".asampling");
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
 	}
 }
