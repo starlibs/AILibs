@@ -9,7 +9,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.cli.CommandLine;
@@ -117,12 +119,36 @@ public class MLPlanCLI {
 					// set the number of args
 					.numberOfArgs(option.has("numArgs") ? option.get("numArgs").asInt() : (isFlag(option, "hasArg") ? 1 : 0))
 					// set the description
-					.desc(option.get("description").asText() + (option.has("default") ? "(Default: " + option.get("default").asText() + ")" : "")).build());
+					.desc(getDescription(option)).build());
 			if (option.has("default")) {
 				defaults.put(option.get("shortOpt").asText(), option.get("default").asText());
 			}
 		}
 		return options;
+	}
+
+	private static String getDescription(final JsonNode option) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(option.get("description").asText());
+		if (option.has("default")) {
+			sb.append("(Default: ").append(option.get("default").asText()).append(")");
+		}
+
+		if (option.get("shortOpt").equals(O_LOSS)) {
+			sb.append("\n");
+			for (Entry<String, IMLPlanCLIModule> entry : getModuleRegistry().entrySet()) {
+				sb.append(entry.getKey()).append(": ").append(entry.getValue().getPerformanceMeasures().stream().collect(Collectors.joining(", "))).append("\n");
+			}
+		}
+
+		if (option.get("shortOpt").equals(O_MODULE)) {
+			sb.append("\n");
+			for (Entry<String, IMLPlanCLIModule> entry : getModuleRegistry().entrySet()) {
+				sb.append(entry.getKey()).append(": ").append(entry.getValue().getPerformanceMeasures().stream().collect(Collectors.joining(", "))).append("\n");
+			}
+		}
+
+		return sb.toString();
 	}
 
 	private static CommandLine generateCommandLine(final Options options, final String[] commandLineArguments) {

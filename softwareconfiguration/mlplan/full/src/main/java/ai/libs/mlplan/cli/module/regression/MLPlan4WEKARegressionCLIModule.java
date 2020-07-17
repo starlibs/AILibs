@@ -9,23 +9,22 @@ import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
 import ai.libs.mlplan.cli.MLPlanCLI;
-import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
-import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
+import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 
-public class MLPlan4SKLearnRegressionCLIModule extends AMLPlan4RegressionCLIModule implements IMLPlanCLIModule {
+public class MLPlan4WEKARegressionCLIModule extends AMLPlan4RegressionCLIModule {
 
-	public static final String M_RUL = "sklearn-rul";
+	private static final String M_WEKA = "weka-regression";
 
-	public MLPlan4SKLearnRegressionCLIModule() {
-		super(Arrays.asList(M_RUL), M_RUL);
+	public MLPlan4WEKARegressionCLIModule() {
+		super(Arrays.asList(M_WEKA), M_WEKA);
 	}
 
 	@Override
-	public MLPlanScikitLearnBuilder getMLPlanBuilderForSetting(final CommandLine cl, final ILabeledDataset fitDataset) throws IOException {
-		MLPlanScikitLearnBuilder builder = null;
+	public MLPlanWekaBuilder getMLPlanBuilderForSetting(final CommandLine cl, final ILabeledDataset fitDataset) throws IOException {
+		MLPlanWekaBuilder builder = null;
 		switch (cl.getOptionValue(MLPlanCLI.O_MODULE)) {
-		case "sklearn-rul":
-			builder = MLPlanScikitLearnBuilder.forRUL();
+		case M_WEKA:
+			builder = MLPlanWekaBuilder.forClassification();
 			break;
 		}
 		this.configureLoss(cl, builder);
@@ -36,4 +35,5 @@ public class MLPlan4SKLearnRegressionCLIModule extends AMLPlan4RegressionCLIModu
 	public String getRunReportAsString(final ISupervisedLearner learner, final ILearnerRunReport runReport) {
 		return "";
 	}
+
 }

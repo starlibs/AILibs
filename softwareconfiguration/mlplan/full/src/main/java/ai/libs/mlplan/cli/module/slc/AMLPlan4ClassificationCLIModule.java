@@ -21,11 +21,12 @@ import ai.libs.jaicore.ml.classification.loss.dataset.Precision;
 import ai.libs.jaicore.ml.classification.loss.dataset.Recall;
 import ai.libs.jaicore.ml.classification.loss.instance.LogLoss;
 import ai.libs.mlplan.cli.MLPlanCLI;
+import ai.libs.mlplan.cli.module.AMLPlanCLIModule;
 import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
 import ai.libs.mlplan.cli.module.UnsupportedModuleConfigurationException;
 import ai.libs.mlplan.core.AMLPlanBuilder;
 
-public abstract class AMLPlan4ClassificationCLIModule implements IMLPlanCLIModule {
+public abstract class AMLPlan4ClassificationCLIModule extends AMLPlanCLIModule implements IMLPlanCLIModule {
 
 	// binary only
 	private static final String L_AUC = "AUC";
@@ -38,8 +39,8 @@ public abstract class AMLPlan4ClassificationCLIModule implements IMLPlanCLIModul
 
 	private static final List<String> BINARY_ONLY_MEASURES = Arrays.asList(L_AUC, L_F1, L_PRECISION, L_RECALL);
 
-	protected AMLPlan4ClassificationCLIModule() {
-		// TODO Auto-generated constructor stub
+	protected AMLPlan4ClassificationCLIModule(final List<String> subModules, final String defaultModule) {
+		super(subModules, defaultModule, Arrays.asList(L_AUC, L_F1, L_PRECISION, L_RECALL, L_ERRORRATE, L_LOGLOSS), L_ERRORRATE);
 	}
 
 	protected void configureLoss(final CommandLine cl, final ICategoricalAttribute labelAtt, final AMLPlanBuilder builder) {
@@ -51,33 +52,32 @@ public abstract class AMLPlan4ClassificationCLIModule implements IMLPlanCLIModul
 			}
 		}
 
-		if (cl.hasOption(MLPlanCLI.O_LOSS)) {
-			String performanceMeasure = cl.getOptionValue(MLPlanCLI.O_LOSS, L_ERRORRATE);
-			if (BINARY_ONLY_MEASURES.contains(performanceMeasure) && labelAtt.getLabels().size() > 2) {
-				throw new UnsupportedModuleConfigurationException("Cannot use binary performance measure for non-binary classification dataset.");
-			}
-			switch (performanceMeasure) {
-			case "ERRORRATE":
-				builder.withPerformanceMeasure(EClassificationPerformanceMeasure.ERRORRATE);
-				break;
-			case "LOGLOSS":
-				builder.withPerformanceMeasure(new AveragedInstanceLoss(new LogLoss()));
-				break;
-			case "AUC":
-				builder.withPerformanceMeasure(new AreaUnderROCCurve(positiveClassIndex));
-				break;
-			case "F1":
-				builder.withPerformanceMeasure(new F1Measure(positiveClassIndex));
-				break;
-			case "PRECISION":
-				builder.withPerformanceMeasure(new Precision(positiveClassIndex));
-				break;
-			case "RECALL":
-				builder.withPerformanceMeasure(new Recall(positiveClassIndex));
-				break;
-			default:
-				throw new UnsupportedModuleConfigurationException("Unsupported measure " + performanceMeasure);
-			}
+		String performanceMeasure = cl.getOptionValue(MLPlanCLI.O_LOSS, L_ERRORRATE);
+		if (BINARY_ONLY_MEASURES.contains(performanceMeasure) && labelAtt.getLabels().size() > 2) {
+			throw new UnsupportedModuleConfigurationException("Cannot use binary performance measure for non-binary classification dataset.");
+		}
+
+		switch (performanceMeasure) {
+		case L_ERRORRATE:
+			builder.withPerformanceMeasure(EClassificationPerformanceMeasure.ERRORRATE);
+			break;
+		case L_LOGLOSS:
+			builder.withPerformanceMeasure(new AveragedInstanceLoss(new LogLoss()));
+			break;
+		case L_AUC:
+			builder.withPerformanceMeasure(new AreaUnderROCCurve(positiveClassIndex));
+			break;
+		case L_F1:
+			builder.withPerformanceMeasure(new F1Measure(positiveClassIndex));
+			break;
+		case L_PRECISION:
+			builder.withPerformanceMeasure(new Precision(positiveClassIndex));
+			break;
+		case L_RECALL:
+			builder.withPerformanceMeasure(new Recall(positiveClassIndex));
+			break;
+		default:
+			throw new UnsupportedModuleConfigurationException("Unsupported measure " + performanceMeasure);
 		}
 	}
 

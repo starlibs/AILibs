@@ -1,10 +1,7 @@
 package ai.libs.mlplan.cli.module.slc;
 
-import static ai.libs.mlplan.cli.MLPlanCLI.getDefault;
-
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
@@ -16,8 +13,11 @@ import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 
 public class MLPlan4WekaClassificationCLIModule extends AMLPlan4ClassificationCLIModule {
 
+	private static final String M_WEKA = "weka";
+	private static final String M_WEKA_TINY = "weka-tiny";
+
 	public MLPlan4WekaClassificationCLIModule() {
-		super();
+		super(Arrays.asList(M_WEKA, M_WEKA_TINY), M_WEKA);
 	}
 
 	@Override
@@ -27,11 +27,11 @@ public class MLPlan4WekaClassificationCLIModule extends AMLPlan4ClassificationCL
 
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 
-		switch (cl.getOptionValue(MLPlanCLI.O_MODULE, getDefault(MLPlanCLI.O_MODULE))) {
-		case "weka":
+		switch (cl.getOptionValue(MLPlanCLI.O_MODULE, this.getDefaultSettingOptionValue())) {
+		case M_WEKA:
 			builder = MLPlanWekaBuilder.forClassification();
 			break;
-		case "weka-tiny":
+		case M_WEKA_TINY:
 			builder = MLPlanWekaBuilder.forClassificationWithTinySearchSpace();
 			break;
 		default:
@@ -42,11 +42,6 @@ public class MLPlan4WekaClassificationCLIModule extends AMLPlan4ClassificationCL
 		this.configureLoss(cl, labelAtt, builder);
 
 		return builder;
-	}
-
-	@Override
-	public List<String> getSettingOptionValues() {
-		return Arrays.asList("weka", "weka-tiny");
 	}
 
 }

@@ -2,7 +2,6 @@ package ai.libs.mlplan.cli.module.slc;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
@@ -17,10 +16,9 @@ public class MLPlan4ScikitLearnClassificationCLIModule extends AMLPlan4Classific
 
 	private static final String M_SKLEARN = "sklearn";
 	private static final String M_ULSKLEARN = "sklearn-unlimited";
-	private static final List<String> MODULE_OPTION_VALUES = Arrays.asList(M_SKLEARN, M_ULSKLEARN);
 
 	public MLPlan4ScikitLearnClassificationCLIModule() {
-		super();
+		super(Arrays.asList(M_SKLEARN, M_ULSKLEARN), M_SKLEARN);
 	}
 
 	@Override
@@ -29,7 +27,7 @@ public class MLPlan4ScikitLearnClassificationCLIModule extends AMLPlan4Classific
 
 		// get the respective builder
 		MLPlanScikitLearnBuilder builder;
-		switch (cl.getOptionValue(MLPlanCLI.O_MODULE, "sklearn")) {
+		switch (cl.getOptionValue(MLPlanCLI.O_MODULE, this.getDefaultSettingOptionValue())) {
 		case M_SKLEARN:
 			builder = MLPlanScikitLearnBuilder.forClassification();
 			break;
@@ -44,11 +42,6 @@ public class MLPlan4ScikitLearnClassificationCLIModule extends AMLPlan4Classific
 		this.configureLoss(cl, labelAtt, builder);
 
 		return builder;
-	}
-
-	@Override
-	public List<String> getSettingOptionValues() {
-		return MODULE_OPTION_VALUES;
 	}
 
 }
