@@ -10,6 +10,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
+import org.api4.java.ai.ml.regression.evaluation.IRegressionPrediction;
 import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,7 @@ public class MLPlanScikitLearnRulExample {
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedRegressor, splits.get(1));
 			List<Double> expected = (List<Double>) report.getPredictionDiffList().getGroundTruthAsList();
-			List<Double> predicted = (List<Double>) report.getPredictionDiffList().getPredictionsAsList();
+			List<IRegressionPrediction> predicted = (List<IRegressionPrediction>) report.getPredictionDiffList().getPredictionsAsList();
 			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}", ERulPerformanceMeasure.ASYMMETRIC_LOSS.loss(expected, predicted), mlplan.getInternalValidationErrorOfSelectedClassifier());
 		} catch (NoSuchElementException e) {
 			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
