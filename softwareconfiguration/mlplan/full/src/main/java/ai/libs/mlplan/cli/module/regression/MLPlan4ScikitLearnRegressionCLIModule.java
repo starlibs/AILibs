@@ -12,12 +12,12 @@ import ai.libs.mlplan.cli.MLPlanCLI;
 import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
 import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
 
-public class MLPlan4SKLearnRegressionCLIModule extends AMLPlan4RegressionCLIModule implements IMLPlanCLIModule {
+public class MLPlan4ScikitLearnRegressionCLIModule extends AMLPlan4RegressionCLIModule implements IMLPlanCLIModule {
 
 	public static final String M_RUL = "sklearn-rul";
 
-	public MLPlan4SKLearnRegressionCLIModule() {
-		super(Arrays.asList(M_RUL), M_RUL);
+	public MLPlan4ScikitLearnRegressionCLIModule() {
+		super(Arrays.asList(M_RUL), M_RUL, AMLPlan4RegressionCLIModule.L_AL);
 	}
 
 	@Override

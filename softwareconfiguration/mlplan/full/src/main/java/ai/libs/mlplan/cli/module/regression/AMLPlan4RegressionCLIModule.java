@@ -17,7 +17,11 @@ public abstract class AMLPlan4RegressionCLIModule extends AMLPlanCLIModule {
 	public static final String L_RMSE = "ROOT_MEAN_SQUARED_ERROR";
 
 	public AMLPlan4RegressionCLIModule(final List<String> subModules, final String defaultModule) {
-		super(subModules, defaultModule, Arrays.asList(L_AL, L_MAPE, L_MSE, L_RMSE), L_AL);
+		this(subModules, defaultModule, L_RMSE);
+	}
+
+	public AMLPlan4RegressionCLIModule(final List<String> subModules, final String defaultModule, final String defaultMeasure) {
+		super(subModules, defaultModule, Arrays.asList(L_AL, L_MAPE, L_MSE, L_RMSE), defaultMeasure);
 	}
 
 	protected void configureLoss(final CommandLine cl, final AMLPlanBuilder builder) {

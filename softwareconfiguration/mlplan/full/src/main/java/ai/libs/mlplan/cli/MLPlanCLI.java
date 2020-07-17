@@ -37,6 +37,9 @@ import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
+import ai.libs.mlplan.cli.module.mlc.MLPlan4MekaMultiLabelCLIModule;
+import ai.libs.mlplan.cli.module.regression.MLPlan4ScikitLearnRegressionCLIModule;
+import ai.libs.mlplan.cli.module.regression.MLPlan4WEKARegressionCLIModule;
 import ai.libs.mlplan.cli.module.slc.MLPlan4ScikitLearnClassificationCLIModule;
 import ai.libs.mlplan.cli.module.slc.MLPlan4WekaClassificationCLIModule;
 import ai.libs.mlplan.cli.report.OpenMLAutoMLBenchmarkReport;
@@ -72,7 +75,8 @@ public class MLPlanCLI {
 
 	/** OPTIONAL PARAMETERS' DEFAULT VALUES */
 	// Communication options standard values
-	private static final List<IMLPlanCLIModule> MODULES_TO_REGISTER = Arrays.asList(new MLPlan4WekaClassificationCLIModule(), new MLPlan4ScikitLearnClassificationCLIModule());
+	private static final List<IMLPlanCLIModule> MODULES_TO_REGISTER = Arrays.asList(new MLPlan4WekaClassificationCLIModule(), new MLPlan4ScikitLearnClassificationCLIModule(), new MLPlan4WEKARegressionCLIModule(),
+			new MLPlan4ScikitLearnRegressionCLIModule(), new MLPlan4MekaMultiLabelCLIModule());
 	private static Map<String, IMLPlanCLIModule> moduleRegistry = null;
 	private static Map<String, String> defaults = new HashMap<>();
 
@@ -134,14 +138,14 @@ public class MLPlanCLI {
 			sb.append("(Default: ").append(option.get("default").asText()).append(")");
 		}
 
-		if (option.get("shortOpt").equals(O_LOSS)) {
+		if (option.get("shortOpt").asText().equals(O_LOSS)) {
 			sb.append("\n");
 			for (Entry<String, IMLPlanCLIModule> entry : getModuleRegistry().entrySet()) {
 				sb.append(entry.getKey()).append(": ").append(entry.getValue().getPerformanceMeasures().stream().collect(Collectors.joining(", "))).append("\n");
 			}
 		}
 
-		if (option.get("shortOpt").equals(O_MODULE)) {
+		if (option.get("shortOpt").asText().equals(O_MODULE)) {
 			sb.append("\n");
 			for (Entry<String, IMLPlanCLIModule> entry : getModuleRegistry().entrySet()) {
 				sb.append(entry.getKey()).append(": ").append(entry.getValue().getPerformanceMeasures().stream().collect(Collectors.joining(", "))).append("\n");
@@ -177,7 +181,6 @@ public class MLPlanCLI {
 		final HelpFormatter formatter = new HelpFormatter();
 		final String syntax = "mlplan [options]";
 		formatter.printHelp(600, syntax, "ML-Plan CLI v0.0.1-alpha\n================================\n", options, "===============================\nVisit us at: https://mlplan.org");
-		System.out.println("Help printed");
 	}
 
 	public static String getDefault(final String key) {
@@ -268,6 +271,7 @@ public class MLPlanCLI {
 	}
 
 	public static void main(final String[] args) throws Exception {
+		System.out.println("juhu: " + Arrays.toString(args));
 		logger.info("Called ML-Plan CLI with the following params: {}", Arrays.toString(args));
 		final Options options = generateOptions();
 		if (args.length == 0) {
