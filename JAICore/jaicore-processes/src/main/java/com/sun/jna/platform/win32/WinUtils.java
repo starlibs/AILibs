@@ -10,7 +10,8 @@ public class WinUtils {
 		// prevent instantiation of this class
 	}
 
-	public static Long getWindowsProcessId(final Process process) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public static Long getWindowsProcessId(final Process process) throws NoSuchFieldException, IllegalAccessException {
+
 		/* determine the pid on windows plattforms */
 		Field f = process.getClass().getDeclaredField("handle");
 		f.setAccessible(true);

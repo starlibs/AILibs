@@ -15,6 +15,7 @@ import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.awaitility.Awaitility;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +100,8 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 		final Random random = new Random(0);
 		RefinementConfiguredSoftwareConfigurationProblem<Double> timeSimulatingProblem = new RefinementConfiguredSoftwareConfigurationProblem<>(problem, ci -> {
 			int sleepTime = runtimes.get(ci.getComponent().getName());
-			Thread.sleep(sleepTime * 1000);
+			long start = System.currentTimeMillis();
+			Awaitility.await().until(() -> System.currentTimeMillis() >= start + sleepTime);
 			double score = random.nextDouble();
 			return score;
 		});
@@ -134,7 +136,8 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 		final Random random = new Random(0);
 		RefinementConfiguredSoftwareConfigurationProblem<Double> timeSimulatingProblem = new RefinementConfiguredSoftwareConfigurationProblem<>(problem, ci -> {
 			int sleepTime = runtimes.get(ci.getComponent().getName());
-			Thread.sleep(sleepTime);
+			long start = System.currentTimeMillis();
+			Awaitility.await().until(() -> System.currentTimeMillis() >= start + sleepTime);
 			double score = random.nextInt(3) + 1.0;
 			return score;
 		});
