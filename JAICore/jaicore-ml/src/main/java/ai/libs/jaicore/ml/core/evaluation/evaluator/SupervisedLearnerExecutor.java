@@ -2,7 +2,6 @@ package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
 import java.util.List;
 
-import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
@@ -71,18 +70,9 @@ public class SupervisedLearnerExecutor implements ISupervisedLearnerExecutor, IL
 		long endTestTime = System.currentTimeMillis();
 
 		/* create difference table */
-		int numTestInstances = test.size();
 		TypelessPredictionDiff diff = new TypelessPredictionDiff();
-		for (int j = 0; j < numTestInstances; j++) {
-			Object prediction;
-			if (predictions.get(j) instanceof IMultiLabelClassification) {
-				prediction = predictions.get(j);
-			} else {
-				prediction = predictions.get(j).getPrediction();
-			}
-			Object groundTruth = test.get(j).getLabel();
-
-			diff.addPair(groundTruth, prediction);
+		for (int i = 0; i < predictions.size(); i++) {
+			diff.addPair(test.get(i).getLabel(), predictions.get(i));
 		}
 		return new LearnerRunReport(train, test, trainingStartTime, trainingEndTime, start, endTestTime, diff);
 	}

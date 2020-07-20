@@ -1,5 +1,7 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Random;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -24,5 +26,12 @@ public class LocalCaseControlSamplingTester extends GeneralSamplingTester<Object
 			return factory.getAlgorithm(sampleSize, dataset, new Random(RANDOM_SEED));
 		}
 		return null;
+	}
+
+	@Override
+	public void testSampleSizeLargeProblem() {
+
+		/* cannot be applied to large data */
+		assertTrue(true);
 	}
 }

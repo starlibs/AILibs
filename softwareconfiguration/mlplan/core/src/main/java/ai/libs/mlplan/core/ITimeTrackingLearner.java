@@ -10,6 +10,8 @@ import ai.libs.jaicore.components.model.ComponentInstance;
 
 public interface ITimeTrackingLearner extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 
+	public ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getLearner();
+
 	public List<Long> getFitTimes();
 
 	public List<Long> getBatchPredictionTimesInMS();

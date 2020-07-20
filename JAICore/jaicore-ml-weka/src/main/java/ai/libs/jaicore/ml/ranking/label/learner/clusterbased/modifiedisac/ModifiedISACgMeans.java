@@ -137,10 +137,6 @@ public class ModifiedISACgMeans extends GMeans<DoublePoint> {
 		return this.gmeansCluster;
 	}
 
-	public List<Cluster> getGmeansCluster() {
-		return this.gmeansCluster;
-	}
-
 	public List<double[]> getIntermediateCenter() {
 		return this.intermediateCenter;
 	}

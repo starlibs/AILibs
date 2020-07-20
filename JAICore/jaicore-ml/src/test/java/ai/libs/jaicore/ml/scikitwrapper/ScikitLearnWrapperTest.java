@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassificationPredictionBatch;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -19,6 +20,7 @@ import org.junit.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
+import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
 
@@ -43,9 +45,10 @@ public class ScikitLearnWrapperTest {
 
 	@Test
 	public void fitRegression() throws Exception {
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("LinearRegression()", "from sklearn.linear_model import LinearRegression", EBasicProblemType.CLASSIFICATION);
+		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("LinearRegression()", "from sklearn.linear_model import LinearRegression",
+				EScikitLearnProblemType.CLASSIFICATION);
 		ILabeledDataset<ILabeledInstance> dataset = this.loadARFF(REGRESSION_ARFF);
-		slw.setProblemType(EBasicProblemType.CLASSIFICATION);
+		slw.setProblemType(EScikitLearnProblemType.CLASSIFICATION);
 		slw.fit(dataset);
 		assertNotNull(MSG_MODELPATH_NOT_NULL, slw.getModelPath());
 		assertTrue(slw.getModelPath().exists());
@@ -55,7 +58,8 @@ public class ScikitLearnWrapperTest {
 	public void fitAndPredict() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.ensemble");
 		String constructInstruction = "sklearn.ensemble.RandomForestClassifier(n_estimators=100)";
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>(constructInstruction, ScikitLearnWrapper.getImportString(imports), false, EBasicProblemType.CLASSIFICATION);
+		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>(constructInstruction, ScikitLearnWrapper.getImportString(imports), false,
+				EScikitLearnProblemType.CLASSIFICATION);
 		ILabeledDataset<ILabeledInstance> dataset = this.loadARFF(CLASSIFICATION_ARFF);
 		RandomHoldoutSplitter<ILabeledDataset<ILabeledInstance>> splitter = new RandomHoldoutSplitter<>(new Random(), .7);
 		IDatasetSplitSet<ILabeledDataset<ILabeledInstance>> set = splitter.nextSplitSet(dataset);
@@ -72,9 +76,9 @@ public class ScikitLearnWrapperTest {
 	@Test
 	public void fitRegressionMultitarget() throws Exception {
 		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor(activation='logistic')", "from sklearn.neural_network import MLPRegressor",
-				EBasicProblemType.REGRESSION);
+				EScikitLearnProblemType.REGRESSION);
 		ILabeledDataset<ILabeledInstance> dataset = this.loadARFF(REGRESSION_ARFF);
-		slw.setProblemType(EBasicProblemType.REGRESSION);
+		slw.setProblemType(EScikitLearnProblemType.REGRESSION);
 		int s = dataset.getNumAttributes();
 		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.fit(dataset);
@@ -84,10 +88,10 @@ public class ScikitLearnWrapperTest {
 
 	@Test
 	public void trainAndTestClassifierRegressionMultitarget() throws Exception {
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EBasicProblemType.CLASSIFICATION);
+		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EScikitLearnProblemType.CLASSIFICATION);
 		ILabeledDataset<ILabeledInstance> datasetTrain = this.loadARFF(BAYESNET_TRAIN_ARFF);
 		ILabeledDataset<ILabeledInstance> datasetTest = datasetTrain;
-		slw.setProblemType(EBasicProblemType.CLASSIFICATION);
+		slw.setProblemType(EScikitLearnProblemType.CLASSIFICATION);
 		int s = datasetTrain.getNumAttributes();
 		int[] targetColumns = { s - 1, s - 2, s - 3 };
 		slw.setTargets(targetColumns);
@@ -98,10 +102,10 @@ public class ScikitLearnWrapperTest {
 
 	@Test
 	public void testClassifierRegression() throws Exception {
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EBasicProblemType.CLASSIFICATION);
+		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EScikitLearnProblemType.CLASSIFICATION);
 		ILabeledDataset<ILabeledInstance> datasetTest = this.loadARFF(BAYESNET_TRAIN_ARFF);
 		slw.setModelPath(new File(MLP_REGRESSOR_DUMP).getAbsoluteFile());
-		slw.setProblemType(EBasicProblemType.CLASSIFICATION);
+		slw.setProblemType(EScikitLearnProblemType.CLASSIFICATION);
 		ISingleLabelClassificationPredictionBatch result = slw.predict(datasetTest);
 		assertEquals("Unequal length of predictions and number of test ILabeledDataset<ILabeledInstance>", result.getNumPredictions(), datasetTest.size());
 	}
@@ -110,7 +114,7 @@ public class ScikitLearnWrapperTest {
 	public void trainClassifierCategorical() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.pipeline", "sklearn.decomposition", "sklearn.ensemble");
 		String constructInstruction = "sklearn.pipeline.make_pipeline(sklearn.pipeline.make_union(sklearn.decomposition.PCA(),sklearn.decomposition.FastICA()),sklearn.ensemble.RandomForestClassifier(n_estimators=100))";
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>(constructInstruction, ScikitLearnWrapper.getImportString(imports), EBasicProblemType.CLASSIFICATION);
+		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>(constructInstruction, ScikitLearnWrapper.getImportString(imports), EScikitLearnProblemType.CLASSIFICATION);
 		ILabeledDataset<ILabeledInstance> dataset = this.loadARFF(CLASSIFICATION_ARFF);
 		slw.fit(dataset);
 		System.out.println(slw.getModelPath());
@@ -122,7 +126,7 @@ public class ScikitLearnWrapperTest {
 	public void trainAndTestClassifierCategorical() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.pipeline", "sklearn.decomposition", "sklearn.ensemble");
 		String constructInstruction = "sklearn.pipeline.make_pipeline(sklearn.pipeline.make_union(sklearn.decomposition.PCA(),sklearn.decomposition.FastICA()),sklearn.ensemble.RandomForestClassifier(n_estimators=100))";
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>(constructInstruction, ScikitLearnWrapper.getImportString(imports), EBasicProblemType.CLASSIFICATION);
+		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>(constructInstruction, ScikitLearnWrapper.getImportString(imports), EScikitLearnProblemType.CLASSIFICATION);
 		ILabeledDataset<ILabeledInstance> datasetTrain = this.loadARFF(CLASSIFICATION_ARFF);
 		ILabeledDataset<ILabeledInstance> datasetTest = (ILabeledDataset<ILabeledInstance>) datasetTrain.createCopy();
 		slw.fit(datasetTrain);
@@ -134,7 +138,7 @@ public class ScikitLearnWrapperTest {
 	public void testClassifierCategorical() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.pipeline", "sklearn.decomposition", "sklearn.ensemble");
 		String constructInstruction = "sklearn.pipeline.make_pipeline(sklearn.pipeline.make_union(sklearn.decomposition.PCA(),sklearn.decomposition.FastICA()),sklearn.ensemble.RandomForestClassifier(n_estimators=100))";
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>(constructInstruction, ScikitLearnWrapper.getImportString(imports), EBasicProblemType.CLASSIFICATION);
+		ScikitLearnWrapper<ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>(constructInstruction, ScikitLearnWrapper.getImportString(imports), EScikitLearnProblemType.CLASSIFICATION);
 		ILabeledDataset<ILabeledInstance> datasetTest = this.loadARFF(CLASSIFICATION_ARFF);
 		slw.setModelPath(new File(CLASSIFIER_DUMP).getAbsoluteFile());
 		ISingleLabelClassificationPredictionBatch result = slw.predict(datasetTest);
@@ -143,10 +147,10 @@ public class ScikitLearnWrapperTest {
 
 	@Test
 	public void getRawOutput() throws Exception {
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EBasicProblemType.CLASSIFICATION);
+		ScikitLearnWrapper<ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EScikitLearnProblemType.CLASSIFICATION);
 		ILabeledDataset<ILabeledInstance> datasetTrain = this.loadARFF(BAYESNET_TRAIN_ARFF);
 		ILabeledDataset<ILabeledInstance> datasetTest = this.loadARFF(BAYESNET_TRAIN_ARFF);
-		slw.setProblemType(EBasicProblemType.REGRESSION);
+		slw.setProblemType(EScikitLearnProblemType.REGRESSION);
 		int s = datasetTrain.getNumAttributes();
 		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.fit(datasetTrain);
@@ -159,9 +163,9 @@ public class ScikitLearnWrapperTest {
 	public void loadOwnClassifierFromFileWithNamespace() throws Exception {
 		File importfolder = new File(IMPORT_FOLDER);
 		String importStatement = ScikitLearnWrapper.createImportStatementFromImportFolder(importfolder, true);
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("test_module_1.My_MLPRegressor()", importStatement, EBasicProblemType.CLASSIFICATION);
+		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("test_module_1.My_MLPRegressor()", importStatement, EScikitLearnProblemType.CLASSIFICATION);
 		ILabeledDataset<ILabeledInstance> dataset = this.loadARFF(REGRESSION_ARFF);
-		slw.setProblemType(EBasicProblemType.REGRESSION);
+		slw.setProblemType(EScikitLearnProblemType.REGRESSION);
 		int s = dataset.getNumAttributes();
 		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.fit(dataset);
@@ -173,9 +177,9 @@ public class ScikitLearnWrapperTest {
 	public void loadOwnClassifierFromFileWithoutNamespace() throws Exception {
 		File importfolder = new File(IMPORT_FOLDER);
 		String importStatement = ScikitLearnWrapper.createImportStatementFromImportFolder(importfolder, false);
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("My_MLPRegressor()", importStatement, EBasicProblemType.CLASSIFICATION);
+		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("My_MLPRegressor()", importStatement, EScikitLearnProblemType.CLASSIFICATION);
 		ILabeledDataset<ILabeledInstance> dataset = this.loadARFF(OWN_CLASSIFIER_DUMP);
-		slw.setProblemType(EBasicProblemType.REGRESSION);
+		slw.setProblemType(EScikitLearnProblemType.REGRESSION);
 		int s = dataset.getNumAttributes();
 		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.fit(dataset);
@@ -187,7 +191,7 @@ public class ScikitLearnWrapperTest {
 	public void invalidConstructorNoConstructionCall() throws IOException {
 		boolean errorTriggeredFlag = false;
 		try {
-			new ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>(null, "", EBasicProblemType.CLASSIFICATION);
+			new ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>(null, "", EScikitLearnProblemType.CLASSIFICATION);
 		} catch (AssertionError e) {
 			errorTriggeredFlag = true;
 		}
@@ -198,7 +202,7 @@ public class ScikitLearnWrapperTest {
 	public void invalidConstructorEmptyConstructionCall() throws IOException {
 		boolean errorTriggeredFlag = false;
 		try {
-			new ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>("", "", EBasicProblemType.CLASSIFICATION);
+			new ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>("", "", EScikitLearnProblemType.CLASSIFICATION);
 		} catch (AssertionError e) {
 			errorTriggeredFlag = true;
 		}
@@ -207,5 +211,9 @@ public class ScikitLearnWrapperTest {
 
 	private ILabeledDataset<ILabeledInstance> loadARFF(final String arffPath) throws IOException, DatasetDeserializationFailedException, InterruptedException {
 		return ArffDatasetAdapter.readDataset(new File(arffPath));
+	}
+
+	private void testFitPredict(final ILabeledDataset dataset) {
+
 	}
 }

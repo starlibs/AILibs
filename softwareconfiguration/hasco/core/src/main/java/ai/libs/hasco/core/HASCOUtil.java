@@ -192,9 +192,10 @@ public class HASCOUtil {
 			case LITERAL_RESOLVES: // field 0 and 1 (parent object name and interface name) are ignored here
 				String componentName = params[2];
 				String objectName = params[3];
-
 				Optional<Component> component = components.stream().filter(c -> c.getName().equals(componentName)).findAny();
-				assert component.isPresent() : "Could not find component with name " + componentName;
+				if (!component.isPresent()) {
+					throw new IllegalStateException("Error when treating literal " + l + ". Could not find component with name \"" + componentName + "\". List of known components: " + components.stream().map(c -> "\n\t" + c.getName()).collect(Collectors.joining()));
+				}
 				ComponentInstance object = new ComponentInstance(component.get(), new HashMap<>(), new HashMap<>());
 				objectMap.put(objectName, object);
 				break;

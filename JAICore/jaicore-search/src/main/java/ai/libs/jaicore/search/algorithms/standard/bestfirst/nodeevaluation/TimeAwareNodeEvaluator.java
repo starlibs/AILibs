@@ -69,7 +69,7 @@ public abstract class TimeAwareNodeEvaluator<T, A, V extends Comparable<V>> impl
 			this.logger.warn("Computation of f-value for {} failed due to exception {} with message {}", path, e.getClass().getName(), e.getMessage());
 			return this.fallbackNodeEvaluator.evaluate(path);
 		} catch (InterruptedException e) {
-			this.logger.warn("Got interrupted during node evaluation. Throwing an InterruptedException");
+			this.logger.info("Got interrupted during node evaluation. Throwing an InterruptedException");
 			throw e;
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof PathEvaluationException) {

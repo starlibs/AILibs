@@ -1,10 +1,14 @@
 package ai.libs.jaicore.ml.core.filter;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.common.reconstruction.IReconstructible;
 
 import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
@@ -36,24 +40,21 @@ public class SplitterUtil {
 		return getLabelStratifiedTrainTestSplit(dataset, random.nextLong(), relativeTrainSize);
 	}
 
-	public static ILabeledDataset<?> getTrainFoldOfLabelStratifiedTrainTestSplit(final ILabeledDataset<?> dataset, final Random random, final double relativeTrainSize) throws SplitFailedException, InterruptedException{
+	public static ILabeledDataset<?> getTrainFoldOfLabelStratifiedTrainTestSplit(final ILabeledDataset<?> dataset, final Random random, final double relativeTrainSize) throws SplitFailedException, InterruptedException {
 		return getLabelStratifiedTrainTestSplit(dataset, random, relativeTrainSize).get(0);
 	}
 
-	public static ILabeledDataset<?> getTrainFoldOfLabelStratifiedTrainTestSplit(final ILabeledDataset<?> dataset, final long seed, final double relativeTrainSize) throws SplitFailedException, InterruptedException{
+	public static ILabeledDataset<?> getTrainFoldOfLabelStratifiedTrainTestSplit(final ILabeledDataset<?> dataset, final long seed, final double relativeTrainSize) throws SplitFailedException, InterruptedException {
 		return getLabelStratifiedTrainTestSplit(dataset, seed, relativeTrainSize).get(0);
 	}
 
-	public static ILabeledDataset<?> getTestFoldOfLabelStratifiedTrainTestSplit(final ILabeledDataset<?> dataset, final Random random, final double relativeTrainSize) throws SplitFailedException, InterruptedException{
+	public static ILabeledDataset<?> getTestFoldOfLabelStratifiedTrainTestSplit(final ILabeledDataset<?> dataset, final Random random, final double relativeTrainSize) throws SplitFailedException, InterruptedException {
 		return getLabelStratifiedTrainTestSplit(dataset, random, relativeTrainSize).get(1);
 	}
 
-	public static ILabeledDataset<?> getTestFoldOfLabelStratifiedTrainTestSplit(final ILabeledDataset<?> dataset, final long seed, final double relativeTrainSize) throws SplitFailedException, InterruptedException{
+	public static ILabeledDataset<?> getTestFoldOfLabelStratifiedTrainTestSplit(final ILabeledDataset<?> dataset, final long seed, final double relativeTrainSize) throws SplitFailedException, InterruptedException {
 		return getLabelStratifiedTrainTestSplit(dataset, seed, relativeTrainSize).get(1);
 	}
-
-
-
 
 	public static List<ILabeledDataset<?>> getSimpleTrainTestSplit(final ILabeledDataset<?> dataset, final long seed, final double relativeTrainSize) throws SplitFailedException, InterruptedException {
 		boolean isReproducible = dataset instanceof IReconstructible;
@@ -62,9 +63,9 @@ public class SplitterUtil {
 			return folds;
 		}
 		try {
-			IReconstructible rDataset = (IReconstructible)dataset;
-			IReconstructible trainFold = ((IReconstructible)folds.get(0));
-			IReconstructible testFold = ((IReconstructible)folds.get(1));
+			IReconstructible rDataset = (IReconstructible) dataset;
+			IReconstructible trainFold = ((IReconstructible) folds.get(0));
+			IReconstructible testFold = ((IReconstructible) folds.get(1));
 			rDataset.getConstructionPlan().getInstructions().forEach(i -> {
 				trainFold.addInstruction(i);
 				testFold.addInstruction(i);
@@ -83,19 +84,34 @@ public class SplitterUtil {
 		return new FilterBasedDatasetSplitter<>(new SimpleRandomSamplingFactory<>(), relativeTrainSize, random).split(dataset);
 	}
 
-	public static ILabeledDataset<?> getTrainFoldOfSimpleTrainTestSplit(final ILabeledDataset<?> dataset, final Random random, final double relativeTrainSize) throws SplitFailedException, InterruptedException{
+	public static ILabeledDataset<?> getTrainFoldOfSimpleTrainTestSplit(final ILabeledDataset<?> dataset, final Random random, final double relativeTrainSize) throws SplitFailedException, InterruptedException {
 		return getSimpleTrainTestSplit(dataset, random, relativeTrainSize).get(0);
 	}
 
-	public static ILabeledDataset<?> getTrainFoldOfSimpleTrainTestSplit(final ILabeledDataset<?> dataset, final long seed, final double relativeTrainSize) throws SplitFailedException, InterruptedException{
+	public static ILabeledDataset<?> getTrainFoldOfSimpleTrainTestSplit(final ILabeledDataset<?> dataset, final long seed, final double relativeTrainSize) throws SplitFailedException, InterruptedException {
 		return getSimpleTrainTestSplit(dataset, seed, relativeTrainSize).get(0);
 	}
 
-	public static ILabeledDataset<?> getTestFoldOfSimpleTrainTestSplit(final ILabeledDataset<?> dataset, final Random random, final double relativeTrainSize) throws SplitFailedException, InterruptedException{
+	public static ILabeledDataset<?> getTestFoldOfSimpleTrainTestSplit(final ILabeledDataset<?> dataset, final Random random, final double relativeTrainSize) throws SplitFailedException, InterruptedException {
 		return getSimpleTrainTestSplit(dataset, random, relativeTrainSize).get(1);
 	}
 
-	public static ILabeledDataset<?> getTestFoldOfSimpleTrainTestSplit(final ILabeledDataset<?> dataset, final long seed, final double relativeTrainSize) throws SplitFailedException, InterruptedException{
+	public static ILabeledDataset<?> getTestFoldOfSimpleTrainTestSplit(final ILabeledDataset<?> dataset, final long seed, final double relativeTrainSize) throws SplitFailedException, InterruptedException {
 		return getSimpleTrainTestSplit(dataset, seed, relativeTrainSize).get(1);
+	}
+
+	public static List<ILabeledDataset<ILabeledInstance>> getRealizationOfSplitSpecification(final ILabeledDataset<? extends ILabeledInstance> dataset, final Collection<? extends Collection<Integer>> splitSpec)
+			throws DatasetCreationException, InterruptedException {
+		List<ILabeledDataset<ILabeledInstance>> split = new ArrayList<>(splitSpec.size());
+
+		for (Collection<Integer> fold : splitSpec) {
+			ILabeledDataset<ILabeledInstance> foldDataset = (ILabeledDataset<ILabeledInstance>) dataset.createEmptyCopy();
+			for (int index : fold) {
+				foldDataset.add(dataset.get(index));
+			}
+			split.add(foldDataset);
+		}
+
+		return split;
 	}
 }

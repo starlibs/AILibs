@@ -1,0 +1,104 @@
+{
+	"version": "0.1-alpha",
+	"options": [
+		{
+			"shortOpt": "h",
+			"longOpt": "help",
+			"description": "Provides an overview of available parameters and their description."
+		},
+		{
+			"shortOpt": "m",
+			"longOpt": "module",
+			"description": "The ML-Plan module to be used.",
+			"hasArg": "true",
+			"default": "weka"
+		},
+		{
+			"shortOpt": "s",
+			"longOpt": "seed",
+			"description": "The randomness seed used for the pseudo random number generator.",
+			"hasArg": "true",
+			"default": "42"
+		},
+		{
+			"shortOpt": "ncpus",
+			"longOpt": "numCPUs",
+			"description": "The number of CPU cores to be used by ML-Plan.",
+			"hasArg": "true",
+			"default": "4"
+		},
+		{
+			"shortOpt": "openMLTask",
+			"longOpt": "openMLTask",
+			"description": "The OpenML task and the fold to run ML-Plan on.",
+			"hasArg": "true",
+			"numArgs": "2"
+		},
+		{
+			"shortOpt": "t",
+			"longOpt": "timeout",
+			"description": "The timeout for the entire ML-Plan run in seconds.",
+			"hasArg": "true",
+			"default": "3600"
+		},
+		{
+			"shortOpt": "tc",
+			"longOpt": "candidateTimeout",
+			"description": "The timeout for evaluating a single candidate in seconds.",
+			"hasArg": "true",
+			"default": "300"
+		},
+		{
+			"shortOpt": "tn",
+			"longOpt": "nodeEvaluationTimeout",
+			"description": "The timeout for evaluating a node in the search tree (in seconds), i.e., the timeout for all the random completions drawn below the current node. This timeout is usually set to the candidate timeout times the number of random completions. *Note*: The default is automatically adapted if this option is not set but the candidate evaluation timeout is configured.",
+			"hasArg": "true",
+			"default": "900"
+		},
+		{
+			"shortOpt": "f",
+			"longOpt": "datasetFit",
+			"hasArg": "true",
+			"required": "false",
+			"description": "The dataset file in ARFF format used for searching an appropriate pipeline."
+		},
+		{
+			"shortOpt": "p",
+			"longOpt": "datasetPredict",
+			"hasArg": "true",
+			"description": "The dataset file in arff format used for applying the found pipeline to."
+		},
+		{
+			"shortOpt": "l",
+			"longOpt": "evaluationMeasure",
+			"hasArg": "true",
+			"description": "The loss function to be used for internally assessing a candidate's performance.\nNote that loss functions are problem specific, i.e. for single-label classification, regression or multi-label classification allow for different loss functions respectively. Score functions are automatically transformed into a loss function.\n Depending on the chosen module, the following options are available to be configured."
+		},
+		{
+			"shortOpt": "ssc",
+			"longOpt": "searchSpaceConfiguraitonFile",
+			"description": "Path to a custom search space configuration file.",
+			"hasArg": "true"
+		},
+		{
+			"shortOpt": "pci",
+			"longOpt": "positiveClassIndex",
+			"description": "The index of the class to be considered as positive (for asymmetric evaluation measures).",
+			"hasArg": "true",
+			"default": "0"
+		},
+		{
+			"shortOpt": "pcn",
+			"longOpt": "positiveClassName",
+			"description": "Path to a custom search space configuration file.",
+			"hasArg": "true"
+		},
+		{
+			"shortOpt": "ooab",
+			"longOpt": "outputOpenmlAutomlBenchmarkResult",
+			"description": "Output the result of the AutoML process according to the OpenML AutoML Benchmark suite. Enabling this option requires a dataset for predicting to be provided.",
+			"hasArg": "true"
+		}
+	
+	]
+}

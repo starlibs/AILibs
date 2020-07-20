@@ -250,8 +250,7 @@ public class ComponentUtil {
 				for (String reqIFace : candidate.getRequiredInterfaceNames()) {
 					int subSolutionsForThisInterface = getNumberOfUnparametrizedCompositions(
 							components,
-							reqIFace
-							);
+							reqIFace);
 					if (waysToResolveComponent > 0) {
 						waysToResolveComponent *= subSolutionsForThisInterface;
 					} else {

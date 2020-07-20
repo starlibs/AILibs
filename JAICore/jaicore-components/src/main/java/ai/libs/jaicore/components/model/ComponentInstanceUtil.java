@@ -52,4 +52,10 @@ public class ComponentInstanceUtil {
 		return sb.toString();
 	}
 
+	public static ComponentInstance getDefaultParametrization(final ComponentInstance ci) {
+		Map<String, ComponentInstance> defaultRequiredInterfaces = new HashMap<>();
+		ci.getSatisfactionOfRequiredInterfaces().forEach((name, ciReq) -> defaultRequiredInterfaces.put(name, getDefaultParametrization(ciReq)));
+		return new ComponentInstance(ci.getComponent(), new HashMap<>(), defaultRequiredInterfaces);
+	}
+
 }

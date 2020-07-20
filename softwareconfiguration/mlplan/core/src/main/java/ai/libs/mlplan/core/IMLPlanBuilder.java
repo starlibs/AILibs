@@ -5,6 +5,7 @@ import java.io.File;
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
 import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFDBuilder;
@@ -37,12 +38,16 @@ public interface IMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, I
 	 */
 	public ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getLearnerEvaluationFactoryForSearchPhase();
 
+	public IDeterministicPredictionPerformanceMeasure<?, ?> getMetricForSearchPhase();
+
 	/**
 	 * This is the factory that will be used to create the pipeline evaluators for evaluation during selection time
 	 * @return
 	 * @throws LearnerEvaluatorConstructionFailedException
 	 */
 	public ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getLearnerEvaluationFactoryForSelectionPhase();
+
+	public IDeterministicPredictionPerformanceMeasure<?, ?> getMetricForSelectionPhase();
 
 	public String getRequestedInterface();
 

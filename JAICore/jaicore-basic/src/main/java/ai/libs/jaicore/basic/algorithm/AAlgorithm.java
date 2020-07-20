@@ -1,8 +1,5 @@
 package ai.libs.jaicore.basic.algorithm;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -32,7 +29,7 @@ import ai.libs.jaicore.timing.TimedComputation;
 public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable {
 
 	/* Logger variables */
-	protected Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
+	private Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
 	private String loggerName;
 
 	/* Parameters of the algorithm. */
@@ -400,7 +397,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		if (this.getTimeout().milliseconds() > 0) {
 			this.deadline = System.currentTimeMillis() + this.getTimeout().milliseconds() - this.timeoutPrecautionOffset;
 			if (this.logger.isInfoEnabled()) {
-				this.logger.info("Timeout is {}. Setting deadline to timestamp {}. Remaining time: {}", this.getTimeout(), Instant.ofEpochMilli(this.deadline).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss")), this.getRemainingTimeToDeadline());
+				this.logger.info("Timeout is {}, and precaution offset is {}. Setting deadline to timestamp {}. Remaining time: {}", this.getTimeout(), this.timeoutPrecautionOffset, this.deadline, this.getRemainingTimeToDeadline());
 			}
 		} else {
 			this.deadline = System.currentTimeMillis() + 86400 * 1000 * 365;

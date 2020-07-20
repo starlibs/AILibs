@@ -10,8 +10,8 @@ import ai.libs.jaicore.ml.classification.loss.instance.AInstanceMeasure;
 public class SquaredError extends AInstanceMeasure<Double, Double> {
 
 	@Override
-	public double loss(final Double actual, final Double expected) {
-		return Math.pow(actual - expected, 2);
+	public double loss(final Double expected, final Double predicted) {
+		return Math.pow(expected - predicted, 2);
 	}
 
 }

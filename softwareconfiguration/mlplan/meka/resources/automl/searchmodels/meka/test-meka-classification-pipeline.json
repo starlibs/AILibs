@@ -1,0 +1,11 @@
+{
+    "repository": "Test Meka Classification Pipeline",
+    "components": [
+        {
+			"name": "meka.classifiers.multilabel.MajorityLabelset",
+			"providedInterface": ["MLClassifier","BasicMLClassifier"],
+			"requiredInterface": [],
+			"parameter": []
+		}
+    ]
+}

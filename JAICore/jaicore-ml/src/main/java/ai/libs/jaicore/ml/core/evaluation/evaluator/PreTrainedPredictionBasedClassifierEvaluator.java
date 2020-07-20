@@ -20,7 +20,7 @@ public class PreTrainedPredictionBasedClassifierEvaluator implements IClassifier
 	private final SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 	private final IDeterministicPredictionPerformanceMeasure<Object, Object> metric;
 
-	public PreTrainedPredictionBasedClassifierEvaluator(final ILabeledDataset<?> testData, final IDeterministicPredictionPerformanceMeasure<Object, Object> metric) {
+	public PreTrainedPredictionBasedClassifierEvaluator(final ILabeledDataset<?> testData, final IDeterministicPredictionPerformanceMeasure metric) {
 		super();
 		this.testData = testData;
 		this.metric = metric;

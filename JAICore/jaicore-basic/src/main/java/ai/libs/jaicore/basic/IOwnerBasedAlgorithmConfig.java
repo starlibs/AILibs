@@ -1,7 +1,10 @@
 package ai.libs.jaicore.basic;
 
+import java.util.concurrent.TimeUnit;
+
 import org.aeonbits.owner.Reloadable;
 import org.api4.java.algorithm.IAlgorithmConfig;
+import org.api4.java.algorithm.Timeout;
 
 /**
  * Configuration interface to defined the access properties for a database connection
@@ -47,4 +50,14 @@ public interface IOwnerBasedAlgorithmConfig extends IOwnerBasedConfig, IAlgorith
 	@Key(K_TIMEOUT)
 	@DefaultValue("-1")
 	public long timeout();
+
+
+	/**
+	 * This is just a shortcut to avoid confusions about the semantics of the defined timeout, which is always defined in milliseconds.
+	 *
+	 * @return The correct Timeout object for the specified timeout.
+	 */
+	public default Timeout getTimeout() {
+		return new Timeout(this.timeout(), TimeUnit.MILLISECONDS);
+	}
 }

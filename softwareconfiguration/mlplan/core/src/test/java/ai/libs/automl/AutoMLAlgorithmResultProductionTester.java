@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -12,20 +13,23 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.classification.IClassifierEvaluator;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
@@ -50,11 +54,12 @@ import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
  *
  */
 @RunWith(Parameterized.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 
 	// creates the test data
 	@Parameters(name = "{0}")
-	public static Collection<OpenMLProblemSet[]> data() throws DatasetDeserializationFailedException  {
+	public static Collection<OpenMLProblemSet[]> data() throws DatasetDeserializationFailedException {
 		try {
 			List<OpenMLProblemSet> problemSets = new ArrayList<>();
 			problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
@@ -93,8 +98,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 				data[i][0] = problemSets.get(i);
 			}
 			return Arrays.asList(data);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new DatasetDeserializationFailedException(e);
 		}
 	}
@@ -102,14 +106,15 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 	@Parameter(0)
 	public OpenMLProblemSet problemSet;
 
-	public abstract IAlgorithm<ILabeledDataset<?>, ? extends IClassifier> getAutoMLAlgorithm(ILabeledDataset<?> data) throws AlgorithmCreationException;
+	public abstract IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(ILabeledDataset<?> data) throws AlgorithmCreationException, IOException;
 
-	public void afterInitHook(final IAlgorithm<ILabeledDataset<?>, ? extends IClassifier> algorithm) {
+	public void afterInitHook(final IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> algorithm) {
 
 	}
 
 	@Test
-	public void testThatModelIsTrained() throws DatasetDeserializationFailedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ObjectEvaluationFailedException, SplitFailedException, AlgorithmCreationException {
+	public void testThatModelIsTrained()
+			throws DatasetDeserializationFailedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ObjectEvaluationFailedException, SplitFailedException, AlgorithmCreationException, IOException {
 		try {
 			assertTrue("There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks(), GlobalTimer.getInstance().getActiveTasks().isEmpty());
 			assertFalse("The thread should not be interrupted when calling the AutoML-tool!", Thread.currentThread().isInterrupted());
@@ -131,11 +136,12 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 
 			/* get algorithm */
 			this.logger.info("Loading the algorithm");
-			IAlgorithm<ILabeledDataset<?>, ? extends IClassifier> algorithm = this.getAutoMLAlgorithm(train); // AutoML-tools should deliver a classifier
+			IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> algorithm = this.getAutoMLAlgorithm(train); // AutoML-tools should deliver a classifier
 
 			assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 			if (algorithm instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
+				this.logger.info("Setting logger of the AutoML tool {} to \"{}\"", algorithm.getClass(), ((ILoggingCustomizable) algorithm).getLoggerName());
 			}
 
 			/* find classifier */
@@ -148,7 +154,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 					AutoMLAlgorithmResultProductionTester.this.afterInitHook(algorithm);
 				}
 			});
-			IClassifier c = algorithm.call();
+			ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> c = algorithm.call();
 			long runtime = System.currentTimeMillis() - start;
 			assertTrue("Algorithm timeout violated. Runtime was " + runtime + ", but configured timeout was " + algorithm.getTimeout(), runtime < algorithm.getTimeout().milliseconds());
 			assertFalse("The thread should not be interrupted after calling the AutoML-tool!", Thread.currentThread().isInterrupted());
@@ -163,14 +169,12 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 			assertTrue("At least 10 instances must be classified!", test.size() >= 10);
 			IClassifierEvaluator evaluator = new PreTrainedPredictionBasedClassifierEvaluator(test, EClassificationPerformanceMeasure.ERRORRATE);
 			double score = evaluator.evaluate(c);
-			Thread.sleep(5000);
+			Thread.sleep(algorithm.getTimeout().seconds() / 20);
 			assertTrue("There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks(), GlobalTimer.getInstance().getActiveTasks().isEmpty());
 			this.logger.info("Error rate of solution {} on {} is: {}", c.getClass().getName(), datasetname, score);
-		}
-		catch (AlgorithmTimeoutedException e) {
+		} catch (AlgorithmTimeoutedException e) {
 			fail("No solution was found in the given timeout. Stack trace: " + Arrays.stream(e.getStackTrace()).map(se -> "\n\t" + se.toString()).collect(Collectors.joining()));
-		}
-		finally {
+		} finally {
 			this.logger.info("Cleaning up everything ...");
 			GlobalTimer.getInstance().getActiveTasks().forEach(t -> {
 				this.logger.info("Canceling task {}", t);

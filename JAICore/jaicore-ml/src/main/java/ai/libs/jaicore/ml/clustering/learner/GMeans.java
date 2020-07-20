@@ -18,14 +18,10 @@ import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
 /**
- * Implementation of Gmeans based on Helen Beierlings implementation of
- * GMeans(https://github.com/helebeen/AILibs/blob/master/JAICore/jaicore-modifiedISAC/src/main/java/jaicore/modifiedISAC/ModifiedISACgMeans.java).<br>
- * For more Information see: "Hamerly, G., and Elkan, C. 2003. Learning the k in
- * kmeans. in proceedings of the seventeenth annual conference on neural
- * information processing systems (nips)". <br>
+ * Implementation of Gmeans based on Helen Beierlings implementation of GMeans(https://github.com/helebeen/AILibs/blob/master/JAICore/jaicore-modifiedISAC/src/main/java/jaicore/modifiedISAC/ModifiedISACgMeans.java).<br>
+ * For more Information see: "Hamerly, G., and Elkan, C. 2003. Learning the k in kmeans. in proceedings of the seventeenth annual conference on neural information processing systems (nips)". <br>
  * <br>
- * This implementation uses {@link KMeansPlusPlusClusterer} as the k-means
- * cluster algorithm.
+ * This implementation uses {@link KMeansPlusPlusClusterer} as the k-means cluster algorithm.
  *
  * @author Helen Beierling
  * @author jnowack
@@ -50,8 +46,7 @@ public class GMeans<C extends Clusterable> {
 	private RandomGenerator randomGenerator;
 
 	/**
-	 * Initializes a basic cluster for the given Point using Mannhatten distance and
-	 * seed=1
+	 * Initializes a basic cluster for the given Point using Mannhatten distance and seed=1
 	 *
 	 * @param toClusterPoints
 	 *            Points which should be clustered
@@ -61,8 +56,7 @@ public class GMeans<C extends Clusterable> {
 	}
 
 	/**
-	 * Initializes a cluster for the given Point using a given distance meassure and
-	 * a seed.
+	 * Initializes a cluster for the given Point using a given distance meassure and a seed.
 	 *
 	 * @param toClusterPoints
 	 *            P
@@ -308,7 +302,6 @@ public class GMeans<C extends Clusterable> {
 	protected double[] difference(final double[] a, final double[] b) {
 		double[] c = new double[a.length];
 		for (int i = 0; i < a.length; i++) {
-			// TODO Muss das auch normaliziert werden
 			if (!(Double.isNaN(a[i]) || Double.isNaN(b[i]))) {
 				c[i] = a[i] - b[i];
 			} else {
@@ -316,6 +309,10 @@ public class GMeans<C extends Clusterable> {
 			}
 		}
 		return c;
+	}
+
+	public List<CentroidCluster<C>> getGmeansCluster() {
+		return this.gmeansCluster;
 	}
 
 	protected List<double[]> getCentersModifiable() {
