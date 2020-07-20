@@ -224,7 +224,7 @@ public class AlgorithmVisualizationWindow implements Runnable {
 	}
 
 	private void addPluginToTabList(final IGUIPlugin plugin) {
-		Tab pluginTab = new Tab(plugin.getView().getTitle(), plugin.getView().getNode());
+		Tab pluginTab = new Tab(plugin.getTitle(), plugin.getView().getNode());
 		Platform.runLater(() -> this.pluginTabPane.getTabs().add(pluginTab));
 	}
 

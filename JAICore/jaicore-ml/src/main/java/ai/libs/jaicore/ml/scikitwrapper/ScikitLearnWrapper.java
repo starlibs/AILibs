@@ -14,6 +14,7 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
@@ -72,7 +73,7 @@ import ai.libs.python.IPythonConfig;
  * @author scheiblm
  */
 public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B>
-implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
+		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 	private static final String PYTHON_FILE_EXT = ".py";
 	private static final String MODEL_DUMP_FILE_EXT = ".pcl";
 	private static final String RESULT_FILE_EXT = ".json";
@@ -347,6 +348,10 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		 * getRawLastClassificationResults().
 		 * */
 		if (this.problemType == EScikitLearnProblemType.CLASSIFICATION) {
+			if (this.rawLastClassificationResults.get(0).size() == 1) { // classifier cannot predict any probabilities. Thus, create pseudo probability from the obtained output
+				int numClasses = ((ICategoricalAttribute) this.dataset.getLabelAttribute()).getLabels().size();
+				return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification(numClasses, x.intValue())).collect(Collectors.toList()));
+			}
 			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().map(x -> x.stream().mapToDouble(y -> y).toArray()).map(SingleLabelClassification::new).collect(Collectors.toList()));
 		} else if (this.problemType == EScikitLearnProblemType.RUL) {
 			if (L.isInfoEnabled()) {

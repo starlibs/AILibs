@@ -14,6 +14,7 @@ import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyProcesse
 public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V extends ASimpleMVCPluginView<M, C, ?>, C extends ASimpleMVCPluginController<M, V>> implements IComputedGUIPlugin, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(ASimpleMVCPlugin.class);
+	private String title;
 	private final M model;
 	private final V view;
 	private final C controller;
@@ -21,6 +22,8 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 	@SuppressWarnings("unchecked")
 	public ASimpleMVCPlugin() {
 		super();
+		this.title = this.getClass().getSimpleName();
+
 		Type[] mvcPatternClasses = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
 		M myModel;
 		V myView;
@@ -54,6 +57,11 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 		this.model.setController(myController);
 		this.model.setView(myView);
 		this.view.setController(myController);
+	}
+
+	public ASimpleMVCPlugin(final String title) {
+		this();
+		this.title = title;
 	}
 
 	@Override
@@ -103,5 +111,10 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 	public void stop() {
 		this.logger.info("Interrupting controller thread {}", this.controller.getName());
 		this.controller.interrupt();
+	}
+
+	@Override
+	public String getTitle() {
+		return this.title;
 	}
 }

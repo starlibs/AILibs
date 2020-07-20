@@ -60,4 +60,9 @@ public interface IGUIPlugin {
 	 * Stops execution of all threads in this plugin (irrevocable).
 	 **/
 	public void stop();
+
+	/**
+	 * @return The title of the plugin as to be displayed in the window.
+	 */
+	public String getTitle();
 }

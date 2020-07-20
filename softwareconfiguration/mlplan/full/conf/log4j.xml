@@ -47,7 +47,7 @@
   </appender>
   
   <logger name="mlplan">
-    <level value="debug" />
+    <level value="info" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
@@ -96,39 +96,43 @@
     <level value="warn" />
   </logger>
   
-  <logger name="mlplan.optimizingfactory.optAlgo">
+  <logger name="mlplan.optimizingfactory.optimizer">
     <level value="info" />
   </logger>
   
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco">
+  <logger name="mlplan.optimizingfactory.optimizer.hasco">
+    <level value="info" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optimizer.hasco.solutionevaluator">
+    <level value="info" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optimizer.hasco.solutionevaluator.benchmark">
     <level value="debug" />
   </logger>
   
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
+  <logger name="mlplan.optimizingfactory.optimizer.hasco.search.nodeevaluator.secondary.evaluator.fw.pe.be.benchmark.executor">
     <level value="debug" />
   </logger>
   
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
-    <level value="debug" />
+  <logger name="mlplan.optimizingfactory.optimizer.hasco.search">
+    <level value="info" />
   </logger>
   
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search">
-    <level value="debug" />
-  </logger>
-  
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search._orgraphsearch._algorithm">
+  <logger name="mlplan.optimizingfactory.optimizer.hasco.search._orgraphsearch._algorithm">
     <level value="warn" />
   </logger>
   
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
+  <logger name="mlplan.optimizingfactory.optimizer.hasco.search.nodeevaluator">
     <level value="warn" />
   </logger>
   
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.treepolicy">
+  <logger name="mlplan.optimizingfactory.optimizer.hasco.search.treepolicy">
     <level value="warn" />
   </logger>
   
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary.randomsearch">
+  <logger name="mlplan.optimizingfactory.optimizer.hasco.search.nodeevaluator.secondary.randomsearch">
     <level value="warn" />
   </logger>
   

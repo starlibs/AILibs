@@ -32,10 +32,18 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ai.libs.hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
 import ai.libs.jaicore.basic.ResourceUtil;
+import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
+import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
+import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
+import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
+import ai.libs.jaicore.search.gui.plugins.rolloutboxplots.SearchRolloutBoxplotPlugin;
+import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
+import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
 import ai.libs.mlplan.cli.module.mlc.MLPlan4MekaMultiLabelCLIModule;
 import ai.libs.mlplan.cli.module.regression.MLPlan4ScikitLearnRegressionCLIModule;
@@ -71,6 +79,7 @@ public class MLPlanCLI {
 	public static final String O_SSC = "ssc";
 	public static final String O_NUM_CPUS = "ncpus";
 	public static final String O_TIMEOUT = "t";
+	public static final String O_VISUALIZATION = "v";
 	public static final String O_CANDIDATE_TIMEOUT = "tc";
 	public static final String O_NODE_EVAL_TIMEOUT = "tn";
 	public static final String O_POS_CLASS_INDEX = "pci";
@@ -239,6 +248,17 @@ public class MLPlanCLI {
 		// build mlplan object
 		MLPlan mlplan = builder.build();
 		mlplan.setLoggerName("mlplan");
+
+		if (cl.hasOption(O_VISUALIZATION)) {
+			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan);
+			window.withMainPlugin(new GraphViewPlugin());
+			window.withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new NodeInfoGUIPlugin(new TFDNodeAsCIViewInfoGenerator(builder.getComponents())), new SearchRolloutHistogramPlugin(),
+					new SearchRolloutBoxplotPlugin());
+//			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan);
+//			window.withMainPlugin(new GraphViewPlugin());
+//			window.withPlugin(new NodeInfoGUIPlugin(new TFDNodeInfoGenerator()), new NodeInfoGUIPlugin(new TFDNodeAsCIViewInfoGenerator(builder.getComponents())),
+//					new SolutionPerformanceTimelinePlugin(new HASCOSolutionCandidateRepresenter()), new SearchRolloutBoxplotPlugin());
+		}
 
 		// call ml-plan to obtain the optimal supervised learner
 		logger.info("Build mlplan classifier");

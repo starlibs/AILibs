@@ -21,8 +21,9 @@ public enum EMLPlanScikitLearnProblemType implements IProblemType<ScikitLearnWra
 			"conf/sklearn-preferenceList.txt", "AbstractClassifier", "BasicClassifier", EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new ScikitLearnClassifierFactory(),
 			new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //
 	CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES(EScikitLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/ml-plan-ul.json", EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
-			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), "AbstractClassifier",
-			"BasicClassifier", EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, CLASSIFICATION_MULTICLASS.getLearnerFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter()), //
+			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(),
+			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getRequestedInterface(), EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getRequestedBasicProblemInterface(), EClassificationPerformanceMeasure.ERRORRATE,
+			EClassificationPerformanceMeasure.ERRORRATE, CLASSIFICATION_MULTICLASS.getLearnerFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter()), //
 	RUL(EScikitLearnProblemType.RUL, "automl/searchmodels/sklearn/sklearn-rul.json", "conf/sklearn-rul.json", null, "conf/sklearn-preferenceList.txt", "MLPipeline", "BasicRegressor", ERulPerformanceMeasure.ASYMMETRIC_LOSS,
 			ERulPerformanceMeasure.ASYMMETRIC_LOSS, new ScikitLearnRULFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter());
 
@@ -93,6 +94,10 @@ public enum EMLPlanScikitLearnProblemType implements IProblemType<ScikitLearnWra
 	@Override
 	public String getRequestedInterface() {
 		return this.requestedHascoInterface;
+	}
+
+	public String getRequestedBasicProblemInterface() {
+		return this.requestedBasicProblemInterface;
 	}
 
 	@Override

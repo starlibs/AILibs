@@ -12,8 +12,6 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 	 */
 	private static final long serialVersionUID = 3727153881173459843L;
 
-	private static final String MISSING_VALUE = "?";
-
 	private final List<String> domain;
 	private final int numCategories;
 
@@ -64,12 +62,12 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		if (!this.isValidValue(attributeValue)) {
 			throw new IllegalArgumentException("No valid attribute value.");
 		}
-		return this.domain.indexOf(this.getLabelOfAttributeValue(attributeValue)) + 1.0;
+		return this.domain.indexOf(this.getLabelOfAttributeValue(attributeValue));
 	}
 
 	@Override
 	public String decodeValue(final double encodedAttributeValue) {
-		return this.domain.get((int) encodedAttributeValue - 1);
+		return this.domain.get((int) encodedAttributeValue);
 	}
 
 	private String getLabelOfAttributeValue(final Object object) {
@@ -90,15 +88,12 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		if (this.isValidValue(object)) {
 			int cObject;
 			if (object instanceof Integer) {
-				cObject = (int)object;
-			}
-			else if (this.domain.contains(object)) {
+				cObject = (int) object;
+			} else if (this.domain.contains(object)) {
 				cObject = this.domain.indexOf(object);
-			}
-			else if (object instanceof ICategoricalAttributeValue) {
+			} else if (object instanceof ICategoricalAttributeValue) {
 				cObject = ((ICategoricalAttributeValue) object).getValue();
-			}
-			else {
+			} else {
 				throw new IllegalStateException("Object should be parseable after the test.");
 			}
 			return new IntBasedCategoricalAttributeValue(this, cObject);
@@ -131,7 +126,7 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 	@Override
 	public String serializeAttributeValue(final Object value) {
 		if (value == null) {
-			return MISSING_VALUE;
+			return null;
 		}
 		if (!(value instanceof Integer)) {
 			throw new IllegalArgumentException("Can only serialize the integer representation of a category.");
@@ -142,9 +137,6 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 	@Override
 	public Integer deserializeAttributeValue(final String string) {
 		String trimmedString = string.trim();
-		if (string.equals(MISSING_VALUE)) {
-			return null;
-		}
 		if ((string.startsWith("'") && string.endsWith("'")) || (string.startsWith("\"") && string.endsWith("\""))) {
 			trimmedString = trimmedString.substring(1, trimmedString.length() - 1);
 		}

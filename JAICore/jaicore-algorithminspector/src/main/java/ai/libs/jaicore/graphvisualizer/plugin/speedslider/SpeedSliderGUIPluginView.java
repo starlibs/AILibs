@@ -47,11 +47,6 @@ public class SpeedSliderGUIPluginView extends ASimpleMVCPluginView<SpeedSliderGU
 	}
 
 	@Override
-	public String getTitle() {
-		return "Speed Slider";
-	}
-
-	@Override
 	public void clear() {
 		/* nothing to do */
 	}

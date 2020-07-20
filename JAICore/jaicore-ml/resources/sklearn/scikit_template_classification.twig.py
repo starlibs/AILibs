@@ -297,7 +297,10 @@ def run_train_test_mode(data, testdata):
         test_features, test_targets = get_feature_target_matrices(testdata)
     else:
         test_features = testdata.input_matrix
-    prediction = classifier_instance.predict_proba(test_features)
+    if predict_proba in classifier_instance:
+        prediction = classifier_instance.predict_proba(test_features)
+    else:
+        prediction = classifier_instance.predict(test_features)
     serialize_prediction(prediction)
 
 def run_test_mode(data):

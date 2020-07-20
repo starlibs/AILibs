@@ -49,6 +49,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ArffDatasetAdapter.class);
 
+	public static final String V_MISSING_VALUE = "?";
 	public static final String K_RELATION_NAME = "relationName";
 	public static final String K_CLASS_INDEX = "classIndex";
 
@@ -236,10 +237,17 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			Object target = null;
 			int cI = 0;
 			for (int i = 0; i < lineSplit.length; i++) {
-				if (i == targetIndex) {
-					target = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
+				final Object value;
+				if (lineSplit[i].equals(V_MISSING_VALUE)) {
+					value = null;
 				} else {
-					parsedDenseInstance[cI++] = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
+					value = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
+				}
+
+				if (i == targetIndex) {
+					target = value;
+				} else {
+					parsedDenseInstance[cI++] = value;
 				}
 			}
 			return Arrays.asList(parsedDenseInstance, target);
@@ -379,6 +387,9 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	private static String serializeAttributeValue(final IAttribute att, final Object value) {
+		if (value == null) {
+			return V_MISSING_VALUE;
+		}
 		String returnValue = att.serializeAttributeValue(value);
 		if (att instanceof ICategoricalAttribute) {
 			returnValue = "'" + returnValue + "'";

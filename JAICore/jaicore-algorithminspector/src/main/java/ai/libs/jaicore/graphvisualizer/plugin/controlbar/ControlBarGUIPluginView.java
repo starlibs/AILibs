@@ -54,11 +54,6 @@ public class ControlBarGUIPluginView extends ASimpleMVCPluginView<ControlBarGUIP
 	}
 
 	@Override
-	public String getTitle() {
-		return "Control Bar";
-	}
-
-	@Override
 	public void clear() {
 		/* nothing to do */
 	}

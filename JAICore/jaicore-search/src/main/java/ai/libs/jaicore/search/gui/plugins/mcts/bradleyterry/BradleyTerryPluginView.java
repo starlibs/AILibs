@@ -81,7 +81,7 @@ public class BradleyTerryPluginView extends ASimpleMVCPluginView<BradleyTerryPlu
 		int depth = 0;
 		while (parents.containsKey(currentNode)) {
 			currentNode = parents.get(currentNode);
-			depth ++;
+			depth++;
 		}
 		sb.append(depth);
 		sb.append(")</h2>");
@@ -156,11 +156,6 @@ public class BradleyTerryPluginView extends ASimpleMVCPluginView<BradleyTerryPlu
 	@Override
 	public void clear() {
 		/* don't do anything */
-	}
-
-	@Override
-	public String getTitle() {
-		return "Search Rollout Statistics";
 	}
 
 }

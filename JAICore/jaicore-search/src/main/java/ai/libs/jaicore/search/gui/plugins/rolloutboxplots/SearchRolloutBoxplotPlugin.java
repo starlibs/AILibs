@@ -10,7 +10,11 @@ import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithm
 public class SearchRolloutBoxplotPlugin extends ASimpleMVCPlugin<SearchRolloutBoxplotPluginModel, SearchRolloutBoxplotPluginView, SearchRolloutBoxplotPluginController> {
 
 	public SearchRolloutBoxplotPlugin() {
-		super();
+		this("boxplot");
+	}
+
+	public SearchRolloutBoxplotPlugin(final String title) {
+		super(title);
 	}
 
 	@Override

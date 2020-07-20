@@ -35,6 +35,11 @@
 			"numArgs": "2"
 		},
 		{
+			"shortOpt": "v",
+			"longOpt": "visualize",
+			"description": "Enable a visualization of the search tree of ML-Plan together with a live stream of observations."
+		},
+		{
 			"shortOpt": "t",
 			"longOpt": "timeout",
 			"description": "The timeout for the entire ML-Plan run in seconds.",

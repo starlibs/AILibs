@@ -13,7 +13,7 @@ public class GraphViewPluginView extends ASimpleMVCPluginView<GraphViewPluginMod
 	private FxViewer fxViewer;
 	private Thread listenerThread;
 
-	public GraphViewPluginView(GraphViewPluginModel model) {
+	public GraphViewPluginView(final GraphViewPluginModel model) {
 		super(model, new BorderPane());
 		this.fxViewer = new FxViewer(model.getGraph(), ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
 		this.fxViewer.enableAutoLayout();
@@ -38,11 +38,6 @@ public class GraphViewPluginView extends ASimpleMVCPluginView<GraphViewPluginMod
 	@Override
 	public void update() {
 		// No need for code here as the update happens automatically via the graphstream graph
-	}
-
-	@Override
-	public String getTitle() {
-		return "Search Graph Viewer";
 	}
 
 	public void stop() {

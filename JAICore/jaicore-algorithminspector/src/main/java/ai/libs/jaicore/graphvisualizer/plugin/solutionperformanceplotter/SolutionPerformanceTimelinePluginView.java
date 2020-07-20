@@ -33,7 +33,6 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 		this.getNode().getXAxis().setLabel("Elapsed time (s)");
 
 		// creating the chart
-		this.getNode().setTitle(this.getTitle());
 		this.getNode().setAnimated(false);
 		// defining a series
 		this.performanceSeries = new Series<>();
@@ -55,11 +54,6 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 			this.performanceSeries.getData().addAll(values);
 		});
 
-	}
-
-	@Override
-	public String getTitle() {
-		return "Solution Performance Timeline";
 	}
 
 	@Override
