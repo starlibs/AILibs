@@ -3,6 +3,8 @@ package ai.libs.jaicore.experiments;
 import java.util.ArrayList;
 import java.util.List;
 
+import ai.libs.jaicore.experiments.databasehandle.AExperimenterSQLHandle;
+
 public class ExperimentUtil {
 
 	private ExperimentUtil() {
@@ -42,10 +44,18 @@ public class ExperimentUtil {
 	}
 
 	public static String getQueryToIdentifyCorruptRuns(final String tablename) {
-		return "SELECT * FROM (SELECT job, COUNT(*) as n FROM `" + tablename + "` WHERE time_started is not null and time_end is null group by job) as t where n > 1";
+		return "SELECT * FROM (SELECT " + AExperimenterSQLHandle.FIELD_EXECUTOR + ", COUNT(*) as n FROM `" + tablename + "` WHERE time_started is not null and time_end is null group by " + AExperimenterSQLHandle.FIELD_EXECUTOR + ") as t where n > 1";
 	}
 
 	public static String getQueryToListAllCorruptJobRuns(final String tablename) {
-		return "SELECT t1.* FROM `" + tablename + "` as t1 join `" + tablename + "` as t2 USING(job) WHERE t1.time_started is not null and t1.time_end is null and t2.time_started > t1.time_started and t2.time_end is null";
+		return "SELECT t1.* FROM `" + tablename + "` as t1 join `" + tablename + "` as t2 USING(" + AExperimenterSQLHandle.FIELD_EXECUTOR + ") WHERE t1.time_started is not null and t1.time_end is null and t2.time_started > t1.time_started and t2.time_end is null";
+	}
+
+	public static String getQueryToListAllRunningExecutions(final String tablename) {
+		return "SELECT * FROM `" + tablename + "` WHERE time_started is not null and time_end is null";
+	}
+
+	public static String getQueryToListAllFailedExecutions(final String tablename) {
+		return "SELECT * FROM `" + tablename + "` WHERE exception is not null";
 	}
 }

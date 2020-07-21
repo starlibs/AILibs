@@ -44,9 +44,9 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	private static final String FIELD_ID = "experiment_id";
 	private static final String FIELD_MEMORY = "memory";
 	private static final String FIELD_MEMORY_MAX = FIELD_MEMORY + "_max";
-	private static final String FIELD_HOST = "host";
-	private static final String FIELD_EXECUTOR = "executor";
-	private static final String FIELD_NUMCPUS = "cpus";
+	public static final String FIELD_HOST = "host";
+	public static final String FIELD_EXECUTOR = "executor";
+	public static final String FIELD_NUMCPUS = "cpus";
 	private static final String FIELD_TIME = "time";
 	private static final String FIELD_TIME_START = FIELD_TIME + "_started";
 	private static final String FIELD_TIME_END = FIELD_TIME + "_end";

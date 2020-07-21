@@ -35,6 +35,8 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	private final int availableMemoryInMB;
 	private final String executorInfo;
 
+	private boolean allExperimentsFinished = false;
+
 	public ExperimentRunner(final IExperimentSetConfig config, final IExperimentSetEvaluator evaluator, final IExperimentDatabaseHandle databaseHandle) throws ExperimentDBInteractionFailedException {
 		this(config, evaluator, databaseHandle, null);
 	}
@@ -77,6 +79,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			List<ExperimentDBEntry> openRandomExperiments = this.handle.getRandomOpenExperiments(maxNumberOfExperiments);
 			if (openRandomExperiments.isEmpty()) {
 				this.logger.info("No more open experiments found.");
+				this.allExperimentsFinished = true;
 				break;
 			}
 
@@ -102,7 +105,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 				} catch (ExperimentDBInteractionFailedException | ExperimentAlreadyStartedException e) {
 					this.logger.error(LoggerUtil.getExceptionInfo(e));
 				}
-			});
+			}, "Thread of experiment id " + exp.getId());
 			expThread.start();
 			expThread.join();
 			numberOfConductedExperiments++;
@@ -120,6 +123,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			Optional<ExperimentDBEntry> nextExperiment = this.handle.startNextExperiment(this.executorInfo);
 			if(!nextExperiment.isPresent()) {
 				this.logger.info("After running {}/{} experiments, no more un-started experiments were found.", numberOfConductedExperiments, maxNumberOfExperiments);
+				this.allExperimentsFinished = true;
 				break;
 			}
 
@@ -248,4 +252,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		}
 	}
 
+	public boolean mightHaveMoreExperiments() {
+		return !this.allExperimentsFinished;
+	}
 }
