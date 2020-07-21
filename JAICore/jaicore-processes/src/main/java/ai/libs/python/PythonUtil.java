@@ -8,45 +8,33 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
 
 import ai.libs.jaicore.basic.SystemRequirementsNotMetException;
 
 public class PythonUtil {
-
-	private static final IPythonConfig config = ConfigFactory.create(IPythonConfig.class);
-	private static String CMD_PYTHON = config.getPythonCommand();
-
 	private static final String CMD_PYTHON_COMMANDPARAM = "-c";
-
 	private static final String PY_IMPORT = "import ";
 
 	private final File pathToPathonExecutable;
+	private final String pythonCommand;
 
 	public PythonUtil() {
-		this(ConfigCache.getOrCreate(IPythonConfig.class));
+		this(ConfigFactory.create(IPythonConfig.class));
 	}
 
 	public PythonUtil(final IPythonConfig config) {
-		this(config.getPath());
-	}
-
-	public PythonUtil(final String pathToFolderContainingThePythonExecutable) {
-		this(pathToFolderContainingThePythonExecutable != null ? new File(pathToFolderContainingThePythonExecutable) : null);
-	}
-
-	public PythonUtil(final File pathToFolderContainingThePythonExecutable) {
-		super();
-		if (pathToFolderContainingThePythonExecutable != null) {
-			if (!pathToFolderContainingThePythonExecutable.exists()) {
-				throw new IllegalArgumentException("The path to python executable " + pathToFolderContainingThePythonExecutable.getAbsolutePath() + " does not exist.");
+		this.pythonCommand = config.getPythonCommand();
+		String path = config.getPath();
+		this.pathToPathonExecutable = path != null ? new File(config.getPath()) : null;
+		if (this.pathToPathonExecutable != null) {
+			if (!this.pathToPathonExecutable.exists()) {
+				throw new IllegalArgumentException("The path to python executable " + this.pathToPathonExecutable.getAbsolutePath() + " does not exist.");
 			}
-			if (!new File(pathToFolderContainingThePythonExecutable + File.separator + CMD_PYTHON).exists()) {
-				throw new IllegalArgumentException("The given path does not contain an executable with name " + CMD_PYTHON);
+			if (!new File(this.pathToPathonExecutable + File.separator + this.pythonCommand).exists()) {
+				throw new IllegalArgumentException("The given path does not contain an executable with name " + this.pythonCommand);
 			}
 		}
-		this.pathToPathonExecutable = pathToFolderContainingThePythonExecutable;
 	}
 
 	public ProcessBuilder getProcessBuilder() {
@@ -56,7 +44,7 @@ public class PythonUtil {
 	public String executeScript(final String script) throws IOException {
 		ProcessBuilder processBuilder = this.getProcessBuilder();
 		processBuilder.redirectErrorStream(true);
-		String command = (this.pathToPathonExecutable != null ? this.pathToPathonExecutable.getAbsolutePath() + File.separator : "") + CMD_PYTHON;
+		String command = (this.pathToPathonExecutable != null ? this.pathToPathonExecutable.getAbsolutePath() + File.separator : "") + this.pythonCommand;
 		Process p = processBuilder.command(command, CMD_PYTHON_COMMANDPARAM, script).start();
 		StringBuilder sb = new StringBuilder();
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {

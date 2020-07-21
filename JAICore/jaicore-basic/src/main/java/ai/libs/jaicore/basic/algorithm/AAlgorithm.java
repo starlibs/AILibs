@@ -1,7 +1,10 @@
 package ai.libs.jaicore.basic.algorithm;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -49,6 +52,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private final Set<Thread> activeThreads = new HashSet<>();
 	private EAlgorithmState state = EAlgorithmState.CREATED;
 	private final EventBus eventBus = new EventBus();
+	private final List<Object> listeners = new ArrayList<>();
 
 	private int timeoutPrecautionOffset = 100; // this offset is substracted from the true remaining time whenever a timer is scheduled to ensure that the timeout is respected
 	private static final int MIN_RUNTIME_FOR_OBSERVED_TASK = 50;
@@ -109,6 +113,11 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	@Override
 	public void registerListener(final Object listener) {
 		this.eventBus.register(listener);
+		this.listeners.add(listener);
+	}
+
+	public List<Object> getListeners() {
+		return Collections.unmodifiableList(this.listeners);
 	}
 
 	@Override

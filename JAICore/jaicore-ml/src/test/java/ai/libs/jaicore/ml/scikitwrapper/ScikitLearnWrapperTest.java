@@ -58,7 +58,7 @@ public class ScikitLearnWrapperTest {
 	public void fitAndPredict() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.ensemble");
 		String constructInstruction = "sklearn.ensemble.RandomForestClassifier(n_estimators=100)";
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>(constructInstruction, ScikitLearnWrapper.getImportString(imports), false,
+		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>(constructInstruction, ScikitLearnWrapper.getImportString(imports), true,
 				EScikitLearnProblemType.CLASSIFICATION);
 		ILabeledDataset<ILabeledInstance> dataset = this.loadARFF(CLASSIFICATION_ARFF);
 		RandomHoldoutSplitter<ILabeledDataset<ILabeledInstance>> splitter = new RandomHoldoutSplitter<>(new Random(), .7);

@@ -95,6 +95,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 	protected final IObjectEvaluator<ILabeledPath<T, A>, V> solutionEvaluator;
 	protected IUncertaintySource<T, A, V> uncertaintySource;
 	protected SolutionEventBus<T> eventBus = new SolutionEventBus<>();
+	private final List<Object> solutionListeners = new ArrayList<>();
 	private final Map<List<T>, V> bestKnownScoreUnderNodeInCompleterGraph = new HashMap<>();
 	private boolean visualizeSubSearch;
 
@@ -468,8 +469,8 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 			}
 		}
 		V score = this.scoresOfSolutionPaths.get(path.getNodes());
-		assert score != null : "Stored scores must never be null";
 		this.logger.debug("Determined value {} for path of length {}.", score, path.getNumberOfNodes());
+		assert score != null : "Stored scores must never be null";
 		this.logger.trace("Full path is {}", path);
 		return score;
 	}
@@ -491,8 +492,9 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 			solutionObject.setAnnotation("fTime", this.timesToComputeEvaluations.get(solution.getNodes()));
 			solutionObject.setAnnotation("timeToSolution", (int) (System.currentTimeMillis() - this.timestampOfFirstEvaluation));
 			solutionObject.setAnnotation("nodesEvaluatedToSolution", numberOfComputedFValues);
-			this.logger.debug("Posting solution {}", solutionObject);
+			this.logger.debug("Posting solution {} to {} listeners: {}", solutionObject, this.solutionListeners.size(), this.solutionListeners);
 			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(ALGORITHM, solutionObject));
+			this.logger.debug("Posted solution {} to event bus.", solutionObject);
 		} catch (Exception e) {
 			List<Pair<String, Object>> explanations = new ArrayList<>();
 			if (this.logger.isDebugEnabled()) {
@@ -533,6 +535,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 	@Override
 	public void registerSolutionListener(final Object listener) {
 		this.eventBus.register(listener);
+		this.solutionListeners.add(listener);
 	}
 
 	@Override

@@ -74,7 +74,7 @@ import ai.libs.python.IPythonConfig;
  * @author scheiblm
  */
 public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B>
-		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
+implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 	private static final String PYTHON_FILE_EXT = ".py";
 	private static final String MODEL_DUMP_FILE_EXT = ".pcl";
 	private static final String RESULT_FILE_EXT = ".json";
@@ -101,7 +101,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	private File modelFile;
 	private File trainArff;
 
-	private final boolean withoutModelDump;
+	private final boolean withModelDump;
 
 	private String constructInstruction;
 
@@ -123,14 +123,14 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * @throws IOException
 	 *             The script could not be created.
 	 */
-	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withoutModelDump, final EScikitLearnProblemType problemType) throws IOException {
+	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withModelDump, final EScikitLearnProblemType problemType) throws IOException {
 		if (ProcessUtil.getOS() == EOperatingSystem.MAC || ProcessUtil.getOS() == EOperatingSystem.LINUX) {
 			this.listenToPidFromProcess = true;
 		} else {
 			this.listenToPidFromProcess = false;
 		}
 
-		this.withoutModelDump = withoutModelDump;
+		this.withModelDump = withModelDump;
 		this.constructInstruction = constructInstruction;
 		this.setProblemType(problemType);
 
@@ -167,11 +167,11 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 *             The script could not be created.
 	 */
 	public ScikitLearnWrapper(final String constructInstruction, final String imports, final EScikitLearnProblemType problemType) throws IOException {
-		this(constructInstruction, imports, false, problemType);
+		this(constructInstruction, imports, true, problemType);
 	}
 
 	public ScikitLearnWrapper(final String constructInstruction, final String imports, final File trainedModelPath, final EScikitLearnProblemType problemType) throws IOException {
-		this(constructInstruction, imports, false, problemType);
+		this(constructInstruction, imports, true, problemType);
 		this.modelFile = trainedModelPath;
 	}
 
@@ -215,7 +215,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			this.trainArff = this.getArffFile(data, arffName);
 			this.dataset = (ILabeledDataset<ILabeledInstance>) data.createEmptyCopy();
 
-			if (!this.withoutModelDump) {
+			if (this.withModelDump) {
 				this.modelFile = new File(MODEL_DUMPS_DIRECTORY, this.configurationUID + "_" + arffName + MODEL_DUMP_FILE_EXT);
 				ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff).withOutputFile(this.modelFile);
 				skLearnWrapperCommandBuilder.withSeed(this.seed);
@@ -293,7 +293,8 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		File outputFile = this.getResultFile(arffName);
 		outputFile.getParentFile().mkdirs();
 
-		if (!this.withoutModelDump) {
+		/* create prediction file */
+		if (this.withModelDump) {
 			ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff).withModelFile(this.modelFile).withOutputFile(outputFile);
 			skLearnWrapperCommandBuilder.withSeed(this.seed);
 			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
@@ -325,7 +326,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 					if (listener.getErrorOutput().toLowerCase().contains("convergence")) {
 						// ignore convergence warning
 						L.warn("Learner {} could not converge. Consider increase number of iterations.", this.constructInstruction);
-//						throw new PredictionException("Learner could not converge. Increase number of iterations.");
+						// throw new PredictionException("Learner could not converge. Increase number of iterations.");
 					} else {
 						throw new PredictionException(listener.getErrorOutput());
 					}

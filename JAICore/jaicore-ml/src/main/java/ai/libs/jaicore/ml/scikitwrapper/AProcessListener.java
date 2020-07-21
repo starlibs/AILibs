@@ -38,7 +38,7 @@ public abstract class AProcessListener implements IProcessListener {
 		try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
 			// While process is alive the output- and error stream is output.
 			while (process.isAlive()) {
-				if (Thread.currentThread().isInterrupted()) {
+				if (Thread.interrupted()) { // reset flag since we will throw an exception now
 					if (this.listenForPIDFromProcess && this.processIDObtainedFromListening > 0) {
 						ProcessUtil.killProcess(this.processIDObtainedFromListening);
 					} else {

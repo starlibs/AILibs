@@ -18,7 +18,6 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.slf4j.Logger;
@@ -28,7 +27,7 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.core.events.HASCOSolutionEvent;
 import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
-import ai.libs.hasco.core.reduction.softcomp2planning.HASCOReduction;
+import ai.libs.hasco.core.reduction.softcomp2planning.HASCOReductionSolutionEvaluator;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.components.model.ComponentInstance;
@@ -37,7 +36,6 @@ import ai.libs.jaicore.components.model.CompositionProblemUtil;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.model.UnparametrizedComponentInstance;
 import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithm;
-import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedGraphSearchBasedPlan;
@@ -109,11 +107,9 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 
 		/* derive planning problem and search problem */
 		this.logger.debug("Deriving search problem");
-		this.timeGrabbingEvaluationWrapper = new TimeRecordingObjectEvaluator<>(configurationProblem.getCompositionEvaluator());
-		RefinementConfiguredSoftwareConfigurationProblem<V> cpWithTimeTrackedEvals = new RefinementConfiguredSoftwareConfigurationProblem<>(configurationProblem, this.timeGrabbingEvaluationWrapper);
-		HASCOReduction<V> hascoReduction = new HASCOReduction<>();
-		this.planningProblem = hascoReduction.encodeProblem(cpWithTimeTrackedEvals);
-		this.searchProblem = HASCOUtil.getSearchProblemWithEvaluation(cpWithTimeTrackedEvals, planning2searchReduction);
+		this.planningProblem = HASCOUtil.getPlannigProblem(configurationProblem);
+		this.searchProblem = HASCOUtil.getSearchProblemWithEvaluation(this.planningProblem, planning2searchReduction);
+		this.timeGrabbingEvaluationWrapper = ((HASCOReductionSolutionEvaluator<V>)this.planningProblem.getPlanEvaluator()).getTimedEvaluator();
 
 		/* create search object */
 		this.logger.debug("Creating and initializing the search object");
@@ -142,7 +138,7 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 				String operations = this.planningProblem.getCorePlanningProblem().getDomain().getOperations().stream()
 						.map(o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: " + o.getPrecondition() + "\n\t\t\tAdd List: " + o.getAddLists() + "\n\t\t\tDelete List: " + o.getDeleteLists()).collect(Collectors.joining());
 				String methods = this.planningProblem.getCorePlanningProblem().getDomain().getMethods().stream().map(m -> "\n\t\t" + m.getName() + "(" + m.getParameters() + ") for task " + m.getTask() + "\n\t\t\tPre: " + m.getPrecondition()
-						+ "\n\t\t\tPre Eval: " + m.getEvaluablePrecondition() + "\n\t\t\tNetwork: " + m.getNetwork().getLineBasedStringRepresentation()).collect(Collectors.joining());
+				+ "\n\t\t\tPre Eval: " + m.getEvaluablePrecondition() + "\n\t\t\tNetwork: " + m.getNetwork().getLineBasedStringRepresentation()).collect(Collectors.joining());
 				this.logger.debug("Derived the following HTN planning problem:\n\tOperations:{}\n\tMethods:{}", operations, methods);
 			}
 			AlgorithmInitializedEvent event = this.activate();
@@ -173,7 +169,7 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 
 				@Subscribe
 				public void receiveSolutionCandidateFoundEvent(final EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent) {
-
+					HASCO.this.logger.info("Received solution event {}", solutionEvent);
 					EvaluatedSearchGraphPath<N, A, V> searchPath = solutionEvent.getSolutionCandidate();
 					IPlan plan = HASCO.this.planning2searchReduction.decodeSolution(searchPath);
 					ComponentInstance objectInstance;
@@ -184,28 +180,20 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 					}
 					HASCO.this.returnedUnparametrizedComponentInstances.add(new UnparametrizedComponentInstance(objectInstance));
 					V score;
-					try {
-						boolean scoreInCache = HASCO.this.timeGrabbingEvaluationWrapper.hasEvaluationForComponentInstance(objectInstance);
-						if (scoreInCache) {
-							score = solutionEvent.getSolutionCandidate().getScore();
-						} else {
-							score = HASCO.this.timeGrabbingEvaluationWrapper.evaluate(objectInstance);
-						}
-						HASCO.this.logger.info("Received new solution with score {} from search, communicating this solution to the HASCO listeners. Number of returned unparametrized solutions is now {}/{}.", score,
-								HASCO.this.returnedUnparametrizedComponentInstances.size(), HASCO.this.numUnparametrizedSolutions);
-						IEvaluatedGraphSearchBasedPlan<N, A, V> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score, searchPath);
-						HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan, HASCO.this.timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
-						HASCO.this.updateBestSeenSolution(solution);
-						HASCO.this.listOfAllRecognizedSolutions.add(solution);
-						HASCOSolutionEvent<V> hascoSolutionEvent = new HASCOSolutionEvent<>(HASCO.this, solution);
-						HASCO.this.hascoSolutionEventCache.put(solutionEvent, hascoSolutionEvent);
-						HASCO.this.post(hascoSolutionEvent);
-					} catch (ObjectEvaluationFailedException e) {
-						HASCO.this.logger.error(LoggerUtil.getExceptionInfo(e));
-					} catch (InterruptedException e) {
-						HASCO.this.logger.info("Got interrupted while processing the solution event. The solution has not been recognized properly.");
-						Thread.currentThread().interrupt();
+					boolean scoreInCache = HASCO.this.timeGrabbingEvaluationWrapper.hasEvaluationForComponentInstance(objectInstance);
+					if (!scoreInCache) {
+						throw new IllegalStateException("The time recording object evaluator has no information about component instance " + objectInstance);
 					}
+					score = solutionEvent.getSolutionCandidate().getScore();
+					HASCO.this.logger.info("Received new solution with score {} from search, communicating this solution to the HASCO listeners. Number of returned unparametrized solutions is now {}/{}.", score,
+							HASCO.this.returnedUnparametrizedComponentInstances.size(), HASCO.this.numUnparametrizedSolutions);
+					IEvaluatedGraphSearchBasedPlan<N, A, V> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score, searchPath);
+					HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan, HASCO.this.timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
+					HASCO.this.updateBestSeenSolution(solution);
+					HASCO.this.listOfAllRecognizedSolutions.add(solution);
+					HASCOSolutionEvent<V> hascoSolutionEvent = new HASCOSolutionEvent<>(HASCO.this, solution);
+					HASCO.this.hascoSolutionEventCache.put(solutionEvent, hascoSolutionEvent);
+					HASCO.this.post(hascoSolutionEvent);
 				}
 			});
 

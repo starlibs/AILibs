@@ -24,9 +24,12 @@ public class TimeRecordingObjectEvaluator<T, V extends Comparable<V>> implements
 	@Override
 	public V evaluate(final T object) throws InterruptedException, ObjectEvaluationFailedException {
 		long start = System.currentTimeMillis();
+		this.logger.info("Starting timed evaluation.");
 		V score = this.baseEvaluator.evaluate(object);
 		long end = System.currentTimeMillis();
-		this.consumedTimes.put(object, (int) (end - start));
+		int runtime = (int) (end - start);
+		this.logger.info("Finished evaluation in {}ms. Score is {}", runtime, score);
+		this.consumedTimes.put(object, runtime);
 		return score;
 	}
 

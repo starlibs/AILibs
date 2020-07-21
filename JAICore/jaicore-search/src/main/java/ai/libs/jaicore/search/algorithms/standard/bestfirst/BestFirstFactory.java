@@ -3,6 +3,7 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst;
 import java.util.Objects;
 
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.slf4j.Logger;
@@ -19,7 +20,7 @@ implements IOptimalPathInORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, 
 	private int timeoutForFInMS;
 	private IPathEvaluator<N, A, V> timeoutEvaluator;
 	private Logger logger = LoggerFactory.getLogger(BestFirstFactory.class);
-	private AlgorithmicProblemReduction<P, EvaluatedSearchGraphPath<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>> reduction;
+	private AlgorithmicProblemReduction<IPathSearchInput<N, A>, EvaluatedSearchGraphPath<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>> reduction;
 
 	public BestFirstFactory() {
 		super();
@@ -64,11 +65,11 @@ implements IOptimalPathInORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, 
 		this.logger = LoggerFactory.getLogger(loggerName);
 	}
 
-	public AlgorithmicProblemReduction<P, EvaluatedSearchGraphPath<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>> getReduction() {
+	public AlgorithmicProblemReduction<IPathSearchInput<N, A>, EvaluatedSearchGraphPath<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>> getReduction() {
 		return this.reduction;
 	}
 
-	public void setReduction(final AlgorithmicProblemReduction<P, EvaluatedSearchGraphPath<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>> reduction) {
+	public void setReduction(final AlgorithmicProblemReduction<IPathSearchInput<N, A>, EvaluatedSearchGraphPath<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>> reduction) {
 		this.reduction = reduction;
 	}
 
@@ -80,6 +81,7 @@ implements IOptimalPathInORGraphSearchFactory<P, EvaluatedSearchGraphPath<N, A, 
 				throw new IllegalStateException("No reduction provided for inputs of type " + problem.getClass().getName() + ".");
 			}
 			Objects.requireNonNull(this.reduction);
+			this.logger.info("Reducing the original problem {} using reduction {}", problem, this.reduction);
 			acceptedProblem = (P) this.reduction.encodeProblem(problem);
 		}
 		if (problem.getPathEvaluator() == null) {

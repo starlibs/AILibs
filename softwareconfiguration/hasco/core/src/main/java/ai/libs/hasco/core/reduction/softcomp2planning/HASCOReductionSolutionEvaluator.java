@@ -15,6 +15,7 @@ import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfiguratio
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.planning.core.Action;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;
+import ai.libs.jaicore.timing.TimeRecordingObjectEvaluator;
 
 public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements IObjectEvaluator<IPlan, V>, ILoggingCustomizable {
 
@@ -22,12 +23,14 @@ public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements
 	private final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem;
 	private final HASCOReduction<V> reduction;
 	private final IObjectEvaluator<ComponentInstance, V> evaluator;
+	private final TimeRecordingObjectEvaluator<ComponentInstance, V> timedEvaluator;
 
 	public HASCOReductionSolutionEvaluator(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final HASCOReduction<V> reduction) {
 		super();
 		this.configurationProblem = configurationProblem;
 		this.reduction = reduction;
 		this.evaluator = this.configurationProblem.getCompositionEvaluator();
+		this.timedEvaluator = new TimeRecordingObjectEvaluator<>(this.evaluator);
 	}
 
 	public HASCOReduction<V> getReduction() {
@@ -41,7 +44,7 @@ public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements
 			throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(Action::getEncoding).collect(Collectors.joining("\n\t")));
 		}
 		this.logger.info("Forwarding evaluation request for CI {} to evaluator {}", solution, this.evaluator.getClass().getName());
-		return this.evaluator.evaluate(solution);
+		return this.timedEvaluator.evaluate(solution);
 	}
 
 	@Override
@@ -65,5 +68,13 @@ public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements
 		} else {
 			this.logger.info("Evaluator {} cannot be customized for logging, so not configuring its logger.", this.evaluator.getClass().getName());
 		}
+	}
+
+	public IObjectEvaluator<ComponentInstance, V> getEvaluator() {
+		return this.evaluator;
+	}
+
+	public TimeRecordingObjectEvaluator<ComponentInstance, V> getTimedEvaluator() {
+		return this.timedEvaluator;
 	}
 }
