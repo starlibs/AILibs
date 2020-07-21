@@ -9,11 +9,15 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.aeonbits.owner.ConfigCache;
+import org.aeonbits.owner.ConfigFactory;
 
 import ai.libs.jaicore.basic.SystemRequirementsNotMetException;
 
 public class PythonUtil {
-	private static String CMD_PYTHON;
+
+	private static final IPythonConfig config = ConfigFactory.create(IPythonConfig.class);
+	private static String CMD_PYTHON = config.getPythonCommand();
+
 	private static final String CMD_PYTHON_COMMANDPARAM = "-c";
 
 	private static final String PY_IMPORT = "import ";
@@ -43,9 +47,6 @@ public class PythonUtil {
 			}
 		}
 		this.pathToPathonExecutable = pathToFolderContainingThePythonExecutable;
-		IPythonConfig config = ConfigCache.getOrCreate(IPythonConfig.class);
-		CMD_PYTHON = config.getPythonCommand();
-
 	}
 
 	public ProcessBuilder getProcessBuilder() {
