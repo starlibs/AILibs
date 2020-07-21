@@ -3,14 +3,18 @@ package ai.libs.mlplan.multiclass.sklearn.builder;
 import java.io.IOException;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.algorithm.Timeout;
 
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.AMonteCarloCrossValidationBasedEvaluatorFactory;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
+import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.core.IProblemType;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.multiclass.sklearn.AScikitLearnLearnerFactory;
 import ai.libs.mlplan.multiclass.sklearn.EMLPlanScikitLearnProblemType;
 import ai.libs.python.IPythonConfig;
@@ -26,6 +30,7 @@ public class MLPlanScikitLearnBuilder extends AMLPlanBuilder<ScikitLearnWrapper<
 	private IPythonConfig pythonConfig;
 	private String[] pythonAdditionalRequiredModules;
 	private final boolean skipSetupCheck;
+	private boolean cacheSplits = true;
 
 	public static MLPlanScikitLearnBuilder forClassification() throws IOException {
 		return new MLPlanScikitLearnBuilder(EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS);
@@ -70,6 +75,11 @@ public class MLPlanScikitLearnBuilder extends AMLPlanBuilder<ScikitLearnWrapper<
 		return this.getSelf();
 	}
 
+	public MLPlanScikitLearnBuilder withCacheSplits(final boolean cacheSplits) {
+		this.cacheSplits = cacheSplits;
+		return this.getSelf();
+	}
+
 	@Override
 	public MLPlanScikitLearnBuilder withSeed(final long seed) {
 		super.withSeed(seed);
@@ -98,12 +108,20 @@ public class MLPlanScikitLearnBuilder extends AMLPlanBuilder<ScikitLearnWrapper<
 		return this;
 	}
 
+	private void setDeterministicDatasetSplitter(final ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factory) {
+		if (factory instanceof AMonteCarloCrossValidationBasedEvaluatorFactory<?>) {
+			((AMonteCarloCrossValidationBasedEvaluatorFactory<?>) factory).withCacheSplitSets(true);
+		}
+	}
+
 	@Override
 	public MLPlan<ScikitLearnWrapper<IPrediction, IPredictionBatch>> build() {
 		if (!this.skipSetupCheck) {
 			new PythonRequirementDefinition(PYTHON_MINIMUM_REQUIRED_VERSION_REL, PYTHON_MINIMUM_REQUIRED_VERSION_MAJ, PYTHON_MINIMUM_REQUIRED_VERSION_MIN, ArrayUtils.addAll(PYTHON_REQUIRED_MODULES, this.pythonAdditionalRequiredModules))
 					.check(this.pythonConfig);
 		}
+		this.setDeterministicDatasetSplitter(this.getLearnerEvaluationFactoryForSearchPhase());
+		this.setDeterministicDatasetSplitter(this.getLearnerEvaluationFactoryForSelectionPhase());
 		return super.build();
 	}
 }

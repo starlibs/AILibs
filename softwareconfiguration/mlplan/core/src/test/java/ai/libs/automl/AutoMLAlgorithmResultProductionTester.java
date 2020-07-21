@@ -62,36 +62,36 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 	public static Collection<OpenMLProblemSet[]> data() throws DatasetDeserializationFailedException {
 		try {
 			List<OpenMLProblemSet> problemSets = new ArrayList<>();
-			problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
-			problemSets.add(new OpenMLProblemSet(273)); // IMDB drama
-			problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
-			problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
-			problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
-			//		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
-			problemSets.add(new OpenMLProblemSet(1457)); // amazon
-			problemSets.add(new OpenMLProblemSet(1501)); // semeion
-			//		problemSets.add(new OpenMLProblemSet(149)); // CovP	okElec
-			//		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
-			problemSets.add(new OpenMLProblemSet(4136)); // dexter
-			problemSets.add(new OpenMLProblemSet(4137)); // dorothea
-			problemSets.add(new OpenMLProblemSet(40668)); // connect-4
-			problemSets.add(new OpenMLProblemSet(1590)); // adult
-			problemSets.add(new OpenMLProblemSet(182)); // satimage
-			problemSets.add(new OpenMLProblemSet(24)); // mushroom
-			problemSets.add(new OpenMLProblemSet(39)); // ecoli
-			problemSets.add(new OpenMLProblemSet(44)); // spambase
-			problemSets.add(new OpenMLProblemSet(60)); // waveform-5000
-			problemSets.add(new OpenMLProblemSet(61)); // iris
-			problemSets.add(new OpenMLProblemSet(9)); // autos
-			problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic
-			problemSets.add(new OpenMLProblemSet(1104)); // leukemia
-			problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
-			//		problemSets.add(new OpenMLProblemSet(554)); // mnist
-			//		problemSets.add(new OpenMLProblemSet(155)); // pokerhand
-			problemSets.add(new OpenMLProblemSet(40691)); // winequality
-			//		problemSets.add(new OpenMLProblemSet(41026)); // gisette
-			//		problemSets.add(new OpenMLProblemSet(41065)); // mnist-rotate
-			problemSets.add(new OpenMLProblemSet(41066)); // secom
+//			problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp löppt
+//			problemSets.add(new OpenMLProblemSet(9)); // autos löppt
+//			problemSets.add(new OpenMLProblemSet(24)); // mushroom löppt
+//			problemSets.add(new OpenMLProblemSet(39)); // ecoli löppt
+//			problemSets.add(new OpenMLProblemSet(44)); // spambase löppt
+//			problemSets.add(new OpenMLProblemSet(60)); // waveform-5000 löppt
+//			problemSets.add(new OpenMLProblemSet(61)); // iris löppt
+//			problemSets.add(new OpenMLProblemSet(149)); // CovP okElec fail
+//			problemSets.add(new OpenMLProblemSet(155)); // pokerhand fail
+//			problemSets.add(new OpenMLProblemSet(182)); // satimage fail
+//			problemSets.add(new OpenMLProblemSet(273)); // IMDB drama fail
+//			problemSets.add(new OpenMLProblemSet(554)); // mnist fail
+//			problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic fail
+//			problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes löppt
+//			problemSets.add(new OpenMLProblemSet(1104)); // leukemia löppt
+//			problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung fail
+//			problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary löppt
+//			problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary löppt
+			problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
+//			problemSets.add(new OpenMLProblemSet(1457)); // amazon
+//			problemSets.add(new OpenMLProblemSet(1501)); // semeion
+//			problemSets.add(new OpenMLProblemSet(1590)); // adult
+//			problemSets.add(new OpenMLProblemSet(4136)); // dexter
+//			problemSets.add(new OpenMLProblemSet(4137)); // dorothea
+//			problemSets.add(new OpenMLProblemSet(40668)); // connect-4
+//			problemSets.add(new OpenMLProblemSet(40691)); // winequality
+//			problemSets.add(new OpenMLProblemSet(40927)); // cifar-10
+//			problemSets.add(new OpenMLProblemSet(41026)); // gisette
+//			problemSets.add(new OpenMLProblemSet(41065)); // mnist-rotate
+//			problemSets.add(new OpenMLProblemSet(41066)); // secom
 
 			OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
 			for (int i = 0; i < data.length; i++) {
@@ -171,7 +171,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 			double score = evaluator.evaluate(c);
 			Thread.sleep(algorithm.getTimeout().seconds() / 20);
 			assertTrue("There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks(), GlobalTimer.getInstance().getActiveTasks().isEmpty());
-			this.logger.info("Error rate of solution {} on {} is: {}", c.getClass().getName(), datasetname, score);
+			this.logger.info("Error rate of solution {} ({}) on {} is: {}", c.getClass().getName(), c, datasetname, score);
 		} catch (AlgorithmTimeoutedException e) {
 			fail("No solution was found in the given timeout. Stack trace: " + Arrays.stream(e.getStackTrace()).map(se -> "\n\t" + se.toString()).collect(Collectors.joining()));
 		} finally {

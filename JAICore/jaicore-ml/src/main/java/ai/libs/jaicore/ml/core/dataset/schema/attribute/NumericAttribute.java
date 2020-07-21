@@ -82,5 +82,4 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 	public Double deserializeAttributeValue(final String string) {
 		return Double.parseDouble(string);
 	}
-
 }

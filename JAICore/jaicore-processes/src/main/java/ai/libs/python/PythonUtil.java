@@ -13,8 +13,7 @@ import org.aeonbits.owner.ConfigCache;
 import ai.libs.jaicore.basic.SystemRequirementsNotMetException;
 
 public class PythonUtil {
-
-	private static final String CMD_PYTHON = "python";
+	private static String CMD_PYTHON;
 	private static final String CMD_PYTHON_COMMANDPARAM = "-c";
 
 	private static final String PY_IMPORT = "import ";
@@ -44,6 +43,9 @@ public class PythonUtil {
 			}
 		}
 		this.pathToPathonExecutable = pathToFolderContainingThePythonExecutable;
+		IPythonConfig config = ConfigCache.getOrCreate(IPythonConfig.class);
+		CMD_PYTHON = config.getPythonCommand();
+
 	}
 
 	public ProcessBuilder getProcessBuilder() {

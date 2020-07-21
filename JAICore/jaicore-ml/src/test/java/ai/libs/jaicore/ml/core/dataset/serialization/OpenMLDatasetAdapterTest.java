@@ -1,8 +1,10 @@
 package ai.libs.jaicore.ml.core.dataset.serialization;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,6 +26,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.openml.apiconnector.io.OpenmlConnector;
+import org.openml.apiconnector.xml.DataQuality;
 
 import ai.libs.jaicore.ml.core.dataset.DatasetTestUtil;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
@@ -31,6 +35,8 @@ import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 
 @RunWith(Parameterized.class)
 public class OpenMLDatasetAdapterTest {
+
+	private static OpenmlConnector con = new OpenmlConnector();
 
 	private static Map<Integer, Integer> numInstances = new HashMap<>();
 	private static Map<Integer, Integer> numFeatures = new HashMap<>();
@@ -47,28 +53,63 @@ public class OpenMLDatasetAdapterTest {
 		return new OpenMLProblemSet(id);
 	}
 
+	private static OpenMLProblemSet register(final int id) throws Exception {
+		DataQuality quality = con.dataQualities(id, 1);
+		numClasses.put(id, quality.getQualitiesMap().get("NumberOfClasses").intValue());
+		numInstances.put(id, quality.getQualitiesMap().get("NumberOfInstances").intValue());
+		numFeatures.put(id, quality.getQualitiesMap().get("NumberOfFeatures").intValue() - 1);
+		return new OpenMLProblemSet(id);
+	}
+
 	// creates the test data
 	@Parameters(name = "{0}")
 	public static Collection<OpenMLProblemSet[]> data() throws IOException, Exception {
 		List<OpenMLProblemSet> problemSets = new ArrayList<>();
-		problemSets.add(register(3, 3196, 36, 2, true)); // kr-vs-kp
-		problemSets.add(register(23512, 98050, 28, 2, true)); // higgs
-		problemSets.add(register(1457, 1500, 10000, 50, true)); // amazon
-		problemSets.add(register(42123, 3615, 6, 3169, true)); // articleinfluence
-		problemSets.add(register(554, 70000, 784, 10, true)); // MNIST
-		problemSets.add(register(4136, 600, 20000, 2, true)); // dexter
-		problemSets.add(register(4137, 1150, 100000, 2, true)); // dorothea
-		problemSets.add(register(41026, 7000, 5000, 2, false)); // gisette
-		problemSets.add(register(40927, 60000, 3072, 10, false)); // CIFAR-10
-		problemSets.add(register(183, 4177, 8, 28, true)); // abalone
-		problemSets.add(register(181, 1484, 8, 10, true)); // yeast
-		problemSets.add(register(1501, 1593, 256, 10, true)); // semeion
-		problemSets.add(register(41064, 58000, 784, 2, true)); // convex
-		problemSets.add(register(41066, 1567, 590, 2, true)); // secom
-		problemSets.add(register(41065, 62000, 784, 10, true)); // mnist rotate
-		problemSets.add(register(273, 120919, 1001, 2, true)); // IMDB drama
-		problemSets.add(register(1156, 275, 10936, 2, true)); // AP_Omentum_Ovary
-//		problemSets.add(register(40594, 2000, 250, 12, true)); // Reuters (multi-label classification dataset; not yet supported)
+		Arrays.asList(
+//				3, // kr-vs-kp
+//				9, // autos
+//				24, // mushroom
+//				39, // ecoli
+//				44, // spambase
+//				60, // waveform-5000
+//				61, // iris
+//				149, // CovPokElec
+//				155, // pokerhand
+//				181, // yeast
+//				182, // satimage
+//				183, // abalone
+//				273, // IMDB Drama
+//				554, // MNIST
+//				1039, // hiva_agnostic
+//				1101, // lymphoma_2classes
+//				1104, // leukemia
+//				1150, // AP_Breast_Lung
+//				1152, // AP_Prostate_Ovary
+//				1156, // AP_Omentum_Ovary
+//				1240, // AirlinesCodmaAdult
+//				1457, // amazon
+//				1501, // semeion
+//				1590, // adult
+//				4136, // dexter
+//				4137, // dorothea
+//				23512, // higgs
+				40594, // Reuters
+//				40668, // connect-4
+//				40691, // wine-quality-red
+				40927, // CIFAR-10
+//				41026, // gisette
+//				41064, // convex
+//				41065, // mnist rotation
+//				41066, // secom
+				41103, // STL-10
+				42123 // articleinfluence
+		).stream().forEach(t -> {
+			try {
+				problemSets.add(OpenMLDatasetAdapterTest.register(t));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
 
 		OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
 		for (int i = 0; i < data.length; i++) {
@@ -114,6 +155,15 @@ public class OpenMLDatasetAdapterTest {
 		System.out.println("Testing that folds are reconstructible.");
 		this.testReproduction(split.get(0), reproducedFirstFold);
 		this.testReproduction(split.get(1), reproducedSecondFold);
+	}
+
+	@Test
+	public void testWrite() throws IOException, DatasetDeserializationFailedException, InterruptedException {
+		File outFile = new File("tmp/test.arff");
+		outFile.getParentFile().mkdirs();
+		ArffDatasetAdapter.serializeDataset(outFile, this.problemSet.getDataset());
+		ILabeledDataset<?> reread = ArffDatasetAdapter.readDataset(outFile);
+		assertNotNull("Could not read in dataset again after writing", reread);
 	}
 
 	public void testReconstructibility(final ILabeledDataset<?> dataset) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException {

@@ -1,1 +1,3 @@
+sklearn.tree.DecisionTreeClassifier
+xgboost.XGBClassifier
 sklearn.ensemble.RandomForestClassifier

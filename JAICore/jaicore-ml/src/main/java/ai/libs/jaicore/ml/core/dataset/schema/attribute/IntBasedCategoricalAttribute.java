@@ -39,13 +39,15 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 	@Override
 	public boolean isValidValue(final Object attributeValue) {
 		if (attributeValue == null) {
-			return false;
+			return true;
 		}
 		Integer value = null;
 		if (attributeValue instanceof ICategoricalAttributeValue) {
 			value = ((ICategoricalAttributeValue) attributeValue).getValue();
 		} else if (attributeValue instanceof Integer) {
 			value = (Integer) attributeValue;
+		} else if (attributeValue instanceof Double) {
+			value = (int) (double) attributeValue;
 		} else if (this.domain.contains(attributeValue)) {
 			value = this.domain.indexOf(attributeValue);
 		}
@@ -130,6 +132,9 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		}
 		if (!(value instanceof Integer)) {
 			throw new IllegalArgumentException("Can only serialize the integer representation of a category.");
+		}
+		if (((Integer) value) < 0) {
+			return null;
 		}
 		return this.domain.get((Integer) value);
 	}

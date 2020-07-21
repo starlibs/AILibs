@@ -60,6 +60,7 @@ public class PythonRequirementDefinition {
 				throw new SystemRequirementsNotMetException("Could not find required python modules: " + SetUtil.implode(missingPythonModules, ", "));
 			}
 		} catch (IOException e) {
+			e.printStackTrace();
 			throw new SystemRequirementsNotMetException("Could not check whether python is installed in the required version. Make sure that \"python\" is available as a command on your command line.");
 		}
 	}

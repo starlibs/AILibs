@@ -296,11 +296,13 @@ def run_train_test_mode(data, testdata):
     if sys.argv["regression"]:
         test_features, test_targets = get_feature_target_matrices(testdata)
     else:
-        test_features = testdata.input_matrix
-    if predict_proba in classifier_instance:
+        test_features = np.array(testdata.input_matrix)
+    
+    try:
         prediction = classifier_instance.predict_proba(test_features)
-    else:
+    except:
         prediction = classifier_instance.predict(test_features)
+    
     serialize_prediction(prediction)
 
 def run_test_mode(data):

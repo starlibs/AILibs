@@ -6,11 +6,15 @@ import org.api4.java.ai.ml.core.evaluation.IPredictionAndGroundTruthTable;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.regression.evaluation.IRegressionPrediction;
 
+import ai.libs.jaicore.ml.regression.loss.dataset.MeanAbsoluteError;
+import ai.libs.jaicore.ml.regression.loss.dataset.MeanAbsolutePercentageError;
 import ai.libs.jaicore.ml.regression.loss.dataset.MeanSquaredError;
+import ai.libs.jaicore.ml.regression.loss.dataset.R2;
 import ai.libs.jaicore.ml.regression.loss.dataset.RootMeanSquaredError;
+import ai.libs.jaicore.ml.regression.loss.dataset.RootMeanSquaredLogarithmError;
 
 public enum ERegressionPerformanceMeasure implements IDeterministicPredictionPerformanceMeasure<Double, IRegressionPrediction> {
-	MEAN_SQUARED_ERROR(new MeanSquaredError()), ROOT_MEAN_SQUARED_ERROR(new RootMeanSquaredError());
+	MSE(new MeanSquaredError()), RMSE(new RootMeanSquaredError()), RMSLE(new RootMeanSquaredLogarithmError()), MAE(new MeanAbsoluteError()), MAPE(new MeanAbsolutePercentageError()), R2(new R2());
 
 	private final IDeterministicPredictionPerformanceMeasure<Double, IRegressionPrediction> measure;
 

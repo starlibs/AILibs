@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -85,14 +86,14 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	private static final File MODEL_DUMPS_DIRECTORY = new File(TMP_FOLDER, "model_dumps");
 	private static final boolean VERBOSE = false; // If true the output stream of the python process is printed.
 	private boolean listenToPidFromProcess; // If true, the PID is obtained from the python process being started by listening to according output.
-	private static final boolean DELETE_TEMPORARY_FILES_ON_EXIT = false;
+	private static final boolean DELETE_TEMPORARY_FILES_ON_EXIT = true;
 
 	private File scikitTemplate; // Path to the used python template.
 	private ILabeledDataset<ILabeledInstance> dataset;
 
 	/* Problem definition fields */
 	private EScikitLearnProblemType problemType;
-	private IPythonConfig pythonConfig;
+	private IPythonConfig pythonConfig = ConfigFactory.create(IPythonConfig.class);
 	private int[] targetColumns = new int[0]; // Defines which of the columns in the arff file represent the target vectors. If not set, the last column is assumed to be the target vector.
 
 	/* Identifying the wrapped sklearn instance. */
@@ -250,7 +251,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * @throws IOException
 	 *             During the serialization of the data as an arff file something went wrong.
 	 */
-	private File getArffFile(final ILabeledDataset<? extends ILabeledInstance> data, final String arffName) throws IOException {
+	private synchronized File getArffFile(final ILabeledDataset<? extends ILabeledInstance> data, final String arffName) throws IOException {
 		File arffOutputFile = new File(TMP_FOLDER, arffName + ".arff");
 		if (DELETE_TEMPORARY_FILES_ON_EXIT) {
 			arffOutputFile.deleteOnExit();
@@ -321,7 +322,13 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			try {
 				this.runProcess(testCommand, listener);
 				if (!listener.getErrorOutput().isEmpty()) {
-					throw new PredictionException(listener.getErrorOutput());
+					if (listener.getErrorOutput().toLowerCase().contains("convergence")) {
+						// ignore convergence warning
+						L.warn("Learner {} could not converge. Consider increase number of iterations.", this.constructInstruction);
+//						throw new PredictionException("Learner could not converge. Increase number of iterations.");
+					} else {
+						throw new PredictionException(listener.getErrorOutput());
+					}
 				}
 			} catch (InterruptedException | PredictionException e) {
 				throw e;
@@ -340,7 +347,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			ObjectMapper objMapper = new ObjectMapper();
 			this.rawLastClassificationResults = objMapper.readValue(fileContent, List.class);
 		} catch (IOException e) {
-			throw new PredictionException("Could not read result file or parse the json content to a list", e);
+			throw new PredictionException("Could not read result file or parse the json content to a list.");
 		}
 
 		/* Since Scikit supports multiple target results but Weka does not, the results have to be flattened.
@@ -629,9 +636,10 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				processParameters.add(this.timeout.seconds() - 5 + "");
 			}
 			if (ScikitLearnWrapper.this.pythonConfig != null && ScikitLearnWrapper.this.pythonConfig.getPath() != null) {
-				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getPath() + File.separator + "python");
+				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getPath() + File.separator + ScikitLearnWrapper.this.pythonConfig.getPythonCommand());
 			} else {
-				processParameters.add("python");
+
+				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getPythonCommand());
 			}
 			processParameters.add("-u"); // Force python to run stdout and stderr unbuffered.
 			processParameters.add(scriptFile.getAbsolutePath()); // Script to be executed.

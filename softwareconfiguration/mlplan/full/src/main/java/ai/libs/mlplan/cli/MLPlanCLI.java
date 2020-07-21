@@ -45,7 +45,6 @@ import ai.libs.jaicore.search.gui.plugins.rolloutboxplots.SearchRolloutBoxplotPl
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
-import ai.libs.mlplan.cli.module.mlc.MLPlan4MekaMultiLabelCLIModule;
 import ai.libs.mlplan.cli.module.regression.MLPlan4ScikitLearnRegressionCLIModule;
 import ai.libs.mlplan.cli.module.regression.MLPlan4WEKARegressionCLIModule;
 import ai.libs.mlplan.cli.module.slc.MLPlan4ScikitLearnClassificationCLIModule;
@@ -91,7 +90,7 @@ public class MLPlanCLI {
 	/** OPTIONAL PARAMETERS' DEFAULT VALUES */
 	// Communication options standard values
 	private static final List<IMLPlanCLIModule> MODULES_TO_REGISTER = Arrays.asList(new MLPlan4WekaClassificationCLIModule(), new MLPlan4ScikitLearnClassificationCLIModule(), new MLPlan4WEKARegressionCLIModule(),
-			new MLPlan4ScikitLearnRegressionCLIModule(), new MLPlan4MekaMultiLabelCLIModule());
+			new MLPlan4ScikitLearnRegressionCLIModule());
 	private static Map<String, IMLPlanCLIModule> moduleRegistry = null;
 	private static Map<String, String> defaults = new HashMap<>();
 
@@ -125,7 +124,6 @@ public class MLPlanCLI {
 			if (!option.has(K_SHORT_OPT)) {
 				throw new IllegalArgumentException("Error in the cli configuration file. " + mapper.writeValueAsString(option) + " has no shortOpt field.");
 			}
-
 			options.addOption(Option.builder(option.get(K_SHORT_OPT).asText())
 					// set the long name of the option
 					.longOpt(option.get(K_LONG_OPT).asText())
@@ -231,7 +229,7 @@ public class MLPlanCLI {
 
 		// set common configs
 		builder.withNumCpus(Integer.parseInt(cl.getOptionValue(O_NUM_CPUS, getDefault(O_NUM_CPUS))));
-		builder.withSeed(Integer.parseInt(cl.getOptionValue(O_SEED, getDefault(O_SEED))));
+		builder.withSeed(Long.parseLong(cl.getOptionValue(O_SEED, getDefault(O_SEED))));
 
 		// set timeouts
 		builder.withTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_TIMEOUT, getDefault(O_TIMEOUT))), DEF_TIME_UNIT));
@@ -254,10 +252,6 @@ public class MLPlanCLI {
 			window.withMainPlugin(new GraphViewPlugin());
 			window.withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new NodeInfoGUIPlugin(new TFDNodeAsCIViewInfoGenerator(builder.getComponents())), new SearchRolloutHistogramPlugin(),
 					new SearchRolloutBoxplotPlugin());
-//			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan);
-//			window.withMainPlugin(new GraphViewPlugin());
-//			window.withPlugin(new NodeInfoGUIPlugin(new TFDNodeInfoGenerator()), new NodeInfoGUIPlugin(new TFDNodeAsCIViewInfoGenerator(builder.getComponents())),
-//					new SolutionPerformanceTimelinePlugin(new HASCOSolutionCandidateRepresenter()), new SearchRolloutBoxplotPlugin());
 		}
 
 		// call ml-plan to obtain the optimal supervised learner
@@ -291,9 +285,8 @@ public class MLPlanCLI {
 	}
 
 	public static void main(final String[] args) throws Exception {
-		if (logger.isInfoEnabled()) {
-			logger.info("Called ML-Plan CLI with the following params: {}", Arrays.toString(args));
-		}
+		System.out.println("Called ML-Plan CLI with the following params: >" + Arrays.toString(args) + "<");
+
 		final Options options = generateOptions();
 		if (args.length == 0) {
 			printUsage(options);
