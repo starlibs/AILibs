@@ -41,6 +41,7 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.interrupt.Interrupter;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.dataset.DatasetUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.PreTrainedPredictionBasedClassifierEvaluator;
@@ -62,36 +63,37 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 	public static Collection<OpenMLProblemSet[]> data() throws DatasetDeserializationFailedException {
 		try {
 			List<OpenMLProblemSet> problemSets = new ArrayList<>();
-			//			problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp l�ppt
-			//			problemSets.add(new OpenMLProblemSet(9)); // autos l�ppt
-			//			problemSets.add(new OpenMLProblemSet(24)); // mushroom l�ppt
-			//			problemSets.add(new OpenMLProblemSet(39)); // ecoli l�ppt
-			//			problemSets.add(new OpenMLProblemSet(44)); // spambase l�ppt
-			//			problemSets.add(new OpenMLProblemSet(60)); // waveform-5000 l�ppt
-			//			problemSets.add(new OpenMLProblemSet(61)); // iris l�ppt
-			//			//			problemSets.add(new OpenMLProblemSet(149)); // CovP okElec fail
-			//			//			problemSets.add(new OpenMLProblemSet(155)); // pokerhand fail
-			//			problemSets.add(new OpenMLProblemSet(182)); // satimage fail
-			//			problemSets.add(new OpenMLProblemSet(273)); // IMDB drama fail
-			//			//			problemSets.add(new OpenMLProblemSet(554)); // mnist fail
-			//			problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic fail
-			//			problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes l�ppt
-			//			problemSets.add(new OpenMLProblemSet(1104)); // leukemia l�ppt
-			//			problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung fail
-			//			problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary l�ppt
-			//			problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary l�ppt
-			//			problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
+			problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp l�ppt
+			problemSets.add(new OpenMLProblemSet(9)); // autos l�ppt
+			problemSets.add(new OpenMLProblemSet(24)); // mushroom l�ppt
+			problemSets.add(new OpenMLProblemSet(39)); // ecoli l�ppt
+			problemSets.add(new OpenMLProblemSet(44)); // spambase l�ppt
+			problemSets.add(new OpenMLProblemSet(60)); // waveform-5000 l�ppt
+			problemSets.add(new OpenMLProblemSet(61)); // iris l�ppt
+			//			problemSets.add(new OpenMLProblemSet(149)); // CovP okElec fail
+			//			problemSets.add(new OpenMLProblemSet(155)); // pokerhand fail
+			problemSets.add(new OpenMLProblemSet(182)); // satimage fail
+			problemSets.add(new OpenMLProblemSet(273)); // IMDB drama fail
+			//			problemSets.add(new OpenMLProblemSet(554)); // mnist fail
+			problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic fail
+			problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes l�ppt
+			problemSets.add(new OpenMLProblemSet(1104)); // leukemia l�ppt
+			problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung fail
+			problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary l�ppt
+			problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary l�ppt
+			//			//			problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
 			problemSets.add(new OpenMLProblemSet(1457)); // amazon
-			//			problemSets.add(new OpenMLProblemSet(1501)); // semeion
-			//			problemSets.add(new OpenMLProblemSet(1590)); // adult
-			//			problemSets.add(new OpenMLProblemSet(4136)); // dexter
-			//			problemSets.add(new OpenMLProblemSet(4137)); // dorothea
-			//			problemSets.add(new OpenMLProblemSet(40668)); // connect-4
-			//			problemSets.add(new OpenMLProblemSet(40691)); // winequality
+			problemSets.add(new OpenMLProblemSet(1501)); // semeion
+			//						problemSets.add(new OpenMLProblemSet(1590)); // adult # THIS ARFF CANNOT BE PARSED BY THE PYTHON ARFF LOADERS
+			problemSets.add(new OpenMLProblemSet(4136)); // dexter
+			problemSets.add(new OpenMLProblemSet(4137)); // dorothea
+			problemSets.add(new OpenMLProblemSet(40668)); // connect-4
+			problemSets.add(new OpenMLProblemSet(40691)); // winequality
 			//			problemSets.add(new OpenMLProblemSet(40927)); // cifar-10
 			//			problemSets.add(new OpenMLProblemSet(41026)); // gisette
 			//			problemSets.add(new OpenMLProblemSet(41065)); // mnist-rotate
-			//			problemSets.add(new OpenMLProblemSet(41066)); // secom
+			problemSets.add(new OpenMLProblemSet(41066)); // secom
+			//			problemSets.add(new OpenMLProblemSet(41705)); // ASP-POTASSCO-classification # THIS ARFF CANNOT BE PARSED BY THE PYTHON ARFF LOADERS
 
 			OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
 			for (int i = 0; i < data.length; i++) {
@@ -141,7 +143,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 
 			assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 			if (algorithm instanceof ILoggingCustomizable) {
-				((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
+				((ILoggingCustomizable) algorithm).setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 				this.logger.info("Setting logger of the AutoML tool {} to \"{}\"", algorithm.getClass(), ((ILoggingCustomizable) algorithm).getLoggerName());
 			}
 

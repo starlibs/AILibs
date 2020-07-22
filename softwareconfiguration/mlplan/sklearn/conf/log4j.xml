@@ -98,7 +98,7 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 
-	<logger name="testers">
+	<logger name="tester">
 		<level value="debug" />
 		<appender-ref ref="console" />
 		<appender-ref ref="infoFileAppender" />
@@ -216,7 +216,7 @@
 
 	<!-- configuration for ML-Plan Test logging -->
 	<logger name="testedalgorithm">
-		<level value="debug" />
+		<level value="warn" />
 
 		<appender-ref ref="console" />
 		<appender-ref ref="infoFileAppender" />
@@ -243,12 +243,12 @@
 
 	<logger
 		name="testedalgorithm.optimizingfactory.optimizer.hasco.search">
-		<level value="debug" />
+		<level value="info" />
 	</logger>
 
 	<logger
 		name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator">
-		<level value="debug" />
+		<level value="info" />
 	</logger>
 	
 	<logger

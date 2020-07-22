@@ -36,8 +36,8 @@ public class MLPlanScikitLearnResultDeliveryTester extends AutoMLAlgorithmResult
 			throw new AlgorithmCreationException(e);
 		}
 		assertTrue("The majority classifier already needs too much time: " + baseTime, baseTime < 60);
-		Timeout totalTimeout = new Timeout(Math.min(90, (data.size() + data.getNumAttributes()) / 1000 + 10 * baseTime), TimeUnit.SECONDS);
-		builder.withTimeOut(totalTimeout); // time out at most 90 seconds
+		Timeout totalTimeout = new Timeout(Math.min(100, 10 + (data.size() + data.getNumAttributes()) / 1000 + 15 * baseTime), TimeUnit.SECONDS);
+		builder.withTimeOut(totalTimeout); // time out at most 100 seconds
 		builder.withCandidateEvaluationTimeOut(new Timeout(totalTimeout.seconds() / 2, TimeUnit.SECONDS));
 		builder.withNodeEvaluationTimeOut(new Timeout(totalTimeout.seconds(), TimeUnit.SECONDS));
 

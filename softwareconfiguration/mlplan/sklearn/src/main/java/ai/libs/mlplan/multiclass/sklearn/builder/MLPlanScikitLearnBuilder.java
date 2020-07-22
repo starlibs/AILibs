@@ -25,7 +25,7 @@ public class MLPlanScikitLearnBuilder extends AMLPlanBuilder<ScikitLearnWrapper<
 	private static final int PYTHON_MINIMUM_REQUIRED_VERSION_REL = 3;
 	private static final int PYTHON_MINIMUM_REQUIRED_VERSION_MAJ = 5;
 	private static final int PYTHON_MINIMUM_REQUIRED_VERSION_MIN = 0;
-	private static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn" };
+	private static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn", "tpot", "pandas", "xgboost" };
 
 	private IPythonConfig pythonConfig;
 	private String[] pythonAdditionalRequiredModules;
@@ -118,7 +118,7 @@ public class MLPlanScikitLearnBuilder extends AMLPlanBuilder<ScikitLearnWrapper<
 	public MLPlan<ScikitLearnWrapper<IPrediction, IPredictionBatch>> build() {
 		if (!this.skipSetupCheck) {
 			new PythonRequirementDefinition(PYTHON_MINIMUM_REQUIRED_VERSION_REL, PYTHON_MINIMUM_REQUIRED_VERSION_MAJ, PYTHON_MINIMUM_REQUIRED_VERSION_MIN, ArrayUtils.addAll(PYTHON_REQUIRED_MODULES, this.pythonAdditionalRequiredModules))
-					.check(this.pythonConfig);
+			.check(this.pythonConfig);
 		}
 		this.setDeterministicDatasetSplitter(this.getLearnerEvaluationFactoryForSearchPhase());
 		this.setDeterministicDatasetSplitter(this.getLearnerEvaluationFactoryForSelectionPhase());

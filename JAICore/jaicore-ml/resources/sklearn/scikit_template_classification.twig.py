@@ -60,10 +60,18 @@ def parse(arff_, is_path=True):
         
         # list_attributes must be a list of tuples (name, type)
         # list_data must be either a dictionary (sparse) or a list of lists
+        class_attribute = None
         for a in dfARFF.columns:
             if a.lower() == "class":
                 class_attribute = a
+        if class_attribute is None:
+            class_attribute = dfARFF.columns[-1]
         
+        
+        # replace nan values with 0
+        dfARFF = dfARFF.fillna(0)
+        
+        # return ARFF structure object
         return ArffStructure(dfARFF, class_attribute)
     except Exception as e:
         import traceback
@@ -93,7 +101,7 @@ class ArffStructure:
         """ Reads and encapsulates arff_data which is a dictionary returned by the arff.py module.
         """
         self.data = df
-        self.input_matrix = df.drop(columns=[class_attribute]).values
+        self.input_matrix = pd.get_dummies(df.drop(columns=[class_attribute])).values
         self.output_matrix = df[[class_attribute]].values
         self.class_attribute = class_attribute
 
@@ -211,7 +219,7 @@ def run_train_mode(data):
         if targets.shape[1] != 1:
         	raise Exception("Can currently only work with single targets.")
         X = features
-        y = targets[:,0]
+        y = targets[:,0].astype("str")
     # Create instance of classifier with given parameters.
     classifier_instance = {{classifier_construct}}
     classifier_instance.fit(X, y)
@@ -231,7 +239,7 @@ def run_train_test_mode(data, testdata):
         if targets.shape[1] != 1:
         	raise Exception("Can currently only work with single targets.")
         X = features
-        y = targets[:,0]
+        y = targets[:,0].astype("str")
         print(len(X), len(y))
     # Create instance of classifier with given parameters.
     classifier_instance = {{classifier_construct}}
