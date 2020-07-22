@@ -30,9 +30,9 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 		if (attributeValue instanceof INumericAttributeValue) {
 			return ((INumericAttributeValue) attributeValue).getValue();
 		} else if (attributeValue instanceof Integer) {
-			return ((Integer) attributeValue) * 1.0;
+			return ((Integer) attributeValue);
 		} else if (attributeValue instanceof Long) {
-			return ((Long) attributeValue) * 1.0;
+			return ((Long) attributeValue);
 		} else if (attributeValue instanceof Double) {
 			return (Double) attributeValue;
 		} else if (attributeValue instanceof String && NumberUtils.isCreatable((String) attributeValue)) {
@@ -75,7 +75,16 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 		if (value == null) {
 			return null;
 		}
-		return this.getAttributeValueAsDouble(value) + "";
+		Double doubleValue = this.getAttributeValueAsDouble(value);
+
+		if (doubleValue % 1 == 0) {
+			if (doubleValue > Integer.MAX_VALUE) {
+				return doubleValue.longValue() + "";
+			} else {
+				return doubleValue.intValue() + "";
+			}
+		}
+		return doubleValue + "";
 	}
 
 	@Override
