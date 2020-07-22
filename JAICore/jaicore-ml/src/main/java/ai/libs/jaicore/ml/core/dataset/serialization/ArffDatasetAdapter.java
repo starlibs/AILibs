@@ -246,7 +246,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			int cI = 0;
 			for (int i = 0; i < lineSplit.length; i++) {
 				final Object value;
-				if (lineSplit[i].equals(V_MISSING_VALUE)) {
+				if (lineSplit[i].trim().equals(V_MISSING_VALUE)) {
 					value = null;
 				} else {
 					value = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
