@@ -22,9 +22,7 @@ import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 
 /**
- * This is an example class that illustrates the usage of ML-Plan on the segment dataset of OpenML. It is configured to run for 30 seconds and to use 70% of the data for search and 30% for selection in its second phase.
- *
- * The API key used for OpenML is ML-Plan's key (read only).
+ * This is an example class that illustrates the usage of ML-Plan on the segment dataset of OpenML. It is configured to run for 30 seconds and to use 80% of the data for search and 30% for selection in its second phase.
  *
  * @author fmohr
  *
@@ -35,7 +33,7 @@ public class MLPlanOpenMLExample {
 
 	public static void main(final String[] args) throws Exception {
 
-		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(60);
+		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(3);
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 30 seconds */
@@ -46,10 +44,10 @@ public class MLPlanOpenMLExample {
 		builder.withNumCpus(4);
 		builder.withSeed(1);
 		builder.withMCCVBasedCandidateEvaluationInSearchPhase(3, .8);
+		builder.withPortionOfDataReservedForSelection(.0);
 
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setRandomSeed(1);
-		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setLoggerName("example");
 
 		try {
