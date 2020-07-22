@@ -3,6 +3,7 @@ package ai.libs.jaicore.ml.scikitwrapper;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,9 +14,11 @@ import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
@@ -74,26 +77,20 @@ import ai.libs.python.IPythonConfig;
  * @author scheiblm
  */
 public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B>
-implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
-	private static final String PYTHON_FILE_EXT = ".py";
-	private static final String MODEL_DUMP_FILE_EXT = ".pcl";
-	private static final String RESULT_FILE_EXT = ".json";
+		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 
 	private static final Logger L = LoggerFactory.getLogger(ScikitLearnWrapper.class);
+	private static final IScikitLearnWrapperConfig CONF = ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class);
 
-	private static final File TMP_FOLDER = new File("tmp"); // Folder to put the serialized arff files and the scripts in.
+	private IPythonConfig pythonConfig = ConfigFactory.create(IPythonConfig.class);
 
-	private static final File MODEL_DUMPS_DIRECTORY = new File(TMP_FOLDER, "model_dumps");
-	private static final boolean VERBOSE = false; // If true the output stream of the python process is printed.
 	private boolean listenToPidFromProcess; // If true, the PID is obtained from the python process being started by listening to according output.
-	private static final boolean DELETE_TEMPORARY_FILES_ON_EXIT = true;
 
 	private File scikitTemplate; // Path to the used python template.
 	private ILabeledDataset<ILabeledInstance> dataset;
 
 	/* Problem definition fields */
 	private EScikitLearnProblemType problemType;
-	private IPythonConfig pythonConfig = ConfigFactory.create(IPythonConfig.class);
 	private int[] targetColumns = new int[0]; // Defines which of the columns in the arff file represent the target vectors. If not set, the last column is assumed to be the target vector.
 
 	/* Identifying the wrapped sklearn instance. */
@@ -124,12 +121,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	 *             The script could not be created.
 	 */
 	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withModelDump, final EScikitLearnProblemType problemType) throws IOException {
-		if (ProcessUtil.getOS() == EOperatingSystem.MAC || ProcessUtil.getOS() == EOperatingSystem.LINUX) {
-			this.listenToPidFromProcess = true;
-		} else {
-			this.listenToPidFromProcess = false;
-		}
-
+		this.listenToPidFromProcess = (ProcessUtil.getOS() == EOperatingSystem.MAC || ProcessUtil.getOS() == EOperatingSystem.LINUX);
 		this.withModelDump = withModelDump;
 		this.constructInstruction = constructInstruction;
 		this.setProblemType(problemType);
@@ -138,15 +130,15 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		String hashCode = StringUtils.join(constructInstruction, imports).hashCode() + "";
 		this.configurationUID = hashCode.startsWith("-") ? hashCode.replace("-", "1") : "0" + hashCode;
 
-		if (!TMP_FOLDER.exists()) {
-			TMP_FOLDER.mkdirs();
+		if (!CONF.getTempFolder().exists()) {
+			CONF.getTempFolder().mkdirs();
 		}
 
 		File scriptFile = this.getSKLearnScriptFile();
 		if (!scriptFile.createNewFile() && L.isDebugEnabled()) {
 			L.debug("Script file for configuration UID {} already exists in {}", this.configurationUID, scriptFile.getAbsolutePath());
 		}
-		if (DELETE_TEMPORARY_FILES_ON_EXIT) {
+		if (CONF.getDeleteFileOnExit()) {
 			scriptFile.deleteOnExit();
 		}
 
@@ -192,7 +184,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	 */
 	private File getSKLearnScriptFile() {
 		Objects.requireNonNull(this.configurationUID);
-		return new File(TMP_FOLDER, this.configurationUID + PYTHON_FILE_EXT);
+		return new File(CONF.getTempFolder(), this.configurationUID + CONF.getPythonFileExtension());
 	}
 
 	/**
@@ -201,7 +193,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	 * @return The file where the results are to be stored.
 	 */
 	private File getResultFile(final String arffName) {
-		return new File(MODEL_DUMPS_DIRECTORY, arffName + "_" + this.configurationUID + RESULT_FILE_EXT);
+		return new File(CONF.getModelDumpsDirectory(), arffName + "_" + this.configurationUID + CONF.getResultFileExtension());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -210,13 +202,19 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		try {
 
 			/* Ensure model dump directory exists and get the name of the dump */
-			MODEL_DUMPS_DIRECTORY.mkdirs();
+			CONF.getModelDumpsDirectory().mkdirs();
 			String arffName = this.getArffName(data);
 			this.trainArff = this.getArffFile(data, arffName);
 			this.dataset = (ILabeledDataset<ILabeledInstance>) data.createEmptyCopy();
 
+			if (data.getLabelAttribute() instanceof ICategoricalAttribute) {
+				this.problemType = EScikitLearnProblemType.CLASSIFICATION;
+			} else if (data.getLabelAttribute() instanceof INumericAttribute && this.problemType != EScikitLearnProblemType.RUL) {
+				this.problemType = EScikitLearnProblemType.REGRESSION;
+			}
+
 			if (this.withModelDump) {
-				this.modelFile = new File(MODEL_DUMPS_DIRECTORY, this.configurationUID + "_" + arffName + MODEL_DUMP_FILE_EXT);
+				this.modelFile = new File(CONF.getModelDumpsDirectory(), this.configurationUID + "_" + arffName + CONF.getPickleFileExtension());
 				ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff).withOutputFile(this.modelFile);
 				skLearnWrapperCommandBuilder.withSeed(this.seed);
 				skLearnWrapperCommandBuilder.withTimeout(this.timeout);
@@ -225,7 +223,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 				if (L.isDebugEnabled()) {
 					L.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
 				}
-				DefaultProcessListener listener = new DefaultProcessListener(VERBOSE, this.listenToPidFromProcess);
+				DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
 				this.runProcess(trainCommand, listener);
 
 				if (!listener.getErrorOutput().isEmpty()) {
@@ -252,8 +250,8 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	 *             During the serialization of the data as an arff file something went wrong.
 	 */
 	private synchronized File getArffFile(final ILabeledDataset<? extends ILabeledInstance> data, final String arffName) throws IOException {
-		File arffOutputFile = new File(TMP_FOLDER, arffName + ".arff");
-		if (DELETE_TEMPORARY_FILES_ON_EXIT) {
+		File arffOutputFile = new File(CONF.getTempFolder(), arffName + ".arff");
+		if (CONF.getDeleteFileOnExit()) {
 			arffOutputFile.deleteOnExit();
 		}
 		/* If Instances with the same Instance (given the hash is collision resistant) is already serialized, there is no need for doing it once more. */
@@ -282,7 +280,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		}
 		Arrays.stream(dTest).forEach(data::add);
 
-		MODEL_DUMPS_DIRECTORY.mkdirs();
+		CONF.getModelDumpsDirectory().mkdirs();
 		String arffName = this.getArffName(data);
 		File testArff;
 		try {
@@ -305,7 +303,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 			}
 
 			try {
-				this.runProcess(testCommand, new DefaultProcessListener(VERBOSE, this.listenToPidFromProcess));
+				this.runProcess(testCommand, new DefaultProcessListener(this.listenToPidFromProcess));
 			} catch (IOException e) {
 				throw new PredictionException("Could not run scikit-learn classifier.", e);
 			}
@@ -319,7 +317,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 				L.debug("Run train test mode with {}", Arrays.toString(testCommand));
 			}
 
-			DefaultProcessListener listener = new DefaultProcessListener(VERBOSE, this.listenToPidFromProcess);
+			DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
 			try {
 				this.runProcess(testCommand, listener);
 				if (!listener.getErrorOutput().isEmpty()) {
@@ -342,8 +340,8 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		try {
 			/* Parse the result */
 			fileContent = FileUtil.readFileAsString(outputFile);
-			if (DELETE_TEMPORARY_FILES_ON_EXIT) {
-				java.nio.file.Files.delete(outputFile.toPath());
+			if (CONF.getDeleteFileOnExit()) {
+				Files.delete(outputFile.toPath());
 			}
 			ObjectMapper objMapper = new ObjectMapper();
 			this.rawLastClassificationResults = objMapper.readValue(fileContent, List.class);
@@ -361,7 +359,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 				return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification(numClasses, x.intValue())).collect(Collectors.toList()));
 			}
 			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().map(x -> x.stream().mapToDouble(y -> y).toArray()).map(SingleLabelClassification::new).collect(Collectors.toList()));
-		} else if (this.problemType == EScikitLearnProblemType.RUL) {
+		} else if (this.problemType == EScikitLearnProblemType.RUL || this.problemType == EScikitLearnProblemType.REGRESSION) {
 			if (L.isInfoEnabled()) {
 				L.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()));
 			}
@@ -493,7 +491,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 			String call = Arrays.toString(parameters).replace(",", "");
 			L.debug("Starting process {}", call.substring(1, call.length() - 1));
 		}
-		ProcessBuilder processBuilder = new ProcessBuilder(parameters).directory(TMP_FOLDER);
+		ProcessBuilder processBuilder = new ProcessBuilder(parameters).directory(CONF.getTempFolder());
 		Process process = processBuilder.start();
 		try {
 			L.debug("Started process with PID: {}", ProcessUtil.getPID(process));
@@ -512,12 +510,12 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	 *
 	 * @author wever
 	 */
-	private enum WrapperExecutionMode {
+	private enum EWrapperExecutionMode {
 		TRAIN("train"), TEST("test"), TRAIN_TEST("traintest");
 
 		private String name;
 
-		private WrapperExecutionMode(final String name) {
+		private EWrapperExecutionMode(final String name) {
 			this.name = name;
 		}
 
@@ -544,7 +542,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 
 		private String arffFile;
 		private String testArffFile;
-		private WrapperExecutionMode mode;
+		private EWrapperExecutionMode mode;
 		private String modelFile;
 		private String outputFile;
 		private long seed;
@@ -560,18 +558,18 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		}
 
 		public ScikitLearnWrapperCommandBuilder withTrainMode() {
-			return this.withMode(WrapperExecutionMode.TRAIN);
+			return this.withMode(EWrapperExecutionMode.TRAIN);
 		}
 
 		public ScikitLearnWrapperCommandBuilder withTestMode() {
-			return this.withMode(WrapperExecutionMode.TEST);
+			return this.withMode(EWrapperExecutionMode.TEST);
 		}
 
 		public ScikitLearnWrapperCommandBuilder withTrainTestMode() {
-			return this.withMode(WrapperExecutionMode.TRAIN_TEST);
+			return this.withMode(EWrapperExecutionMode.TRAIN_TEST);
 		}
 
-		private ScikitLearnWrapperCommandBuilder withMode(final WrapperExecutionMode execMode) {
+		private ScikitLearnWrapperCommandBuilder withMode(final EWrapperExecutionMode execMode) {
 			this.mode = execMode;
 			return this;
 		}
@@ -657,9 +655,13 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 			}
 			processParameters.addAll(Arrays.asList(SEED_FLAG, String.valueOf(this.seed)));
 
-			if (this.mode == WrapperExecutionMode.TEST) {
+			if (this.mode == EWrapperExecutionMode.TEST) {
 				Objects.requireNonNull(this.modelFile);
 				processParameters.addAll(Arrays.asList(MODEL_FLAG, this.modelFile));
+			}
+
+			if (ScikitLearnWrapper.this.problemType == EScikitLearnProblemType.REGRESSION) {
+				processParameters.add("--regression");
 			}
 
 			if (ScikitLearnWrapper.this.targetColumns != null && ScikitLearnWrapper.this.targetColumns.length > 0) {

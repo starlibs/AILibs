@@ -16,15 +16,19 @@ import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
 public class MLPlan4ScikitLearnRegressionCLIModule extends AMLPlan4RegressionCLIModule implements IMLPlanCLIModule {
 
 	public static final String M_RUL = "sklearn-rul";
+	public static final String M_REGRESSION = "sklearn-regression";
 
 	public MLPlan4ScikitLearnRegressionCLIModule() {
-		super(Arrays.asList(M_RUL), M_RUL, AMLPlan4RegressionCLIModule.L_AL);
+		super(Arrays.asList(M_REGRESSION, M_RUL), M_REGRESSION, AMLPlan4RegressionCLIModule.L_RMSE);
 	}
 
 	@Override
 	public MLPlanScikitLearnBuilder getMLPlanBuilderForSetting(final CommandLine cl, final ILabeledDataset fitDataset) throws IOException {
 		MLPlanScikitLearnBuilder builder = null;
 		switch (cl.getOptionValue(MLPlanCLI.O_MODULE)) {
+		case M_REGRESSION:
+			builder = MLPlanScikitLearnBuilder.forRegression();
+			break;
 		case M_RUL:
 			builder = MLPlanScikitLearnBuilder.forRUL();
 			break;

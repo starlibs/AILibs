@@ -3,9 +3,7 @@
   "components": [
     {
       "name": "sklearn.ensemble.AdaBoostRegressor",
-      "providedInterface": [
-        "BasicRegressor"
-      ],
+      "providedInterface": [ "BasicRegressor" ],
       "requiredInterface": [
         {
           "id": "base_estimator",
