@@ -29,7 +29,7 @@ public interface IMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, I
 	 * This is the splitter that splits the given input data into data for the search phase and for the selection phase
 	 * @return
 	 */
-	public IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<? extends ILabeledInstance>> getSearchSelectionDatasetSplitter();
+	public IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> getSearchSelectionDatasetSplitter();
 
 	/**
 	 * This is the factory that will be used to create the pipeline evaluators for evaluation during search time
