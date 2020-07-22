@@ -410,7 +410,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 	private static void serializeMetaData(final BufferedWriter bw, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
 		StringBuilder sb = new StringBuilder();
-		sb.append(EArffItem.RELATION.getValue() + " " + data.getRelationName());
+		sb.append(EArffItem.RELATION.getValue() + " '" + data.getRelationName() + "'");
 		sb.append("\n");
 		sb.append("\n");
 		for (IAttribute att : data.getInstanceSchema().getAttributeList()) {
