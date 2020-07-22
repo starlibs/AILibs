@@ -348,7 +348,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 			ObjectMapper objMapper = new ObjectMapper();
 			this.rawLastClassificationResults = objMapper.readValue(fileContent, List.class);
 		} catch (IOException e) {
-			throw new PredictionException("Could not read result file or parse the json content to a list.");
+			throw new PredictionException("Could not read result file or parse the json content to a list.", e);
 		}
 
 		/* Since Scikit supports multiple target results but Weka does not, the results have to be flattened.

@@ -8,6 +8,7 @@ import sys
 import warnings
 from scipy.io import arff as scipy_arff
 from os.path import join as path_join
+import pandas as pd
 {{imports}}
 
 OUTPUT_FILE = None
@@ -16,8 +17,7 @@ OUTPUT_FILE = None
 ArffStructure and parse implemented by Amin Faez.
 """
 
-
-def parse(arff_, is_path=True, dense_mode=True):
+def parse(arff_, is_path=True):
     """ Opens and reads the file located at path.
     May also be called with the content string.
     arff_: either  arff file path or arff file content. treated based on how is_bath is assigned.
@@ -29,19 +29,42 @@ def parse(arff_, is_path=True, dense_mode=True):
         arff_data = open(arff_, 'r')
     else:
         arff_data = arff_  # here path is actually the content of an arff file.
+        
+    ## automatically find out whether the file is a sparse file
+    seenData = False
+    for x in arff_data:
+        if x.isspace():
+            continue
+        if "@data" in x:
+            seenData = True
+            continue
+        if not seenData:
+            continue
+        dense_mode =  not ("{" in x and "}" in x)
+        break
+    
     try:
-        try:
-            if dense_mode:
-                mode = arff.DENSE
-            else:
-                mode = arff.LOD
-            arff_parsed = arff.load(arff_data, return_type=mode, encode_nominal=True)
-        except:  # exception is thrown when sparse data is loaded in DENSE mode.
-            if dense_mode:
-                arff_parsed = parse(arff_, is_path, False)  # arff may be in sparse format.
-
-        obj = ArffStructure(arff_parsed)
-        return obj
+        if is_path: # reload file, because we scanned over it already
+            arff_data = open(arff_, 'r')
+        if dense_mode:
+            dfARFF = pd.DataFrame(scipy_arff.loadarff(arff_data)[0])
+        else:
+            arff_parsed = arff.load(arff_data, return_type=arff.LOD, encode_nominal=True)
+            list_attributes = arff_parsed["attributes"]
+            list_data = arff_parsed["data"]
+            rows = np.zeros((len(list_data), len(list_attributes)))
+            for i, entry in enumerate(list_data):
+                for attr_index in entry:
+                    rows[i][attr_index] = entry[attr_index]
+            dfARFF = pd.DataFrame(rows, columns=[a[0] for a in list_attributes])
+        
+        # list_attributes must be a list of tuples (name, type)
+        # list_data must be either a dictionary (sparse) or a list of lists
+        for a in dfARFF.columns:
+            if a.lower() == "class":
+                class_attribute = a
+        
+        return ArffStructure(dfARFF, class_attribute)
     except Exception as e:
         import traceback
         traceback.print_tb(e.__traceback__)
@@ -66,87 +89,13 @@ class ArffStructure:
         from the arff file in a one-hot manner.
     """
 
-    def __init__(self, arff_data):
+    def __init__(self, df, class_attribute):
         """ Reads and encapsulates arff_data which is a dictionary returned by the arff.py module.
         """
-        # attribute list containing a tuples (x,y).
-        #  x = attribute name. y = attribute type.
-        attributes_list = arff_data['attributes']
-        # list of data entries. data entries are lists.
-        data_list = arff_data['data']
-
-        # looking for the class attribute in the list and extracting it.
-        class_index = 0  # save at which index the class attribute was found
-
-        for tupel in attributes_list:
-            if tupel[0] == 'class':
-                classtupel = tupel
-                self.class_list = classtupel[1]
-                attributes_list.remove(tupel)  # Now attribute list only consists of input attributes
-                break
-            class_index += 1
-
-        if not hasattr(self, 'class_list'):
-            # class list couldn't be found. use last tuple in attributes_list instead
-            self.class_list = attributes_list.pop()[1]
-            class_index = len(attributes_list)
-
-        self.in_size = len(attributes_list)
-        if type(self.class_list) == str:
-            # class is only a single type
-            self.out_size = 1
-        else:
-            self.out_size = len(self.class_list)
-
-        # Now, extract data from data_list which was taken from arff
-        self.input_matrix = []
-        self.output_matrix = []
-
-        # true, if arff was in a sparse format. (Im new to python and don't know how to use duck typing here.)
-        sparse_format = type(data_list[0]) == dict
-
-        # stores the accumulated values for every entry in attribute.
-        # We need this to fill missing data with the median of attribute values. *See end of method*
-        acc_list = [0] * (self.in_size + 1)
-        missing_list = []  # list of tuple. stores the position of every missing entry.
-        entry_index = 0
-        for entry in data_list:
-            self.input_matrix.append([])  # append a new empty row
-            # every entry contains a value for each attribute. Extract it and add it to the value_list
-            # for every attribute extract value
-            for attr_index in range(self.in_size + 1):
-                if sparse_format:
-                    # If sparse_format, entry is a dict (x,y). x is index of attribute. y is value.
-                    if attr_index in entry:  # value wasn't omitted.
-                        value = (entry[attr_index])  # may return None if "?" value was used
-                    else:  # was omitted in the arff data. So the value is 0.
-                        value = 0
-                else:
-                    # Not sparse_format so entry is a list of every value.
-                    value = entry[attr_index]  # may return None if "?" value was used
-                # value has been extracted. Now decide where to store it
-                if attr_index == class_index:  # value is class number. add to output
-                    # one hot the output to be used with soft max in Tensorflow
-                    self.output_matrix.append([])
-                    for class_index_ in range(self.out_size):
-                        self.output_matrix[-1].append(1 if class_index_ == value else 0)
-                else:  # add to input
-                    self.input_matrix[-1].append(value)  # add value to the last row
-                    if value is not None:  # value is available
-                        acc_list[attr_index] += value
-                    else:  # value is missing. add entry to missing_list
-                        missing_list.append((entry_index, attr_index))
-
-                    acc_list[attr_index] += value if value else 0  # accumulate value for this attribute
-
-            entry_index += 1
-        # store data set length
-        self.entry_size = len(self.input_matrix)
-
-        # substitute missing values with the average of the attribute
-        for tupel in missing_list:
-            self.input_matrix[tupel[0]][tupel[1]] = acc_list[tupel[1]] / len(data_list)  # mean of this attribute
-
+        self.data = df
+        self.input_matrix = df.drop(columns=[class_attribute]).values
+        self.output_matrix = df[[class_attribute]].values
+        self.class_attribute = class_attribute
 
 def get_filename(path_of_file):
     """
@@ -259,16 +208,13 @@ def run_train_mode(data):
         features, targets = get_feature_target_matrices(data)
     else:
         features, targets = data.input_matrix, data.output_matrix
-        y_train = []
-        for crow in targets:
-            for x in range(0, len(crow)):
-                if crow[x] == 1:
-                    y_train.append(x)
-        targets = np.array(y_train)
-        features = np.array(features)
+        if targets.shape[1] != 1:
+        	raise Exception("Can currently only work with single targets.")
+        X = features
+        y = targets[:,0]
     # Create instance of classifier with given parameters.
     classifier_instance = {{classifier_construct}}
-    classifier_instance.fit(features, targets)
+    classifier_instance.fit(X, y)
     serialize_model(classifier_instance)
 
 def run_train_test_mode(data, testdata):
@@ -282,16 +228,14 @@ def run_train_test_mode(data, testdata):
         features, targets = get_feature_target_matrices(data)
     else:
         features, targets = data.input_matrix, data.output_matrix
-        y_train = []
-        for crow in targets:
-            for x in range(0, len(crow)):
-                if crow[x] == 1:
-                    y_train.append(x)
-        targets = np.array(y_train)
-        features = np.array(features)
+        if targets.shape[1] != 1:
+        	raise Exception("Can currently only work with single targets.")
+        X = features
+        y = targets[:,0]
+        print(len(X), len(y))
     # Create instance of classifier with given parameters.
     classifier_instance = {{classifier_construct}}
-    classifier_instance.fit(features, targets)
+    classifier_instance.fit(X, y)
     
     if sys.argv["regression"]:
         test_features, test_targets = get_feature_target_matrices(testdata)

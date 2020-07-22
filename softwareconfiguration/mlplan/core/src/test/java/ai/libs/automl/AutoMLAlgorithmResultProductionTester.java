@@ -81,11 +81,11 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 			//			problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary l�ppt
 			//			problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary l�ppt
 			//			problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
-			//			problemSets.add(new OpenMLProblemSet(1457)); // amazon
+			problemSets.add(new OpenMLProblemSet(1457)); // amazon
 			//			problemSets.add(new OpenMLProblemSet(1501)); // semeion
 			//			problemSets.add(new OpenMLProblemSet(1590)); // adult
 			//			problemSets.add(new OpenMLProblemSet(4136)); // dexter
-			problemSets.add(new OpenMLProblemSet(4137)); // dorothea
+			//			problemSets.add(new OpenMLProblemSet(4137)); // dorothea
 			//			problemSets.add(new OpenMLProblemSet(40668)); // connect-4
 			//			problemSets.add(new OpenMLProblemSet(40691)); // winequality
 			//			problemSets.add(new OpenMLProblemSet(40927)); // cifar-10

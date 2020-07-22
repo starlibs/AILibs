@@ -140,9 +140,14 @@
 		name="ai.libs.mlplan.multiclass.sklearn.SKLearnClassifierFactory">
 		<level value="debug" />
 	</logger>
+	
 	<logger
 		name="ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder">
 		<level value="info" />
+	</logger>
+	
+	<logger name="ai.libs.jaicore.ml.scikitwrapper">
+		<level value="debug" />
 	</logger>
 
 	<logger name="ai.libs.jaicore.ml.regression">

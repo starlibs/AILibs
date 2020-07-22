@@ -2,6 +2,7 @@ package ai.libs.automl;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -12,29 +13,41 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.builder.HASCOBuilder;
+import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFD;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
+import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.mlplan.core.IProblemType;
 
 public abstract class AbstractSearchSpaceConfigurationTest {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger("mlplan");
+	private static final Logger LOGGER = LoggerFactory.getLogger(LoggerUtil.);
 
 	protected final IProblemType<?> problemType;
 	protected final List<ComponentInstance> allComponentInstances;
 	protected StringBuilder stringBuilder;
+	protected final File searchSpaceFile;
 
 	public AbstractSearchSpaceConfigurationTest(final IProblemType<?> problemType) throws IOException {
 		this.problemType = problemType;
-		this.allComponentInstances = new ArrayList<>(ComponentUtil.getAllAlgorithmSelectionInstances(this.problemType.getRequestedInterface(),
-				new ComponentLoader(FileUtil.getExistingFileWithHighestPriority(this.problemType.getSearchSpaceConfigFileFromResource(), this.problemType.getSearchSpaceConfigFromFileSystem())).getComponents()));
+		this.searchSpaceFile = FileUtil.getExistingFileWithHighestPriority(this.problemType.getSearchSpaceConfigFileFromResource(), this.problemType.getSearchSpaceConfigFromFileSystem());
+		this.allComponentInstances = new ArrayList<>(ComponentUtil.getAllAlgorithmSelectionInstances(this.problemType.getRequestedInterface(), new ComponentLoader(this.searchSpaceFile).getComponents()));
 
 	}
 
 	@Test
-	public void testDefaultConfigs() throws Exception {
+	public void testNoExceptionsInGraphGeneration() throws Exception {
+		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(this.searchSpaceFile, this.problemType.getRequestedInterface(), ci -> 0.0);
+		HASCOViaFD<Double> hasco = HASCOBuilder.get(problem).withBestFirst().viaRandomCompletions().getAlgorithm();
+		hasco.call();
+	}
+
+	@Test
+	public void testExecutabilityOfDefaultConfigs() throws Exception {
 		LOGGER.info("Testing default configurations for {}", this.problemType.getName());
 		int numberOfPipelinesFound = 0;
 		int numberOfErrorsFound = 0;
@@ -80,7 +93,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 	}
 
 	@Test
-	public void testMinConfigs() throws Exception {
+	public void testExecutabilityOfMinConfigs() throws Exception {
 		LOGGER.info("Testing minimum configurations for {}", this.problemType.getName());
 		int numberOfPipelinesFound = 0;
 		int numberOfErrorsFound = 0;
@@ -126,7 +139,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 	}
 
 	@Test
-	public void testMaxConfigs() throws Exception {
+	public void testExecutabilityOfMaxConfigs() throws Exception {
 		LOGGER.info("Testing maximum configurations for {}", this.problemType.getName());
 		int numberOfPipelinesFound = 0;
 		int numberOfErrorsFound = 0;
@@ -172,7 +185,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 	}
 
 	@Test
-	public void testCatConfigs() throws Exception {
+	public void testExecutabilityOfCatConfigs() throws Exception {
 		LOGGER.info("Testing categorical configurations for {}", this.problemType.getName());
 		int numberOfPipelinesFound = 0;
 		int numberOfErrorsFound = 0;
