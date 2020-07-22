@@ -539,6 +539,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		private static final String MODEL_FLAG = "--model";
 		private static final String OUTPUT_FLAG = "--output";
 		private static final String SEED_FLAG = "--seed";
+		private static final String REGRESSION_FLAG = "--regression";
 
 		private String arffFile;
 		private String testArffFile;
@@ -661,7 +662,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			}
 
 			if (ScikitLearnWrapper.this.problemType == EScikitLearnProblemType.REGRESSION) {
-				processParameters.add("--regression");
+				processParameters.add(REGRESSION_FLAG);
 			}
 
 			if (ScikitLearnWrapper.this.targetColumns != null && ScikitLearnWrapper.this.targetColumns.length > 0) {
