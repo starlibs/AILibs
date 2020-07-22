@@ -36,6 +36,11 @@ public class JobSchedulingProblemBuilder {
 		return this.withWorkcenter("W", null);
 	}
 
+	public JobSchedulingProblemBuilder singleOperationAndSingleMachine() {
+		this.singleStaged();
+		return this.withMachineForWorkcenter("M", "W", 0, 0);
+	}
+
 	public JobSchedulingProblemBuilder withParallelMachines(final int k) {
 		this.machines.clear();
 		for (Entry<String, Workcenter> wcEntry : this.workcenters.entrySet()) {
@@ -52,6 +57,24 @@ public class JobSchedulingProblemBuilder {
 			throw new IllegalArgumentException("A job with ID " + jobID + " has already been defined.");
 		}
 		this.jobs.put(jobID, new Job(jobID, releaseDate, dueDate, weight));
+		return this;
+	}
+
+	public JobSchedulingProblemBuilder withSingleOpJob(final int processingTime, final int weight) {
+		int id = 1;
+		String jobId = "J" + id;
+		while (this.jobs.containsKey(jobId)) {
+			id ++;
+			jobId = "J" + id;
+		}
+		this.withJob(jobId, 0, 0, weight);
+		id = 1;
+		String opId = "O" + id;
+		while (this.operations.containsKey(opId)) {
+			id ++;
+			opId = "O" + id;
+		}
+		this.withOperationForJob(opId, jobId, processingTime, 0, "W");
 		return this;
 	}
 

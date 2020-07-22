@@ -125,13 +125,10 @@ public class RestSqlAdapter implements IDatabaseAdapter {
 			CloseableHttpResponse response = client.execute(post);
 			this.logger.info("Received response. Now processing the result.");
 			int statusCode = response.getStatusLine().getStatusCode();
-			if(statusCode/100 == 4 || statusCode/100 == 5) {
+			if (statusCode / 100 == 4 || statusCode / 100 == 5) {
 				// status code is 4xx or 5xx
 				String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-				logger.error("SQLasRESTServer returned status code: {}."
-								+ " \nThe sql query was: {}."
-								+ " \nThe response body is: {}",
-						statusCode, query, responseBody);
+				this.logger.error("SQLasRESTServer returned status code: {}." + " \nThe sql query was: {}." + " \nThe response body is: {}", statusCode, query, responseBody);
 				throw new SQLException("SQL Server error: " + responseBody);
 			}
 			assert (statusCode == HttpStatus.SC_OK);

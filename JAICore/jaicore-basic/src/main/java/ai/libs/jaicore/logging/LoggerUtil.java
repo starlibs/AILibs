@@ -8,6 +8,10 @@ import ai.libs.jaicore.basic.sets.Pair;
 
 public class LoggerUtil {
 
+	public static final String LOGGER_NAME_EXAMPLE = "example"; // name for loggers of an object describing an example usage
+	public static final String LOGGER_NAME_TESTER = "tester"; // name for loggers that conduct tests
+	public static final String LOGGER_NAME_TESTEDALGORITHM = "testedalgorithm"; // name for loggers of algorithms that ARE tested within a test
+
 	private static final String INDENTED_LINEBREAK = "\n\t\t";
 
 	private LoggerUtil() {
