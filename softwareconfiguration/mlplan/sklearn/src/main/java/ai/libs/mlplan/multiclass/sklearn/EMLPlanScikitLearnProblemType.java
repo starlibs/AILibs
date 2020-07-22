@@ -10,6 +10,7 @@ import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformance
 import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
+import ai.libs.jaicore.ml.regression.loss.ERegressionPerformanceMeasure;
 import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.IProblemType;
@@ -24,6 +25,11 @@ public enum EMLPlanScikitLearnProblemType implements IProblemType<ScikitLearnWra
 			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(),
 			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getRequestedInterface(), EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getRequestedBasicProblemInterface(), EClassificationPerformanceMeasure.ERRORRATE,
 			EClassificationPerformanceMeasure.ERRORRATE, CLASSIFICATION_MULTICLASS.getLearnerFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter()), //
+
+	REGRESSION(EScikitLearnProblemType.REGRESSION, "automl/searchmodels/sklearn/mlplan-regression.json", EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
+			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), "AbstractRegressor",
+			"BasicRegressor", ERegressionPerformanceMeasure.RMSE, ERegressionPerformanceMeasure.RMSE, new ScikitLearnRegressorFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter()), //
+
 	RUL(EScikitLearnProblemType.RUL, "automl/searchmodels/sklearn/sklearn-rul.json", "conf/sklearn-rul.json", null, "conf/sklearn-preferenceList.txt", "MLPipeline", "BasicRegressor", ERulPerformanceMeasure.ASYMMETRIC_LOSS,
 			ERulPerformanceMeasure.ASYMMETRIC_LOSS, new ScikitLearnRULFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter());
 

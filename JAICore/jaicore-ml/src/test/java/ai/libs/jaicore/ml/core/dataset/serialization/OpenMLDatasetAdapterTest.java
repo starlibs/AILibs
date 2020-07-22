@@ -65,7 +65,7 @@ public class OpenMLDatasetAdapterTest {
 	@Parameters(name = "{0}")
 	public static Collection<OpenMLProblemSet[]> data() throws IOException, Exception {
 		List<OpenMLProblemSet> problemSets = new ArrayList<>();
-		Arrays.asList(
+		Arrays.asList(//
 //				3, // kr-vs-kp
 //				9, // autos
 //				24, // mushroom
@@ -87,22 +87,21 @@ public class OpenMLDatasetAdapterTest {
 //				1152, // AP_Prostate_Ovary
 //				1156, // AP_Omentum_Ovary
 //				1240, // AirlinesCodmaAdult
-//				1457, // amazon
+				1457, // amazon
 //				1501, // semeion
 //				1590, // adult
 //				4136, // dexter
 //				4137, // dorothea
 //				23512, // higgs
-				40594, // Reuters
+//				40594, // Reuters => Multi target
 //				40668, // connect-4
 //				40691, // wine-quality-red
-				40927, // CIFAR-10
+//				40927, // CIFAR-10
 //				41026, // gisette
 //				41064, // convex
 //				41065, // mnist rotation
 //				41066, // secom
-				41103, // STL-10
-				42123 // articleinfluence
+				42123 // articleinfluence => string attribute
 		).stream().forEach(t -> {
 			try {
 				problemSets.add(OpenMLDatasetAdapterTest.register(t));

@@ -137,7 +137,8 @@ def load_arff_file(arff_path):
     # Load the arff dataset and convert the data into array.
     if sys.argv["regression"]:
         data, meta = scipy_arff.loadarff(arff_path)
-        data = np.asarray(data.tolist(), dtype=np.float64)
+        #data = np.asarray(data.tolist(), dtype=np.float64)
+        data = np.array(data)
         if len(data) <= 1:
             raise ValueError("Not enough data points in : " + arff_path)
     else:

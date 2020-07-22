@@ -40,6 +40,10 @@ public class MLPlanScikitLearnBuilder extends AMLPlanBuilder<ScikitLearnWrapper<
 		return new MLPlanScikitLearnBuilder(EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES);
 	}
 
+	public static MLPlanScikitLearnBuilder forRegression() throws IOException {
+		return new MLPlanScikitLearnBuilder(EMLPlanScikitLearnProblemType.REGRESSION);
+	}
+
 	public static MLPlanScikitLearnBuilder forRUL() throws IOException {
 		return new MLPlanScikitLearnBuilder(EMLPlanScikitLearnProblemType.RUL);
 	}
