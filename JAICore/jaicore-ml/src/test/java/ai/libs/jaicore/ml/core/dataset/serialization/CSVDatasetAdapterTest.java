@@ -1,5 +1,7 @@
 package ai.libs.jaicore.ml.core.dataset.serialization;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -13,7 +15,9 @@ public class CSVDatasetAdapterTest {
 	@Test
 	public void testWriteDataset() throws DatasetDeserializationFailedException, IOException {
 		ILabeledDataset<ILabeledInstance> dataset = OpenMLDatasetReader.deserializeDataset(31);
-		CSVDatasetAdapter.writeDataset(new File("test.csv"), dataset);
+		File f = new File("test.csv");
+		CSVDatasetAdapter.writeDataset(f, dataset);
+		assertTrue(f.exists());
 	}
 
 }

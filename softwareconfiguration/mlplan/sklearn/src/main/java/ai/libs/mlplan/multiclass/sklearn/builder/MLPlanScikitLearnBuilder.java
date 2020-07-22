@@ -30,7 +30,6 @@ public class MLPlanScikitLearnBuilder extends AMLPlanBuilder<ScikitLearnWrapper<
 	private IPythonConfig pythonConfig;
 	private String[] pythonAdditionalRequiredModules;
 	private final boolean skipSetupCheck;
-	private boolean cacheSplits = true;
 
 	public static MLPlanScikitLearnBuilder forClassification() throws IOException {
 		return new MLPlanScikitLearnBuilder(EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS);
@@ -76,11 +75,6 @@ public class MLPlanScikitLearnBuilder extends AMLPlanBuilder<ScikitLearnWrapper<
 	public MLPlanScikitLearnBuilder withProblemType(final IProblemType<ScikitLearnWrapper<IPrediction, IPredictionBatch>> problemType) throws IOException {
 		super.withProblemType(problemType);
 		this.pythonAdditionalRequiredModules = ((EMLPlanScikitLearnProblemType) problemType).getSkLearnProblemType().getPythonRequiredModules();
-		return this.getSelf();
-	}
-
-	public MLPlanScikitLearnBuilder withCacheSplits(final boolean cacheSplits) {
-		this.cacheSplits = cacheSplits;
 		return this.getSelf();
 	}
 
