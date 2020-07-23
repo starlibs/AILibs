@@ -6,7 +6,7 @@
 
 
 # AILibs
-AILibs is a modular collection of Java libraries related to automated decision making. It's highlight projects are:
+AILibs is a modular collection of Java libraries related to automated decision making. It's highlight functionalities are:
 * Graph Search ([jaicore-search](https://fmohr.github.io/AILibs/projects/jaicore-search/)):  (AStar, BestFirst, Branch & Bound, DFS, MCTS, and more)
 * Logic (`jaicore-logic`): Represent and reason about propositional and simple first order logic formulas
 * Planning (`jaicore-planning`): State-space planning (STRIPS, PDDL), and hierarchical planning (HTN, ITN, PTN)
