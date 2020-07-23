@@ -12,7 +12,7 @@ AILibs is a modular collection of Java libraries related to automated decision m
 * Planning (`jaicore-planning`): State-space planning (STRIPS, PDDL), and hierarchical planning (HTN, ITN, PTN)
 * Reproducible Experiments ([jaicore-experiments](https://fmohr.github.io/AILibs/projects/jaicore-experiments/)): Design and efficiently conduct experiments in a highly parallelized manner.
 * Automated Software Configuration ([HASCO](https://fmohr.github.io/AILibs/projects/hasco/)): Hierarchical configuration of software systems.
-* Automated Machine Learning ([ML-Plan](https://fmohr.github.io/AILibs/projects/mlplan/)`): Automatically find optimal machine learning pipelines in WEKA or sklearn
+* Automated Machine Learning ([ML-Plan](https://fmohr.github.io/AILibs/projects/mlplan/)): Automatically find optimal machine learning pipelines in WEKA or sklearn
 
 All algorithms in AILibs are steppable, and their behavior can be analyzed via the algorithm inspector: `jaicore-algorithminspector`. For example, graph search algorithms send events that allow a graph visualization in the algorithm inspector.
 
