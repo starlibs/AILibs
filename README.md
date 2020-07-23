@@ -6,30 +6,37 @@
 
 
 # AILibs
-AILibs is a collection of Java libraries related to automated decision making. It currently consists of two building blocks. It is also home of the current version of the AutoML-tool [ML-Plan](https://fmohr.github.io/AILibs/projects/mlplan/).
+AILibs is a modular collection of Java libraries related to automated decision making. It's highlight functionalities are:
+* Graph Search ([jaicore-search](https://fmohr.github.io/AILibs/projects/jaicore-search/)):  (AStar, BestFirst, Branch & Bound, DFS, MCTS, and more)
+* Logic (`jaicore-logic`): Represent and reason about propositional and simple first order logic formulas
+* Planning (`jaicore-planning`): State-space planning (STRIPS, PDDL), and hierarchical planning (HTN, ITN, PTN)
+* Reproducible Experiments ([jaicore-experiments](https://fmohr.github.io/AILibs/projects/jaicore-experiments/)): Design and efficiently conduct experiments in a highly parallelized manner.
+* Automated Software Configuration ([HASCO](https://fmohr.github.io/AILibs/projects/hasco/)): Hierarchical configuration of software systems.
+* Automated Machine Learning ([ML-Plan](https://fmohr.github.io/AILibs/projects/mlplan/)): Automatically find optimal machine learning pipelines in WEKA or sklearn
 
-* **JAICore** (Java AI Core) is a collection of projects with basic general purpose AI algorithms mainly in the area of logic reasoning, heuristic search, and machine learning
-* **softwareconfiguration** is a collection of projects related to automatically configuring software systems. Here we also maintain the code for our AutoML flagship **[ML-Plan](https://fmohr.github.io/AILibs/projects/mlplan/)**
+All algorithms in AILibs are steppable, and their behavior can be analyzed via the algorithm inspector: `jaicore-algorithminspector`. For example, graph search algorithms send events that allow a graph visualization in the algorithm inspector.
 
-**[Find out more about AILibs and how to use it.](https://fmohr.github.io/AILibs/)
+[Find out more about AILibs and how to use it or how to contribute.](https://fmohr.github.io/AILibs/)
 
 ## Using AILibs in your project
 You can resolve each of our projects via a Maven dependency (using Maven central as repository).
+For example, to bind in our machine learning library `jaicore-ml`, you can do the following:
 ### Maven
 ```
 <dependency>
   <groupId>ai.libs</groupId>
   <artifactId>jaicore-ml</artifactId>
-  <version>0.2.0</version>
+  <version>0.2.2</version>
 </dependency>
 ```
 
 ### Gradle 
 ```gradle
 dependencies {
-    implementation 'ai.libs:jaicore-ml:0.2.0'
+    implementation 'ai.libs:jaicore-ml:0.2.2'
 }
 ```
+For more details, refer to the [documentation](https://fmohr.github.io/AILibs/) of the respective module.
 
 ## Setting up your IDE to work with AILibs
 ### Eclipse
@@ -60,24 +67,3 @@ Then open Eclipse and go to the import menu, e.g., in the package manager. Choos
 
 * [HASCO](https://javadoc.io/doc/ai.libs/hasco/)
 * [ML-Plan](https://javadoc.io/doc/ai.libs/mlplan/)
-
-
-## Troubleshooting
-
-### Maven dependency resolvement problems
-
-In some cases, Maven is not able to import referenced dependencies on repositories different from the central Maven repositories, resulting in a build failure. 
-To solve this problem, one might add the following repositories to the ```pom.xml``` to be able to properly execute ```maven compile``` or similar:
-
-```
-<repositories>
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
-    <repository>
-        <id>nexus.cs.upb</id>
-        <url>https://nexus.cs.upb.de/repository/maven-releases/</url>
-    </repository>
-</repositories>
-```
