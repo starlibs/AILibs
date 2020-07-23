@@ -16,7 +16,7 @@ AILibs is a modular collection of Java libraries related to automated decision m
 
 All algorithms in AILibs are steppable, and their behavior can be analyzed via the algorithm inspector: `jaicore-algorithminspector`. For example, graph search algorithms send events that allow a graph visualization in the algorithm inspector.
 
-**[Find out more about AILibs and how to use it or how to contribute.](https://fmohr.github.io/AILibs/)
+[Find out more about AILibs and how to use it or how to contribute.](https://fmohr.github.io/AILibs/)
 
 ## Using AILibs in your project
 You can resolve each of our projects via a Maven dependency (using Maven central as repository).
