@@ -11,7 +11,11 @@ public class NodeInfoGUIPlugin extends ASimpleMVCPlugin<NodeInfoGUIPluginModel, 
 	private final NodeInfoGenerator<?> infoGenerator;
 
 	public NodeInfoGUIPlugin(final NodeInfoGenerator<?> infoGenerator) {
-		super();
+		this("Node Info", infoGenerator);
+	}
+
+	public NodeInfoGUIPlugin(final String title, final NodeInfoGenerator<?> infoGenerator) {
+		super(title);
 		this.infoGenerator = infoGenerator;
 	}
 

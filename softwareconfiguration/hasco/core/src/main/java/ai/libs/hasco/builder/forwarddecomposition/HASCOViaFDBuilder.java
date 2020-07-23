@@ -3,6 +3,7 @@ package ai.libs.hasco.builder.forwarddecomposition;
 import ai.libs.hasco.builder.HASCOBuilder;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.SimpleForwardDecompositionReducer;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness;
 
 public class HASCOViaFDBuilder<V extends Comparable<V>, B extends HASCOViaFDBuilder<V, B>> extends HASCOBuilder<TFDNode, String, V, B> {
 
@@ -30,7 +31,7 @@ public class HASCOViaFDBuilder<V extends Comparable<V>, B extends HASCOViaFDBuil
 		}
 		@SuppressWarnings("unchecked")
 		HASCOViaFDAndBestFirstBuilder<Double, ?> builder = (HASCOViaFDAndBestFirstBuilder<Double, ?>)this.withBestFirst();
-		builder.withNodeEvaluator(n -> 0.0);
+		builder.withReduction(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness());
 		return builder;
 	}
 

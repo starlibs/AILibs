@@ -972,7 +972,7 @@ public class SetUtil {
 	}
 
 	public static String serializeAsSet(final Collection<String> set) {
-		return set.toString().replaceAll("\\[", "{").replaceAll("\\]", "}");
+		return set.toString().replace("\\[", "{").replace("\\]", "}");
 	}
 
 	public static Set<String> unserializeSet(final String setDescriptor) {

@@ -21,7 +21,7 @@ public class BranchAndBound<N, A> extends StandardBestFirst<N, A, Double> {
 
 	public static <N, A> GraphSearchWithSubpathEvaluationsInput<N, A, Double> encodeBoundsIntoProblem(final IPathSearchWithPathEvaluationsInput<N, A, Double> problem, final int numSamplesPerNode) {
 		GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<N, A, Double> trans = new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(n -> null, n -> false,
-				new Random().nextLong(), numSamplesPerNode, 100000, 100000);
+				new Random(), numSamplesPerNode, 100000, 100000);
 		return trans.encodeProblem(problem);
 	}
 

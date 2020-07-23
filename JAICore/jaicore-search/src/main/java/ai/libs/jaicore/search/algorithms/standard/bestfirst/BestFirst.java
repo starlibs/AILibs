@@ -799,6 +799,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 	@Override
 	protected EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> registerSolution(final EvaluatedSearchGraphPath<N, A, V> solutionPath) {
 		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent = super.registerSolution(solutionPath); // this emits an event on the event bus
+		this.bfLogger.debug("Successfully registered solution on parent level, now adding the solution to the local queue.");
 		assert !this.solutions.contains(solutionEvent.getSolutionCandidate()) : "Registering solution " + solutionEvent.getSolutionCandidate() + " for the second time!";
 		this.solutions.add(solutionEvent.getSolutionCandidate());
 		synchronized (this.pendingSolutionFoundEvents) {

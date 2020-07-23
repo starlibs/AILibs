@@ -34,7 +34,7 @@ public class TimeSliderGUIPluginView extends ASimpleMVCPluginView<TimeSliderGUIP
 			timestepSliderLayout.getChildren().add(this.timestepSlider);
 
 			this.timestepSliderLabel = new Label(BASE_TEXT + ": " + 0 + "/" + model.getMaximumTimeStep());
-			timestepSliderLayout.getChildren().add(timestepSliderLabel);
+			timestepSliderLayout.getChildren().add(this.timestepSliderLabel);
 			Label spacer = new Label(" ");
 			timestepSliderLayout.getChildren().add(spacer);
 		});
@@ -62,11 +62,6 @@ public class TimeSliderGUIPluginView extends ASimpleMVCPluginView<TimeSliderGUIP
 		}
 
 		Platform.runLater(() -> this.timestepSliderLabel.setText(BASE_TEXT + ": " + model.getCurrentTimeStep() + "/" + model.getMaximumTimeStep()));
-	}
-
-	@Override
-	public String getTitle() {
-		return "Time Slider";
 	}
 
 	@Override

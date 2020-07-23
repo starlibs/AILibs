@@ -46,16 +46,9 @@ public class ControlBarGUIPluginView extends ASimpleMVCPluginView<ControlBarGUIP
 	public void update() {
 		if (this.getModel().isPaused()) {
 			this.startButton.setText("Resume");
-			// this.startButton.setDisable(false);
 		} else {
 			this.startButton.setText("Pause ");
-			// this.startButton.setDisable(true);
 		}
-	}
-
-	@Override
-	public String getTitle() {
-		return "Control Bar";
 	}
 
 	@Override

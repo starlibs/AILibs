@@ -2,13 +2,15 @@ package ai.libs.hasco.builder.forwarddecomposition;
 
 import java.util.Objects;
 
+import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
-import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 
 import ai.libs.hasco.builder.HASCOBuilder;
+import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
-import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer;
+import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 /**
  * This factory makes it easier to create HASCO objects. In contrast to the standard HASCOFactory, it is only necessary to set the problem and a node evaluator
@@ -23,7 +25,7 @@ import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraph
  */
 public class HASCOViaFDAndBestFirstBuilder<V extends Comparable<V>, B extends HASCOViaFDAndBestFirstBuilder<V, B>> extends HASCOViaFDBuilder<V, B> {
 
-	private IPathEvaluator<TFDNode, String, V> nodeEvaluator;
+	private AlgorithmicProblemReduction<IPathSearchInput<TFDNode, String>, EvaluatedSearchGraphPath<TFDNode, String, V>, GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V>, EvaluatedSearchGraphPath<TFDNode, String, V>> reduction;
 
 	public HASCOViaFDAndBestFirstBuilder(final HASCOBuilder<TFDNode, String, V, ?> b) {
 		super(b);
@@ -36,25 +38,21 @@ public class HASCOViaFDAndBestFirstBuilder<V extends Comparable<V>, B extends HA
 		return (BestFirstFactory<IPathSearchWithPathEvaluationsInput<TFDNode, String, V>, TFDNode, String, V>) super.getSearchFactory();
 	}
 
-	public B withNodeEvaluator(final IPathEvaluator<TFDNode, String, V> nodeEvaluator) {
-		Objects.requireNonNull(nodeEvaluator);
-		this.nodeEvaluator = nodeEvaluator;
+	public B withReduction(final AlgorithmicProblemReduction<IPathSearchInput<TFDNode, String>, EvaluatedSearchGraphPath<TFDNode, String, V>, GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V>, EvaluatedSearchGraphPath<TFDNode, String, V>> reduction) {
+		Objects.requireNonNull(reduction);
+		this.reduction = reduction;
 		return this.getSelf();
 
-	}
-
-	public IPathEvaluator<TFDNode, String, V> getNodeEvaluator() {
-		return this.nodeEvaluator;
 	}
 
 	@Override
 	public HASCOViaFD<V> getAlgorithm() {
 		this.requireThatProblemHasBeenDefined();
-		if (this.nodeEvaluator == null) {
-			throw new IllegalStateException("No node evaluator defined yet.");
+		if (this.reduction == null) {
+			throw new IllegalStateException("No reduction defined yet.");
 		}
 		BestFirstFactory<IPathSearchWithPathEvaluationsInput<TFDNode, String, V>, TFDNode, String, V> factory = new BestFirstFactory<>();
-		factory.setReduction(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<>(this.nodeEvaluator));
+		factory.setReduction(this.reduction);
 		HASCOViaFD<V> hasco = new HASCOViaFD<>(super.getProblem(), factory);
 		hasco.setConfig(this.getHascoConfig());
 		return hasco;

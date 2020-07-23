@@ -40,9 +40,4 @@ public class SearchRolloutHistogramPluginView extends ASimpleMVCPluginView<Searc
 		Platform.runLater(this.histogram::clear);
 	}
 
-	@Override
-	public String getTitle() {
-		return "Search Rollout Statistics";
-	}
-
 }

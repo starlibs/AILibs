@@ -17,7 +17,11 @@ import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithm
 public class HASCOModelStatisticsPlugin extends ASimpleMVCPlugin<HASCOModelStatisticsPluginModel, HASCOModelStatisticsPluginView, HASCOModelStatisticsPluginController> {
 
 	public HASCOModelStatisticsPlugin() {
-		super();
+		this("HASCO Model Statistics");
+	}
+
+	public HASCOModelStatisticsPlugin(final String title) {
+		super(title);
 	}
 
 	@Override

@@ -7,11 +7,9 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 import org.api4.java.algorithm.Timeout;
 
 import ai.libs.hasco.builder.HASCOBuilder;
-import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.core.IHascoAware;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
+import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 
 public class HASCOViaFDAndBestFirstWithRandomCompletionsBuilder extends HASCOViaFDAndBestFirstBuilder<Double, HASCOViaFDAndBestFirstWithRandomCompletionsBuilder> {
 
@@ -77,10 +75,7 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsBuilder extends HASCOVia
 
 		/* create node evaluator */
 		this.requireThatProblemHasBeenDefined();
-		IPathEvaluator<TFDNode, String, Double> pathEvaluator = HASCOUtil.getSearchProblemWithEvaluation(this.getProblem(), this.getPlanningGraphGeneratorDeriver()).getPathEvaluator();
-		IPathEvaluator<TFDNode, String, Double> nodeEvaluator = new RandomCompletionBasedNodeEvaluator<>(this.random, this.numSamples, this.numSamples * 2, pathEvaluator,
-				this.timeoutForSingleCompletionEvaluationInMS, this.timeoutForNodeEvaluationInMS, this.priorizingPredicate);
-		this.withNodeEvaluator(this.preferredNodeEvaluator != null ? new AlternativeNodeEvaluator<>(this.preferredNodeEvaluator, nodeEvaluator) : nodeEvaluator);
+		this.withReduction(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(this.preferredNodeEvaluator, this.priorizingPredicate, this.random, this.numSamples, this.timeoutForSingleCompletionEvaluationInMS, this.timeoutForNodeEvaluationInMS));
 
 		/* now get algorithm and tell some of its components about it */
 		HASCOViaFD<Double> hasco = super.getAlgorithm();

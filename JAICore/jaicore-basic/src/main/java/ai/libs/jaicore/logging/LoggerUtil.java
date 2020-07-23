@@ -45,7 +45,7 @@ public class LoggerUtil {
 		if (additionalInformationObjects != null) {
 			for (Pair<String, Object> additionalObject : additionalInformationObjects) {
 				sb.append("\n\t" + additionalObject.getX() + INDENTED_LINEBREAK);
-				sb.append(additionalObject.getY().toString().replaceAll("\n", INDENTED_LINEBREAK));
+				sb.append(additionalObject.getY().toString().replace("\n", INDENTED_LINEBREAK));
 			}
 		}
 		return sb.toString();

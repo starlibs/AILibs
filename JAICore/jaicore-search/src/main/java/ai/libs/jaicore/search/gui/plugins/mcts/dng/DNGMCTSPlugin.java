@@ -11,7 +11,11 @@ import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithm
 public class DNGMCTSPlugin extends ASimpleMVCPlugin<DNGMCTSPluginModel, DNGMCTSPluginView, DNGMCTSPluginController> {
 
 	public DNGMCTSPlugin() {
-		super();
+		this("DNG MCTS Plugin");
+	}
+
+	public DNGMCTSPlugin(final String title) {
+		super(title);
 	}
 
 	@Override

@@ -70,7 +70,7 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearc
 			return new BestFirst<>((I)reducedProblem);
 		case "bf-informed":
 			GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<N, A, Double> reducer2 = new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(n -> null,
-					n -> false, seed, 3, 10000, 10000);
+					n -> false, new Random(seed), 3, 10000, 10000);
 			return new BestFirst<>((I)reducer2.encodeProblem(input));
 		case "uct":
 			return this.getMCTS((I)input, new UCTFactory<>(), maxiter, seed);

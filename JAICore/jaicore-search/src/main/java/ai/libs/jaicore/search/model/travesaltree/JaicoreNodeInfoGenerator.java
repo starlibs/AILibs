@@ -30,7 +30,7 @@ public class JaicoreNodeInfoGenerator<N, V extends Comparable<V>> implements Nod
 		Map<String, Object> annotations = node.getAnnotations();
 
 		sb.append("<h2>Annotation</h2><table><tr><th>Key</th><th>Value</th></tr>");
-		for (Entry<String, Object> annotationEntry: annotations.entrySet()) {
+		for (Entry<String, Object> annotationEntry : annotations.entrySet()) {
 			if (!annotationEntry.getKey().equals(ENodeAnnotation.F_ERROR.toString())) {
 				sb.append("<tr><td>" + annotationEntry.getKey() + "</td><td>" + annotationEntry.getValue() + "</td></tr>");
 			}

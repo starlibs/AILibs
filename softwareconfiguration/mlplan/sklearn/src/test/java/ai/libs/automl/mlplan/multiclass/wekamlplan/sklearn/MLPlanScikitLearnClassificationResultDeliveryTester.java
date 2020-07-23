@@ -16,14 +16,14 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.Timeout;
 
-import ai.libs.automl.AutoMLAlgorithmResultProductionTester;
+import ai.libs.automl.AutoMLAlgorithmForClassificationResultProductionTester;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
 
-public class MLPlanScikitLearnResultDeliveryTester extends AutoMLAlgorithmResultProductionTester {
+public class MLPlanScikitLearnClassificationResultDeliveryTester extends AutoMLAlgorithmForClassificationResultProductionTester {
 
 	@Override
 	public IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws AlgorithmCreationException, IOException {
@@ -36,8 +36,8 @@ public class MLPlanScikitLearnResultDeliveryTester extends AutoMLAlgorithmResult
 			throw new AlgorithmCreationException(e);
 		}
 		assertTrue("The majority classifier already needs too much time: " + baseTime, baseTime < 60);
-		Timeout totalTimeout = new Timeout(Math.min(90, (data.size() + data.getNumAttributes()) / 1000 + 10 * baseTime), TimeUnit.SECONDS);
-		builder.withTimeOut(totalTimeout); // time out at most 90 seconds
+		Timeout totalTimeout = new Timeout(Math.min(100, 10 + (data.size() + data.getNumAttributes()) / 1000 + 15 * baseTime), TimeUnit.SECONDS);
+		builder.withTimeOut(totalTimeout); // time out at most 100 seconds
 		builder.withCandidateEvaluationTimeOut(new Timeout(totalTimeout.seconds() / 2, TimeUnit.SECONDS));
 		builder.withNodeEvaluationTimeOut(new Timeout(totalTimeout.seconds(), TimeUnit.SECONDS));
 

@@ -59,11 +59,6 @@ public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOMo
 	}
 
 	@Override
-	public String getTitle() {
-		return "HASCO Model Statistics";
-	}
-
-	@Override
 	public void clear() {
 		this.rootNode.clear();
 		this.histogram.clear();

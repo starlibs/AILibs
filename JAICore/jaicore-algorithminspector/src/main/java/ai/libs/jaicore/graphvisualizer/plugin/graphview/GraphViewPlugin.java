@@ -9,6 +9,14 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPro
 
 public class GraphViewPlugin extends ASimpleMVCPlugin<GraphViewPluginModel, GraphViewPluginView, GraphViewPluginController> {
 
+	public GraphViewPlugin() {
+		this("Search Graph Viewer");
+	}
+
+	public GraphViewPlugin(final String title) {
+		super(title);
+	}
+
 	@Override
 	public void stop() {
 		super.stop();
@@ -19,4 +27,5 @@ public class GraphViewPlugin extends ASimpleMVCPlugin<GraphViewPluginModel, Grap
 	public Collection<AlgorithmEventPropertyComputer> getPropertyComputers() {
 		return Arrays.asList(new NodeInfoAlgorithmEventPropertyComputer());
 	}
+
 }

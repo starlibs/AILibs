@@ -8,9 +8,12 @@ import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPlugin;
 
 public class ControlBarGUIPlugin extends ASimpleMVCPlugin<ControlBarGUIPluginModel, ControlBarGUIPluginView, ControlBarGUIPluginController> {
 
-
 	public ControlBarGUIPlugin() {
-		super();
+		this("Control Bar");
+	}
+
+	public ControlBarGUIPlugin(final String title) {
+		super(title);
 	}
 
 	@Override
