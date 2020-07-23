@@ -16,7 +16,7 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.Timeout;
 
-import ai.libs.automl.AutoMLAlgorithmResultProductionTester;
+import ai.libs.automl.AutoMLAlgorithmForClassificationResultProductionTester;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
@@ -26,7 +26,7 @@ import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
 
-public class WekaMLPlanResultDeliveryTester extends AutoMLAlgorithmResultProductionTester {
+public class WekaClassificationMLPlanResultDeliveryTester extends AutoMLAlgorithmForClassificationResultProductionTester {
 
 	@Override
 	public IAlgorithm<ILabeledDataset<?>, IWekaClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws AlgorithmCreationException {

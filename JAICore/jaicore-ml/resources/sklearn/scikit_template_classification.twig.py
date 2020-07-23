@@ -152,18 +152,15 @@ def load_arff_files(arff_path_train, arff_path_test):
     Returns content.
     """
     # Load the arff dataset and convert the data into array.
-    if sys.argv["regression"]:
-        raise Exception("Regression not supported")
-    else:
-        dfTrain, class_attribute = parse(arff_path_train)
-        dfTest, class_attribute = parse(arff_path_test)
-        dfUnion = pd.concat([dfTrain, dfTest])
-        data = ArffStructure(dfUnion, class_attribute)
-        print(len(data.input_matrix), len(data.output_matrix))
-        dfBinarized = pd.concat([data.input_df, data.output_df], axis=1)
-        dfBinarizedTrain = dfBinarized[:len(dfTrain)]
-        dfBinarizedTest = dfBinarized[len(dfTrain):]
-        return ArffStructure(dfBinarizedTrain, class_attribute), ArffStructure(dfBinarizedTest, class_attribute)
+    dfTrain, class_attribute = parse(arff_path_train)
+    dfTest, class_attribute = parse(arff_path_test)
+    dfUnion = pd.concat([dfTrain, dfTest])
+    data = ArffStructure(dfUnion, class_attribute)
+    print(len(data.input_matrix), len(data.output_matrix))
+    dfBinarized = pd.concat([data.input_df, data.output_df], axis=1)
+    dfBinarizedTrain = dfBinarized[:len(dfTrain)]
+    dfBinarizedTest = dfBinarized[len(dfTrain):]
+    return ArffStructure(dfBinarizedTrain, class_attribute), ArffStructure(dfBinarizedTest, class_attribute)
 
 def get_feature_target_matrices(data):
     """
@@ -252,29 +249,25 @@ def run_train_test_mode(data, testdata):
     the script was started with or those that were given to the template.
     Returns path to serialized model.
     """
-    if sys.argv["regression"]:
-        features, targets = get_feature_target_matrices(data)
-    else:
-        features, targets = data.input_matrix, data.output_matrix
-        if targets.shape[1] != 1:
-        	raise Exception("Can currently only work with single targets.")
-        X = features
-        y = targets[:,0].astype("str")
-        print(len(X), len(y))
+    features, targets = data.input_matrix, data.output_matrix
+    if targets.shape[1] != 1:
+        raise Exception("Can currently only work with single targets.")
+    X = features
+    y = targets[:,0].astype("str")
+    print(len(X), len(y))
     # Create instance of classifier with given parameters.
     classifier_instance = {{classifier_construct}}
     classifier_instance.fit(X, y)
     
+    test_features = np.array(testdata.input_matrix)
+    
     if sys.argv["regression"]:
-        test_features, test_targets = get_feature_target_matrices(testdata)
-    else:
-        test_features = np.array(testdata.input_matrix)
-    
-    try:
-        prediction = classifier_instance.predict_proba(test_features)
-    except:
         prediction = classifier_instance.predict(test_features)
-    
+    else:
+        try:
+            prediction = classifier_instance.predict_proba(test_features)
+        except:
+            prediction = classifier_instance.predict(test_features)
     serialize_prediction(prediction)
 
 def run_test_mode(data):

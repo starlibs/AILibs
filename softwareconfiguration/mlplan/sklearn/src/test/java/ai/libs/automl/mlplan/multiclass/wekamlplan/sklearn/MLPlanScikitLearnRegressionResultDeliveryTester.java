@@ -16,19 +16,19 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.Timeout;
 
-import ai.libs.automl.AutoMLAlgorithmResultProductionTester;
+import ai.libs.automl.AutoMLAlgorithmForRegressionResultProductionTester;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
 
-public class MLPlanScikitLearnResultDeliveryTester extends AutoMLAlgorithmResultProductionTester {
+public class MLPlanScikitLearnRegressionResultDeliveryTester extends AutoMLAlgorithmForRegressionResultProductionTester {
 
 	@Override
 	public IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws AlgorithmCreationException, IOException {
 		this.logger.info("Creating ML-Plan instance.");
-		MLPlanScikitLearnBuilder builder = MLPlanScikitLearnBuilder.forClassification();
+		MLPlanScikitLearnBuilder builder = MLPlanScikitLearnBuilder.forRegression();
 		int baseTime;
 		try {
 			baseTime = Math.max(5, (int) Math.ceil(1.2 * this.getTrainTimeOfMajorityClassifier(data) / 1000.0));
@@ -48,7 +48,7 @@ public class MLPlanScikitLearnResultDeliveryTester extends AutoMLAlgorithmResult
 
 	public int getTrainTimeOfMajorityClassifier(final ILabeledDataset<?> data) throws TrainingException, InterruptedException, DatasetDeserializationFailedException, SplitFailedException, PredictionException {
 		long start = System.currentTimeMillis();
-		List<ILabeledDataset> ds = SplitterUtil.getLabelStratifiedTrainTestSplit(data, 0, .7);
+		List<ILabeledDataset<?>> ds = SplitterUtil.getSimpleTrainTestSplit(data, 0, .7);
 		new MajorityClassifier().fitAndPredict(ds.get(0), ds.get(1));
 		return (int) (System.currentTimeMillis() - start);
 	}

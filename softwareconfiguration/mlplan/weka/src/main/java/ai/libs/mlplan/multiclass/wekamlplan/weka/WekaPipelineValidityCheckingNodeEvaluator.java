@@ -91,6 +91,11 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 		if (this.containsNegativeValues && classifierName.matches("(.*)(naivebayesmultinomial)(.*)")) {
 			throw new ControlledNodeEvaluationException("Negative numeric attribute values are not supported by the classifier.");
 		}
+
+		/* Exclude some learners for regression problems */
+		if (this.regression && classifierName.matches("(.*)(oner|smo|j48|jrip|naivebayes|logistic|lmt|bayesnet)(.*)")) {
+			throw new ControlledNodeEvaluationException("Learner does not support regression");
+		}
 	}
 
 	@Override
