@@ -63,24 +63,24 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 	public static Collection<OpenMLProblemSet[]> data() throws DatasetDeserializationFailedException {
 		try {
 			List<OpenMLProblemSet> problemSets = new ArrayList<>();
-			problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp l�ppt
-			problemSets.add(new OpenMLProblemSet(9)); // autos l�ppt
-			problemSets.add(new OpenMLProblemSet(24)); // mushroom l�ppt
-			problemSets.add(new OpenMLProblemSet(39)); // ecoli l�ppt
-			problemSets.add(new OpenMLProblemSet(44)); // spambase l�ppt
-			problemSets.add(new OpenMLProblemSet(60)); // waveform-5000 l�ppt
-			problemSets.add(new OpenMLProblemSet(61)); // iris l�ppt
-			//			problemSets.add(new OpenMLProblemSet(149)); // CovP okElec fail
-			//			problemSets.add(new OpenMLProblemSet(155)); // pokerhand fail
-			problemSets.add(new OpenMLProblemSet(182)); // satimage fail
-			problemSets.add(new OpenMLProblemSet(273)); // IMDB drama fail
-			//			problemSets.add(new OpenMLProblemSet(554)); // mnist fail
-			problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic fail
-			problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes l�ppt
-			problemSets.add(new OpenMLProblemSet(1104)); // leukemia l�ppt
-			problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung fail
-			problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary l�ppt
-			problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary l�ppt
+			problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
+			problemSets.add(new OpenMLProblemSet(9)); // autos
+			problemSets.add(new OpenMLProblemSet(24)); // mushroom
+			problemSets.add(new OpenMLProblemSet(39)); // ecoli
+			problemSets.add(new OpenMLProblemSet(44)); // spambase
+			problemSets.add(new OpenMLProblemSet(60)); // waveform-5000
+			problemSets.add(new OpenMLProblemSet(61)); // iris
+			//			problemSets.add(new OpenMLProblemSet(149)); // CovP okElec
+			//			problemSets.add(new OpenMLProblemSet(155)); // pokerhand
+			problemSets.add(new OpenMLProblemSet(182)); // satimage
+			problemSets.add(new OpenMLProblemSet(273)); // IMDB drama
+			//			problemSets.add(new OpenMLProblemSet(554)); // mnist
+			problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic
+			problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
+			problemSets.add(new OpenMLProblemSet(1104)); // leukemia
+			problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
+			problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
+			problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
 			//			//			problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
 			problemSets.add(new OpenMLProblemSet(1457)); // amazon
 			problemSets.add(new OpenMLProblemSet(1501)); // semeion

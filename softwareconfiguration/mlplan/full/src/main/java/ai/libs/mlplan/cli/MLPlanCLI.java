@@ -233,6 +233,21 @@ public class MLPlanCLI {
 
 		// set timeouts
 		builder.withTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_TIMEOUT, getDefault(O_TIMEOUT))), DEF_TIME_UNIT));
+		if (cl.hasOption(O_CANDIDATE_TIMEOUT)) {
+			builder.withCandidateEvaluationTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_CANDIDATE_TIMEOUT)), DEF_TIME_UNIT));
+		} else {
+			Timeout candidateTimeout;
+			if (builder.getTimeOut().seconds() < 60 * 5) {
+				candidateTimeout = new Timeout(30, DEF_TIME_UNIT);
+			} else if (builder.getTimeOut().seconds() < 60 * 60) {
+				candidateTimeout = new Timeout(300, DEF_TIME_UNIT);
+			} else if (builder.getTimeOut().seconds() < 60 * 60 * 12) {
+				candidateTimeout = new Timeout(600, DEF_TIME_UNIT);
+			} else {
+				candidateTimeout = new Timeout(1200, DEF_TIME_UNIT);
+			}
+			builder.withCandidateEvaluationTimeOut(candidateTimeout);
+		}
 		builder.withCandidateEvaluationTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_CANDIDATE_TIMEOUT, getDefault(O_CANDIDATE_TIMEOUT))), DEF_TIME_UNIT));
 		if (cl.hasOption(O_NODE_EVAL_TIMEOUT)) {
 			builder.withNodeEvaluationTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_NODE_EVAL_TIMEOUT, getDefault(O_NODE_EVAL_TIMEOUT))), DEF_TIME_UNIT));
@@ -250,8 +265,8 @@ public class MLPlanCLI {
 		if (cl.hasOption(O_VISUALIZATION)) {
 			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan);
 			window.withMainPlugin(new GraphViewPlugin());
-			window.withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new NodeInfoGUIPlugin(new TFDNodeAsCIViewInfoGenerator(builder.getComponents())), new SearchRolloutHistogramPlugin(),
-					new SearchRolloutBoxplotPlugin());
+			window.withPlugin(new NodeInfoGUIPlugin("Node Info", new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new NodeInfoGUIPlugin("CI View", new TFDNodeAsCIViewInfoGenerator(builder.getComponents())),
+					new SearchRolloutHistogramPlugin(), new SearchRolloutBoxplotPlugin());
 		}
 
 		// call ml-plan to obtain the optimal supervised learner

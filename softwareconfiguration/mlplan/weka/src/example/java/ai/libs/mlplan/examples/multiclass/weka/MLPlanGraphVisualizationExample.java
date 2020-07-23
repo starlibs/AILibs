@@ -49,7 +49,8 @@ public class MLPlanGraphVisualizationExample {
 		/* create visualization */
 		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan);
 		window.withMainPlugin(new GraphViewPlugin());
-		window.withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin(), new NodeInfoGUIPlugin(new TFDNodeAsCIViewInfoGenerator(mlplanBuilder.getComponents())));
+		window.withPlugin(new NodeInfoGUIPlugin("Node Info", new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new NodeInfoGUIPlugin("CI View", new TFDNodeAsCIViewInfoGenerator(mlplanBuilder.getComponents())),
+				new SearchRolloutHistogramPlugin());
 
 		try {
 			long start = System.currentTimeMillis();
