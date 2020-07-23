@@ -60,7 +60,6 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 		Objects.requireNonNull(myView);
 		Objects.requireNonNull(myModel);
 		this.model = myModel;
-		System.out.println(this.model.getClass().getSimpleName() + " " + this.getTitle() + " " + this.model.hashCode());
 		this.view = myView;
 		this.controller = myController;
 		this.model.setController(myController);

@@ -18,7 +18,6 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 public class CSVDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<ILabeledInstance>> {
 
 	public CSVDatasetAdapter() {
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override

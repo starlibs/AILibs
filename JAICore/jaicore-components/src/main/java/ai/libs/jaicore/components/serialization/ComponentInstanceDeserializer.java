@@ -41,10 +41,9 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 		Map<String, String> parameterValues = mapper.treeToValue(p.get("params"), HashMap.class);
 		// read the component
 
-		String componentName = p.get("component").toString().replaceAll("\"", "");
+		String componentName = p.get("component").toString().replace("\"", "");
 
-		Component component = this.possibleComponents.stream().filter(c -> c.getName().equals(componentName)).findFirst()
-				.orElseThrow(NoSuchElementException::new);
+		Component component = this.possibleComponents.stream().filter(c -> c.getName().equals(componentName)).findFirst().orElseThrow(NoSuchElementException::new);
 
 		Map<String, ComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<>();
 		// recursively resolve the requiredInterfaces
