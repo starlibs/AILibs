@@ -15,11 +15,6 @@ public class DefaultProcessListener extends AProcessListener {
 	/* Logging */
 	private static final Logger L = LoggerFactory.getLogger(DefaultProcessListener.class);
 
-	/**
-	 * Flag whether standard outputs are forwarded to the logger.
-	 */
-	protected final boolean verbose;
-
 	private StringBuilder errorSB;
 	private StringBuilder defaultSB;
 
@@ -28,9 +23,8 @@ public class DefaultProcessListener extends AProcessListener {
 	 *
 	 * @param verbose Flag whether standard outputs are forwarded to the logger.
 	 */
-	public DefaultProcessListener(final boolean verbose) {
+	public DefaultProcessListener() {
 		super();
-		this.verbose = verbose;
 		this.errorSB = new StringBuilder();
 		this.defaultSB = new StringBuilder();
 	}
@@ -40,9 +34,8 @@ public class DefaultProcessListener extends AProcessListener {
 	 *
 	 * @param verbose Flag whether standard outputs are forwarded to the logger.
 	 */
-	public DefaultProcessListener(final boolean verbose, final boolean listenToPIDFromProcess) {
+	public DefaultProcessListener(final boolean listenToPIDFromProcess) {
 		super(listenToPIDFromProcess);
-		this.verbose = verbose;
 		this.errorSB = new StringBuilder();
 		this.defaultSB = new StringBuilder();
 	}
@@ -50,17 +43,13 @@ public class DefaultProcessListener extends AProcessListener {
 	@Override
 	public void handleError(final String error) {
 		this.errorSB.append(error + "\n");
-		if (this.verbose) {
-			L.error(">>> {}", error);
-		}
+		L.error(">>> {}", error);
 	}
 
 	@Override
 	public void handleInput(final String input) throws IOException, InterruptedException {
 		this.defaultSB.append(input + "\n");
-		if (this.verbose) {
-			L.info(">>> {}", input);
-		}
+		L.info(">>> {}", input);
 	}
 
 	public String getErrorOutput() {

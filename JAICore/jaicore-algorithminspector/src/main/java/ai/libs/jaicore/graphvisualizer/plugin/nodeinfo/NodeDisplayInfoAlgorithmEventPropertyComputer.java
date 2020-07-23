@@ -52,7 +52,6 @@ public class NodeDisplayInfoAlgorithmEventPropertyComputer<N> implements Algorit
 
 	private String getNodeInfoForNodeIfTypeFits(final N node) {
 		return this.nodeInfoGenerator.generateInfoForNode(node);
-
 	}
 
 	@Override

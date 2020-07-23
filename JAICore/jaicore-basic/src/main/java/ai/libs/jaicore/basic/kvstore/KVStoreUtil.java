@@ -54,8 +54,8 @@ public class KVStoreUtil {
 			String[] cellFormattingSplit = store.getAsString(cellFormatting).split("#");
 			List<String> cleanedCellFormatting = Arrays.stream(cellFormattingSplit).filter(x -> !x.equals("")).collect(Collectors.toList());
 
-			String rowValue = store.getAsString(rowIndex).replaceAll("\\_", "\\\\_");
-			String columnValue = store.getAsString(columnIndex).replaceAll("\\_", "\\\\_");
+			String rowValue = store.getAsString(rowIndex).replace("\\_", "\\\\_");
+			String columnValue = store.getAsString(columnIndex).replace("\\_", "\\\\_");
 
 			StringBuilder tableEntryBuilder = new StringBuilder();
 			for (String cellKey : cleanedCellFormatting) {
@@ -101,8 +101,8 @@ public class KVStoreUtil {
 			String[] cellFormattingSplit = store.getAsString(cellFormatting).split("#");
 			List<String> cleanedCellFormatting = Arrays.stream(cellFormattingSplit).filter(x -> !x.equals("")).collect(Collectors.toList());
 
-			String rowValue = store.getAsString(rowIndex).replaceAll("\\_", "\\\\_");
-			String columnValue = store.getAsString(columnIndex).replaceAll("\\_", "\\\\_");
+			String rowValue = store.getAsString(rowIndex).replace("\\_", "\\\\_");
+			String columnValue = store.getAsString(columnIndex).replace("\\_", "\\\\_");
 
 			StringBuilder tableEntryBuilder = new StringBuilder();
 			for (String cellKey : cleanedCellFormatting) {

@@ -64,7 +64,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 		this.logger.info("Created construction string: {}", constructionString);
 
 		try {
-			ScikitLearnWrapper<IPrediction, IPredictionBatch> wrapper = new ScikitLearnWrapper<>(constructionString, imports.toString(), true, this.sklearnProblemType);
+			ScikitLearnWrapper<IPrediction, IPredictionBatch> wrapper = new ScikitLearnWrapper<>(constructionString, imports.toString(), false, this.sklearnProblemType);
 			if (this.pythonConfig != null) {
 				wrapper.setPythonConfig(this.pythonConfig);
 			}

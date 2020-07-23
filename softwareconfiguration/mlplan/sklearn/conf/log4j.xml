@@ -66,6 +66,16 @@
 		name="ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester">
 		<level value="trace" />
 	</logger>
+	
+	<logger
+		name="ai.libs.jaicore.timing">
+		<level value="debug" />
+	</logger>
+	
+	<logger
+		name="ai.libs.jaicore.interrupt">
+		<level value="debug" />
+	</logger>
 
 	<logger name="MLPlanCLI">
 		<appender-ref ref="console" />
@@ -79,10 +89,6 @@
 		<level value="warn" />
 	</logger>
 
-	<logger name="ai.libs.jaicore.interrupt">
-		<level value="warn" />
-	</logger>
-
 	<logger name="hasco">
 		<level value="warn" />
 		<appender-ref ref="console" />
@@ -92,7 +98,7 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 
-	<logger name="testers">
+	<logger name="tester">
 		<level value="debug" />
 		<appender-ref ref="console" />
 		<appender-ref ref="infoFileAppender" />
@@ -134,9 +140,14 @@
 		name="ai.libs.mlplan.multiclass.sklearn.SKLearnClassifierFactory">
 		<level value="debug" />
 	</logger>
+	
 	<logger
 		name="ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder">
 		<level value="info" />
+	</logger>
+	
+	<logger name="ai.libs.jaicore.ml.scikitwrapper">
+		<level value="debug" />
 	</logger>
 
 	<logger name="ai.libs.jaicore.ml.regression">
@@ -151,45 +162,50 @@
 		<level value="warn" />
 	</logger>
 
-	<logger name="mlplan.optimizingfactory.optAlgo">
+	<logger name="mlplan.optimizingfactory.optimizer">
 		<level value="info" />
 	</logger>
 
-	<logger name="mlplan.optimizingfactory.optAlgo.hasco">
+	<logger name="mlplan.optimizingfactory.optimizer.hasco">
 		<level value="warn" />
 	</logger>
 
 	<logger
-		name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
+		name="mlplan.optimizingfactory.optimizer.hasco.solutionevaluator">
 		<level value="info" />
 	</logger>
 
 	<logger
-		name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
+		name="mlplan.optimizingfactory.optimizer.hasco.solutionevaluator.benchmark">
 		<level value="warn" />
 	</logger>
 
-	<logger name="mlplan.optimizingfactory.optAlgo.hasco.search">
-		<level value="warn" />
-	</logger>
-
-	<logger
-		name="mlplan.optimizingfactory.optAlgo.hasco.search._orgraphsearch._algorithm">
+	<logger name="mlplan.optimizingfactory.optimizer.hasco.search">
 		<level value="warn" />
 	</logger>
 
 	<logger
-		name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
+		name="mlplan.optimizingfactory.optimizer.hasco.search._orgraphsearch._algorithm">
 		<level value="warn" />
 	</logger>
 
 	<logger
-		name="mlplan.optimizingfactory.optAlgo.hasco.search.treepolicy">
+		name="mlplan.optimizingfactory.optimizer.hasco.search.nodeevaluator">
 		<level value="warn" />
 	</logger>
 
 	<logger
-		name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary.randomsearch">
+		name="mlplan.optimizingfactory.optimizer.hasco.search.treepolicy">
+		<level value="warn" />
+	</logger>
+	
+	<logger
+		name="mlplan.optimizingfactory.optimizer.hasco.search.nodeevaluator.secondary">
+		<level value="trace" />
+	</logger>
+
+	<logger
+		name="mlplan.optimizingfactory.optimizer.hasco.search.nodeevaluator.secondary.randomsearch">
 		<level value="warn" />
 	</logger>
 
@@ -200,7 +216,7 @@
 
 	<!-- configuration for ML-Plan Test logging -->
 	<logger name="testedalgorithm">
-		<level value="debug" />
+		<level value="warn" />
 
 		<appender-ref ref="console" />
 		<appender-ref ref="infoFileAppender" />
@@ -217,26 +233,31 @@
 		<level value="warn" />
 	</logger>
 
-	<logger name="testedalgorithm.optimizingfactory.optAlgo">
+	<logger name="testedalgorithm.optimizingfactory.optimizer">
 		<level value="warn" />
 	</logger>
 
-	<logger name="testedalgorithm.optimizingfactory.optAlgo.hasco">
-		<level value="warn" />
-	</logger>
-
-	<logger
-		name="testedalgorithm.optimizingfactory.optAlgo.hasco.search">
-		<level value="warn" />
+	<logger name="testedalgorithm.optimizingfactory.optimizer.hasco">
+		<level value="info" />
 	</logger>
 
 	<logger
-		name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
-		<level value="warn" />
+		name="testedalgorithm.optimizingfactory.optimizer.hasco.search">
+		<level value="info" />
 	</logger>
 
 	<logger
-		name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.randomsearch">
+		name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator">
+		<level value="info" />
+	</logger>
+	
+	<logger
+		name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator.secondary.evaluator.fw">
+		<level value="info" />
+	</logger>
+
+	<logger
+		name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator.randomsearch">
 		<level value="warn" />
 	</logger>
 

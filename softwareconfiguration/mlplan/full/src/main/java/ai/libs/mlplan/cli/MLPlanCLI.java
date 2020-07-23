@@ -32,12 +32,19 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ai.libs.hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
 import ai.libs.jaicore.basic.ResourceUtil;
+import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
+import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
+import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
+import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
+import ai.libs.jaicore.search.gui.plugins.rolloutboxplots.SearchRolloutBoxplotPlugin;
+import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
+import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
-import ai.libs.mlplan.cli.module.mlc.MLPlan4MekaMultiLabelCLIModule;
 import ai.libs.mlplan.cli.module.regression.MLPlan4ScikitLearnRegressionCLIModule;
 import ai.libs.mlplan.cli.module.regression.MLPlan4WEKARegressionCLIModule;
 import ai.libs.mlplan.cli.module.slc.MLPlan4ScikitLearnClassificationCLIModule;
@@ -71,6 +78,7 @@ public class MLPlanCLI {
 	public static final String O_SSC = "ssc";
 	public static final String O_NUM_CPUS = "ncpus";
 	public static final String O_TIMEOUT = "t";
+	public static final String O_VISUALIZATION = "v";
 	public static final String O_CANDIDATE_TIMEOUT = "tc";
 	public static final String O_NODE_EVAL_TIMEOUT = "tn";
 	public static final String O_POS_CLASS_INDEX = "pci";
@@ -82,7 +90,7 @@ public class MLPlanCLI {
 	/** OPTIONAL PARAMETERS' DEFAULT VALUES */
 	// Communication options standard values
 	private static final List<IMLPlanCLIModule> MODULES_TO_REGISTER = Arrays.asList(new MLPlan4WekaClassificationCLIModule(), new MLPlan4ScikitLearnClassificationCLIModule(), new MLPlan4WEKARegressionCLIModule(),
-			new MLPlan4ScikitLearnRegressionCLIModule(), new MLPlan4MekaMultiLabelCLIModule());
+			new MLPlan4ScikitLearnRegressionCLIModule());
 	private static Map<String, IMLPlanCLIModule> moduleRegistry = null;
 	private static Map<String, String> defaults = new HashMap<>();
 
@@ -116,7 +124,6 @@ public class MLPlanCLI {
 			if (!option.has(K_SHORT_OPT)) {
 				throw new IllegalArgumentException("Error in the cli configuration file. " + mapper.writeValueAsString(option) + " has no shortOpt field.");
 			}
-
 			options.addOption(Option.builder(option.get(K_SHORT_OPT).asText())
 					// set the long name of the option
 					.longOpt(option.get(K_LONG_OPT).asText())
@@ -222,10 +229,25 @@ public class MLPlanCLI {
 
 		// set common configs
 		builder.withNumCpus(Integer.parseInt(cl.getOptionValue(O_NUM_CPUS, getDefault(O_NUM_CPUS))));
-		builder.withSeed(Integer.parseInt(cl.getOptionValue(O_SEED, getDefault(O_SEED))));
+		builder.withSeed(Long.parseLong(cl.getOptionValue(O_SEED, getDefault(O_SEED))));
 
 		// set timeouts
 		builder.withTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_TIMEOUT, getDefault(O_TIMEOUT))), DEF_TIME_UNIT));
+		if (cl.hasOption(O_CANDIDATE_TIMEOUT)) {
+			builder.withCandidateEvaluationTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_CANDIDATE_TIMEOUT)), DEF_TIME_UNIT));
+		} else {
+			Timeout candidateTimeout;
+			if (builder.getTimeOut().seconds() < 60 * 5) {
+				candidateTimeout = new Timeout(30, DEF_TIME_UNIT);
+			} else if (builder.getTimeOut().seconds() < 60 * 60) {
+				candidateTimeout = new Timeout(300, DEF_TIME_UNIT);
+			} else if (builder.getTimeOut().seconds() < 60 * 60 * 12) {
+				candidateTimeout = new Timeout(600, DEF_TIME_UNIT);
+			} else {
+				candidateTimeout = new Timeout(1200, DEF_TIME_UNIT);
+			}
+			builder.withCandidateEvaluationTimeOut(candidateTimeout);
+		}
 		builder.withCandidateEvaluationTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_CANDIDATE_TIMEOUT, getDefault(O_CANDIDATE_TIMEOUT))), DEF_TIME_UNIT));
 		if (cl.hasOption(O_NODE_EVAL_TIMEOUT)) {
 			builder.withNodeEvaluationTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_NODE_EVAL_TIMEOUT, getDefault(O_NODE_EVAL_TIMEOUT))), DEF_TIME_UNIT));
@@ -239,6 +261,13 @@ public class MLPlanCLI {
 		// build mlplan object
 		MLPlan mlplan = builder.build();
 		mlplan.setLoggerName("mlplan");
+
+		if (cl.hasOption(O_VISUALIZATION)) {
+			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan);
+			window.withMainPlugin(new GraphViewPlugin());
+			window.withPlugin(new NodeInfoGUIPlugin("Node Info", new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new NodeInfoGUIPlugin("CI View", new TFDNodeAsCIViewInfoGenerator(builder.getComponents())),
+					new SearchRolloutHistogramPlugin(), new SearchRolloutBoxplotPlugin());
+		}
 
 		// call ml-plan to obtain the optimal supervised learner
 		logger.info("Build mlplan classifier");
@@ -271,9 +300,8 @@ public class MLPlanCLI {
 	}
 
 	public static void main(final String[] args) throws Exception {
-		if (logger.isInfoEnabled()) {
-			logger.info("Called ML-Plan CLI with the following params: {}", Arrays.toString(args));
-		}
+		System.out.println("Called ML-Plan CLI with the following params: >" + Arrays.toString(args) + "<");
+
 		final Options options = generateOptions();
 		if (args.length == 0) {
 			printUsage(options);

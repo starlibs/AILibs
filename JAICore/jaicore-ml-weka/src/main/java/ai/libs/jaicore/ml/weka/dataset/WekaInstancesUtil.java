@@ -55,7 +55,7 @@ public class WekaInstancesUtil {
 			iNew.setDataset(wekaInstances);
 			if (dataset.getLabelAttribute() instanceof ICategoricalAttribute) {
 				iNew.setClassValue(((ICategoricalAttribute) dataset.getLabelAttribute()).getLabelOfCategory((int) inst.getLabel()));
-			} else {
+			} else if (inst.getLabel() != null) {
 				iNew.setClassValue(Double.parseDouble(inst.getLabel().toString()));
 			}
 			wekaInstances.add(iNew); // this MUST come here AFTER having set the class value; otherwise, the class is not registered correctly in the Instances object!!

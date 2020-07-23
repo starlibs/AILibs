@@ -8,10 +8,15 @@ import ai.libs.jaicore.basic.IOwnerBasedConfig;
 public interface IPythonConfig extends IOwnerBasedConfig {
 
 	public static final String KEY_PATH = "path";
+	public static final String KEY_PYTHON = "pythonCmd";
 	public static final String KEY_ANACONDA = "anaconda";
 
 	@Key(KEY_PATH)
 	public String getPath();
+
+	@Key(KEY_PYTHON)
+	@DefaultValue("python3")
+	public String getPythonCommand();
 
 	@Key(KEY_ANACONDA)
 	public String getAnacondaEnvironment();

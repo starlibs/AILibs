@@ -9,7 +9,7 @@ import org.api4.java.algorithm.IAlgorithm;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanSimpleBuilder;
 
-public class MLPlanResultProductionTester extends AutoMLAlgorithmResultProductionTester {
+public class MLPlanResultProductionTester extends AutoMLAlgorithmForClassificationResultProductionTester {
 
 	@Override
 	public IAlgorithm<ILabeledDataset<?>, IClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws IOException {

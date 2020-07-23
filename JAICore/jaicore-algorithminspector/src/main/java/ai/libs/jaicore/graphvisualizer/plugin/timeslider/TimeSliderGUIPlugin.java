@@ -6,10 +6,14 @@ import java.util.Collection;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPlugin;
 
-public class TimeSliderGUIPlugin extends ASimpleMVCPlugin<TimeSliderGUIPluginModel, TimeSliderGUIPluginView, TimeSliderGUIPluginController>{
+public class TimeSliderGUIPlugin extends ASimpleMVCPlugin<TimeSliderGUIPluginModel, TimeSliderGUIPluginView, TimeSliderGUIPluginController> {
 
 	public TimeSliderGUIPlugin() {
-		super();
+		this("Time Slider");
+	}
+
+	public TimeSliderGUIPlugin(final String title) {
+		super(title);
 	}
 
 	@Override

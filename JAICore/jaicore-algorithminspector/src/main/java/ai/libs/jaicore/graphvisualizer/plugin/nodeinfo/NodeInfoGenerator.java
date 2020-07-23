@@ -1,7 +1,7 @@
 package ai.libs.jaicore.graphvisualizer.plugin.nodeinfo;
 
 /**
- * 
+ *
  * @author hetzer
  *
  * @param <N>
@@ -10,4 +10,5 @@ package ai.libs.jaicore.graphvisualizer.plugin.nodeinfo;
 public interface NodeInfoGenerator<N> {
 
 	public String generateInfoForNode(N node);
+
 }

@@ -17,8 +17,9 @@ import org.api4.java.common.control.IRandomConfigurable;
  * @author fmohr
  *
  */
-public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends AMonteCarloCrossValidationBasedEvaluatorFactory<F>> implements
-ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, IRandomConfigurable, IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>, IPredictionPerformanceMetricConfigurable {
+public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends AMonteCarloCrossValidationBasedEvaluatorFactory<F>>
+		implements ISplitBasedSupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, F>, IRandomConfigurable, IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>,
+		IPredictionPerformanceMetricConfigurable {
 
 	private IDatasetSplitter<? extends ILabeledDataset<?>> datasetSplitter;
 	protected Random random;
@@ -41,6 +42,7 @@ ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends I
 	 *
 	 * @return Returns the dataset spliiter.
 	 */
+	@Override
 	public IDatasetSplitter<? extends ILabeledDataset<?>> getDatasetSplitter() {
 		return this.datasetSplitter;
 	}
@@ -93,6 +95,7 @@ ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends I
 	 *            The dataset splitter to be used.
 	 * @return The factory object.
 	 */
+	@Override
 	public F withDatasetSplitter(final IDatasetSplitter<? extends ILabeledDataset<?>> datasetSplitter) {
 		this.datasetSplitter = datasetSplitter;
 		return this.getSelf();

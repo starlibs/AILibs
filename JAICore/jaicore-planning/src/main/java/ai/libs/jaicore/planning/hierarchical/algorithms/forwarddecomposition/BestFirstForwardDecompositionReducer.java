@@ -11,6 +11,7 @@ import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer;
+import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness;
 
 public class BestFirstForwardDecompositionReducer<V extends Comparable<V>> extends
 AForwardDecompositionReducer<CostSensitiveHTNPlanningProblem<IHTNPlanningProblem, V>, IEvaluatedGraphSearchBasedPlan<TFDNode, String, V>, GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V>, EvaluatedSearchGraphPath<TFDNode, String, V>> {
@@ -18,7 +19,7 @@ AForwardDecompositionReducer<CostSensitiveHTNPlanningProblem<IHTNPlanningProblem
 	private GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<TFDNode, String, V> transformer;
 
 	public BestFirstForwardDecompositionReducer() {
-		this(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<>());
+		this(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness());
 	}
 
 	public BestFirstForwardDecompositionReducer(final IPathEvaluator<TFDNode, String, V> nodeEvaluator) {

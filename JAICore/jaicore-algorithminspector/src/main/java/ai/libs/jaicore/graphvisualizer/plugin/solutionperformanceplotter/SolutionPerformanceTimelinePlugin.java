@@ -11,7 +11,11 @@ public class SolutionPerformanceTimelinePlugin extends ASimpleMVCPlugin<Solution
 	private final SolutionCandidateRepresenter solutionRepresenter;
 
 	public SolutionPerformanceTimelinePlugin(final SolutionCandidateRepresenter solutionRepresenter) {
-		super();
+		this("Solution Performance Timeline", solutionRepresenter);
+	}
+
+	public SolutionPerformanceTimelinePlugin(final String title, final SolutionCandidateRepresenter solutionRepresenter) {
+		super(title);
 		this.solutionRepresenter = solutionRepresenter;
 	}
 

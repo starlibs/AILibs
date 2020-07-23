@@ -1,6 +1,5 @@
 package ai.libs.mlplan.multiclass.wekamlplan.weka;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -13,25 +12,13 @@ import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.ControlledNodeEvaluationException;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
 
 public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityCheckingNodeEvaluator implements ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(WekaPipelineValidityCheckingNodeEvaluator.class);
-
-	/* the predicates of the dataset */
-	private boolean propertiesDetermined;
-	private boolean binaryClass;
-	private boolean multiClass;
-	private boolean regression;
-	private boolean multiValuedNominalAttributes;
-	private boolean containsNegativeValues;
 
 	public WekaPipelineValidityCheckingNodeEvaluator() {
 		super();
@@ -39,42 +26,6 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 
 	public WekaPipelineValidityCheckingNodeEvaluator(final Collection<Component> components, final ILabeledDataset<?> data) {
 		super(components, data);
-	}
-
-	private boolean multiValuedNominalAttributesExist() {
-		Instances data = this.getData().getInstances();
-		for (int i = 0; i < data.numAttributes(); i++) {
-			Attribute att = data.attribute(i);
-			if (att != data.classAttribute() && att.isNominal() && att.numValues() > 2) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private synchronized void extractDatasetProperties() {
-		if (!this.propertiesDetermined) {
-
-			if (this.getComponents() == null) {
-				throw new IllegalStateException("Components not defined!");
-			}
-
-			/* compute binary class predicate */
-			Instances data = this.getInstancesInWekaFormat();
-			this.binaryClass = data.classAttribute().isNominal() && data.classAttribute().numValues() == 2;
-			this.multiClass = data.classAttribute().isNominal() && data.classAttribute().numValues() > 2;
-			this.regression = data.classAttribute().isNumeric();
-
-			/* determine whether the dataset is multi-valued nominal */
-			this.multiValuedNominalAttributes = this.multiValuedNominalAttributesExist();
-
-			this.containsNegativeValues = false;
-			for (Instance i : data) {
-				this.containsNegativeValues = this.containsNegativeValues || Arrays.stream(i.toDoubleArray()).anyMatch(x -> x < 0);
-			}
-
-			this.propertiesDetermined = true;
-		}
 	}
 
 	@Override
@@ -113,7 +64,6 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 	}
 
 	private void checkValidity(final ComponentInstance classifier) throws ControlledNodeEvaluationException {
-
 		String classifierName = classifier.getComponent().getName().toLowerCase();
 
 		/* forbid M5regression algorithms on non-binary classes */
@@ -141,15 +91,11 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 		if (this.containsNegativeValues && classifierName.matches("(.*)(naivebayesmultinomial)(.*)")) {
 			throw new ControlledNodeEvaluationException("Negative numeric attribute values are not supported by the classifier.");
 		}
-	}
 
-	@Override
-	public WekaInstances getData() {
-		return (WekaInstances) super.getData();
-	}
-
-	public Instances getInstancesInWekaFormat() {
-		return this.getData().getInstances();
+		/* Exclude some learners for regression problems */
+		if (this.regression && classifierName.matches("(.*)(oner|smo|j48|jrip|naivebayes|logistic|lmt|bayesnet)(.*)")) {
+			throw new ControlledNodeEvaluationException("Learner does not support regression");
+		}
 	}
 
 	@Override

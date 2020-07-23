@@ -16,6 +16,8 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.logging.LoggerUtil;
+
 public class SupervisedLearnerExecutor implements ISupervisedLearnerExecutor, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(SupervisedLearnerExecutor.class);
@@ -43,6 +45,9 @@ public class SupervisedLearnerExecutor implements ISupervisedLearnerExecutor, IL
 		} catch (InterruptedException e) {
 			long now = System.currentTimeMillis();
 			this.logger.info("Learner was interrupted during prediction after a runtime of {}ms for training and {}ms for testing ({}ms total walltime).", endTrainTime - startTrainTime, now - endTrainTime, now - startTrainTime);
+			if (Thread.currentThread().isInterrupted()) {
+				this.logger.warn("Observed an InterruptedException while evaluating a learner of type {} ({}) AND the thread is interrupted. This should never happen! Here is the detailed information: {}", learner.getClass(), learner, LoggerUtil.getExceptionInfo(e));
+			}
 			throw new LearnerExecutionInterruptedException(startTrainTime, endTrainTime, endTrainTime, System.currentTimeMillis());
 		} catch (PredictionException e) {
 			this.logger.info("Prediction failed with exception {}.", e.getClass().getName());

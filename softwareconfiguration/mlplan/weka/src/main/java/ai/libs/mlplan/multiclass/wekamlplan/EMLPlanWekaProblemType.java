@@ -1,5 +1,7 @@
 package ai.libs.mlplan.multiclass.wekamlplan;
 
+import java.util.Random;
+
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
@@ -24,7 +26,7 @@ public enum EMLPlanWekaProblemType implements IProblemType<IWekaClassifier> {
 
 	REGRESSION(EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFileFromResource(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
 			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(),
-			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getRequestedInterface(), new WekaRegressorFactory(), new RootMeanSquaredError(), new RootMeanSquaredError(), new RandomHoldoutSplitter(.7)), //
+			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getRequestedInterface(), new WekaRegressorFactory(), new RootMeanSquaredError(), new RootMeanSquaredError(), new RandomHoldoutSplitter<>(new Random(0), .7)), //
 
 	CLASSIFICATION_MULTICLASS_TINY("automl/searchmodels/weka/tinytest.json", EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(), "mlplan/weka-preferenceList-tiny.txt",
 			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getRequestedInterface(),

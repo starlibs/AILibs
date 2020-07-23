@@ -69,9 +69,16 @@ public class HASCOUtil {
 		return new CostSensitivePlanningToStandardSearchProblemReduction<CEOCIPSTNPlanningProblem, N, A, Double>(plan2searchReduction).encodeProblem(planningProblem);
 	}
 
-	public static <N, A, V extends Comparable<V>> IPathSearchWithPathEvaluationsInput<N, A, V> getSearchProblemWithEvaluation(final RefinementConfiguredSoftwareConfigurationProblem<V> problem, final IHASCOPlanningReduction<N, A> plan2searchReduction){
+	public static <V extends Comparable<V>> CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> getPlannigProblem(final RefinementConfiguredSoftwareConfigurationProblem<V> problem) {
 		HASCOReduction<V> hascoReduction = new HASCOReduction<>();
-		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> planningProblem = hascoReduction.encodeProblem(problem);
+		return hascoReduction.encodeProblem(problem);
+	}
+
+	public static <N, A, V extends Comparable<V>> IPathSearchWithPathEvaluationsInput<N, A, V> getSearchProblemWithEvaluation(final RefinementConfiguredSoftwareConfigurationProblem<V> problem, final IHASCOPlanningReduction<N, A> plan2searchReduction){
+		return getSearchProblemWithEvaluation(getPlannigProblem(problem), plan2searchReduction);
+	}
+
+	public static <N, A, V extends Comparable<V>> IPathSearchWithPathEvaluationsInput<N, A, V> getSearchProblemWithEvaluation(final CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> planningProblem, final IHASCOPlanningReduction<N, A> plan2searchReduction){
 		return new CostSensitivePlanningToStandardSearchProblemReduction<CEOCIPSTNPlanningProblem, N, A, V>(plan2searchReduction).encodeProblem(planningProblem);
 	}
 

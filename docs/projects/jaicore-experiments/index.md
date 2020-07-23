@@ -1,7 +1,7 @@
 ---
 layout: project
 title: jaicore-experiments
-version: 0.2.0
+version: 0.2.2
 navigation_mode: anchor
 navigation:
     - { id: "overview", link: "overview", title: "Overview" }

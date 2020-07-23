@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.interrupt.InterruptionTimerTask;
+import ai.libs.jaicore.logging.LoggerUtil;
 
 /**
  * This class is the single-thread pendant to asynchronous computations realized with Futures
@@ -35,6 +36,7 @@ public abstract class TimedComputation {
 		logger.debug("Scheduling timer for interruption in {}ms with reason {}, i.e. timestamp {}.", timeout.milliseconds(), start + timeout.milliseconds(), reasonToLogOnTimeout);
 		timer.schedule(task, timeout.milliseconds());
 		Interrupter interrupter = Interrupter.get();
+		logger.debug("Acquired interrupter {}.", interrupter);
 		T output = null;
 		Exception caughtException = null;
 		try {
@@ -54,12 +56,16 @@ public abstract class TimedComputation {
 		 */
 		int runtime = (int) (System.currentTimeMillis() - start);
 		int delay = runtime - (int) timeout.milliseconds();
+		boolean isInterrupted = Thread.currentThread().isInterrupted();
 		if (caughtException != null) {
 			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed exception: {}. Thread interrupt flag is {}.", runtime, delay, caughtException.getClass().getName(),
-					Thread.currentThread().isInterrupted());
+					isInterrupted);
+			if ((caughtException instanceof InterruptedException) && isInterrupted && interrupter.getAllUnresolvedInterruptsOfThread(Thread.currentThread()).size() == 1) { // only the reason belonging to our task is on the stack
+				logger.warn("Timed computation has thrown an InterruptedException AND the thread is interrupted AND there are no other open interrupts on the thread! This should never happen! Here is the stack trace: \n\t{}", LoggerUtil.getExceptionInfo(caughtException));
+			}
 		} else {
 			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed regular output return value: {}. Thread interrupt flag is {}.", runtime, delay, output,
-					Thread.currentThread().isInterrupted());
+					isInterrupted);
 		}
 
 		/* now make sure that
@@ -75,12 +81,7 @@ public abstract class TimedComputation {
 				logger.info("Thread has been interrupted internally. Resolving the interrupt (this may throw an InterruptedException).");
 				timeoutTriggered = true;
 				Thread.interrupted(); // clear the interrupted field
-				try {
-					Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
-				} catch (InterruptedException e) {
-					logger.debug("Re-interrupting current thread, because another interrupt has been open.");
-					Thread.currentThread().interrupt();
-				}
+				Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
 			}
 
 			/* otherwise, if the thread has been interrupted directly and not as a consequence of a shutdown, forward the interrupt */
@@ -97,7 +98,7 @@ public abstract class TimedComputation {
 				logger.info("Throwing TimeoutException");
 				throw new AlgorithmTimeoutedException(delay);
 			} else if (caughtException instanceof InterruptedException) {
-				logger.debug("Now re-throwing {}, which was caught in timed computation. Interrupt-flag is {}.", caughtException, Thread.currentThread().isInterrupted());
+				logger.debug("An InterruptedException was thrown during the timed execution: {}. Re-throwing it. Interrupt-flag is {}.", caughtException, Thread.currentThread().isInterrupted());
 				throw (InterruptedException) caughtException;
 			} else {
 				logger.debug("Now re-throwing {}, which was caught in timed computation. Interrupt-flag is {}.", caughtException, Thread.currentThread().isInterrupted());

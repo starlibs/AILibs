@@ -97,9 +97,4 @@ public class SearchRolloutBoxplotPluginView extends ASimpleMVCPluginView<SearchR
 		/* nothing to do */
 	}
 
-	@Override
-	public String getTitle() {
-		return "Search Rollout Statistics";
-	}
-
 }

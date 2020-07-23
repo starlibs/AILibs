@@ -33,12 +33,8 @@ public class NodeInfoGUIPluginView extends ASimpleMVCPluginView<NodeInfoGUIPlugi
 	}
 
 	@Override
-	public String getTitle() {
-		return "Node Information";
-	}
-
-	@Override
 	public void clear() {
 		/* don't do anything */
 	}
+
 }

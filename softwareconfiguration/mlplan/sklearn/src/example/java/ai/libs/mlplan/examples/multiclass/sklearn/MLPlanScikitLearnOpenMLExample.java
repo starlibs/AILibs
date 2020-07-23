@@ -33,7 +33,7 @@ import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
  */
 public class MLPlanScikitLearnOpenMLExample {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger("example");
+	private static final Logger LOGGER = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_EXAMPLE);
 
 	public static void main(final String[] args) throws Exception {
 
