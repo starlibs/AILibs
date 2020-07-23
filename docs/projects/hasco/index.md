@@ -330,4 +330,4 @@ init task-network: tResolveSingle<reqInterface>('request', 'solution')
 JavaDoc is available [here](https://javadoc.io/doc/ai.libs/hasco-core/).
 
 # Contribute
-ML-Plan is currently developed in the [softwareconfiguration folder of AILibs on github.com](https://github.com/fmohr/AILibs/tree/master/softwareconfiguration/mlplan).
+ML-Plan is currently developed in the [softwareconfiguration folder of AILibs on github.com](https://github.com/starlibs/AILibs/tree/master/softwareconfiguration/mlplan).
