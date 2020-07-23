@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/fmohr/AILibs.svg?branch=dev)](https://travis-ci.com/fmohr/AILibs)
+[![Build Status](https://travis-ci.com/starlibs/AILibs.svg?branch=dev)](https://travis-ci.com/starlibs/AILibs)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=starlibs.ailibs&metric=alert_status)](https://sonarcloud.io/dashboard/index/starlibs.ailibs)
 [![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=starlibs.ailibs&metric=coverage)](https://sonarcloud.io/component_measures?id=starlibs.ailibs&metric=coverage&view=list)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/ai.libs/jaicore-basic/badge.svg)](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A"ai.libs)
@@ -7,16 +7,16 @@
 
 # AILibs
 AILibs is a modular collection of Java libraries related to automated decision making. It's highlight functionalities are:
-* Graph Search ([jaicore-search](https://fmohr.github.io/AILibs/projects/jaicore-search/)):  (AStar, BestFirst, Branch & Bound, DFS, MCTS, and more)
+* Graph Search ([jaicore-search](https://starlibs.github.io/AILibs/projects/jaicore-search/)):  (AStar, BestFirst, Branch & Bound, DFS, MCTS, and more)
 * Logic (`jaicore-logic`): Represent and reason about propositional and simple first order logic formulas
 * Planning (`jaicore-planning`): State-space planning (STRIPS, PDDL), and hierarchical planning (HTN, ITN, PTN)
-* Reproducible Experiments ([jaicore-experiments](https://fmohr.github.io/AILibs/projects/jaicore-experiments/)): Design and efficiently conduct experiments in a highly parallelized manner.
-* Automated Software Configuration ([HASCO](https://fmohr.github.io/AILibs/projects/hasco/)): Hierarchical configuration of software systems.
-* Automated Machine Learning ([ML-Plan](https://fmohr.github.io/AILibs/projects/mlplan/)): Automatically find optimal machine learning pipelines in WEKA or sklearn
+* Reproducible Experiments ([jaicore-experiments](https://starlibs.github.io/AILibs/projects/jaicore-experiments/)): Design and efficiently conduct experiments in a highly parallelized manner.
+* Automated Software Configuration ([HASCO](https://starlibs.github.io/AILibs/projects/hasco/)): Hierarchical configuration of software systems.
+* Automated Machine Learning ([ML-Plan](https://starlibs.github.io/AILibs/projects/mlplan/)): Automatically find optimal machine learning pipelines in WEKA or sklearn
 
 All algorithms in AILibs are steppable, and their behavior can be analyzed via the algorithm inspector: `jaicore-algorithminspector`. For example, graph search algorithms send events that allow a graph visualization in the algorithm inspector.
 
-[Find out more about AILibs and how to use it or how to contribute.](https://fmohr.github.io/AILibs/)
+[Find out more about AILibs and how to use it or how to contribute.](https://starlibs.github.io/AILibs/)
 
 ## Using AILibs in your project
 You can resolve each of our projects via a Maven dependency (using Maven central as repository).
@@ -36,7 +36,7 @@ dependencies {
     implementation 'ai.libs:jaicore-ml:0.2.2'
 }
 ```
-For more details, refer to the [documentation](https://fmohr.github.io/AILibs/) of the respective module.
+For more details, refer to the [documentation](https://starlibs.github.io/AILibs/) of the respective module.
 
 ## Setting up your IDE to work with AILibs
 ### Eclipse
