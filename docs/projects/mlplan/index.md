@@ -98,14 +98,34 @@ For library-specific aspects, there may be additional methods for the respective
 Note that ML-Plan for scikit-learn is also Java-based, i.e. we do not have a Python version of ML-Plan only for being able to cope with scikit-learn. Instead, ML-Plan can be configured to work with scikit-learn as the library to be used.
 
 ##### ML-Plan for WEKA
+If you are interested in standard classification tasks such as binary or multinomial classification, create an ML-Plan builder as follows.
+
 ```java
-MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
+MLPlanWekaBuilder builder = MLPlanWekaBuilder.forClassification();
+```
+
+If you have a regression problem instead you may be get an appropriate ML-Plan builder like this:
+
+```java
+MLPlanWekaBuilder builder = MLPlanWekaBuilder.forRegression();
 ```
 
 ##### ML-Plan for scikit-learn
+ML-Plan for scikit-learn can also be instantiated for both classification, and regression. The way the builders are obtained are analogous to how we create these for WEKA:
+
+Use
+
 ```java
 MLPlanScikitLearnBuilder builder = MLPlanScikitLearnBuilder.forClassification();
 ```
+
+for obtaining an ML-Plan builder to work with scikit-learn to tackle standard classification problems and 
+
+```java
+MLPlanScikitLearnBuilder builder = MLPlanScikitLearnBuilder.forRegression();
+```
+
+to obtain a builder which pre-configures the builder ready for tackling regression problems with scikit-learn.
 
 **Note**: If you want to use ML-Plan for scikit-learn, then ML-Plan assumes Python 3.5 or higher to be active (invoked when calling `python` on the command line), and the following packages must be installed:
 `liac-arff`,
