@@ -253,7 +253,10 @@ def run_train_test_mode(data, testdata):
     if targets.shape[1] != 1:
         raise Exception("Can currently only work with single targets.")
     X = features
-    y = targets[:,0].astype("str")
+    if not sys.argv["regression"]:
+        y = targets[:,0].astype("str")
+    else:
+        y = targets[:,0]
     print(len(X), len(y))
     # Create instance of classifier with given parameters.
     classifier_instance = {{classifier_construct}}

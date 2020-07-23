@@ -2,8 +2,22 @@
   "repository": "sklearn-regressors",
   "components": [
     {
+      "name": "sklearn.dummy.DummyRegressor",
+      "providedInterface": [ "BasicRegressor", "AbstractRegressor" ],
+      "requiredInterface": [
+      ],
+      "parameter": [
+        {
+          "name": "strategy",
+          "type": "cat",
+          "values": [ "mean", "median" ],
+          "default": "mean"
+        }
+      ]
+    },
+    {
       "name": "sklearn.ensemble.AdaBoostRegressor",
-      "providedInterface": [ "BasicRegressor" ],
+      "providedInterface": [ "BasicRegressor", "AbstractRegressor" ],
       "requiredInterface": [
         {
           "id": "base_estimator",
@@ -46,7 +60,7 @@
       "providedInterface": [
         "BasicRegressor",
         "BaseLearner",
-        "FeatureImportanceEstimator"
+        "FeatureImportanceEstimator", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -216,7 +230,7 @@
       "providedInterface": [
         "BasicRegressor",
         "BaseLearner",
-        "FeatureImportanceEstimator"
+        "FeatureImportanceEstimator", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -420,7 +434,7 @@
       "providedInterface": [
         "BasicRegressor",
         "BaseLearner",
-        "FeatureImportanceEstimator"
+        "FeatureImportanceEstimator", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -579,7 +593,7 @@
       "providedInterface": [
         "BasicRegressor", 
         "BaseLearner",
-        "FeatureImportanceEstimator"
+        "FeatureImportanceEstimator", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -748,7 +762,7 @@
       "providedInterface": [
         "BasicRegressor",
         "BaseLearner",
-        "FeatureImportanceEstimator"
+        "FeatureImportanceEstimator", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -901,7 +915,7 @@
       "name": "sklearn.linear_model.LinearRegression",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -945,7 +959,7 @@
       "name": "sklearn.linear_model.Ridge",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -1013,7 +1027,7 @@
       "name": "sklearn.linear_model.SGDRegressor",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -1163,7 +1177,7 @@
       "name": "sklearn.linear_model.ElasticNet",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -1253,7 +1267,7 @@
       "name": "sklearn.linear_model.Lasso",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -1334,7 +1348,7 @@
       "name": "sklearn.linear_model.LassoLars",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -1405,7 +1419,7 @@
       "name": "sklearn.linear_model.OrthogonalMatchingPursuit",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -1494,7 +1508,7 @@
       "name": "sklearn.linear_model.ARDRegression",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -1602,7 +1616,7 @@
       "name": "sklearn.linear_model.BayesianRidge",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -1701,7 +1715,7 @@
       "name": "sklearn.linear_model.HuberRegressor",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -1756,7 +1770,7 @@
       "name": "sklearn.linear_model.PassiveAggressiveRegressor",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -1865,7 +1879,7 @@
       "name": "sklearn.neighbors.KNeighborsRegressor",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -1940,7 +1954,7 @@
       "name": "sklearn.svm.LinearSVR",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -2004,7 +2018,7 @@
       "name": "sklearn.svm.NuSVR",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
@@ -2116,7 +2130,7 @@
       "name": "sklearn.svm.SVR",
       "providedInterface": [
         "BasicRegressor",
-        "BaseLearner"
+        "BaseLearner", "AbstractRegressor"
       ],
       "requiredInterface": [],
       "parameter": [
