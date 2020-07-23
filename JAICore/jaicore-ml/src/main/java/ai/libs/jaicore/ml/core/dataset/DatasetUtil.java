@@ -130,7 +130,7 @@ public class DatasetUtil {
 			labelMap.clear();
 			List<String> labels = catLabel.getLabels();
 			for (int i = 0; i < labels.size(); i++) {
-				labelMap.put(catLabel.deserializeAttributeValue(labels.get(i)), Integer.valueOf(labels.indexOf(labels.get(i))).doubleValue());
+				labelMap.put(catLabel.deserializeAttributeValue(labels.get(i)), (double) labels.indexOf(labels.get(i)));
 			}
 		}
 		return convertTargetOfDataset(dataset, attr, labelMap, "convertToRegressionDataset");
