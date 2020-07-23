@@ -77,7 +77,7 @@ import ai.libs.python.IPythonConfig;
  * @author scheiblm
  */
 public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B>
-implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
+		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 
 	private static final Logger L = LoggerFactory.getLogger(ScikitLearnWrapper.class);
 	private static final IScikitLearnWrapperConfig CONF = ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class);
@@ -660,10 +660,6 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 				processParameters.addAll(Arrays.asList(MODEL_FLAG, this.modelFile));
 			}
 
-			if (ScikitLearnWrapper.this.problemType == EScikitLearnProblemType.REGRESSION) {
-				processParameters.add(REGRESSION_FLAG);
-			}
-
 			if (ScikitLearnWrapper.this.targetColumns != null && ScikitLearnWrapper.this.targetColumns.length > 0) {
 				processParameters.add("--targets");
 				for (int i : ScikitLearnWrapper.this.targetColumns) {
@@ -671,11 +667,13 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 				}
 			}
 			/* All additional parameters that the script shall consider. */
-			StringJoiner stringJoiner = new StringJoiner(" ");
-			for (String parameter : processParameters) {
-				stringJoiner.add(parameter);
-			}
+			System.out.println(processParameters);
+
 			if (os == EOperatingSystem.MAC) {
+				StringJoiner stringJoiner = new StringJoiner(" ");
+				for (String parameter : processParameters) {
+					stringJoiner.add(parameter);
+				}
 				return new String[] { "sh", "-c", stringJoiner.toString() };
 			} else {
 				return processParameters.toArray(new String[] {});
