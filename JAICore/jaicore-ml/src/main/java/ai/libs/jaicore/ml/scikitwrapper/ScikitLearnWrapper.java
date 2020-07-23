@@ -667,8 +667,6 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				}
 			}
 			/* All additional parameters that the script shall consider. */
-			System.out.println(processParameters);
-
 			if (os == EOperatingSystem.MAC) {
 				StringJoiner stringJoiner = new StringJoiner(" ");
 				for (String parameter : processParameters) {

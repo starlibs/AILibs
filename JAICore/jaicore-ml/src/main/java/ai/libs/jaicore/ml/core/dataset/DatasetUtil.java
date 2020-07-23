@@ -52,16 +52,7 @@ public class DatasetUtil {
 		return diff;
 	}
 
-	public static ILabeledDataset<?> convertToClassificationDataset(final ILabeledDataset<?> dataset) {
-		IAttribute currentLabelAttribute = dataset.getLabelAttribute();
-		if (currentLabelAttribute instanceof ICategoricalAttribute) {
-			return dataset;
-		}
-		Set<String> values = new HashSet<>();
-		for (ILabeledInstance i : dataset) {
-			values.add(i.getLabel().toString());
-		}
-		IntBasedCategoricalAttribute attr = new IntBasedCategoricalAttribute(currentLabelAttribute.getName(), new ArrayList<>(values));
+	private static ILabeledDataset<?> convertTargetOfDataset(final ILabeledDataset<?> dataset, final IAttribute attr, final Map<Object, ? extends Object> conversionMap, final String utilMethodName) {
 
 		/* copy attribute list and exchange this attribute */
 		List<IAttribute> attList = new ArrayList<>(dataset.getInstanceSchema().getAttributeList());
@@ -75,9 +66,9 @@ public class DatasetUtil {
 		for (ILabeledInstance i : dataset) {
 			ILabeledInstance ci;
 			if (i instanceof DenseInstance) {
-				ci = new DenseInstance(i.getAttributes(), attr.getIdOfLabel(i.getLabel().toString()));
+				ci = new DenseInstance(i.getAttributes(), conversionMap.get(i.getLabel()));
 			} else if (i instanceof SparseInstance) {
-				ci = new SparseInstance(numAttributes, ((SparseInstance) i).getAttributeMap(), attr.getIdOfLabel(i.getLabel().toString()));
+				ci = new SparseInstance(numAttributes, ((SparseInstance) i).getAttributeMap(), conversionMap.get(i.getLabel()));
 			} else {
 				throw new UnsupportedOperationException();
 			}
@@ -91,12 +82,31 @@ public class DatasetUtil {
 		if (dataset instanceof IReconstructible) {
 			((IReconstructible) dataset).getConstructionPlan().getInstructions().forEach(datasetModified::addInstruction);
 			try {
-				datasetModified.addInstruction(new ReconstructionInstruction(DatasetUtil.class.getMethod("convertToClassificationDataset", ILabeledDataset.class), "this"));
+				datasetModified.addInstruction(new ReconstructionInstruction(DatasetUtil.class.getMethod(utilMethodName, ILabeledDataset.class), "this"));
 			} catch (NoSuchMethodException | SecurityException e) {
 				throw new UnsupportedOperationException(e);
 			}
 		}
 		return datasetModified;
+	}
+
+	public static ILabeledDataset<?> convertToClassificationDataset(final ILabeledDataset<?> dataset) {
+		IAttribute currentLabelAttribute = dataset.getLabelAttribute();
+		if (currentLabelAttribute instanceof ICategoricalAttribute) {
+			return dataset;
+		}
+
+		Set<String> values = dataset.stream().map(x -> x.getLabel().toString()).collect(Collectors.toSet());
+		IntBasedCategoricalAttribute attr = new IntBasedCategoricalAttribute(currentLabelAttribute.getName(), new ArrayList<>(values));
+
+		Map<Object, Object> conversionMap = new HashMap<>();
+		for (ILabeledInstance i : dataset) {
+			if (!conversionMap.containsKey(i.getLabel())) {
+				conversionMap.put(i.getLabel(), attr.deserializeAttributeValue(i.getLabel().toString()));
+			}
+		}
+
+		return convertTargetOfDataset(dataset, attr, conversionMap, "convertToClassificationDataset");
 	}
 
 	public static ILabeledDataset<?> convertToRegressionDataset(final ILabeledDataset<?> dataset) {
@@ -106,8 +116,8 @@ public class DatasetUtil {
 		}
 		NumericAttribute attr = new NumericAttribute(currentLabelAttribute.getName());
 
-		ICategoricalAttribute catLabel = (ICategoricalAttribute) dataset.getLabelAttribute();
 		Map<Object, Double> labelMap = new HashMap<>();
+		ICategoricalAttribute catLabel = (ICategoricalAttribute) dataset.getLabelAttribute();
 		try {
 			for (String label : catLabel.getLabels()) {
 				try {
@@ -123,41 +133,7 @@ public class DatasetUtil {
 				labelMap.put(catLabel.deserializeAttributeValue(labels.get(i)), Integer.valueOf(labels.indexOf(labels.get(i))).doubleValue());
 			}
 		}
-
-		/* copy attribute list and exchange this attribute */
-		List<IAttribute> attList = new ArrayList<>(dataset.getInstanceSchema().getAttributeList());
-
-		/* get new scheme */
-		LabeledInstanceSchema scheme = new LabeledInstanceSchema(dataset.getRelationName(), attList, attr);
-		Dataset datasetModified = new Dataset(scheme);
-
-		/* now copy all the instances*/
-		int numAttributes = dataset.getNumAttributes();
-		for (ILabeledInstance i : dataset) {
-			ILabeledInstance ci;
-			if (i instanceof DenseInstance) {
-				ci = new DenseInstance(i.getAttributes(), labelMap.get(i.getLabel()));
-			} else if (i instanceof SparseInstance) {
-				ci = new SparseInstance(numAttributes, ((SparseInstance) i).getAttributeMap(), labelMap.get(i.getLabel()));
-			} else {
-				throw new UnsupportedOperationException();
-			}
-			if (!datasetModified.getLabelAttribute().isValidValue(ci.getLabel())) {
-				throw new IllegalStateException("Value " + ci.getLabel() + " is not a valid label value for label attribute " + datasetModified.getLabelAttribute());
-			}
-			datasetModified.add(ci);
-		}
-
-		/* add reconstruction instructions to the dataset */
-		if (dataset instanceof IReconstructible) {
-			((IReconstructible) dataset).getConstructionPlan().getInstructions().forEach(datasetModified::addInstruction);
-			try {
-				datasetModified.addInstruction(new ReconstructionInstruction(DatasetUtil.class.getMethod("convertToRegressionDataset", ILabeledDataset.class), "this"));
-			} catch (NoSuchMethodException | SecurityException e) {
-				throw new UnsupportedOperationException(e);
-			}
-		}
-		return datasetModified;
+		return convertTargetOfDataset(dataset, attr, labelMap, "convertToRegressionDataset");
 	}
 
 	public static ILabeledDataset<?> getDatasetFromMapCollection(final Collection<Map<String, Object>> datasetAsListOfMaps, final String nameOfLabelAttribute) {
