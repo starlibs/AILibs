@@ -13,20 +13,21 @@ public class SpeedSliderGUIPluginView extends ASimpleMVCPluginView<SpeedSliderGU
 	private Slider visualizationSpeedSlider;
 
 	public SpeedSliderGUIPluginView(final SpeedSliderGUIPluginModel model) {
-		super (model, new VBox());
+		super(model, new VBox());
 		Platform.runLater(() -> {
 			VBox visualizationSpeedSliderLayout = this.getNode();
 			visualizationSpeedSliderLayout.setAlignment(Pos.CENTER);
 
-			this.visualizationSpeedSlider = new Slider(1, 100, this.getModel().getCurrentSpeedPercentage());
+			this.visualizationSpeedSlider = new Slider(0, 100, this.getModel().getCurrentSpeedPercentage());
 			this.visualizationSpeedSlider.setShowTickLabels(true);
 			this.visualizationSpeedSlider.setShowTickMarks(true);
 			this.visualizationSpeedSlider.setMajorTickUnit(5);
-			this.visualizationSpeedSlider.setMinorTickCount(1);
+			this.visualizationSpeedSlider.setMinorTickCount(4);
+			this.visualizationSpeedSlider.setBlockIncrement(1);
+			this.visualizationSpeedSlider.setSnapToTicks(true);
 
 			this.visualizationSpeedSlider.setOnMouseReleased(event -> this.handleInputEvent());
 			this.visualizationSpeedSlider.setOnKeyPressed(event -> this.handleInputEvent());
-			this.visualizationSpeedSlider.setOnKeyReleased(event -> this.handleInputEvent());
 
 			visualizationSpeedSliderLayout.getChildren().add(this.visualizationSpeedSlider);
 
@@ -43,11 +44,6 @@ public class SpeedSliderGUIPluginView extends ASimpleMVCPluginView<SpeedSliderGU
 	@Override
 	public void update() {
 		this.visualizationSpeedSlider.setValue(this.getModel().getCurrentSpeedPercentage());
-	}
-
-	@Override
-	public String getTitle() {
-		return "Speed Slider";
 	}
 
 	@Override

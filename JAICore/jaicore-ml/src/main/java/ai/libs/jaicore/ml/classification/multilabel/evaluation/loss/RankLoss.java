@@ -27,10 +27,10 @@ public class RankLoss extends AMultiLabelClassificationMeasure {
 		this.tieLoss = tieLoss;
 	}
 
-	private double rankingLoss(final int[] expected, final IMultiLabelClassification actual) {
+	private double rankingLoss(final int[] expected, final IMultiLabelClassification predicted) {
 		List<Integer> expectedRelevantLabels = ArrayUtil.argMax(expected);
 		List<Integer> expectedIrrelevantLabels = ArrayUtil.argMin(expected);
-		double[] labelRelevance = actual.getPrediction();
+		double[] labelRelevance = predicted.getPrediction();
 		double wrongRankingCounter = 0;
 		for (int expectedRel : expectedRelevantLabels) {
 			for (int expectedIrr : expectedIrrelevantLabels) {
@@ -47,10 +47,10 @@ public class RankLoss extends AMultiLabelClassificationMeasure {
 	}
 
 	@Override
-	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> actual) {
-		this.checkConsistency(expected, actual);
+	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
+		this.checkConsistency(expected, predicted);
 
-		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.rankingLoss(expected.get(x), actual.get(x))).average();
+		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.rankingLoss(expected.get(x), predicted.get(x))).average();
 		if (res.isPresent()) {
 			return res.getAsDouble();
 		} else {

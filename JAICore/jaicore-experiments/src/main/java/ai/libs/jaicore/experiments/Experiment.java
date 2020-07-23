@@ -14,6 +14,7 @@ public class Experiment {
 	private final int numCPUs;
 	private Map<String, String> valuesOfKeyFields;
 	private Map<String, Object> valuesOfResultFields;
+	private final String error;
 
 	public Experiment(final Experiment experiment) {
 		this(experiment.getMemoryInMB(), experiment.getNumCPUs(), new HashMap<>(experiment.getValuesOfKeyFields()), experiment.getValuesOfResultFields() != null ? new HashMap<>(experiment.getValuesOfResultFields()) : null);
@@ -24,11 +25,16 @@ public class Experiment {
 	}
 
 	public Experiment(final int memoryInMB, final int numCPUs, final Map<String, String> valuesOfKeyFields, final Map<String, Object> valuesOfResultFields) {
+		this(memoryInMB, numCPUs, valuesOfKeyFields, valuesOfResultFields, "");
+	}
+
+	public Experiment(final int memoryInMB, final int numCPUs, final Map<String, String> valuesOfKeyFields, final Map<String, Object> valuesOfResultFields, final String error) {
 		super();
 		this.memoryInMB = memoryInMB;
 		this.numCPUs = numCPUs;
 		this.valuesOfKeyFields = valuesOfKeyFields;
 		this.valuesOfResultFields = valuesOfResultFields;
+		this.error = error;
 	}
 
 	public Map<String, String> getValuesOfKeyFields() {
@@ -59,6 +65,10 @@ public class Experiment {
 
 	public int getNumCPUs() {
 		return this.numCPUs;
+	}
+
+	public String getError() {
+		return this.error;
 	}
 
 	@Override

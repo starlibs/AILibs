@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.hasco.events.TwoPhaseHASCOPhaseSwitchEvent;
+import ai.libs.hasco.core.events.TwoPhaseHASCOPhaseSwitchEvent;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluationCompletedEvent;
 import ai.libs.mlplan.core.MLPlan;

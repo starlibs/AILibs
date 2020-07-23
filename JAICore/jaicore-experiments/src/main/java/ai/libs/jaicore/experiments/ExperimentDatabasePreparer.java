@@ -19,12 +19,13 @@ import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
 public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 	private Logger logger = LoggerFactory.getLogger(ExperimentDatabasePreparer.class);
 
+	private final IExperimentSetConfig experimentConfig;
 	private final ExperimentSetAnalyzer configAnalyzer;
 	private final IExperimentDatabaseHandle handle;
 	private final int memoryLimit;
 	private final int cpuLimit;
 
-	public ExperimentDatabasePreparer(final IExperimentSetConfig config, final IExperimentDatabaseHandle databaseHandle) throws ExperimentDBInteractionFailedException {
+	public ExperimentDatabasePreparer(final IExperimentSetConfig config, final IExperimentDatabaseHandle databaseHandle) {
 
 		if (config.getKeyFields() == null) {
 			throw new IllegalArgumentException("Configuration has not defined any key fields. Make sure to specify the " + IExperimentSetConfig.KEYFIELDS + " entry in the config file.");
@@ -53,7 +54,7 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 
 		/* synchronize information with the database */
 		this.handle = databaseHandle;
-		this.handle.setup(config);
+		this.experimentConfig = config;
 		this.logger.info("Successfully created and initialized ExperimentDatabasePreparer.");
 	}
 
@@ -68,7 +69,13 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 	 * @throws InterruptedException
 	 * @throws AlgorithmExecutionCanceledException
 	 */
-	public List<ExperimentDBEntry> synchronizeExperiments() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public List<ExperimentDBEntry> synchronizeExperiments()
+			throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+
+		/* setup the table */
+		this.logger.info("Creating experiment table if not existent.");
+		this.handle.setup(this.experimentConfig);
+		this.logger.info("Table ready. Now synchronizing experiments.");
 
 		/* get set of all POSSIBLE experiments and all CREATED experiments */
 		List<Map<String, String>> tmpPossibleKeyCombinations = new ArrayList<>(this.configAnalyzer.getAllPossibleKeyCombinations());
@@ -81,7 +88,7 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 		for (ExperimentDBEntry experiment : installedExperiments) {
 			if (tmpPossibleKeyCombinations.contains(experiment.getExperiment().getValuesOfKeyFields())) {
 				tmpPossibleKeyCombinations.remove(experiment.getExperiment().getValuesOfKeyFields());
-				removed ++;
+				removed++;
 			} else {
 				this.logger.warn("Experiment with id {} and keys {} seems outdated. The reason can be an illegal key name or an outdated value for one of the keys. Enable DEBUG mode for more details.", experiment.getId(),
 						experiment.getExperiment().getValuesOfKeyFields());
@@ -93,7 +100,7 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 		if (tmpPossibleKeyCombinations.isEmpty()) {
 			return new ArrayList<>(0);
 		}
-		List<ExperimentDBEntry> entries = this.handle.createAndGetExperiments(tmpPossibleKeyCombinations.stream().map(t -> new Experiment(this.memoryLimit, this.cpuLimit, t)).collect(Collectors.toList()));
+		List<ExperimentDBEntry> entries = this.handle.createOrGetExperiments(tmpPossibleKeyCombinations.stream().map(t -> new Experiment(this.memoryLimit, this.cpuLimit, t)).collect(Collectors.toList()));
 		this.logger.info("Ids of {} inserted entries: {}", entries.size(), entries.stream().map(ExperimentDBEntry::getId).collect(Collectors.toList()));
 		return entries;
 	}
@@ -111,4 +118,11 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 		}
 	}
 
+	public ExperimentSetAnalyzer getConfigAnalyzer() {
+		return this.configAnalyzer;
+	}
+
+	public IExperimentDatabaseHandle getHandle() {
+		return this.handle;
+	}
 }

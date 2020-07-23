@@ -123,13 +123,13 @@ public class DNGMCTSPluginView extends ASimpleMVCPluginView<DNGMCTSPluginModel, 
 
 			List<Double> scoresOfLeft = qValues.get(leftChild);
 			sb.append(HTML_H4_OPEN);
-			sb.append(leftChild + " (" + scoresOfLeft.size()  + ")");
+			sb.append(leftChild + " (" + scoresOfLeft.size() + ")");
 			sb.append(HTML_H4_CLOSE);
 			sb.append(scoresOfLeft.subList(Math.max(0, scoresOfLeft.size() - 5), scoresOfLeft.size()).stream().map(v -> MathExt.round(v, 4)).collect(Collectors.toList()));
 			List<Double> scoresOfRight = qValues.get(rightChild);
 			if (scoresOfRight != null) {
 				sb.append(HTML_H4_OPEN);
-				sb.append(rightChild + " (" + scoresOfRight.size()  + ")");
+				sb.append(rightChild + " (" + scoresOfRight.size() + ")");
 				sb.append(HTML_H4_CLOSE);
 				sb.append(scoresOfRight.subList(Math.max(0, scoresOfRight.size() - 5), scoresOfRight.size()).stream().map(v -> MathExt.round(v, 4)).collect(Collectors.toList()));
 			}
@@ -141,11 +141,6 @@ public class DNGMCTSPluginView extends ASimpleMVCPluginView<DNGMCTSPluginModel, 
 	@Override
 	public void clear() {
 		/* do nothing */
-	}
-
-	@Override
-	public String getTitle() {
-		return "Search Rollout Statistics";
 	}
 
 }

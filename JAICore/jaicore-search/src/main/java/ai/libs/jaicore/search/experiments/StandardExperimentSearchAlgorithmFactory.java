@@ -6,38 +6,58 @@ import java.util.Random;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearch;
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.INodeGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 
 import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
 import ai.libs.jaicore.experiments.Experiment;
 import ai.libs.jaicore.experiments.configurations.IAlgorithmNameConfig;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.brue.BRUEFactory;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.comparison.FixedCommitmentMCTSFactory;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.comparison.PlackettLuceMCTSFactory;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.comparison.preferencekernel.BootstrappingPreferenceKernel;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.ensemble.EnsembleMCTSFactory;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.spuct.SPUCTFactory;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.tag.TAGMCTSFactory;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.thompson.DNGMCTSFactory;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.thompson.DNGPolicy;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.uct.UCBPolicy;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.uct.UCTFactory;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.uuct.UUCTFactory;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.uuct.utility.VaR;
 import ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer.IteratingGraphSearchOptimizer;
 import ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer.IteratingGraphSearchOptimizerFactory;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearchFactory;
-import ai.libs.jaicore.search.algorithms.standard.mcts.SPUCTPathSearch;
-import ai.libs.jaicore.search.algorithms.standard.mcts.UCBPolicy;
-import ai.libs.jaicore.search.algorithms.standard.mcts.UCTPathSearch;
-import ai.libs.jaicore.search.algorithms.standard.mcts.brue.BRUEPathSearch;
-import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.FixedCommitmentMCTSPathSearch;
-import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.PlackettLuceMCTSPathSearch;
-import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.preferencekernel.BootstrappingPreferenceKernel;
-import ai.libs.jaicore.search.algorithms.standard.mcts.ensemble.EnsembleMCTSPathSearch;
-import ai.libs.jaicore.search.algorithms.standard.mcts.tag.TAGMCTSPathSearch;
-import ai.libs.jaicore.search.algorithms.standard.mcts.thompson.DNGMCTSPathSearch;
-import ai.libs.jaicore.search.algorithms.standard.mcts.thompson.DNGPolicy;
+import ai.libs.jaicore.search.algorithms.standard.mcts.MCTSPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.random.RandomSearchFactory;
-import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchWithPathEvaluationsInputToGraphSearchWithSubpathEvaluationViaUninformedness;
 
 public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearchWithPathEvaluationsInput<N, A, Double>> {
 
+	private MCTSPathSearch<I, N, A> getMCTS(final I input, final MCTSFactory<N, A, ?> factory, final int maxiter, final int seed) {
+		factory.withRandom(new Random(seed));
+		factory.withMaxIterations(maxiter);
+		return new MCTSPathSearch<>(input, factory);
+	}
+
 	@SuppressWarnings("unchecked")
 	public IOptimalPathInORGraphSearch<I, ? extends IEvaluatedPath<N, A, Double>, N, A, Double> getAlgorithm(final Experiment experiment, final IPathSearchWithPathEvaluationsInput<N, A, Double> input) {
 		final int seed = Integer.parseInt(experiment.getValuesOfKeyFields().get(IOwnerBasedRandomConfig.K_SEED));
 		final String algorithm = experiment.getValuesOfKeyFields().get(IAlgorithmNameConfig.K_ALGORITHM_NAME);
+
+		final int maxiter = 10000;
+
+		if (algorithm.startsWith("uuct-")) {
+			String[] parts = algorithm.split("-");
+			double alpha = Double.parseDouble(parts[1]);
+			double b = Double.parseDouble(parts[2]);
+			UUCTFactory<N, A> uuctFactory = new UUCTFactory<>();
+			uuctFactory.setUtility(new VaR(alpha, b));
+			return this.getMCTS((I)input, uuctFactory, maxiter, seed);
+		}
+
 		switch (algorithm) {
 		case "random":
 			IteratingGraphSearchOptimizerFactory<I, N, A, Double> factory = new IteratingGraphSearchOptimizerFactory<>();
@@ -50,38 +70,54 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearc
 			return new BestFirst<>((I)reducedProblem);
 		case "bf-informed":
 			GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<N, A, Double> reducer2 = new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(n -> null,
-					n -> false, seed, 3, 10000, 10000);
+					n -> false, new Random(seed), 3, 10000, 10000);
 			return new BestFirst<>((I)reducer2.encodeProblem(input));
 		case "uct":
-			return new UCTPathSearch<>((I)input, false, Math.sqrt(2), seed, 0.0);
+			return this.getMCTS((I)input, new UCTFactory<>(), maxiter, seed);
 		case "ensemble":
 
-			DNGPolicy<N, A> dng001 = new DNGPolicy<>((INodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, .01);
-			DNGPolicy<N, A> dng01 = new DNGPolicy<>((INodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, .1);
-			DNGPolicy<N, A> dng1 = new DNGPolicy<>((INodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, 1.0);
-			DNGPolicy<N, A> dng10 = new DNGPolicy<>((INodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, 10.0);
-			DNGPolicy<N, A> dng100 = new DNGPolicy<>((INodeGoalTester<N, A>)((I)input).getGoalTester(), n -> ((I)input).getPathEvaluator().evaluate(new SearchGraphPath<>(n)), 0, 100.0);
-			return new EnsembleMCTSPathSearch<>((I)input, Arrays.asList(new UCBPolicy<>(), dng001, dng01, dng1, dng01, dng10, dng100), new Random(seed));
+			DNGMCTSFactory<N, A> dngFactory = new DNGMCTSFactory<>();
+			dngFactory.setInitLambda(0.01);
+			DNGPolicy<N, A> dng001 = (DNGPolicy<N, A>)this.getMCTS((I)input, dngFactory, maxiter, seed).getMcts().getTreePolicy();
+			dngFactory.setInitLambda(0.1);
+			DNGPolicy<N, A> dng01 = (DNGPolicy<N, A>)this.getMCTS((I)input, dngFactory, maxiter, seed).getMcts().getTreePolicy();
+			dngFactory.setInitLambda(1);
+			DNGPolicy<N, A> dng1 = (DNGPolicy<N, A>)this.getMCTS((I)input, dngFactory, maxiter, seed).getMcts().getTreePolicy();
+			dngFactory.setInitLambda(10);
+			DNGPolicy<N, A> dng10 = (DNGPolicy<N, A>)this.getMCTS((I)input, dngFactory, maxiter, seed).getMcts().getTreePolicy();
+			dngFactory.setInitLambda(100);
+			DNGPolicy<N, A> dng100 = (DNGPolicy<N, A>)this.getMCTS((I)input, dngFactory, maxiter, seed).getMcts().getTreePolicy();
+			EnsembleMCTSFactory<N, A> eFactory = new EnsembleMCTSFactory<>();
+			eFactory.setTreePolicies(Arrays.asList(new UCBPolicy<>(1.0, true), dng001, dng01, dng1, dng01, dng10, dng100));
+			return this.getMCTS((I)input, eFactory, maxiter, seed);
 		case "sp-uct":
-			return new SPUCTPathSearch<>((I)input, seed, 0.0, .5, 10000);
+			SPUCTFactory<N, A> spucbFactory = new SPUCTFactory<>();
+			spucbFactory.setBigD(10000);
+			return this.getMCTS((I)input, spucbFactory, maxiter, seed);
 		case "pl-mcts-mean":
-			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(DescriptiveStatistics::getMean, 1), new Random(seed), new Random(seed));
+			return this.getMCTS((I)input, new PlackettLuceMCTSFactory<N, A>().withPreferenceKernel(new BootstrappingPreferenceKernel<>(DescriptiveStatistics::getMean, 1)), maxiter, seed);
 		case "pl-mcts-mean+std":
-			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(d -> d.getMean() + d.getStandardDeviation(), 1), new Random(seed), new Random(seed));
+			return this.getMCTS((I)input, new PlackettLuceMCTSFactory<N, A>().withPreferenceKernel(new BootstrappingPreferenceKernel<>(d -> d.getMean() + d.getStandardDeviation(), 1)), maxiter, seed);
 		case "pl-mcts-mean-std":
-			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(d -> d.getMean() - d.getStandardDeviation(), 1), new Random(seed), new Random(seed));
+			return this.getMCTS((I)input, new PlackettLuceMCTSFactory<N, A>().withPreferenceKernel(new BootstrappingPreferenceKernel<>(d -> d.getMean() - d.getStandardDeviation(), 1)), maxiter, seed);
 		case "pl-mcts-min":
-			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(DescriptiveStatistics::getMin, 1), new Random(seed), new Random(seed));
+			return this.getMCTS((I)input, new PlackettLuceMCTSFactory<N, A>().withPreferenceKernel(new BootstrappingPreferenceKernel<>(DescriptiveStatistics::getMin, 1)), maxiter, seed);
 		case "mcts-kfix-100-mean":
-			return new FixedCommitmentMCTSPathSearch<>((I)input, 0.0, 100, DescriptiveStatistics::getMean);
+			FixedCommitmentMCTSFactory<N, A> fcFactory1 = new FixedCommitmentMCTSFactory<>();
+			fcFactory1.setK(100);
+			fcFactory1.setMetric(DescriptiveStatistics::getMean);
+			return this.getMCTS((I)input, fcFactory1, maxiter, seed);
 		case "mcts-kfix-200-mean":
-			return new FixedCommitmentMCTSPathSearch<>((I)input, 0.0, 200, DescriptiveStatistics::getMean);
+			FixedCommitmentMCTSFactory<N, A> fcFactory2 = new FixedCommitmentMCTSFactory<>();
+			fcFactory2.setK(200);
+			fcFactory2.setMetric(DescriptiveStatistics::getMean);
+			return this.getMCTS((I)input, fcFactory2, maxiter, seed);
 		case "dng":
-			return new DNGMCTSPathSearch<>((I)input, seed, 0.0, 1.0);
+			return this.getMCTS((I)input, new DNGMCTSFactory<>(), maxiter, seed);
 		case "tag":
-			return new TAGMCTSPathSearch<>((I)input, seed, 0.0);
+			return this.getMCTS((I)input, new TAGMCTSFactory<>(), maxiter, seed);
 		case "brue":
-			return new BRUEPathSearch<>((I)input, seed, 0.0);
+			return this.getMCTS((I)input, new BRUEFactory<>(), maxiter, seed);
 		case "dfs":
 			IteratingGraphSearchOptimizerFactory<I, N, A, Double> dfsFactory = new IteratingGraphSearchOptimizerFactory<>();
 			dfsFactory.setBaseAlgorithmFactory(new DepthFirstSearchFactory<>());

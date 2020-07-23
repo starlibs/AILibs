@@ -29,13 +29,19 @@ public class AlternativeNodeEvaluator<N, A, V extends Comparable<V>> extends Dec
 
 	private String loggerName;
 	private final IPathEvaluator<N, A, V> ne1;
+	private final boolean enforceExecutionOfSecondEvaluator;
 
 	public AlternativeNodeEvaluator(final IPathEvaluator<N, A, V> ne1, final IPathEvaluator<N, A, V> ne2) {
+		this (ne1, ne2, false);
+	}
+
+	public AlternativeNodeEvaluator(final IPathEvaluator<N, A, V> ne1, final IPathEvaluator<N, A, V> ne2, final boolean enforceExecutionOfSecondEvaluator) {
 		super(ne2);
 		if (ne1 == null) {
 			throw new IllegalArgumentException("The alternativ evaluator in node evaluator must not be null!");
 		}
 		this.ne1 = ne1;
+		this.enforceExecutionOfSecondEvaluator = enforceExecutionOfSecondEvaluator;
 	}
 
 	@Override
@@ -59,7 +65,7 @@ public class AlternativeNodeEvaluator<N, A, V extends Comparable<V>> extends Dec
 		if (super.reportsSolutions()) {
 			return true;
 		}
-		return this.doesDecoratedEvaluatorReportSolutions();
+		return this.ne1 instanceof IPotentiallySolutionReportingPathEvaluator && ((IPotentiallySolutionReportingPathEvaluator<?, ?, ?>) this.ne1).reportsSolutions();
 	}
 
 	@Override
@@ -87,7 +93,7 @@ public class AlternativeNodeEvaluator<N, A, V extends Comparable<V>> extends Dec
 	@Override
 	public V evaluate(final ILabeledPath<N, A> node) throws PathEvaluationException, InterruptedException {
 		V f1 = this.ne1.evaluate(node);
-		if (f1 != null) {
+		if (!this.enforceExecutionOfSecondEvaluator && f1 != null) {
 			return f1;
 		}
 		return super.evaluate(node);

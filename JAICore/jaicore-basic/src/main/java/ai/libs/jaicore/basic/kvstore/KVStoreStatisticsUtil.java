@@ -186,6 +186,20 @@ public class KVStoreStatisticsUtil {
 
 			onesStore.put(output, ESignificanceTestResult.TIE);
 			Map<String, Double> sampleMapOfOne = toSampleMap(onesStore.getAsStringList(pairingIndex, ","), onesStore.getAsDoubleList(sampledValues, ","));
+			List<String> mergedSampleIDs = new LinkedList<>(sampleMapOfOne.keySet());
+
+			double[] one = new double[mergedSampleIDs.size()];
+			double meanOne = 0.0;
+			int counter = 0;
+			for (String sampleID : mergedSampleIDs) {
+				if (sampleMapOfOne.containsKey(sampleID)) {
+					one[counter] = sampleMapOfOne.get(sampleID);
+					meanOne += one[counter] / sampleMapOfOne.size();
+				} else {
+					one[counter] = Double.NaN;
+				}
+				counter++;
+			}
 
 			for (Entry<String, KVStoreCollection> sampleData : settingToSampleWisePartition.getValue().entrySet()) {
 				if (sampleData.getKey().equals(nameOfTestPopulation)) {
@@ -193,34 +207,18 @@ public class KVStoreStatisticsUtil {
 				}
 
 				IKVStore otherStore = sampleData.getValue().get(0);
-
 				Map<String, Double> sampleMapOfOther = toSampleMap(otherStore.getAsStringList(pairingIndex, ","), otherStore.getAsDoubleList(sampledValues, ","));
 
-				Set<String> mergedSampleIDs = new HashSet<>(sampleMapOfOne.keySet());
-				mergedSampleIDs.addAll(sampleMapOfOther.keySet());
-
-				double[] one = new double[mergedSampleIDs.size()];
 				double[] other = new double[mergedSampleIDs.size()];
-
-				double meanOne = 0.0;
 				double meanOther = 0.0;
-
-				int counter = 0;
-				for (String sampleID : mergedSampleIDs) {
-					if (sampleMapOfOne.containsKey(sampleID)) {
-						one[counter] = sampleMapOfOne.get(sampleID);
-						meanOne += one[counter] / sampleMapOfOne.size();
-					} else {
-						one[counter] = Double.NaN;
-					}
-
+				for (int i = 0; i < mergedSampleIDs.size(); i++) {
+					String sampleID = mergedSampleIDs.get(i);
 					if (sampleMapOfOther.containsKey(sampleID)) {
-						other[counter] = sampleMapOfOther.get(sampleID);
-						meanOther += other[counter] / sampleMapOfOther.size();
+						other[i] = sampleMapOfOther.get(sampleID);
+						meanOther += other[i] / sampleMapOfOther.size();
 					} else {
-						other[counter] = Double.NaN;
+						other[i] = Double.NaN;
 					}
-					counter++;
 				}
 
 				if (StatisticsUtil.wilcoxonSignedRankSumTestTwoSided(one, other)) {
@@ -232,6 +230,7 @@ public class KVStoreStatisticsUtil {
 				} else {
 					otherStore.put(output, ESignificanceTestResult.TIE);
 				}
+
 			}
 		}
 		return groupedCollection;
@@ -445,6 +444,23 @@ public class KVStoreStatisticsUtil {
 			stats.addValue(s.getAsDouble(rank));
 		}
 		return averageRanks;
+	}
+  
+	public static void bestWilcoxonSignedRankTest(final KVStoreCollection collection, final String setting, final String sampleID, final String pairingIndices, final String sampledValues, final String output) {
+		String bestField = output + "_best";
+		KVStoreCollectionOneLayerPartition bestPart = new KVStoreCollectionOneLayerPartition(setting, collection);
+		bestPart.forEach(x -> best(x.getValue(), setting, sampleID, sampledValues, bestField));
+
+		KVStoreCollectionTwoLayerPartition partition = new KVStoreCollectionTwoLayerPartition(setting, sampleID, collection);
+
+		for (Entry<String, Map<String, KVStoreCollection>> partitionEntry : partition) {
+			Optional<Entry<String, KVStoreCollection>> best = partitionEntry.getValue().entrySet().stream().filter(x -> x.getValue().get(0).getAsBoolean(bestField)).findFirst();
+			if (best.isPresent()) {
+				KVStoreCollection merged = new KVStoreCollection();
+				partitionEntry.getValue().values().forEach(merged::addAll);
+				KVStoreStatisticsUtil.wilcoxonSignedRankTest(merged, setting, sampleID, pairingIndices, sampledValues, best.get().getKey(), output);
+			}
+		}
 	}
 
 }

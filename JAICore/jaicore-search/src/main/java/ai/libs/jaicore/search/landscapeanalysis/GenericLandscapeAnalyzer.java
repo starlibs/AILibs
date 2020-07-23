@@ -10,10 +10,15 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvalua
 import org.api4.java.datastructure.graph.ILabeledPath;
 import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
 public class GenericLandscapeAnalyzer<N, A> {
+
+	private static Logger logger = LoggerFactory.getLogger("testers");
+
 	private final IPathSearchWithPathEvaluationsInput<N, A, Double> problem;
 	private final N root;
 	private final ISuccessorGenerator<N, A> successorGenerator;
@@ -108,14 +113,14 @@ public class GenericLandscapeAnalyzer<N, A> {
 			Collections.shuffle(nedList);
 			currentPath = new SearchGraphPath<>(currentPath, nedList.get(0).getTo(), nedList.get(0).getArcLabel());
 		}
-		System.out.println("Drew path " + currentPath.getArcs() + ": " + currentPath.getHead());
+		logger.info("Drew path {}: {}" , currentPath.getArcs(), currentPath.getHead());
 		return this.getIterativeProbeValues(currentPath, probSizePerLevelAndChild);
 	}
 
 	public List<List<double[]>> getIterativeProbeValues(final ILabeledPath<N, A> path, final Number probSizePerLevelAndChild) throws PathEvaluationException, InterruptedException {
 		List<List<double[]>> iterativeProbes = new ArrayList<>();
 		for (int depth = 0; depth < path.getNumberOfNodes() - 1; depth++) {
-			System.out.println("Probing on level " + depth);
+			logger.info("Probing on level {}", depth);
 
 			/* compute sub-path of the relevant depth */
 			ILabeledPath<N, A> subPath = path;

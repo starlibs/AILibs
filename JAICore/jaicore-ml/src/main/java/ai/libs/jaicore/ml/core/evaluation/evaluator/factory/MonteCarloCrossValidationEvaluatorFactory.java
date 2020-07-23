@@ -22,14 +22,14 @@ public class MonteCarloCrossValidationEvaluatorFactory extends AMonteCarloCrossV
 		if (this.getTrainFoldSize() <= 0 || this.getTrainFoldSize() >= 1) {
 			throw new IllegalStateException("Train fold size is configured to " + this.getTrainFoldSize() + " but must be strictly greater than 0 and strictly smaller than 1.");
 		}
-		Objects.requireNonNull(this.random);
-		Objects.requireNonNull(this.data);
-		Objects.requireNonNull(this.metric);
+		Objects.requireNonNull(this.random, "No random source has been defined for the MCCV.");
+		Objects.requireNonNull(this.data, "No data has been set for the MCCV.");
+		Objects.requireNonNull(this.metric, "No metric has been set for the MCCV.");
 		if (this.numMCIterations <= 0) {
 			throw new IllegalStateException("Cannot create MCCV evaluator due to invalid number of repeats " + this.getNumMCIterations() + ". Set number of repeats to a positive value!");
 		}
 		IAggregatedPredictionPerformanceMeasure<?, ?> aggMeasure = new AveragingPredictionPerformanceMeasure<>(this.metric);
-		return new MonteCarloCrossValidationEvaluator(this.data, this.getNumMCIterations(), this.getTrainFoldSize(), this.random, aggMeasure);
+		return new MonteCarloCrossValidationEvaluator(this.getCacheSplitSets(), this.data, this.getNumMCIterations(), this.getTrainFoldSize(), this.random, aggMeasure);
 	}
 
 	@Override

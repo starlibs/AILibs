@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.core.dataset;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -8,7 +9,7 @@ public class DenseInstance extends AInstance {
 	private List<Object> attributes;
 
 	public DenseInstance(final Object[] attributes, final Object label) {
-		this(Arrays.asList(attributes), label);
+		this(new ArrayList<>(Arrays.asList(attributes)), label);
 	}
 
 	public DenseInstance(final List<Object> attributes, final Object label) {

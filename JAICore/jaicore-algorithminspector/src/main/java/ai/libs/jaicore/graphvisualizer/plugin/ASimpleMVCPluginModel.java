@@ -9,11 +9,11 @@ import org.slf4j.LoggerFactory;
  * @author fmohr
  *
  */
-public abstract class ASimpleMVCPluginModel<V extends ASimpleMVCPluginView<?, ?, ?>, C extends ASimpleMVCPluginController<?,?>> implements IGUIPluginModel, ILoggingCustomizable {
+public abstract class ASimpleMVCPluginModel<V extends ASimpleMVCPluginView<?, ?, ?>, C extends ASimpleMVCPluginController<?, ?>> implements IGUIPluginModel, ILoggingCustomizable {
 
 	private V view;
 	private C controller;
-	protected Logger logger = LoggerFactory.getLogger("gui.model." + this.getClass().getName());
+	private Logger logger = LoggerFactory.getLogger("gui.model." + this.getClass().getName());
 
 	public void setView(final V view) {
 		this.view = view;
@@ -32,7 +32,6 @@ public abstract class ASimpleMVCPluginModel<V extends ASimpleMVCPluginView<?, ?,
 	}
 
 	public abstract void clear();
-
 
 	@Override
 	public String getLoggerName() {

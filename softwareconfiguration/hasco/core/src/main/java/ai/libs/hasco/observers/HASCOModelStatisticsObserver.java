@@ -9,8 +9,8 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.hasco.events.HASCOSolutionEvent;
-import ai.libs.hasco.model.UnparametrizedComponentInstance;
+import ai.libs.hasco.core.events.HASCOSolutionEvent;
+import ai.libs.jaicore.components.model.UnparametrizedComponentInstance;
 
 public class HASCOModelStatisticsObserver {
 

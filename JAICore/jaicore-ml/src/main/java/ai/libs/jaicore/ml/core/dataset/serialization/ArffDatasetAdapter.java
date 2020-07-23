@@ -8,11 +8,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -41,18 +44,20 @@ import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.StringAttribute;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffAttributeType;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffItem;
+import ai.libs.jaicore.ml.pdm.dataset.SensorTimeSeriesAttribute;
 
 public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<ILabeledInstance>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ArffDatasetAdapter.class);
 
+	public static final String V_MISSING_VALUE = "?";
 	public static final String K_RELATION_NAME = "relationName";
 	public static final String K_CLASS_INDEX = "classIndex";
 
 	private static final String F_CLASS_INDEX = "C";
 
 	private static final String SEPARATOR_RELATIONNAME = ":";
-	private static final String SEPARATOR_ATTRIBUTE_DESCRIPTION = " ";
+	private static final Pattern REG_EXP_ATTRIBUTE_DESCRIPTION = Pattern.compile("('[^']*'|[^ ]+)\\s+(.*)");
 	private static final String SEPARATOR_DENSE_INSTANCE_VALUES = ",";
 
 	private final boolean sparseMode;
@@ -155,14 +160,14 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	protected static IAttribute parseAttribute(final String line) throws UnsupportedAttributeTypeException {
-		String attributeDefinitionSplit = line.replaceAll("\\t", " ").substring(EArffItem.ATTRIBUTE.getValue().length() + 1).trim();
-		String name = attributeDefinitionSplit.substring(0, attributeDefinitionSplit.indexOf(SEPARATOR_ATTRIBUTE_DESCRIPTION));
-		if (name.trim().startsWith("'") && !name.trim().endsWith("'")) {
-			int cutIndex = attributeDefinitionSplit.indexOf('\'', name.length());
-			name += attributeDefinitionSplit.substring(name.length(), name.length() + cutIndex + 1);
+		String attributeDefinitionSplit = line.replace("\\t", " ").substring(EArffItem.ATTRIBUTE.getValue().length() + 1).trim();
+		Matcher m = REG_EXP_ATTRIBUTE_DESCRIPTION.matcher(attributeDefinitionSplit);
+		if (!m.find()) {
+			throw new IllegalArgumentException("Cannot parse attribute definition: " + line);
 		}
+		String name = m.group(1);
+		String type = m.group(2);
 
-		String type = attributeDefinitionSplit.substring(name.length() + 1).trim();
 		name = name.trim();
 		if ((name.startsWith("'") && name.endsWith("'")) || (name.startsWith("\"") && name.endsWith("\""))) {
 			name = name.substring(1, name.length() - 1);
@@ -188,6 +193,8 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			return new NumericAttribute(name);
 		case STRING:
 			return new StringAttribute(name);
+		case TIMESERIES:
+			return new SensorTimeSeriesAttribute(name);
 		case NOMINAL:
 			if (values != null) {
 				return new IntBasedCategoricalAttribute(name,
@@ -195,8 +202,18 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			} else {
 				throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
 			}
+
 		default:
 			throw new UnsupportedAttributeTypeException("Can not deal with attribute type " + type);
+		}
+	}
+
+	private static boolean tryParseInt(final String string) {
+		try {
+			Integer.parseInt(string);
+			return true;
+		} catch (Exception e) {
+			return false;
 		}
 	}
 
@@ -209,15 +226,13 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		String curLine = line;
 		if (curLine.trim().startsWith("{") && curLine.trim().endsWith("}")) {
 			curLine = curLine.substring(1, curLine.length() - 1);
-			sparseMode = true;
 			if (curLine.trim().isEmpty()) { // the instance does not mention any explicit values => return an empty map.
 				return new HashMap<>();
 			}
 		}
 
 		String[] lineSplit = curLine.split(",");
-
-		if (lineSplit.length < attributes.size()) {
+		if (!(lineSplit[0].startsWith("'") && lineSplit[0].endsWith("'") || lineSplit[0].startsWith("\"") && lineSplit[0].endsWith("\"")) && lineSplit[0].contains(" ") && tryParseInt(lineSplit[0].split(" ")[0])) {
 			sparseMode = true;
 		}
 
@@ -230,18 +245,29 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			Object target = null;
 			int cI = 0;
 			for (int i = 0; i < lineSplit.length; i++) {
-				if (i == targetIndex) {
-					target = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
+				final Object value;
+				if (lineSplit[i].trim().equals(V_MISSING_VALUE)) {
+					value = null;
 				} else {
-					parsedDenseInstance[cI++] = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
+					value = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
+				}
+
+				if (i == targetIndex) {
+					target = value;
+				} else {
+					parsedDenseInstance[cI++] = value;
 				}
 			}
 			return Arrays.asList(parsedDenseInstance, target);
 		} else {
 			Map<Integer, Object> parsedSparseInstance = new HashMap<>();
 			for (String sparseValue : lineSplit) {
+				sparseValue = sparseValue.trim(); // remove leading or trailing white spaces.
 				int indexOfFirstSpace = sparseValue.indexOf(' ');
 				int indexOfAttribute = Integer.parseInt(sparseValue.substring(0, indexOfFirstSpace));
+				if (indexOfAttribute > targetIndex) {
+					indexOfAttribute--;
+				}
 				String attributeValue = sparseValue.substring(indexOfFirstSpace + 1);
 				parsedSparseInstance.put(indexOfAttribute, attributes.get(indexOfAttribute).deserializeAttributeValue(attributeValue));
 			}
@@ -268,16 +294,16 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile, final int columnWithClassIndex) throws DatasetDeserializationFailedException {
+		String line = null;
+		long lineCounter = 0;
 		try (BufferedReader br = Files.newBufferedReader(datasetFile.toPath())) {
 			ILabeledDataset<ILabeledInstance> dataset = null;
 			KVStore relationMetaData = new KVStore();
 			List<IAttribute> attributes = new ArrayList<>();
 
 			boolean instanceReadMode = false;
-			String line;
-			long lineCounter = 1;
-
 			while ((line = br.readLine()) != null) {
+				lineCounter++;
 				if (!instanceReadMode) {
 					if (line.toLowerCase().startsWith(EArffItem.RELATION.getValue())) {
 						// parse relation meta data
@@ -313,12 +339,8 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						} else if (parsedInstance instanceof Map) {
 							@SuppressWarnings("unchecked")
 							Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
-							Object label = (parsedSparseInstance).containsKey(relationMetaData.getAsInt(K_CLASS_INDEX)) ? parsedSparseInstance.remove(relationMetaData.getAsInt(K_CLASS_INDEX)) : 0; // in sparse instance, the class attribute
-							// may be missing; it is then assumed to
-							// be 0
-							if (label == null) {
-								throw new IllegalArgumentException("Cannot identify label for instance " + line);
-							}
+							Object label = (parsedSparseInstance).containsKey(relationMetaData.getAsInt(K_CLASS_INDEX)) ? parsedSparseInstance.remove(relationMetaData.getAsInt(K_CLASS_INDEX)) : 0; // in sparse instance, the class
+							// may be missing; it is then assumed to be 0
 							newI = new SparseInstance(dataset.getNumAttributes(), parsedSparseInstance, label);
 						} else {
 							throw new IllegalStateException("Severe Error: The format of the parsed instance is not as expected.");
@@ -330,11 +352,9 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 					}
 				}
 			}
-			lineCounter++;
-
 			return dataset;
 		} catch (Exception e) {
-			throw new DatasetDeserializationFailedException("Could not deserialize dataset from ARFF file.", e);
+			throw new DatasetDeserializationFailedException("Could not deserialize dataset from ARFF file. Error occurred on line " + lineCounter + ": " + line, e);
 		}
 	}
 
@@ -358,21 +378,29 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				bw.write(serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
 				bw.write("\n");
 			} else {
-				bw.write("{");
-				bw.write(((SparseInstance) instance).getAttributeMap().entrySet().stream().map(x -> x.getKey() + " " + serializeAttributeValue(data.getInstanceSchema().getAttribute(x.getKey()), x.getValue()))
-						.collect(Collectors.joining(",")));
-				if (instance.isLabelPresent()) {
-					bw.write(",");
+				StringBuilder sb = new StringBuilder();
+				Map<Integer, Object> attributeValues = ((SparseInstance) instance).getAttributeMap();
+				List<Integer> keys = new ArrayList<>(attributeValues.keySet());
+				Collections.sort(keys);
+
+				sb.append("{");
+				sb.append(keys.stream().map(x -> x + " " + serializeAttributeValue(data.getInstanceSchema().getAttribute(x), attributeValues.get(x))).collect(Collectors.joining(", ")));
+				if (!attributeValues.isEmpty() && instance.isLabelPresent()) {
+					sb.append(",");
 				}
-				bw.write(data.getNumAttributes());
-				bw.write(" ");
-				bw.write(serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
-				bw.write("}\n");
+				sb.append(data.getNumAttributes());
+				sb.append(" ");
+				sb.append(serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
+				sb.append("}\n");
+				bw.write(sb.toString());
 			}
 		}
 	}
 
 	private static String serializeAttributeValue(final IAttribute att, final Object value) {
+		if (value == null) {
+			return V_MISSING_VALUE;
+		}
 		String returnValue = att.serializeAttributeValue(value);
 		if (att instanceof ICategoricalAttribute) {
 			returnValue = "'" + returnValue + "'";
@@ -382,7 +410,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 	private static void serializeMetaData(final BufferedWriter bw, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
 		StringBuilder sb = new StringBuilder();
-		sb.append(EArffItem.RELATION.getValue() + " " + data.getRelationName());
+		sb.append(EArffItem.RELATION.getValue() + " '" + data.getRelationName() + "'");
 		sb.append("\n");
 		sb.append("\n");
 		for (IAttribute att : data.getInstanceSchema().getAttributeList()) {
@@ -400,6 +428,8 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			sb.append("{'" + ((ICategoricalAttribute) att).getLabels().stream().collect(Collectors.joining("','")) + "'}");
 		} else if (att instanceof INumericAttribute) {
 			sb.append(EArffAttributeType.NUMERIC.getName());
+		} else if (att instanceof SensorTimeSeriesAttribute) {
+			sb.append(EArffAttributeType.TIMESERIES.getName());
 		}
 		return sb.toString();
 	}

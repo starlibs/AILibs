@@ -1,6 +1,5 @@
  {
   "repository" : "sklearn-tpot-classifiers",
-  "include": ["./scikit-learn-classifiers-tpot.json"],
   "components" : [ {
     "name" : "sklearn.preprocessing.Binarizer",
     "providedInterface" : [ "sklearn.preprocessing.Binarizer", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],

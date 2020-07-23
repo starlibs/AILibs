@@ -17,8 +17,9 @@ import org.api4.java.common.control.IRandomConfigurable;
  * @author fmohr
  *
  */
-public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends AMonteCarloCrossValidationBasedEvaluatorFactory<F>> implements
-		ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, IRandomConfigurable, IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>, IPredictionPerformanceMetricConfigurable {
+public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends AMonteCarloCrossValidationBasedEvaluatorFactory<F>>
+		implements ISplitBasedSupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, F>, IRandomConfigurable, IDataConfigurable<ILabeledDataset<? extends ILabeledInstance>>,
+		IPredictionPerformanceMetricConfigurable {
 
 	private IDatasetSplitter<? extends ILabeledDataset<?>> datasetSplitter;
 	protected Random random;
@@ -27,6 +28,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 	private double trainFoldSize;
 	private int timeoutForSolutionEvaluation;
 	protected IDeterministicPredictionPerformanceMeasure<?, ?> metric;
+	private boolean cacheSplitSets = false;
 
 	/**
 	 * Standard c'tor.
@@ -37,14 +39,17 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 
 	/**
 	 * Getter for the dataset splitter.
+	 *
 	 * @return Returns the dataset spliiter.
 	 */
+	@Override
 	public IDatasetSplitter<? extends ILabeledDataset<?>> getDatasetSplitter() {
 		return this.datasetSplitter;
 	}
 
 	/**
 	 * Getter for the number of iterations, i.e. the number of splits considered.
+	 *
 	 * @return The number of iterations.
 	 */
 	public int getNumMCIterations() {
@@ -53,6 +58,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 
 	/**
 	 * Getter for the dataset which is used for splitting.
+	 *
 	 * @return The original dataset that is being split.
 	 */
 	@Override
@@ -62,6 +68,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 
 	/**
 	 * Getter for the size of the train fold.
+	 *
 	 * @return The portion of the training data.
 	 */
 	public double getTrainFoldSize() {
@@ -70,17 +77,25 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 
 	/**
 	 * Getter for the timeout for evaluating a solution.
+	 *
 	 * @return The timeout for evaluating a solution.
 	 */
 	public int getTimeoutForSolutionEvaluation() {
 		return this.timeoutForSolutionEvaluation;
 	}
 
+	public IDeterministicPredictionPerformanceMeasure<?, ?> getMetric() {
+		return this.metric;
+	}
+
 	/**
 	 * Configures the evaluator to use the given dataset splitter.
-	 * @param datasetSplitter The dataset splitter to be used.
+	 *
+	 * @param datasetSplitter
+	 *            The dataset splitter to be used.
 	 * @return The factory object.
 	 */
+	@Override
 	public F withDatasetSplitter(final IDatasetSplitter<? extends ILabeledDataset<?>> datasetSplitter) {
 		this.datasetSplitter = datasetSplitter;
 		return this.getSelf();
@@ -93,7 +108,9 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 
 	/**
 	 * Configures the number of monte carlo cross-validation iterations.
-	 * @param numMCIterations The number of iterations to run.
+	 *
+	 * @param numMCIterations
+	 *            The number of iterations to run.
 	 * @return The factory object.
 	 */
 	public F withNumMCIterations(final int numMCIterations) {
@@ -103,7 +120,9 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 
 	/**
 	 * Configures the dataset which is split into train and test data.
-	 * @param data The dataset to be split.
+	 *
+	 * @param data
+	 *            The dataset to be split.
 	 * @return The factory object.
 	 */
 	public F withData(final ILabeledDataset<?> data) {
@@ -113,7 +132,9 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 
 	/**
 	 * Configures the portion of the training data relative to the entire dataset size.
-	 * @param trainFoldSize The size of the training fold (0,1).
+	 *
+	 * @param trainFoldSize
+	 *            The size of the training fold (0,1).
 	 * @return The factory object.
 	 */
 	public F withTrainFoldSize(final double trainFoldSize) {
@@ -123,7 +144,9 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 
 	/**
 	 * Configures a timeout for evaluating a solution.
-	 * @param timeoutForSolutionEvaluation The timeout for evaluating a solution.
+	 *
+	 * @param timeoutForSolutionEvaluation
+	 *            The timeout for evaluating a solution.
 	 * @return The factory object.
 	 */
 	public F withTimeoutForSolutionEvaluation(final int timeoutForSolutionEvaluation) {
@@ -152,5 +175,18 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends 
 	public F withMeasure(final IDeterministicPredictionPerformanceMeasure<?, ?> measure) {
 		this.setMeasure(measure);
 		return this.getSelf();
+	}
+
+	public IDeterministicPredictionPerformanceMeasure<?, ?> getMeasure() {
+		return this.metric;
+	}
+
+	public F withCacheSplitSets(final boolean cacheSplitSets) {
+		this.cacheSplitSets = cacheSplitSets;
+		return this.getSelf();
+	}
+
+	public boolean getCacheSplitSets() {
+		return this.cacheSplitSets;
 	}
 }

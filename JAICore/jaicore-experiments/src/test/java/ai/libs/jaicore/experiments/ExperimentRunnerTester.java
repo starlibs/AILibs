@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -44,8 +45,46 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 	public static Collection<Object[]> setData(){
 
 		Collection<Object[]> params = new ArrayList<>();
-		params.add(new Object[] { new File("testrsc/experiment-constrained.cfg") });
-		params.add(new Object[] { new File("testrsc/experiment-unconstrained.cfg") });
+		params.add(new Object[] {
+				new File("testrsc/experiment-constrained.cfg"),
+				(Consumer<ExperimentRunner>)(ExperimentRunner runner) -> {
+					try {
+						runner.randomlyConductExperiments();
+					} catch (Exception ex) {
+						throw new RuntimeException(ex);
+					}
+				}
+		});
+		params.add(new Object[] {
+				new File("testrsc/experiment-unconstrained.cfg"),
+				(Consumer<ExperimentRunner>)(ExperimentRunner runner) -> {
+					try {
+						runner.sequentiallyConductExperiments();
+					} catch(Exception ex) {
+						throw new RuntimeException(ex);
+					}
+				}
+		});
+		params.add(new Object[] {
+				new File("testrsc/experiment-unconstrained.cfg"),
+				(Consumer<ExperimentRunner>)(ExperimentRunner runner) -> {
+					try {
+						runner.randomlyConductExperiments();
+					} catch (Exception ex) {
+						throw new RuntimeException(ex);
+					}
+				}
+		});
+		params.add(new Object[] {
+				new File("testrsc/experiment-constrained.cfg"),
+				(Consumer<ExperimentRunner>)(ExperimentRunner runner) -> {
+					try {
+						runner.sequentiallyConductExperiments();
+					} catch(Exception ex) {
+						throw new RuntimeException(ex);
+					}
+				}
+		});
 		return params;
 	}
 
@@ -107,12 +146,15 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 
 	private final IDatabaseConfig conf = (IDatabaseConfig) ConfigFactory.create(IDatabaseConfig.class).loadPropertiesFromFile(new File("testrsc/dbconfig.properties"));
 	private final IExperimentDatabaseHandle handle = new ExperimenterMySQLHandle(this.conf);
+	// the following attributes are injected by JUnit:
 	private final IExperimentSetConfig config;
+	private final Consumer<ExperimentRunner> experimentRunnerMethod;
 	private final int numberOfTotalExperiments;
 
-	public ExperimentRunnerTester(final File configFile) {
+	public ExperimentRunnerTester(final File configFile, Consumer<ExperimentRunner> experimentRunnerMethod) {
 		super();
 		this.config = (IExperimentSetConfig)ConfigFactory.create(IExperimentSetConfig.class).loadPropertiesFromFile(configFile);
+		this.experimentRunnerMethod = experimentRunnerMethod;
 		this.numberOfTotalExperiments = this.config.getConstraints() == null ? (3 * new Generator().getNumberOfValues()) : 4;
 	}
 
@@ -129,11 +171,11 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 	}
 
 	@Test
-	public void test2ThatAllExperimentsAreConducted() throws ExperimentDBInteractionFailedException, InterruptedException {
+	public void test2ThatAllExperimentsAreConductedExactlyOnceUsingParallelization() throws ExperimentDBInteractionFailedException, InterruptedException {
 
 		/* check that running the experiments works */
 		ExperimentRunner runner = new ExperimentRunner(this.config, this, this.handle);
-		runner.randomlyConductExperiments();
+		experimentRunnerMethod.accept(runner);
 		Collection<ExperimentDBEntry> conductedExperiments = this.handle.getConductedExperiments();
 		assertEquals(this.numberOfTotalExperiments, conductedExperiments.size());
 

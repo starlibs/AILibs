@@ -1,2 +1,0 @@
-paramfile = Logistic.pcs
-gRPC_port = 8081

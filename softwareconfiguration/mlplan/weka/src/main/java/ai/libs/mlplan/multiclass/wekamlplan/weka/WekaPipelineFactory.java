@@ -7,8 +7,11 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
-import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.IParameterDomain;
+import ai.libs.jaicore.components.model.NumericParameterDomain;
+import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
@@ -31,6 +34,7 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 
 	@Override
 	public IWekaClassifier getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
+		this.logger.debug("Instantiate weka classifier from component instance {}.", groundComponent);
 		try {
 			if (groundComponent.getComponent().getName().equals("pipeline")) {
 				ComponentInstance preprocessorCI = null;
@@ -43,6 +47,7 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 				ASSearch search = ASSearch.forName(searcherCI.getComponent().getName(), this.getParameterList(searcherCI).toArray(new String[0]));
 
 				IWekaClassifier c = this.getComponentInstantiation(groundComponent.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER));
+				this.logger.debug("Returning a MLPipeline object (aseval: {}, assearch: {}, classifier: {})", eval != null, search != null, c != null);
 				return new WekaClassifier(new MLPipeline(search, eval, c.getClassifier()));
 
 			} else {
@@ -74,9 +79,8 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 					case "B": // suppose that this defines a base classifier
 						Classifier baseClassifier = this.getComponentInstantiation(reqI.getValue()).getClassifier();
 						if (c instanceof Stacking) {
-							((Stacking) c).setClassifiers(new Classifier[] {baseClassifier});
-						}
-						else {
+							((Stacking) c).setClassifiers(new Classifier[] { baseClassifier });
+						} else {
 							this.logger.error("Unsupported option B for classifier {}", c.getClass().getName());
 						}
 						break;
@@ -109,19 +113,28 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 		List<String> parameters = new LinkedList<>();
 
 		for (Entry<String, String> parameterValues : ci.getParameterValues().entrySet()) {
-			if (parameterValues.getKey().toLowerCase().endsWith("activator") || parameterValues.getValue().equals("REMOVED")) {
+
+			Parameter param = ci.getComponent().getParameterWithName(parameterValues.getKey());
+			boolean isDefault = param.isDefaultValue(parameterValues.getValue());
+
+			if (parameterValues.getKey().toLowerCase().endsWith("activator") || parameterValues.getValue().equals("REMOVED") || isDefault) {
 				continue;
 			}
 
 			if (!parameterValues.getValue().equals("false")) {
 				parameters.add("-" + parameterValues.getKey());
 			}
+
+			IParameterDomain domain = ci.getComponent().getParameterWithName(parameterValues.getKey()).getDefaultDomain();
 			if (parameterValues.getValue() != null && !parameterValues.getValue().equals("") && !parameterValues.getValue().equals("true") && !parameterValues.getValue().equals("false")) {
-				parameters.add(parameterValues.getValue());
+				if (domain instanceof NumericParameterDomain && ((NumericParameterDomain) domain).isInteger()) {
+					parameters.add((int) Double.parseDouble(parameterValues.getValue()) + "");
+				} else {
+					parameters.add(parameterValues.getValue());
+				}
 			}
 		}
 
 		return parameters;
 	}
-
 }

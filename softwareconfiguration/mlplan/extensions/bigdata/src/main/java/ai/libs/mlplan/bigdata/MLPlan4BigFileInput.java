@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.StatisticsUtil;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
+import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.MCCVSplitEvaluationEvent;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.ReservoirSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SimpleRandomSamplingFactory;

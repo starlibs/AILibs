@@ -8,6 +8,10 @@ import ai.libs.jaicore.basic.sets.Pair;
 
 public class LoggerUtil {
 
+	public static final String LOGGER_NAME_EXAMPLE = "example"; // name for loggers of an object describing an example usage
+	public static final String LOGGER_NAME_TESTER = "tester"; // name for loggers that conduct tests
+	public static final String LOGGER_NAME_TESTEDALGORITHM = "testedalgorithm"; // name for loggers of algorithms that ARE tested within a test
+
 	private static final String INDENTED_LINEBREAK = "\n\t\t";
 
 	private LoggerUtil() {
@@ -41,7 +45,7 @@ public class LoggerUtil {
 		if (additionalInformationObjects != null) {
 			for (Pair<String, Object> additionalObject : additionalInformationObjects) {
 				sb.append("\n\t" + additionalObject.getX() + INDENTED_LINEBREAK);
-				sb.append(additionalObject.getY().toString().replaceAll("\n", INDENTED_LINEBREAK));
+				sb.append(additionalObject.getY().toString().replace("\n", INDENTED_LINEBREAK));
 			}
 		}
 		return sb.toString();

@@ -3,54 +3,54 @@ package ai.libs.jaicore.search.algorithms.standard.mcts;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 
-import ai.libs.jaicore.search.core.interfaces.StandardORGraphSearchFactory;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 
-public class MCTSPathSearchFactory<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<I, EvaluatedSearchGraphPath<N, A, V>, N, A, V, MCTSPathSearch<I, N, A, V>> implements IOptimalPathInORGraphSearchFactory<I, EvaluatedSearchGraphPath<N, A, V>, N, A, V,  MCTSPathSearch<I, N, A, V>> {
-	private IPathUpdatablePolicy<N, A, V> treePolicy;
-	private IPolicy<N, A, V> defaultPolicy;
-	private V evaluationFailurePenalty;
-	private boolean forbidDoublePaths;
 
-	public IPathUpdatablePolicy<N, A, V> getTreePolicy() {
-		return this.treePolicy;
-	}
+/**
+ *
+ * @author Felix Mohr
+ *
+ * @param <N> Type of states (nodes)
+ * @param <A> Type of actions
+ */
+public class MCTSPathSearchFactory<N, A>
+implements IOptimalPathInORGraphSearchFactory<IPathSearchWithPathEvaluationsInput<N, A, Double>, EvaluatedSearchGraphPath<N, A, Double>, N, A, Double, MCTSPathSearch<IPathSearchWithPathEvaluationsInput<N, A, Double>, N, A>> {
 
-	public void setTreePolicy(final IPathUpdatablePolicy<N, A, V> treePolicy) {
-		this.treePolicy = treePolicy;
-	}
+	private IPathSearchWithPathEvaluationsInput<N, A, Double> problem;
+	private MCTSFactory<N, A, ?> mctsFactory;
 
-	public IPolicy<N, A, V> getDefaultPolicy() {
-		return this.defaultPolicy;
-	}
-
-	public void setDefaultPolicy(final IPolicy<N, A, V> defaultPolicy) {
-		this.defaultPolicy = defaultPolicy;
-	}
-
-	public V getEvaluationFailurePenalty() {
-		return this.evaluationFailurePenalty;
-	}
-
-	public void setEvaluationFailurePenalty(final V evaluationFailurePenalty) {
-		this.evaluationFailurePenalty = evaluationFailurePenalty;
-	}
-
-	public boolean isForbidDoublePaths() {
-		return this.forbidDoublePaths;
-	}
-
-	public void setForbidDoublePaths(final boolean forbidDoublePaths) {
-		this.forbidDoublePaths = forbidDoublePaths;
+	@Override
+	public MCTSPathSearch<IPathSearchWithPathEvaluationsInput<N, A, Double>, N, A> getAlgorithm() {
+		if (this.problem == null) {
+			throw new IllegalStateException("No problem has been defined.");
+		}
+		return this.getAlgorithm(this.problem);
 	}
 
 	@Override
-	public MCTSPathSearch<I, N, A, V> getAlgorithm() {
-		return this.getAlgorithm(this.getInput());
+	public MCTSPathSearch<IPathSearchWithPathEvaluationsInput<N, A, Double>, N, A> getAlgorithm(final IPathSearchWithPathEvaluationsInput<N, A, Double> input) {
+		if (this.mctsFactory == null) {
+			throw new IllegalStateException("No MCTS factory has been set. Please set a factory prior to building the MCTS path search.");
+		}
+		return new MCTSPathSearch<>(input, this.mctsFactory);
 	}
 
-	@Override
-	public MCTSPathSearch<I, N, A, V> getAlgorithm(final I problem) {
-		return new MCTSPathSearch<>(problem, this.treePolicy, this.defaultPolicy, this.evaluationFailurePenalty);
+	public IPathSearchWithPathEvaluationsInput<N, A, Double> getProblem() {
+		return this.problem;
+	}
+
+	public MCTSPathSearchFactory<N, A> withProblem(final IPathSearchWithPathEvaluationsInput<N, A, Double> problem) {
+		this.problem = problem;
+		return this;
+	}
+
+	public MCTSFactory<N, A, ?> getMctsFactory() {
+		return this.mctsFactory;
+	}
+
+	public MCTSPathSearchFactory<N, A> withMCTSFactory(final MCTSFactory<N, A, ?> mctsFactory) {
+		this.mctsFactory = mctsFactory;
+		return this;
 	}
 }

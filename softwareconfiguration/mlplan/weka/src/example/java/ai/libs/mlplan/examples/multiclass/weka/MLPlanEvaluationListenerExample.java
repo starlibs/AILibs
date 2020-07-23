@@ -5,7 +5,10 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
@@ -17,12 +20,13 @@ import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluationCompletedEvent;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluationFailedEvent;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
 import ai.libs.mlplan.core.MLPlan;
+import ai.libs.mlplan.core.TimeTrackingLearnerWrapper;
+import ai.libs.mlplan.core.events.ClassifierFoundEvent;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 
 /**
@@ -47,21 +51,32 @@ public class MLPlanEvaluationListenerExample {
 		builder.withNodeEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new Timeout(5, TimeUnit.SECONDS));
 		builder.withTimeOut(new Timeout(30, TimeUnit.SECONDS));
-		MLPlan<IWekaClassifier> mlplan = builder.withDataset(split.get(0)).build();
+		builder.withDataset(split.get(0));
+
+		MLPlan<IWekaClassifier> mlplan = builder.build();
+		mlplan.setLoggerName("testedalgorithm");
 
 		/* register a listener  */
 		mlplan.registerListener(new Object() {
 			@Subscribe
-			public void receiveEvent(final TrainTestSplitEvaluationFailedEvent<?, ?> e) { // this event is fired whenever any pipeline is evaluated successfully
-				IWekaClassifier classifier = ((WekaClassifier) e.getLearner());
-				LOGGER.info("Received exception for learner {}: {}", classifier, e.getReport().getException().getClass().getName());
+			public void receiveEvent(final ClassifierFoundEvent event) {
+				WekaClassifier learner = (WekaClassifier) event.getSolutionCandidate();
+				LOGGER.info("Received successful evaluation with error={} within {}ms for pipeline: {}", event.getInSampleError(), event.getTimeToEvaluate(), learner.toString());
 			}
 
 			@Subscribe
-			public void receiveEvent(final TrainTestSplitEvaluationCompletedEvent<?, ?> e) { // this event is fired whenever any pipeline is evaluated successfully
-				double errorRate = EClassificationPerformanceMeasure.ERRORRATE.loss(e.getReport().getPredictionDiffList());
-				IWekaClassifier classifier = ((WekaClassifier) e.getLearner());
-				LOGGER.info("Received single evaluation error rate for learner {} is {}", classifier, errorRate);
+			public void receiveEvent(final TrainTestSplitEvaluationFailedEvent<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> event) {
+				WekaClassifier learner = null;
+				if (event.getLearner() instanceof TimeTrackingLearnerWrapper) {
+					TimeTrackingLearnerWrapper wrapper = ((TimeTrackingLearnerWrapper) event.getLearner());
+					learner = (WekaClassifier) wrapper.getLearner();
+				}
+				if (learner != null) {
+					ILearnerRunReport report = event.getReport();
+					String exceptionStackTrace = ExceptionUtils.getStackTrace(report.getException());
+					long candidateRuntime = (report.getTrainEndTime() - report.getTrainStartTime()) + (report.getTestEndTime() - report.getTestStartTime());
+					LOGGER.info("Received failed evaluation within {}ms for pipeline: {}", candidateRuntime, learner.getClassifier(), exceptionStackTrace);
+				}
 			}
 		});
 
@@ -70,11 +85,13 @@ public class MLPlanEvaluationListenerExample {
 			IWekaClassifier optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
+			LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));
 
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}", EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList()));
+			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}",
+					EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList().getCastedView(Integer.class, ISingleLabelClassification.class)), mlplan.getInternalValidationErrorOfSelectedClassifier());
 		} catch (NoSuchElementException e) {
 			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}

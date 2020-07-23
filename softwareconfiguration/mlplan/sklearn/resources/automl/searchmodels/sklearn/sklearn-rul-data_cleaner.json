@@ -1,0 +1,14 @@
+ {
+  "repository" : "sklearn-rul-data_cleaner",
+  "components" : [ 
+    {
+      "name": "InvalidNumberReplacementTransformer",
+      "providedInterface": [
+        "DataCleaner"
+      ],
+      "requiredInterface": [],
+      "parameter": []      
+    }
+  ]
+}
+  

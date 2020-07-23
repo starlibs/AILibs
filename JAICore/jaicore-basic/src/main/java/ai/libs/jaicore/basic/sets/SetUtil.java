@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -19,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.api4.java.common.attributedobjects.GetPropertyFailedException;
@@ -164,7 +166,7 @@ public class SetUtil {
 		/* |M| = 0 */
 		if (items.isEmpty()) {
 			Collection<Collection<T>> setWithEmptySet = new ArrayList<>();
-			setWithEmptySet.add(new ArrayList<T>());
+			setWithEmptySet.add(new ArrayList<>());
 			return setWithEmptySet;
 		}
 
@@ -200,7 +202,7 @@ public class SetUtil {
 		/* |M| = 0 */
 		if (items.isEmpty()) {
 			Collection<Collection<T>> setWithEmptySet = new ArrayList<>();
-			setWithEmptySet.add(new ArrayList<T>());
+			setWithEmptySet.add(new ArrayList<>());
 			return setWithEmptySet;
 		}
 
@@ -345,7 +347,7 @@ public class SetUtil {
 		ExecutorService pool = Executors.newFixedThreadPool(n);
 		Semaphore solutionSemaphore = new Semaphore(1);
 		solutionSemaphore.acquire();
-		pool.submit(new SubSetComputer<T>(new ArrayList<>(superSet), k, 0, new HashSet<T>(), res, pool, new Semaphore(n - 1), MathExt.binomial(superSet.size(), k), solutionSemaphore));
+		pool.submit(new SubSetComputer<>(new ArrayList<>(superSet), k, 0, new HashSet<>(), res, pool, new Semaphore(n - 1), MathExt.binomial(superSet.size(), k), solutionSemaphore));
 		solutionSemaphore.acquire();
 		pool.shutdown();
 		return res;
@@ -493,10 +495,14 @@ public class SetUtil {
 
 		for (S item1 : a) {
 			for (T item2 : b) {
-				product.add(new Pair<S, T>(item1, item2));
+				product.add(new Pair<>(item1, item2));
 			}
 		}
 		return product;
+	}
+
+	public static <T> Collection<List<T>> cartesianProduct(final List<? extends Collection<T>> listOfSets) {
+		return cartesianProductReq(new ArrayList<>(listOfSets));
 	}
 
 	/**
@@ -506,7 +512,7 @@ public class SetUtil {
 	 *            The set B.
 	 * @return The Cartesian product A x B.
 	 */
-	public static <T> Collection<List<T>> cartesianProduct(final List<? extends Collection<T>> listOfSets) {
+	private static <T> Collection<List<T>> cartesianProductReq(final List<? extends Collection<T>> listOfSets) {
 
 		/* compute expected number of items of the result */
 		int expectedSize = 1;
@@ -806,7 +812,11 @@ public class SetUtil {
 	}
 
 	public static <T> T getRandomElement(final Collection<T> set, final long seed) {
-		int choice = new Random(seed).nextInt(set.size());
+		return getRandomElement(set, new Random(seed));
+	}
+
+	public static <T> T getRandomElement(final Collection<T> set, final Random random) {
+		int choice = random.nextInt(set.size());
 		if (set instanceof List) {
 			return ((List<T>) set).get(choice);
 		}
@@ -817,6 +827,18 @@ public class SetUtil {
 			}
 		}
 		return null;
+	}
+
+	public static <T> Collection<T> getRandomSubset(final Collection<T> set, final int k, final Random random) {
+		List<T> copy = new ArrayList<>(set);
+		Collections.shuffle(copy, random);
+		return copy.stream().limit(k).collect(Collectors.toList());
+	}
+
+	public static Collection<Integer> getRandomSetOfIntegers(final int maxExclusive, final int k, final Random random) {
+		List<Integer> ints = new ArrayList<>(k);
+		IntStream.range(0, maxExclusive).forEach(ints::add);
+		return getRandomSubset(ints, k, random);
 	}
 
 	public static <T extends Comparable<T>> List<T> mergeSort(final Collection<T> set) {
@@ -950,7 +972,7 @@ public class SetUtil {
 	}
 
 	public static String serializeAsSet(final Collection<String> set) {
-		return set.toString().replaceAll("\\[", "{").replaceAll("\\]", "}");
+		return set.toString().replace("\\[", "{").replace("\\]", "}");
 	}
 
 	public static Set<String> unserializeSet(final String setDescriptor) {
@@ -1073,5 +1095,65 @@ public class SetUtil {
 	public static Type getGenericClass(final Collection<?> c) {
 		ParameterizedType stringListType = (ParameterizedType) c.getClass().getGenericSuperclass();
 		return stringListType.getActualTypeArguments()[0];
+	}
+
+	public static <T extends Comparable<T>> int argmax(final List<T> list) {
+		int n = list.size();
+		T best = null;
+		int index = -1;
+		for (int i = 0; i < n; i++) {
+			T x = list.get(i);
+			if (best == null || best.compareTo(x) > 0) {
+				best = x;
+				index = i;
+			}
+		}
+		return index;
+	}
+
+	public static <T extends Comparable<T>> int argmax(final T[] arr) {
+		return argmax(Arrays.asList(arr));
+	}
+
+	public static <T extends Comparable<T>> int argmin(final List<T> list) {
+		int n = list.size();
+		T best = null;
+		int index = -1;
+		for (int i = 0; i < n; i++) {
+			T x = list.get(i);
+			if (best == null || best.compareTo(x) < 0) {
+				best = x;
+				index = i;
+			}
+		}
+		return index;
+	}
+
+	public static <T extends Comparable<T>> int argmin(final T[] arr) {
+		return argmin(Arrays.asList(arr));
+	}
+
+	public static int argmin(final int[] arr) {
+		int minIndex = -1;
+		int min = Integer.MAX_VALUE;
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i] < min) {
+				min = arr[i];
+				minIndex = i;
+			}
+		}
+		return minIndex;
+	}
+
+	public static int argmax(final int[] arr) {
+		int maxIndex = -1;
+		int max = Integer.MIN_VALUE;
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i] > max) {
+				max = arr[i];
+				maxIndex = i;
+			}
+		}
+		return maxIndex;
 	}
 }

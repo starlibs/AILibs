@@ -31,16 +31,16 @@ public class ChoquisticRelevanceLoss extends AMultiLabelClassificationMeasure {
 	 * y_i \in {0,1}: ground truth
 	 *
 	 * @param expected
-	 * @param actual
+	 * @param predicted
 	 * @return
 	 */
-	private double fcrit(final int expected, final double actual) {
-		return 1 - Math.abs(actual - expected);
+	private double fcrit(final int expected, final double predicted) {
+		return 1 - Math.abs(predicted - expected);
 	}
 
-	private double instanceLoss(final int[] expected, final double[] actual) {
+	private double instanceLoss(final int[] expected, final double[] predicted) {
 		double sum = 0.0;
-		List<Double> listOfCis = IntStream.range(0, expected.length).mapToObj(i -> this.fcrit(expected[i], actual[i])).collect(Collectors.toList());
+		List<Double> listOfCis = IntStream.range(0, expected.length).mapToObj(i -> this.fcrit(expected[i], predicted[i])).collect(Collectors.toList());
 		listOfCis.add(0.0);
 		Collections.sort(listOfCis);
 		for (int i = 1; i < listOfCis.size(); i++) {
@@ -50,18 +50,18 @@ public class ChoquisticRelevanceLoss extends AMultiLabelClassificationMeasure {
 	}
 
 	@Override
-	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> actual) {
-		this.checkConsistency(expected, actual);
+	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
+		this.checkConsistency(expected, predicted);
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		for (int i = 0; i < expected.size(); i++) {
-			stats.addValue(this.instanceLoss(expected.get(i), actual.get(i).getPrediction()));
+			stats.addValue(this.instanceLoss(expected.get(i), predicted.get(i).getPrediction()));
 		}
 		return stats.getMean();
 	}
 
 	@Override
-	public double score(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> actual) {
-		return 1 - this.loss(expected, actual);
+	public double score(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
+		return 1 - this.loss(expected, predicted);
 	}
 
 }

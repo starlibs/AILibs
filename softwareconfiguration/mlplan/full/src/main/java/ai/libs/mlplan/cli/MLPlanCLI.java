@@ -2,13 +2,18 @@ package ai.libs.mlplan.cli;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -16,136 +21,148 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
-import ai.libs.jaicore.concurrent.GlobalTimer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import ai.libs.hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
+import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.AutoMEKAGGPFitnessMeasureLoss;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.ExactMatch;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.F1MacroAverageL;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.Hamming;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.InstanceWiseF1;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.JaccardScore;
-import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.RankLoss;
-import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
-import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
-import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
+import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
+import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
+import ai.libs.jaicore.search.gui.plugins.rolloutboxplots.SearchRolloutBoxplotPlugin;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
-import ai.libs.mlplan.core.AbstractMLPlanBuilder;
+import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
+import ai.libs.mlplan.cli.module.regression.MLPlan4ScikitLearnRegressionCLIModule;
+import ai.libs.mlplan.cli.module.regression.MLPlan4WEKARegressionCLIModule;
+import ai.libs.mlplan.cli.module.slc.MLPlan4ScikitLearnClassificationCLIModule;
+import ai.libs.mlplan.cli.module.slc.MLPlan4WekaClassificationCLIModule;
+import ai.libs.mlplan.cli.report.OpenMLAutoMLBenchmarkReport;
+import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
-import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
-import meka.classifiers.multilabel.MultiLabelClassifier;
-import meka.core.MLUtils;
-import meka.core.Metrics;
-import meka.core.Result;
-import weka.classifiers.Classifier;
-import weka.classifiers.evaluation.Evaluation;
-import weka.core.Instances;
-import weka.core.SerializationHelper;
 
-/**
- * Enables command-line usage of ML-Plan.
- *
- * @author Helena Graf
- *
- */
 public class MLPlanCLI {
 
 	// CLI variables
-	private static Logger logger = LoggerFactory.getLogger("MLPlanCLI");
+	private static Logger logger = LoggerFactory.getLogger(MLPlanCLI.class);
+	private static final String CLI_SYNTAX = "java -jar <mlplan.jar>";
+	private static final String K_SHORT_OPT = "shortOpt";
+	private static final String K_DEFAULT = "default";
+	private static final String K_DESCRIPTION = "description";
+	private static final String K_LONG_OPT = "longOpt";
+	private static final String K_HAS_ARG = "hasArg";
+	private static final String K_NUM_ARGS = "numArgs";
 
-	// MLPlan options
-	private static String trainOption = "train";
-	private static String testOption = "test";
-	private static String totalTimeoutOption = "timeoutTotal";
-	private static String nodeEvaluationTimeoutOption = "timeoutNodeEval";
-	private static String solutionEvaluationTimeoutOption = "timeoutSolutionEval";
-	private static String algorithmConfigurationOption = "algorithmConfig";
-	private static String searchSpaceConfigurationOption = "searchSpaceConfig";
-	private static String evaluationMeasureOption = "evaluationMeasure";
-	private static String numCPUsOption = "numCPUS";
-	private static String randomSeedOption = "randomSeed";
-	private static String multiLabelOption = "multilabel";
-	private static String positiveClassIndex = "positiveClassIndex";
+	private static final IMLPlanCLIConfig CONFIG = ConfigFactory.create(IMLPlanCLIConfig.class);
+	private static final TimeUnit DEF_TIME_UNIT = TimeUnit.valueOf(CONFIG.getDefaultTimeUnit());
+	private static final int DEF_NUM_RANDOM_COMPLETIONS = 3;
 
-	// MLPlan options standard values
-	private static String totalTimeout = "150";
-	private static String nodeEvaluationTimeout = "60";
-	private static String solutionEvaluationTimeout = "60";
-	private static String numCPUS = "4";
-	private static String randomSeed = "0";
+	public static final String O_HELP = "h";
+	public static final String O_MODULE = "m";
+	public static final String O_FIT_DATASET = "f";
+	public static final String O_PREDICT_DATASET = "p";
+	public static final String O_LOSS = "l";
+	public static final String O_SEED = "s";
+	public static final String O_SSC = "ssc";
+	public static final String O_NUM_CPUS = "ncpus";
+	public static final String O_TIMEOUT = "t";
+	public static final String O_VISUALIZATION = "v";
+	public static final String O_CANDIDATE_TIMEOUT = "tc";
+	public static final String O_NODE_EVAL_TIMEOUT = "tn";
+	public static final String O_POS_CLASS_INDEX = "pci";
+	public static final String O_POS_CLASS_NAME = "pcn";
+	public static final String O_OPENML_TASK = "openMLTask";
 
-	// Communication options
-	private static String modelFileOption = "modelFile";
-	private static String resultsFileOption = "resultsFile";
-	private static String printModelOption = "printModel";
-	private static String visualizeOption = "visualize";
-	private static String helpOption = "help";
+	public static final String O_OUT_OPENML_BENCHMARK = "ooab";
 
+	/** OPTIONAL PARAMETERS' DEFAULT VALUES */
 	// Communication options standard values
-	private static String modelFile = "model.txt";
-	private static String resultsFile = "results.txt";
+	private static final List<IMLPlanCLIModule> MODULES_TO_REGISTER = Arrays.asList(new MLPlan4WekaClassificationCLIModule(), new MLPlan4ScikitLearnClassificationCLIModule(), new MLPlan4WEKARegressionCLIModule(),
+			new MLPlan4ScikitLearnRegressionCLIModule());
+	private static Map<String, IMLPlanCLIModule> moduleRegistry = null;
+	private static Map<String, String> defaults = new HashMap<>();
+
+	private static Map<String, IMLPlanCLIModule> getModuleRegistry() {
+		if (moduleRegistry != null) {
+			return moduleRegistry;
+		}
+		moduleRegistry = new HashMap<>();
+		for (IMLPlanCLIModule module : MODULES_TO_REGISTER) {
+			for (String setting : module.getSettingOptionValues()) {
+				moduleRegistry.put(setting, module);
+			}
+		}
+		return moduleRegistry;
+	}
+
+	private static boolean isFlag(final JsonNode n, final String fieldName) {
+		return n.has(fieldName) && n.get(fieldName).asBoolean();
+	}
 
 	private MLPlanCLI() {
 		// Intentionally left blank
 	}
 
-	private static Options generateOptions() {
-		// MLPLan options
-		final Option train = Option.builder("t").required(false).hasArg().longOpt(trainOption).desc("location of the .arff training data file").build();
-		final Option test = Option.builder("T").required(false).longOpt(testOption).hasArg().desc("location of the .arff test data file").build();
-		final Option totalTimeout = Option.builder("tt").longOpt(totalTimeoutOption).required(false).hasArg().desc("timeout for the complete run of mlplan in seconds").build();
-		final Option nodeEvaluationTimeout = Option.builder("tne").longOpt(nodeEvaluationTimeoutOption).required(false).hasArg().desc("timeout for the evaluation of a single node in seconds").build();
-		final Option solutionEvaluation = Option.builder("tse").longOpt(solutionEvaluationTimeoutOption).required(false).hasArg().desc("timeout for the evaluation of a solution in seconds").build();
-		final Option algorithmConfiguration = Option.builder("ac").longOpt(algorithmConfigurationOption).required(false).hasArg().desc("configuration file for mlplan").build();
-		final Option searchSpaceConfiguration = Option.builder("sc").longOpt(searchSpaceConfigurationOption).required(false).hasArg().desc("search space configuration file, or alternatively: weka, weka-tiny, sklearn, sklearn-ul, meka")
-				.build();
-		final Option evaluationMeasure = Option.builder("em").longOpt(evaluationMeasureOption).required(false).hasArg().desc(
-				"measure for assessing solution quality, allowed values: \nsinglelabel: \nERRORRATE, MEAN_SQUARED_ERROR, PRECISION, ROOT_MEAN_SQUARED_ERROR \nmultilabel: \nAUTO_MEKA_GGP_FITNESS, AUTO_MEKA_GGP_FITNESS_LOSS, EXACT_MATCH_ACCURARY, EXACT_MATCH_LOSS, F1_MACRO_AVG_D, F1_MACRO_AVG_D_LOSS, F1_MACRO_AVG_L, F1_MACRO_AVG_L_LOSS,  HAMMING_ACCURACY, HAMMING_LOSS, JACCARD_LOSS, JACCARD_SCORE, RANK_LOSS, RANK_SCORE")
-				.build();
-		final Option positiveClass = Option.builder("pci").longOpt(positiveClassIndex).required(false).hasArg(true).desc("Index of the class (in the list of classes) which is to be considered as the positive class").build();
-		final Option numCPUS = Option.builder("ncpus").longOpt(numCPUsOption).required(false).hasArg().desc("number of used CPUs, default: " + MLPlanCLI.numCPUS).build();
-		final Option randomSeed = Option.builder("rs").longOpt(randomSeedOption).required(false).hasArg().desc("randomization seed, default: " + MLPlanCLI.randomSeed).build();
-		final Option multiLabel = Option.builder("ml").longOpt(multiLabelOption).required(false).hasArg(false).desc("enable for multilabel settings").build();
+	private static Options generateOptions() throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode root = mapper.readTree(ResourceUtil.readResourceFileToString("config.mlplan-cli.json"));
 
-		// Communication options
-		final Option modelFile = Option.builder("mf").longOpt(modelFileOption).required(false).hasArg()
-				.desc("serialize model to the given output file, \"off\" if no model file shall be written; turn off for search spaces that contain non-serializable models").build();
-		final Option resultsFile = Option.builder("rf").longOpt(resultsFileOption).required(false).hasArg().desc("serialize model to the given output file, \"off\" if no results file shall be written").build();
-		final Option visualize = Option.builder("v").longOpt(visualizeOption).required(false).hasArg(false).desc("enable visualization").build();
-		final Option printModel = Option.builder("p").longOpt(printModelOption).required(false).hasArg(false).desc("whether a visual representation of the final model shall be added to the model file").build();
-		final Option help = Option.builder("h").longOpt(helpOption).required(false).hasArg(false).desc("supply help").build();
-
-		// Add options to Options
 		final Options options = new Options();
-		options.addOption(train);
-		options.addOption(test);
-		options.addOption(totalTimeout);
-		options.addOption(nodeEvaluationTimeout);
-		options.addOption(solutionEvaluation);
-		options.addOption(algorithmConfiguration);
-		options.addOption(searchSpaceConfiguration);
-		options.addOption(evaluationMeasure);
-		options.addOption(numCPUS);
-		options.addOption(randomSeed);
-		options.addOption(multiLabel);
-		options.addOption(resultsFile);
-		options.addOption(modelFile);
-		options.addOption(visualize);
-		options.addOption(printModel);
-		options.addOption(help);
-		options.addOption(positiveClass);
+		for (JsonNode option : root.get("options")) {
+			if (!option.has(K_SHORT_OPT)) {
+				throw new IllegalArgumentException("Error in the cli configuration file. " + mapper.writeValueAsString(option) + " has no shortOpt field.");
+			}
+			options.addOption(Option.builder(option.get(K_SHORT_OPT).asText())
+					// set the long name of the option
+					.longOpt(option.get(K_LONG_OPT).asText())
+					// set a flag whether this option is required
+					.required(isFlag(option, "required"))
+					// set a flag whether the option has an argument
+					.hasArg(isFlag(option, K_HAS_ARG))
+					// set a flag whether the argument is optional
+					.optionalArg(isFlag(option, "argOptional"))
+					// set the number of args
+					.numberOfArgs(option.has(K_NUM_ARGS) ? option.get(K_NUM_ARGS).asInt() : (isFlag(option, K_HAS_ARG) ? 1 : 0))
+					// set the description
+					.desc(getDescription(option)).build());
+			if (option.has(K_DEFAULT)) {
+				defaults.put(option.get(K_SHORT_OPT).asText(), option.get(K_DEFAULT).asText());
+			}
+		}
 		return options;
+	}
+
+	private static String getDescription(final JsonNode option) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(option.get(K_DESCRIPTION).asText());
+		if (option.has(K_DEFAULT)) {
+			sb.append("(Default: ").append(option.get(K_DEFAULT).asText()).append(")");
+		}
+
+		if (option.get(K_SHORT_OPT).asText().equals(O_LOSS)) {
+			sb.append("\n");
+			for (Entry<String, IMLPlanCLIModule> entry : getModuleRegistry().entrySet()) {
+				sb.append(entry.getKey()).append(": ").append(entry.getValue().getPerformanceMeasures().stream().collect(Collectors.joining(", "))).append("\n");
+			}
+		}
+
+		if (option.get(K_SHORT_OPT).asText().equals(O_MODULE)) {
+			sb.append("\n").append(getModuleRegistry().keySet().stream().collect(Collectors.joining(", ")));
+		}
+
+		return sb.toString();
 	}
 
 	private static CommandLine generateCommandLine(final Options options, final String[] commandLineArguments) {
@@ -153,10 +170,8 @@ public class MLPlanCLI {
 		CommandLine commandLine = null;
 		try {
 			commandLine = cmdLineParser.parse(options, commandLineArguments);
-		}
-
-		catch (ParseException parseException) {
-			logger.error("ERROR: Unable to parse command-line arguments {} due to {}", Arrays.toString(commandLineArguments), parseException);
+		} catch (ParseException parseException) {
+			logger.error("ERROR: Unable to parse command-line arguments {} due to exception.", Arrays.toString(commandLineArguments), parseException);
 		}
 
 		return commandLine;
@@ -164,281 +179,116 @@ public class MLPlanCLI {
 
 	private static void printUsage(final Options options) {
 		final HelpFormatter formatter = new HelpFormatter();
-		final String syntax = "mlplan";
 		final PrintWriter pw = new PrintWriter(System.out);
-		formatter.printUsage(pw, 400, syntax, options);
-		pw.println("use -h or --help for help");
+		formatter.printUsage(pw, 400, CLI_SYNTAX, options);
+		pw.println("use -h or --help for more detailed information about possible options.");
 		pw.flush();
 	}
 
 	private static void printHelp(final Options options) {
 		final HelpFormatter formatter = new HelpFormatter();
-		final String syntax = "mlplan [options]";
-		formatter.printHelp(syntax, options);
+		formatter.printHelp(600, CLI_SYNTAX, "ML-Plan CLI v0.0.1-alpha\n================================\n", options, "===============================\nVisit us at: https://mlplan.org");
 	}
 
-	private static void runMLPlan(final CommandLine commandLine) throws Exception {
+	public static String getDefault(final String key) {
+		return defaults.get(key);
+	}
 
-		File trainDataFile = new File(commandLine.getOptionValue(trainOption));
-		logger.info("Load train data file: {}", trainDataFile.getAbsolutePath());
+	private static void runMLPlan(final CommandLine cl) throws Exception {
+		// check whether a dataset is provided for fitting.
+		if (!cl.hasOption(O_FIT_DATASET) && !cl.hasOption(O_OPENML_TASK)) {
+			System.err.println("Either need a training dataset provided via " + O_FIT_DATASET + " or a task and fold of an OpenML task provided via " + O_OPENML_TASK);
+			System.exit(1);
+		} else if (cl.hasOption(O_FIT_DATASET) && cl.hasOption(O_OPENML_TASK)) {
+			System.err.println("Cannot use both: local dataset and openml task. Only one option either " + O_FIT_DATASET + " or " + O_OPENML_TASK + " may be given.");
+		}
 
-		Instances trainData = new Instances(new FileReader(trainDataFile));
-		if (commandLine.hasOption(multiLabelOption)) {
-			MLUtils.prepareData(trainData);
+		// Load CLI modules and identify module responsible for the requested ml-plan configuration
+		Map<String, IMLPlanCLIModule> moduleRegistry = getModuleRegistry();
+		String moduleName = cl.getOptionValue(O_MODULE, getDefault(O_MODULE));
+		if (!moduleRegistry.containsKey(moduleName)) {
+			System.err.println("There is no module registered for handling the requested mode " + moduleName);
+			System.exit(1);
+		}
+		IMLPlanCLIModule module = moduleRegistry.get(moduleName);
+
+		// load training data
+		ILabeledDataset fitDataset;
+		ILabeledDataset predictDataset = null;
+		if (cl.hasOption(O_OPENML_TASK)) {
+			String[] taskSpec = cl.getOptionValues(O_OPENML_TASK);
+			List<ILabeledDataset<ILabeledInstance>> split = OpenMLDatasetReader.loadTaskFold(Integer.parseInt(taskSpec[0]), Integer.parseInt(taskSpec[1]));
+			fitDataset = split.get(0);
+			predictDataset = split.get(1);
 		} else {
-			trainData.setClassIndex(trainData.numAttributes() - 1);
+			fitDataset = ArffDatasetAdapter.readDataset(new File(cl.getOptionValue(O_FIT_DATASET)));
 		}
 
-		AbstractMLPlanBuilder builder;
-		if (commandLine.hasOption(searchSpaceConfigurationOption)) {
-			switch (commandLine.getOptionValue(searchSpaceConfigurationOption)) {
-			case "weka":
-				builder = new MLPlanWekaBuilder();
-				break;
-			case "weka-tiny":
-				builder = new MLPlanWekaBuilder().withTinyWekaSearchSpace();
-				break;
-			case "sklearn":
-				builder = new MLPlanSKLearnBuilder();
-				break;
-			case "sklearn-ul":
-				builder = new MLPlanSKLearnBuilder().withUnlimitedLengthPipelineSearchSpace();
-				break;
-			case "meka":
-				builder = new ML2PlanMekaBuilder();
-				break;
-			default:
-				throw new IllegalArgumentException("Could not identify search space configuration");
-			}
+		// retrieve builder from module
+		AMLPlanBuilder builder = module.getMLPlanBuilderForSetting(cl, fitDataset);
+
+		// set common configs
+		builder.withNumCpus(Integer.parseInt(cl.getOptionValue(O_NUM_CPUS, getDefault(O_NUM_CPUS))));
+		builder.withSeed(Long.parseLong(cl.getOptionValue(O_SEED, getDefault(O_SEED))));
+
+		// set timeouts
+		builder.withTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_TIMEOUT, getDefault(O_TIMEOUT))), DEF_TIME_UNIT));
+		if (cl.hasOption(O_CANDIDATE_TIMEOUT)) {
+			builder.withCandidateEvaluationTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_CANDIDATE_TIMEOUT)), DEF_TIME_UNIT));
 		} else {
-			builder = new MLPlanWekaBuilder();
-		}
-
-		if (commandLine.hasOption(multiLabelOption)) {
-			ML2PlanMekaBuilder mekaBuilder = (ML2PlanMekaBuilder) builder;
-			switch (commandLine.getOptionValue(evaluationMeasureOption)) {
-			case "AUTO_MEKA_GGP_FITNESS":
-				mekaBuilder.withPerformanceMeasure(new AutoMEKAGGPFitnessMeasureLoss());
-				break;
-			case "EXACT_MATCH":
-				mekaBuilder.withPerformanceMeasure(new ExactMatch());
-				break;
-			case "F1_MACRO_AVG_D":
-				mekaBuilder.withPerformanceMeasure(new InstanceWiseF1());
-				break;
-			case "F1_MACRO_AVG_L":
-				mekaBuilder.withPerformanceMeasure(new F1MacroAverageL());
-				break;
-			case "HAMMING":
-				mekaBuilder.withPerformanceMeasure(new Hamming());
-				break;
-			case "JACCARD":
-				mekaBuilder.withPerformanceMeasure(new JaccardScore());
-				break;
-			case "RANK_LOSS":
-				mekaBuilder.withPerformanceMeasure(new RankLoss());
-				break;
-			default:
-				throw new IllegalArgumentException("Invalid multilabel measure " + commandLine.getOptionValue(evaluationMeasureOption));
-			}
-		}
-
-		if (commandLine.hasOption(algorithmConfigurationOption)) {
-			File algoConfigFile = new File(commandLine.getOptionValue(algorithmConfigurationOption));
-			builder.withAlgorithmConfigFile(algoConfigFile);
-		}
-		builder.withNodeEvaluationTimeOut(new Timeout(Integer.parseInt(commandLine.getOptionValue(nodeEvaluationTimeoutOption, nodeEvaluationTimeout)), TimeUnit.SECONDS));
-		builder.withCandidateEvaluationTimeOut(new Timeout(Integer.parseInt(commandLine.getOptionValue(solutionEvaluationTimeoutOption, solutionEvaluationTimeout)), TimeUnit.SECONDS));
-		builder.withTimeOut(new Timeout(Integer.parseInt(commandLine.getOptionValue(totalTimeoutOption, totalTimeout)), TimeUnit.SECONDS));
-		builder.withNumCpus(Integer.parseInt(commandLine.getOptionValue(numCPUsOption, numCPUS)));
-		MLPlan<IWekaClassifier> mlplan = builder.withDataset(new WekaInstances(trainData)).build();
-
-		mlplan.setLoggerName("mlplan");
-		mlplan.setRandomSeed(Integer.parseInt(commandLine.getOptionValue(randomSeedOption, randomSeed)));
-
-		Instances testData = null;
-		if (commandLine.hasOption(testOption)) {
-			File testDataFile = new File(commandLine.getOptionValue(testOption));
-			logger.info("Load test data file: {}", testDataFile.getAbsolutePath());
-			testData = new Instances(new FileReader(testDataFile));
-			if (commandLine.hasOption(multiLabelOption)) {
-				MLUtils.prepareData(testData);
+			Timeout candidateTimeout;
+			if (builder.getTimeOut().seconds() < 60 * 5) {
+				candidateTimeout = new Timeout(30, DEF_TIME_UNIT);
+			} else if (builder.getTimeOut().seconds() < 60 * 60) {
+				candidateTimeout = new Timeout(300, DEF_TIME_UNIT);
+			} else if (builder.getTimeOut().seconds() < 60 * 60 * 12) {
+				candidateTimeout = new Timeout(600, DEF_TIME_UNIT);
 			} else {
-				testData.setClassIndex(testData.numAttributes() - 1);
+				candidateTimeout = new Timeout(1200, DEF_TIME_UNIT);
 			}
+			builder.withCandidateEvaluationTimeOut(candidateTimeout);
+		}
+		builder.withCandidateEvaluationTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_CANDIDATE_TIMEOUT, getDefault(O_CANDIDATE_TIMEOUT))), DEF_TIME_UNIT));
+		if (cl.hasOption(O_NODE_EVAL_TIMEOUT)) {
+			builder.withNodeEvaluationTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_NODE_EVAL_TIMEOUT, getDefault(O_NODE_EVAL_TIMEOUT))), DEF_TIME_UNIT));
+		} else {
+			builder.withNodeEvaluationTimeOut(new Timeout(builder.getNodeEvaluationTimeOut().seconds() * DEF_NUM_RANDOM_COMPLETIONS, DEF_TIME_UNIT));
 		}
 
-		if (commandLine.hasOption(visualizeOption)) {
+		// finally provide the training data
+		builder.withDataset(fitDataset);
+
+		// build mlplan object
+		MLPlan mlplan = builder.build();
+		mlplan.setLoggerName("mlplan");
+
+		if (cl.hasOption(O_VISUALIZATION)) {
 			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan);
 			window.withMainPlugin(new GraphViewPlugin());
-			window.withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin(), new HASCOModelStatisticsPlugin());
+			window.withPlugin(new NodeInfoGUIPlugin("Node Info", new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new NodeInfoGUIPlugin("CI View", new TFDNodeAsCIViewInfoGenerator(builder.getComponents())),
+					new SearchRolloutHistogramPlugin(), new SearchRolloutBoxplotPlugin());
 		}
 
+		// call ml-plan to obtain the optimal supervised learner
 		logger.info("Build mlplan classifier");
-		ISupervisedLearner optimizedClassifier = mlplan.call();
+		ISupervisedLearner optimizedLearner = mlplan.call();
 
-		logger.info("Open timeout tasks: {}", GlobalTimer.getInstance().getActiveTasks());
-
-		if (!"off".equals(commandLine.getOptionValue(modelFileOption))) {
-			serializeModel(commandLine, mlplan.getSelectedClassifier());
-		}
-
-		if (commandLine.hasOption(testOption)) {
-			double error = -1;
-
-			if (commandLine.hasOption(multiLabelOption)) {
-				logger.info("Assess test performance...");
-				Result result = meka.classifiers.multilabel.Evaluation.evaluateModel((MultiLabelClassifier) mlplan.getSelectedClassifier(), trainData, testData);
-
-				switch (commandLine.getOptionValue(evaluationMeasureOption, "AUTO_MEKA_GGP_FITNESS_LOSS")) {
-				case "AUTO_MEKA_GGP_FITNESS":
-					error = (Metrics.P_ExactMatch(result.allTrueValues(), result.allPredictions(0.5)) + (1 - Metrics.L_Hamming(result.allTrueValues(), result.allPredictions(0.5)))
-							+ Metrics.P_FmacroAvgL(result.allTrueValues(), result.allPredictions(0.5)) + (1 - Metrics.L_RankLoss(result.allTrueValues(), result.allPredictions()))) / 4.0;
-					break;
-				case "AUTO_MEKA_GGP_FITNESS_LOSS":
-					error = 1 - (Metrics.P_ExactMatch(result.allTrueValues(), result.allPredictions(0.5)) + (1 - Metrics.L_Hamming(result.allTrueValues(), result.allPredictions(0.5)))
-							+ Metrics.P_FmacroAvgL(result.allTrueValues(), result.allPredictions(0.5)) + (1 - Metrics.L_RankLoss(result.allTrueValues(), result.allPredictions()))) / 4.0;
-					break;
-				case "EXACT_MATCH_ACCURARY":
-					error = Metrics.P_ExactMatch(result.allTrueValues(), result.allPredictions(0.5));
-					break;
-				case "EXACT_MATCH_LOSS":
-					error = 1 - Metrics.P_ExactMatch(result.allTrueValues(), result.allPredictions(0.5));
-					break;
-				case "F1_MACRO_AVG_D":
-					error = Metrics.P_FmacroAvgD(result.allTrueValues(), result.allPredictions(0.5));
-					break;
-				case "F1_MACRO_AVG_D_LOSS":
-					error = 1 - Metrics.P_FmacroAvgD(result.allTrueValues(), result.allPredictions(0.5));
-					break;
-				case "F1_MACRO_AVG_L":
-					error = Metrics.P_FmacroAvgL(result.allTrueValues(), result.allPredictions(0.5));
-					break;
-				case "F1_MACRO_AVG_L_LOSS":
-					error = 1 - Metrics.P_FmacroAvgL(result.allTrueValues(), result.allPredictions(0.5));
-					break;
-				case "HAMMING_ACCURACY":
-					error = Metrics.P_Hamming(result.allTrueValues(), result.allPredictions(0.5));
-					break;
-				case "HAMMING_LOSS":
-					error = Metrics.L_Hamming(result.allTrueValues(), result.allPredictions(0.5));
-					break;
-				case "JACCARD_LOSS":
-					error = Metrics.L_JaccardDist(result.allTrueValues(), result.allPredictions(0.5));
-					break;
-				case "JACCARD_SCORE":
-					error = Metrics.P_JaccardIndex(result.allTrueValues(), result.allPredictions(0.5));
-					break;
-				case "RANK_LOSS":
-					error = Metrics.L_RankLoss(result.allTrueValues(), result.allPredictions());
-					break;
-				case "RANK_SCORE":
-					error = 1 - Metrics.L_RankLoss(result.allTrueValues(), result.allPredictions());
-					break;
-				default:
-					throw new IllegalArgumentException("Invalid multilabel measure " + commandLine.getOptionValue(evaluationMeasureOption));
-				}
-
-				if (!"off".equals(commandLine.getOptionValue(resultsFileOption))) {
-					writeMultiLabelEvaluationFile(result, mlplan.getInternalValidationErrorOfSelectedClassifier(), commandLine, mlplan.getSelectedClassifier().getClassifier());
-				}
-			} else {
-				Evaluation eval = new Evaluation(trainData);
-				logger.info("Assess test performance...");
-				eval.evaluateModel(((IWekaClassifier) optimizedClassifier).getClassifier(), testData);
-
-				switch (commandLine.getOptionValue(evaluationMeasureOption, "ERRORRATE")) {
-				case "ERRORRATE":
-					error = eval.errorRate();
-					break;
-				case "MEAN_SQUARED_ERROR":
-					error = Math.pow(eval.rootMeanSquaredError(), 2);
-					break;
-				case "ROOT_MEAN_SQUARED_ERROR":
-					error = eval.rootMeanSquaredError();
-					break;
-				case "PRECISION":
-					error = 1 - eval.precision(Integer.parseInt(commandLine.getOptionValue(positiveClassIndex, "0")));
-					break;
-				default:
-					throw new IllegalArgumentException("Invalid singlelabel measure " + commandLine.getOptionValue(evaluationMeasureOption));
-				}
-
-				if (!"off".equals(commandLine.getOptionValue(resultsFileOption))) {
-					writeSingleLabelEvaluationFile(eval, mlplan.getInternalValidationErrorOfSelectedClassifier(), commandLine, mlplan.getSelectedClassifier().getClassifier());
-				}
+		if (predictDataset != null || cl.hasOption(O_PREDICT_DATASET)) {
+			if (cl.hasOption(O_PREDICT_DATASET)) {
+				File predictDatasetFile = new File(cl.getOptionValue(O_PREDICT_DATASET));
+				logger.info("Load test data file: {}", predictDatasetFile.getAbsolutePath());
+				predictDataset = ArffDatasetAdapter.readDataset(predictDatasetFile);
 			}
 
-			logger.info("Test error was {}. Internally estimated error for this model was {}", error, mlplan.getInternalValidationErrorOfSelectedClassifier());
-		}
+			ILearnerRunReport runReport = new SupervisedLearnerExecutor().execute(optimizedLearner, predictDataset);
+			logger.info("Run report of the module: {}", module.getRunReportAsString(mlplan.getSelectedClassifier(), runReport));
 
-		logger.info("Experiment done.");
-	}
-
-	private static void serializeModel(final CommandLine commandLine, final ISupervisedLearner bestClassifier) throws Exception {
-		SerializationHelper.write(commandLine.getOptionValue(modelFileOption, modelFile), bestClassifier);
-	}
-
-	private static void writeMultiLabelEvaluationFile(final Result result, final double internalError, final CommandLine commandLine, final Classifier bestModel) {
-		StringBuilder builder = new StringBuilder();
-		builder.append("Internally believed error: ");
-		builder.append(internalError);
-		builder.append(System.lineSeparator());
-		builder.append(System.lineSeparator());
-		builder.append("Best Model: ");
-		builder.append(System.lineSeparator());
-		builder.append(bestModel.toString());
-		builder.append(System.lineSeparator());
-		builder.append(System.lineSeparator());
-		builder.append(result.toString());
-		builder.append(System.lineSeparator());
-		builder.append(System.lineSeparator());
-		if (commandLine.hasOption(printModelOption)) {
-			builder.append("Classifier Representation: ");
-			builder.append(System.lineSeparator());
-			builder.append(System.lineSeparator());
-			if (bestModel instanceof ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline) {
-				builder.append(((MLPipeline) bestModel).getBaseClassifier().toString());
-			} else {
-				builder.append(bestModel.toString());
+			if (cl.hasOption(O_OUT_OPENML_BENCHMARK)) {
+				String outputFile = cl.getOptionValue(O_OUT_OPENML_BENCHMARK, getDefault(O_OUT_OPENML_BENCHMARK));
+				logger.info("Generating report conforming the OpenML AutoML Benchmark format which is then written to {}.", outputFile);
+				writeFile(outputFile, new OpenMLAutoMLBenchmarkReport(runReport).toString());
 			}
 		}
-
-		writeFile(commandLine.getOptionValue(resultsFileOption, resultsFile), builder.toString());
-	}
-
-	private static void writeSingleLabelEvaluationFile(final Evaluation eval, final double internalError, final CommandLine commandLine, final Classifier bestModel) throws Exception {
-		StringBuilder builder = new StringBuilder();
-		builder.append("Internally believed error: ");
-		builder.append(internalError);
-		builder.append(System.lineSeparator());
-		builder.append(System.lineSeparator());
-		builder.append("Best Model: ");
-		builder.append(System.lineSeparator());
-		builder.append(bestModel.toString());
-		builder.append(System.lineSeparator());
-		builder.append(System.lineSeparator());
-		builder.append(eval.toSummaryString("Summary", true));
-		builder.append(System.lineSeparator());
-		builder.append(eval.toClassDetailsString("Class Details"));
-		builder.append(System.lineSeparator());
-		builder.append("Evaluation Overview");
-		builder.append(System.lineSeparator());
-		builder.append(eval.toCumulativeMarginDistributionString());
-		builder.append(System.lineSeparator());
-		builder.append(eval.toMatrixString("Matrix"));
-		if (commandLine.hasOption(printModelOption)) {
-			builder.append("Classifier Representation: ");
-			builder.append(System.lineSeparator());
-			builder.append(System.lineSeparator());
-			if (bestModel instanceof ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline) {
-				builder.append(((ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline) bestModel).getBaseClassifier().toString());
-			} else {
-				builder.append(bestModel.toString());
-			}
-		}
-
-		writeFile(commandLine.getOptionValue(resultsFileOption, resultsFile), builder.toString());
 	}
 
 	private static void writeFile(final String fileName, final String value) {
@@ -450,13 +300,15 @@ public class MLPlanCLI {
 	}
 
 	public static void main(final String[] args) throws Exception {
+		System.out.println("Called ML-Plan CLI with the following params: >" + Arrays.toString(args) + "<");
+
 		final Options options = generateOptions();
 		if (args.length == 0) {
 			printUsage(options);
 		} else {
 			CommandLine commandLine = generateCommandLine(options, args);
 			if (commandLine != null) {
-				if (commandLine.hasOption(helpOption)) {
+				if (commandLine.hasOption(O_HELP)) {
 					printHelp(options);
 				} else {
 					runMLPlan(commandLine);

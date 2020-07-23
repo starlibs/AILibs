@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -74,13 +75,13 @@ public class KVStoreCollection extends LinkedList<IKVStore> {
 							this.add(kvStore);
 						}
 					} catch (Exception e) {
-						logger.error("An exception occurred while parsing the directory collecting the chunk: {}", e);
+						logger.error("An exception occurred while parsing the directory collecting the chunk: {}", subFile, e);
 					}
 				} else {
 					try {
 						this.readFrom(FileUtil.readFileAsString(file));
 					} catch (Exception e) {
-						logger.error("An exception occurred while reading the chunk from the given file: {}", e);
+						logger.error("An exception occurred while reading the chunk from the given file: {}", subFile, e);
 					}
 				}
 			}
@@ -91,6 +92,17 @@ public class KVStoreCollection extends LinkedList<IKVStore> {
 		KVStoreCollection selectedCollection = new KVStoreCollection();
 		for (IKVStore store : this) {
 			if (store.matches(selection)) {
+				selectedCollection.add(store);
+			}
+		}
+		return selectedCollection;
+	}
+
+	public KVStoreCollection selectContained(final Map<String, Collection<String>> containsSelect, final boolean or) {
+		KVStoreCollection selectedCollection = new KVStoreCollection();
+		for (IKVStore store : this) {
+			long count = containsSelect.entrySet().stream().filter(x -> x.getValue().contains(store.getAsString(x.getKey()))).count();
+			if ((or && count > 0) || (!or && count == containsSelect.size())) {
 				selectedCollection.add(store);
 			}
 		}
@@ -178,6 +190,29 @@ public class KVStoreCollection extends LinkedList<IKVStore> {
 			this.removeIf(t -> {
 				for (Entry<String, String> entry : condition.entrySet()) {
 					if (!t.getAsString(entry.getKey()).equals(entry.getValue())) {
+						return false;
+					}
+				}
+				return true;
+			});
+		}
+	}
+
+	public void removeAnyContained(final Map<String, Collection<String>> condition, final boolean or) {
+		if (or) {
+			this.removeIf(t -> {
+				for (Entry<String, Collection<String>> entry : condition.entrySet()) {
+					String val = t.getAsString(entry.getKey());
+					if (val == null && (entry.getValue() == null || entry.getValue().isEmpty()) || val != null && entry.getValue().contains(val)) {
+						return true;
+					}
+				}
+				return false;
+			});
+		} else {
+			this.removeIf(t -> {
+				for (Entry<String, Collection<String>> entry : condition.entrySet()) {
+					if (!entry.getValue().contains(t.getAsString(entry.getKey()))) {
 						return false;
 					}
 				}

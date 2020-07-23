@@ -11,7 +11,11 @@ import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithm
 public class BradleyTerryPlugin extends ASimpleMVCPlugin<BradleyTerryPluginModel, BradleyTerryPluginView, BradleyTerryPluginController> {
 
 	public BradleyTerryPlugin() {
-		super();
+		this("Bradley Terry Plugin");
+	}
+
+	public BradleyTerryPlugin(final String title) {
+		super(title);
 	}
 
 	@Override

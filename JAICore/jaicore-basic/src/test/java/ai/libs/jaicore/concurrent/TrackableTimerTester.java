@@ -4,9 +4,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.Tester;
@@ -146,7 +146,7 @@ public class TrackableTimerTester extends Tester {
 			@Override
 			public void run() {
 				while (!Thread.interrupted()) {
-					Awaitility.await().atLeast(Duration.ONE_HUNDRED_MILLISECONDS);
+					Awaitility.await().atLeast(100, TimeUnit.MILLISECONDS);
 				}
 			}
 		};

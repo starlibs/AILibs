@@ -5,7 +5,7 @@ import javafx.scene.Node;
 
 /**
  * An {@link IGUIPluginView} is part of an {@link IGUIPlugin} and is responsible displaying the information stored in the {@link IGUIPluginModel}.
- * 
+ *
  * @author atornede
  *
  */
@@ -13,7 +13,7 @@ public interface IGUIPluginView {
 
 	/**
 	 * Returns the JavaFX Scene {@link Node} which will be displayed inside the {@link AlgorithmVisualizationWindow}.
-	 * 
+	 *
 	 * @return The JavaFX Scene {@link Node} which will be displayed inside the {@link AlgorithmVisualizationWindow}
 	 */
 	public Node getNode();
@@ -23,10 +23,4 @@ public interface IGUIPluginView {
 	 */
 	public void update();
 
-	/**
-	 * Returns the title of the view of the associated {@link IGUIPlugin}.
-	 * 
-	 * @return The title of the view of the associated {@link IGUIPlugin}.
-	 */
-	public String getTitle();
 }

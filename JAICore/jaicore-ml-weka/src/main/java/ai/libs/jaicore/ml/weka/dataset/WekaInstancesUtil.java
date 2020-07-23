@@ -11,7 +11,9 @@ import java.util.stream.IntStream;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttributeValue;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttributeValue;
 import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
@@ -45,15 +47,15 @@ public class WekaInstancesUtil {
 		int expectedAttributes = dataset.getInstanceSchema().getNumAttributes();
 		for (ILabeledInstance inst : dataset) {
 			if (inst.getNumAttributes() != expectedAttributes) {
-				throw new IllegalStateException("Dataset scheme defines a number of " + expectedAttributes + " attributes, but instance has " + inst.getNumAttributes() + ". Attributes in scheme: " + dataset.getInstanceSchema().getAttributeList().stream().map(a -> "\n\t" + a.getName() + " (" + a.toString() + ")").collect(Collectors.joining()) + ". Attributes in instance: " + Arrays.stream(inst.getAttributes()).map(a -> "\n\t" + a.toString()).collect(Collectors.joining()));
+				throw new IllegalStateException("Dataset scheme defines a number of " + expectedAttributes + " attributes, but instance has " + inst.getNumAttributes() + ".");
 			}
 			double[] point = inst.getPoint();
 			double[] pointWithLabel = Arrays.copyOf(point, point.length + 1);
 			DenseInstance iNew = new DenseInstance(1, pointWithLabel);
 			iNew.setDataset(wekaInstances);
 			if (dataset.getLabelAttribute() instanceof ICategoricalAttribute) {
-				iNew.setClassValue(((ICategoricalAttribute) dataset.getLabelAttribute()).getLabelOfCategory((int)inst.getLabel()));
-			} else {
+				iNew.setClassValue(((ICategoricalAttribute) dataset.getLabelAttribute()).getLabelOfCategory((int) inst.getLabel()));
+			} else if (inst.getLabel() != null) {
 				iNew.setClassValue(Double.parseDouble(inst.getLabel().toString()));
 			}
 			wekaInstances.add(iNew); // this MUST come here AFTER having set the class value; otherwise, the class is not registered correctly in the Instances object!!
@@ -64,15 +66,14 @@ public class WekaInstancesUtil {
 	public static Instances createDatasetFromSchema(final ILabeledInstanceSchema schema) throws UnsupportedAttributeTypeException {
 		Objects.requireNonNull(schema);
 		List<Attribute> attributes = new LinkedList<>();
-
 		for (int i = 0; i < schema.getNumAttributes(); i++) {
 			IAttribute attType = schema.getAttributeList().get(i);
-			if (attType instanceof NumericAttribute) {
+			if (attType instanceof INumericAttribute) {
 				attributes.add(new Attribute(attType.getName()));
-			} else if (attType instanceof IntBasedCategoricalAttribute) {
-				attributes.add(new Attribute(attType.getName(), ((IntBasedCategoricalAttribute) attType).getLabels()));
+			} else if (attType instanceof ICategoricalAttribute) {
+				attributes.add(new Attribute(attType.getName(), ((ICategoricalAttribute) attType).getLabels()));
 			} else {
-				throw new UnsupportedAttributeTypeException("The class attribute has an unsupported attribute type " + attType.getName() + ".");
+				throw new UnsupportedAttributeTypeException("The class attribute has an unsupported attribute type " + attType.getClass().getName() + " of attribute " + attType.getName() + ".");
 			}
 		}
 
@@ -122,9 +123,19 @@ public class WekaInstancesUtil {
 		iNew.setDataset(dataset);
 		for (int i = 0; i < instance.getNumAttributes(); i++) {
 			if (schema.getAttribute(i) instanceof INumericAttribute) {
-				iNew.setValue(i, ((INumericAttribute) schema.getAttribute(i)).getAsAttributeValue(instance.getAttributeValue(i)).getValue());
+				INumericAttributeValue value = ((INumericAttribute) schema.getAttribute(i)).getAsAttributeValue(instance.getAttributeValue(i));
+				if (value != null) {
+					iNew.setValue(i, value.getValue());
+				} else {
+					iNew.setMissing(i);
+				}
 			} else if (schema.getAttribute(i) instanceof ICategoricalAttribute) {
-				iNew.setValue(i, ((ICategoricalAttribute) schema.getAttribute(i)).getAsAttributeValue(instance.getAttributeValue(i)).getValue());
+				ICategoricalAttributeValue value = ((ICategoricalAttribute) schema.getAttribute(i)).getAsAttributeValue(instance.getAttributeValue(i));
+				if (value != null) {
+					iNew.setValue(i, value.getValue());
+				} else {
+					iNew.setMissing(i);
+				}
 			} else {
 				throw new UnsupportedAttributeTypeException("Only categorical and numeric attributes are supported!");
 			}

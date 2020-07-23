@@ -10,7 +10,7 @@ import ai.libs.jaicore.basic.ArrayUtil;
 
 public class JaccardScore extends AMultiLabelClassificationMeasure {
 
-	private ai.libs.jaicore.ml.classification.loss.dataset.JaccardScore instanceScorer;
+	private ai.libs.jaicore.ml.classification.loss.instance.JaccardScore instanceScorer;
 
 	public JaccardScore() {
 		super();
@@ -21,8 +21,8 @@ public class JaccardScore extends AMultiLabelClassificationMeasure {
 	}
 
 	@Override
-	public double score(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> actual) {
-		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.instanceScorer.score(ArrayUtil.argMax(expected.get(x)), this.getThresholdedPredictionAsSet(actual.get(x)))).average();
+	public double score(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
+		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.instanceScorer.score(ArrayUtil.argMax(expected.get(x)), this.getThresholdedPredictionAsSet(predicted.get(x)))).average();
 		if (!res.isPresent()) {
 			throw new IllegalStateException("Could not average the jaccord score.");
 		} else {
@@ -31,8 +31,8 @@ public class JaccardScore extends AMultiLabelClassificationMeasure {
 	}
 
 	@Override
-	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> actual) {
-		return 1 - this.score(expected, actual);
+	public double loss(final List<? extends int[]> expected, final List<? extends IMultiLabelClassification> predicted) {
+		return 1 - this.score(expected, predicted);
 	}
 
 }

@@ -2,7 +2,7 @@ package ai.libs.jaicore.graphvisualizer.plugin.nodeinfo;
 
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import javafx.application.Platform;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
@@ -11,15 +11,15 @@ import javafx.scene.web.WebView;
  * @author Felix Mohr
  *
  */
-public class NodeInfoGUIPluginView extends ASimpleMVCPluginView<NodeInfoGUIPluginModel, NodeInfoGUIPluginController, FlowPane> {
+public class NodeInfoGUIPluginView extends ASimpleMVCPluginView<NodeInfoGUIPluginModel, NodeInfoGUIPluginController, StackPane> {
 
 	private WebEngine webViewEngine;
 
 	public NodeInfoGUIPluginView(final NodeInfoGUIPluginModel model) {
-		super(model, new FlowPane());
+		super(model, new StackPane());
 		Platform.runLater(() -> {
 			WebView view = new WebView();
-			FlowPane node = this.getNode();
+			StackPane node = this.getNode();
 			node.getChildren().add(view);
 			this.webViewEngine = view.getEngine();
 			this.webViewEngine.loadContent("<i>No node selected</i>");
@@ -33,12 +33,8 @@ public class NodeInfoGUIPluginView extends ASimpleMVCPluginView<NodeInfoGUIPlugi
 	}
 
 	@Override
-	public String getTitle() {
-		return "Node Information";
-	}
-
-	@Override
 	public void clear() {
 		/* don't do anything */
 	}
+
 }

@@ -11,4 +11,5 @@ dependencies {
 	}
 	compile project(':mlplan-core')
 	testCompile project(path: ':mlplan-core', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }

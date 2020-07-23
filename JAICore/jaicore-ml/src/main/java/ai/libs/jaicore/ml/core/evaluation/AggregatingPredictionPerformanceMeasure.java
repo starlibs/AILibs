@@ -33,8 +33,8 @@ public class AggregatingPredictionPerformanceMeasure<E, A> implements IAggregate
 	@Override
 	public double loss(final List<IPredictionAndGroundTruthTable<? extends E, ? extends A>> pairTables) {
 		List<List<? extends E>> expected = pairTables.stream().map(IPredictionAndGroundTruthTable::getGroundTruthAsList).collect(Collectors.toList());
-		List<List<? extends A>> actual = pairTables.stream().map(IPredictionAndGroundTruthTable::getPredictionsAsList).collect(Collectors.toList());
-		return this.loss(expected, actual);
+		List<List<? extends A>> predicted = pairTables.stream().map(IPredictionAndGroundTruthTable::getPredictionsAsList).collect(Collectors.toList());
+		return this.loss(expected, predicted);
 	}
 
 	@Override

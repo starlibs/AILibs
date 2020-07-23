@@ -1,5 +1,6 @@
 dependencies {
 	compile project(':JAICore:jaicore-basic')
+	compile project(':JAICore:jaicore-components')
 	compile project(':JAICore:jaicore-logic')
 	compile project(':JAICore:jaicore-algorithminspector')
 	compile project(':JAICore:jaicore-planning')
@@ -8,6 +9,7 @@ dependencies {
 	compile("$apacheCommonsLang")
 	compile("$mysql")
 	
+  	testCompile 'org.awaitility:awaitility:3.1.6'
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }
 			
