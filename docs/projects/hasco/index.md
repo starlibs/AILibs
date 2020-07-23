@@ -3,7 +3,7 @@ layout: project
 title: HASCO
 subtitle: HASCO subtitle
 navigation_mode: anchor
-version: 0.2.0
+version: 0.2.2
 navigation:
     - { id: "overview", link: "overview", title: "Overview" }
     - { id: "installation", link: "installation", title: "Installation" }

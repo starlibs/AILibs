@@ -34,6 +34,7 @@ public class MLPlanScikitLearnARFFExample {
 		long start = System.currentTimeMillis();
 		File file = new File("testrsc/waveform.arff");
 		ILabeledDataset<ILabeledInstance> dataset = ArffDatasetAdapter.readDataset(file);
+
 		LOGGER.info("Data read. Time to create dataset object was {}ms", System.currentTimeMillis() - start);
 		List<ILabeledDataset<ILabeledInstance>> split = RandomHoldoutSplitter.createSplit(dataset, 42, .7);
 
@@ -43,9 +44,9 @@ public class MLPlanScikitLearnARFFExample {
 		builder.withCandidateEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS));
 		builder.withTimeOut(new Timeout(3, TimeUnit.MINUTES));
 		builder.withNumCpus(4);
+		builder.withPortionOfDataReservedForSelection(0); // disable selection
 
 		MLPlan<ScikitLearnWrapper<IPrediction, IPredictionBatch>> mlplan = builder.withDataset(split.get(0)).build();
-		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("testedalgorithm");
 
 		try {

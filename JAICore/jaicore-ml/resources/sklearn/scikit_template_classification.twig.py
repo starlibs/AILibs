@@ -70,9 +70,8 @@ def parse(arff_, is_path=True):
         
         # replace nan values with 0
         dfARFF = dfARFF.fillna(0)
+        return dfARFF, class_attribute
         
-        # return ARFF structure object
-        return ArffStructure(dfARFF, class_attribute)
     except Exception as e:
         import traceback
         traceback.print_tb(e.__traceback__)
@@ -101,8 +100,10 @@ class ArffStructure:
         """ Reads and encapsulates arff_data which is a dictionary returned by the arff.py module.
         """
         self.data = df
-        self.input_matrix = pd.get_dummies(df.drop(columns=[class_attribute])).values
-        self.output_matrix = df[[class_attribute]].values
+        self.input_df = pd.get_dummies(df.drop(columns=[class_attribute]))
+        self.input_matrix = self.input_df.values
+        self.output_df = df[[class_attribute]]
+        self.output_matrix = self.output_df.values
         self.class_attribute = class_attribute
 
 def get_filename(path_of_file):
@@ -137,14 +138,32 @@ def load_arff_file(arff_path):
     # Load the arff dataset and convert the data into array.
     if sys.argv["regression"]:
         data, meta = scipy_arff.loadarff(arff_path)
-        #data = np.asarray(data.tolist(), dtype=np.float64)
-        data = np.array(data)
+        data = np.asarray(data.tolist(), dtype=np.float64)
         if len(data) <= 1:
             raise ValueError("Not enough data points in : " + arff_path)
     else:
-        data = parse(arff_path)
+        df, class_attribute = parse(arff_path)
+        data =  ArffStructure(df, class_attribute)
     return data
-
+    
+def load_arff_files(arff_path_train, arff_path_test):
+    """
+    Loads an arff file from disk.
+    Returns content.
+    """
+    # Load the arff dataset and convert the data into array.
+    if sys.argv["regression"]:
+        raise Exception("Regression not supported")
+    else:
+        dfTrain, class_attribute = parse(arff_path_train)
+        dfTest, class_attribute = parse(arff_path_test)
+        dfUnion = pd.concat([dfTrain, dfTest])
+        data = ArffStructure(dfUnion, class_attribute)
+        print(len(data.input_matrix), len(data.output_matrix))
+        dfBinarized = pd.concat([data.input_df, data.output_df], axis=1)
+        dfBinarizedTrain = dfBinarized[:len(dfTrain)]
+        dfBinarizedTest = dfBinarized[len(dfTrain):]
+        return ArffStructure(dfBinarizedTrain, class_attribute), ArffStructure(dfBinarizedTest, class_attribute)
 
 def get_feature_target_matrices(data):
     """
@@ -277,16 +296,17 @@ def main():
     print("using seed ", sys.argv["seed"])
     np.random.seed(int(sys.argv["seed"]))
     print("load arff file from ", sys.argv["arff"])
-    data = load_arff_file(sys.argv["arff"])
     print("run script in mode ", sys.argv["mode"])
     if sys.argv["mode"] == "train":
+        data = load_arff_file(sys.argv["arff"])
         run_train_mode(data)
     elif sys.argv["mode"] == "test":
         assert sys.argv["model"]
+        data = load_arff_file(sys.argv["arff"])
         run_test_mode(data)
     elif sys.argv["mode"] == "traintest":
-        testdata = load_arff_file(sys.argv["testarff"]);
-        run_train_test_mode(data, testdata)
+        traindata, testdata = load_arff_files(sys.argv["arff"], sys.argv["testarff"]);
+        run_train_test_mode(traindata, testdata)
 
 
 if __name__ == "__main__":

@@ -77,7 +77,7 @@ import ai.libs.python.IPythonConfig;
  * @author scheiblm
  */
 public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B>
-		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
+implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 
 	private static final Logger L = LoggerFactory.getLogger(ScikitLearnWrapper.class);
 	private static final IScikitLearnWrapperConfig CONF = ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class);
@@ -324,7 +324,6 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 					if (listener.getErrorOutput().toLowerCase().contains("convergence")) {
 						// ignore convergence warning
 						L.warn("Learner {} could not converge. Consider increase number of iterations.", this.constructInstruction);
-						// throw new PredictionException("Learner could not converge. Increase number of iterations.");
 					} else {
 						throw new PredictionException(listener.getErrorOutput());
 					}
