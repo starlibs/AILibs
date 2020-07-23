@@ -14,15 +14,23 @@ import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyProcesse
 public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V extends ASimpleMVCPluginView<M, C, ?>, C extends ASimpleMVCPluginController<M, V>> implements IComputedGUIPlugin, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(ASimpleMVCPlugin.class);
-	private String title;
+	private final String title;
 	private final M model;
 	private final V view;
 	private final C controller;
 
 	@SuppressWarnings("unchecked")
 	public ASimpleMVCPlugin() {
+		this(null);
+	}
+
+	public ASimpleMVCPlugin(final String title) {
 		super();
-		this.title = this.getClass().getSimpleName();
+		if (title == null) {
+			this.title = this.getClass().getSimpleName();
+		} else {
+			this.title = title;
+		}
 
 		Type[] mvcPatternClasses = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
 		M myModel;
@@ -52,16 +60,12 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 		Objects.requireNonNull(myView);
 		Objects.requireNonNull(myModel);
 		this.model = myModel;
+		System.out.println(this.model.getClass().getSimpleName() + " " + this.getTitle() + " " + this.model.hashCode());
 		this.view = myView;
 		this.controller = myController;
 		this.model.setController(myController);
 		this.model.setView(myView);
 		this.view.setController(myController);
-	}
-
-	public ASimpleMVCPlugin(final String title) {
-		this();
-		this.title = title;
 	}
 
 	@Override
