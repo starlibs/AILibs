@@ -43,9 +43,13 @@ public abstract class AutoMLAlgorithmForRegressionResultProductionTester extends
 	@Parameters(name = "{0}")
 	public static Collection<OpenMLProblemSet[]> data() throws DatasetDeserializationFailedException {
 		try {
+			List<Integer> ignoreDatasets = Arrays.asList(565);
 			List<OpenMLProblemSet> problemSets = new ArrayList<>();
 			Study study = con.studyGet(130); // openml regression 30
 			Arrays.stream(study.getDataset()).map(x -> {
+				if (ignoreDatasets.contains(x)) {
+					return null;
+				}
 				try {
 					return new OpenMLProblemSet(x);
 				} catch (Exception e) {
