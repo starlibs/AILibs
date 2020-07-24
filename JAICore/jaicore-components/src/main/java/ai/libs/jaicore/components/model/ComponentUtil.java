@@ -85,52 +85,49 @@ public class ComponentUtil {
 	}
 
 	public static ComponentInstance minParameterizationOfComponent(final Component component) {
-		ComponentInstance ci = null;
-		do {
-			Map<String, String> parameterValues = new HashMap<>();
-			for (Parameter p : component.getParameters()) {
-				if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
-					parameterValues.put(p.getName(), p.getDefaultValue() + "");
-				} else {
-					NumericParameterDomain numDomain = (NumericParameterDomain) p.getDefaultDomain();
-					if (numDomain.isInteger()) {
-						if ((int) (numDomain.getMax() - numDomain.getMin()) > 0) {
-							parameterValues.put(p.getName(), (int) numDomain.getMin() + "");
-						} else {
-							parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
-						}
+
+		Map<String, String> parameterValues = new HashMap<>();
+		for (Parameter p : component.getParameters()) {
+			if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
+				parameterValues.put(p.getName(), p.getDefaultValue() + "");
+			} else {
+				NumericParameterDomain numDomain = (NumericParameterDomain) p.getDefaultDomain();
+				if (numDomain.isInteger()) {
+					if ((int) (numDomain.getMax() - numDomain.getMin()) > 0) {
+						parameterValues.put(p.getName(), (int) numDomain.getMin() + "");
 					} else {
-						parameterValues.put(p.getName(), numDomain.getMin() + "");
+						parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
 					}
+				} else {
+					parameterValues.put(p.getName(), numDomain.getMin() + "");
 				}
 			}
-			ci = componentInstanceWithNoRequiredInterfaces(component, parameterValues);
-		} while (!ComponentInstanceUtil.isValidComponentInstantiation(ci));
+		}
+		ComponentInstance ci = componentInstanceWithNoRequiredInterfaces(component, parameterValues);
+		ComponentInstanceUtil.checkComponentInstantiation(ci);
 		return ci;
 	}
 
 	public static ComponentInstance maxParameterizationOfComponent(final Component component) {
-		ComponentInstance ci;
-		do {
-			Map<String, String> parameterValues = new HashMap<>();
-			for (Parameter p : component.getParameters()) {
-				if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
-					parameterValues.put(p.getName(), p.getDefaultValue() + "");
-				} else {
-					NumericParameterDomain numDomain = (NumericParameterDomain) p.getDefaultDomain();
-					if (numDomain.isInteger()) {
-						if ((int) (numDomain.getMax() - numDomain.getMin()) > 0) {
-							parameterValues.put(p.getName(), (int) numDomain.getMax() + "");
-						} else {
-							parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
-						}
+		Map<String, String> parameterValues = new HashMap<>();
+		for (Parameter p : component.getParameters()) {
+			if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
+				parameterValues.put(p.getName(), p.getDefaultValue() + "");
+			} else {
+				NumericParameterDomain numDomain = (NumericParameterDomain) p.getDefaultDomain();
+				if (numDomain.isInteger()) {
+					if ((int) (numDomain.getMax() - numDomain.getMin()) > 0) {
+						parameterValues.put(p.getName(), (int) numDomain.getMax() + "");
 					} else {
-						parameterValues.put(p.getName(), numDomain.getMax() + "");
+						parameterValues.put(p.getName(), (int) p.getDefaultValue() + "");
 					}
+				} else {
+					parameterValues.put(p.getName(), numDomain.getMax() + "");
 				}
 			}
-			ci = componentInstanceWithNoRequiredInterfaces(component, parameterValues);
-		} while (!ComponentInstanceUtil.isValidComponentInstantiation(ci));
+		}
+		ComponentInstance ci = componentInstanceWithNoRequiredInterfaces(component, parameterValues);
+		ComponentInstanceUtil.checkComponentInstantiation(ci);
 		return ci;
 	}
 

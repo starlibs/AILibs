@@ -2,6 +2,7 @@ package ai.libs.automl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +34,8 @@ import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.mlplan.core.IProblemType;
 
 public abstract class AbstractSearchSpaceConfigurationTest {
+
+	private static final boolean FAIL_IMMEDIATELY = true;
 
 	protected Logger LOGGER = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER);
 
@@ -79,23 +82,25 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		int numberOfErrorsFound = 0;
 		this.stringBuilder = new StringBuilder();
 
+		int n = this.allComponentInstances.size();
+		int i = 0;
 		for (ComponentInstance ciToInstantiate : this.allComponentInstances) {
+			i++;
+			this.LOGGER.info("Considering composition {}/{}", i, n);
+
 			List<ComponentInstance> queue = new LinkedList<>();
 			queue.add(ciToInstantiate);
-
 			this.LOGGER.trace("Sample parameters for contained components.");
 			while (!queue.isEmpty()) {
 				ComponentInstance currentCI = queue.remove(0);
 				if (!currentCI.getComponent().getParameters().isEmpty()) {
 					ComponentInstance parametrization = null;
-					while (parametrization == null) {
-						try {
-							parametrization = ComponentUtil.getDefaultParameterizationOfComponent(currentCI.getComponent());
-						} catch (Exception e) {
-							this.LOGGER.warn("Could not instantiate component instance {} with max parameters", ciToInstantiate, e);
-						}
+					try {
+						parametrization = ComponentUtil.getDefaultParameterizationOfComponent(currentCI.getComponent());
+						currentCI.getParameterValues().putAll(parametrization.getParameterValues());
+					} catch (Exception e) {
+						this.LOGGER.warn("Could not instantiate component instance {} with max parameters", ciToInstantiate, e);
 					}
-					currentCI.getParameterValues().putAll(parametrization.getParameterValues());
 				}
 				if (!currentCI.getSatisfactionOfRequiredInterfaces().isEmpty()) {
 					queue.addAll(currentCI.getSatisfactionOfRequiredInterfaces().values());
@@ -125,23 +130,25 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		int numberOfErrorsFound = 0;
 		this.stringBuilder = new StringBuilder();
 
+		int n = this.allComponentInstances.size();
+		int i = 0;
 		for (ComponentInstance ciToInstantiate : this.allComponentInstances) {
+
+			/* compute version of composition in which all parameters are set to their minimum */
+			i++;
+			this.LOGGER.info("Considering composition {}/{}", i, n);
 			List<ComponentInstance> queue = new LinkedList<>();
 			queue.add(ciToInstantiate);
-
-			this.LOGGER.trace("Sample parameters for contained components.");
 			while (!queue.isEmpty()) {
 				ComponentInstance currentCI = queue.remove(0);
 				if (!currentCI.getComponent().getParameters().isEmpty()) {
 					ComponentInstance parametrization = null;
-					while (parametrization == null) {
-						try {
-							parametrization = ComponentUtil.minParameterizationOfComponent(currentCI.getComponent());
-						} catch (Exception e) {
-							this.LOGGER.warn("Could not instantiate component instance {} with max parameters", ciToInstantiate, e);
-						}
+					try {
+						parametrization = ComponentUtil.minParameterizationOfComponent(currentCI.getComponent());
+						currentCI.getParameterValues().putAll(parametrization.getParameterValues());
+					} catch (Exception e) {
+						this.LOGGER.error("Could not instantiate component instance {} with min parameters", ciToInstantiate, e);
 					}
-					currentCI.getParameterValues().putAll(parametrization.getParameterValues());
 				}
 				if (!currentCI.getSatisfactionOfRequiredInterfaces().isEmpty()) {
 					queue.addAll(currentCI.getSatisfactionOfRequiredInterfaces().values());
@@ -171,7 +178,12 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		int numberOfErrorsFound = 0;
 		this.stringBuilder = new StringBuilder();
 
+		int n = this.allComponentInstances.size();
+		int i = 0;
 		for (ComponentInstance ciToInstantiate : this.allComponentInstances) {
+			i++;
+			this.LOGGER.info("Considering composition {}/{}", i, n);
+
 			List<ComponentInstance> queue = new LinkedList<>();
 			queue.add(ciToInstantiate);
 
@@ -269,6 +281,26 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		assertEquals(this.stringBuilder.toString(), 0, numberOfErrorsFound, 0.0001);
 	}
 
-	protected abstract boolean doesExecutionFail(final ComponentInstance componentInstance) throws Exception;
+	private boolean doesExecutionFail(final ComponentInstance componentInstance) throws Exception {
+		try {
+			this.execute(componentInstance);
+			return false;
+		}
+		catch (Exception e) {
+			this.stringBuilder.append("\n\n========================================================================================\n");
+			this.stringBuilder.append("Could not execute pipeline:\n");
+			this.stringBuilder.append(CompositionSerializer.serializeComponentInstance(componentInstance));
+			this.stringBuilder.append("\n");
+			this.stringBuilder.append("Unknown Reason\n" + this.getReasonForFailure(e));
+			if (FAIL_IMMEDIATELY) {
+				fail(this.stringBuilder.toString());
+			}
+			return true;
+		}
+	}
+
+	public abstract void execute(final ComponentInstance componentInstance) throws Exception;
+
+	public abstract String getReasonForFailure(Exception e);
 
 }

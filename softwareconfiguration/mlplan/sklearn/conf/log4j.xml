@@ -69,12 +69,12 @@
 	
 	<logger
 		name="ai.libs.jaicore.timing">
-		<level value="debug" />
+		<level value="warn" />
 	</logger>
 	
 	<logger
 		name="ai.libs.jaicore.interrupt">
-		<level value="debug" />
+		<level value="warn" />
 	</logger>
 
 	<logger name="MLPlanCLI">
@@ -138,7 +138,7 @@
 
 	<logger
 		name="ai.libs.mlplan.multiclass.sklearn.SKLearnClassifierFactory">
-		<level value="debug" />
+		<level value="warn" />
 	</logger>
 	
 	<logger
@@ -147,11 +147,11 @@
 	</logger>
 	
 	<logger name="ai.libs.jaicore.ml.scikitwrapper">
-		<level value="debug" />
+		<level value="warn" />
 	</logger>
 
 	<logger name="ai.libs.jaicore.ml.regression">
-		<level value="debug" />
+		<level value="warn" />
 	</logger>
 
 	<logger name="hasco.core.Util">

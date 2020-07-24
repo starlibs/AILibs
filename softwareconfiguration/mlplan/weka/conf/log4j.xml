@@ -44,7 +44,7 @@
     </layout>
   </appender>
  
-  <logger name="testers">
+  <logger name="tester">
     <level value="debug" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
