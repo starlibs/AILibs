@@ -136,14 +136,8 @@ def load_arff_file(arff_path):
     Returns content.
     """
     # Load the arff dataset and convert the data into array.
-    if sys.argv["regression"]:
-        data, meta = scipy_arff.loadarff(arff_path)
-        data = np.asarray(data.tolist(), dtype=np.float64)
-        if len(data) <= 1:
-            raise ValueError("Not enough data points in : " + arff_path)
-    else:
-        df, class_attribute = parse(arff_path)
-        data =  ArffStructure(df, class_attribute)
+    df, class_attribute = parse(arff_path)
+    data =  ArffStructure(df, class_attribute)
     return data
     
 def load_arff_files(arff_path_train, arff_path_test):
@@ -229,14 +223,14 @@ def run_train_mode(data):
     the script was started with or those that were given to the template.
     Returns path to serialized model.
     """
-    if sys.argv["regression"]:
-        features, targets = get_feature_target_matrices(data)
-    else:
-        features, targets = data.input_matrix, data.output_matrix
-        if targets.shape[1] != 1:
-        	raise Exception("Can currently only work with single targets.")
-        X = features
+    features, targets = data.input_matrix, data.output_matrix
+    if targets.shape[1] != 1:
+        raise Exception("Can currently only work with single targets.")
+    X = features
+    if not sys.argv["regression"]:
         y = targets[:,0].astype("str")
+    else:
+        y = targets[:,0]
     # Create instance of classifier with given parameters.
     classifier_instance = {{classifier_construct}}
     classifier_instance.fit(X, y)
@@ -273,18 +267,23 @@ def run_train_test_mode(data, testdata):
             prediction = classifier_instance.predict(test_features)
     serialize_prediction(prediction)
 
-def run_test_mode(data):
+def run_test_mode(testdata):
     """
     Tests the model that is referenced by the model argument with the given data.
     Returns path to prediction results.
     """
     with open(sys.argv["model"], 'rb') as file:
         classifier_instance = pickle.load(file)
+
+    test_features = np.array(testdata.input_matrix)
+    
     if sys.argv["regression"]:
-        features, targets = get_feature_target_matrices(data)
+        prediction = classifier_instance.predict(test_features)
     else:
-        features = data.input_matrix
-    prediction = classifier_instance.predict(features)
+        try:
+            prediction = classifier_instance.predict_proba(test_features)
+        except:
+            prediction = classifier_instance.predict(test_features)
     serialize_prediction(prediction)
 
 
