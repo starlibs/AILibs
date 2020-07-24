@@ -203,4 +203,4 @@ Classifier c = new MLPlanWekaBuilder().withDataset(new WekaInstances(dataset)).b
 JavaDoc is available [here](https://javadoc.io/doc/ai.libs/mlplan/).
 
 ### Contribute
-ML-Plan is currently developed in the [softwareconfiguration folder of AILibs on github.com](https://github.com/fmohr/AILibs/tree/master/softwareconfiguration/mlplan).
+ML-Plan is currently developed in the [softwareconfiguration folder of AILibs on github.com](https://github.com/starlibs/AILibs/tree/master/softwareconfiguration/mlplan).
