@@ -16,6 +16,9 @@ import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFail
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
+import org.api4.java.ai.ml.regression.evaluation.IRegressionPrediction;
+import org.api4.java.ai.ml.regression.evaluation.IRegressionResultBatch;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
@@ -45,10 +48,8 @@ public class ScikitLearnWrapperTest {
 
 	@Test
 	public void fitRegression() throws Exception {
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("LinearRegression()", "from sklearn.linear_model import LinearRegression",
-				EScikitLearnProblemType.CLASSIFICATION);
+		ScikitLearnWrapper<IRegressionPrediction, IRegressionResultBatch> slw = new ScikitLearnWrapper<>("LinearRegression()", "from sklearn.linear_model import LinearRegression", EScikitLearnProblemType.REGRESSION);
 		ILabeledDataset<ILabeledInstance> dataset = this.loadARFF(REGRESSION_ARFF);
-		slw.setProblemType(EScikitLearnProblemType.CLASSIFICATION);
 		slw.fit(dataset);
 		assertNotNull(MSG_MODELPATH_NOT_NULL, slw.getModelPath());
 		assertTrue(slw.getModelPath().exists());
@@ -58,21 +59,20 @@ public class ScikitLearnWrapperTest {
 	public void fitAndPredict() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.ensemble");
 		String constructInstruction = "sklearn.ensemble.RandomForestClassifier(n_estimators=100)";
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>(constructInstruction, ScikitLearnWrapper.getImportString(imports), true,
+		ScikitLearnWrapper<ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>(constructInstruction, ScikitLearnWrapper.getImportString(imports), true,
 				EScikitLearnProblemType.CLASSIFICATION);
 		ILabeledDataset<ILabeledInstance> dataset = this.loadARFF(CLASSIFICATION_ARFF);
 		RandomHoldoutSplitter<ILabeledDataset<ILabeledInstance>> splitter = new RandomHoldoutSplitter<>(new Random(), .7);
 		IDatasetSplitSet<ILabeledDataset<ILabeledInstance>> set = splitter.nextSplitSet(dataset);
 
 		long startTrain = System.currentTimeMillis();
-		slw.fit(set.getFolds(0).get(0));
-		System.out.println("Build took: " + (System.currentTimeMillis() - startTrain));
+		ISingleLabelClassificationPredictionBatch preds = slw.fitAndPredict(set.getFolds(0).get(0), set.getFolds(0).get(1));
+		System.out.println("Call took: " + (System.currentTimeMillis() - startTrain) + "ms");
 
-		long startVal = System.currentTimeMillis();
-		assertNotNull(slw.predict(set.getFolds(0).get(1)));
-		System.out.println("Validation took: " + (System.currentTimeMillis() - startVal));
+		assertNotNull(preds);
 	}
 
+	@Ignore("Currently multi-target is not supported anymore.")
 	@Test
 	public void fitRegressionMultitarget() throws Exception {
 		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor(activation='logistic')", "from sklearn.neural_network import MLPRegressor",
@@ -86,6 +86,7 @@ public class ScikitLearnWrapperTest {
 		assertTrue(slw.getModelPath().exists());
 	}
 
+	@Ignore("Currently multi-target is not supported anymore.")
 	@Test
 	public void trainAndTestClassifierRegressionMultitarget() throws Exception {
 		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EScikitLearnProblemType.CLASSIFICATION);
@@ -100,13 +101,13 @@ public class ScikitLearnWrapperTest {
 		assertEquals("Unequal length of predictions and number of test ILabeledDataset<ILabeledInstance>", result.getNumPredictions(), targetColumns.length * datasetTest.size());
 	}
 
+	@Ignore("Currently unsupported feature")
 	@Test
 	public void testClassifierRegression() throws Exception {
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EScikitLearnProblemType.CLASSIFICATION);
+		ScikitLearnWrapper<IRegressionPrediction, IRegressionResultBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EScikitLearnProblemType.REGRESSION);
 		ILabeledDataset<ILabeledInstance> datasetTest = this.loadARFF(BAYESNET_TRAIN_ARFF);
 		slw.setModelPath(new File(MLP_REGRESSOR_DUMP).getAbsoluteFile());
-		slw.setProblemType(EScikitLearnProblemType.CLASSIFICATION);
-		ISingleLabelClassificationPredictionBatch result = slw.predict(datasetTest);
+		IRegressionResultBatch result = slw.predict(datasetTest);
 		assertEquals("Unequal length of predictions and number of test ILabeledDataset<ILabeledInstance>", result.getNumPredictions(), datasetTest.size());
 	}
 
@@ -134,6 +135,7 @@ public class ScikitLearnWrapperTest {
 		assertEquals("Unequal length of predictions and number of test ILabeledDataset<ILabeledInstance>", result.getNumPredictions(), datasetTest.size());
 	}
 
+	@Ignore("Currently unsupported feature.")
 	@Test
 	public void testClassifierCategorical() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.pipeline", "sklearn.decomposition", "sklearn.ensemble");
@@ -147,10 +149,9 @@ public class ScikitLearnWrapperTest {
 
 	@Test
 	public void getRawOutput() throws Exception {
-		ScikitLearnWrapper<ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EScikitLearnProblemType.CLASSIFICATION);
+		ScikitLearnWrapper<IRegressionPrediction, IRegressionResultBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EScikitLearnProblemType.REGRESSION);
 		ILabeledDataset<ILabeledInstance> datasetTrain = this.loadARFF(BAYESNET_TRAIN_ARFF);
 		ILabeledDataset<ILabeledInstance> datasetTest = this.loadARFF(BAYESNET_TRAIN_ARFF);
-		slw.setProblemType(EScikitLearnProblemType.REGRESSION);
 		int s = datasetTrain.getNumAttributes();
 		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.fit(datasetTrain);
@@ -159,6 +160,7 @@ public class ScikitLearnWrapperTest {
 		assertTrue(slw.getModelPath().exists());
 	}
 
+	@Ignore("Currently unsupported feature")
 	@Test
 	public void loadOwnClassifierFromFileWithNamespace() throws Exception {
 		File importfolder = new File(IMPORT_FOLDER);
@@ -173,13 +175,13 @@ public class ScikitLearnWrapperTest {
 		assertTrue(slw.getModelPath().exists());
 	}
 
+	@Ignore("Currently multi-target is not supported anymore.")
 	@Test
 	public void loadOwnClassifierFromFileWithoutNamespace() throws Exception {
 		File importfolder = new File(IMPORT_FOLDER);
 		String importStatement = ScikitLearnWrapper.createImportStatementFromImportFolder(importfolder, false);
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("My_MLPRegressor()", importStatement, EScikitLearnProblemType.CLASSIFICATION);
+		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("My_MLPRegressor()", importStatement, EScikitLearnProblemType.REGRESSION);
 		ILabeledDataset<ILabeledInstance> dataset = this.loadARFF(OWN_CLASSIFIER_DUMP);
-		slw.setProblemType(EScikitLearnProblemType.REGRESSION);
 		int s = dataset.getNumAttributes();
 		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.fit(dataset);
@@ -213,7 +215,4 @@ public class ScikitLearnWrapperTest {
 		return ArffDatasetAdapter.readDataset(new File(arffPath));
 	}
 
-	private void testFitPredict(final ILabeledDataset dataset) {
-
-	}
 }
