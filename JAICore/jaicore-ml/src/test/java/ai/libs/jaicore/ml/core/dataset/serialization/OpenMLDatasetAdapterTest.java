@@ -66,49 +66,49 @@ public class OpenMLDatasetAdapterTest {
 	public static Collection<OpenMLProblemSet[]> data() throws IOException, Exception {
 		List<OpenMLProblemSet> problemSets = new ArrayList<>();
 		Arrays.asList(//
-//				3, // kr-vs-kp
-//				9, // autos
-//				24, // mushroom
-//				39, // ecoli
-//				44, // spambase
-//				60, // waveform-5000
-//				61, // iris
-//				149, // CovPokElec
-//				155, // pokerhand
-//				181, // yeast
-//				182, // satimage
-//				183, // abalone
-//				273, // IMDB Drama
-//				554, // MNIST
-//				1039, // hiva_agnostic
-//				1101, // lymphoma_2classes
-//				1104, // leukemia
-//				1150, // AP_Breast_Lung
-//				1152, // AP_Prostate_Ovary
-//				1156, // AP_Omentum_Ovary
-//				1240, // AirlinesCodmaAdult
+				3, // kr-vs-kp
+				9, // autos
+				24, // mushroom
+				39, // ecoli
+				44, // spambase
+				60, // waveform-5000
+				61, // iris
+				149, // CovPokElec
+				155, // pokerhand
+				181, // yeast
+				182, // satimage
+				183, // abalone
+				273, // IMDB Drama
+				554, // MNIST
+				1039, // hiva_agnostic
+				1101, // lymphoma_2classes
+				1104, // leukemia
+				1150, // AP_Breast_Lung
+				1152, // AP_Prostate_Ovary
+				1156, // AP_Omentum_Ovary
+				1240, // AirlinesCodmaAdult
 				1457, // amazon
-//				1501, // semeion
-//				1590, // adult
-//				4136, // dexter
-//				4137, // dorothea
-//				23512, // higgs
-//				40594, // Reuters => Multi target
-//				40668, // connect-4
-//				40691, // wine-quality-red
-//				40927, // CIFAR-10
-//				41026, // gisette
-//				41064, // convex
-//				41065, // mnist rotation
-//				41066, // secom
+				1501, // semeion
+				1590, // adult
+				4136, // dexter
+				4137, // dorothea
+				23512, // higgs
+				40594, // Reuters => Multi target
+				40668, // connect-4
+				40691, // wine-quality-red
+				40927, // CIFAR-10
+				41026, // gisette
+				41064, // convex
+				41065, // mnist rotation
+				41066, // secom
 				42123 // articleinfluence => string attribute
-		).stream().forEach(t -> {
-			try {
-				problemSets.add(OpenMLDatasetAdapterTest.register(t));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		});
+				).stream().forEach(t -> {
+					try {
+						problemSets.add(OpenMLDatasetAdapterTest.register(t));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				});
 
 		OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
 		for (int i = 0; i < data.length; i++) {
