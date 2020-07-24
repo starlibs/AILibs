@@ -101,9 +101,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 
 	public void setHasco(final HASCO<N, A, Double> hasco) {
 		this.hasco = hasco;
-		if (this.getLoggerName() != null) {
-			this.hasco.setLoggerName(this.getLoggerName() + SUFFIX_HASCO);
-		}
+		this.setHASCOLoggerNameIfPossible();
 		this.hasco.setConfig(this.getConfig());
 		this.hasco.registerListener(new Object() {
 
@@ -546,6 +544,9 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 	}
 
 	private void setHASCOLoggerNameIfPossible() {
+		if (this.getLoggerName() == null) {
+			return;
+		}
 		if (this.hasco == null) {
 			this.logger.info("HASCO object is null, so not setting a logger.");
 			return;

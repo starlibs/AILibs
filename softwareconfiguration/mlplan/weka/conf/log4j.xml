@@ -163,6 +163,10 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
+  <logger name="example.optimizingfactory">
+    <level value="warn" />
+  </logger>
+  
   <!-- configuration for ML-Plan Test logging -->
   <logger name="testedalgorithm">
     <level value="debug" />

@@ -2,6 +2,9 @@ package ai.libs.jaicore.db;
 
 import java.io.IOException;
 
+import org.junit.Rule;
+import org.junit.rules.Timeout;
+
 import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.db.sql.rest.IRestDatabaseConfig;
 
@@ -9,6 +12,9 @@ public abstract class DBTester extends Tester {
 
 	public static final String VAR_DB_HOST = "AILIBS_JAICORE_DB_REST_DB_HOST";
 	public static final String VAR_DB_TOKEN = "AILIBS_JAICORE_DB_REST_DB_TOKEN";
+
+	@Rule
+	public Timeout globalTimeout = Timeout.seconds(10); // database tests should not take longer than 10 seconds
 
 	public static IRestDatabaseConfig setConnectionConfigIfEmpty(final IRestDatabaseConfig config) throws IOException {
 		if (config.getHost() == null || config.getHost().trim().isEmpty()) {
