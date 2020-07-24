@@ -141,14 +141,12 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 
 	@Override
 	public Integer deserializeAttributeValue(final String string) {
-		if (!this.domain.contains(string)) {
-			return null;
-		}
 		String trimmedString = string.trim();
 		if ((string.startsWith("'") && string.endsWith("'")) || (string.startsWith("\"") && string.endsWith("\""))) {
 			trimmedString = trimmedString.substring(1, trimmedString.length() - 1);
 		}
-		return this.domain.indexOf(trimmedString);
+		int indexOf = this.domain.indexOf(trimmedString);
+		return (indexOf < 0) ? null : indexOf;
 	}
 
 	@Override
