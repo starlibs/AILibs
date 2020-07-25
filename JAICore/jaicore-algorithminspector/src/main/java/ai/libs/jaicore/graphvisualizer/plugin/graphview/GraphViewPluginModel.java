@@ -25,6 +25,8 @@ public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginV
 
 	private Logger logger = LoggerFactory.getLogger(GraphViewPluginModel.class);
 
+	private static final String L_UI_CLASS = "ui.class";
+
 	private static final String DEFAULT_RESSOURCE_STYLESHEET_PATH = "searchgraph.css";
 	private static final String STYLESHEET_PATH = "conf/searchgraph.css";
 
@@ -119,12 +121,12 @@ public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginV
 
 	private void switchNodeType(final Node node, final String newType) {
 		if (!this.isLabeledAsRootNode(node)) {
-			node.setAttribute("ui.class", newType);
+			node.setAttribute(L_UI_CLASS, newType);
 		}
 	}
 
 	private boolean isLabeledAsRootNode(final Node node) {
-		return node.getAttribute("ui.class") != null && node.getAttribute("ui.class").equals("root");
+		return node.getAttribute(L_UI_CLASS) != null && node.getAttribute(L_UI_CLASS).equals("root");
 	}
 
 	public void removeNode(final Object node) throws ViewGraphManipulationException {

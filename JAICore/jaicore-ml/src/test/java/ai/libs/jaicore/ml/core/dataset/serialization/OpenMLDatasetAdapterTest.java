@@ -28,13 +28,19 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataQuality;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.dataset.DatasetTestUtil;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 
 @RunWith(Parameterized.class)
 public class OpenMLDatasetAdapterTest {
+
+	private static final boolean IGNORE_BIG_DATASETS = true;
+	protected Logger logger = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER);
 
 	private static OpenmlConnector con = new OpenmlConnector();
 
@@ -89,22 +95,27 @@ public class OpenMLDatasetAdapterTest {
 				1240, // AirlinesCodmaAdult
 				1457, // amazon
 				1501, // semeion
+				1515, // micro-mass
 				1590, // adult
 				4136, // dexter
 				4137, // dorothea
 				23512, // higgs
-				40594, // Reuters => Multi target
+				//				40594, // Reuters => Multi target
 				40668, // connect-4
 				40691, // wine-quality-red
 				40927, // CIFAR-10
 				41026, // gisette
 				41064, // convex
 				41065, // mnist rotation
-				41066, // secom
-				42123 // articleinfluence => string attribute
+				41066 // secom
+				//				42123 // articleinfluence => string attribute
 				).stream().forEach(t -> {
 					try {
-						problemSets.add(OpenMLDatasetAdapterTest.register(t));
+						OpenMLProblemSet set = OpenMLDatasetAdapterTest.register(t);
+						if (IGNORE_BIG_DATASETS && (numInstances.get(t) * numFeatures.get(t) > 1000000)) {
+							return; // ignore big datasets here
+						}
+						problemSets.add(set);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -119,19 +130,21 @@ public class OpenMLDatasetAdapterTest {
 
 	@Parameter(0)
 	public OpenMLProblemSet problemSet;
+	private static int lastCachedId; // this is to detect whether the current dataset hold in dataset fits the current problem set
+	private static ILabeledDataset<?> dataset;
 
-	@Test
-	public void testReadAndReconstructibility() throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
-		System.gc();
+	private void assureThatCorrectDatasetIsLoaded() throws DatasetDeserializationFailedException, InterruptedException {
 		int id = this.problemSet.getId();
-		int expectedInstances = numInstances.get(id);
-		int expectedAttributes = numFeatures.get(id);
-		int expectedClasses = numClasses.get(id);
-		this.testReconstructibility(this.read(id, expectedInstances, expectedAttributes, expectedClasses));
+		if (lastCachedId != id) {
+			dataset = this.read(id, numInstances.get(id), numFeatures.get(id), numClasses.get(id));
+			lastCachedId = id;
+		}
 	}
 
 	public ILabeledDataset<ILabeledInstance> read(final int id, final int expectedInstances, final int expectedAttributes, final int expectedClasses) throws DatasetDeserializationFailedException, InterruptedException {
+		this.logger.debug("Reading in dataset with id {}", id);
 		ILabeledDataset<ILabeledInstance> data = OpenMLDatasetReader.deserializeDataset(id);
+		this.logger.debug("Dataset read, now checking general properties.");
 		assertEquals("Incorrect number of instances.", expectedInstances, data.size());
 		assertEquals("Incorrect number of attributes.", expectedAttributes, data.getNumAttributes());
 		DatasetTestUtil.checkDatasetCoherence(data);
@@ -140,44 +153,59 @@ public class OpenMLDatasetAdapterTest {
 
 	@Test
 	public void testReconstructibilityOfStratifiedSplit() throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException, SplitFailedException {
+		this.assureThatCorrectDatasetIsLoaded();
 		if (!splitTests.contains(this.problemSet.getId())) {
 			return;
 		}
 		System.gc();
-		ILabeledDataset<?> dataset = this.problemSet.getDataset();
 
 		/* create stratified split and test that folds are reproducible */
-		System.out.println("Creating a stratified split.");
-		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(dataset, 0, .7);
+		this.logger.info("Creating a stratified split.");
+		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(this.dataset, 0, .7);
 		ILabeledDataset<?> reproducedFirstFold = (ILabeledDataset<?>) ((IReconstructible) split.get(0)).getConstructionPlan().reconstructObject();
 		ILabeledDataset<?> reproducedSecondFold = (ILabeledDataset<?>) ((IReconstructible) split.get(1)).getConstructionPlan().reconstructObject();
-		System.out.println("Testing that folds are reconstructible.");
+		this.logger.info("Testing that folds are reconstructible.");
 		this.testReproduction(split.get(0), reproducedFirstFold);
 		this.testReproduction(split.get(1), reproducedSecondFold);
 	}
 
 	@Test
 	public void testWrite() throws IOException, DatasetDeserializationFailedException, InterruptedException {
+		this.assureThatCorrectDatasetIsLoaded();
 		File outFile = new File("tmp/test.arff");
 		outFile.getParentFile().mkdirs();
-		ArffDatasetAdapter.serializeDataset(outFile, this.problemSet.getDataset());
+		this.logger.debug("Reading in dataset.", outFile);
+		ILabeledDataset<?> ds = this.dataset;
+		this.logger.debug("Serializing dataset.");
+		ArffDatasetAdapter.serializeDataset(outFile, ds);
+		this.logger.debug("Re-reading dataset from tmp file {}", outFile);
 		ILabeledDataset<?> reread = ArffDatasetAdapter.readDataset(outFile);
 		assertNotNull("Could not read in dataset again after writing", reread);
+		assertEquals("Datasets have different sizes!", ds.size(), reread.size());
+		int n = reread.size();
+		for (int i = 0; i < n; i++) {
+			ILabeledInstance expected = ds.get(i);
+			ILabeledInstance actual = reread.get(i);
+			assertEquals("Mismatch in " + i + "-th instance of dataset.", expected, actual);
+		}
+		assertEquals("Datasets are not the same.", ds, reread);
 	}
 
-	public void testReconstructibility(final ILabeledDataset<?> dataset) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
-		if (!(dataset instanceof IReconstructible)) {
+	@Test
+	public void testReconstructibility() throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
+		this.assureThatCorrectDatasetIsLoaded();
+		if (!(this.dataset instanceof IReconstructible)) {
 			fail("Dataset not reconstructible");
 		}
 
 		/* test reproducibility of the dataset itself */
-		IReconstructible rDataset = (IReconstructible) dataset;
-		System.out.println("Creating reconstruction plan.");
+		IReconstructible rDataset = (IReconstructible) this.dataset;
+		this.logger.info("Creating reconstruction plan.");
 		IReconstructionPlan plan = rDataset.getConstructionPlan();
-		System.out.println("Recovering object from reconstruction plan.");
+		this.logger.info("Recovering object from reconstruction plan.");
 		ILabeledDataset<?> reproducedDataset = (ILabeledDataset<?>) plan.reconstructObject();
-		System.out.println("Testing equalness of the reproduced object");
-		this.testReproduction(dataset, reproducedDataset);
+		this.logger.info("Testing equalness of the reproduced object");
+		this.testReproduction(this.dataset, reproducedDataset);
 	}
 
 	private void testReproduction(final ILabeledDataset<?> expected, final ILabeledDataset<?> actual) {

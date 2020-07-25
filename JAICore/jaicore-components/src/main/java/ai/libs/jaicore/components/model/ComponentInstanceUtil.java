@@ -24,6 +24,21 @@ public class ComponentInstanceUtil {
 	 * @return Returns true iff all dependency conditions hold.
 	 */
 	public static boolean isValidComponentInstantiation(final ComponentInstance ci) {
+		try {
+			checkComponentInstantiation(ci);
+			return true;
+		}
+		catch (Exception e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Checks whether a component instance adheres to the defined inter-parameter dependencies defined in the component.
+	 * @param ci The component instance to be verified.
+	 * @throws Exception with explanation if it is not valid
+	 */
+	public static void checkComponentInstantiation(final ComponentInstance ci) {
 		Map<Parameter, IParameterDomain> refinedDomainMap = new HashMap<>();
 
 		for (Parameter param : ci.getComponent().getParameters()) {
@@ -37,10 +52,9 @@ public class ComponentInstanceUtil {
 
 		for (Dependency dependency : ci.getComponent().getDependencies()) {
 			if (CompositionProblemUtil.isDependencyPremiseSatisfied(dependency, refinedDomainMap) && !CompositionProblemUtil.isDependencyConditionSatisfied(dependency.getConclusion(), refinedDomainMap)) {
-				return false;
+				throw new IllegalStateException("Problem with dependency " + dependency);
 			}
 		}
-		return true;
 	}
 
 	public static String toComponentNameString(final ComponentInstance ci) {
