@@ -1,6 +1,7 @@
 package ai.libs.jaicore.db.sql.rest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -12,12 +13,15 @@ import java.util.List;
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.datastructure.kvstore.IKVStore;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.db.DBTester;
 
 public class RestSqlAdapterTest extends DBTester {
+
+	private static File CONFIG_FILE = new File("testrsc/test.restSqlAdapter.properties");
 
 	private static RestSqlAdapter adapter;
 
@@ -27,12 +31,15 @@ public class RestSqlAdapterTest extends DBTester {
 
 	@BeforeClass
 	public static void setup() throws IOException {
-		IRestDatabaseConfig config = ConfigFactory.create(IRestDatabaseConfig.class, FileUtil.readPropertiesFile(new File("testrsc/test.restSqlAdapter.properties")));
+		assertTrue(CONFIG_FILE.exists());
+		IRestDatabaseConfig config = ConfigFactory.create(IRestDatabaseConfig.class, FileUtil.readPropertiesFile(CONFIG_FILE));
+		assertNotNull(config.getHost());
 		setConnectionConfigIfEmpty(config);
 		adapter = new RestSqlAdapter(config);
 	}
 
 	@Test
+	@Ignore
 	public void testSelectQuery() throws SQLException {
 		List<IKVStore> res = adapter.getResultsOfQuery("SELECT * FROM " + SELECT_TABLE);
 		if (res.isEmpty() || res.size() > 1) {
@@ -46,6 +53,7 @@ public class RestSqlAdapterTest extends DBTester {
 	}
 
 	@Test
+	@Ignore
 	public void testInsertQuery() throws SQLException {
 		int numEntriesBefore = this.numEntries(DELETE_FROM_INSERT_TABLE);
 		adapter.insert("INSERT INTO " + DELETE_FROM_INSERT_TABLE + " (y) VALUES (2)");
@@ -54,6 +62,7 @@ public class RestSqlAdapterTest extends DBTester {
 	}
 
 	@Test
+	@Ignore
 	public void testRemoveEntryQuery() throws SQLException {
 		int numEntriesBefore = this.numEntries(DELETE_FROM_INSERT_TABLE);
 		adapter.insert("DELETE FROM " + DELETE_FROM_INSERT_TABLE + " LIMIT 1");
@@ -62,6 +71,7 @@ public class RestSqlAdapterTest extends DBTester {
 	}
 
 	@Test
+	@Ignore
 	public void testCreateAndDropTable() throws SQLException {
 		this.logger.info("Create table...");
 		adapter.query("CREATE TABLE " + CREATE_DROP_TABLE + " (a VARCHAR(1))");

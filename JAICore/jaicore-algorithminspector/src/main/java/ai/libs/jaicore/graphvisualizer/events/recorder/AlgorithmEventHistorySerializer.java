@@ -88,7 +88,7 @@ public class AlgorithmEventHistorySerializer {
 	 * @throws JsonMappingException If something went wrong during the transformation to JSON.
 	 * @throws IOException If something went wrong during the transformation to JSON.
 	 */
-	public AlgorithmEventHistory deserializeAlgorithmEventHistory(final File serializedAlgorithmEventHistory) throws JsonParseException, JsonMappingException, IOException {
+	public AlgorithmEventHistory deserializeAlgorithmEventHistory(final File serializedAlgorithmEventHistory) throws IOException {
 		List<String> lines = Files.readAllLines(Paths.get(serializedAlgorithmEventHistory.toURI()));
 		StringJoiner joiner = new StringJoiner(" ");
 		for (String line : lines) {

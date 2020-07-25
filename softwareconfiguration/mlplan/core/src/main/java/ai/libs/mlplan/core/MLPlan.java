@@ -197,8 +197,10 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			this.twoPhaseHASCOFactory = new TwoPhaseHASCOBuilder<>(hascoFactory);
 			this.twoPhaseHASCOFactory.setConfig(this.getConfig().copy(TwoPhaseHASCOConfig.class)); // instantiate 2-Phase-HASCO with a config COPY to not have config changes in 2-Phase-HASCO impacts on the MLPlan configuration
 			this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.twoPhaseHASCOFactory);
-			this.logger.info("Setting logger of {} to {}.optimizingfactory", this.optimizingFactory.getClass().getName(), this.loggerName);
-			this.optimizingFactory.setLoggerName(this.loggerName + ".optimizingfactory");
+			if (this.loggerName != null) {
+				this.logger.info("Setting logger of {} to {}.optimizingfactory", this.optimizingFactory.getClass().getName(), this.loggerName);
+				this.optimizingFactory.setLoggerName(this.loggerName + ".optimizingfactory");
+			}
 			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
 			this.optimizingFactory.registerListener(new Object() {
 				@Subscribe
