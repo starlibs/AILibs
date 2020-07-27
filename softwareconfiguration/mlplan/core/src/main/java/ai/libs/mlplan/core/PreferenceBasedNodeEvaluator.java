@@ -19,6 +19,8 @@ import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
 public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, String, Double>, ILoggingCustomizable {
 
+	private static final double EXPAND_NODE_SCORE = (-1) * Double.MAX_VALUE;
+
 	private final Collection<Component> components;
 	private final List<String> orderingOfComponents;
 	private final String nameOfMethodToResolveBareLearner;
@@ -45,8 +47,8 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 		}
 		this.logger.debug("Determined {} applied methods: {}", appliedMethods.size(), appliedMethods);
 
-		//		resolveAbstractClassifierWith
-		//		resolveAbstractClassifierWithweka.classifiers.functions.SMO
+		// resolveAbstractClassifierWith
+		// resolveAbstractClassifierWithweka.classifiers.functions.SMO
 
 		/* get partial component */
 		ComponentInstance instance = HASCOUtil.getSolutionCompositionFromState(this.components, n.getHead().getState(), false);
@@ -56,14 +58,14 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 		/* first check whether any decision about an instance is recognizable. If not, return 0.0 */
 		if (instance == null) {
 			this.logger.info("No decision recognizable *in state* yet, returning 0.0");
-			return 0.0;
+			return EXPAND_NODE_SCORE;
 		}
 
 		/* now check whether this is a pipeline */
 		String nameOfLastAppliedMethod = appliedMethods.get(appliedMethods.size() - 1);
 		String compactStringOfCI = CompositionSerializer.serializeComponentInstance(instance).toString();
 		this.logger.debug("The associated component instance is {}. Constitutes a pipeline? {}. Name of last applied method: {}", compactStringOfCI, isPipeline ? "yes" : "no", nameOfLastAppliedMethod);
-		Double score = 0.0;
+		Double score = EXPAND_NODE_SCORE;
 		boolean lastMethodBeforeSteppingToRandomCompletions = false;
 		if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
 			lastMethodBeforeSteppingToRandomCompletions = nameOfLastAppliedMethod.startsWith(this.nameOfMethodToResolveLearnerInPipeline);
@@ -73,8 +75,8 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 			} else if (instance.getSatisfactionOfRequiredInterfaces().containsKey("regressor")) {
 				classifierName = instance.getSatisfactionOfRequiredInterfaces().get("regressor").getComponent().getName();
 			} else {
-				this.logger.debug("Exact decision about pipeline fillup not recognizable in state yet. Returning 0.0.");
-				return 0.0;
+				this.logger.debug("Exact decision about pipeline fillup not recognizable in state yet. Returning {}.", EXPAND_NODE_SCORE);
+				return EXPAND_NODE_SCORE;
 			}
 		} else {
 			classifierName = instance.getComponent().getName();
@@ -84,21 +86,20 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 
 		if (lastMethodBeforeSteppingToRandomCompletions) {
 			if (isPipeline) {
-				score += this.orderingOfComponents.size() + 1;
+				score /= Math.pow(10, ((this.orderingOfComponents.size() + 1)));
 			}
-
-			score += (this.orderingOfComponents.contains(classifierName) ? this.orderingOfComponents.indexOf(classifierName) + 1 : this.orderingOfComponents.size() + 1);
-			score *= 1.0e-10;
+			score /= Math.pow(10, ((this.orderingOfComponents.contains(classifierName) ? this.orderingOfComponents.indexOf(classifierName) + 1 : this.orderingOfComponents.size() + 1)));
 		} else {
 			score = null;
 			if (!this.sentLogMessageForHavingEnteredSecondSubPhase) {
 				double scoreOfParent;
-				if ((scoreOfParent = ((BackPointerPath<TFDNode, String, Double>) n.getPathToParentOfHead()).getScore()) > 1.0e-6) {
+				if ((scoreOfParent = ((BackPointerPath<TFDNode, String, Double>) n.getPathToParentOfHead()).getScore()) > (EXPAND_NODE_SCORE / 1E100)) {
 					this.sentLogMessageForHavingEnteredSecondSubPhase = true;
 					this.logger.info("Entering phase 1b! Breadth first search ends here, because the search is asking for the f-value of a node whose parent has been truely evaluated with an f-value of {}", scoreOfParent);
 				}
 			}
 		}
+
 		this.logger.info("Returning score {} for instance {}", score, compactStringOfCI);
 		return score;
 

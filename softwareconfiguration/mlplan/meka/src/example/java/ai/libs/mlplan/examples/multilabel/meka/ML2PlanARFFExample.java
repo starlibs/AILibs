@@ -7,14 +7,14 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
+import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
 
-import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.classification.multilabel.dataset.IMekaInstances;
 import ai.libs.jaicore.ml.classification.multilabel.dataset.MekaInstances;
+import ai.libs.jaicore.ml.classification.multilabel.evaluation.loss.InstanceWiseF1;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
@@ -31,8 +31,6 @@ import weka.core.Instances;
  */
 public class ML2PlanARFFExample {
 
-	private static final boolean ACTIVATE_VISUALIZATION = false;
-
 	public static void main(final String[] args) throws Exception {
 		File datasetFile = new File("../../../../datasets/classification/multi-label/flags.arff");
 		Instances wekaData = new Instances(new FileReader(datasetFile));
@@ -41,7 +39,7 @@ public class ML2PlanARFFExample {
 		List<ILabeledDataset<?>> split = SplitterUtil.getSimpleTrainTestSplit(dataset, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */
-		MLPlan<IMekaClassifier> mlplan = new ML2PlanMekaBuilder().withNumCpus(1).withTimeOut(new Timeout(1, TimeUnit.HOURS)).withDataset(split.get(0)).build();
+		MLPlan<IMekaClassifier> mlplan = new ML2PlanMekaBuilder().withNumCpus(4).withTimeOut(new Timeout(300, TimeUnit.SECONDS)).withDataset(split.get(0)).build();
 		mlplan.setLoggerName("ml2plan");
 
 		try {
@@ -53,7 +51,7 @@ public class ML2PlanARFFExample {
 			/* evaluate solution produced by mlplan */
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
-			System.out.println("Error Rate of the solution produced by ML-Plan: " + EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList().getCastedView(Integer.class, ISingleLabelClassification.class)));
+			System.out.println("Error Rate of the solution produced by ML-Plan: " + new InstanceWiseF1().loss(report.getPredictionDiffList().getCastedView(int[].class, IMultiLabelClassification.class)));
 		} catch (NoSuchElementException e) {
 			System.out.println("Building the classifier failed: " + e.getMessage());
 		}

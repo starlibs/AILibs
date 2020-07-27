@@ -35,7 +35,7 @@ public class HOMERNodeTest {
 
 	@Test
 	public void testToString() {
-		assertEquals("toString is not giving the correct result.", "((1),(2)),(5),(7)", node.toString());
+		assertEquals("toString is not giving the correct result.", "J48(J48(1,2),5,7)", node.toString());
 	}
 
 	@Test

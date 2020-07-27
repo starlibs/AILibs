@@ -87,7 +87,7 @@ allprojects {
 	    jna = 'net.java.dev.jna:jna:5.6.0' // JAICore-Processes
 	    weka = 'ai.libs.thirdparty:interruptible-weka:0.1.5'
 	    wekaRotationForest = 'nz.ac.waikato.cms.weka:rotationForest:1.0.3'
-	    meka = 'ai.libs.thirdparty:interruptible-meka:0.1.1'
+	    meka = 'ai.libs.thirdparty:interruptible-meka:0.1.2'
 	    mysql = 'mysql:mysql-connector-java:5.1.45'
 	    moea = 'org.moeaframework:moeaframework:2.12'
 	    cli = 'commons-cli:commons-cli:1.4'
