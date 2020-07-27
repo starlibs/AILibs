@@ -61,7 +61,7 @@ public class BOSSLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integ
 
 		/**
 		 * If mean corrected is set to true than the first DFT coefficient is dropped to normalize the mean.
-		 * c.f.p. 1519 "The BOSS is concerned with time series classification in the presence of noise by Patrick Sch�fer"
+		 * c.f.p. 1519 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
 		 */
 		@Key(K_MEANCORRECTED)
 		public boolean meanCorrected();
