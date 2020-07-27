@@ -180,7 +180,13 @@ public class ConfusionMetrics {
 	 * @return The F-Measure score.
 	 */
 	public static double getFMeasure(final double beta, final int tp, final int fp, final int fn) {
-		return (1 + Math.pow(beta, 2)) * getPrecision(tp, fp) * getRecall(tp, fn) / (Math.pow(beta, 2) * getPrecision(tp, fp) + getRecall(tp, fn));
+		double precision = getPrecision(tp, fp);
+		double recall = getRecall(tp, fn);
+		double betaSquare = Math.pow(beta, 2);
+		if (precision + recall == 0.0) {
+			return 0.0;
+		}
+		return (1 + betaSquare) * precision * recall / (betaSquare * getPrecision(tp, fp) + getRecall(tp, fn));
 	}
 
 	/**

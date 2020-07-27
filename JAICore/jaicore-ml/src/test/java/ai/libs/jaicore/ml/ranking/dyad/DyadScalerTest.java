@@ -25,7 +25,7 @@ import ai.libs.jaicore.ml.ranking.dyad.learner.util.DyadUnitIntervalScaler;
 /**
  * Tests our basic scalers.
  *
- * @author Mirko J�rgens
+ * @author Mirko Jürgens
  *
  */
 public class DyadScalerTest {

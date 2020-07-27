@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * [1] Jonathan Barzilai and Jonathan M. Borwein, "Two-point step size gradient
  * methods", in: IMA journal of numerical analysis, 8.1 (1998), pp. 141-148.
  *
- * @author Mirko J�rgens
+ * @author Mirko Jürgens
  *
  */
 public class GradientDescentOptimizer implements IGradientBasedOptimizer {

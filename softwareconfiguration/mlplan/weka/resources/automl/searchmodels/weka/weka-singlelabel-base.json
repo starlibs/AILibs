@@ -322,7 +322,7 @@
       "name" : "K",
       "type" : "int",
       "default" : "0",
-      "min" : 2,
+      "min" : 0,
       "max" : 32,
       "refineSplits" : 8,
       "minInterval" : 1
@@ -333,12 +333,9 @@
       "values" : [ "0", "1" ]
     }, {
       "name" : "depth",
-      "type" : "int",
-      "default" : "0",
-      "min" : 2,
-      "max" : 20,
-      "refineSplits" : 8,
-      "minInterval" : 1
+      "type" : "cat",
+      "values": [0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
+      "default" : "0"
     } ],
     "dependencies" : [ {
       "pre" : "featuresActivator in {0}",
@@ -374,7 +371,7 @@
       "name" : "K",
       "type" : "int",
       "default" : "0",
-      "min" : 2,
+      "min" : 0,
       "max" : 32,
       "refineSplits" : 8,
       "minInterval" : 1
@@ -385,12 +382,9 @@
       "values" : [ "0", "1" ]
     }, {
       "name" : "depth",
-      "type" : "int",
-      "default" : "0",
-      "min" : 2.0,
-      "max" : 20.0,
-      "refineSplits" : 8,
-      "minInterval" : 1
+      "type" : "cat",
+      "values": [0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
+      "default" : "0"
     }, {
       "name" : "backActivator",
       "type" : "cat",

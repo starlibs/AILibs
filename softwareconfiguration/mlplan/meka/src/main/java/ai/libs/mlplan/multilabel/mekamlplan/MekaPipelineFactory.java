@@ -11,6 +11,7 @@ import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
+import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.classification.multilabel.learner.MekaClassifier;
 import meka.classifiers.multilabel.MultiLabelClassifier;
@@ -98,18 +99,16 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 		return baseLearnerList;
 	}
 
-	private List<String> getOptionsForParameterValues(final ComponentInstance ci) {
+	public static List<String> getOptionsForParameterValues(final ComponentInstance ci) {
 		List<String> optionsList = new LinkedList<>();
 		for (Entry<String, String> parameterValue : ci.getParameterValues().entrySet()) {
-
-			if (parameterValue.getKey().startsWith("-") || parameterValue.getKey().startsWith("_")) {
-				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), parameterValue);
+			Parameter param = ci.getComponent().getParameterWithName(parameterValue.getKey());
+			if (param.isDefaultValue(parameterValue.getValue()) || parameterValue.getKey().toLowerCase().contains("activator") || parameterValue.getValue().equals("false")) {
+				continue;
 			}
 
 			if (parameterValue.getValue().equals("true")) {
 				optionsList.add("-" + parameterValue.getKey());
-			} else if (parameterValue.getKey().toLowerCase().contains("activator") || parameterValue.getValue().equals("false")) {
-				// ignore this parameter
 			} else {
 				optionsList.add("-" + parameterValue.getKey());
 				if (ci.getComponent().getParameterWithName(parameterValue.getKey()).isNumeric()) {
