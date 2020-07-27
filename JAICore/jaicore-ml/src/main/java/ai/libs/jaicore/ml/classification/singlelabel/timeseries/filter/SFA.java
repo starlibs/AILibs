@@ -9,7 +9,7 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.exception.NoneFi
 
 /**
  * @author Helen Beierling
- *         c.f. p. 1511 p. 1510 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Sch�fer
+ *         c.f. p. 1511 p. 1510 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
  *         This class combines the MCB of finding the bins for a given set of DFT coefficients and SFA
  *         which selects the right letter for a DFT coefficient.
  */

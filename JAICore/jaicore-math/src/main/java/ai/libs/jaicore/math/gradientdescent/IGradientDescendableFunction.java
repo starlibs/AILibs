@@ -9,7 +9,7 @@ import org.api4.java.common.math.IVector;
  * In particular, if a function implements this interface, we assume that the
  * underlying space is convex.
  *
- * @author Helena Graf, Mirko J�rgens
+ * @author Helena Graf, Mirko Jürgens
  *
  */
 public interface IGradientDescendableFunction {

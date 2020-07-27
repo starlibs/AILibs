@@ -148,7 +148,7 @@ public class GMeans<C extends Clusterable> {
 				for (int p = 0; p < loopPoints.get(r).getPoint().length; p++) {
 					if (!Double.isNaN(loopPoints.get(r).getPoint()[p]) && !Double.isNaN(v[p])) {
 						y[r] += (v[p] * loopPoints.get(r).getPoint()[p]) / w;
-						// TODO soll ich wenn v an der stelle NaN ist einfach so tuen als w�re es
+						// TODO soll ich wenn v an der stelle NaN ist einfach so tuen als wäre es
 						// 1 oder nichts machen
 					}
 				}

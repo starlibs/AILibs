@@ -11,9 +11,9 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.exception.NoneFi
 /**
  * @author Helen Beierling This class calculates the DFT coefficients for a given double vector or a set of them. The calculations are done iteratively or recursively.
  *
- *         Rafiei, D., and Mendelzon, A. Efficient retrieval of similar time sequences using DFT. (1998), pp. 249�257. (1)
+ *         Rafiei, D., and Mendelzon, A. Efficient retrieval of similar time sequences using DFT. (1998), pp. 249-257. (1)
  *
- *         Sch�fer, P.: The BOSS is concerned with time series classification in the presence of noise. DMKD (2015) p.1510 p.1516 (2)
+ *         Schäfer, P.: The BOSS is concerned with time series classification in the presence of noise. DMKD (2015) p.1510 p.1516 (2)
  */
 public class DFT extends AFilter {
 
