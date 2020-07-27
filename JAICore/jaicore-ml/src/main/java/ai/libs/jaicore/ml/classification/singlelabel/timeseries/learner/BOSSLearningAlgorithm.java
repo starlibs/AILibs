@@ -39,7 +39,7 @@ public class BOSSLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integ
 		/**
 		 * The alphabet size determines the number of Bins for the SFA Histograms. Four was determined empirical
 		 * as an optimal value for the alphabet size.
-		 * cf.p. 1519 "The BOSS is concerned with time series classification in the presence of noise by Patrick Sch�fer"
+		 * cf.p. 1519 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
 		 *
 		 */
 		@Key(K_ALPHABET_SIZE)

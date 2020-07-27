@@ -37,7 +37,7 @@ import edu.stanford.nlp.optimization.QNMinimizer;
  * [1].
  *
  *
- * [1] Sch�fer, D. & H�llermeier, Dyad ranking using Plackett-Luce models based
+ * [1] Schäfer, D. & Hüllermeier, Dyad ranking using Plackett-Luce models based
  * on joint feature representations,
  * https://link.springer.com/article/10.1007%2Fs10994-017-5694-9
  *

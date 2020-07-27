@@ -22,7 +22,7 @@ import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
  * Obviously, this is a highly inefficient approach for estimating the gradient
  * (if we have n partial derivatives, we need 2 *n estimations).
  *
- * @author Mirko J�rgens
+ * @author Mirko Jürgens
  *
  */
 public class BlackBoxGradient implements IGradientFunction {
