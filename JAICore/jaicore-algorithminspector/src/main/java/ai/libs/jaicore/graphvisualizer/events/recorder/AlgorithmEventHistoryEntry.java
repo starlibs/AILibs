@@ -1,5 +1,7 @@
 package ai.libs.jaicore.graphvisualizer.events.recorder;
 
+import java.io.Serializable;
+
 import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
 
 /**
@@ -8,8 +10,12 @@ import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEv
  * @author atornede
  *
  */
-public class AlgorithmEventHistoryEntry {
+public class AlgorithmEventHistoryEntry implements Serializable {
 
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 7213427866393560711L;
 	private IPropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent;
 	private long timeEventWasReceived;
 
@@ -75,10 +81,7 @@ public class AlgorithmEventHistoryEntry {
 		} else if (!this.propertyProcessedAlgorithmEvent.equals(other.propertyProcessedAlgorithmEvent)) {
 			return false;
 		}
-		if (this.timeEventWasReceived != other.timeEventWasReceived) {
-			return false;
-		}
-		return true;
+		return this.timeEventWasReceived == other.timeEventWasReceived;
 	}
 
 	@Override
