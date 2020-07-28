@@ -92,7 +92,7 @@ public class WekaInstancesTester {
 					} else if (data.attribute(j).isNominal()) {
 						String expectedValue = data.attribute(j).value((int) data.get(i).value(j));
 						ICategoricalAttribute type = (ICategoricalAttribute) wrapped.getListOfAttributes().get(j);
-						int intValue = (int)Math.round(value);
+						int intValue = (int) Math.round(value);
 						String wrappedValue = type.serializeAttributeValue(intValue);
 						assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + wrappedValue + " but should have " + expectedValue, expectedValue, wrappedValue);
 					} else {
@@ -137,13 +137,12 @@ public class WekaInstancesTester {
 		assertEquals(wrapped.getLabelAttribute().getClass(), emptyCopy.getLabelAttribute().getClass());
 	}
 
-
 	@Test
 	public void testCopy() throws Exception {
 		Instances data = new Instances(new FileReader(this.dataset));
 		data.setClassIndex(data.numAttributes() - 1);
 		IWekaInstances wrapped = new WekaInstances(data);
-		IWekaInstances copy = (IWekaInstances)wrapped.createCopy();
+		IWekaInstances copy = (IWekaInstances) wrapped.createCopy();
 
 		/* check that the copy is equal to the original */
 		assertEquals(wrapped, copy);
@@ -208,7 +207,7 @@ public class WekaInstancesTester {
 		WekaInstances wrapped = new WekaInstances(data);
 
 		for (IWekaInstance i : wrapped) {
-			assertTrue(i.equals(i));
+			assertEquals(i, i);
 		}
 		assertEquals(wrapped, wrapped);
 	}
@@ -224,7 +223,7 @@ public class WekaInstancesTester {
 		int n = dataAsArray.length;
 		assertEquals(wrapped.size(), n);
 		for (int i = 0; i < n; i++) {
-			assertTrue(wrapped.get(i).equals(dataAsArray[i]));
+			assertEquals(dataAsArray[i], wrapped.get(i));
 		}
 
 		/* check Instance array */
@@ -232,7 +231,7 @@ public class WekaInstancesTester {
 		n = dataAsSpecificArray.length;
 		assertEquals(wrapped.size(), n);
 		for (int i = 0; i < n; i++) {
-			assertTrue(wrapped.get(i).equals(dataAsSpecificArray[i]));
+			assertEquals(dataAsSpecificArray[i], wrapped.get(i));
 		}
 	}
 

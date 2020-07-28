@@ -53,7 +53,7 @@ public class WekaInstancesUtilTester extends Tester {
 		ILabeledDataset<?> dataset = this.problemSet.getDataset();
 		Instances wekaInstances = WekaInstancesUtil.datasetToWekaInstances(dataset);
 		assertEquals(dataset.size(), wekaInstances.size());
-		assertEquals(dataset.getNumAttributes(), wekaInstances.numAttributes() - (long)1);
+		assertEquals(dataset.getNumAttributes(), wekaInstances.numAttributes() - (long) 1);
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class WekaInstancesUtilTester extends Tester {
 	public void testSparse2SparseAndDense2Dense() throws DatasetDeserializationFailedException, InterruptedException {
 		ILabeledDataset<?> dataset = this.problemSet.getDataset();
 		for (ILabeledInstance i : dataset) {
-			assertTrue((i instanceof SparseInstance) == (((WekaInstance)i).getElement() instanceof weka.core.SparseInstance));
+			assertEquals((i instanceof SparseInstance), (((WekaInstance) i).getElement() instanceof weka.core.SparseInstance));
 		}
 	}
 
