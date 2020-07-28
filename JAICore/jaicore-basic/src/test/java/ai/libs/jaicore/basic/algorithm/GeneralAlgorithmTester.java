@@ -1,5 +1,6 @@
 package ai.libs.jaicore.basic.algorithm;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -228,16 +229,14 @@ public abstract class GeneralAlgorithmTester extends Tester {
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof InterruptedException && Interrupter.get().hasThreadBeenInterruptedWithReason(algorithmThread, interruptReason)) {
 				controlledInterruptedExceptionSeen = true;
-			} else if (e.getCause() instanceof AlgorithmExecutionCanceledException && threadNumberViolated.get()){
+			} else if (e.getCause() instanceof AlgorithmExecutionCanceledException && threadNumberViolated.get()) {
 				this.logger.info("Detected thread count violation.");
-			}
-			else {
+			} else {
 				throw e;
 			}
 		} catch (TimeoutException e) {
 			this.logger.warn("Time limit for test has been reached.");
-		}
-		finally {
+		} finally {
 			if (!parallelized) {
 				threadCountObserverThread.cancel();
 			}
@@ -490,7 +489,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 		if (numberOfThreadsAfter > 0) {
 			group.enumerate(threads, true);
 		}
-		assertTrue("Number of threads has increased with execution. New threads: " + Arrays.toString(threads), numberOfThreadsAfter == 0);
+		assertEquals("Number of threads has increased with execution. New threads: " + Arrays.toString(threads), 0, numberOfThreadsAfter);
 	}
 
 	private class CheckingEventListener {

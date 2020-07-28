@@ -424,7 +424,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 					List<Double> distances = this.findDistances(s, data);
 					double quality = this.qualityMeasure.assessQuality(distances, classes);
 					s.setDeterminedQuality(quality);
-					shapelets.add(new AbstractMap.SimpleEntry<Shapelet, Double>(s, quality));
+					shapelets.add(new AbstractMap.SimpleEntry<>(s, quality));
 				}
 			}
 			sortByQualityDesc(shapelets);

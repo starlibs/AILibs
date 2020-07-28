@@ -20,7 +20,7 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 	/**
 	 * The collected and processed Instances
 	 */
-	private ArrayList<ArrayList<Pair<String,Double>>> collectedClassifierandPerformance;
+	private ArrayList<ArrayList<Pair<String, Double>>> collectedClassifierandPerformance;
 
 	private int numberOfClassifier;
 	private ArrayList<String> allClassifier = new ArrayList<>();
@@ -36,7 +36,7 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 		return atributesofTrainingsdata;
 	}
 
-	public List<ArrayList<Pair<String,Double>>> getCollectedClassifierandPerformance() {
+	public List<ArrayList<Pair<String, Double>>> getCollectedClassifierandPerformance() {
 		return this.collectedClassifierandPerformance;
 	}
 
@@ -49,33 +49,32 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 	}
 
 	public ModifiedISACInstanceCollector(final Instances data, final int startOfClassifierPerformanceValues, final int endOfClassifierPerformanceValues) {
-
 		this.collectedClassifierandPerformance = new ArrayList<>();
-		this.numberOfClassifier = (((endOfClassifierPerformanceValues+1)-(startOfClassifierPerformanceValues+1))+1);
+		this.numberOfClassifier = (((endOfClassifierPerformanceValues + 1) - (startOfClassifierPerformanceValues + 1)) + 1);
 
-		for(Instance i : data) {
-			ArrayList<Pair<String,Double>> pandc = new ArrayList<>();
-			for(int j = endOfClassifierPerformanceValues; j>=startOfClassifierPerformanceValues; j--) {
+		for (Instance i : data) {
+			ArrayList<Pair<String, Double>> pandc = new ArrayList<>();
+			for (int j = endOfClassifierPerformanceValues; j >= startOfClassifierPerformanceValues; j--) {
 				String classi = i.attribute(j).name();
 				double perfo = i.value(j);
-				Pair<String, Double> tup = new Pair<>(classi,perfo);
+				Pair<String, Double> tup = new Pair<>(classi, perfo);
 				pandc.add(tup);
 			}
 			this.collectedClassifierandPerformance.add(pandc);
 		}
 
 		Instance inst = data.get(0);
-		for(int i = endOfClassifierPerformanceValues;i>=startOfClassifierPerformanceValues;i--) {
+		for (int i = endOfClassifierPerformanceValues; i >= startOfClassifierPerformanceValues; i--) {
 			this.allClassifier.add(inst.attribute(i).name());
 			data.deleteAttributeAt(i);
 		}
 
 		data.deleteAttributeAt(0);
-		for(int i = 0; i<data.numAttributes();i++) {
+		for (int i = 0; i < data.numAttributes(); i++) {
 			atributesofTrainingsdata.add(data.attribute(i).toString());
 		}
 		for (Instance i : data) {
-			this.collectedInstances.add(new ProblemInstance<Instance>(i));
+			this.collectedInstances.add(new ProblemInstance<>(i));
 		}
 	}
 
@@ -92,13 +91,14 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 	public ModifiedISACInstanceCollector() throws Exception {
 		this(loadDefaultInstances(), 104, 125);
 	}
+
 	public void setNumberOfClassifier(final int number) {
 		this.numberOfClassifier = number;
 	}
+
 	@Override
 	public List<ProblemInstance<Instance>> getProblemInstances() {
 		return this.collectedInstances;
 	}
-
 
 }

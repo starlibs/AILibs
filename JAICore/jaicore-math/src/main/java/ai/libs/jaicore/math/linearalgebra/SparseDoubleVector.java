@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.api4.java.common.math.IVector;
 
@@ -237,10 +239,8 @@ public class SparseDoubleVector extends AbstractVector {
 		this.setIsChanged();
 		Random random = RandomGenerator.getRNG();
 		int numberToAdd = random.nextInt(this.internalVector.size());
-		List<Integer> unfilledIndexes = new ArrayList<>();
-		for (int i = 0; i < this.internalVector.size(); i++) {
-			unfilledIndexes.add(i);
-		}
+
+		List<Integer> unfilledIndexes = IntStream.range(0, this.internalVector.size()).mapToObj(x -> x).collect(Collectors.toList());
 		for (int numberOfAddedValues = 0; numberOfAddedValues < numberToAdd; numberOfAddedValues++) {
 			int randomIndex = random.nextInt(unfilledIndexes.size());
 			int toBeFilledIndex = unfilledIndexes.get(randomIndex);

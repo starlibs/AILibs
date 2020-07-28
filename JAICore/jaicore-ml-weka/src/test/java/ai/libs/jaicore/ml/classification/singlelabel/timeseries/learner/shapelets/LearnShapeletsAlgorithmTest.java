@@ -1,5 +1,8 @@
 package ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.shapelets;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -12,7 +15,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.MathUtil;
-import junit.framework.Assert;
 
 /**
  * Unit tests for {@link LearnShapeletsLearningAlgorithm}.
@@ -70,7 +72,7 @@ public class LearnShapeletsAlgorithmTest {
 	public void sigmoidTest() {
 		final double z = 0.5;
 		final double expected = 0.6224593312018545646389;
-		Assert.assertEquals("The sigmoid calculation delivers a wrong value.", expected, MathUtil.sigmoid(z), EPS_DELTA);
+		assertEquals("The sigmoid calculation delivers a wrong value.", expected, MathUtil.sigmoid(z), EPS_DELTA);
 	}
 
 	/**
@@ -83,7 +85,7 @@ public class LearnShapeletsAlgorithmTest {
 		final int minShapeLength = 2;
 
 		// Actual implementation differs from paper's version due to index shift correction
-		Assert.assertEquals("The calculated number of segments does not match the expected number of segments.", 30 - (5 + 1) * 2, LearnShapeletsLearningAlgorithm.getNumberOfSegments(Q, minShapeLength, r));
+		assertEquals("The calculated number of segments does not match the expected number of segments.", 30 - (5 + 1) * 2, LearnShapeletsLearningAlgorithm.getNumberOfSegments(Q, minShapeLength, r));
 	}
 
 	/**
@@ -97,13 +99,13 @@ public class LearnShapeletsAlgorithmTest {
 		final double[] instance = new double[] { 1, 2, 3 };
 		final int j = 0; // Start with first index
 
-		Assert.assertEquals("The calculated distance of the given instance does not match the expected distance.", 0d, LearnShapeletsLearningAlgorithm.calculateD(this.S, minShapeLength, r, instance, 0, j), EPS_DELTA);
+		assertEquals("The calculated distance of the given instance does not match the expected distance.", 0d, LearnShapeletsLearningAlgorithm.calculateD(this.S, minShapeLength, r, instance, 0, j), EPS_DELTA);
 
 		final double[] instance2 = new double[] { 2, 3, 4 }; // Shifted by one => Differs 1 per position
 
 		final double expected = 3d / 3d;
 
-		Assert.assertEquals("The calculated distance of the given instance does not match the expected distance.", expected, LearnShapeletsLearningAlgorithm.calculateD(this.S, minShapeLength, r, instance2, 0, j), EPS_DELTA);
+		assertEquals("The calculated distance of the given instance does not match the expected distance.", expected, LearnShapeletsLearningAlgorithm.calculateD(this.S, minShapeLength, r, instance2, 0, j), EPS_DELTA);
 	}
 
 	/**
@@ -118,11 +120,11 @@ public class LearnShapeletsAlgorithmTest {
 		final double alpha = -1d;
 
 		// getNumberOfSegments(Q=4, minShapeLength=3, r=0) = 1
-		Assert.assertEquals("The calculated soft minimum distance does not match the expected distance.", 0d, LearnShapeletsLearningAlgorithm.calculateMHat(this.S, minShapeLength, r, instance, 0, instance.length, alpha));
+		assertEquals("The calculated soft minimum distance does not match the expected distance.", 0d, LearnShapeletsLearningAlgorithm.calculateMHat(this.S, minShapeLength, r, instance, 0, instance.length, alpha), 1E-8);
 
 		final double[] instance2 = new double[] { 1, 2, 3 };
 		// getNumberOfSegments(Q=3, minShapeLength=3, r=0) = 0
-		Assert.assertEquals("The calculated soft minimum distance does not match the expected distance.", 0d, LearnShapeletsLearningAlgorithm.calculateMHat(this.S, minShapeLength, r, instance2, 0, instance2.length, alpha));
+		assertEquals("The calculated soft minimum distance does not match the expected distance.", 0d, LearnShapeletsLearningAlgorithm.calculateMHat(this.S, minShapeLength, r, instance2, 0, instance2.length, alpha), 1E-8);
 	}
 
 	/**
@@ -139,9 +141,9 @@ public class LearnShapeletsAlgorithmTest {
 		this.algorithm.setC(3);
 
 		List<Integer> result = this.algorithm.shuffleAccordingToAlternatingClassScheme(indices, targets, random);
-		Assert.assertEquals("The result indices size does not match the expected size.", indices.size(), result.size());
-		Assert.assertTrue("The calculated indices does not contain each original index.", result.stream().allMatch(i -> indices.contains(i)));
-		Assert.assertTrue("The first element is not member of the first class.", targets[result.get(0)] == 0);
+		assertEquals("The result indices size does not match the expected size.", indices.size(), result.size());
+		assertTrue("The calculated indices does not contain each original index.", result.stream().allMatch(i -> indices.contains(i)));
+		assertEquals("The first element is not member of the first class.", 0, targets[result.get(0)]);
 
 		// Check thrown exception
 		this.exception.expect(IllegalArgumentException.class);

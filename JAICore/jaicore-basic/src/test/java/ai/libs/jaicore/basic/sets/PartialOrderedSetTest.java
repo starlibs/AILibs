@@ -1,5 +1,6 @@
 package ai.libs.jaicore.basic.sets;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -126,10 +127,10 @@ public class PartialOrderedSetTest {
 	 */
 	@Test
 	public void testGetTransitiveClosureE() {
-		assertTrue(this.set.getTransitiveClosure(A).equals(this.transitiveClosureOfA));
-		assertTrue(this.set.getTransitiveClosure(B).equals(this.transitiveClosureOfB));
-		assertTrue(this.set.getTransitiveClosure(C).equals(this.transitiveClosureOfC));
-		assertTrue(this.set.getTransitiveClosure(D).equals(this.transitiveClosureOfD));
+		assertEquals(this.transitiveClosureOfA, this.set.getTransitiveClosure(A));
+		assertEquals(this.transitiveClosureOfB, this.set.getTransitiveClosure(B));
+		assertEquals(this.transitiveClosureOfC, this.set.getTransitiveClosure(C));
+		assertEquals(this.transitiveClosureOfD, this.set.getTransitiveClosure(D));
 	}
 
 	/**
@@ -160,8 +161,8 @@ public class PartialOrderedSetTest {
 			if (subset.contains(D)) {
 				expectedTransitiveClosure.addAll(this.transitiveClosureOfD);
 			}
-			assertTrue("Expedted transitive closure of " + subset.toString() + " is " + expectedTransitiveClosure.toString() + " but calculated was " + this.set.getTransitiveClosure(subset),
-					this.set.getTransitiveClosure(subset).equals(expectedTransitiveClosure));
+			assertEquals("Expedted transitive closure of " + subset.toString() + " is " + expectedTransitiveClosure.toString() + " but calculated was " + this.set.getTransitiveClosure(subset), expectedTransitiveClosure,
+					this.set.getTransitiveClosure(subset));
 		}
 	}
 

@@ -232,11 +232,8 @@ public class WekaUtil {
 		// iterate over every attribute and check.
 		for (Enumeration<Attribute> attributeEnum = wekaInstances.enumerateAttributes(); attributeEnum.hasMoreElements();) {
 			Attribute currentAttr = attributeEnum.nextElement();
-			if (!currentAttr.isNominal()) {
-				continue; // ignore attributes that aren't nominal.
-			}
-			if (currentAttr == classAttribute) {
-				// ignore class attribute (already checked in case ignoreClassAttribute==true):
+			if (!currentAttr.isNominal()// ignore attributes that aren't nominal.
+					|| currentAttr == classAttribute) {// ignore class attribute (already checked in case ignoreClassAttribute==true):
 				continue;
 			}
 			if (currentAttr.numValues() >= 3) {
