@@ -86,9 +86,9 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 
 		if (lastMethodBeforeSteppingToRandomCompletions) {
 			if (isPipeline) {
-				score /= Math.pow(10, ((this.orderingOfComponents.size() + 1)));
+				score /= Math.pow(10, this.orderingOfComponents.size() + 1);
 			}
-			score /= Math.pow(10, ((this.orderingOfComponents.contains(classifierName) ? this.orderingOfComponents.indexOf(classifierName) + 1 : this.orderingOfComponents.size() + 1)));
+			score /= Math.pow(10, this.orderingOfComponents.contains(classifierName) ? this.orderingOfComponents.indexOf(classifierName) + 1 : this.orderingOfComponents.size() + 1);
 		} else {
 			score = null;
 			if (!this.sentLogMessageForHavingEnteredSecondSubPhase) {
