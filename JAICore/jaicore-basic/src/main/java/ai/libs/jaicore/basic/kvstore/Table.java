@@ -91,7 +91,7 @@ public class Table<V> {
 				if (selectRow != null) {
 					V entry = selectRow.get(c);
 					if (entry != null) {
-						sb.append(entry.toString().replaceAll("_", "\\_"));
+						sb.append(entry.toString().replace("_", "\\_"));
 					} else {
 						sb.append(missingEntry);
 					}

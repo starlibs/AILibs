@@ -29,6 +29,10 @@ import ai.libs.jaicore.db.sql.SQLAdapter;
  */
 public class KVStoreUtil {
 
+	private static final String DEF_SEP = ";";
+	private static final String UNDERSCORE = "\\_";
+	private static final String ESCAPED_UNDERSCORE = "\\\\_";
+
 	private KVStoreUtil() {
 		// prevent instantiation of this util class.
 	}
@@ -47,7 +51,7 @@ public class KVStoreUtil {
 	 * @return A string representing the data of the {@link KVStoreCollection} in LaTeX formatting.
 	 */
 	public static String kvStoreCollectionToLaTeXTable(final KVStoreCollection kvStoreCollection, final String rowIndex, final String columnIndex, final String cellFormatting, final String missingEntry) {
-		return kvStoreCollectionToTable(kvStoreCollection, rowIndex, columnIndex, cellFormatting, missingEntry).toLaTeX();
+		return kvStoreCollectionToTable(kvStoreCollection, rowIndex, columnIndex, cellFormatting).toLaTeX(missingEntry);
 	}
 
 	/**
@@ -60,7 +64,7 @@ public class KVStoreUtil {
 	 * @return A string representing the data of the {@link KVStoreCollection} in CSV formatting.
 	 */
 	public static String kvStoreCollectionToCSVTable(final KVStoreCollection kvStoreCollection, final String rowIndex, final String columnIndex, final String cellFormatting, final String standardValue) {
-		return kvStoreCollectionToTable(kvStoreCollection, rowIndex, columnIndex, cellFormatting, standardValue).toCSV(standardValue);
+		return kvStoreCollectionToTable(kvStoreCollection, rowIndex, columnIndex, cellFormatting).toCSV(standardValue);
 	}
 
 	/**
@@ -72,15 +76,15 @@ public class KVStoreUtil {
 	 * @param standardValue A default value for empty cells of the table.
 	 * @return A table object representing the KVStoreCollection's data for the column and row indices.
 	 */
-	public static Table<String> kvStoreCollectionToTable(final KVStoreCollection kvStoreCollection, final String rowIndex, final String columnIndex, final String cellFormatting, final String standardValue) {
+	public static Table<String> kvStoreCollectionToTable(final KVStoreCollection kvStoreCollection, final String rowIndex, final String columnIndex, final String cellFormatting) {
 		Table<String> table = new Table<>();
 		for (IKVStore store : kvStoreCollection) {
 
 			String[] cellFormattingSplit = store.getAsString(cellFormatting).split("#");
 			List<String> cleanedCellFormatting = Arrays.stream(cellFormattingSplit).filter(x -> !x.equals("")).collect(Collectors.toList());
 
-			String rowValue = store.getAsString(rowIndex).replace("\\_", "\\\\_");
-			String columnValue = store.getAsString(columnIndex).replace("\\_", "\\\\_");
+			String rowValue = store.getAsString(rowIndex).replace(UNDERSCORE, ESCAPED_UNDERSCORE);
+			String columnValue = store.getAsString(columnIndex).replace(UNDERSCORE, ESCAPED_UNDERSCORE);
 
 			StringBuilder tableEntryBuilder = new StringBuilder();
 			for (String cellKey : cleanedCellFormatting) {
@@ -105,7 +109,7 @@ public class KVStoreUtil {
 	 * @throws IOException Thrown if there are issues reading the csv file.
 	 */
 	public static KVStoreCollection readFromCSVWithHeader(final File csvFile, final Map<String, String> commonFields) throws IOException {
-		return readFromCSVWithHeader(csvFile, commonFields, ";");
+		return readFromCSVWithHeader(csvFile, commonFields, DEF_SEP);
 	}
 
 	/**
@@ -130,7 +134,7 @@ public class KVStoreUtil {
 	 * @throws IOException Thrown if there are issues reading the csv file.
 	 */
 	public static KVStoreCollection readFromCSV(final String[] columns, final File csvFile, final Map<String, String> commonFields) throws IOException {
-		return readFromCSV(columns, csvFile, commonFields, ";");
+		return readFromCSV(columns, csvFile, commonFields, DEF_SEP);
 	}
 
 	/**

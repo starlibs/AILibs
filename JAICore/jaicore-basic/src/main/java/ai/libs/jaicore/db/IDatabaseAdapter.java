@@ -139,7 +139,7 @@ public interface IDatabaseAdapter extends Serializable, AutoCloseable, ILoggingC
 	 * @throws SQLException Thrown if the statement is malformed or an issue while executing the sql statement occurs.
 	 */
 	default int update(final String sql) throws SQLException {
-		return this.update(sql, new ArrayList<String>());
+		return this.update(sql, new ArrayList<>());
 	}
 
 	/**
