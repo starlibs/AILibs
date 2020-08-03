@@ -5,26 +5,31 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.ILabeledPath;
 import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 
-public class GraphBasedMDP<N, A> implements IMDP<N, A, Double> {
+public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomizable {
 
 	private final IPathSearchWithPathEvaluationsInput<N, A, Double> graph;
 	private final N root;
 	private final ISuccessorGenerator<N, A> succGen;
 	private final IPathGoalTester<N, A> goalTester;
 	private final Map<N, Pair<N, A>> backPointers = new HashMap<>();
+	private Logger logger = LoggerFactory.getLogger(GraphBasedMDP.class);
 
 	public GraphBasedMDP(final IPathSearchWithPathEvaluationsInput<N, A, Double> graph) {
 		super();
@@ -73,10 +78,18 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double> {
 
 	@Override
 	public Map<N, Double> getProb(final N state, final A action) throws InterruptedException {
-		N succ = this.succGen.generateSuccessors(state).stream().filter(nd -> nd.getArcLabel().equals(action)).findAny().get().getTo();
-		Map<N, Double> out = new HashMap<>();
-		out.put(succ, 1.0);
-		return out;
+		Optional<INewNodeDescription<N, A>> succOpt = this.succGen.generateSuccessors(state).stream().filter(nd -> nd.getArcLabel().equals(action)).findAny();
+		if (succOpt.isPresent()) {
+			N succ = succOpt.get().getTo();
+			Map<N, Double> out = new HashMap<>();
+			out.put(succ, 1.0);
+			return out;
+		}
+		else {
+			System.err.println("THERE IS NO SUCCESSOR REACHABLE WITH ACTION " + action + " IN THE MDP!");
+			return null;
+		}
+
 	}
 
 	@Override
@@ -88,6 +101,7 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double> {
 	public Double getScore(final N state, final A action, final N successor) throws PathEvaluationException, InterruptedException {
 
 		/* now build the whole path using the back-pointer map */
+		this.logger.info("Getting score for SAS-triple ({}, {}, {})", state, action, successor);
 		N cur = successor;
 		List<N> nodes = new ArrayList<>();
 		List<A> arcs = new ArrayList<>();
@@ -102,14 +116,43 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double> {
 
 		/* check whether path is a goal path */
 		if (!this.goalTester.isGoal(path)) { // in the MDP-view of a node, partial paths do not yield a reward but only full paths.
+			boolean isTerminal = this.isTerminalState(path.getHead());
+			if (isTerminal) {
+				this.logger.debug("Found dead end! Returning null.");
+				return null;
+			}
+			this.logger.info("Path {} is not a goal path, returning 0.0", path);
 			return 0.0;
 		}
-		return this.graph.getPathEvaluator().evaluate(path).doubleValue();
+		this.logger.info("Path is a goal path, invoking path evaluator.");
+		double score = this.graph.getPathEvaluator().evaluate(path).doubleValue();
+		this.logger.info("Obtained score {} for path", score);
+		return score;
 
 	}
 
 	@Override
 	public boolean isTerminalState(final N state) throws InterruptedException {
 		return this.getApplicableActions(state).isEmpty();
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
+		if (this.graph.getGraphGenerator() instanceof ILoggingCustomizable) {
+			this.logger.info("Setting logger of successor generator to {}.gg", name);
+			((ILoggingCustomizable) this.graph.getGraphGenerator()).setLoggerName(name + ".gg");
+		}
+		if (this.goalTester instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.goalTester).setLoggerName(name + ".gt");
+		}
+		if (this.graph.getPathEvaluator() instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.graph.getPathEvaluator()).setLoggerName(name + ".pe");
+		}
 	}
 }

@@ -10,6 +10,8 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.event.IEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
@@ -33,7 +35,8 @@ import ai.libs.jaicore.search.probleminputs.IMDP;
  */
 public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends AOptimalPathInORGraphSearch<I, N, A, Double> {
 
-	private final IMDP<N, A, Double> mdp;
+	private Logger logger = LoggerFactory.getLogger(MCTSPathSearch.class);
+	private final GraphBasedMDP<N, A> mdp;
 	private final MCTS<N, A> mcts;
 
 	public MCTSPathSearch(final I problem, final MCTSFactory<N, A, ?> mctsFactory) {
@@ -48,6 +51,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 		case CREATED:
 
 			/* initialize MCTS */
+			this.mdp.setLoggerName(this.getLoggerName() + ".mdp");
 			IEvent mctsInitEvent;
 			do {
 				mctsInitEvent = this.mcts.next();
@@ -72,6 +76,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 				/* form a path object and return a respective event */
 				MCTSIterationCompletedEvent<N, A, Double> ce = (MCTSIterationCompletedEvent<N, A, Double>) e;
 				double overallScore = ce.getScores().stream().reduce((a, b) -> a + b).get();
+				this.logger.info("Registered rollout with score {}. Updating best seen solution correspondingly.", overallScore);
 				EvaluatedSearchGraphPath<N, A, Double> path = new EvaluatedSearchGraphPath<>(ce.getRollout(), overallScore);
 
 				/* only if the roll-out is a goal path, emit a success event */
@@ -83,8 +88,6 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 				}
 			}
 			return this.terminate();
-
-
 
 		default:
 			throw new IllegalStateException();
@@ -109,8 +112,14 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 
 	@Override
 	public void setLoggerName(final String name) {
-		super.setLoggerName(name);
+		super.setLoggerName(name + "._algorithm");
+		this.logger = LoggerFactory.getLogger(name);
 		this.mcts.setLoggerName(name + ".mcts");
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
 	}
 
 	public IMDP<N, A, Double> getMdp() {

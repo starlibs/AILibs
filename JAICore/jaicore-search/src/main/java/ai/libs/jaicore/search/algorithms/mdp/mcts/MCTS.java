@@ -72,7 +72,7 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		switch (this.getState()) {
 		case CREATED:
-			this.logger.info("Initialized MCTS algorithm {}.", this.getClass().getName());
+			this.logger.info("Initialized MCTS algorithm {}.\n\tTree Policy: {}\n\tDefault Policy: {}\n\tMax Iterations: {}\n\tMax Depth: {}\n\tTaboo Exhausted Nodes: {}", this.getClass().getName(), this.treePolicy, this.defaultPolicy, this.maxIterations, this.maxDepth, this.tabooExhaustedNodes);
 			return this.activate();
 		case ACTIVE:
 			if (this.iterations >= this.maxIterations) {
@@ -108,13 +108,15 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 						this.logger.debug("Found {} possible actions for state {}", possibleActions.size(), current);
 						if (this.tabooExhaustedNodes) {
 							Collection<A> tabooActionsForThisState = this.tabooActions.get(current);
+							this.logger.debug("Found {} tabooed actions for this state.", tabooActionsForThisState != null ? tabooActionsForThisState.size() : 0);
 							if (tabooActionsForThisState != null) {
 								possibleActions = possibleActions.stream().filter(a -> !tabooActionsForThisState.contains(a)).collect(Collectors.toList());
-								if (possibleActions.isEmpty()) {
-									this.tabooLastActionOfPath(path);
-								}
 							}
-						} else if (possibleActions.isEmpty()) {
+							if (possibleActions.isEmpty() && path.getNumberOfNodes() > 1) { // otherwise we are in the root and the thing ends
+								this.tabooLastActionOfPath(path);
+							}
+						}
+						if (possibleActions.isEmpty()) {
 							if (path.isPoint()) { // if we are in the root and cannot do anything anymore, then stop the algorithm.
 								this.logger.info("There are no possible actions in the root. Finishing.");
 								return this.terminate();
@@ -126,6 +128,7 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 						if (phase == 1 && this.tpReadyStates.contains(current)) {
 							this.logger.debug("Ask tree policy to choose one action of: {}.", possibleActions);
 							action = this.treePolicy.getAction(current, possibleActions);
+							Objects.requireNonNull(action, "Actions in MCTS must never be null, but tree policy returned null!");
 							this.logger.debug("Tree policy recommended action {}.", action);
 						} else {
 							if (phase == 1) { // switch to next phase
@@ -148,6 +151,7 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 								}
 								assert !untriedActions.isEmpty() : "Untried actions must not be empty!";
 								action = untriedActions.poll();
+								Objects.requireNonNull(action, "Actions in MCTS must never be null!");
 								if (untriedActions.isEmpty()) { // if this was the last untried action, remove it from that field and add it to the tree policy pool
 									this.untriedActionsOfIncompleteStates.remove(current);
 									this.tpReadyStates.add(current);
@@ -158,6 +162,7 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 							} else if (phase == 3) {
 								this.logger.debug("Ask default policy to choose one action of: {}.", possibleActions);
 								action = this.defaultPolicy.getAction(current, possibleActions);
+								Objects.requireNonNull(action, "Actions in MCTS must never be null, but default policy has returned null!");
 								assert possibleActions.contains(action);
 								this.logger.debug("Default policy chose action {}.", action);
 							}
@@ -169,6 +174,16 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 						path.extend(current, action);
 					}
 
+					/* if we touched the ground with the tree policy, add the last action to the taboo list */
+					if (this.tabooExhaustedNodes && phase == 1) {
+						this.tabooLastActionOfPath(path);
+					}
+
+					if (scores.contains(null)) {
+						this.logger.warn("Found playout with null-score. Ignoring this run.");
+						return this.nextWithException();
+					}
+
 					/* update tree policy with accumulated score */
 					int progress = (int) Math.round(this.iterations * 100.0 / this.maxIterations);
 					if (progress > this.lastProgressReport && progress % 5 == 0) {
@@ -176,14 +191,11 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 						this.lastProgressReport = progress;
 					}
 
-					/* if we touched the ground with the tree policy, add the last action to the taboo list */
-					if (this.tabooExhaustedNodes && phase == 1) {
-						this.tabooLastActionOfPath(path);
-					}
 
 					/* create and publish roll-out event */
+					boolean isGoalPath = this.mdp.isTerminalState(path.getHead());
 					double totalUndiscountedScore = scores.stream().reduce(0.0, (a, b) -> a.doubleValue() + b.doubleValue());
-					this.logger.info("Found playout of length {} and (undiscounted) score {}", path.getNumberOfNodes(), totalUndiscountedScore);
+					this.logger.info("Found playout of length {}. Head is goal: {}. (Undiscounted) score of path is {}", path.getNumberOfNodes(), isGoalPath, totalUndiscountedScore);
 					this.logger.debug("Found leaf node with score {}. Now propagating this score over the path with actions {}. Leaf state is: {}.", totalUndiscountedScore, path.getArcs(), path.getHead());
 					if (!path.isPoint()) {
 						this.treePolicy.updatePath(path, scores);

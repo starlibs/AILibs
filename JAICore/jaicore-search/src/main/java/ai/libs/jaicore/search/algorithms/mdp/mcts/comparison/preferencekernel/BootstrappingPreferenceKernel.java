@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -116,8 +117,12 @@ public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N,
 	@Override
 	public boolean canProduceReliableRankings(final N node) {
 		int minObservations = Integer.MAX_VALUE;
-		for (N child : this.explorationGraph.getSuccessors(node)) {
-			minObservations = Math.min(minObservations, this.observations.get(child).size());
+		Objects.requireNonNull(this.explorationGraph, "Exploration graph not set!");
+		Collection<N> successors = this.explorationGraph.getSuccessors(node);
+		if (successors != null) {
+			for (N child : successors) {
+				minObservations = Math.min(minObservations, this.observations.get(child).size());
+			}
 		}
 		this.logger.debug("Refusing production of rankings, because there is a node with only {} observations, which is less than the required {}.", minObservations, this.minSamplesToCreateRankings);
 		return minObservations >= this.minSamplesToCreateRankings;

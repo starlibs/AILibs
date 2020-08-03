@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.apache.commons.math3.distribution.GammaDistribution;
@@ -156,11 +157,12 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 		for (A action : actions) {
 			double score = this.getQValue(state, action);
 			this.eventBus.post(new DNGQSampleEvent<N, A>(null, state, action, score));
-			if (score < bestScore) {
+			if (bestAction == null || score < bestScore) {
 				bestAction = action;
 				bestScore = score;
 			}
 		}
+		Objects.requireNonNull(bestAction, "Best action cannot be null if there were " + actions.size() + " options!");
 		return bestAction;
 	}
 
@@ -216,7 +218,8 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 
 	public Pair<Double, Double> sampleWithNormalGamma(final N state) {
 		double tau = new GammaDistribution(this.alpha.get(state), this.beta.get(state)).sample();
-		double muNew = new NormalDistribution(this.mu.get(state), 1 / (this.lambda.get(state) * tau)).sample();
+		double std = 1 / (this.lambda.get(state) * tau);
+		double muNew = std > 0 ? new NormalDistribution(this.mu.get(state), std).sample() : this.mu.get(state);
 		return new Pair<>(muNew, tau);
 	}
 
