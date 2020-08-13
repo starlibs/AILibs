@@ -194,7 +194,8 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 				try {
 					score = Hyperband.this.getInput().getCompositionEvaluator().evaluate(ci, budget);
 				} catch (InterruptedException e) {
-					return;
+					Thread.currentThread().interrupt();
+					score = Hyperband.this.crashedEvaluationScore;
 				} catch (ObjectEvaluationFailedException e) {
 					score = Hyperband.this.crashedEvaluationScore;
 				}
