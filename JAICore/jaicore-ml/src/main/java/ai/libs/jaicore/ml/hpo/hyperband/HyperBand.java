@@ -1,0 +1,217 @@
+package ai.libs.jaicore.ml.hpo.hyperband;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.IntStream;
+
+import org.api4.java.algorithm.events.IAlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ai.libs.jaicore.basic.MathExt;
+import ai.libs.jaicore.basic.algorithm.AOptimizer;
+import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentInstanceUtil;
+import ai.libs.jaicore.components.model.EvaluatedSoftwareConfigurationSolution;
+import ai.libs.jaicore.ml.hpo.hyperband.HyperBand.HyperBandSolutionCandidate;
+
+public class HyperBand extends AOptimizer<MultiFidelitySoftwareConfigurationProblem<Double>, HyperBandSolutionCandidate, Double> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(HyperBand.class);
+
+	public class MultiFidelityScore implements Comparable<MultiFidelityScore> {
+
+		private final double r;
+		private final double score;
+
+		public MultiFidelityScore(final double r, final double score) {
+			this.r = r;
+			this.score = score;
+		}
+
+		@Override
+		public int compareTo(final MultiFidelityScore o) {
+			// compare budgets: the more the better (later round)
+			int compareBudget = Double.compare(o.r, this.r);
+
+			// if budget is not equal return the score evaluated on larger budget
+			if (compareBudget != 0) {
+				return compareBudget;
+			} else {
+				// compare scores: the smaller the better (loss minimization)
+				return Double.compare(this.score, o.score);
+			}
+		}
+	}
+
+	public class HyperBandSolutionCandidate implements EvaluatedSoftwareConfigurationSolution<Double> {
+		private ComponentInstance ci;
+		private double r;
+		private double score;
+
+		public HyperBandSolutionCandidate(final ComponentInstance ci, final double r, final double score) {
+			this.ci = ci;
+			this.r = r;
+			this.score = score;
+		}
+
+		public double getR() {
+			return this.r;
+		}
+
+		@Override
+		public Double getScore() {
+			return this.score;
+		}
+
+		@Override
+		public ComponentInstance getComponentInstance() {
+			return this.ci;
+		}
+
+		@Override
+		public String toString() {
+			return "c:" + this.score;
+		}
+	}
+
+	private double eta;
+	private double r_max;
+	private double crashedEvaluationScore;
+
+	// total budget B
+	private double b;
+	// number of brackets s_max
+	private int s_max;
+
+	private Random rand;
+
+	private ExecutorService pool = null;
+
+	public HyperBand(final IHyperBandConfig config, final MultiFidelitySoftwareConfigurationProblem<Double> problem) {
+		super(config, problem);
+		this.rand = new Random(config.getSeed());
+	}
+
+	@Override
+	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+		switch (this.getState()) {
+		case CREATED:
+			this.eta = this.getConfig().getEta();
+			this.r_max = this.getInput().getCompositionEvaluator().getMaxBudget();
+			this.crashedEvaluationScore = this.getConfig().getCrashScore();
+
+			if (this.getConfig().getIterations().equals("auto")) {
+				this.s_max = (int) Math.floor(MathExt.logBase(this.r_max, this.eta));
+			} else {
+				this.s_max = Integer.parseInt(this.getConfig().getIterations());
+			}
+			this.b = (this.s_max + 1) * this.r_max;
+
+			if (this.getConfig().cpus() > 1) {
+				this.pool = Executors.newFixedThreadPool(this.getConfig().cpus());
+			}
+			LOGGER.info("Initialized HyperBand with eta={}, r_max={}, s_max={}, b={} and parallelizing with {} cpu cores.", this.eta, this.r_max, this.s_max, this.b, this.getConfig().cpus());
+			return super.activate();
+		case INACTIVE:
+			throw new AlgorithmException("Algorithm has already finished.");
+		default:
+		case ACTIVE:
+			for (int s = this.s_max; s >= 0; s--) {
+				int n = (int) Math.ceil((this.b / this.r_max) * (Math.pow(this.eta, s) / (s + 1)));
+				double r = (this.r_max) * Math.pow(this.eta, -s);
+				LOGGER.info("Execute round {} of HyperBand with n={}, r={}", (this.s_max - s + 1), n, r);
+
+				// sample random configurations
+				List<ComponentInstance> t = this.getNCandidates(n);
+				// begin successive halving with (n,r) inner loop
+				for (int i = 0; i <= s; i++) {
+					int n_i = (int) Math.floor(n / Math.pow(this.eta, i));
+					double r_i = (r * Math.pow(this.eta, i));
+
+					// evaluated candidates
+					List<HyperBandSolutionCandidate> evaluatedCandidates = this.evaluate(t, r_i);
+
+					// sort, update best seen solution
+					evaluatedCandidates.sort((o1, o2) -> o1.getScore().compareTo(o2.getScore()));
+					this.updateBestSeenSolution(evaluatedCandidates.get(0));
+
+					// select top k
+					t.clear();
+					int k = (int) Math.floor(n_i / this.eta);
+					IntStream.range(0, k).mapToObj(x -> evaluatedCandidates.get(x).getComponentInstance()).forEach(t::add);
+				}
+			}
+
+			if (this.pool != null) {
+				this.pool.shutdownNow();
+			}
+			return super.terminate();
+		}
+	}
+
+	private List<HyperBandSolutionCandidate> evaluate(final List<ComponentInstance> t, final double budget) throws InterruptedException {
+		Lock lock = new ReentrantLock();
+		List<HyperBandSolutionCandidate> candidateList = new ArrayList<>(t.size());
+
+		Semaphore sem = new Semaphore(0);
+		List<Runnable> runnables = new ArrayList<>(t.size());
+
+		for (ComponentInstance ci : t) {
+			runnables.add(new Runnable() {
+				@Override
+				public void run() {
+					double score;
+					try {
+						score = HyperBand.this.getInput().getCompositionEvaluator().evaluate(ci, budget);
+					} catch (InterruptedException e) {
+						return;
+					} catch (ObjectEvaluationFailedException e) {
+						score = HyperBand.this.crashedEvaluationScore;
+					}
+
+					lock.lock();
+					try {
+						candidateList.add(new HyperBandSolutionCandidate(ci, budget, score));
+					} finally {
+						lock.unlock();
+						sem.release();
+					}
+				}
+			});
+		}
+
+		if (this.pool != null) {
+			runnables.stream().forEach(this.pool::submit);
+			sem.acquire(t.size());
+		} else {
+			runnables.stream().forEach(x -> x.run());
+		}
+
+		return candidateList;
+	}
+
+	private List<ComponentInstance> getNCandidates(final int n) {
+		List<ComponentInstance> ciList = new ArrayList<>(n);
+		for (int i = 0; i < n; i++) {
+			ciList.add(ComponentInstanceUtil.sampleRandomComponentInstance(this.getInput().getRequiredInterface(), this.getInput().getComponents(), this.rand));
+		}
+		return ciList;
+	}
+
+	@Override
+	public IHyperBandConfig getConfig() {
+		return (IHyperBandConfig) super.getConfig();
+	}
+
+}
