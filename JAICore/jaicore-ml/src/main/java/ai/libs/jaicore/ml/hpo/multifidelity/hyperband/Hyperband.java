@@ -98,13 +98,13 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 	}
 
 	private double eta;
-	private double r_max;
+	private double rMax;
 	private double crashedEvaluationScore;
 
 	// total budget B
 	private double b;
 	// number of brackets s_max
-	private int s_max;
+	private int sMax;
 
 	private Random rand;
 
@@ -120,39 +120,39 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 		switch (this.getState()) {
 		case CREATED:
 			this.eta = this.getConfig().getEta();
-			this.r_max = this.getInput().getCompositionEvaluator().getMaxBudget();
+			this.rMax = this.getInput().getCompositionEvaluator().getMaxBudget();
 			this.crashedEvaluationScore = this.getConfig().getCrashScore();
 
 			if (this.getConfig().getIterations().equals("auto")) {
-				this.s_max = (int) Math.floor(MathExt.logBase(this.r_max, this.eta));
+				this.sMax = (int) Math.floor(MathExt.logBase(this.rMax, this.eta));
 			} else {
-				this.s_max = Integer.parseInt(this.getConfig().getIterations());
+				this.sMax = Integer.parseInt(this.getConfig().getIterations());
 			}
-			this.b = (this.s_max + 1) * this.r_max;
+			this.b = (this.sMax + 1) * this.rMax;
 
 			if (this.getConfig().cpus() > 1) {
 				this.pool = Executors.newFixedThreadPool(this.getConfig().cpus());
 			}
-			LOGGER.info("Initialized HyperBand with eta={}, r_max={}, s_max={}, b={} and parallelizing with {} cpu cores.", this.eta, this.r_max, this.s_max, this.b, this.getConfig().cpus());
+			LOGGER.info("Initialized HyperBand with eta={}, r_max={}, s_max={}, b={} and parallelizing with {} cpu cores.", this.eta, this.rMax, this.sMax, this.b, this.getConfig().cpus());
 			return super.activate();
 		case INACTIVE:
 			throw new AlgorithmException("Algorithm has already finished.");
 		default:
 		case ACTIVE:
-			for (int s = this.s_max; s >= 0; s--) {
-				int n = (int) Math.ceil((this.b / this.r_max) * (Math.pow(this.eta, s) / (s + 1)));
-				double r = (this.r_max) * Math.pow(this.eta, -s);
-				LOGGER.info("Execute round {} of HyperBand with n={}, r={}", (this.s_max - s + 1), n, r);
+			for (int s = this.sMax; s >= 0; s--) {
+				int n = (int) Math.ceil((this.b / this.rMax) * (Math.pow(this.eta, s) / (s + 1)));
+				double r = (this.rMax) * Math.pow(this.eta, -s);
+				LOGGER.info("Execute round {} of HyperBand with n={}, r={}", (this.sMax - s + 1), n, r);
 
 				// sample random configurations
 				List<ComponentInstance> t = this.getNCandidates(n);
 				// begin successive halving with (n,r) inner loop
 				for (int i = 0; i <= s; i++) {
-					int n_i = (int) Math.floor(n / Math.pow(this.eta, i));
-					double r_i = (r * Math.pow(this.eta, i));
+					int nI = (int) Math.floor(n / Math.pow(this.eta, i));
+					double rI = (r * Math.pow(this.eta, i));
 
 					// evaluated candidates
-					List<HyperbandSolutionCandidate> evaluatedCandidates = this.evaluate(t, r_i);
+					List<HyperbandSolutionCandidate> evaluatedCandidates = this.evaluate(t, rI);
 
 					// sort, update best seen solution
 					evaluatedCandidates.sort((o1, o2) -> o1.getScore().compareTo(o2.getScore()));
@@ -160,7 +160,7 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 
 					// select top k
 					t.clear();
-					int k = (int) Math.floor(n_i / this.eta);
+					int k = (int) Math.floor(nI / this.eta);
 					IntStream.range(0, k).mapToObj(x -> evaluatedCandidates.get(x).getComponentInstance()).forEach(t::add);
 				}
 			}
