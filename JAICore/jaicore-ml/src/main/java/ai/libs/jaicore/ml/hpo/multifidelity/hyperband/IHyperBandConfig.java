@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.hpo.hyperband;
+package ai.libs.jaicore.ml.hpo.multifidelity.hyperband;
 
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 

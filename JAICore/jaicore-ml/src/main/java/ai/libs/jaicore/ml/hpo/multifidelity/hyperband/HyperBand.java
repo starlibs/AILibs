@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.hpo.hyperband;
+package ai.libs.jaicore.ml.hpo.multifidelity.hyperband;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +23,9 @@ import ai.libs.jaicore.basic.algorithm.AOptimizer;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 import ai.libs.jaicore.components.model.EvaluatedSoftwareConfigurationSolution;
-import ai.libs.jaicore.ml.hpo.hyperband.HyperBand.HyperBandSolutionCandidate;
-import ai.libs.jaicore.ml.hpo.hyperband.HyperBand.MultiFidelityScore;
+import ai.libs.jaicore.ml.hpo.multifidelity.MultiFidelitySoftwareConfigurationProblem;
+import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.HyperBand.HyperBandSolutionCandidate;
+import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.HyperBand.MultiFidelityScore;
 
 public class HyperBand extends AOptimizer<MultiFidelitySoftwareConfigurationProblem<Double>, HyperBandSolutionCandidate, MultiFidelityScore> {
 

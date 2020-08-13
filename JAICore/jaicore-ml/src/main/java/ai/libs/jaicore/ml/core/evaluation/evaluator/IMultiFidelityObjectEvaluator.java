@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.hpo.hyperband;
+package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;

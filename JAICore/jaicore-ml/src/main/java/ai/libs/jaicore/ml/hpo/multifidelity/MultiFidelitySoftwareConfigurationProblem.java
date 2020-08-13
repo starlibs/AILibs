@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.hpo.hyperband;
+package ai.libs.jaicore.ml.hpo.multifidelity;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,6 +7,7 @@ import java.util.Collection;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.IMultiFidelityObjectEvaluator;
 
 public class MultiFidelitySoftwareConfigurationProblem<V extends Comparable<V>> extends SoftwareConfigurationProblem<V> {
 

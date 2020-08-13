@@ -15,6 +15,10 @@ import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.IMultiFidelityObjectEvaluator;
+import ai.libs.jaicore.ml.hpo.multifidelity.MultiFidelitySoftwareConfigurationProblem;
+import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.HyperBand;
+import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.IHyperBandConfig;
 
 public class HyperBandTest {
 
