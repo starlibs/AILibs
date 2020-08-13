@@ -1,5 +1,8 @@
 package ai.libs.jaicore.ml.hpo.hyperband;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
@@ -18,6 +21,7 @@ import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.IMultiFidelityObjectEvaluator;
 import ai.libs.jaicore.ml.hpo.multifidelity.MultiFidelitySoftwareConfigurationProblem;
 import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.Hyperband;
+import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.Hyperband.HyperbandSolutionCandidate;
 import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.IHyperbandConfig;
 
 public class HyperBandTest {
@@ -50,7 +54,9 @@ public class HyperBandTest {
 		};
 		MultiFidelitySoftwareConfigurationProblem<Double> input = new MultiFidelitySoftwareConfigurationProblem<>(components, requiredInterface, evaluator);
 		Hyperband hb = new Hyperband(config, input);
-		hb.call();
+		HyperbandSolutionCandidate result = hb.call();
+		assertNotNull("Returned candidate is not a solution", result);
+		assertEquals("A", result.getComponentInstance().getComponent().getName());
 	}
 
 }

@@ -180,25 +180,22 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 		List<Runnable> runnables = new ArrayList<>(t.size());
 
 		for (ComponentInstance ci : t) {
-			runnables.add(new Runnable() {
-				@Override
-				public void run() {
-					double score;
-					try {
-						score = Hyperband.this.getInput().getCompositionEvaluator().evaluate(ci, budget);
-					} catch (InterruptedException e) {
-						return;
-					} catch (ObjectEvaluationFailedException e) {
-						score = Hyperband.this.crashedEvaluationScore;
-					}
+			runnables.add(() -> {
+				double score;
+				try {
+					score = Hyperband.this.getInput().getCompositionEvaluator().evaluate(ci, budget);
+				} catch (InterruptedException e) {
+					return;
+				} catch (ObjectEvaluationFailedException e) {
+					score = Hyperband.this.crashedEvaluationScore;
+				}
 
-					lock.lock();
-					try {
-						candidateList.add(new HyperbandSolutionCandidate(ci, budget, score));
-					} finally {
-						lock.unlock();
-						sem.release();
-					}
+				lock.lock();
+				try {
+					candidateList.add(new HyperbandSolutionCandidate(ci, budget, score));
+				} finally {
+					lock.unlock();
+					sem.release();
 				}
 			});
 		}
@@ -207,7 +204,7 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 			runnables.stream().forEach(this.pool::submit);
 			sem.acquire(t.size());
 		} else {
-			runnables.stream().forEach(x -> x.run());
+			runnables.stream().forEach(Runnable::run);
 		}
 
 		return candidateList;
