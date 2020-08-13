@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -40,6 +41,7 @@ import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
+import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapperConfig;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import ai.libs.jaicore.search.gui.plugins.rolloutboxplots.SearchRolloutBoxplotPlugin;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
@@ -50,8 +52,11 @@ import ai.libs.mlplan.cli.module.regression.MLPlan4WEKARegressionCLIModule;
 import ai.libs.mlplan.cli.module.slc.MLPlan4ScikitLearnClassificationCLIModule;
 import ai.libs.mlplan.cli.module.slc.MLPlan4WekaClassificationCLIModule;
 import ai.libs.mlplan.cli.report.OpenMLAutoMLBenchmarkReport;
+import ai.libs.mlplan.cli.report.StatisticsListener;
+import ai.libs.mlplan.cli.report.StatisticsReport;
 import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
+import ai.libs.python.IPythonConfig;
 
 public class MLPlanCLI {
 
@@ -86,6 +91,10 @@ public class MLPlanCLI {
 	public static final String O_OPENML_TASK = "openMLTask";
 
 	public static final String O_OUT_OPENML_BENCHMARK = "ooab";
+	public static final String O_OUT_STATS = "os";
+
+	public static final String O_TMP = "tmp";
+	public static final String O_PYTHON_CMD = "pythonCmd";
 
 	/** OPTIONAL PARAMETERS' DEFAULT VALUES */
 	// Communication options standard values
@@ -203,6 +212,15 @@ public class MLPlanCLI {
 			System.err.println("Cannot use both: local dataset and openml task. Only one option either " + O_FIT_DATASET + " or " + O_OPENML_TASK + " may be given.");
 		}
 
+		if (cl.hasOption(O_TMP)) {
+			ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class).setProperty(IScikitLearnWrapperConfig.K_TEMP_FOLDER, cl.getOptionValue(O_TMP));
+		}
+
+		if (cl.hasOption(O_PYTHON_CMD)) {
+			ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class).setProperty(IScikitLearnWrapperConfig.KEY_PYTHON, cl.getOptionValue(O_PYTHON_CMD));
+			ConfigCache.getOrCreate(IPythonConfig.class).setProperty(IPythonConfig.KEY_PYTHON, cl.getOptionValue(O_PYTHON_CMD));
+		}
+
 		// Load CLI modules and identify module responsible for the requested ml-plan configuration
 		Map<String, IMLPlanCLIModule> moduleRegistry = getModuleRegistry();
 		String moduleName = cl.getOptionValue(O_MODULE, getDefault(O_MODULE));
@@ -262,6 +280,9 @@ public class MLPlanCLI {
 		MLPlan mlplan = builder.build();
 		mlplan.setLoggerName("mlplan");
 
+		StatisticsListener statsListener = new StatisticsListener();
+		mlplan.registerListener(statsListener);
+
 		if (cl.hasOption(O_VISUALIZATION)) {
 			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan);
 			window.withMainPlugin(new GraphViewPlugin());
@@ -287,6 +308,12 @@ public class MLPlanCLI {
 				String outputFile = cl.getOptionValue(O_OUT_OPENML_BENCHMARK, getDefault(O_OUT_OPENML_BENCHMARK));
 				logger.info("Generating report conforming the OpenML AutoML Benchmark format which is then written to {}.", outputFile);
 				writeFile(outputFile, new OpenMLAutoMLBenchmarkReport(runReport).toString());
+			}
+
+			if (cl.hasOption(O_OUT_STATS)) {
+				String outputFile = cl.getOptionValue(O_OUT_STATS, getDefault(O_OUT_STATS));
+				logger.info("Generating statistics report in json and writing it to file {}.", outputFile);
+				writeFile(outputFile, new StatisticsReport(statsListener, mlplan.getComponentInstanceOfSelectedClassifier(), runReport).toString());
 			}
 		}
 	}

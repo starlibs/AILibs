@@ -15,7 +15,6 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigCache;
-import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
@@ -80,9 +79,8 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 
 	private static final Logger L = LoggerFactory.getLogger(ScikitLearnWrapper.class);
-	private static final IScikitLearnWrapperConfig CONF = ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class);
-
-	private IPythonConfig pythonConfig = ConfigFactory.create(IPythonConfig.class);
+	private final IScikitLearnWrapperConfig CONF = ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class);
+	private IPythonConfig pythonConfig = ConfigCache.getOrCreate(IPythonConfig.class);
 
 	private boolean listenToPidFromProcess; // If true, the PID is obtained from the python process being started by listening to according output.
 
@@ -130,15 +128,15 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		String hashCode = StringUtils.join(constructInstruction, imports).hashCode() + "";
 		this.configurationUID = hashCode.startsWith("-") ? hashCode.replace("-", "1") : "0" + hashCode;
 
-		if (!CONF.getTempFolder().exists()) {
-			CONF.getTempFolder().mkdirs();
+		if (!this.CONF.getTempFolder().exists()) {
+			this.CONF.getTempFolder().mkdirs();
 		}
 
 		File scriptFile = this.getSKLearnScriptFile();
 		if (!scriptFile.createNewFile() && L.isDebugEnabled()) {
 			L.debug("Script file for configuration UID {} already exists in {}", this.configurationUID, scriptFile.getAbsolutePath());
 		}
-		if (CONF.getDeleteFileOnExit()) {
+		if (this.CONF.getDeleteFileOnExit()) {
 			scriptFile.deleteOnExit();
 		}
 
@@ -184,7 +182,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 */
 	private File getSKLearnScriptFile() {
 		Objects.requireNonNull(this.configurationUID);
-		return new File(CONF.getTempFolder(), this.configurationUID + CONF.getPythonFileExtension());
+		return new File(this.CONF.getTempFolder(), this.configurationUID + this.CONF.getPythonFileExtension());
 	}
 
 	/**
@@ -193,7 +191,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * @return The file where the results are to be stored.
 	 */
 	private File getResultFile(final String arffName) {
-		return new File(CONF.getModelDumpsDirectory(), arffName + "_" + this.configurationUID + CONF.getResultFileExtension());
+		return new File(this.CONF.getModelDumpsDirectory(), arffName + "_" + this.configurationUID + this.CONF.getResultFileExtension());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -202,7 +200,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		try {
 
 			/* Ensure model dump directory exists and get the name of the dump */
-			CONF.getModelDumpsDirectory().mkdirs();
+			this.CONF.getModelDumpsDirectory().mkdirs();
 			String arffName = this.getArffName(data);
 			this.trainArff = this.getArffFile(data, arffName);
 			this.dataset = (ILabeledDataset<ILabeledInstance>) data.createEmptyCopy();
@@ -214,7 +212,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			}
 
 			if (this.withModelDump) {
-				this.modelFile = new File(CONF.getModelDumpsDirectory(), this.configurationUID + "_" + arffName + CONF.getPickleFileExtension());
+				this.modelFile = new File(this.CONF.getModelDumpsDirectory(), this.configurationUID + "_" + arffName + this.CONF.getPickleFileExtension());
 				ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff).withOutputFile(this.modelFile);
 				skLearnWrapperCommandBuilder.withSeed(this.seed);
 				skLearnWrapperCommandBuilder.withTimeout(this.timeout);
@@ -250,8 +248,8 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 *             During the serialization of the data as an arff file something went wrong.
 	 */
 	private synchronized File getArffFile(final ILabeledDataset<? extends ILabeledInstance> data, final String arffName) throws IOException {
-		File arffOutputFile = new File(CONF.getTempFolder(), arffName + ".arff");
-		if (CONF.getDeleteFileOnExit()) {
+		File arffOutputFile = new File(this.CONF.getTempFolder(), arffName + ".arff");
+		if (this.CONF.getDeleteFileOnExit()) {
 			arffOutputFile.deleteOnExit();
 		}
 		/* If Instances with the same Instance (given the hash is collision resistant) is already serialized, there is no need for doing it once more. */
@@ -280,7 +278,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		}
 		Arrays.stream(dTest).forEach(data::add);
 
-		CONF.getModelDumpsDirectory().mkdirs();
+		this.CONF.getModelDumpsDirectory().mkdirs();
 		String arffName = this.getArffName(data);
 		File testArff;
 		try {
@@ -339,7 +337,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		try {
 			/* Parse the result */
 			fileContent = FileUtil.readFileAsString(outputFile);
-			if (CONF.getDeleteFileOnExit()) {
+			if (this.CONF.getDeleteFileOnExit()) {
 				Files.delete(outputFile.toPath());
 			}
 			ObjectMapper objMapper = new ObjectMapper();
@@ -490,7 +488,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			String call = Arrays.toString(parameters).replace(",", "");
 			L.debug("Starting process {}", call.substring(1, call.length() - 1));
 		}
-		ProcessBuilder processBuilder = new ProcessBuilder(parameters).directory(CONF.getTempFolder());
+		ProcessBuilder processBuilder = new ProcessBuilder(parameters).directory(this.CONF.getTempFolder());
 		Process process = processBuilder.start();
 		try {
 			L.debug("Started process with PID: {}", ProcessUtil.getPID(process));
@@ -636,7 +634,6 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			if (ScikitLearnWrapper.this.pythonConfig != null && ScikitLearnWrapper.this.pythonConfig.getPath() != null) {
 				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getPath() + File.separator + ScikitLearnWrapper.this.pythonConfig.getPythonCommand());
 			} else {
-
 				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getPythonCommand());
 			}
 			processParameters.add("-u"); // Force python to run stdout and stderr unbuffered.
@@ -665,6 +662,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 					processParameters.add("" + i);
 				}
 			}
+
 			/* All additional parameters that the script shall consider. */
 			if (os == EOperatingSystem.MAC) {
 				StringJoiner stringJoiner = new StringJoiner(" ");

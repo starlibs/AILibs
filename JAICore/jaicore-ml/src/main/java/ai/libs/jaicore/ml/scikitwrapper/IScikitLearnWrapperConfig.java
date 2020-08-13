@@ -6,6 +6,8 @@ import ai.libs.python.IPythonConfig;
 
 public interface IScikitLearnWrapperConfig extends IPythonConfig {
 
+	public static final String K_TEMP_FOLDER = "sklearn.wrapper.temp.folder";
+
 	public static final String DEF_TEMP_FOLDER = "tmp";
 
 	@Key("sklearn.wrapper.python.extension")
@@ -21,10 +23,10 @@ public interface IScikitLearnWrapperConfig extends IPythonConfig {
 	public String getResultFileExtension();
 
 	@Key("sklearn.wrapper.temp.delete_on_exit")
-	@DefaultValue("false")
+	@DefaultValue("true")
 	public boolean getDeleteFileOnExit();
 
-	@Key("sklearn.wrapper.temp.folder")
+	@Key(K_TEMP_FOLDER)
 	@DefaultValue(DEF_TEMP_FOLDER)
 	public File getTempFolder();
 

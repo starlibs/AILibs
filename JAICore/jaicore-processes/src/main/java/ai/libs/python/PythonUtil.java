@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.ConfigCache;
 
 import ai.libs.jaicore.basic.SystemRequirementsNotMetException;
 
@@ -16,22 +16,22 @@ public class PythonUtil {
 	private static final String CMD_PYTHON_COMMANDPARAM = "-c";
 	private static final String PY_IMPORT = "import ";
 
-	private final File pathToPathonExecutable;
+	private final File pathToPythonExecutable;
 	private final String pythonCommand;
 
 	public PythonUtil() {
-		this(ConfigFactory.create(IPythonConfig.class));
+		this(ConfigCache.getOrCreate(IPythonConfig.class));
 	}
 
 	public PythonUtil(final IPythonConfig config) {
 		this.pythonCommand = config.getPythonCommand();
 		String path = config.getPath();
-		this.pathToPathonExecutable = path != null ? new File(config.getPath()) : null;
-		if (this.pathToPathonExecutable != null) {
-			if (!this.pathToPathonExecutable.exists()) {
-				throw new IllegalArgumentException("The path to python executable " + this.pathToPathonExecutable.getAbsolutePath() + " does not exist.");
+		this.pathToPythonExecutable = path != null ? new File(config.getPath()) : null;
+		if (this.pathToPythonExecutable != null) {
+			if (!this.pathToPythonExecutable.exists()) {
+				throw new IllegalArgumentException("The path to python executable " + this.pathToPythonExecutable.getAbsolutePath() + " does not exist.");
 			}
-			if (!new File(this.pathToPathonExecutable + File.separator + this.pythonCommand).exists()) {
+			if (!new File(this.pathToPythonExecutable + File.separator + this.pythonCommand).exists()) {
 				throw new IllegalArgumentException("The given path does not contain an executable with name " + this.pythonCommand);
 			}
 		}
@@ -44,7 +44,7 @@ public class PythonUtil {
 	public String executeScript(final String script) throws IOException {
 		ProcessBuilder processBuilder = this.getProcessBuilder();
 		processBuilder.redirectErrorStream(true);
-		String command = (this.pathToPathonExecutable != null ? this.pathToPathonExecutable.getAbsolutePath() + File.separator : "") + this.pythonCommand;
+		String command = (this.pathToPythonExecutable != null ? this.pathToPythonExecutable.getAbsolutePath() + File.separator : "") + this.pythonCommand;
 		Process p = processBuilder.command(command, CMD_PYTHON_COMMANDPARAM, script).start();
 		StringBuilder sb = new StringBuilder();
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {

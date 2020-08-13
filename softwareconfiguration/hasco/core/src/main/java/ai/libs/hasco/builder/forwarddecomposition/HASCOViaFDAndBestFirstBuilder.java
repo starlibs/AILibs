@@ -59,7 +59,7 @@ public class HASCOViaFDAndBestFirstBuilder<V extends Comparable<V>, B extends HA
 	}
 
 	@SuppressWarnings("unchecked")
-	public HASCOViaFDAndBestFirstWithRandomCompletionsBuilder viaRandomCompletions() {
+	public HASCOViaFDAndBestFirstWithRandomCompletionsBuilder withRandomCompletions() {
 		if (!this.getScoreClass().equals(Double.class)) {
 			throw new IllegalStateException("Random completions only applicable for double-typed problems.");
 		}

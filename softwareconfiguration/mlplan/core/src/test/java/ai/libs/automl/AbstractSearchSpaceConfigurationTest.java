@@ -63,7 +63,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 			}
 			return 0.0;
 		});
-		HASCOViaFD<Double> hasco = HASCOBuilder.get(problem).withBestFirst().viaRandomCompletions().getAlgorithm();
+		HASCOViaFD<Double> hasco = HASCOBuilder.get(problem).withBestFirst().withRandomCompletions().getAlgorithm();
 		hasco.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		hasco.setTimeout(new Timeout(30, TimeUnit.SECONDS));
 		try {

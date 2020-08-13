@@ -4,6 +4,7 @@ dependencies {
 	compile project(":JAICore:jaicore-search")
 	compile project(":JAICore:jaicore-processes")
 	compile project(":JAICore:jaicore-math")
+	compile project(":JAICore:jaicore-components")
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	
 	compile ("$api4AIml")

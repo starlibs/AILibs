@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.aeonbits.owner.ConfigFactory;
+import org.aeonbits.owner.ConfigCache;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.algorithm.Timeout;
@@ -41,7 +41,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 
 	private Logger logger = LoggerFactory.getLogger(AScikitLearnLearnerFactory.class);
 	private String loggerName;
-	private IPythonConfig pythonConfig = ConfigFactory.create(IPythonConfig.class);
+	private IPythonConfig pythonConfig = ConfigCache.getOrCreate(IPythonConfig.class);
 	private long seed;
 	private Timeout timeout;
 

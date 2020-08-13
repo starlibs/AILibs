@@ -15,7 +15,7 @@ public class HASCOBasicUsageExample4RandomCompletions {
 
 	public static void main(final String[] args) throws IOException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(new File("../../../JAICore/jaicore-components/testrsc/difficultproblem.json"), "IFace", n -> 0.0);
-		HASCOViaFD<Double> hasco = HASCOBuilder.get().withProblem(problem).withBestFirst().viaRandomCompletions().withNumSamples(3).getAlgorithm();
+		HASCOViaFD<Double> hasco = HASCOBuilder.get().withProblem(problem).withBestFirst().withRandomCompletions().withNumSamples(3).getAlgorithm();
 		hasco.nextSolutionCandidate().getScore();
 	}
 }

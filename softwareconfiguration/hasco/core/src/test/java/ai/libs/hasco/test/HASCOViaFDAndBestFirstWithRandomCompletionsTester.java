@@ -33,7 +33,7 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsTester extends HASCOTest
 	private Logger logger = LoggerFactory.getLogger("tester");
 
 	public static HASCOViaFDAndBestFirstWithRandomCompletionsBuilder getBuilder() {
-		return HASCOBuilder.get().withBestFirst().viaRandomCompletions();
+		return HASCOBuilder.get().withBestFirst().withRandomCompletions();
 	}
 
 	@Override

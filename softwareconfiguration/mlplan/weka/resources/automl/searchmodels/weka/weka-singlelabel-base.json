@@ -764,6 +764,48 @@
       "pre" : "D in {true}",
       "post" : "K in {false}"
     } ]
+  },{
+    "name" : "weka.classifiers.functions.SGD",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "Regressor", "WekaBaseClassifier", "BaseClassifier", "RandomizableBaseClassifier" ],
+    "parameter" : [ {
+      "name" : "F",
+      "type" : "cat",
+      "values" : [0,1,2,3,4],
+      "default": 0
+    }, {
+      "name" : "L",
+      "type" : "cat",
+      "values": [0.000001,0.00001,0.0001,0.001,0.01,0.1],
+      "default" : 0.01
+    }, {
+      "name" : "R",
+      "type" : "cat",
+      "values": [0.000001,0.00001,0.0001,0.001,0.01,0.1],
+      "default" : 0.0001
+    }, {
+      "name" : "E",
+      "type" : "cat",
+      "values": [1,5,10,25,50,100,200,300,400,500,1000,2500,5000],
+      "default" : 500
+    }, {
+      "name" : "C",
+      "type" : "cat",
+      "values": [1e-6,1e-5,1e-4,1e-3,1e-2,1e-1],
+      "default": 1e-3
+    }, {
+      "name" : "N",
+      "type" : "boolean",
+      "default": false
+    }, {
+      "name" : "M",
+      "type" : "boolean",
+      "default": false
+    } ],
+    "dependencies" : [ {
+      "pre" : "F in {0,1,2}",
+      "post" : "C in {1e-3}"
+    } ]
   },
   {
     "name" : "weka.classifiers.bayes.BayesNet",
