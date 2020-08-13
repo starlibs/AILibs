@@ -24,8 +24,9 @@ import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 import ai.libs.jaicore.components.model.EvaluatedSoftwareConfigurationSolution;
 import ai.libs.jaicore.ml.hpo.hyperband.HyperBand.HyperBandSolutionCandidate;
+import ai.libs.jaicore.ml.hpo.hyperband.HyperBand.MultiFidelityScore;
 
-public class HyperBand extends AOptimizer<MultiFidelitySoftwareConfigurationProblem<Double>, HyperBandSolutionCandidate, Double> {
+public class HyperBand extends AOptimizer<MultiFidelitySoftwareConfigurationProblem<Double>, HyperBandSolutionCandidate, MultiFidelityScore> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(HyperBand.class);
 
@@ -52,25 +53,24 @@ public class HyperBand extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 				return Double.compare(this.score, o.score);
 			}
 		}
+
+		@Override
+		public String toString() {
+			return "(" + this.r + ";" + this.score + ")";
+		}
 	}
 
-	public class HyperBandSolutionCandidate implements EvaluatedSoftwareConfigurationSolution<Double> {
+	public class HyperBandSolutionCandidate implements EvaluatedSoftwareConfigurationSolution<MultiFidelityScore> {
 		private ComponentInstance ci;
-		private double r;
-		private double score;
+		private MultiFidelityScore score;
 
 		public HyperBandSolutionCandidate(final ComponentInstance ci, final double r, final double score) {
 			this.ci = ci;
-			this.r = r;
-			this.score = score;
-		}
-
-		public double getR() {
-			return this.r;
+			this.score = new MultiFidelityScore(r, score);
 		}
 
 		@Override
-		public Double getScore() {
+		public MultiFidelityScore getScore() {
 			return this.score;
 		}
 
