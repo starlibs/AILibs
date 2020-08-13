@@ -17,14 +17,14 @@ import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.IMultiFidelityObjectEvaluator;
 import ai.libs.jaicore.ml.hpo.multifidelity.MultiFidelitySoftwareConfigurationProblem;
-import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.HyperBand;
-import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.IHyperBandConfig;
+import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.Hyperband;
+import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.IHyperbandConfig;
 
 public class HyperBandTest {
 
 	@Test
 	public void testHyperBandRun() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		IHyperBandConfig config = ConfigFactory.create(IHyperBandConfig.class);
+		IHyperbandConfig config = ConfigFactory.create(IHyperbandConfig.class);
 		Collection<Component> components = new ArrayList<>();
 		Component a = new Component("A");
 		a.addParameter(new Parameter("p1", new NumericParameterDomain(false, 0.0, 100.0), 50.0));
@@ -53,7 +53,7 @@ public class HyperBandTest {
 			}
 		};
 		MultiFidelitySoftwareConfigurationProblem<Double> input = new MultiFidelitySoftwareConfigurationProblem<>(components, requiredInterface, evaluator);
-		HyperBand hb = new HyperBand(config, input);
+		Hyperband hb = new Hyperband(config, input);
 		hb.call();
 	}
 

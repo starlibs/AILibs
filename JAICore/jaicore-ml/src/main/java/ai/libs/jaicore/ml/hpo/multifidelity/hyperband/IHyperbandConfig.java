@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.hpo.multifidelity.hyperband;
 
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 
-public interface IHyperBandConfig extends IOwnerBasedAlgorithmConfig {
+public interface IHyperbandConfig extends IOwnerBasedAlgorithmConfig {
 
 	public static final String NS = "hpo.hyperband.";
 	public static final String K_ETA = NS + "eta";

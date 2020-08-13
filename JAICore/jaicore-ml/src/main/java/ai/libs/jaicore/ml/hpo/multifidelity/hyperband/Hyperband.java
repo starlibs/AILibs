@@ -24,12 +24,23 @@ import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 import ai.libs.jaicore.components.model.EvaluatedSoftwareConfigurationSolution;
 import ai.libs.jaicore.ml.hpo.multifidelity.MultiFidelitySoftwareConfigurationProblem;
-import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.HyperBand.HyperBandSolutionCandidate;
-import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.HyperBand.MultiFidelityScore;
+import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.Hyperband.HyperbandSolutionCandidate;
+import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.Hyperband.MultiFidelityScore;
 
-public class HyperBand extends AOptimizer<MultiFidelitySoftwareConfigurationProblem<Double>, HyperBandSolutionCandidate, MultiFidelityScore> {
+/**
+ * HyperBand is a simple but effective hyper-parameter optimization technique, heavily relying on a technique called successive halving.
+ * Given a maximum amount of allocatable resources r_max and an integer parameter eta > 1, it allocates resources in a clever way, racing
+ * randomly sampled solution candidates with increasing resources for more promising ones.
+ *
+ * For more details, refer to the published paper by Li et al. from 2018:
+ * Hyperband: A Novel Bandit-Based Approach to Hyperparameter Optimization. In: Journal of Machine Learning research 18 (2018) 1-52
+ *
+ * @author mwever
+ *
+ */
+public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProblem<Double>, HyperbandSolutionCandidate, MultiFidelityScore> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(HyperBand.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Hyperband.class);
 
 	public class MultiFidelityScore implements Comparable<MultiFidelityScore> {
 
@@ -61,11 +72,11 @@ public class HyperBand extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 		}
 	}
 
-	public class HyperBandSolutionCandidate implements EvaluatedSoftwareConfigurationSolution<MultiFidelityScore> {
+	public class HyperbandSolutionCandidate implements EvaluatedSoftwareConfigurationSolution<MultiFidelityScore> {
 		private ComponentInstance ci;
 		private MultiFidelityScore score;
 
-		public HyperBandSolutionCandidate(final ComponentInstance ci, final double r, final double score) {
+		public HyperbandSolutionCandidate(final ComponentInstance ci, final double r, final double score) {
 			this.ci = ci;
 			this.score = new MultiFidelityScore(r, score);
 		}
@@ -99,7 +110,7 @@ public class HyperBand extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 
 	private ExecutorService pool = null;
 
-	public HyperBand(final IHyperBandConfig config, final MultiFidelitySoftwareConfigurationProblem<Double> problem) {
+	public Hyperband(final IHyperbandConfig config, final MultiFidelitySoftwareConfigurationProblem<Double> problem) {
 		super(config, problem);
 		this.rand = new Random(config.getSeed());
 	}
@@ -141,7 +152,7 @@ public class HyperBand extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 					double r_i = (r * Math.pow(this.eta, i));
 
 					// evaluated candidates
-					List<HyperBandSolutionCandidate> evaluatedCandidates = this.evaluate(t, r_i);
+					List<HyperbandSolutionCandidate> evaluatedCandidates = this.evaluate(t, r_i);
 
 					// sort, update best seen solution
 					evaluatedCandidates.sort((o1, o2) -> o1.getScore().compareTo(o2.getScore()));
@@ -161,9 +172,9 @@ public class HyperBand extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 		}
 	}
 
-	private List<HyperBandSolutionCandidate> evaluate(final List<ComponentInstance> t, final double budget) throws InterruptedException {
+	private List<HyperbandSolutionCandidate> evaluate(final List<ComponentInstance> t, final double budget) throws InterruptedException {
 		Lock lock = new ReentrantLock();
-		List<HyperBandSolutionCandidate> candidateList = new ArrayList<>(t.size());
+		List<HyperbandSolutionCandidate> candidateList = new ArrayList<>(t.size());
 
 		Semaphore sem = new Semaphore(0);
 		List<Runnable> runnables = new ArrayList<>(t.size());
@@ -174,16 +185,16 @@ public class HyperBand extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 				public void run() {
 					double score;
 					try {
-						score = HyperBand.this.getInput().getCompositionEvaluator().evaluate(ci, budget);
+						score = Hyperband.this.getInput().getCompositionEvaluator().evaluate(ci, budget);
 					} catch (InterruptedException e) {
 						return;
 					} catch (ObjectEvaluationFailedException e) {
-						score = HyperBand.this.crashedEvaluationScore;
+						score = Hyperband.this.crashedEvaluationScore;
 					}
 
 					lock.lock();
 					try {
-						candidateList.add(new HyperBandSolutionCandidate(ci, budget, score));
+						candidateList.add(new HyperbandSolutionCandidate(ci, budget, score));
 					} finally {
 						lock.unlock();
 						sem.release();
@@ -211,8 +222,8 @@ public class HyperBand extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 	}
 
 	@Override
-	public IHyperBandConfig getConfig() {
-		return (IHyperBandConfig) super.getConfig();
+	public IHyperbandConfig getConfig() {
+		return (IHyperbandConfig) super.getConfig();
 	}
 
 }
