@@ -67,6 +67,19 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 		}
 
 		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + this.getEnclosingInstance().hashCode();
+			long temp;
+			temp = Double.doubleToLongBits(this.r);
+			result = prime * result + (int) (temp ^ (temp >>> 32));
+			temp = Double.doubleToLongBits(this.score);
+			result = prime * result + (int) (temp ^ (temp >>> 32));
+			return result;
+		}
+
+		@Override
 		public boolean equals(final Object o) {
 			if (!(o instanceof MultiFidelityScore)) {
 				return false;
@@ -78,6 +91,10 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 		@Override
 		public String toString() {
 			return "(" + this.r + ";" + this.score + ")";
+		}
+
+		private Hyperband getEnclosingInstance() {
+			return Hyperband.this;
 		}
 	}
 
