@@ -67,6 +67,15 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 		}
 
 		@Override
+		public boolean equals(final Object o) {
+			if (!(o instanceof MultiFidelityScore)) {
+				return false;
+			}
+			MultiFidelityScore other = (MultiFidelityScore) o;
+			return (Math.abs(this.r - other.r) < 1E-8 && Math.abs(this.score - other.score) < 1E-8);
+		}
+
+		@Override
 		public String toString() {
 			return "(" + this.r + ";" + this.score + ")";
 		}
