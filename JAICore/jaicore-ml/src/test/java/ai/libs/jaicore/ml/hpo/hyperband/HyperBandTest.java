@@ -32,10 +32,6 @@ public class HyperBandTest {
 
 		String requiredInterface = "A";
 		IMultiFidelityObjectEvaluator<ComponentInstance, Double> evaluator = new IMultiFidelityObjectEvaluator<ComponentInstance, Double>() {
-			@Override
-			public Double evaluate(final ComponentInstance object) throws InterruptedException, ObjectEvaluationFailedException {
-				return this.evaluate(object, this.getMaxBudget());
-			}
 
 			@Override
 			public double getMaxBudget() {
