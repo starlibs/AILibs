@@ -12,6 +12,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ai.libs.jaicore.components.model.Component;
@@ -26,9 +27,10 @@ import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.IHyperbandConfig;
 
 public class HyperBandTest {
 
-	@Test
-	public void testHyperBandRun() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		IHyperbandConfig config = ConfigFactory.create(IHyperbandConfig.class);
+	private static MultiFidelitySoftwareConfigurationProblem<Double> input;
+
+	@BeforeClass
+	public static void setup() {
 		Collection<Component> components = new ArrayList<>();
 		Component a = new Component("A");
 		a.addParameter(new Parameter("p1", new NumericParameterDomain(false, 0.0, 100.0), 50.0));
@@ -36,7 +38,6 @@ public class HyperBandTest {
 
 		String requiredInterface = "A";
 		IMultiFidelityObjectEvaluator<ComponentInstance, Double> evaluator = new IMultiFidelityObjectEvaluator<ComponentInstance, Double>() {
-
 			@Override
 			public double getMaxBudget() {
 				return 5.0;
@@ -52,11 +53,26 @@ public class HyperBandTest {
 				return new Random().nextDouble();
 			}
 		};
-		MultiFidelitySoftwareConfigurationProblem<Double> input = new MultiFidelitySoftwareConfigurationProblem<>(components, requiredInterface, evaluator);
+
+		input = new MultiFidelitySoftwareConfigurationProblem<>(components, requiredInterface, evaluator);
+	}
+
+	@Test
+	public void testHyperBandRunSingleThreaded() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+		this.runHyperbandTest(ConfigFactory.create(IHyperbandConfig.class));
+	}
+
+	@Test
+	public void testHyperBandRunMultiThreaded() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+		IHyperbandConfig config = ConfigFactory.create(IHyperbandConfig.class);
+		config.setProperty(IHyperbandConfig.K_CPUS, "4");
+		this.runHyperbandTest(config);
+	}
+
+	private void runHyperbandTest(final IHyperbandConfig config) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		Hyperband hb = new Hyperband(config, input);
 		HyperbandSolutionCandidate result = hb.call();
 		assertNotNull("Returned candidate is not a solution", result);
 		assertEquals("A", result.getComponentInstance().getComponent().getName());
 	}
-
 }
