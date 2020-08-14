@@ -19,12 +19,12 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.IMultiFidelityObjectEvaluato
  */
 public class MultiFidelitySoftwareConfigurationProblem<V extends Comparable<V>> extends SoftwareConfigurationProblem<V> {
 
-	public MultiFidelitySoftwareConfigurationProblem(final File configurationFile, final String requiredInerface, final IMultiFidelityObjectEvaluator<ComponentInstance, V> compositionEvaluator) throws IOException {
-		super(configurationFile, requiredInerface, compositionEvaluator);
+	public MultiFidelitySoftwareConfigurationProblem(final File configurationFile, final String requestedInterface, final IMultiFidelityObjectEvaluator<ComponentInstance, V> compositionEvaluator) throws IOException {
+		super(configurationFile, requestedInterface, compositionEvaluator);
 	}
 
-	public MultiFidelitySoftwareConfigurationProblem(final Collection<Component> components, final String requiredInterface, final IMultiFidelityObjectEvaluator<ComponentInstance, V> compositionEvaluator) {
-		super(components, requiredInterface, compositionEvaluator);
+	public MultiFidelitySoftwareConfigurationProblem(final Collection<Component> components, final String requestedInterface, final IMultiFidelityObjectEvaluator<ComponentInstance, V> compositionEvaluator) {
+		super(components, requestedInterface, compositionEvaluator);
 	}
 
 	public MultiFidelitySoftwareConfigurationProblem(final MultiFidelitySoftwareConfigurationProblem<V> problem) {

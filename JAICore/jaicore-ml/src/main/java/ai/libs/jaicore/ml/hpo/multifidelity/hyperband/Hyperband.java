@@ -57,7 +57,7 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 			// compare budgets: the more the better (later round)
 			int compareBudget = Double.compare(o.r, this.r);
 
-			// if budget is not equal return the score evaluated on larger budget
+			// if budget is not equal prefer the score evaluated on larger budget
 			if (compareBudget != 0) {
 				return compareBudget;
 			} else {
