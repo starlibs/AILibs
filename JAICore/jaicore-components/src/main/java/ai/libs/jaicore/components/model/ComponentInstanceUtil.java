@@ -1,8 +1,12 @@
 package ai.libs.jaicore.components.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -27,8 +31,7 @@ public class ComponentInstanceUtil {
 		try {
 			checkComponentInstantiation(ci);
 			return true;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			return false;
 		}
 	}
@@ -72,4 +75,37 @@ public class ComponentInstanceUtil {
 		return new ComponentInstance(ci.getComponent(), new HashMap<>(), defaultRequiredInterfaces);
 	}
 
+	/**
+	 * Samples a random component instance with random parameters.
+	 *
+	 * @param requiredInterface The required interface the sampled component instance must conform.
+	 * @param components The components that can be chosen.
+	 * @param rand Random number generator for pseudo randomization.
+	 * @return A randomly sampled component instance with random parameters.
+	 */
+	public static ComponentInstance sampleRandomComponentInstance(final String requiredInterface, final Collection<Component> components, final Random rand) {
+		List<Component> componentsList = new ArrayList<>(ComponentUtil.getComponentsProvidingInterface(components, requiredInterface));
+		ComponentInstance ci = ComponentUtil.getRandomParameterizationOfComponent(componentsList.get(rand.nextInt(componentsList.size())), rand);
+		for (Interface i : ci.getComponent().getRequiredInterfaces()) {
+			ci.getSatisfactionOfRequiredInterfaces().put(i.getId(), sampleRandomComponentInstance(i.getName(), components, rand));
+		}
+		return ci;
+	}
+
+	/**
+	 * Samples a random component instance with default parameters.
+	 *
+	 * @param requiredInterface The required interface the sampled component instance must conform.
+	 * @param components The components that can be chosen.
+	 * @param rand Random number generator for pseudo randomization.
+	 * @return A randomly sampled component instance with default parameters.
+	 */
+	public static ComponentInstance sampleDefaultComponentInstance(final String requiredInterface, final Collection<Component> components, final Random rand) {
+		List<Component> componentsList = new ArrayList<>(ComponentUtil.getComponentsProvidingInterface(components, requiredInterface));
+		ComponentInstance ci = ComponentUtil.getDefaultParameterizationOfComponent(componentsList.get(rand.nextInt(componentsList.size())));
+		for (Interface i : ci.getComponent().getRequiredInterfaces()) {
+			ci.getSatisfactionOfRequiredInterfaces().put(i.getId(), sampleDefaultComponentInstance(i.getName(), components, rand));
+		}
+		return ci;
+	}
 }

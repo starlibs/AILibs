@@ -102,44 +102,39 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="ml2plan.optimizingfactory.optAlgo">
-    <level value="info" />
-  </logger>
-  
-  <logger name="ml2plan.optimizingfactory.optAlgo.hasco">
+  <logger name="ml2plan.optimizingfactory.optimizer">
     <level value="warn" />
   </logger>
   
-  <logger name="ml2plan.optimizingfactory.optAlgo.hasco.solutionevaluator">
+  <logger name="ml2plan.optimizingfactory.optimizer.hasco">
     <level value="warn" />
   </logger>
   
-  <logger name="ml2plan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
+  <logger name="ml2plan.optimizingfactory.optimizer.hasco.solutionevaluator">
     <level value="warn" />
   </logger>
   
-  
-  <logger name="ai.libs.jaicore.ml.classification.multilabel.learner">
-    <level value="info" />
-  </logger>
-  
-  <logger name="ml2plan.optimizingfactory.optAlgo.hasco.search">
+  <logger name="ml2plan.optimizingfactory.optimizer.hasco.solutionevaluator.benchmark">
     <level value="warn" />
   </logger>
   
-  <logger name="ml2plan.optimizingfactory.optAlgo.hasco.search._orgraphsearch._algorithm">
+  <logger name="ml2plan.optimizingfactory.optimizer.hasco.search">
     <level value="warn" />
   </logger>
   
-  <logger name="ml2plan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
+  <logger name="ml2plan.optimizingfactory.optimizer.hasco.search._orgraphsearch._algorithm">
     <level value="warn" />
   </logger>
   
-  <logger name="ml2plan.optimizingfactory.optAlgo.hasco.search.treepolicy">
+  <logger name="ml2plan.optimizingfactory.optimizer.hasco.search.nodeevaluator">
     <level value="warn" />
   </logger>
   
-  <logger name="ml2plan.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary.randomsearch">
+  <logger name="ml2plan.optimizingfactory.optimizer.hasco.search.treepolicy">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="ml2plan.optimizingfactory.optimizer.hasco.search.nodeevaluator.secondary.randomsearch">
     <level value="warn" />
   </logger>
   
@@ -157,6 +152,10 @@
   
   <logger name="ai.libs.jaicore.interrupt">
   	<level value="warn" />
+  </logger>
+  
+  <logger name="ai.libs.jaicore.ml.classification.multilabel.learner">
+    <level value="info" />
   </logger>
   
   <!-- configuration for example classes -->
@@ -189,26 +188,31 @@
     <level value="warn" />
   </logger>
   
-  <logger name="testedalgorithm.optimizingfactory.optAlgo">
+  <logger name="testedalgorithm.optimizingfactory.optimizer">
     <level value="warn" />
   </logger>
   
-  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco">
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco">
     <level value="warn" />
   </logger>
   
-  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search">
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco.search">
     <level value="warn" />
   </logger>
-  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator">
     <level value="warn" />
   </logger>
   
-  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.randomsearch">
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator.randomsearch">
   	<level value="warn" />
   </logger>
   
-  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary">
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator.secondary">
   	<level value="warn" />
   </logger>
+  
+  <logger name="ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator">
+  	<level value="error" />
+  </logger>
+  
 </log4j:configuration>
