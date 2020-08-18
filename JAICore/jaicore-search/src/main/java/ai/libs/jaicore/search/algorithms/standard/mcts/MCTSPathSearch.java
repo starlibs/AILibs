@@ -129,4 +129,8 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 	public MCTS<N, A> getMcts() {
 		return this.mcts;
 	}
+
+	public int getNumberOfNodesInMemory() {
+		return this.mcts.getNumberOfNodesInMemory();
+	}
 }

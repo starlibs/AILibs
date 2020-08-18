@@ -3,11 +3,12 @@ package ai.libs.jaicore.experiments;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Function;
 
 import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -34,6 +35,9 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 	private final IExperimentRunController<?> controller;
 	private final Caps<?, ?> caps;
 
+	private Function<Experiment, Timeout> experimentSpecificTimeout;
+	private Timeout timeout;
+
 	private Logger logger = LoggerFactory.getLogger(AlgorithmBenchmarker.class);
 	private Thread eventThread;
 
@@ -50,9 +54,20 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 
 			/* get algorithm */
 			IAlgorithm<?, ?> algorithm = this.caps.decoder.getAlgorithm(experimentEntry.getExperiment());
-			this.logger.debug("Created optimizer {} for problem instance {}. Configuring logger name if possible.", algorithm, algorithm.getInput());
+			this.logger.debug("Created algorithm {} of class {} for problem instance {}. Configuring logger name if possible.", algorithm, algorithm.getClass(), algorithm.getInput());
 			if (algorithm instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) algorithm).setLoggerName(this.getLoggerName() + ".algorithm");
+			}
+
+			/* set algorithm timeout */
+			if (this.experimentSpecificTimeout != null) {
+				Timeout to = this.experimentSpecificTimeout.apply(experimentEntry.getExperiment());
+				algorithm.setTimeout(to);
+				this.logger.info("Set algorithm timeout to experiment specific timeout: {}", to);
+			}
+			else if (this.timeout != null) {
+				algorithm.setTimeout(this.timeout);
+				this.logger.info("Set algorithm timeout to general timeout: {}", this.timeout);
 			}
 
 			final List<IEventBasedResultUpdater> resultUpdaters = this.controller.getResultUpdaterComputer(experimentEntry.getExperiment());
@@ -106,12 +121,10 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 				} catch (AlgorithmExecutionCanceledException e) {
 					this.logger.info("CANCEL");
 					/* this may just happen */
-				} catch (NoSuchElementException e) {
-					this.logger.info("NO SUCH ELEMENT");
-					/* this just may happen */
 				} catch (Exception e) {
 					this.logger.error(LoggerUtil.getExceptionInfo(e));
-				}});
+				}
+			});
 			t.start();
 			t.join();
 
@@ -125,8 +138,7 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 			}
 		} catch (ExperimentDecodingException e1) {
 			throw new ExperimentEvaluationFailedException(e1);
-		}
-		finally {
+		} finally {
 			if (this.eventThread != null) {
 				this.eventThread.interrupt();
 				this.eventThread = null;
@@ -142,5 +154,22 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Loggername is now {}", name);
+	}
+
+	public Timeout getTimeout() {
+		return this.timeout;
+	}
+
+	public void setTimeout(final Timeout timeout) {
+		this.timeout = timeout;
+	}
+
+	public Function<Experiment, Timeout> getExperimentSpecificTimeout() {
+		return this.experimentSpecificTimeout;
+	}
+
+	public void setExperimentSpecificTimeout(final Function<Experiment, Timeout> experimentSpecificTimeout) {
+		this.experimentSpecificTimeout = experimentSpecificTimeout;
 	}
 }

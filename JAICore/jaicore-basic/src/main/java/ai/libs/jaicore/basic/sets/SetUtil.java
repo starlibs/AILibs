@@ -829,6 +829,30 @@ public class SetUtil {
 		return null;
 	}
 
+	public static <T> T getRandomElement(final List<T> list, final Random random, final List<Double> probabilityVector) {
+
+		/* sanity check */
+		int n = list.size();
+		if (probabilityVector.size() != n) {
+			throw new IllegalArgumentException("Probability vector should have length " + n + " but has " + probabilityVector.size());
+		}
+
+		/* normalize probabilities if necessary */
+		double alpha = probabilityVector.stream().reduce((a, b) -> a + b).get();
+		List<Double> probabilities = alpha == 1 ? probabilityVector : probabilityVector.stream().map(d -> d / alpha).collect(Collectors.toList());
+
+		/* draw random number and loop over elements until the accumulated density is the desired one */
+		double randomNumber = random.nextDouble();
+		double accumulatedProbability = 0;
+		for (int i = 0; i < n; i++) {
+			accumulatedProbability += probabilities.get(i);
+			if (accumulatedProbability >= randomNumber) {
+				return list.get(i);
+			}
+		}
+		throw new IllegalStateException("Probability has been accumulated to " + accumulatedProbability + " but no element was returned.");
+	}
+
 	public static <T> Collection<T> getRandomSubset(final Collection<T> set, final int k, final Random random) {
 		List<T> copy = new ArrayList<>(set);
 		Collections.shuffle(copy, random);

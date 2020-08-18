@@ -171,6 +171,10 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		return false;
 	}
 
+	protected long getDeadline() {
+		return this.deadline;
+	}
+
 	protected Timeout getRemainingTimeToDeadline() {
 		if (this.deadline < 0) {
 			return new Timeout(Integer.MAX_VALUE, TimeUnit.SECONDS);

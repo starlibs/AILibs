@@ -72,7 +72,10 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	 * @throws InterruptedException
 	 */
 	public void randomlyConductExperiments(final int maxNumberOfExperiments) throws ExperimentDBInteractionFailedException, InterruptedException {
-		this.logger.info("Starting to run up to {} experiments.", maxNumberOfExperiments);
+		if (this.logger.isInfoEnabled()) {
+			Runtime r = Runtime.getRuntime();
+			this.logger.info("Starting to run up to {} experiments. Memory statistics: {}MB allocated, {}MB free", maxNumberOfExperiments, r.totalMemory(), r.freeMemory());
+		}
 
 		int numberOfConductedExperiments = 0;
 		while ((maxNumberOfExperiments <= 0 || numberOfConductedExperiments < maxNumberOfExperiments)) {
@@ -213,10 +216,11 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			}
 			this.evaluator.evaluate(expEntry, m -> {
 				try {
-					this.logger.info("Updating experiment with id {} with the following map: {}", expEntry.getId(), m);
+					this.logger.info("Updating experiment with id {} in the following entries (enable DEBUG for values): {}", expEntry.getId(), m.keySet());
+					this.logger.debug("Update map is: {}", m);
 					this.handle.updateExperiment(expEntry, m);
 				} catch (ExperimentUpdateFailedException e) {
-					this.logger.error("Error in updating experiment data. Message of {}: {}", e.getClass().getName(), e.getMessage());
+					this.logger.error("Error in updating experiment data. Message of {}: {}.\nStack trace:\n {}", e.getClass().getName(), e.getMessage(), LoggerUtil.getExceptionInfo(e));
 				}
 			});
 

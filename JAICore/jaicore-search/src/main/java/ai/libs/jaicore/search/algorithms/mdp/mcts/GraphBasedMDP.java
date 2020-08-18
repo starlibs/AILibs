@@ -86,7 +86,7 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 			return out;
 		}
 		else {
-			System.err.println("THERE IS NO SUCCESSOR REACHABLE WITH ACTION " + action + " IN THE MDP!");
+			this.logger.error("THERE IS NO SUCCESSOR REACHABLE WITH ACTION {} IN THE MDP!", action);
 			return null;
 		}
 

@@ -51,7 +51,7 @@ public class EnhancedTTSPTelescopeGraphGenerator implements IGraphGenerator<Enha
 				EnhancedTTSPTelescopeGraphGenerator.this.logger.info("Computing successors of node {}", node);
 				List<INewNodeDescription<EnhancedTTSPBinaryTelescopeNode, String>> l = new ArrayList<>();
 				if (node.getCurTour().size() >= EnhancedTTSPTelescopeGraphGenerator.this.problem.getPossibleDestinations().size()) {
-					EnhancedTTSPTelescopeGraphGenerator.this.logger.warn("Cannot generate successors of a node in which we are in pos {} and in which have already visited everything!", node.getCurLocation());
+					EnhancedTTSPTelescopeGraphGenerator.this.logger.info("Cannot generate successors of a node in which we are in pos {} and in which have already visited everything!", node.getCurLocation());
 					return l;
 				}
 

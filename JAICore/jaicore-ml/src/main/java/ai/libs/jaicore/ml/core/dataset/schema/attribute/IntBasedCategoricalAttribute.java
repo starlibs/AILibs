@@ -131,7 +131,10 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 			return null;
 		}
 		if (!(value instanceof Integer)) {
-			throw new IllegalArgumentException("Can only serialize the integer representation of a category.");
+			if (!this.domain.contains(value)) {
+				throw new IllegalArgumentException("The given value \"" + value + "\" is not part of the domain and cannot be serialized. The domain is: " + this.domain);
+			}
+			return (String)value; // here we know that this must be a String; otherwise it could not be in the domain!
 		}
 		if (((Integer) value) < 0) {
 			return null;

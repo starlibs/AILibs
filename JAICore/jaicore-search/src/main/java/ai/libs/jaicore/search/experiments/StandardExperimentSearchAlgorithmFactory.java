@@ -15,7 +15,8 @@ import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.brue.BRUEFactory;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.comparison.FixedCommitmentMCTSFactory;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.comparison.PlackettLuceMCTSFactory;
-import ai.libs.jaicore.search.algorithms.mdp.mcts.comparison.preferencekernel.BootstrappingPreferenceKernel;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.comparison.preferencekernel.bootstrapping.BootstrappingPreferenceKernel;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.comparison.preferencekernel.bootstrapping.DefaultBootsrapConfigurator;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.ensemble.EnsembleMCTSFactory;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.spuct.SPUCTFactory;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.tag.TAGMCTSFactory;
@@ -47,7 +48,7 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearc
 		final int seed = Integer.parseInt(experiment.getValuesOfKeyFields().get(IOwnerBasedRandomConfig.K_SEED));
 		final String algorithm = experiment.getValuesOfKeyFields().get(IAlgorithmNameConfig.K_ALGORITHM_NAME);
 
-		final int maxiter = 10000;
+		final int maxiter = Integer.MAX_VALUE;
 
 		if (algorithm.startsWith("uuct-")) {
 			String[] parts = algorithm.split("-");
@@ -95,13 +96,13 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearc
 			spucbFactory.setBigD(10000);
 			return this.getMCTS((I)input, spucbFactory, maxiter, seed);
 		case "pl-mcts-mean":
-			return this.getMCTS((I)input, new PlackettLuceMCTSFactory<N, A>().withPreferenceKernel(new BootstrappingPreferenceKernel<>(DescriptiveStatistics::getMean, 1)), maxiter, seed);
+			return this.getMCTS((I)input, new PlackettLuceMCTSFactory<N, A>().withPreferenceKernel(new BootstrappingPreferenceKernel<>(DescriptiveStatistics::getMean, new DefaultBootsrapConfigurator(), 1)), maxiter, seed);
 		case "pl-mcts-mean+std":
-			return this.getMCTS((I)input, new PlackettLuceMCTSFactory<N, A>().withPreferenceKernel(new BootstrappingPreferenceKernel<>(d -> d.getMean() + d.getStandardDeviation(), 1)), maxiter, seed);
+			return this.getMCTS((I)input, new PlackettLuceMCTSFactory<N, A>().withPreferenceKernel(new BootstrappingPreferenceKernel<>(d -> d.getMean() + d.getStandardDeviation(), new DefaultBootsrapConfigurator(), 1)), maxiter, seed);
 		case "pl-mcts-mean-std":
-			return this.getMCTS((I)input, new PlackettLuceMCTSFactory<N, A>().withPreferenceKernel(new BootstrappingPreferenceKernel<>(d -> d.getMean() - d.getStandardDeviation(), 1)), maxiter, seed);
+			return this.getMCTS((I)input, new PlackettLuceMCTSFactory<N, A>().withPreferenceKernel(new BootstrappingPreferenceKernel<>(d -> d.getMean() - d.getStandardDeviation(), new DefaultBootsrapConfigurator(), 1)), maxiter, seed);
 		case "pl-mcts-min":
-			return this.getMCTS((I)input, new PlackettLuceMCTSFactory<N, A>().withPreferenceKernel(new BootstrappingPreferenceKernel<>(DescriptiveStatistics::getMin, 1)), maxiter, seed);
+			return this.getMCTS((I)input, new PlackettLuceMCTSFactory<N, A>().withPreferenceKernel(new BootstrappingPreferenceKernel<>(DescriptiveStatistics::getMin, new DefaultBootsrapConfigurator(), 1)), maxiter, seed);
 		case "mcts-kfix-100-mean":
 			FixedCommitmentMCTSFactory<N, A> fcFactory1 = new FixedCommitmentMCTSFactory<>();
 			fcFactory1.setK(100);

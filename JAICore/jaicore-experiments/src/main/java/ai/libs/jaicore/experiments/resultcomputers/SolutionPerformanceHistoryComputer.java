@@ -44,6 +44,7 @@ public class SolutionPerformanceHistoryComputer implements IEventBasedResultUpda
 
 	@Override
 	public void setAlgorithm(final IAlgorithm<?, ?> algorithm) {
-		throw new UnsupportedOperationException("Setting the algorithm is currently not allowed.");
+
+		/* this computer does not need the algorithm for its computations */
 	}
 }

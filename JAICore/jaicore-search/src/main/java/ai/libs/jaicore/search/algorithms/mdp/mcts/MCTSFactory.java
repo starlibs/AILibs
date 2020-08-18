@@ -8,10 +8,11 @@ import ai.libs.jaicore.search.probleminputs.IMDP;
 public abstract class MCTSFactory<N, A, B extends MCTSFactory<N, A, B>> extends AAlgorithmFactory<IMDP<N, A, Double>, IPolicy<N, A>, MCTS<N, A>> {
 
 	private int maxIterations = Integer.MAX_VALUE;
-	private double gamma = 1.0;
+	private double gamma = 1.0; // a gamma value of 1 means that there is no discount
 	private double epsilon = 0.0;
 	private Random random = new Random(0);
 	private boolean tabooExhaustedNodes = false;
+	private boolean maximize = false;
 
 	public int getMaxIterations() {
 		return this.maxIterations;
@@ -40,6 +41,20 @@ public abstract class MCTSFactory<N, A, B extends MCTSFactory<N, A, B>> extends 
 		return this.getSelf();
 	}
 
+	public B maximize() {
+		this.maximize = true;
+		return this.getSelf();
+	}
+
+	public B minimize() {
+		this.maximize = false;
+		return this.getSelf();
+	}
+
+	public boolean isMaximize() {
+		return this.maximize;
+	}
+
 	public Random getRandom() {
 		return this.random;
 	}
@@ -57,6 +72,8 @@ public abstract class MCTSFactory<N, A, B extends MCTSFactory<N, A, B>> extends 
 		this.tabooExhaustedNodes = tabooExhaustedNodes;
 		return this.getSelf();
 	}
+
+
 
 	@Override
 	public MCTS<N, A> getAlgorithm() {

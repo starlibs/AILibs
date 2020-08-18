@@ -3,9 +3,12 @@ package ai.libs.jaicore.experiments;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -35,6 +38,8 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 	private String loggerNameForAlgorithm;
 	private ExperimentRunner runner;
 	private String executorInfo; // information about the job of the compute center executing this in order to ease tracking
+	private Timeout timeout;
+	private Function<Experiment, Timeout> experimentSpecificTimeout;
 
 	private Logger logger = LoggerFactory.getLogger("expfe");
 
@@ -77,6 +82,16 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 
 	public ExperimenterFrontend withExperimentsConfig(final IExperimentSetConfig config) {
 		this.config = config;
+		return this;
+	}
+
+	public ExperimenterFrontend withTimeout(final Timeout to) {
+		this.timeout = to;
+		return this;
+	}
+
+	public ExperimenterFrontend withExperimentSpecificTimeout(final Function<Experiment, Timeout> timeoutFunction) {
+		this.experimentSpecificTimeout = timeoutFunction;
 		return this;
 	}
 
@@ -129,6 +144,12 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 		if (this.domain != null) {
 			this.evaluator = new AlgorithmBenchmarker(this.domain.getDecoder(), this.controller);
 			((AlgorithmBenchmarker) this.evaluator).setLoggerName(this.loggerNameForAlgorithm != null ? this.loggerNameForAlgorithm : (this.getLoggerName() + ".evaluator"));
+			if (this.timeout != null) {
+				((AlgorithmBenchmarker) this.evaluator).setTimeout(this.timeout);
+			}
+			if (this.experimentSpecificTimeout != null) {
+				((AlgorithmBenchmarker) this.evaluator).setExperimentSpecificTimeout(this.experimentSpecificTimeout);
+			}
 		}
 	}
 
@@ -147,6 +168,10 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 			this.runner.setLoggerName(this.getLoggerName() + ".runner");
 		}
 		return this.runner;
+	}
+
+	public void conductExperiment(final int id) throws ExperimentDBInteractionFailedException, InterruptedException {
+		this.getExperimentRunner().conductExperiment(this.databaseHandle.getExperimentWithId(id));
 	}
 
 	public void randomlyConductExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
@@ -171,6 +196,16 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 		return this;
 	}
 
+	public ExperimenterFrontend randomlyConductExperiments(final Timeout to, final int maxExperimentRuntime) throws ExperimentDBInteractionFailedException, InterruptedException {
+		long deadline = System.currentTimeMillis() + to.milliseconds();
+		while (System.currentTimeMillis() + maxExperimentRuntime < deadline) {
+			this.logger.info("We have time for more experiments. Conducting next.");
+			this.randomlyConductExperiments(1);
+			this.logger.info("Finished experiment.");
+		}
+		return this;
+	}
+
 	public boolean mightHaveMoreExperiments() throws ExperimentDBInteractionFailedException {
 		return this.getExperimentRunner().mightHaveMoreExperiments();
 	}
@@ -183,7 +218,12 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 		this.evaluator.evaluate(experimentEntry, results::putAll);
 		Experiment expCopy = new Experiment(experiment);
 		expCopy.setValuesOfResultFields(results);
-		return controller.parseResultMap(expCopy);
+		return controller.getExperimentEncoding(expCopy);
+	}
+
+	public void simulateExperiment(final int id) throws ExperimentEvaluationFailedException, InterruptedException, ExperimentFailurePredictionException, ExperimentDBInteractionFailedException {
+		Objects.requireNonNull(this.databaseHandle, "Not database handle has been set.");
+		this.simulateExperiment(this.databaseHandle.getExperimentWithId(id).getExperiment(), null);
 	}
 
 	@Override

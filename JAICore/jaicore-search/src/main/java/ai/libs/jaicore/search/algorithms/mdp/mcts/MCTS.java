@@ -30,8 +30,10 @@ import ai.libs.jaicore.search.probleminputs.MDPUtils;
  *
  * @author Felix Mohr
  *
- * @param <N> Type of states (nodes)
- * @param <A> Type of actions
+ * @param <N>
+ *            Type of states (nodes)
+ * @param <A>
+ *            Type of actions
  */
 public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 
@@ -42,11 +44,18 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 	private final MDPUtils utils = new MDPUtils();
 	private final IPathUpdatablePolicy<N, A, Double> treePolicy;
 	private final IPolicy<N, A> defaultPolicy;
-	private final double maxIterations;
+	private final int maxIterations;
+
+	/* variables describing the state of the search */
 	private int iterations = 0;
 	private Collection<N> tpReadyStates = new HashSet<>();
 	private Map<N, Queue<A>> untriedActionsOfIncompleteStates = new HashMap<>();
 	private int lastProgressReport = 0;
+
+	/* stats variables */
+	private int msSpentInRollouts;
+	private int msSpentInTreePolicyQueries;
+	private int msSpentInTreePolicyUpdates;
 
 	/* taboo management */
 	private final boolean tabooExhaustedNodes;
@@ -54,7 +63,7 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 
 	private ILabeledPath<N, A> enforcedPrefixPath = null;
 
-	public MCTS(final IMDP<N, A, Double> input, final IPathUpdatablePolicy<N, A, Double> treePolicy, final IPolicy<N, A> defaultPolicy, final double maxIterations, final double gamma, final double epsilon,
+	public MCTS(final IMDP<N, A, Double> input, final IPathUpdatablePolicy<N, A, Double> treePolicy, final IPolicy<N, A> defaultPolicy, final int maxIterations, final double gamma, final double epsilon,
 			final boolean tabooExhaustedNodes) {
 		super(input);
 		Objects.requireNonNull(input);
@@ -72,7 +81,8 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		switch (this.getState()) {
 		case CREATED:
-			this.logger.info("Initialized MCTS algorithm {}.\n\tTree Policy: {}\n\tDefault Policy: {}\n\tMax Iterations: {}\n\tMax Depth: {}\n\tTaboo Exhausted Nodes: {}", this.getClass().getName(), this.treePolicy, this.defaultPolicy, this.maxIterations, this.maxDepth, this.tabooExhaustedNodes);
+			this.logger.info("Initialized MCTS algorithm {}.\n\tTree Policy: {}\n\tDefault Policy: {}\n\tMax Iterations: {}\n\tMax Depth: {}\n\tTaboo Exhausted Nodes: {}", this.getClass().getName(), this.treePolicy, this.defaultPolicy,
+					this.maxIterations, this.maxDepth, this.tabooExhaustedNodes);
 			return this.activate();
 		case ACTIVE:
 			if (this.iterations >= this.maxIterations) {
@@ -80,8 +90,15 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 				return this.terminate();
 			} else {
 				try {
-
+					long timeStart = System.currentTimeMillis();
 					this.iterations++;
+
+					/* if the number of (estimated) remaining rollouts is relevant for the tree policy, tell it */
+					if (this.treePolicy instanceof IRolloutLimitDependentPolicy) {
+						double avgTimeOfRollouts = this.msSpentInRollouts * 1.0 / this.iterations;
+						int expectedRemainingNumberOfRollouts = (int)Math.floor(this.getRemainingTimeToDeadline().milliseconds() / avgTimeOfRollouts);
+						((IRolloutLimitDependentPolicy) this.treePolicy).setEstimatedNumberOfRemainingRollouts(expectedRemainingNumberOfRollouts);
+					}
 
 					/* draw playout */
 					this.logger.info("Draw next playout: #{}.", this.iterations);
@@ -119,6 +136,7 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 						if (possibleActions.isEmpty()) {
 							if (path.isPoint()) { // if we are in the root and cannot do anything anymore, then stop the algorithm.
 								this.logger.info("There are no possible actions in the root. Finishing.");
+								this.msSpentInRollouts += (System.currentTimeMillis() - timeStart);
 								return this.terminate();
 							}
 							break;
@@ -127,7 +145,9 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 						/* first case */
 						if (phase == 1 && this.tpReadyStates.contains(current)) {
 							this.logger.debug("Ask tree policy to choose one action of: {}.", possibleActions);
+							long tpStart = System.currentTimeMillis();
 							action = this.treePolicy.getAction(current, possibleActions);
+							this.msSpentInTreePolicyQueries += (System.currentTimeMillis() - tpStart);
 							Objects.requireNonNull(action, "Actions in MCTS must never be null, but tree policy returned null!");
 							this.logger.debug("Tree policy recommended action {}.", action);
 						} else {
@@ -140,9 +160,12 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 								if (!this.untriedActionsOfIncompleteStates.containsKey(current)) {
 									untriedActions = new LinkedList<>(possibleActions);
 									if (untriedActions.isEmpty()) {
+										long tpStart = System.currentTimeMillis();
 										this.treePolicy.updatePath(path, scores);
+										this.msSpentInTreePolicyUpdates += (System.currentTimeMillis() - tpStart);
 										IAlgorithmEvent event = new MCTSIterationCompletedEvent<>(this, this.treePolicy, new SearchGraphPath<>(path), scores);
 										this.post(event);
+										this.msSpentInRollouts += (System.currentTimeMillis() - timeStart);
 										return event;
 									}
 									this.untriedActionsOfIncompleteStates.put(current, new LinkedList<>(possibleActions));
@@ -181,6 +204,7 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 
 					if (scores.contains(null)) {
 						this.logger.warn("Found playout with null-score. Ignoring this run.");
+						this.msSpentInRollouts += (System.currentTimeMillis() - timeStart);
 						return this.nextWithException();
 					}
 
@@ -191,17 +215,19 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 						this.lastProgressReport = progress;
 					}
 
-
 					/* create and publish roll-out event */
 					boolean isGoalPath = this.mdp.isTerminalState(path.getHead());
 					double totalUndiscountedScore = scores.stream().reduce(0.0, (a, b) -> a.doubleValue() + b.doubleValue());
 					this.logger.info("Found playout of length {}. Head is goal: {}. (Undiscounted) score of path is {}", path.getNumberOfNodes(), isGoalPath, totalUndiscountedScore);
 					this.logger.debug("Found leaf node with score {}. Now propagating this score over the path with actions {}. Leaf state is: {}.", totalUndiscountedScore, path.getArcs(), path.getHead());
 					if (!path.isPoint()) {
+						long tpStart = System.currentTimeMillis();
 						this.treePolicy.updatePath(path, scores);
+						this.msSpentInTreePolicyUpdates += (System.currentTimeMillis() - tpStart);
 					}
 					IAlgorithmEvent event = new MCTSIterationCompletedEvent<>(this, this.treePolicy, new SearchGraphPath<>(path), scores);
 					this.post(event);
+					this.msSpentInRollouts += (System.currentTimeMillis() - timeStart);
 					return event;
 				} catch (ActionPredictionFailedException | ObjectEvaluationFailedException e) {
 					throw new AlgorithmException("Could not create playout!", e);
@@ -288,5 +314,21 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 	@Override
 	public String getLoggerName() {
 		return this.logger.getName();
+	}
+
+	public int getNumberOfNodesInMemory() {
+		return this.tpReadyStates.size();
+	}
+
+	public int getMsSpentInRollouts() {
+		return this.msSpentInRollouts;
+	}
+
+	public int getMsSpentInTreePolicyQueries() {
+		return this.msSpentInTreePolicyQueries;
+	}
+
+	public int getMsSpentInTreePolicyUpdates() {
+		return this.msSpentInTreePolicyUpdates;
 	}
 }

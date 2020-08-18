@@ -58,4 +58,12 @@ public class ExperimentUtil {
 	public static String getQueryToListAllFailedExecutions(final String tablename) {
 		return "SELECT * FROM `" + tablename + "` WHERE exception is not null";
 	}
+
+	public static String getOccurredExceptions(final String tablename, final String... ignorePatterns) {
+		StringBuilder sb = new StringBuilder();
+		for (String p : ignorePatterns) {
+			sb.append(" AND `exception` NOT LIKE '%" + p + "%'");
+		}
+		return "SELECT exception, COUNT(*) FROM `" + tablename + "` WHERE exception is not null" + sb.toString() + " GROUP BY exception";
+	}
 }
