@@ -10,16 +10,14 @@ import java.util.function.Function;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
-import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.jaicore.experiments.exceptions.ExperimentDecodingException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
-import ai.libs.jaicore.logging.LoggerUtil;
 
 public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCustomizable {
 
@@ -114,19 +112,13 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 			});
 
 			/* run algorithm */
-			Thread t = new Thread(() -> {
-				try {
-					this.logger.info("Running call method on {}", algorithm);
-					algorithm.call();
-				} catch (AlgorithmExecutionCanceledException e) {
-					this.logger.info("CANCEL");
-					/* this may just happen */
-				} catch (Exception e) {
-					this.logger.error(LoggerUtil.getExceptionInfo(e));
-				}
-			});
-			t.start();
-			t.join();
+			this.logger.info("Running call method on {}", algorithm);
+			try { // this try block must be here, because timeouts are regular behavior but may throw an exception. One more reason to change this ...
+				algorithm.call();
+			}
+			catch (AlgorithmTimeoutedException e) {
+				this.logger.info("Algorithm timed out.");
+			}
 
 			/* finish updaters, and update ultimate results */
 			final Map<String, Object> results = new HashMap<>();
@@ -136,7 +128,7 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 			if (!results.isEmpty()) {
 				processor.processResults(results);
 			}
-		} catch (ExperimentDecodingException e1) {
+		} catch (Throwable e1) { // we catch throwable here on purpose to be sure that this is logged to the database
 			throw new ExperimentEvaluationFailedException(e1);
 		} finally {
 			if (this.eventThread != null) {

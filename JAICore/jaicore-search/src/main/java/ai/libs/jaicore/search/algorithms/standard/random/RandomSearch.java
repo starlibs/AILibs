@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -92,7 +93,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 	}
 
 	/**
-	 * This expansion either generates all successors of a node (if the successor generator function is not able to provide single successor) or only one new successor. The node is put on CLOSED once all successors have been generated.
+	 * This expansion either generates all successors of a node (if the successor generator function is not able to provide single successor) or only one new successor.
+	 *
+	 * The node is put on CLOSED once all successors have been generated.
 	 *
 	 * Note that the fact that a new successor is generated does not mean that the algorithm will choose the newly generated successor to be appended to the paths.
 	 *
@@ -117,13 +120,11 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 				/* generate the next successor */
 				Iterator<INewNodeDescription<N, A>> iterator = this.successorGenerators.computeIfAbsent(node, ((ILazySuccessorGenerator<N, A>) this.gen)::getIterativeGenerator);
 				if (!iterator.hasNext()) {
-					throw new IllegalStateException();
+					throw new IllegalArgumentException("The path cannot be expanded since the head has no successors. However, it is also not marked as a goal node. Head is: " + node);
 				}
 				INewNodeDescription<N, A> successor = iterator.next();
 				assert this.exploredGraph.isGraphSane();
-				if (successor == null) {
-					throw new IllegalStateException();
-				}
+				Objects.requireNonNull(successor, "Received null object as a successor");
 				assert this.exploredGraph.hasItem(node) : "Parent node of successor is not part of the explored graph.";
 				if (this.exploredGraph.getSuccessors(node).contains(successor.getTo())) {
 					throw new IllegalStateException("Single node generator has generated a known successor. Generating another candidate.");

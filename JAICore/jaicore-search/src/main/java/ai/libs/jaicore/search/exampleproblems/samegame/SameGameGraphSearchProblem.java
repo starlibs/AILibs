@@ -13,6 +13,7 @@ public class SameGameGraphSearchProblem implements IPathSearchWithPathEvaluation
 
 	private final SameGameGraphGenerator gg;
 	private final boolean maximize;
+	private final int minScore;
 	private final int maxScore;
 	private final boolean relativeScores;
 
@@ -26,6 +27,7 @@ public class SameGameGraphSearchProblem implements IPathSearchWithPathEvaluation
 
 	public SameGameGraphSearchProblem(final SameGameState initState, final boolean maximize, final boolean relativeScores) {
 		this.gg = new SameGameGraphGenerator(initState);
+		this.minScore = -10000;
 		this.maxScore = (int)Math.pow(initState.getNumberOfPiecesPerColor().values().stream().max(Integer::compare).get() - 2.0, 2);
 		this.relativeScores = relativeScores;
 		this.maximize = maximize;
@@ -43,7 +45,10 @@ public class SameGameGraphSearchProblem implements IPathSearchWithPathEvaluation
 
 	@Override
 	public IPathEvaluator<SameGameNode, SameGameCell, Double> getPathEvaluator() {
-		return p -> (this.maximize ? 1 : (-1)) * ((double)p.getHead().getScore()) / (this.relativeScores ? this.maxScore : 1);
+		return p -> {
+			double unitVal = ((double)p.getHead().getScore()) / (this.relativeScores ? (this.maxScore - this.minScore) : 1);
+			return this.maximize ? unitVal : (1 - unitVal);
+		};
 	}
 
 	public int getMaxScore() {

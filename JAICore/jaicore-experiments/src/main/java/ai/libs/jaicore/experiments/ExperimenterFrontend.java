@@ -211,6 +211,7 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 	}
 
 	public <O> O simulateExperiment(final Experiment experiment, final IExperimentRunController<O> controller) throws ExperimentEvaluationFailedException, InterruptedException, ExperimentFailurePredictionException {
+		Objects.requireNonNull(controller, "A controller must be provided to simulate an experiment.");
 		this.withController(controller);
 		this.prepareEvaluator();
 		ExperimentDBEntry experimentEntry = new ExperimentDBEntry(-1, experiment);
@@ -221,9 +222,10 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 		return controller.getExperimentEncoding(expCopy);
 	}
 
-	public void simulateExperiment(final int id) throws ExperimentEvaluationFailedException, InterruptedException, ExperimentFailurePredictionException, ExperimentDBInteractionFailedException {
+	public void simulateExperiment(final int id, final IExperimentRunController<?> controller) throws ExperimentEvaluationFailedException, InterruptedException, ExperimentFailurePredictionException, ExperimentDBInteractionFailedException {
 		Objects.requireNonNull(this.databaseHandle, "Not database handle has been set.");
-		this.simulateExperiment(this.databaseHandle.getExperimentWithId(id).getExperiment(), null);
+		this.databaseHandle.setup(this.config);
+		this.simulateExperiment(this.databaseHandle.getExperimentWithId(id).getExperiment(), controller);
 	}
 
 	@Override

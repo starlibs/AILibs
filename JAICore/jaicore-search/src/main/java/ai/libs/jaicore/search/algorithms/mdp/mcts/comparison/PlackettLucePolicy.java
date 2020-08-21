@@ -70,7 +70,7 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	private static final int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_ABS = 5;
 	private static final int GAMMA_LONG_OBSERVATIONS_PER_CHILD_TO_REACH_ONE = 10;
 	private static final double GAMMA_LONG_DERIVATIVE_EXP = 2;
-	private static final double GOAL_COMMIT_DEPTH = .8;
+	private static final double GOAL_COMMIT_DEPTH = .95;
 
 	private static final int MINIMUMNUMBERTOCOMMIT = 100;
 
@@ -342,9 +342,11 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	}
 
 	@Override
-	public void setEstimatedNumberOfRemainingRollouts(final int numRollouts) {
-		if (numRollouts < 0) {
-			throw new IllegalArgumentException("Estimated number of remaining rollouts must not be negative!");
+	public void setEstimatedNumberOfRemainingRollouts(final int pNumRollouts) {
+		int numRollouts = pNumRollouts;
+		if (pNumRollouts < 0) {
+			this.logger.warn("Estimated number of remaining rollouts must not be negative but was {}! Setting it to 1.", pNumRollouts);
+			numRollouts = 1;
 		}
 		this.expectedNumberOfTotalRollouts = this.numUpdates + numRollouts;
 		if (this.avgBranchingFactor > 0) {

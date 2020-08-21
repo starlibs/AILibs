@@ -230,7 +230,7 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 					this.msSpentInRollouts += (System.currentTimeMillis() - timeStart);
 					return event;
 				} catch (ActionPredictionFailedException | ObjectEvaluationFailedException e) {
-					throw new AlgorithmException("Could not create playout!", e);
+					throw new AlgorithmException("Could not create playout due to an exception! MCTS cannot deal with this in general. Please modify your MDP such that this kind of exceptions is resolved to some kind of score.", e);
 				}
 			}
 		default:
