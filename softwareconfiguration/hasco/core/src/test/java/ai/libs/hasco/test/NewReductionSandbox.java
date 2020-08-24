@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
-import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -17,6 +16,7 @@ import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedPlan;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.BlindForwardDecompositionHTNPlanner;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
+import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
 
 public class NewReductionSandbox {
@@ -36,18 +36,17 @@ public class NewReductionSandbox {
 		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, Double> htnProblem = reduction.encodeProblem(problem);
 		htnProblem.getDomain().getMethods().forEach(m -> System.out.println(m));
 
-		// I can't run this
-		///* solve the HTN planning problem */
-		//BlindForwardDecompositionHTNPlanner algo = new BlindForwardDecompositionHTNPlanner(htnProblem, n -> 0.0);
-		//IEvaluatedPlan<Double> plan = (IEvaluatedPlan<Double>)algo.call();
-//
-		///* reproduce the configuration solution from plan */
-		//System.out.println("Solution plan:");
-		//plan.getActions().forEach(a -> System.out.println("\t" + a.getEncoding()));
-		//Monom finalState = HASCOUtil.getFinalStateOfPlan(htnProblem.getInit(), plan);
-		//System.out.println("Final state: ");
-		//finalState.forEach(l -> System.out.println("\t- " + l));
-//
+		/* solve the HTN planning problem */
+		BlindForwardDecompositionHTNPlanner<Double> algo = new BlindForwardDecompositionHTNPlanner<>(htnProblem, n -> 0.0);
+		IEvaluatedPlan<Double> plan = algo.call();
+
+		/* reproduce the configuration solution from plan */
+		System.out.println("Solution plan:");
+		plan.getActions().forEach(a -> System.out.println("\t" + a.getEncoding()));
+		Monom finalState = HASCOUtil.getFinalStateOfPlan(htnProblem.getInit(), plan);
+		System.out.println("Final state: ");
+		finalState.forEach(l -> System.out.println("\t- " + l));
+
 		/* your work :D (later) */
 
 	}
@@ -60,15 +59,15 @@ public class NewReductionSandbox {
 		/* derive HTN planning problem*/
 		HASCOReduction<Double> reduction = new HASCOReduction<>();
 		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, Double> htnProblem = reduction.encodeProblem(problem);
-		htnProblem.getDomain().getMethods().forEach(m -> System.out.println(prettyMethod((OCIPMethod) m)));
+		htnProblem.getDomain().getMethods().forEach(m -> System.out.println(this.prettyMethod((OCIPMethod) m)));
 	}
 
-	private String prettyMethod (OCIPMethod method) {
+	private String prettyMethod (final OCIPMethod method) {
 		String tasknet = String.join("\n\t\t", method.getNetwork().getItems().stream().map(i -> i.toString()).collect(Collectors.toSet()));
 
 		return method.getName() + "("+ method.getParameters() +"): \n" +
-				"\tpre-condition: " + method.getPrecondition() + "\n" +
-				"\ttask-network: \n\t\t" + tasknet + "\n" +
-				"\teval-pre-condition: " + method.getEvaluablePrecondition() + "\n";
+		"\tpre-condition: " + method.getPrecondition() + "\n" +
+		"\ttask-network: \n\t\t" + tasknet + "\n" +
+		"\teval-pre-condition: " + method.getEvaluablePrecondition() + "\n";
 	}
 }
