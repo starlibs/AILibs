@@ -33,6 +33,7 @@ public class NewReductionSandbox {
 		HASCOReduction<Double> reduction = new HASCOReduction<>();
 		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, Double> htnProblem = reduction.encodeProblem(problem);
 		htnProblem.getDomain().getMethods().forEach(m -> System.out.println(m));
+		System.out.println("Hasta acá retorna linea 35");
 
 		/* solve the HTN planning problem */
 		BlindForwardDecompositionHTNPlanner algo = new BlindForwardDecompositionHTNPlanner(htnProblem, n -> 0.0);
@@ -46,6 +47,7 @@ public class NewReductionSandbox {
 		finalState.forEach(l -> System.out.println("\t- " + l));
 
 		/* your work :D (later) */
+		
 	}
 
 }
