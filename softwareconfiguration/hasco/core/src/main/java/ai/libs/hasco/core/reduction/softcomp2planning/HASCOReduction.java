@@ -145,7 +145,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 		for(Component c: components) {
 			String cname = c.getName();
 			
-			//Recorro las interfaces proveídas de cada componente
+			//Recorro las interfaces provistas de cada componente
 			for (Interface i : c.getRequiredInterfaces()) {
 				String methodParams = "c1";
 				
@@ -153,7 +153,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				List<Literal> network = new ArrayList();
 				String output = "";
 				
-				//Recorro la cantidad de interfaces requeridas mínimas
+				//Recorro la cantidad de interfaces requeridas mÃ­nimas
 				for(int x = 1; x <= i.getMin(); x++) {
 					network.add(new Literal("1_tResolveSingle" + i + "("+cname+", c2_"+x+")"));	
 					output += "c2_"+x;
@@ -173,7 +173,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				
 				network.add(new Literal("1_tResolveSingle" + i + "("+cname+", c2)"));	
 				
-				//Falta agregar la condiciòn de AnyOmitted
+				//Falta agregar la condiciÃ³n de AnyOmitted
 				methods.add(new OCIPMethod("doResolve" + i, methodParams, new Literal("1_tResolveSingleOptional" + i + "("+cname+"c2"+")"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, output, new Monom()));	
 				
 				
@@ -224,7 +224,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				/* create the outputs of this method and add the method to the collection */
 				List<VariableParam> outputs = methodParams.stream().filter(p -> !p.equals(inputParam)).collect(Collectors.toList());
 				
-				//Falta agregar la nueva condición
+				//Falta agregar la nueva condiciÃ³n
 				methods.add(new OCIPMethod("resolve" + i + "With" + cname, methodParams, new Literal("tResolveSingle" + i + "(c1,c2)"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, outputs, new Monom()));
 			}
 						

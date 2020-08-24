@@ -2,7 +2,9 @@ package ai.libs.hasco.test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.stream.Collectors;
 
+import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -21,7 +23,7 @@ public class NewReductionSandbox {
 
 	private static final File problemFileNormal = new File("../../../JAICore/jaicore-components/testrsc/simpleproblem.json");
 	private static final String reqInterfaceNormal = "IFace";
-	private static final File problemFileListInterface = null;
+	private static final File problemFileListInterface = new File("../../../JAICore/jaicore-components/testrsc/list_required_interface_reduction.json");
 
 	@Test
 	public void test() throws IOException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
@@ -33,21 +35,40 @@ public class NewReductionSandbox {
 		HASCOReduction<Double> reduction = new HASCOReduction<>();
 		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, Double> htnProblem = reduction.encodeProblem(problem);
 		htnProblem.getDomain().getMethods().forEach(m -> System.out.println(m));
-		System.out.println("Hasta acá retorna linea 35");
 
-		/* solve the HTN planning problem */
-		BlindForwardDecompositionHTNPlanner algo = new BlindForwardDecompositionHTNPlanner(htnProblem, n -> 0.0);
-		IEvaluatedPlan<Double> plan = (IEvaluatedPlan<Double>)algo.call();
-
-		/* reproduce the configuration solution from plan */
-		System.out.println("Solution plan:");
-		plan.getActions().forEach(a -> System.out.println("\t" + a.getEncoding()));
-		Monom finalState = HASCOUtil.getFinalStateOfPlan(htnProblem.getInit(), plan);
-		System.out.println("Final state: ");
-		finalState.forEach(l -> System.out.println("\t- " + l));
-
+		// I can't run this
+		///* solve the HTN planning problem */
+		//BlindForwardDecompositionHTNPlanner algo = new BlindForwardDecompositionHTNPlanner(htnProblem, n -> 0.0);
+		//IEvaluatedPlan<Double> plan = (IEvaluatedPlan<Double>)algo.call();
+//
+		///* reproduce the configuration solution from plan */
+		//System.out.println("Solution plan:");
+		//plan.getActions().forEach(a -> System.out.println("\t" + a.getEncoding()));
+		//Monom finalState = HASCOUtil.getFinalStateOfPlan(htnProblem.getInit(), plan);
+		//System.out.println("Final state: ");
+		//finalState.forEach(l -> System.out.println("\t- " + l));
+//
 		/* your work :D (later) */
-		
+
 	}
 
+	@Test
+	public void listIFace() throws IOException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+		/* load original software configuration problem */
+		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(problemFileListInterface, reqInterfaceNormal, n -> 0.0);
+
+		/* derive HTN planning problem*/
+		HASCOReduction<Double> reduction = new HASCOReduction<>();
+		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, Double> htnProblem = reduction.encodeProblem(problem);
+		htnProblem.getDomain().getMethods().forEach(m -> System.out.println(prettyMethod((OCIPMethod) m)));
+	}
+
+	private String prettyMethod (OCIPMethod method) {
+		String tasknet = String.join("\n\t\t", method.getNetwork().getItems().stream().map(i -> i.toString()).collect(Collectors.toSet()));
+
+		return method.getName() + "("+ method.getParameters() +"): \n" +
+				"\tpre-condition: " + method.getPrecondition() + "\n" +
+				"\ttask-network: \n\t\t" + tasknet + "\n" +
+				"\teval-pre-condition: " + method.getEvaluablePrecondition() + "\n";
+	}
 }
