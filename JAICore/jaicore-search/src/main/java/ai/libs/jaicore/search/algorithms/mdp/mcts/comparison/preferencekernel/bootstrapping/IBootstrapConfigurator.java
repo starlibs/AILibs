@@ -8,5 +8,5 @@ public interface IBootstrapConfigurator {
 
 	public int getNumBootstraps(Map<?, DoubleList> observationsPerAction);
 
-	public int getBootstrapSize(Map<?, DoubleList> observationsPerAction);
+	public int getBootstrapSizePerChild(Map<?, DoubleList> observationsPerAction);
 }

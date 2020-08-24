@@ -13,6 +13,8 @@ import org.api4.java.common.event.IEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.Subscribe;
+
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
@@ -43,6 +45,13 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 		super(problem);
 		this.mdp = new GraphBasedMDP<>(problem);
 		this.mcts = mctsFactory.getAlgorithm(this.mdp);
+		this.mcts.registerListener(new Object() {
+
+			@Subscribe
+			public void receiveMCTSEvent(final IAlgorithmEvent e) {
+				MCTSPathSearch.this.post(e); // forward everything
+			}
+		});
 	}
 
 	@Override

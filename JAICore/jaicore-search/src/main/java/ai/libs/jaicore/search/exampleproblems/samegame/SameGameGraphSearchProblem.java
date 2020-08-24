@@ -46,7 +46,7 @@ public class SameGameGraphSearchProblem implements IPathSearchWithPathEvaluation
 	@Override
 	public IPathEvaluator<SameGameNode, SameGameCell, Double> getPathEvaluator() {
 		return p -> {
-			double unitVal = ((double)p.getHead().getScore()) / (this.relativeScores ? (this.maxScore - this.minScore) : 1);
+			double unitVal = ((double)p.getHead().getScore() - this.minScore) / (this.relativeScores ? (this.maxScore - this.minScore) : 1);
 			return this.maximize ? unitVal : (1 - unitVal);
 		};
 	}

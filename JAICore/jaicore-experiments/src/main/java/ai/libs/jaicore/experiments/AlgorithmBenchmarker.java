@@ -1,10 +1,12 @@
 package ai.libs.jaicore.experiments;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.api4.java.algorithm.IAlgorithm;
@@ -38,6 +40,8 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 
 	private Logger logger = LoggerFactory.getLogger(AlgorithmBenchmarker.class);
 	private Thread eventThread;
+
+	private final List<Consumer<IAlgorithm<?, ?>>> preRunHooks = new ArrayList<>();
 
 	public <I, A extends IAlgorithm<? extends I, ?>> AlgorithmBenchmarker(final IExperimentDecoder<I, A> decoder, final IExperimentRunController<?> controller) {
 		this.caps = new Caps<>(decoder);
@@ -111,6 +115,9 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 				}
 			});
 
+			/* running pre-run hooks */
+			this.preRunHooks.forEach(h -> h.accept(algorithm));
+
 			/* run algorithm */
 			this.logger.info("Running call method on {}", algorithm);
 			try { // this try block must be here, because timeouts are regular behavior but may throw an exception. One more reason to change this ...
@@ -163,5 +170,9 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 
 	public void setExperimentSpecificTimeout(final Function<Experiment, Timeout> experimentSpecificTimeout) {
 		this.experimentSpecificTimeout = experimentSpecificTimeout;
+	}
+
+	public void addPreRunHook(final Consumer<IAlgorithm<?, ?>> hook) {
+		this.preRunHooks.add(hook);
 	}
 }

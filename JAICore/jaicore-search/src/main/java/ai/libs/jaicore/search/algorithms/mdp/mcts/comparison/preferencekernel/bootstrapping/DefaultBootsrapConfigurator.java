@@ -29,7 +29,7 @@ public class DefaultBootsrapConfigurator implements IBootstrapConfigurator {
 	}
 
 	@Override
-	public int getBootstrapSize(final Map<?, DoubleList> observationsPerAction) {
+	public int getBootstrapSizePerChild(final Map<?, DoubleList> observationsPerAction) {
 		return this.size;
 	}
 }

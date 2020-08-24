@@ -10,6 +10,10 @@ public class PlackettLuceMCTSFactory<N, A> extends MCTSFactory<N, A, PlackettLuc
 
 	private IPreferenceKernel<N, A> preferenceKernel;
 
+	public PlackettLuceMCTSFactory () {
+		this.withTabooExhaustedNodes(true);
+	}
+
 	public IPreferenceKernel<N, A> getPreferenceKernel() {
 		return this.preferenceKernel;
 	}

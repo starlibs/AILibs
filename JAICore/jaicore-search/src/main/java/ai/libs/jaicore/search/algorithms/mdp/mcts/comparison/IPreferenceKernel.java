@@ -13,5 +13,9 @@ public interface IPreferenceKernel<N, A> {
 
 	public boolean canProduceReliableRankings(final N node, Collection<A> actions);
 
+	public void signalNodeActiveness(N node); // signals that node is now in principle a candidate for the tree policy
+
 	public void clearKnowledge(N node);
+
+	public int getErasedObservationsInTotal(); // allows to ask how many observations have been eliminated
 }

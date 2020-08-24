@@ -1,9 +1,12 @@
 package ai.libs.jaicore.experiments;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -40,6 +43,7 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 	private String executorInfo; // information about the job of the compute center executing this in order to ease tracking
 	private Timeout timeout;
 	private Function<Experiment, Timeout> experimentSpecificTimeout;
+	private final List<Consumer<IAlgorithm<?, ?>>> preRunHooks = new ArrayList<>();
 
 	private Logger logger = LoggerFactory.getLogger("expfe");
 
@@ -151,6 +155,7 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 				((AlgorithmBenchmarker) this.evaluator).setExperimentSpecificTimeout(this.experimentSpecificTimeout);
 			}
 		}
+		this.preRunHooks.forEach(h -> ((AlgorithmBenchmarker)this.evaluator).addPreRunHook(h));
 	}
 
 	private ExperimentRunner getExperimentRunner() throws ExperimentDBInteractionFailedException {
@@ -236,5 +241,9 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
+	}
+
+	public void addPreRunHook(final Consumer<IAlgorithm<?, ?>> hook) {
+		this.preRunHooks.add(hook);
 	}
 }
