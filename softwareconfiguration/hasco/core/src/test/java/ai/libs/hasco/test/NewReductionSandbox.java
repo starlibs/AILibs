@@ -21,53 +21,55 @@ import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanni
 
 public class NewReductionSandbox {
 
-	private static final File problemFileNormal = new File("../../../JAICore/jaicore-components/testrsc/simpleproblem.json");
-	private static final String reqInterfaceNormal = "IFace";
-	private static final File problemFileListInterface = new File("../../../JAICore/jaicore-components/testrsc/list_required_interface_reduction.json");
+    private static final File problemFileNormal = new File("../../../JAICore/jaicore-components/testrsc/simpleproblem.json");
+    private static final String reqInterfaceNormal = "IFace";
+    private static final File problemFileListInterface = new File("../../../JAICore/jaicore-components/testrsc/list_required_interface_reduction.json");
 
-	@Test
-	public void test() throws IOException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+    @Test
+    public void test() throws IOException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 
-		/* load original software configuration problem */
-		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(problemFileNormal, reqInterfaceNormal, n -> 0.0);
+        /* load original software configuration problem */
+        RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(problemFileNormal, reqInterfaceNormal, n -> 0.0);
 
-		/* derive HTN planning problem*/
-		HASCOReduction<Double> reduction = new HASCOReduction<>();
-		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, Double> htnProblem = reduction.encodeProblem(problem);
-		htnProblem.getDomain().getMethods().forEach(m -> System.out.println(m));
+        /* derive HTN planning problem*/
+        HASCOReduction<Double> reduction = new HASCOReduction<>();
+        CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, Double> htnProblem = reduction.encodeProblem(problem);
+        htnProblem.getDomain().getMethods().forEach(m -> System.out.println(this.prettifyMethod((OCIPMethod) m)));
 
-		/* solve the HTN planning problem */
-		BlindForwardDecompositionHTNPlanner<Double> algo = new BlindForwardDecompositionHTNPlanner<>(htnProblem, n -> 0.0);
-		IEvaluatedPlan<Double> plan = algo.call();
+        /* solve the HTN planning problem */
+        BlindForwardDecompositionHTNPlanner<Double> algo = new BlindForwardDecompositionHTNPlanner<>(htnProblem, n -> 0.0);
+        IEvaluatedPlan<Double> plan = algo.call();
 
-		/* reproduce the configuration solution from plan */
-		System.out.println("Solution plan:");
-		plan.getActions().forEach(a -> System.out.println("\t" + a.getEncoding()));
-		Monom finalState = HASCOUtil.getFinalStateOfPlan(htnProblem.getInit(), plan);
-		System.out.println("Final state: ");
-		finalState.forEach(l -> System.out.println("\t- " + l));
+        /* reproduce the configuration solution from plan */
+        System.out.println("Solution plan:");
+        plan.getActions().forEach(a -> System.out.println("\t" + a.getEncoding()));
+        Monom finalState = HASCOUtil.getFinalStateOfPlan(htnProblem.getInit(), plan);
+        System.out.println("Final state: ");
+        finalState.forEach(l -> System.out.println("\t- " + l));
 
-		/* your work :D (later) */
+        /* your work :D (later) */
 
-	}
+    }
 
-	@Test
-	public void listIFace() throws IOException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		/* load original software configuration problem */
-		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(problemFileListInterface, reqInterfaceNormal, n -> 0.0);
+    @Test
+    public void listIFace() throws IOException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+        /* load original software configuration problem */
+        RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(problemFileListInterface, reqInterfaceNormal, n -> 0.0);
 
-		/* derive HTN planning problem*/
-		HASCOReduction<Double> reduction = new HASCOReduction<>();
-		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, Double> htnProblem = reduction.encodeProblem(problem);
-		htnProblem.getDomain().getMethods().forEach(m -> System.out.println(this.prettyMethod((OCIPMethod) m)));
-	}
+        /* derive HTN planning problem*/
+        HASCOReduction<Double> reduction = new HASCOReduction<>();
+        CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, Double> htnProblem = reduction.encodeProblem(problem);
+        htnProblem.getDomain().getMethods().forEach(m -> System.out.println(this.prettifyMethod((OCIPMethod) m)));
+    }
 
-	private String prettyMethod (final OCIPMethod method) {
-		String tasknet = String.join("\n\t\t", method.getNetwork().getItems().stream().map(i -> i.toString()).collect(Collectors.toSet()));
+    private String prettifyMethod(final OCIPMethod method) {
+        String tasknet = String.join("\n\t\t", method.getNetwork().getItems().stream().map(i -> i.toString()).collect(Collectors.toSet()));
 
-		return method.getName() + "("+ method.getParameters() +"): \n" +
-		"\tpre-condition: " + method.getPrecondition() + "\n" +
-		"\ttask-network: \n\t\t" + tasknet + "\n" +
-		"\teval-pre-condition: " + method.getEvaluablePrecondition() + "\n";
-	}
+        return method.getName() + "(" + method.getParameters() + "): \n" +
+                "\ttask-name: " + method.getTask() + "\n" +
+                "\tpre-condition: " + method.getPrecondition() + "\n" +
+                "\ttask-network: \n\t\t" + tasknet + "\n" +
+                "\toutputs: " + method.getOutputs() + "\n" +
+                "\teval-pre-condition: " + method.getEvaluablePrecondition() + "\n";
+    }
 }
