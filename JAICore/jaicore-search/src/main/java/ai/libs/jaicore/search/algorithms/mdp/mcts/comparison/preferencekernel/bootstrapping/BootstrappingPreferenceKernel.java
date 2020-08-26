@@ -225,4 +225,22 @@ public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N,
 	public int getErasedObservationsInTotal() {
 		return this.erasedObservationsInTotal;
 	}
+
+	/**
+	 * Returns the action that has least observations
+	 */
+	@Override
+	public A getMostImportantActionToObtainApplicability(final N node, final Collection<A> actions) {
+		Map<A, DoubleList> obsForNode = this.observations.get(node);
+		A leastTriedAction = null;
+		int minAttempts = Integer.MAX_VALUE;
+		for (A action : actions) {
+			int attempts = obsForNode.containsKey(action) ? obsForNode.get(action).size() : 0;
+			if (attempts < minAttempts) {
+				minAttempts = attempts;
+				leastTriedAction = action;
+			}
+		}
+		return leastTriedAction;
+	}
 }

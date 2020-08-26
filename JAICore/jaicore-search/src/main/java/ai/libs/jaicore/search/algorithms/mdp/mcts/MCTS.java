@@ -2,13 +2,13 @@ package ai.libs.jaicore.search.algorithms.mdp.mcts;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Queue;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.api4.java.algorithm.events.IAlgorithmEvent;
@@ -51,12 +51,15 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 	private final MDPUtils utils = new MDPUtils();
 	private final IPathUpdatablePolicy<N, A, Double> treePolicy;
 	private final IPolicy<N, A> defaultPolicy;
+	private final boolean uniformSamplingDefaultPolicy;
+	private final Random randomSourceOfUniformSamplyPolicy;
 	private final int maxIterations;
 
 	/* variables describing the state of the search */
 	private int iterations = 0;
-	private Collection<N> tpReadyStates = new HashSet<>();
-	private Map<N, Queue<A>> untriedActionsOfIncompleteStates = new HashMap<>();
+	private final Collection<N> tpReadyStates = new HashSet<>();
+	private final Map<N, Collection<A>> applicableActionsPerState = new HashMap<>();
+	private final Map<N, List<A>> untriedActionsOfIncompleteStates = new HashMap<>();
 	private int lastProgressReport = 0;
 
 	/* stats variables */
@@ -78,6 +81,8 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 		this.mdp = input;
 		this.treePolicy = treePolicy;
 		this.defaultPolicy = defaultPolicy;
+		this.uniformSamplingDefaultPolicy = defaultPolicy instanceof UniformRandomPolicy;
+		this.randomSourceOfUniformSamplyPolicy = this.uniformSamplingDefaultPolicy ? ((UniformRandomPolicy<?, ?, ?>)defaultPolicy).getRandom(): null;
 		this.maxIterations = maxIterations;
 		this.maxDepth = MDPUtils.getTimeHorizon(gamma, epsilon);
 		this.tabooExhaustedNodes = tabooExhaustedNodes;
@@ -92,6 +97,29 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 				}
 			});
 		}
+	}
+
+	public List<A> getPotentialActions(final ILabeledPath<N, A> path, final Collection<A> applicableActions) {
+		N current = path.getHead();
+		List<A> possibleActions = new ArrayList<>(applicableActions);
+		if (possibleActions.isEmpty()) {
+			this.logger.warn("Computing potential actions for an empty set of applicable actions makes no sense! Returning an empty set for node {}.", current);
+			return possibleActions;
+		}
+
+		/* determine possible actions */
+		this.logger.debug("Computing potential actions based on {} applicable ones for state {}", applicableActions.size(), current);
+		if (this.tabooExhaustedNodes) {
+			Collection<A> tabooActionsForThisState = this.tabooActions.get(current);
+			this.logger.debug("Found {} tabooed actions for this state.", tabooActionsForThisState != null ? tabooActionsForThisState.size() : 0);
+			if (tabooActionsForThisState != null) {
+				possibleActions = possibleActions.stream().filter(a -> !tabooActionsForThisState.contains(a)).collect(Collectors.toList());
+			}
+			if (possibleActions.isEmpty() && path.getNumberOfNodes() > 1) { // otherwise we are in the root and the thing ends
+				this.tabooLastActionOfPath(path);
+			}
+		}
+		return possibleActions;
 	}
 
 	@Override
@@ -111,7 +139,7 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 					this.iterations++;
 
 					/* if the number of (estimated) remaining rollouts is relevant for the tree policy, tell it */
-					if (this.treePolicy instanceof IRolloutLimitDependentPolicy) {
+					if (this.treePolicy instanceof IRolloutLimitDependentPolicy && this.isTimeoutDefined()) {
 						double avgTimeOfRollouts = this.msSpentInRollouts * 1.0 / this.iterations;
 						int expectedRemainingNumberOfRollouts = (int) Math.floor(this.getRemainingTimeToDeadline().milliseconds() / avgTimeOfRollouts);
 						((IRolloutLimitDependentPolicy) this.treePolicy).setEstimatedNumberOfRemainingRollouts(expectedRemainingNumberOfRollouts);
@@ -131,14 +159,11 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 					N current = path.getRoot();
 					A action = null;
 					int phase = 1;
-					Collection<A> possibleActions;
 					long lastTerminationCheck = 0;
-					while (path.getNumberOfNodes() < this.maxDepth) {
-
-						/* compute possible actions (this is done first since this may take long/timeout/interrupt, so that we check afterwards whether we are still active */
-						long startActionTime = System.currentTimeMillis();
-						possibleActions = this.mdp.getApplicableActions(current);
-						timeSpentInActionApplicabilityComputationThisIteration += (System.currentTimeMillis() - startActionTime);
+					int depth = 0;
+					while (path.getNumberOfNodes() < this.maxDepth && !this.mdp.isTerminalState(current)) {
+						this.logger.debug("Now extending the roll-out in depth {}", depth);
+						depth ++;
 
 						/* make sure that we have not been canceled/timeouted/interrupted */
 						long now = System.currentTimeMillis();
@@ -147,30 +172,23 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 							lastTerminationCheck = now;
 						}
 
-						/* determine possible actions */
-						this.logger.debug("Found {} possible actions for state {}", possibleActions.size(), current);
-						if (this.tabooExhaustedNodes) {
-							Collection<A> tabooActionsForThisState = this.tabooActions.get(current);
-							this.logger.debug("Found {} tabooed actions for this state.", tabooActionsForThisState != null ? tabooActionsForThisState.size() : 0);
-							if (tabooActionsForThisState != null) {
-								possibleActions = possibleActions.stream().filter(a -> !tabooActionsForThisState.contains(a)).collect(Collectors.toList());
-							}
-							if (possibleActions.isEmpty() && path.getNumberOfNodes() > 1) { // otherwise we are in the root and the thing ends
-								this.tabooLastActionOfPath(path);
-							}
-						}
-						if (possibleActions.isEmpty()) {
-							if (path.isPoint()) { // if we are in the root and cannot do anything anymore, then stop the algorithm.
-								this.logger.info("There are no possible actions in the root. Finishing.");
-								this.summarizeIteration(System.currentTimeMillis() - timeStart, timeSpentInActionApplicabilityComputationThisIteration, timeSpentInSuccessorGenerationThisIteration, invocationsOfTreePolicyInThisIteration, invocationsOfDefaultPolicyInThisIteration,
-										timeSpentInTreePolicyQueriesThisIteration, timeSpentInTreePolicyUpdatesThisIteration, timeSpentInDefaultPolicyThisIteration);
-								return this.terminate();
-							}
-							break;
-						}
-
 						/* first case: Tree policy can be applied */
 						if (phase == 1 && this.tpReadyStates.contains(current)) {
+
+							/* here we assume that the set of applicable actions is stored in memory, and we just compute the subset of them for the case that taboo is active */
+							this.logger.debug("Computing possible actions for node {}", current);
+							assert this.applicableActionsPerState.containsKey(current) && !this.applicableActionsPerState.get(current).isEmpty() : "It makes no sense to apply the TP to a node without applicable actions!";
+							List<A> possibleActions = this.getPotentialActions(path, this.applicableActionsPerState.get(current));
+							if (possibleActions.isEmpty()) {
+								if (path.isPoint()) { // if we are in the root and cannot do anything anymore, then stop the algorithm.
+									this.logger.info("There are no possible actions in the root. Finishing.");
+									this.summarizeIteration(System.currentTimeMillis() - timeStart, timeSpentInActionApplicabilityComputationThisIteration, timeSpentInSuccessorGenerationThisIteration, invocationsOfTreePolicyInThisIteration, invocationsOfDefaultPolicyInThisIteration,
+											timeSpentInTreePolicyQueriesThisIteration, timeSpentInTreePolicyUpdatesThisIteration, timeSpentInDefaultPolicyThisIteration);
+									return this.terminate();
+								}
+								break;
+							}
+
 							this.logger.debug("Ask tree policy to choose one action of: {}.", possibleActions);
 							long tpStart = System.currentTimeMillis();
 							action = this.treePolicy.getAction(current, possibleActions);
@@ -183,10 +201,20 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 								this.logger.debug("Switching to roll-out phase 2.");
 								phase = 2;
 							}
-							if (phase == 2) {
-								Queue<A> untriedActions;
-								if (!this.untriedActionsOfIncompleteStates.containsKey(current)) {
-									untriedActions = new LinkedList<>(possibleActions);
+							if (phase == 2) { // this phase is for the first node on the path that is not TP ready. This node has (unless it is a leaf) untried actions
+
+								/* compute the actions that have not been tried for this node */
+								List<A> untriedActions;
+								if (!this.untriedActionsOfIncompleteStates.containsKey(current)) { // if this is the first time we see this node, compute *all* its successors
+
+									/* compute possible actions (this is done first since this may take long/timeout/interrupt, so that we check afterwards whether we are still active */
+									long startActionTime = System.currentTimeMillis();
+									Collection<A> applicableActions =Collections.unmodifiableCollection(this.mdp.getApplicableActions(current));
+									untriedActions = new ArrayList<>(applicableActions);
+									timeSpentInActionApplicabilityComputationThisIteration += (System.currentTimeMillis() - startActionTime);
+									this.applicableActionsPerState.put(current, applicableActions);
+
+									/* if there are no applicable actions for this node (dead-end) conduct back-propagation */
 									if (untriedActions.isEmpty()) {
 										long tpStart = System.currentTimeMillis();
 										this.treePolicy.updatePath(path, scores);
@@ -201,12 +229,16 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 								} else {
 									untriedActions = this.untriedActionsOfIncompleteStates.get(current);
 								}
+
+								/* now remove the first untried action from the list */
 								this.logger.debug("There are {} untried actions: {}", untriedActions.size(), untriedActions);
 								assert !untriedActions.isEmpty() : "Untried actions must not be empty!";
-								action = untriedActions.poll();
+								action = untriedActions.remove(0);
 								this.logger.debug("Choosing untried action {}. There are {} remaining untried actions: {}", action, untriedActions.size(), untriedActions);
 								Objects.requireNonNull(action, "Actions in MCTS must never be null!");
-								if (untriedActions.isEmpty()) { // if this was the last untried action, remove it from that field and add it to the tree policy pool
+
+								/* if this was the last untried action, remove it from that field and add it to the tree policy pool */
+								if (untriedActions.isEmpty()) {
 									this.untriedActionsOfIncompleteStates.remove(current);
 									this.tpReadyStates.add(current);
 									if (path.isPoint()) {
@@ -220,17 +252,35 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 								phase = 3;
 								this.logger.debug("Switching to roll-out phase 3.");
 							} else if (phase == 3) {
-								this.logger.debug("Ask default policy to choose one action of: {}.", possibleActions);
+
 								long startDP = System.currentTimeMillis();
-								action = this.defaultPolicy.getAction(current, possibleActions);
+
+								/* if the default policy is a uniform sampler, just directly ask the MDP */
+								if (this.uniformSamplingDefaultPolicy) {
+									this.logger.debug("Sample a single action directly from the MDP.");
+									action = this.mdp.getUniformlyRandomApplicableAction(current, this.randomSourceOfUniformSamplyPolicy);
+								}
+								else {
+
+									/* determine possible actions and ask default policy which one to choose */
+									long startActionTime = System.currentTimeMillis();
+									Collection<A> applicableActions = this.mdp.getApplicableActions(current);
+									timeSpentInActionApplicabilityComputationThisIteration += (System.currentTimeMillis() - startActionTime);
+									this.logger.debug("Ask default policy to choose one action of: {}.", applicableActions);
+									action = this.defaultPolicy.getAction(current, applicableActions);
+									assert applicableActions.contains(action);
+								}
 								timeSpentInDefaultPolicyThisIteration += (System.currentTimeMillis() - startDP);
 								invocationsOfDefaultPolicyInThisIteration++;
 								Objects.requireNonNull(action, "Actions in MCTS must never be null, but default policy has returned null!");
-								assert possibleActions.contains(action);
 								this.logger.debug("Default policy chose action {}.", action);
+							}
+							else {
+								throw new IllegalStateException("Invalid phase " + phase);
 							}
 						}
 
+						/* we now have the action chosen for this node. Now draw a successor state */
 						long startSuccessorComputation = System.currentTimeMillis();
 						N nextState = this.utils.drawSuccessorState(this.mdp, current, action);
 						timeSpentInSuccessorGenerationThisIteration += System.currentTimeMillis() - startSuccessorComputation;

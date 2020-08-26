@@ -1,7 +1,10 @@
 package ai.libs.jaicore.search.probleminputs;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
+
+import ai.libs.jaicore.basic.sets.SetUtil;
 
 public abstract class AMDP<N, A, V extends Comparable<V>> implements IMDP<N, A, V> {
 
@@ -29,5 +32,15 @@ public abstract class AMDP<N, A, V extends Comparable<V>> implements IMDP<N, A, 
 	@Override
 	public boolean isTerminalState(final N state) throws InterruptedException {
 		return this.getApplicableActions(state).isEmpty();
+	}
+
+	@Override
+	public A getUniformlyRandomApplicableAction(final N state, final Random random) throws InterruptedException {
+		return SetUtil.getRandomElement(this.getApplicableActions(state), random);
+	}
+
+	@Override
+	public boolean isActionApplicableInState(final N state, final A action) throws InterruptedException {
+		return this.getApplicableActions(state).contains(action);
 	}
 }

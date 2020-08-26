@@ -147,6 +147,10 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		this.getConfig().setProperty(IOwnerBasedAlgorithmConfig.K_TIMEOUT, timeout.milliseconds() + "");
 	}
 
+	public boolean isTimeoutDefined() {
+		return this.getTimeout().milliseconds() > 0;
+	}
+
 	public int getTimeoutPrecautionOffset() {
 		return this.timeoutPrecautionOffset;
 	}

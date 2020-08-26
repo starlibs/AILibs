@@ -7,6 +7,8 @@ import org.api4.java.datastructure.graph.ILabeledPath;
 
 public interface IPreferenceKernel<N, A> {
 
+	public A getMostImportantActionToObtainApplicability(final N node, Collection<A> actions);
+
 	public void signalNewScore(ILabeledPath<N, A> path, double score);
 
 	public List<List<A>> getRankingsForActions(final N node, Collection<A> actions);

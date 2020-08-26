@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.shorts.ShortRBTreeSet;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
 
@@ -18,14 +18,31 @@ public class SameGameState {
 	private final byte[][] board; // 0 for empty cells, positive ints for the colors
 	private final short numPieces;
 
+	public static byte[][] getBoardAsBytes(final String boardAsString) {
+		List<String> lines = Arrays.stream(boardAsString.split("\n")).filter(l -> !l.trim().isEmpty()).collect(Collectors.toList());
+		byte[][] board = new byte[lines.size()][lines.get(0).length()];
+		for (int i = 0; i < lines.size(); i++) {
+			String trimmedLine = lines.get(i).trim();
+			board[i] = new byte[trimmedLine.length()];
+			for (int j = 0; j < trimmedLine.length(); j++) {
+				board[i][j] = Byte.parseByte(trimmedLine.substring(j, j + 1));
+			}
+		}
+		return board;
+	}
+
+	public SameGameState(final String board) {
+		this(getBoardAsBytes(board));
+	}
+
 	public SameGameState(final byte[][] board) {
 		this.score = 0;
 		this.board = board;
 		short tmpNumPieces = 0;
-		for (int i= 0; i < board.length; i++) {
+		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[i].length; j++) {
 				if (board[i][j] != 0) {
-					tmpNumPieces ++;
+					tmpNumPieces++;
 				}
 			}
 		}
@@ -70,12 +87,11 @@ public class SameGameState {
 		for (int c : colsToDrop) {
 			int fallHeightInColumn = 0;
 			boolean touchedFirstEmpty = false;
-			for (int r = this.board.length - 1; r >= 0; r --) {
+			for (int r = this.board.length - 1; r >= 0; r--) {
 				if (boardCopy[r][c] == 0) {
-					fallHeightInColumn ++;
+					fallHeightInColumn++;
 					touchedFirstEmpty = true;
-				}
-				else {
+				} else {
 					if (touchedFirstEmpty) {
 						boardCopy[r + fallHeightInColumn][c] = boardCopy[r][c];
 						boardCopy[r][c] = 0;
@@ -88,9 +104,8 @@ public class SameGameState {
 		int offset = 0;
 		for (int c = 0; c < boardCopy[0].length; c++) {
 			if (boardCopy[boardCopy.length - 1][c] == 0) {
-				offset ++;
-			}
-			else if (offset > 0) {
+				offset++;
+			} else if (offset > 0) {
 				for (int r = 0; r < boardCopy.length; r++) {
 					boardCopy[r][c - offset] = boardCopy[r][c];
 					boardCopy[r][c] = 0;
@@ -98,14 +113,13 @@ public class SameGameState {
 			}
 		}
 
-		short newScore = (short)(this.score + (int)Math.pow(removedPieces.size() - 2.0, 2));
-		short newNumPieces = (short)(this.numPieces - removedPieces.size());
+		short newScore = (short) (this.score + (int) Math.pow(removedPieces.size() - 2.0, 2));
+		short newNumPieces = (short) (this.numPieces - removedPieces.size());
 		if (!isMovePossible(boardCopy)) {
 			if (newNumPieces == 0) {
 				newScore += 1000;
-			}
-			else {
-				newScore -= Math.pow(newNumPieces - 2.0,2);
+			} else {
+				newScore -= Math.pow(newNumPieces - 2.0, 2);
 			}
 		}
 		return new SameGameState(newScore, boardCopy, newNumPieces);
@@ -129,28 +143,28 @@ public class SameGameState {
 		byte color = this.board[row][col];
 		boolean addedOne = false;
 		int colorLeft = col > 0 ? this.board[row][col - 1] : 0;
-		SameGameCell leftCell = new SameGameCell(row, (byte)(col - 1));
+		SameGameCell leftCell = new SameGameCell(row, (byte) (col - 1));
 		if (colorLeft == color && !countedPieces.contains(leftCell)) {
 			countedPieces.add(leftCell);
 			this.getAllConnectedPiecesOfSameColor(row, leftCell.getCol(), countedPieces);
 			addedOne = true;
 		}
 		int colorRight = col < this.board[row].length - 1 ? this.board[row][col + 1] : 0;
-		SameGameCell rightCell = new SameGameCell(row, (byte)(col + 1));
+		SameGameCell rightCell = new SameGameCell(row, (byte) (col + 1));
 		if (colorRight == color && !countedPieces.contains(rightCell)) {
 			countedPieces.add(rightCell);
 			this.getAllConnectedPiecesOfSameColor(row, rightCell.getCol(), countedPieces);
 			addedOne = true;
 		}
 		int colorUp = row > 0 ? this.board[row - 1][col] : 0;
-		SameGameCell upCell = new SameGameCell((byte)(row - 1), col);
+		SameGameCell upCell = new SameGameCell((byte) (row - 1), col);
 		if (colorUp == color && !countedPieces.contains(upCell)) {
 			countedPieces.add(upCell);
 			this.getAllConnectedPiecesOfSameColor(upCell.getRow(), col, countedPieces);
 			addedOne = true;
 		}
 		int colorDown = row < this.board.length - 1 ? this.board[row + 1][col] : 0;
-		SameGameCell downCell = new SameGameCell((byte)(row + 1), col);
+		SameGameCell downCell = new SameGameCell((byte) (row + 1), col);
 		if (colorDown == color && !countedPieces.contains(downCell)) {
 			countedPieces.add(downCell);
 			this.getAllConnectedPiecesOfSameColor(downCell.getRow(), col, countedPieces);
@@ -161,8 +175,8 @@ public class SameGameState {
 
 	public String getBoardAsString() {
 		StringBuilder sb = new StringBuilder();
-		for (int row = 0; row < this.board.length; row ++) {
-			for (int col = 0; col < this.board[row].length; col ++) {
+		for (int row = 0; row < this.board.length; row++) {
+			for (int col = 0; col < this.board[row].length; col++) {
 				sb.append(this.board[row][col]);
 			}
 			sb.append("\n");
@@ -190,10 +204,10 @@ public class SameGameState {
 		SameGameCell[][] cellObjects = new SameGameCell[this.board.length][this.board[0].length];
 		byte lastRow = -1;
 		byte lastCol;
-		IntList indicesToRemove = new IntArrayList();
-		for (byte row = 0; row < this.board.length; row ++) {
+		IntSet indicesToRemove = new IntArraySet();
+		for (byte row = 0; row < this.board.length; row++) {
 			lastCol = -1;
-			for (byte col = 0; col < this.board[row].length; col ++) {
+			for (byte col = 0; col < this.board[row].length; col++) {
 				byte color = this.board[row][col];
 				if (color != 0) {
 					SameGameCell cell = new SameGameCell(row, col);
@@ -206,6 +220,7 @@ public class SameGameState {
 						identifiedBlocks.get(topBlockId).add(cell);
 
 						/* if the cell has ALSO the same value as the left neighbor, merge the groups (unless those groups already HAVE been merged) */
+						assert lastCol == col - 1;
 						if (col > 0 && this.board[row][lastCol] == color) {
 							int leftBlockId = blocksOfCells.get(cellObjects[row][lastCol]); // gets the id of the block of the piece on the left
 							if (identifiedBlocks.get(leftBlockId) != identifiedBlocks.get(topBlockId)) {
@@ -218,9 +233,9 @@ public class SameGameState {
 
 					/* else, if the cell has ONLY the same value as its left neighbor, joint them */
 					else if (col > 0 && this.board[row][lastCol] == color) {
-						int blockId = blocksOfCells.get(cellObjects[row][lastCol]);
-						blocksOfCells.put(cell, blockId);
-						identifiedBlocks.get(blockId).add(cell);
+						int leftBlockId = blocksOfCells.get(cellObjects[row][lastCol]);
+						blocksOfCells.put(cell, leftBlockId);
+						identifiedBlocks.get(leftBlockId).add(cell);
 					}
 
 					/* otherwise, the cell cannot be merged with left or top and, hence, opens a new block */
@@ -236,7 +251,7 @@ public class SameGameState {
 			}
 			lastRow = row;
 		}
-		for (int r : indicesToRemove.stream().sorted((i1,i2) -> Integer.compare(i2, i1)).collect(Collectors.toList())) {
+		for (int r : indicesToRemove.stream().sorted((i1, i2) -> Integer.compare(i2, i1)).collect(Collectors.toList())) {
 			identifiedBlocks.remove(r);
 		}
 		return identifiedBlocks;
@@ -251,8 +266,8 @@ public class SameGameState {
 	}
 
 	public static boolean isMovePossible(final byte[][] board) {
-		for (int row = 0; row < board.length; row ++) {
-			for (int col = 0; col < board[row].length; col ++) {
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
 				if (canCellBeSelected(board, row, col)) {
 					return true;
 				}
@@ -288,8 +303,8 @@ public class SameGameState {
 
 	public Map<Integer, Integer> getNumberOfPiecesPerColor() {
 		Map<Integer, Integer> map = new HashMap<>();
-		for (int row = 0; row < this.board.length; row ++) {
-			for (int col = 0; col < this.board[row].length; col ++) {
+		for (int row = 0; row < this.board.length; row++) {
+			for (int col = 0; col < this.board[row].length; col++) {
 				int color = this.board[row][col];
 				if (color == 0) {
 					continue;

@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -63,7 +64,7 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	private final Map<N, Integer> depths = new HashMap<>();
 	private final Random random;
 	private final UniformRandomPolicy<N, A, Double> randomPolicy;
-	private final IGammaFunction gammaShort = new CosLinGammaFunction(3, 4, 2, 2);
+	private final IGammaFunction gammaShort = new CosLinGammaFunction(1, 20, 10, 10);
 	private static final double EPSILON = 0.0;
 	private IOwnerBasedAlgorithmConfig config = ConfigFactory.create(IOwnerBasedAlgorithmConfig.class);
 
@@ -73,16 +74,19 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	private double avgBranchingFactor = -1;
 	private int numUpdates;
 	private int expectedNumberOfTotalRollouts;
-	private double estimateForSlopeForTargetValueOfGammaEqualsOne;
+	// private double estimateForSlopeForTargetValueOfGammaEqualsOne;
+
+	private Function<Integer, Integer> rolloutsForGammaEquals1AsFunctionOfHeight;
 
 	/* configuration of gamma-shape. this depends on the branching factor.
 	 * Note that "per child" does not mean that each child needs so many visits but for k children, the parent needs k * p observations. */
-	private static final int GAMMA_LONG_MAX = 1;
+	private static final int GAMMA_LONG_MAX = 2;
 	private static final int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT = 10;
 	private static final int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_ABS = 10;
 	private static final int GAMMA_LONG_OBSERVATIONS_PER_CHILD_TO_REACH_ONE = 10;
-	private static final double GAMMA_LONG_DERIVATIVE_EXP = 2;
-	private static final double GOAL_COMMIT_DEPTH = .9;
+	private static final double GAMMA_LONG_DERIVATIVE_EXP = 1;
+	private static final double GOAL_COMMIT_DEPTH = 1.2;
+	private static final int GOAL_TARGET_SIZE = (int) Math.pow(2, 5);
 
 	private static final int MINIMUMNUMBERTOCOMMIT = 20;
 
@@ -102,16 +106,32 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 		}
 	}
 
-	public CombinedGammaFunction getGammaFunction(final N node, final Collection<A> actions) {
+	public IGammaFunction getGammaFunction(final N node, final Collection<A> actions) {
 		int k = actions.size();
 		int depth = this.depths.get(node);
-		int obsRequiredForOne = depth - this.fixedDecisions.size() < this.avgTargetDepth ? (int) Math.ceil(this.getNumberOfSamplesPerChildForGamma(depth - this.fixedDecisions.size())) : 1;
-		double blowup = 1.0;// 2.0 * (1 - this.numUpdates * 1.0 / this.expectedNumberOfTotalRollouts);
-		obsRequiredForOne *= k;
-		obsRequiredForOne *= blowup;
-		IGammaFunction definiteDecisionGammaFunction = new CosLinGammaFunction(GAMMA_LONG_MAX, Math.max(GAMMA_LONG_OBSERVATIONS_PER_CHILD_TO_REACH_ONE * k, (int) Math.ceil(obsRequiredForOne)),
-				Math.max(GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT * k, (int) Math.ceil(0.5 * obsRequiredForOne)), k * GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_ABS);// new
-		return new CombinedGammaFunction(this.gammaShort, definiteDecisionGammaFunction);
+		int numberOfOpenDecisions = depth - this.fixedDecisions.size();
+		boolean isInDecisionMode = numberOfOpenDecisions < this.avgTargetDepth;
+		int obsRequiredForOne = isInDecisionMode ? this.rolloutsForGammaEquals1AsFunctionOfHeight.apply(depth) : 1;
+		// System.out.println(depth + ": " + obsRequiredForOne);
+		if (isInDecisionMode && obsRequiredForOne < GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT) {
+			this.logger.warn("Cannot work on this problem with {} open decisions, because even the minimum required observations ({}) are higher than the number of observations required to reach one ({}). Setting value to minimum + 1 = {}",
+					numberOfOpenDecisions, GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT, obsRequiredForOne, GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT + 1);
+			// obsRequiredForOne = GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT + 1;
+		}
+		// System.out.println(depth + ": " + obsRequiredForOne);
+		//		obsRequiredForOne *= k;
+		//		System.out.println(depth + ": " + obsRequiredForOne);
+		if (obsRequiredForOne < 0) {
+			obsRequiredForOne = 100000; // large number
+		}
+		//		System.out.println(obsRequiredForOne);
+		obsRequiredForOne = Math.max(GAMMA_LONG_OBSERVATIONS_PER_CHILD_TO_REACH_ONE * k, (int) Math.ceil(obsRequiredForOne));
+		int minObservationsToSupportGamma = GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT * k;
+		minObservationsToSupportGamma = Math.max(minObservationsToSupportGamma, Math.max(minObservationsToSupportGamma * 2 / 3, obsRequiredForOne - 100));
+		//		System.out.println(minObservationsToSupportGamma);
+		IGammaFunction definiteDecisionGammaFunction = new CosLinGammaFunction(GAMMA_LONG_MAX, obsRequiredForOne, minObservationsToSupportGamma, k * GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_ABS);
+		// return new CombinedGammaFunction(this.gammaShort, definiteDecisionGammaFunction);
+		return definiteDecisionGammaFunction;
 	}
 
 	public double getGammaValue(final N node, final Collection<A> actions) {
@@ -150,8 +170,8 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 
 		/* check whether we can produce a useful information */
 		if (!this.preferenceKernel.canProduceReliableRankings(node, actions)) {
-			this.logger.info("The preference kernel tells us that it cannot produce reliable information yet. Choosing one action at random.");
-			return this.randomPolicy.getAction(node, actions);
+			this.logger.info("The preference kernel tells us that it cannot produce reliable information yet. Choosing one that seems most useful to the preference kernel.");
+			return this.preferenceKernel.getMostImportantActionToObtainApplicability(node, actions);
 		}
 
 		/* determine probability to proceed */
@@ -175,9 +195,11 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 
 			/* update node map (only if there are listeners for this) */
 			if (this.hasListeners) {
-				double lgw = ((CombinedGammaFunction) gammaFunction).getLongTermWeightBasedOnProbability(nodeProbability);
+				if (gammaFunction instanceof CombinedGammaFunction) {
+					double lgw = ((CombinedGammaFunction) gammaFunction).getLongTermWeightBasedOnProbability(nodeProbability);
+					nodeInfoMap.put("longgammaweight", lgw);
+				}
 				nodeInfoMap.put("gamma", gammaValue);
-				nodeInfoMap.put("longgammaweight", lgw);
 				nodeInfoMap.put("prob", nodeProbability);
 			}
 
@@ -419,37 +441,56 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 		}
 
 		/* update avg depth */
-		this.avgDepth = (this.numUpdates * this.avgDepth + pathLength) / (this.numUpdates + 1.0);
-		this.avgTargetDepth = this.avgDepth * GOAL_COMMIT_DEPTH;
-		this.numUpdates++;
 		if (!this.maxChildren.isEmpty()) {
-			this.avgBranchingFactor = this.maxChildren.values().stream().reduce((a, b) -> a + b).get() / (1.0 * this.maxChildren.size());
+			this.avgBranchingFactor = Math.max(2, this.maxChildren.values().stream().reduce((a, b) -> a + b).get() / (1.0 * this.maxChildren.size()));
 		}
+		this.avgDepth = (this.numUpdates * this.avgDepth + pathLength) / (this.numUpdates + 1.0);
+		if (this.avgBranchingFactor > 0) {
+			this.avgTargetDepth = this.avgDepth * GOAL_COMMIT_DEPTH + (Math.log(GOAL_TARGET_SIZE) / Math.log(this.avgBranchingFactor));
+		} else {
+			this.avgTargetDepth = this.avgDepth;
+		}
+		this.numUpdates++;
+		this.logger.info("Setting avg target depth to {}", this.avgTargetDepth);
 	}
 
 	@Override
 	public void setEstimatedNumberOfRemainingRollouts(final int pNumRollouts) {
 		int numRollouts = pNumRollouts;
+		// System.out.println(numRollouts);
 		if (pNumRollouts < 0) {
 			this.logger.warn("Estimated number of remaining rollouts must not be negative but was {}! Setting it to 1.", pNumRollouts);
 			numRollouts = 1;
 		}
 		this.expectedNumberOfTotalRollouts = this.numUpdates + numRollouts;
 		if (this.avgBranchingFactor > 0) {
-			double sum = 0;
-			for (int h = this.fixedDecisions.size(); h < this.avgTargetDepth; h++) {
-				sum += Math.pow(this.avgTargetDepth - h, GAMMA_LONG_DERIVATIVE_EXP);
+
+			/* compute samples to be required in the root for gamma = 1 */
+			double sumTmp = 0;
+			double hmax = this.avgTargetDepth - this.fixedDecisions.size();
+			for (int h = 0; h < hmax; h++) {
+				double f = (1 - h / hmax);
+				double innerSum = 0;
+				for (int t = 0; t < h; t++) {
+					innerSum += Math.pow(-1 / this.avgBranchingFactor, t);
+				}
+				sumTmp += innerSum * f;
 			}
-			if (sum < 0) {
-				throw new IllegalStateException("Sum must not be negative!");
-			}
-			this.estimateForSlopeForTargetValueOfGammaEqualsOne = numRollouts / (this.avgBranchingFactor * sum);
-			if (this.estimateForSlopeForTargetValueOfGammaEqualsOne < 0) {
-				throw new IllegalStateException("The estimated slope is negative!");
-			}
-			if (!this.isApproximationCorrect(numRollouts)) {
-				throw new IllegalStateException("The approximation for the slope relevant to compute gamma is errorneous.");
-			}
+			final double x0 = pNumRollouts / sumTmp;
+			final double a = x0 / hmax;
+			// System.out.println(x0 + " -> " + a);
+			this.rolloutsForGammaEquals1AsFunctionOfHeight = d -> Math.max((int) (x0 - a * (d - this.fixedDecisions.size())), GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT + 1);
+
+			// this.estimateForSlopeForTargetValueOfGammaEqualsOne = numRollouts / (this.avgBranchingFactor * sum);
+			// System.out.println(this.estimateForSlopeForTargetValueOfGammaEqualsOne + " <- " + numRollouts + " / " + this.avgBranchingFactor + " * " + sum);
+			// if (this.estimateForSlopeForTargetValueOfGammaEqualsOne < 0) {
+			// throw new IllegalStateException("The estimated slope is negative!");
+			// }
+			// if (this.logger.isDebugEnabled() && !this.isApproximationCorrect(numRollouts)) {
+			// this.logger.error("The approximation for the slope relevant to compute gamma is errorneous.");
+			// }
+		} else {
+			this.rolloutsForGammaEquals1AsFunctionOfHeight = d -> 1000;
 		}
 	}
 
@@ -459,31 +500,32 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	 *            is usually an int, but we allow double for theoretical reasons and to check correctness
 	 * @return
 	 */
-	public double getNumberOfSamplesPerChildForGamma(final double depth) {
-		if (depth > this.avgTargetDepth) {
-			throw new IllegalArgumentException("Depth cannot be greater than avg depth.");
-		}
-		return Math.pow(this.avgTargetDepth - depth, GAMMA_LONG_DERIVATIVE_EXP) * this.estimateForSlopeForTargetValueOfGammaEqualsOne;
-	}
+	// public double getNumberOfSamplesPerChildForGammaEqualsOne(final double depth) {
+	// if (depth > this.avgTargetDepth) {
+	// throw new IllegalArgumentException("Depth cannot be greater than avg depth.");
+	// }
+	//
+	// return Math.pow(this.avgTargetDepth - depth, GAMMA_LONG_DERIVATIVE_EXP) * this.estimateForSlopeForTargetValueOfGammaEqualsOne;
+	// }
 
-	private boolean isApproximationCorrect(final int expectedNumberOfRemainingRollouts) {
-		double sum = 0;
-		if (this.fixedDecisions.size() > this.avgTargetDepth) {
-			return true;
-		}
-		for (int h = this.fixedDecisions.size(); h < this.avgTargetDepth; h++) {
-			double v = this.getNumberOfSamplesPerChildForGamma(h);
-			if (v < 0) {
-				throw new IllegalStateException("Observed a negativ value for number of samples per child: " + v);
-			}
-			sum += v * this.avgBranchingFactor;
-		}
-		int seen = (int) Math.round(sum);
-		if (seen != expectedNumberOfRemainingRollouts) {
-			this.logger.warn("Expected {} but saw {}", expectedNumberOfRemainingRollouts, seen);
-		}
-		return seen == expectedNumberOfRemainingRollouts;
-	}
+	// private boolean isApproximationCorrect(final int expectedNumberOfRemainingRollouts) {
+	// double sum = 0;
+	// if (this.fixedDecisions.size() > this.avgTargetDepth) {
+	// return true;
+	// }
+	// for (int h = this.fixedDecisions.size(); h < this.avgTargetDepth; h++) {
+	// double v = this.getNumberOfSamplesPerChildForGammaEqualsOne(h);
+	// if (v < 0) {
+	// throw new IllegalStateException("Observed a negativ value for number of samples per child: " + v);
+	// }
+	// sum += v * this.avgBranchingFactor;
+	// }
+	// int seen = (int) Math.round(sum);
+	// if (seen != expectedNumberOfRemainingRollouts) {
+	// this.logger.warn("Expected {} but saw {}", expectedNumberOfRemainingRollouts, seen);
+	// }
+	// return seen == expectedNumberOfRemainingRollouts;
+	// }
 
 	public IPreferenceKernel<N, A> getPreferenceKernel() {
 		return this.preferenceKernel;

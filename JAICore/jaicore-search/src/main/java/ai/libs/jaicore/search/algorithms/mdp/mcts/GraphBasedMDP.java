@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
@@ -19,10 +20,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.search.model.ILazyRandomizableSuccessorGenerator;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 
 public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomizable {
+
+	private static final int MAX_SUCCESSOR_CACHE_SIZE = 100;
 
 	private final IPathSearchWithPathEvaluationsInput<N, A, Double> graph;
 	private final N root;
@@ -30,6 +35,7 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 	private final IPathGoalTester<N, A> goalTester;
 	private final Map<N, Pair<N, A>> backPointers = new HashMap<>();
 	private Logger logger = LoggerFactory.getLogger(GraphBasedMDP.class);
+	private final Map<N, Map<A, N>> successorCache = new HashMap<>();
 
 	public GraphBasedMDP(final IPathSearchWithPathEvaluationsInput<N, A, Double> graph) {
 		super();
@@ -53,9 +59,11 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 	public Collection<A> getApplicableActions(final N state) throws InterruptedException {
 		Collection<INewNodeDescription<N, A>> successors = this.succGen.generateSuccessors(state);
 		Collection<A> actions = new ArrayList<>();
+		Map<A, N> cache = new HashMap<>();
 		for (INewNodeDescription<N, A> succ : successors) {
 			A action = succ.getArcLabel();
 			actions.add(action);
+			cache.put(action, succ.getTo());
 			if (this.backPointers.containsKey(succ.getTo())) {
 				Pair<N, A> backpointer = this.backPointers.get(succ.getTo());
 				boolean sameParent = backpointer.getX().equals(state);
@@ -73,23 +81,36 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 			}
 			this.backPointers.put(succ.getTo(), new Pair<>(state, action));
 		}
+
+		/* clear the cache if we have too many entries */
+		if (this.successorCache.size() > MAX_SUCCESSOR_CACHE_SIZE) {
+			this.successorCache.clear();
+		}
+		this.successorCache.put(state, cache);
 		return actions;
 	}
 
 	@Override
 	public Map<N, Double> getProb(final N state, final A action) throws InterruptedException {
-		Optional<INewNodeDescription<N, A>> succOpt = this.succGen.generateSuccessors(state).stream().filter(nd -> nd.getArcLabel().equals(action)).findAny();
-		if (succOpt.isPresent()) {
-			N succ = succOpt.get().getTo();
-			Map<N, Double> out = new HashMap<>();
-			out.put(succ, 1.0);
-			return out;
+
+		/* first determine the successor node (either by cache or by constructing the successors again) */
+		N successor = null;
+		if (this.successorCache.containsKey(state) && this.successorCache.get(state).containsKey(action)) {
+			successor = this.successorCache.get(state).get(action);
 		}
 		else {
-			this.logger.error("THERE IS NO SUCCESSOR REACHABLE WITH ACTION {} IN THE MDP!", action);
-			return null;
+			Optional<INewNodeDescription<N, A>> succOpt = this.succGen.generateSuccessors(state).stream().filter(nd -> nd.getArcLabel().equals(action)).findAny();
+			if (!succOpt.isPresent()) {
+				this.logger.error("THERE IS NO SUCCESSOR REACHABLE WITH ACTION {} IN THE MDP!", action);
+				return null;
+			}
+			successor = succOpt.get().getTo();
 		}
 
+		/* now equip this successor with probability 1 */
+		Map<N, Double> out = new HashMap<>();
+		out.put(successor, 1.0);
+		return out;
 	}
 
 	@Override
@@ -154,5 +175,31 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 		if (this.graph.getPathEvaluator() instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) this.graph.getPathEvaluator()).setLoggerName(name + ".pe");
 		}
+	}
+
+	@Override
+	public A getUniformlyRandomApplicableAction(final N state, final Random random) throws InterruptedException {
+		if (this.succGen instanceof ILazyRandomizableSuccessorGenerator) {
+			INewNodeDescription<N, A> ne = ((ILazyRandomizableSuccessorGenerator<N, A>) this.succGen).getIterativeGenerator(state, random).next();
+			if (this.successorCache.size() > MAX_SUCCESSOR_CACHE_SIZE) {
+				this.successorCache.clear();
+			}
+			this.successorCache.computeIfAbsent(state, n -> new HashMap<>()).put(ne.getArcLabel(), ne.getTo());
+			return ne.getArcLabel();
+		}
+		this.logger.debug("The successor generator {} does not support lazy AND randomized successor generation. Now computing all successors and drawing one at random.", this.succGen.getClass());
+		Collection<INewNodeDescription<N, A>> successors = this.succGen.generateSuccessors(state);
+		if (successors.isEmpty()) {
+			throw new IllegalArgumentException("The given node has no successors: " + state);
+		}
+		return SetUtil.getRandomElement(successors, random).getArcLabel();
+	}
+
+	@Override
+	public boolean isActionApplicableInState(final N state, final A action) throws InterruptedException {
+		if (this.successorCache.containsKey(state) && this.successorCache.get(state).containsKey(action)) {
+			return true;
+		}
+		return this.getApplicableActions(state).contains(action);
 	}
 }

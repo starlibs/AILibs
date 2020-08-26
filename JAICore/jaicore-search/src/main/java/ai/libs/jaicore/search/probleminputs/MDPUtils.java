@@ -48,10 +48,10 @@ public class MDPUtils implements ILoggingCustomizable {
 	}
 
 	public <N, A> N drawSuccessorState(final IMDP<N, A, ?> mdp, final N state, final A action, final Random rand) throws InterruptedException {
-		Map<N, Double> dist = mdp.getProb(state, action);
-		if (!mdp.getApplicableActions(state).contains(action)) {
+		if (!mdp.isActionApplicableInState(state, action)) {
 			throw new IllegalArgumentException("Action " + action + " is not applicable in " + state);
 		}
+		Map<N, Double> dist = mdp.getProb(state, action);
 		double p = rand.nextDouble();
 		double s = 0;
 		for (Entry<N, Double> neighborWithProb : dist.entrySet()) {

@@ -62,7 +62,9 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearc
 		switch (algorithm) {
 		case "random":
 			IteratingGraphSearchOptimizerFactory<I, N, A, Double> factory = new IteratingGraphSearchOptimizerFactory<>();
-			factory.setBaseAlgorithmFactory(new RandomSearchFactory<>());
+			RandomSearchFactory<N, A> rsf = new RandomSearchFactory<>();
+			rsf.setSeed(seed);
+			factory.setBaseAlgorithmFactory(rsf);
 			IteratingGraphSearchOptimizer<I, N, A, Double> optimizer = factory.getAlgorithm((I)input);
 			return optimizer;
 		case "bf-uninformed":
