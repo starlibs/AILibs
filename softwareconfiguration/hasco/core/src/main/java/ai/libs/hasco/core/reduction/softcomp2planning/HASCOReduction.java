@@ -147,7 +147,10 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 			
 			//Recorro las interfaces provistas de cada componente
 			for (Interface i : c.getRequiredInterfaces()) {
-				String methodParams = "c1";
+				List<VariableParam> methodParams = new ArrayList<>();
+				VariableParam inputParam = new VariableParam("c1");
+				methodParams.add(inputParam);
+				List<VariableParam> methodOutputs = new ArrayList<>();
 				
 				//Configuro el tasknetwork del metodo resolve<i>(c1; c2_1,..,c2_<max(I)>)
 				List<Literal> network = new ArrayList();
