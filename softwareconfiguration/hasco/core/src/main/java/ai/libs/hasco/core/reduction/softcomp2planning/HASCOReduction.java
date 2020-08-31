@@ -151,35 +151,38 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				
 				//Configuro el tasknetwork del metodo resolve<i>(c1; c2_1,..,c2_<max(I)>)
 				List<Literal> network = new ArrayList();
-				String output = "";
+				//String output = "";
+				String condition ="!anyOmitted(c1,'"+i+"')";
 				
 				//Recorro la cantidad de interfaces requeridas mínimas
 				for(int x = 1; x <= i.getMin(); x++) {
 					network.add(new Literal("1_tResolveSingle" + i + "("+cname+", c2_"+x+")"));	
-					output += "c2_"+x;
+					VariableParam output = new VariableParam("c2_"+x);
+					methodOutputs.add(output);
 				}
 				
 				//Recorro la cantidad de interfaces requeridas opcionales
 				for(int x = i.getMin() + 1; x <= i.getMax(); x++) {
 					network.add(new Literal("1_tResolveSingleOptional"+i+"("+cname+",c2_"+x+")"));
-					output += "c2_"+x;
+					VariableParam output = new VariableParam("c2_"+x);
+					methodOutputs.add(output);
 				}
 				
-				methods.add(new OCIPMethod("resolve" + i, methodParams, new Literal("1_tResolve" + i + "(c1)"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, output, new Monom()));				
+				methods.add(new OCIPMethod("resolve" + i, methodParams, new Literal("1_tResolve" + i + "(c1)"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, methodOutputs, new Monom()));				
 				//doResolve
-				methodParams = "c1, c2";
+				methodParams.add(new VariableParam("c2"));
 				
-				output = "";
+				methodOutputs.clear();
 				
 				network.add(new Literal("1_tResolveSingle" + i + "("+cname+", c2)"));	
 				
 				//Falta agregar la condición de AnyOmitted
-				methods.add(new OCIPMethod("doResolve" + i, methodParams, new Literal("1_tResolveSingleOptional" + i + "("+cname+"c2"+")"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, output, new Monom()));	
+				methods.add(new OCIPMethod("doResolve" + i, methodParams, new Literal("1_tResolveSingleOptional" + i + "("+cname+"c2"+")"), new Monom(COMPONENT_OF_C1 + " & " + condition), new TaskNetwork(network), false, methodOutputs, new Monom()));	
 				
 				
-				network.add(new Literal("omitResolution("+cname+", "+ "'"+i+"'"+", c2)"));	
+				//network.add(new Literal("omitResolution("+cname+", "+ "'"+i+"'"+", c2)"));	
 				
-				methods.add(new OCIPMethod("doNotResolve" + i, methodParams, new Literal("1_tResolveSingleOptional" + i + "("+cname+"c2"+")"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, output, new Monom()));	
+				methods.add(new OCIPMethod("doNotResolve" + i, methodParams, new Literal("1_tResolveSingleOptional" + i + "("+cname+"c2"+")"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, methodOutputs, new Monom()));	
 			}
 			
 			/* create methods for the refinement of the interfaces offered by this component */
@@ -189,7 +192,8 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				methodParams.add(inputParam);
 				methodParams.add(new VariableParam("c2"));
 				List<Interface> requiredInterfaces = c.getRequiredInterfaces();
-
+				String condition ="!anyOmitted(c1,'"+i+"')";
+				
 				/* create string for the arguments of this operation */
 				StringBuilder satisfyOpArgumentsSB = new StringBuilder();
 				if (CONFIGURE_PARAMS) {
@@ -225,7 +229,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				List<VariableParam> outputs = methodParams.stream().filter(p -> !p.equals(inputParam)).collect(Collectors.toList());
 				
 				//Falta agregar la nueva condición
-				methods.add(new OCIPMethod("resolve" + i + "With" + cname, methodParams, new Literal("tResolveSingle" + i + "(c1,c2)"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, outputs, new Monom()));
+				methods.add(new OCIPMethod("resolve" + i + "With" + cname, methodParams, new Literal("tResolveSingle" + i + "(c1,c2)"), new Monom(COMPONENT_OF_C1 + " & " + condition), new TaskNetwork(network), false, outputs, new Monom()));
 			}
 						
 		}
