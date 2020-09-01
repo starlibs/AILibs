@@ -1,10 +1,6 @@
 package ai.libs.hasco.core.reduction.softcomp2planning;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
@@ -58,6 +54,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 	private static final String REFINE_PARAMETER_PREFIX = "2_tRefineParam";
 	private static final String DECLARE_CLOSED_PREFIX = "2_declareClosed";
 	private static final String REDEF_VALUE_PREFIX = "2_redefValue";
+	private static final String OMIT_RESOLUTION_PREFIX = "2_omitResolution";
 
 	private static final String COMPONENT_OF_C1 = "component(c1)";
 	private static final String COMPONENT_OF_C2 = "component(c2)";
@@ -127,17 +124,29 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 		}
 
 		/* create operations for parameter initialization */
+		// redefValue(container, previousValue, newValue)
 		Map<CNFFormula, Monom> redefOpAddList = new HashMap<>();
 		redefOpAddList.put(new CNFFormula(), new Monom("val(container,newValue) & overwritten(container)"));
 		Map<CNFFormula, Monom> redefOpDelList = new HashMap<>();
 		redefOpDelList.put(new CNFFormula(), new Monom("val(container,previousValue)"));
 		operations.add(new CEOCOperation(REDEF_VALUE_PREFIX, "container,previousValue,newValue", new Monom("val(container,previousValue)"), redefOpAddList, redefOpDelList, ""));
+
+		// declareClosed(container)
 		Map<CNFFormula, Monom> closeOpAddList = new HashMap<>();
 		closeOpAddList.put(new CNFFormula(), new Monom("closed(container)"));
 		operations.add(new CEOCOperation(DECLARE_CLOSED_PREFIX, "container", new Monom(), closeOpAddList, new HashMap<>(), ""));
+
+		// In the case of list interfaces
+		if (true) {
+			// omitResolution(c1, i , c2)
+			Map<CNFFormula, Monom> omitResolutionOpAddList = new HashMap<>();
+			omitResolutionOpAddList.put(new CNFFormula(), new Monom(Arrays.asList(new Literal("null", new Param("c2")))));
+			operations.add(new CEOCOperation(OMIT_RESOLUTION_PREFIX, "c1,i,c2", new Monom(), omitResolutionOpAddList, new HashMap<>(), ""));
+		}
 		return operations;
 	}
 
+	// For list interfaces
 	public static List<OCIPMethod> getMethodsList(final Collection<Component> components){
 		List<OCIPMethod> methods = new ArrayList<>();
 		
@@ -239,7 +248,8 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 		 
 		return methods;
 	}
-	
+
+	// For non list interfaces
 	public static List<OCIPMethod> getMethods(final Collection<Component> components) {
 		List<OCIPMethod> methods = new ArrayList<>();
 		for (Component c : components) {
