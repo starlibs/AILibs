@@ -192,6 +192,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 
 				/* create the outputs of this method and add the method to the collection */
 				List<VariableParam> outputs = methodParams.stream().filter(p -> !p.equals(inputParam)).collect(Collectors.toList());
+				// resolve<i>With<c>(c1; c2, p1, ..., pm, r1, ..., rn)
 				methods.add(new OCIPMethod("resolve" + i + "With" + cName, methodParams, new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + i + "(c1,c2)"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, outputs, new Monom()));
 			}
 
@@ -210,12 +211,16 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 					refinementArgumentsSB.append(", " + pIdent);
 					paramRefinementsParams.add(new VariableParam(pIdent));
 					networkForRefinements.add(new Literal(REFINE_PARAMETER_PREFIX + pName + "Of" + cName + "(c2, " + pIdent + ")"));
+					// ignoreParamRefinementFor<p>Of<c>(object, container, curval)
 					methods.add(getMethodIgnoreParamRefinement(cName, pName));
+					// refineParam<p>Of<c>(c2, p1, ..., pm)
 					methods.add(getMethodRefineParam(cName, pName));
 				}
 				networkForRefinements.add(new Literal(REFINE_PARAMETERS_PREFIX + cName + "(c2" + refinementArgumentsSB.toString() + ")"));
+				// refineParamsOf<c>(c2, p1, ..., pm)
 				methods.add(new OCIPMethod("refineParamsOf" + cName, paramRefinementsParams, new Literal(REFINE_PARAMETERS_PREFIX + cName + "(c2" + refinementArgumentsSB.toString() + ")"), new Monom(COMPONENT_OF_C2),
 						new TaskNetwork(networkForRefinements), false, new ArrayList<>(), new Monom("!refinementCompleted('" + cName + "', c2)")));
+				// closeRefinementOfParamsOf<c>(c2, p1, ..., pm)
 				methods.add(new OCIPMethod("closeRefinementOfParamsOf" + cName, paramRefinementsParams, new Literal(REFINE_PARAMETERS_PREFIX + cName + "(c2" + refinementArgumentsSB.toString() + ")"), new Monom(COMPONENT_OF_C2),
 						new TaskNetwork(), false, new ArrayList<>(), new Monom("refinementCompleted('" + cName + "', c2)")));
 			}
@@ -262,9 +267,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				//Falta agregar la condición de AnyOmitted
 				methods.add(new OCIPMethod("doResolve" + i, methodParams, new Literal("1_tResolveSingleOptional" + i + "("+cname+"c2"+")"), new Monom(COMPONENT_OF_C1 + " & " + condition), new TaskNetwork(network), false, methodOutputs, new Monom()));
 
-
 				//network.add(new Literal("omitResolution("+cname+", "+ "'"+i+"'"+", c2)"));
-
 				methods.add(new OCIPMethod("doNotResolve" + i, methodParams, new Literal("1_tResolveSingleOptional" + i + "("+cname+"c2"+")"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, methodOutputs, new Monom()));
 			}
 
