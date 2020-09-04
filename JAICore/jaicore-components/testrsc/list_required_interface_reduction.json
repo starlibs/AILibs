@@ -1,8 +1,8 @@
 {
-  "repository": "list-required-interface-reduction",
+  "repository": "list-requiredinterface-reduction",
   "components": [
     {
-      "name": "A-IF",
+      "name": "AIF",
       "requiredInterface": [
         {
           "id": "reqIFace1",
@@ -33,7 +33,7 @@
       "dependencies": []
     },
     {
-      "name": "C-TIF",
+      "name": "CTIF",
       "requiredInterface": [],
       "providedInterface": [
         "TestIFace"

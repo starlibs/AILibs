@@ -1,6 +1,10 @@
 package ai.libs.hasco.core.reduction.softcomp2planning;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
@@ -250,12 +254,14 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				}
 
 				// Tasks: tResolveSingle<i>(c1, c2_1)... tResolveSingle<i>(c1, c2_<min(I)>)
-				for(int j = 1; j <= i.getMin(); j++)
+				for(int j = 1; j <= i.getMin(); j++) {
 					network.add(new Literal(RESOLVE_SINGLE + i + "(c1, c2_"+j+")"));
+				}
 
 				// Tasks: tResolveSingleOptional<i>(c1, c2_<min(I)+1>)... tResolveSingleOptional<i>(c1, c2_<max(I)>)
-				for(int j = i.getMin() + 1; j <= i.getMax(); j++)
+				for(int j = i.getMin() + 1; j <= i.getMax(); j++) {
 					network.add(new Literal(RESOLVE_SINGLE_OPTIONAL+i+"(c1, c2_"+j+")"));
+				}
 
 				methods.add(new OCIPMethod("resolve" + i, methodParams, new Literal(RESOLVE_COMPONENT_IFACE_OPTIONAL_PREFIX + i + "(c1)"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, methodOutputs, new Monom()));
 

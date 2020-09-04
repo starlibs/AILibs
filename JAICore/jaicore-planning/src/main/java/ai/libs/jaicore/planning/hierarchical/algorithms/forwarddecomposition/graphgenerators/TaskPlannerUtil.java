@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,9 +44,9 @@ import ai.libs.jaicore.planning.hierarchical.problems.stn.MethodInstance;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.STNPlanningDomain;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 
-public class TaskPlannerUtil {
+public class TaskPlannerUtil implements ILoggingCustomizable {
 
-	private static final Logger logger = LoggerFactory.getLogger(TaskPlannerUtil.class);
+	private Logger logger = LoggerFactory.getLogger(TaskPlannerUtil.class);
 
 	private Map<String, EvaluablePredicate> evaluablePlanningPredicates;
 
@@ -69,6 +70,8 @@ public class TaskPlannerUtil {
 
 	public Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(final CNFFormula knowledge, final Method method, final Literal task, final Monom state, final List<Literal> remainingProblems)
 			throws InterruptedException {
+
+		this.logger.info("Determine instances of method {} that are applicable in current state for task {}. Complete agenda: {}", method.getName(), task, remainingProblems);
 		Collection<MethodInstance> applicableDerivedMethodInstances = new ArrayList<>();
 		Collection<Map<VariableParam, LiteralParam>> maps = this.getMappingsThatMatchTasksAndMakesItApplicable(knowledge, method.getTask(), task, method.getPrecondition(), state);
 		for (Map<VariableParam, LiteralParam> grounding : maps) {
@@ -182,10 +185,12 @@ public class TaskPlannerUtil {
 
 				applicableDerivedMethodInstances.add(new MethodInstance(method, extendedGrounding));
 				if (method.isLonely()) {
+					this.logger.info("Determined {} applicable method instances of method {} for task {}", applicableDerivedMethodInstances.size(), method.getName(), task);
 					return applicableDerivedMethodInstances;
 				}
 			}
 		}
+		this.logger.info("Determined {} applicable method instances of method {} for task {}", applicableDerivedMethodInstances.size(), method.getName(), task);
 		return applicableDerivedMethodInstances;
 	}
 
@@ -199,7 +204,7 @@ public class TaskPlannerUtil {
 
 		/* check whether the literal only needs to be queried for one param */
 		Collection<LiteralParam> paramsThatNeedGrounding = SetUtil.intersection(SetUtil.difference(ungroundParamsInEvaluablePrecondition, paramsGroundSoFar), l.getParameters());
-		logger.info("Now checking validity of {}. Set of params that still need grounding: {}", l, paramsThatNeedGrounding);
+		this.logger.info("Now checking validity of {}. Set of params that still need grounding: {}", l, paramsThatNeedGrounding);
 		if (paramsThatNeedGrounding.size() > 1) {
 			throw new UnsupportedOperationException("Currently only support for at most one unground variable! Here, the following variables of \"" + l + "\"need grounding: " + paramsThatNeedGrounding);
 		}
@@ -234,19 +239,19 @@ public class TaskPlannerUtil {
 		groundingsFixedSoFar.clear();
 		for (Map<VariableParam, ConstantParam> previouslyOracledGrounding : localCopyOfCurrentGrounding) {
 
-			logger.info("Considering combination of previously fixed oracle decisions: {}", previouslyOracledGrounding);
+			this.logger.info("Considering combination of previously fixed oracle decisions: {}", previouslyOracledGrounding);
 
 			/* completing the param array */
 			for (VariableParam oracledParam : paramsGroundSoFar) {
 				if (!positionsOfVariableParams.containsKey(oracledParam)) {
-					logger.debug("Ignoring ground value {} of param {}, because this param does not occur in the literal", previouslyOracledGrounding.get(oracledParam), oracledParam);
+					this.logger.debug("Ignoring ground value {} of param {}, because this param does not occur in the literal", previouslyOracledGrounding.get(oracledParam), oracledParam);
 					continue;
 				}
-				logger.debug("Inserting {} at position {} in the param array.", previouslyOracledGrounding.get(oracledParam), positionsOfVariableParams.get(oracledParam));
+				this.logger.debug("Inserting {} at position {} in the param array.", previouslyOracledGrounding.get(oracledParam), positionsOfVariableParams.get(oracledParam));
 				params[positionsOfVariableParams.get(oracledParam)] = previouslyOracledGrounding.get(oracledParam);
 			}
-			if (logger.isInfoEnabled()) {
-				logger.info("Params for literal are {}", Arrays.toString(params));
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info("Params for literal are {}", Arrays.toString(params));
 			}
 
 			/* recover the parameter to ground */
@@ -260,10 +265,10 @@ public class TaskPlannerUtil {
 
 			/* if this param is checked for the first time, aquire an oracle */
 			if (paramToBeGround != null) {
-				logger.info("No valid grounding for param {} are known, so apply oracle.", paramToBeGround);
+				this.logger.info("No valid grounding for param {} are known, so apply oracle.", paramToBeGround);
 				Collection<List<ConstantParam>> possibleGroundingsOfThisPredicate = l.isPositive() ? predicate.getParamsForPositiveEvaluation(state, params) : predicate.getParamsForNegativeEvaluation(state, params);
 				if (possibleGroundingsOfThisPredicate == null) {
-					logger.warn("Predicate {} returned NULL for params {} in state {}. Canceling grounding process.", l.getPropertyName(), params, state);
+					this.logger.warn("Predicate {} returned NULL for params {} in state {}. Canceling grounding process.", l.getPropertyName(), params, state);
 					return;
 				}
 				Collection<ConstantParam> possibleValuesForNewParamInThisGrounding = possibleGroundingsOfThisPredicate.stream().map(s -> s.get(finalizedIndexOfParam)).collect(Collectors.toSet());
@@ -272,19 +277,19 @@ public class TaskPlannerUtil {
 					extendedOracleGrounding.put(paramToBeGround, oracledParamOfThisLiteral);
 					groundingsFixedSoFar.add(extendedOracleGrounding);
 				}
-				logger.info("Candidates for grounding is now {}", groundingsFixedSoFar);
+				this.logger.info("Candidates for grounding is now {}", groundingsFixedSoFar);
 				paramsGroundSoFar.add(paramToBeGround);
 			}
 
 			/* otherwise just test the predicate against the choices already made */
 			else {
-				if (logger.isInfoEnabled()) {
-					logger.info("No new parameters to ground. Only testing {} (evaluated by {}) against params {} given groundings {}.", l, predicate.getClass().getName(), Arrays.toString(params), groundingsFixedSoFar);
+				if (this.logger.isInfoEnabled()) {
+					this.logger.info("No new parameters to ground. Only testing {} (evaluated by {}) against params {} given groundings {}.", l, predicate.getClass().getName(), Arrays.toString(params), groundingsFixedSoFar);
 				}
 				localCopyOfCurrentGrounding.stream().filter(grounding -> predicate.test(state, params) == l.isPositive()).forEach(groundingsFixedSoFar::add);
 			}
 		}
-		logger.info("Proceeding with extended oracle grounding: {}", groundingsFixedSoFar);
+		this.logger.info("Proceeding with extended oracle grounding: {}", groundingsFixedSoFar);
 		this.getOracleGroundings(ungroundParamsInEvaluablePrecondition, literalsOrderedByOracability, state, paramsGroundSoFar, groundingsFixedSoFar, basicConstantGrounding);
 	}
 
@@ -319,7 +324,7 @@ public class TaskPlannerUtil {
 	private Collection<Map<VariableParam, LiteralParam>> getMappingsThatMatchTasksAndMakesItApplicable(final CNFFormula knowledge, final Literal methodOrPrimitiveTask, final Literal target, final Monom preconditionOfMethodOrPrimitive,
 			final Monom state) throws InterruptedException {
 		assert preconditionOfMethodOrPrimitive != null : "precondition of methode or primitive task " + methodOrPrimitiveTask + " is null";
-		logger.info("Now computing the possible applications of method {} for task {}", methodOrPrimitiveTask, target);
+		this.logger.info("Now computing the possible applications of method {} for task {}", methodOrPrimitiveTask, target);
 
 		/* if no precondition is to be matched, just match the params and return this binding */
 		if (preconditionOfMethodOrPrimitive.isEmpty()) {
@@ -397,7 +402,7 @@ public class TaskPlannerUtil {
 				try {
 					restMaps = fc.call();
 				} catch (AlgorithmExecutionCanceledException | TimeoutException e) {
-					logger.warn("The forward chainer was canceled or timed out, so maybe not all bindings could be computed!");
+					this.logger.warn("The forward chainer was canceled or timed out, so maybe not all bindings could be computed!");
 					return groundings;
 				}
 			} else {
@@ -414,24 +419,24 @@ public class TaskPlannerUtil {
 				completeGroundingMethod.putAll(restMap);
 
 				/* now check applicability of the GROUND method */
-				logger.debug("Now considering grounding {}", completeGroundingMethod);
+				this.logger.debug("Now considering grounding {}", completeGroundingMethod);
 				Monom precondition = new Monom(preconditionOfMethodOrPrimitive, completeGroundingMethod);
 				if (precondition.isContradictory()) {
-					logger.debug("Ignoring this grounding because it makes the precondition contradictory.");
+					this.logger.debug("Ignoring this grounding because it makes the precondition contradictory.");
 					continue;
 				}
 				List<Literal> positiveLiterals = precondition.stream().filter(Literal::isPositive).collect(Collectors.toList());
 				List<Literal> negativeLiterals = precondition.stream().filter(Literal::isNegated).map(l -> l.clone().toggleNegation()).collect(Collectors.toList());
 				if (unitedKnowledge.containsAll(positiveLiterals) && SetUtil.intersection(unitedKnowledge, negativeLiterals).isEmpty()) {
-					logger.debug("Adding the grounding.");
+					this.logger.debug("Adding the grounding.");
 					groundings.add(completeGroundingMethod);
-				} else if (logger.isDebugEnabled()) {
+				} else if (this.logger.isDebugEnabled()) {
 					for (Literal l : positiveLiterals) {
 						if (!unitedKnowledge.contains(l)) {
-							logger.debug("Ignoring this grounding because the united knowledge {} does not contain the positive literal {}", unitedKnowledge, l);
-							if (logger.isTraceEnabled()) {
+							this.logger.debug("Ignoring this grounding because the united knowledge {} does not contain the positive literal {}", unitedKnowledge, l);
+							if (this.logger.isTraceEnabled()) {
 								for (Literal l2 : unitedKnowledge) {
-									logger.trace("Comparing {} of signature {}{} with {} of signature{}{}: {}/{}", l, l.getClass().getName(), l.getParameters().stream().map(p -> p.getName() + ":" + p.getType()).collect(Collectors.toList()),
+									this.logger.trace("Comparing {} of signature {}{} with {} of signature{}{}: {}/{}", l, l.getClass().getName(), l.getParameters().stream().map(p -> p.getName() + ":" + p.getType()).collect(Collectors.toList()),
 											l2, l2.getClass().getName(), l2.getParameters().stream().map(p -> p.getName() + ":" + p.getType()).collect(Collectors.toList()), l.equals(l2), l2.equals(l));
 								}
 							}
@@ -439,12 +444,12 @@ public class TaskPlannerUtil {
 						}
 					}
 					if (!SetUtil.intersection(unitedKnowledge, negativeLiterals).isEmpty()) {
-						logger.debug("Ignoring this grounding because of an non-empty intersection of the united knowledge {} and the negative literals {}", unitedKnowledge, negativeLiterals);
+						this.logger.debug("Ignoring this grounding because of an non-empty intersection of the united knowledge {} and the negative literals {}", unitedKnowledge, negativeLiterals);
 					}
 				}
 			}
 		}
-		logger.info("Admissible groundings for {} with precondition {} on {} in state {} are: {}", methodOrPrimitiveTask, preconditionOfMethodOrPrimitive, target, state, groundings);
+		this.logger.info("Admissible groundings for {} with precondition {} on {} in state {} are: {}", methodOrPrimitiveTask, preconditionOfMethodOrPrimitive, target, state, groundings);
 		return groundings;
 	}
 
@@ -501,5 +506,15 @@ public class TaskPlannerUtil {
 			plan.add(new CEOCAction((CEOCOperation) op.get(), grounding));
 		}
 		return plan;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }

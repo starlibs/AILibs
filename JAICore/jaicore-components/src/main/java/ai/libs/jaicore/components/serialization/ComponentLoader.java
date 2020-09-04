@@ -125,6 +125,9 @@ public class ComponentLoader {
 			Component c;
 			for (JsonNode component : describedComponents) {
 				c = new Component(component.get("name").asText());
+				if (c.getName().contains("-")) {
+					throw new IllegalArgumentException("Illegal component name " + c.getName() + ". No hyphens allowed. Please only use [a-zA-z0-9].");
+				}
 				this.componentMap.put(c.getName(), component);
 
 				if (!this.uniqueComponentNames.add(c.getName())) {

@@ -128,7 +128,7 @@ public class Method implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Method [name=" + this.name + ", parameters=" + this.parameters + ", task=" + this.task + ", precondition=" + this.precondition + ", network=" + this.network + ", lonely=" + this.lonely + "]";
+		return "Method [name=" + this.name + ", parameters=" + this.parameters + ", task=" + this.task + ", precondition=" + this.precondition + ", network=" + this.network.getLineBasedStringRepresentation() + ", lonely=" + this.lonely + "]";
 	}
 
 }
