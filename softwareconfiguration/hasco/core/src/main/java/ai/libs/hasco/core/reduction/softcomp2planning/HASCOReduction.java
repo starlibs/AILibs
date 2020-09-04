@@ -47,6 +47,9 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 
 	// component selection
 	private static final String RESOLVE_COMPONENT_IFACE_PREFIX = "1_tResolve";
+	private static final String RESOLVE_COMPONENT_IFACE_OPTIONAL_PREFIX = "1_tResolveOpt";
+	private static final String RESOLVE_SINGLE = "1_tResolveSingle";
+	private static final String RESOLVE_SINGLE_OPTIONAL = "1_tResolveSingleOptional";
 	private static final String SATISFY_PREFIX = "1_satisfy";
 
 	// component configuration
@@ -147,10 +150,12 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 	public static List<OCIPMethod> getMethods(final Collection<Component> components) {
 		List<OCIPMethod> methods = new ArrayList<>();
 
+
 		// Non-list interfaces methods
 		for (Component c : components) {
 			String cName = c.getName();
 
+			// resolve<i>With<c>(c1; c2, p1, ..., pm, r1, ..., rn)
 			/* create methods for the refinement of the interfaces offered by this component */
 			for (String i : c.getProvidedInterfaces()) {
 				List<VariableParam> methodParams = new ArrayList<>();
@@ -192,7 +197,6 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 
 				/* create the outputs of this method and add the method to the collection */
 				List<VariableParam> outputs = methodParams.stream().filter(p -> !p.equals(inputParam)).collect(Collectors.toList());
-				// resolve<i>With<c>(c1; c2, p1, ..., pm, r1, ..., rn)
 				methods.add(new OCIPMethod("resolve" + i + "With" + cName, methodParams, new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + i + "(c1,c2)"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, outputs, new Monom()));
 			}
 
@@ -227,63 +231,63 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 		}
 
 		// List interfaces methods
-		for(Component c: components) {
-			String cname = c.getName();
+		for (Component c: components) {
+			String cName = c.getName();
 
-			//Recorro las interfaces provistas de cada componente
+			// <<=| resolve<i>(c1; c2_1, ..., c2_<max(I)>) |=>>
 			for (Interface i : c.getRequiredInterfaces()) {
 				List<VariableParam> methodParams = new ArrayList<>();
-				VariableParam inputParam = new VariableParam("c1");
-				methodParams.add(inputParam);
+				List<Literal> network = new ArrayList<>();
 				List<VariableParam> methodOutputs = new ArrayList<>();
+				methodParams.add(new VariableParam("c1"));
 
-				//Configuro el tasknetwork del metodo resolve<i>(c1; c2_1,..,c2_<max(I)>)
-				List<Literal> network = new ArrayList();
-				//String output = "";
 				String condition ="!anyOmitted(c1,'"+i+"')";
-			
 
-				//Recorro la cantidad de interfaces requeridas mínimas
-				for(int x = 1; x <= i.getMin(); x++) {
-					network.add(new Literal("1_tResolveSingle" + i + "(c1, c2_"+x+")"));
-					VariableParam output = new VariableParam("c2_"+x);
-					methodOutputs.add(output);
+				for (int j = 1; j <= i.getMax(); j++) {
+					VariableParam varPar = new VariableParam("c2_"+j);
+					methodParams.add(varPar);
+					methodOutputs.add(varPar);
 				}
 
-				//Recorro la cantidad de interfaces requeridas opcionales
-				for(int x = i.getMin() + 1; x <= i.getMax(); x++) {
-					network.add(new Literal("1_tResolveSingleOptional"+i+"(c1, c2_"+x+")"));
-					VariableParam output = new VariableParam("c2_"+x);
-					methodOutputs.add(output);
-				}
+				// Tasks: tResolveSingle<i>(c1, c2_1)... tResolveSingle<i>(c1, c2_<min(I)>)
+				for(int j = 1; j <= i.getMin(); j++)
+					network.add(new Literal(RESOLVE_SINGLE + i + "(c1, c2_"+j+")"));
 
-				
-				methods.add(new OCIPMethod("resolve" + i, methodParams, new Literal("1_tResolve" + i + "(c1)"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, methodOutputs, new Monom()));
-				//doResolve
+				// Tasks: tResolveSingleOptional<i>(c1, c2_<min(I)+1>)... tResolveSingleOptional<i>(c1, c2_<max(I)>)
+				for(int j = i.getMin() + 1; j <= i.getMax(); j++)
+					network.add(new Literal(RESOLVE_SINGLE_OPTIONAL+i+"(c1, c2_"+j+")"));
+
+				methods.add(new OCIPMethod("resolve" + i, methodParams, new Literal(RESOLVE_COMPONENT_IFACE_OPTIONAL_PREFIX + i + "(c1)"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, methodOutputs, new Monom()));
+
+				// using list.clear() yields unexpected results.
+				methodParams = new ArrayList<>();
+				network = new ArrayList<>();
+				methodOutputs = new ArrayList<>();
+
+
+				// <<=| doResolve<i>(c1, c2) |=>>
+				methodParams.add(new VariableParam("c1"));
 				methodParams.add(new VariableParam("c2"));
 
-				methodOutputs.clear();
-				network.clear();
+				network.add(new Literal(RESOLVE_SINGLE + i + "(c1, c2)"));
 
-				network.add(new Literal("1_tResolveSingle" + i + "("+cname+", c2)"));
+				methods.add(new OCIPMethod("doResolve" + i, methodParams, new Literal(RESOLVE_SINGLE_OPTIONAL + i + "(c1, c2)"), new Monom(COMPONENT_OF_C1 + " & " + condition), new TaskNetwork(network), false, methodOutputs, new Monom()));
+				network = new ArrayList<>();
 
-				//Falta agregar la condición de AnyOmitted
-				methods.add(new OCIPMethod("doResolve" + i, methodParams, new Literal("1_tResolveSingleOptional" + i + "("+cname+"c2"+")"), new Monom(COMPONENT_OF_C1 + " & " + condition), new TaskNetwork(network), false, methodOutputs, new Monom()));
-				
-				network.clear();
-				network.add(new Literal("1_omitResolution" + "(c1, " + "'" + i + "', c2)"));
-				//network.add(new Literal("omitResolution("+cname+", "+ "'"+i+"'"+", c2)"));
-				methods.add(new OCIPMethod("doNotResolve" + i, methodParams, new Literal("1_tResolveSingleOptional" + i + "("+cname+"c2"+")"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, methodOutputs, new Monom()));
+				// <<=| doNotResolve<i>(c1, c2) |=>>
+				network.add(new Literal(OMIT_RESOLUTION_PREFIX + "(c1, "+"'"+i+"', c2)"));
+				methods.add(new OCIPMethod("doNotResolve" + i, methodParams, new Literal(RESOLVE_SINGLE_OPTIONAL + i + "(c1, c2)"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, methodOutputs, new Monom()));
 			}
 
 			/* create methods for the refinement of the interfaces offered by this component */
+			// <<=| resolve<i>With<c>(c1, c2; p1, ..., pm, r1, ..., rn) |=>>
 			for (String i : c.getProvidedInterfaces()) {
 				List<VariableParam> methodParams = new ArrayList<>();
 				VariableParam inputParam = new VariableParam("c1");
 				methodParams.add(inputParam);
 				methodParams.add(new VariableParam("c2"));
 				List<Interface> requiredInterfaces = c.getRequiredInterfaces();
-				String condition ="!anyOmitted(c1,'"+i+"')";
+				String condition ="!anyOmitted(c1, '"+i+"')";
 
 				/* create string for the arguments of this operation */
 				StringBuilder satisfyOpArgumentsSB = new StringBuilder();
@@ -300,7 +304,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				/* configure task network for this method */
 				List<Literal> network = new ArrayList<>();
 				int r = 0;
-				network.add(new Literal(SATISFY_PREFIX + i + "With" + cname + "(c1, c2" + satisfyOpArgumentsSB.toString() + ")"));
+				network.add(new Literal(SATISFY_PREFIX + i + "With" + cName + "(c1, c2" + satisfyOpArgumentsSB.toString() + ")"));
 				for (Interface requiredInterface : requiredInterfaces) {
 					String paramName = "r" + (++r);
 					methodParams.add(new VariableParam(paramName));
@@ -314,13 +318,12 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 						refinementArgumentsSB.append(", " + paramIdentifier);
 					}
 				}
-				network.add(new Literal(REFINE_PARAMETERS_PREFIX + cname + "(c2" + refinementArgumentsSB.toString() + ")"));
+				network.add(new Literal(REFINE_PARAMETERS_PREFIX + cName + "(c2" + refinementArgumentsSB.toString() + ")"));
 
 				/* create the outputs of this method and add the method to the collection */
 				List<VariableParam> outputs = methodParams.stream().filter(p -> !p.equals(inputParam)).collect(Collectors.toList());
 
-				//Falta agregar la nueva condición
-				methods.add(new OCIPMethod("resolve" + i + "With" + cname, methodParams, new Literal("tResolveSingle" + i + "(c1,c2)"), new Monom(COMPONENT_OF_C1 + " & " + condition), new TaskNetwork(network), false, outputs, new Monom()));
+				methods.add(new OCIPMethod("resolve" + i + "With" + cName, methodParams, new Literal(RESOLVE_SINGLE + i + "(c1,c2)"), new Monom(COMPONENT_OF_C1 + " & " + condition), new TaskNetwork(network), false, outputs, new Monom()));
 			}
 
 		}
@@ -349,7 +352,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 		evaluablePredicates.put("isValidParameterRangeRefinement", new IsValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
 		evaluablePredicates.put("notRefinable", new IsNotRefinablePredicate(this.components, this.paramRefinementConfig));
 		evaluablePredicates.put("refinementCompleted", new IsRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
-		return new CEOCIPSTNPlanningProblem(domain, knowledge, init, new TaskNetwork(RESOLVE_COMPONENT_IFACE_PREFIX + this.originalProblem.getRequiredInterface() + "('request', 'solution')"), evaluablePredicates, new HashMap<>());
+		return new CEOCIPSTNPlanningProblem(domain, knowledge, init, new TaskNetwork(RESOLVE_SINGLE + this.originalProblem.getRequiredInterface() + "('request', 'solution')"), evaluablePredicates, new HashMap<>());
 	}
 
 	public CEOCIPSTNPlanningProblem getPlanningProblem() {
