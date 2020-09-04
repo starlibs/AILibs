@@ -36,6 +36,7 @@ extends CostSensitiveGraphSearchBasedPlanningAlgorithm<P, S, N, A, V> {
 
 	@Override
 	public void runPreCreationHook() {
+		super.runPreCreationHook();
 		Logger logger = this.getLogger();
 		logger.info("Starting HTN planning process.");
 		if (logger.isDebugEnabled()) {

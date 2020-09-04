@@ -1,7 +1,5 @@
 package ai.libs.hasco.test;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -16,14 +14,19 @@ import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.core.reduction.softcomp2planning.HASCOReduction;
 import ai.libs.jaicore.basic.algorithm.ASolutionCandidateFoundEvent;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
+import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
+import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import ai.libs.jaicore.planning.core.Plan;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedPlan;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.BlindForwardDecompositionHTNPlanner;
+import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
+import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 
 public class NewReductionSandbox {
 	// For easy navigation within the console.
@@ -69,18 +72,21 @@ public class NewReductionSandbox {
 		/* derive HTN planning problem*/
 		HASCOReduction<Double> reduction = new HASCOReduction<>();
 		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, Double> htnProblem = reduction.encodeProblem(problem);
-		System.out.println("<<<=======================| Init State |=======================>>>");
-		htnProblem.getInit().forEach(l -> System.out.println(l));
-		System.out.println("<<<=======================| Initial Task Network |=======================>>>");
-		System.out.println(htnProblem.getNetwork().getLineBasedStringRepresentation());
-		System.out.println("<<<=======================| Methods |=======================>>>");
-		htnProblem.getDomain().getMethods().forEach(m -> System.out.println(this.prettifyMethod((OCIPMethod) m)));
-		System.out.println("<<<=======================| Operations |=======================>>>");
-		htnProblem.getDomain().getOperations().forEach(o -> System.out.println(this.prettifyOperation((CEOCOperation) o)));
+		//		System.out.println("<<<=======================| Init State |=======================>>>");
+		//		htnProblem.getInit().forEach(l -> System.out.println(l));
+		//		System.out.println("<<<=======================| Initial Task Network |=======================>>>");
+		//		System.out.println(htnProblem.getNetwork().getLineBasedStringRepresentation());
+		//		System.out.println("<<<=======================| Methods |=======================>>>");
+		//		htnProblem.getDomain().getMethods().forEach(m -> System.out.println(this.prettifyMethod((OCIPMethod) m)));
+		//		System.out.println("<<<=======================| Operations |=======================>>>");
+		//		htnProblem.getDomain().getOperations().forEach(o -> System.out.println(this.prettifyOperation((CEOCOperation) o)));
 
 		/* solve the HTN planning problem */
 		BlindForwardDecompositionHTNPlanner<Double> algo = new BlindForwardDecompositionHTNPlanner<>(htnProblem, n -> 0.0);
 		//		algo.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
+
+		new AlgorithmVisualizationWindow(algo).withMainPlugin(new GraphViewPlugin()).withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())));
+
 		int seenPlans = 0;
 		while (algo.hasNext()) {
 			IAlgorithmEvent event = algo.nextWithException();
@@ -99,8 +105,12 @@ public class NewReductionSandbox {
 			}
 		}
 
-		int expectedPlans = 10001010;
-		assertEquals(expectedPlans, seenPlans);
+		while (true) {
+			;
+		}
+
+		//		int expectedPlans = 10001010;
+		//		assertEquals(expectedPlans, seenPlans);
 	}
 
 	private String prettifyMethod(final OCIPMethod method) {
