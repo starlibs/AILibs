@@ -378,6 +378,58 @@ public class SetUtil {
 		return res;
 	}
 
+	public static List<Integer> invertPermutation(final List<Integer> permutation) {
+		int n = permutation.size();
+		List<Integer> inverse = new ArrayList<>(n);
+		for (int i = 0; i < n; i++) {
+			inverse.add(permutation.indexOf(i));
+		}
+		return inverse;
+	}
+
+	/**
+	 * Determines the permutation that makes l2 result from l1
+	 **/
+	public static <T> List<Integer> getPermutation(final List<T> l1, final List<T> l2) {
+		int n = l1.size();
+		if (n != l2.size()) {
+			throw new IllegalArgumentException("Expecting two lists of same length!");
+		}
+		List<Integer> p = new ArrayList<>(n);
+		for (int i = 0; i < n; i++) {
+			int pos = l1.indexOf(l2.get(i));
+			if (pos < 0) {
+				throw new IllegalArgumentException("The second list does not contain the element " + l1.get(i) + ". Cannot compute permutation between lists with different elements!");
+			}
+			p.add(pos);
+		}
+		return p;
+	}
+
+	/**
+	 * Permutates the elements of the given list according to the given permutation
+	 *
+	 * @param <T>
+	 * @param list
+	 * @param permutation
+	 * @return
+	 */
+	public static <T> List<T> applyPermutation(final List<T> list, final List<Integer> permutation) {
+		int n = list.size();
+		if (permutation.size() != n) {
+			throw new IllegalArgumentException("The permutation must have the same length as the list.");
+		}
+		List<T> out = new ArrayList<>(n);
+		for (int i = 0; i < n; i++) {
+			out.add(list.get(permutation.get(i)));
+		}
+		return out;
+	}
+
+	public static <T> List<T> applyInvertedPermutation(final List<T> list, final List<Integer> permutation) {
+		return applyPermutation(list, invertPermutation(permutation));
+	}
+
 	public static <T> Collection<List<T>> getPermutations(final Collection<T> set) {
 		Collection<List<T>> permutations = new ArrayList<>();
 		List<T> setAsList = new ArrayList<>(set);
@@ -1180,4 +1232,34 @@ public class SetUtil {
 		}
 		return maxIndex;
 	}
+
+	public static <T> Collection<List<T>> getSubGridRelationFromDomains(final List<List<T>> hypercubeDomains, final int numSamples) {
+		return getSubGridRelationFromRelation(cartesianProduct(hypercubeDomains), numSamples);
+	}
+
+	public static <T> Collection<List<T>> getSubGridRelationFromRelation(final Collection<List<T>> relation, final int numSamples) {
+
+		/* determine total number of entries of the hypercube */
+		long totalSize = relation.size();
+		if (totalSize < numSamples) {
+			throw new IllegalArgumentException("Cannot generate a sample of size " + numSamples + " for a hypercube with only " + totalSize + " entries.");
+		}
+		int stepSize = (int)Math.floor(totalSize * 1.0 / numSamples);
+
+		/* compute full hypercube */
+		int i = 0;
+		Collection<List<T>> subSample = new ArrayList<>();
+		for (List<T> tuple : relation) {
+			if (i % stepSize == 0) {
+				subSample.add(tuple);
+			}
+			i++;
+			if (subSample.size() == numSamples) {
+				break;
+			}
+		}
+		return subSample;
+	}
+
+
 }

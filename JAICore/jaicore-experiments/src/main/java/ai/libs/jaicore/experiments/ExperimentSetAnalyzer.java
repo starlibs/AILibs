@@ -144,89 +144,119 @@ public class ExperimentSetAnalyzer {
 		return true;
 	}
 
-	public List<Map<String, String>> getAllPossibleKeyCombinations() throws IllegalExperimentSetupException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
-		if (this.possibleKeyCombinations == null) {
-			this.logger.debug("Computing all possible experiments.");
+	public List<List<String>> getAllPossibleKeyCombinationsAsList() throws IllegalExperimentSetupException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+		this.logger.debug("Computing all possible experiments.");
 
-			/* build cartesian product over all possible key-values */
-			List<List<String>> values = new ArrayList<>();
-			for (String key : this.keyFields) {
-				if (!this.valuesForKeyFieldsInConfig.containsKey(key)) {
-					throw new IllegalStateException("No values for key " + key + " have been defined!");
-				}
-				List<String> valuesForKey = this.getAllValuesForKey(key);
-				this.logger.debug("Retrieving {} values for key {}. Enable TRACE to see all values.", valuesForKey.size(), key);
-				this.logger.trace("Values for key {}: {}", key, valuesForKey);
-				values.add(valuesForKey);
+		/* build cartesian product over all possible key-values */
+		List<List<String>> values = new ArrayList<>();
+		for (String key : this.keyFields) {
+			if (!this.valuesForKeyFieldsInConfig.containsKey(key)) {
+				throw new IllegalStateException("No values for key " + key + " have been defined!");
 			}
+			List<String> valuesForKey = this.getAllValuesForKey(key);
+			this.logger.debug("Retrieving {} values for key {}. Enable TRACE to see all values.", valuesForKey.size(), key);
+			this.logger.trace("Values for key {}: {}", key, valuesForKey);
+			values.add(valuesForKey);
+		}
 
-			/* get constraints */
-			List<Predicate<List<String>>> constraints = new ArrayList<>();
-			if (this.config.getConstraints() != null) {
-				for (String p : this.config.getConstraints()) {
-					if (p.startsWith(PROTOCOL_JAVA)) {
-						try {
-							constraints.add((Predicate<List<String>>) Class.forName(p.substring(PROTOCOL_JAVA.length()).trim()).getConstructor().newInstance());
-						} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-							this.logger.error("Error in loading constraint {}: {}", p, LoggerUtil.getExceptionInfo(e));
+		/* get constraints */
+		List<List<String>> valuesSortedByConstraintRelevance;
+		List<Predicate<List<String>>> constraints = new ArrayList<>();
+		List<Integer> permutation;
+		if (this.config.getConstraints() != null) {
+
+			List<String> constraintsToParse = new ArrayList<>();
+			Map<String, Integer> constraintScorePerKeyword = new HashMap<>();
+			this.keyFields.forEach(k -> constraintScorePerKeyword.put(k, 0));
+
+			for (String p : this.config.getConstraints()) {
+				if (p.startsWith(PROTOCOL_JAVA)) {
+					try {
+						constraints.add((Predicate<List<String>>) Class.forName(p.substring(PROTOCOL_JAVA.length()).trim()).getConstructor().newInstance());
+					} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+						this.logger.error("Error in loading constraint {}: {}", p, LoggerUtil.getExceptionInfo(e));
+					}
+				}
+				else {
+					this.logger.info("Parsing constraint {}", p);
+					constraintsToParse.add(p);
+					for (String keyword : this.keyFields) {
+						if (p.contains(keyword)) {
+							constraintScorePerKeyword.put(keyword, constraintScorePerKeyword.get(keyword) + 1);
 						}
 					}
-					else {
-						this.logger.info("Parsing constraint {}", p);
-						Predicate<List<String>> predicate = new Predicate<List<String>>() {
+				}
+			}
+			final List<String> keyFieldsSortedByConstraintRelevance = this.keyFields.stream().sorted((f1, f2) -> Integer.compare(constraintScorePerKeyword.get(f2), constraintScorePerKeyword.get(f1))).collect(Collectors.toList());
+			permutation = SetUtil.getPermutation(this.keyFields, keyFieldsSortedByConstraintRelevance);
+			valuesSortedByConstraintRelevance = SetUtil.applyPermutation(values, permutation);
 
-							private final int highestRequiredIndex = ExperimentSetAnalyzer.this.keyFields.stream().filter(p::contains).map(k -> ExperimentSetAnalyzer.this.keyFields.indexOf(k)).max(Integer::compare).get();
+			/* now create predicates from the constraints that require parsing */
+			for (String p : constraintsToParse) {
+				Predicate<List<String>> predicate = new Predicate<List<String>>() {
 
-							@Override
-							public boolean test(final List<String> t) {
-								String evaluatedConstraint = p;
-								int n = t.size(); // n is the number of key fields considered in t (grows over time)
-								if (n <= this.highestRequiredIndex) { // only filter conditions in which all necessary variables have been defined
-									return true;
-								}
-								for (int i = 0; i < n; i++) {
-									evaluatedConstraint = evaluatedConstraint.replace(ExperimentSetAnalyzer.this.keyFields.get(i), t.get(i));
-								}
-								try {
-									ScriptEngine engine = scriptEngine.get();
-									Object evaluation = engine.eval(evaluatedConstraint);
-									if(evaluation instanceof Boolean) {
-										return (boolean) evaluation;
-									} else {
-										ExperimentSetAnalyzer.this.logger.error("The evaluation of constraint={} did not return a boolean but instead: {}. Predicate falls back to `false`."
-												+ " \nThe original constraint is: {}",
-												evaluatedConstraint, evaluation, p);
-										return false;
-									}
-								} catch (ScriptException e) {
-									ExperimentSetAnalyzer.this.logger.error(LoggerUtil.getExceptionInfo(e));
-									return false;
-								}
+					private final int highestRequiredIndex = keyFieldsSortedByConstraintRelevance.stream().filter(p::contains).map(keyFieldsSortedByConstraintRelevance::indexOf).max(Integer::compare).get();
+
+					@Override
+					public boolean test(final List<String> t) {
+						String evaluatedConstraint = p;
+						int n = t.size(); // n is the number of key fields considered in t (grows over time)
+						if (n <= this.highestRequiredIndex || n > this.highestRequiredIndex + 1) { // only apply the predicate for tuples of EXACTLY the length of the highest required variable (we assume that any larger tuple has already been tested implictly by a previously requested sub-tuple)
+							return true;
+						}
+						for (int i = 0; i < n; i++) {
+							evaluatedConstraint = evaluatedConstraint.replace(keyFieldsSortedByConstraintRelevance.get(i), t.get(i));
+						}
+						try {
+							ScriptEngine engine = scriptEngine.get();
+							Object evaluation = engine.eval(evaluatedConstraint);
+							if(evaluation instanceof Boolean) {
+								return (boolean) evaluation;
+							} else {
+								ExperimentSetAnalyzer.this.logger.error("The evaluation of constraint={} did not return a boolean but instead: {}. Predicate falls back to `false`."
+										+ " \nThe original constraint is: {}",
+										evaluatedConstraint, evaluation, p);
+								return false;
 							}
-						};
-						constraints.add(predicate);
+						} catch (ScriptException e) {
+							ExperimentSetAnalyzer.this.logger.error(LoggerUtil.getExceptionInfo(e));
+							return false;
+						}
 					}
-				}
+				};
+				constraints.add(predicate);
 			}
-			Predicate<List<String>> jointConstraints = t -> {
-				for (Predicate<List<String>> c : constraints) {
-					if (!c.test(t)) {
-						return false;
-					}
-				}
-				return true;
-			};
 
-			/* create one experiment object from every tuple */
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Building relation from {} cartesian product with {} constraints.", values.stream().map(l -> "" + l.size()).collect(Collectors.joining(" x ")), constraints.size());
+		}
+		else {
+			valuesSortedByConstraintRelevance = values;
+			permutation = null;
+		}
+		Predicate<List<String>> jointConstraints = t -> {
+			for (Predicate<List<String>> c : constraints) {
+				if (!c.test(t)) {
+					return false;
+				}
 			}
-			RelationComputationProblem<String> problem = constraints.isEmpty() ? new RelationComputationProblem<>(values) : new RelationComputationProblem<>(values, jointConstraints);
-			LDSRelationComputer<String> lc = new LDSRelationComputer<>(problem);
-			lc.setLoggerName(this.logger.getName() + ".relationcomputer");
-			List<List<String>> combinationsAsList = lc.call();
+			return true;
+		};
+
+		/* create one experiment object from every tuple */
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug("Building relation from {} cartesian product with {} constraints.", values.stream().map(l -> "" + l.size()).collect(Collectors.joining(" x ")), constraints.size());
+		}
+		RelationComputationProblem<String> problem = constraints.isEmpty() ? new RelationComputationProblem<>(values) : new RelationComputationProblem<>(valuesSortedByConstraintRelevance, jointConstraints);
+		LDSRelationComputer<String> lc = new LDSRelationComputer<>(problem);
+		lc.setLoggerName(this.logger.getName() + ".relationcomputer");
+		List<List<String>> entries = lc.call();
+		return permutation != null ? entries.stream().map(e -> SetUtil.applyInvertedPermutation(e, permutation)).collect(Collectors.toList()) : entries;
+	}
+
+	public List<Map<String, String>> getAllPossibleKeyCombinations() throws IllegalExperimentSetupException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+		if (this.possibleKeyCombinations == null) {
+			List<List<String>> combinationsAsList = this.getAllPossibleKeyCombinationsAsList();
 			this.logger.info("Obtained {} key combinations. Now building maps from these.", combinationsAsList.size());
-			this.possibleKeyCombinations = Collections.unmodifiableList(combinationsAsList.stream().map(c -> Collections.unmodifiableMap(this.mapValuesToKeyValueMap(c))).collect(Collectors.toList()));
+			this.possibleKeyCombinations = this.mapListTuplesToKeyValueMap(combinationsAsList);
 		}
 		return this.possibleKeyCombinations;
 	}
@@ -238,6 +268,10 @@ public class ExperimentSetAnalyzer {
 			map.put(key, values.get(i++));
 		}
 		return map;
+	}
+
+	public List<Map<String, String>> mapListTuplesToKeyValueMap(final Collection<List<String>> tuples) {
+		return Collections.unmodifiableList(tuples.stream().map(c -> Collections.unmodifiableMap(this.mapValuesToKeyValueMap(c))).collect(Collectors.toList()));
 	}
 
 	public int getNumberOfValuesForKey(final String key) throws IllegalKeyDescriptorException {

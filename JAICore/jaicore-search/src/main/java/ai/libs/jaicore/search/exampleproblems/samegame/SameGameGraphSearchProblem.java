@@ -12,10 +12,7 @@ public class SameGameGraphSearchProblem implements IPathSearchWithPathEvaluation
 	private static final SameGameGoalPredicate GP = new SameGameGoalPredicate();
 
 	private final SameGameGraphGenerator gg;
-	private final boolean maximize;
-	private final int minScore;
-	private final int maxScore;
-	private final boolean relativeScores;
+	private final SameGamePathEvaluator pe;
 
 	public SameGameGraphSearchProblem(final SameGameState initState) {
 		this(initState, true);
@@ -27,10 +24,8 @@ public class SameGameGraphSearchProblem implements IPathSearchWithPathEvaluation
 
 	public SameGameGraphSearchProblem(final SameGameState initState, final boolean maximize, final boolean relativeScores) {
 		this.gg = new SameGameGraphGenerator(initState);
-		this.minScore = -10000;
-		this.maxScore = (int)Math.pow(initState.getNumberOfPiecesPerColor().values().stream().max(Integer::compare).get() - 2.0, 2);
-		this.relativeScores = relativeScores;
-		this.maximize = maximize;
+		this.pe = new SameGamePathEvaluator(initState, maximize, relativeScores);
+
 	}
 
 	@Override
@@ -45,13 +40,10 @@ public class SameGameGraphSearchProblem implements IPathSearchWithPathEvaluation
 
 	@Override
 	public IPathEvaluator<SameGameNode, SameGameCell, Double> getPathEvaluator() {
-		return p -> {
-			double unitVal = ((double)p.getHead().getScore() - this.minScore) / (this.relativeScores ? (this.maxScore - this.minScore) : 1);
-			return this.maximize ? unitVal : (1 - unitVal);
-		};
+		return this.pe;
 	}
 
 	public int getMaxScore() {
-		return this.maxScore;
+		return this.pe.getMaxScore();
 	}
 }

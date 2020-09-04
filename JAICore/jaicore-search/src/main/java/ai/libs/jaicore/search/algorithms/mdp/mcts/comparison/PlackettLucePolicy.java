@@ -81,7 +81,7 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	/* configuration of gamma-shape. this depends on the branching factor.
 	 * Note that "per child" does not mean that each child needs so many visits but for k children, the parent needs k * p observations. */
 	private static final int GAMMA_LONG_MAX = 2;
-	private static final int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT = 10;
+	private static final int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT = 1;
 	private static final int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_ABS = 10;
 	private static final int GAMMA_LONG_OBSERVATIONS_PER_CHILD_TO_REACH_ONE = 10;
 	private static final double GAMMA_LONG_DERIVATIVE_EXP = 1;
