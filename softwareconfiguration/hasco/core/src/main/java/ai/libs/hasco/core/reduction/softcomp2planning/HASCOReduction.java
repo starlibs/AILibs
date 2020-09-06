@@ -154,7 +154,6 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 	public static List<OCIPMethod> getMethods(final Collection<Component> components) {
 		List<OCIPMethod> methods = new ArrayList<>();
 
-
 		// Non-list interfaces methods
 		for (Component c : components) {
 			String cName = c.getName();
@@ -236,6 +235,20 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 
 		// List interfaces methods
 		for (Component c: components) {
+			/* Uncomment to verify that your component problem is being read as expected.
+			String compDesc = "Component " + c.getName() + ", with " + c.getParameters().size() + " parameters" +
+					", and prov ifs " + String.join(", ", c.getProvidedInterfaces()) +
+					", with req ifs " + c.getRequiredInterfaces().stream().map(Interface::toString).collect(Collectors.joining(", "));
+			System.out.println(compDesc);
+			for (Parameter p : c.getParameters()) {
+				System.out.println(p.getName() + " has domain: " + p.getDefaultDomain());
+			}
+
+			for (Interface i : c.getRequiredInterfaces()) {
+				System.out.println(i.getName() + " has min: " + i.getMin() + ", and max: " + i.getMax());
+			}
+			 */
+
 			String cName = c.getName();
 
 			// <<=| resolve<i>(c1; c2_1, ..., c2_<max(I)>) |=>>
@@ -284,7 +297,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				network.add(new Literal(OMIT_RESOLUTION_PREFIX + "(c1, "+"'"+i+"', c2)"));
 				methods.add(new OCIPMethod("doNotResolve" + i, methodParams, new Literal(RESOLVE_SINGLE_OPTIONAL + i + "(c1, c2)"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, methodOutputs, new Monom()));
 			}
-
+			
 			/* create methods for the refinement of the interfaces offered by this component */
 			// <<=| resolve<i>With<c>(c1, c2; p1, ..., pm, r1, ..., rn) |=>>
 			for (String i : c.getProvidedInterfaces()) {

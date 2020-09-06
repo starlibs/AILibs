@@ -28,10 +28,13 @@ import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 
+import static org.junit.Assert.assertEquals;
+
 public class NewReductionSandbox {
 	// For easy navigation within the console.
 	private static int methodCounter = 1;
 	private static int operationCounter = 1;
+	private static int planCounter = 1;
 
 	private static final File problemFileNormal = new File("../../../JAICore/jaicore-components/testrsc/simpleproblem.json");
 	private static final String reqInterfaceNormal = "IFace";
@@ -72,14 +75,14 @@ public class NewReductionSandbox {
 		/* derive HTN planning problem*/
 		HASCOReduction<Double> reduction = new HASCOReduction<>();
 		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, Double> htnProblem = reduction.encodeProblem(problem);
-		//		System.out.println("<<<=======================| Init State |=======================>>>");
-		//		htnProblem.getInit().forEach(l -> System.out.println(l));
-		//		System.out.println("<<<=======================| Initial Task Network |=======================>>>");
-		//		System.out.println(htnProblem.getNetwork().getLineBasedStringRepresentation());
-		//		System.out.println("<<<=======================| Methods |=======================>>>");
-		//		htnProblem.getDomain().getMethods().forEach(m -> System.out.println(this.prettifyMethod((OCIPMethod) m)));
-		//		System.out.println("<<<=======================| Operations |=======================>>>");
-		//		htnProblem.getDomain().getOperations().forEach(o -> System.out.println(this.prettifyOperation((CEOCOperation) o)));
+		System.out.println("<<<=======================| Init State |=======================>>>");
+		htnProblem.getInit().forEach(l -> System.out.println(l));
+		System.out.println("<<<=======================| Initial Task Network |=======================>>>");
+		System.out.println(htnProblem.getNetwork().getLineBasedStringRepresentation());
+		System.out.println("<<<=======================| Methods |=======================>>>");
+		htnProblem.getDomain().getMethods().forEach(m -> System.out.println(this.prettifyMethod((OCIPMethod) m)));
+		System.out.println("<<<=======================| Operations |=======================>>>");
+		htnProblem.getDomain().getOperations().forEach(o -> System.out.println(this.prettifyOperation((CEOCOperation) o)));
 
 		/* solve the HTN planning problem */
 		BlindForwardDecompositionHTNPlanner<Double> algo = new BlindForwardDecompositionHTNPlanner<>(htnProblem, n -> 0.0);
@@ -95,7 +98,7 @@ public class NewReductionSandbox {
 				Plan plan = (Plan)((ASolutionCandidateFoundEvent) event).getSolutionCandidate();
 
 				/* reproduce the configuration solution from plan */
-				System.out.println("Solution plan:");
+				System.out.println(planCounter++ + ") " + "Solution plan:");
 				plan.getActions().forEach(a -> System.out.println("\t" + a.getEncoding()));
 				Monom finalState = HASCOUtil.getFinalStateOfPlan(htnProblem.getInit(), plan);
 				System.out.println("Final state: ");
@@ -105,12 +108,12 @@ public class NewReductionSandbox {
 			}
 		}
 
+		//int expectedPlans = 378;
+		//assertEquals(expectedPlans, seenPlans);
+
 		while (true) {
 			;
 		}
-
-		//		int expectedPlans = 10001010;
-		//		assertEquals(expectedPlans, seenPlans);
 	}
 
 	private String prettifyMethod(final OCIPMethod method) {
