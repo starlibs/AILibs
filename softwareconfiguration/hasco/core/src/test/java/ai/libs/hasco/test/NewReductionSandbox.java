@@ -38,7 +38,7 @@ public class NewReductionSandbox {
 
 	private static final File problemFileNormal = new File("../../../JAICore/jaicore-components/testrsc/simpleproblem.json");
 	private static final String reqInterfaceNormal = "IFace";
-	private static final File problemFileListInterface = new File("../../../JAICore/jaicore-components/testrsc/list_required_interface_reduction.json");
+	private static final File problemFileListInterface = new File("../../../JAICore/jaicore-components/testrsc/list_required_interface_reduction/list_required_interface_reduction.json");
 
 	@Ignore
 	@Test
