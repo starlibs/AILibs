@@ -104,8 +104,8 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 		}
 
 		// recursively resolve the patterns for the requiredInterfaces
-		for (ComponentInstance requiredInterface : cI.getSatisfactionOfRequiredInterfaces().values()) {
-			this.characterize(requiredInterface, patterns);
+		for (List<ComponentInstance> requiredInterface : cI.getSatisfactionOfRequiredInterfaces().values()) {
+			this.characterize(requiredInterface.get(0), patterns);
 		}
 
 		return patterns.asArray();

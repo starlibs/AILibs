@@ -82,9 +82,9 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 	public String extractSKLearnConstructInstruction(final ComponentInstance groundComponent, final Set<String> importSet) {
 		StringBuilder sb = new StringBuilder();
 		if (groundComponent.getComponent().getName().startsWith("mlplan.util.model.make_forward")) {
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("source"), importSet));
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("source").get(0), importSet));
 			sb.append(",");
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("base"), importSet));
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("base").get(0), importSet));
 			return sb.toString();
 		}
 
@@ -111,9 +111,9 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 		} else if (groundComponent.getComponent().getName().contains("make_union"))
 
 		{
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("p1"), importSet));
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("p1").get(0), importSet));
 			sb.append(",");
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("p2"), importSet));
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("p2").get(0), importSet));
 		} else {
 			boolean first = true;
 			for (Entry<String, String> parameterValue : groundComponent.getParameterValues().entrySet()) {
@@ -151,7 +151,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 				}
 			}
 
-			for (Entry<String, ComponentInstance> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
+			for (Entry<String, List<ComponentInstance>> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
 				if (first) {
 					first = false;
 				} else {
@@ -159,7 +159,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 				}
 
 				sb.append(satReqI.getKey() + "=");
-				sb.append(this.extractSKLearnConstructInstruction(satReqI.getValue(), importSet));
+				sb.append(this.extractSKLearnConstructInstruction(satReqI.getValue().get(0), importSet));
 			}
 		}
 		sb.append(")");

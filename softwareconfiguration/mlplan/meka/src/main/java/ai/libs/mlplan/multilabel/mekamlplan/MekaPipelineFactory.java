@@ -48,40 +48,40 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 		Classifier c = (Classifier) Class.forName(ci.getComponent().getName()).newInstance();
 		List<String> optionsList = this.getOptionsForParameterValues(ci);
 
-		for (Entry<String, ComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+		for (Entry<String, List<ComponentInstance>> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
 				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}
 			if (!reqI.getKey().equals("B") && !(c instanceof SingleClassifierEnhancer) && !(reqI.getKey().equals("K") && ci.getComponent().getName().endsWith("SMO"))) {
 				logger.warn("Classifier {} is not a single classifier enhancer and still has an unexpected required interface: {}. Try to set this configuration in the form of options.", ci.getComponent().getName(), reqI);
 				optionsList.add("-" + reqI.getKey());
-				optionsList.add(reqI.getValue().getComponent().getName());
-				if (!reqI.getValue().getParameterValues().isEmpty() || !reqI.getValue().getSatisfactionOfRequiredInterfaces().isEmpty()) {
+				optionsList.add(reqI.getValue().get(0).getComponent().getName());
+				if (!reqI.getValue().get(0).getParameterValues().isEmpty() || !reqI.getValue().get(0).getSatisfactionOfRequiredInterfaces().isEmpty()) {
 					optionsList.add("--");
-					optionsList.addAll(this.getOptionsRecursively(reqI.getValue()));
+					optionsList.addAll(this.getOptionsRecursively(reqI.getValue().get(0)));
 				}
 			}
 		}
 		if (c instanceof OptionHandler) {
 			((OptionHandler) c).setOptions(optionsList.toArray(new String[0]));
 		}
-		for (Entry<String, ComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+		for (Entry<String, List<ComponentInstance>> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
 				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}
 			if (reqI.getKey().equals("K") && ci.getComponent().getName().endsWith("SMO")) {
-				ComponentInstance kernelCI = reqI.getValue();
+				ComponentInstance kernelCI = reqI.getValue().get(0);
 				logger.debug("Set kernel for SMO to be {}", kernelCI.getComponent().getName());
 				Kernel k = (Kernel) Class.forName(kernelCI.getComponent().getName()).newInstance();
 				k.setOptions(this.getOptionsForParameterValues(kernelCI).toArray(new String[0]));
 			} else if (reqI.getKey().equals("B") && (c instanceof MultipleClassifiersCombiner)) {
-				Classifier[] classifiers = this.getListOfBaseLearners(reqI.getValue()).toArray(new Classifier[0]);
+				Classifier[] classifiers = this.getListOfBaseLearners(reqI.getValue().get(0)).toArray(new Classifier[0]);
 				((MultipleClassifiersCombiner) c).setClassifiers(classifiers);
 			} else if (reqI.getKey().equals("W") && (c instanceof SingleClassifierEnhancer)) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Set {} as a base classifier for {}", reqI.getValue().getComponent().getName(), ci.getComponent().getName());
+					logger.trace("Set {} as a base classifier for {}", reqI.getValue().get(0).getComponent().getName(), ci.getComponent().getName());
 				}
-				((SingleClassifierEnhancer) c).setClassifier(this.getClassifier(reqI.getValue()));
+				((SingleClassifierEnhancer) c).setClassifier(this.getClassifier(reqI.getValue().get(0)));
 			}
 		}
 
@@ -91,10 +91,10 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 	private List<Classifier> getListOfBaseLearners(final ComponentInstance ci) throws Exception {
 		List<Classifier> baseLearnerList = new LinkedList<>();
 		if (ci.getComponent().getName().equals("MultipleBaseLearnerListElement")) {
-			baseLearnerList.add(this.getClassifier(ci.getSatisfactionOfRequiredInterfaces().get("classifier")));
+			baseLearnerList.add(this.getClassifier(ci.getSatisfactionOfRequiredInterfaces().get("classifier").get(0)));
 		} else if (ci.getComponent().getName().equals("MultipleBaseLearnerListChain")) {
-			baseLearnerList.add(this.getClassifier(ci.getSatisfactionOfRequiredInterfaces().get("classifier")));
-			baseLearnerList.addAll(this.getListOfBaseLearners(ci.getSatisfactionOfRequiredInterfaces().get("chain")));
+			baseLearnerList.add(this.getClassifier(ci.getSatisfactionOfRequiredInterfaces().get("classifier").get(0)));
+			baseLearnerList.addAll(this.getListOfBaseLearners(ci.getSatisfactionOfRequiredInterfaces().get("chain").get(0)));
 		}
 		return baseLearnerList;
 	}
@@ -130,7 +130,7 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 	private List<String> getOptionsRecursively(final ComponentInstance ci) {
 		List<String> optionsList = this.getOptionsForParameterValues(ci);
 
-		for (Entry<String, ComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+		for (Entry<String, List<ComponentInstance>> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
 				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}
@@ -138,14 +138,14 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 			optionsList.add("-" + reqI.getKey());
 			if (reqI.getKey().equals("B") || reqI.getKey().equals("K")) {
 				List<String> valueList = new LinkedList<>();
-				valueList.add(reqI.getValue().getComponent().getName());
-				valueList.addAll(this.getOptionsRecursively(reqI.getValue()));
+				valueList.add(reqI.getValue().get(0).getComponent().getName());
+				valueList.addAll(this.getOptionsRecursively(reqI.getValue().get(0)));
 				optionsList.add(SetUtil.implode(valueList, " "));
 			} else {
-				optionsList.add(reqI.getValue().getComponent().getName());
-				if (!reqI.getValue().getParameterValues().isEmpty() || !reqI.getValue().getSatisfactionOfRequiredInterfaces().isEmpty()) {
+				optionsList.add(reqI.getValue().get(0).getComponent().getName());
+				if (!reqI.getValue().get(0).getParameterValues().isEmpty() || !reqI.getValue().get(0).getSatisfactionOfRequiredInterfaces().isEmpty()) {
 					optionsList.add("--");
-					optionsList.addAll(this.getOptionsRecursively(reqI.getValue()));
+					optionsList.addAll(this.getOptionsRecursively(reqI.getValue().get(0)));
 				}
 			}
 		}

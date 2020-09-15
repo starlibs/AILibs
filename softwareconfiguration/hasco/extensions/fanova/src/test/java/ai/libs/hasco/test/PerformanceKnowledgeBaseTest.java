@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -49,7 +50,7 @@ public class PerformanceKnowledgeBaseTest {
 		paramValues3.put("Param2", "Val2");
 		paramValues3.put("Param3", "13");
 
-		HashMap<String, ComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<String, ComponentInstance>();
+		HashMap<String, List<ComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
 
 		ComponentInstance ci1 = new ComponentInstance(comp, paramValues1, satisfactionOfRequiredInterfaces);
 		ComponentInstance ci2 = new ComponentInstance(comp, paramValues2, satisfactionOfRequiredInterfaces);

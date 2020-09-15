@@ -39,7 +39,7 @@ public class ScikitLearnPipelineValidityCheckingNodeEvaluator extends PipelineVa
 			/* check invalid classifiers for this kind of dataset */
 			ComponentInstance classifier;
 			if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
-				classifier = instance.getSatisfactionOfRequiredInterfaces().get("classifier");
+				classifier = instance.getSatisfactionOfRequiredInterfaces().get("classifier").get(0);
 			} else {
 				classifier = instance;
 			}

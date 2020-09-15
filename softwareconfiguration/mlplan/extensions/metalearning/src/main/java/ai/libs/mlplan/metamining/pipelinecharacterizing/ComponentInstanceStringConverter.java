@@ -17,10 +17,10 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.CompositionProblemUtil;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
-import ai.libs.jaicore.components.model.CompositionProblemUtil;
 import treeminer.util.TreeRepresentationUtils;
 
 public class ComponentInstanceStringConverter extends Thread {
@@ -87,17 +87,17 @@ public class ComponentInstanceStringConverter extends Thread {
 		}
 
 		if (pipeline.getComponent().getName().equals("pipeline")) {
-			ComponentInstance preprocessorCI = pipeline.getSatisfactionOfRequiredInterfaces().get("preprocessor");
+			ComponentInstance preprocessorCI = pipeline.getSatisfactionOfRequiredInterfaces().get("preprocessor").get(0);
 
 			if (preprocessorCI != null) {
 				// Characterize searcher
-				this.addCharacterizationOfPipelineElement(pipelineBranches, preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search"));
+				this.addCharacterizationOfPipelineElement(pipelineBranches, preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search").get(0));
 
 				// Characterize evaluator
-				this.addCharacterizationOfPipelineElement(pipelineBranches, preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval"));
+				this.addCharacterizationOfPipelineElement(pipelineBranches, preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval").get(0));
 			}
 
-			classifierCI = pipeline.getSatisfactionOfRequiredInterfaces().get("classifier");
+			classifierCI = pipeline.getSatisfactionOfRequiredInterfaces().get("classifier").get(0);
 
 			// Component is just a classifier
 		} else {
@@ -162,7 +162,7 @@ public class ComponentInstanceStringConverter extends Thread {
 				// so far, only have the "K" interface & this has no param so can directly get
 				List<String> kernelFunctionCharacterisation = new ArrayList<>();
 				kernelFunctionCharacterisation.add(requiredInterface);
-				kernelFunctionCharacterisation.addAll(this.ontologyConnector.getAncestorsOfAlgorithm(component.getComponent().getName()));
+				kernelFunctionCharacterisation.addAll(this.ontologyConnector.getAncestorsOfAlgorithm(component.get(0).getComponent().getName()));
 				parameters.add(TreeRepresentationUtils.addChildrenToNode(requiredInterface, Arrays.asList(TreeRepresentationUtils.makeRepresentationForBranch(kernelFunctionCharacterisation))));
 			});
 		}

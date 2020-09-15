@@ -103,7 +103,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 					}
 				}
 				if (!currentCI.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-					queue.addAll(currentCI.getSatisfactionOfRequiredInterfaces().values());
+					currentCI.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> queue.addAll(cil));
 				}
 			}
 			if (ciToInstantiate.getComponent().getRequiredInterfaces().size() == ciToInstantiate.getSatisfactionOfRequiredInterfaces().size()) {
@@ -151,7 +151,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 					}
 				}
 				if (!currentCI.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-					queue.addAll(currentCI.getSatisfactionOfRequiredInterfaces().values());
+					currentCI.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> queue.addAll(cil));
 				}
 			}
 			if (ciToInstantiate.getComponent().getRequiredInterfaces().size() == ciToInstantiate.getSatisfactionOfRequiredInterfaces().size()) {
@@ -202,7 +202,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 					currentCI.getParameterValues().putAll(parametrization.getParameterValues());
 				}
 				if (!currentCI.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-					queue.addAll(currentCI.getSatisfactionOfRequiredInterfaces().values());
+					currentCI.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> queue.addAll(cil));
 				}
 			}
 			if (ciToInstantiate.getComponent().getRequiredInterfaces().size() == ciToInstantiate.getSatisfactionOfRequiredInterfaces().size()) {
@@ -253,7 +253,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 								currentOption.getParameterValues().putAll(parameterization.getParameterValues());
 							}
 							if (!currentOption.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-								optionQueue.addAll(currentOption.getSatisfactionOfRequiredInterfaces().values());
+								currentOption.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> optionQueue.addAll(cil));
 							}
 
 						}
@@ -261,7 +261,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 					}
 				}
 				if (currentCI.getComponent().getRequiredInterfaces().size() == currentCI.getSatisfactionOfRequiredInterfaces().size()) {
-					queue.addAll(currentCI.getSatisfactionOfRequiredInterfaces().values());
+					currentCI.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> queue.addAll(cil));
 				}
 			}
 			for (ComponentInstance instance : componentInstanceClonesWithAllPosibleCategoricalParameters.stream().distinct().collect(Collectors.toList())) {

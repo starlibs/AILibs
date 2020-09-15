@@ -71,9 +71,9 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 			lastMethodBeforeSteppingToRandomCompletions = nameOfLastAppliedMethod.startsWith(this.nameOfMethodToResolveLearnerInPipeline);
 
 			if (instance.getSatisfactionOfRequiredInterfaces().containsKey("classifier")) {
-				classifierName = instance.getSatisfactionOfRequiredInterfaces().get("classifier").getComponent().getName();
+				classifierName = instance.getSatisfactionOfRequiredInterfaces().get("classifier").get(0).getComponent().getName();
 			} else if (instance.getSatisfactionOfRequiredInterfaces().containsKey("regressor")) {
-				classifierName = instance.getSatisfactionOfRequiredInterfaces().get("regressor").getComponent().getName();
+				classifierName = instance.getSatisfactionOfRequiredInterfaces().get("regressor").get(0).getComponent().getName();
 			} else {
 				this.logger.debug("Exact decision about pipeline fillup not recognizable in state yet. Returning {}.", EXPAND_NODE_SCORE);
 				return EXPAND_NODE_SCORE;

@@ -39,14 +39,14 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 			if (groundComponent.getComponent().getName().equals("pipeline")) {
 				ComponentInstance preprocessorCI = null;
 				/* Retrieve component instances of pipeline */
-				preprocessorCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor");
-				ComponentInstance evaluatorCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval");
-				ComponentInstance searcherCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search");
+				preprocessorCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor").get(0);
+				ComponentInstance evaluatorCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval").get(0);
+				ComponentInstance searcherCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search").get(0);
 
 				ASEvaluation eval = ASEvaluation.forName(evaluatorCI.getComponent().getName(), this.getParameterList(evaluatorCI).toArray(new String[0]));
 				ASSearch search = ASSearch.forName(searcherCI.getComponent().getName(), this.getParameterList(searcherCI).toArray(new String[0]));
 
-				IWekaClassifier c = this.getComponentInstantiation(groundComponent.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER));
+				IWekaClassifier c = this.getComponentInstantiation(groundComponent.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER).get(0));
 				this.logger.debug("Returning a MLPipeline object (aseval: {}, assearch: {}, classifier: {})", eval != null, search != null, c != null);
 				return new WekaClassifier(new MLPipeline(search, eval, c.getClassifier()));
 
@@ -58,26 +58,26 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 					((OptionHandler) c).setOptions(options.toArray(new String[0]));
 				}
 
-				for (Entry<String, ComponentInstance> reqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
+				for (Entry<String, List<ComponentInstance>> reqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
 					switch (reqI.getKey()) {
 					case "W":
 						if (c instanceof SingleClassifierEnhancer) { // suppose that this defines a base classifier
-							((SingleClassifierEnhancer) c).setClassifier(this.getComponentInstantiation(reqI.getValue()).getClassifier());
+							((SingleClassifierEnhancer) c).setClassifier(this.getComponentInstantiation(reqI.getValue().get(0)).getClassifier());
 						} else {
 							this.logger.error("Got required interface W but classifier {} is not single classifier enhancer", c.getClass().getName());
 						}
 						break;
 					case "K":
 						if (c instanceof SMO) {
-							Kernel k = (Kernel) Class.forName(reqI.getValue().getComponent().getName()).newInstance();
-							k.setOptions(this.getParameterList(reqI.getValue()).toArray(new String[0]));
+							Kernel k = (Kernel) Class.forName(reqI.getValue().get(0).getComponent().getName()).newInstance();
+							k.setOptions(this.getParameterList(reqI.getValue().get(0)).toArray(new String[0]));
 							((SMO) c).setKernel(k);
 						} else {
 							this.logger.error("Got required interface K but classifier {} is not SMO", c.getClass().getName());
 						}
 						break;
 					case "B": // suppose that this defines a base classifier
-						Classifier baseClassifier = this.getComponentInstantiation(reqI.getValue()).getClassifier();
+						Classifier baseClassifier = this.getComponentInstantiation(reqI.getValue().get(0)).getClassifier();
 						if (c instanceof Stacking) {
 							((Stacking) c).setClassifiers(new Classifier[] { baseClassifier });
 						} else {
@@ -100,10 +100,10 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 		List<IWekaClassifier> baseLearnerList = new LinkedList<>();
 
 		if (ci.getComponent().getName().equals("MultipleBaseLearnerListElement")) {
-			baseLearnerList.add(this.getComponentInstantiation(ci.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER)));
+			baseLearnerList.add(this.getComponentInstantiation(ci.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER).get(0)));
 		} else if (ci.getComponent().getName().equals("MultipleBaseLearnerListChain")) {
-			baseLearnerList.add(this.getComponentInstantiation(ci.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER)));
-			baseLearnerList.addAll(this.getListOfBaseLearners(ci.getSatisfactionOfRequiredInterfaces().get("chain")));
+			baseLearnerList.add(this.getComponentInstantiation(ci.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER).get(0)));
+			baseLearnerList.addAll(this.getListOfBaseLearners(ci.getSatisfactionOfRequiredInterfaces().get("chain").get(0)));
 		}
 
 		return baseLearnerList;

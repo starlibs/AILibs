@@ -17,9 +17,9 @@ public abstract class ATwoStepPipelineScikitLearnFactory extends AScikitLearnLea
 	@Override
 	public String getPipelineBuildString(final ComponentInstance groundComponent, final Set<String> importSet) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get(N_PREPROCESSOR), importSet));
+		sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get(N_PREPROCESSOR).get(0), importSet));
 		sb.append(",");
-		sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get(this.learnerFieldName), importSet));
+		sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get(this.learnerFieldName).get(0), importSet));
 		return sb.toString();
 	}
 

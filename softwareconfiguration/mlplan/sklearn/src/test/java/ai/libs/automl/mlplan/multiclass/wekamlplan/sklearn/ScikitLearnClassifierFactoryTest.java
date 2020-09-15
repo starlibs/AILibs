@@ -97,8 +97,8 @@ public class ScikitLearnClassifierFactoryTest {
 		Component classifierComponent = cl.getComponentWithName(CLASSIFIER_NAME);
 
 		ComponentInstance pipe = ComponentUtil.getDefaultParameterizationOfComponent(makePipe);
-		pipe.getSatisfactionOfRequiredInterfaces().put("preprocessor", ComponentUtil.getDefaultParameterizationOfComponent(preprocessorComponent));
-		pipe.getSatisfactionOfRequiredInterfaces().put("classifier", ComponentUtil.getDefaultParameterizationOfComponent(classifierComponent));
+		pipe.getSatisfactionOfRequiredInterfaces().put("preprocessor", Arrays.asList(ComponentUtil.getDefaultParameterizationOfComponent(preprocessorComponent)));
+		pipe.getSatisfactionOfRequiredInterfaces().put("classifier", Arrays.asList(ComponentUtil.getDefaultParameterizationOfComponent(classifierComponent)));
 
 		Set<String> importSet = new HashSet<>();
 		String actualConstructInstruction = factory.extractSKLearnConstructInstruction(pipe, importSet);
@@ -117,12 +117,12 @@ public class ScikitLearnClassifierFactoryTest {
 
 		ComponentInstance union = ComponentUtil.getDefaultParameterizationOfComponent(makeUnion);
 		for (String prep : new String[] { "p1", "p2" }) {
-			union.getSatisfactionOfRequiredInterfaces().put(prep, ComponentUtil.getDefaultParameterizationOfComponent(preprocessorComponent));
+			union.getSatisfactionOfRequiredInterfaces().put(prep, Arrays.asList(ComponentUtil.getDefaultParameterizationOfComponent(preprocessorComponent)));
 		}
 
 		ComponentInstance pipe = ComponentUtil.getDefaultParameterizationOfComponent(makePipe);
-		pipe.getSatisfactionOfRequiredInterfaces().put("preprocessor", union);
-		pipe.getSatisfactionOfRequiredInterfaces().put("classifier", ComponentUtil.getDefaultParameterizationOfComponent(classifierComponent));
+		pipe.getSatisfactionOfRequiredInterfaces().put("preprocessor", Arrays.asList(union));
+		pipe.getSatisfactionOfRequiredInterfaces().put("classifier", Arrays.asList(ComponentUtil.getDefaultParameterizationOfComponent(classifierComponent)));
 
 		Set<String> importSet = new HashSet<>();
 		String actualConstructInstruction = factory.extractSKLearnConstructInstruction(pipe, importSet);
@@ -141,12 +141,12 @@ public class ScikitLearnClassifierFactoryTest {
 
 		ComponentInstance forward = ComponentUtil.getDefaultParameterizationOfComponent(makeForward);
 		for (String prep : new String[] { "base", "source" }) {
-			forward.getSatisfactionOfRequiredInterfaces().put(prep, ComponentUtil.getDefaultParameterizationOfComponent(preprocessorComponent));
+			forward.getSatisfactionOfRequiredInterfaces().put(prep, Arrays.asList(ComponentUtil.getDefaultParameterizationOfComponent(preprocessorComponent)));
 		}
 
 		ComponentInstance pipe = ComponentUtil.getDefaultParameterizationOfComponent(makePipe);
-		pipe.getSatisfactionOfRequiredInterfaces().put("preprocessor", forward);
-		pipe.getSatisfactionOfRequiredInterfaces().put("classifier", ComponentUtil.getDefaultParameterizationOfComponent(classifierComponent));
+		pipe.getSatisfactionOfRequiredInterfaces().put("preprocessor", Arrays.asList(forward));
+		pipe.getSatisfactionOfRequiredInterfaces().put("classifier", Arrays.asList(ComponentUtil.getDefaultParameterizationOfComponent(classifierComponent)));
 
 		Set<String> importSet = new HashSet<>();
 		String actualConstructInstruction = factory.extractSKLearnConstructInstruction(pipe, importSet);
