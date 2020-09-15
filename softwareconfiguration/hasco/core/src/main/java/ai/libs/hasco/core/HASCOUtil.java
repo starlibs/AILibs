@@ -53,7 +53,8 @@ public class HASCOUtil {
 	private static final String LITERAL_RESOLVES = "resolves";
 	private static final String LITERAL_PARAMCONTAINER = "parameterContainer";
 	private static final String LITERAL_VAL = "val";
-	private static final String LITERAL_INTERFACEIDENTIFIER = "interfaceIdentifier";
+	private static final String LITERAL_INTERFACEGROUPDEFINITION = "interfaceGroup"; // [component name, interface ID (role), component handle, iGroupHandle]
+	private static final String LITERAL_INTERFACEMEMBERSHIP = "interfaceMember"; // [iHandle, iGroupHandle]
 
 	private static final Logger logger = LoggerFactory.getLogger(HASCOUtil.class);
 
@@ -61,7 +62,8 @@ public class HASCOUtil {
 		/* avoid instantiation */
 	}
 
-	public static <N, A> IPathSearchInput<N, A> getSearchProblem(final Collection<Component> components, final String requiredInterface, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig, final IHASCOPlanningReduction<N, A> plan2searchReduction){
+	public static <N, A> IPathSearchInput<N, A> getSearchProblem(final Collection<Component> components, final String requiredInterface, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig,
+			final IHASCOPlanningReduction<N, A> plan2searchReduction) {
 		HASCOReduction<Double> hascoReduction = new HASCOReduction<>();
 		SoftwareConfigurationProblem<Double> coreProblem = new SoftwareConfigurationProblem<>(components, requiredInterface, n -> 0.0);
 		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(coreProblem, paramRefinementConfig);
@@ -74,11 +76,13 @@ public class HASCOUtil {
 		return hascoReduction.encodeProblem(problem);
 	}
 
-	public static <N, A, V extends Comparable<V>> IPathSearchWithPathEvaluationsInput<N, A, V> getSearchProblemWithEvaluation(final RefinementConfiguredSoftwareConfigurationProblem<V> problem, final IHASCOPlanningReduction<N, A> plan2searchReduction){
+	public static <N, A, V extends Comparable<V>> IPathSearchWithPathEvaluationsInput<N, A, V> getSearchProblemWithEvaluation(final RefinementConfiguredSoftwareConfigurationProblem<V> problem,
+			final IHASCOPlanningReduction<N, A> plan2searchReduction) {
 		return getSearchProblemWithEvaluation(getPlannigProblem(problem), plan2searchReduction);
 	}
 
-	public static <N, A, V extends Comparable<V>> IPathSearchWithPathEvaluationsInput<N, A, V> getSearchProblemWithEvaluation(final CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> planningProblem, final IHASCOPlanningReduction<N, A> plan2searchReduction){
+	public static <N, A, V extends Comparable<V>> IPathSearchWithPathEvaluationsInput<N, A, V> getSearchProblemWithEvaluation(final CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> planningProblem,
+			final IHASCOPlanningReduction<N, A> plan2searchReduction) {
 		return new CostSensitivePlanningToStandardSearchProblemReduction<CEOCIPSTNPlanningProblem, N, A, V>(plan2searchReduction).encodeProblem(planningProblem);
 	}
 
@@ -189,7 +193,9 @@ public class HASCOUtil {
 		Map<String, ComponentInstance> objectMap = new HashMap<>();
 		Map<String, Map<String, String>> parameterContainerMap = new HashMap<>(); // stores for each object the name of the container of each parameter
 		Map<String, String> parameterValues = new HashMap<>();
-		Map<String, String> interfaceContainerMap = new HashMap<>();
+		Map<String, String> interfaceMembershipMap = new HashMap<>();
+		Map<String, String> interfaceGroupComponentMap = new HashMap<>(); // stores for each interface group to which component instance it belongs
+		Map<String, String> interfaceGroupRoleMap = new HashMap<>(); // stores for each interface group the role it has for the component
 		Collection<String> overwrittenDatacontainers = getOverwrittenDatacontainersInState(state);
 
 		/* create (empty) component instances, detect containers for parameter values, and register the values of the data containers */
@@ -201,7 +207,8 @@ public class HASCOUtil {
 				String objectName = params[3];
 				Optional<Component> component = components.stream().filter(c -> c.getName().equals(componentName)).findAny();
 				if (!component.isPresent()) {
-					throw new IllegalStateException("Error when treating literal " + l + ". Could not find component with name \"" + componentName + "\". List of known components: " + components.stream().map(c -> "\n\t" + c.getName()).collect(Collectors.joining()));
+					throw new IllegalStateException("Error when treating literal " + l + ". Could not find component with name \"" + componentName + "\". List of known components: "
+							+ components.stream().map(c -> "\n\t" + c.getName()).collect(Collectors.joining()));
 				}
 				ComponentInstance object = new ComponentInstance(component.get(), new HashMap<>(), new HashMap<>());
 				objectMap.put(objectName, object);
@@ -215,8 +222,14 @@ public class HASCOUtil {
 			case LITERAL_VAL:
 				parameterValues.put(params[0], params[1]);
 				break;
-			case LITERAL_INTERFACEIDENTIFIER:
-				interfaceContainerMap.put(params[3], params[1]);
+
+			case LITERAL_INTERFACEGROUPDEFINITION:
+				interfaceGroupComponentMap.put(params[3], params[2]);
+				interfaceGroupRoleMap.put(params[3], params[1]);
+				break;
+
+			case LITERAL_INTERFACEMEMBERSHIP: // first argument is the interface, second is the interface group it belongs to
+				interfaceMembershipMap.put(params[0], params[1]);
 				break;
 			default:
 				/* simply ignore other cases */
@@ -227,12 +240,19 @@ public class HASCOUtil {
 		/* now establish the binding of the required interfaces of the component instances */
 		state.stream().filter(l -> l.getPropertyName().equals(LITERAL_RESOLVES)).forEach(l -> {
 			String[] params = l.getParameters().stream().map(LiteralParam::getName).collect(Collectors.toList()).toArray(new String[] {});
-			String parentObjectName = params[0];
-			String objectName = params[3];
-			ComponentInstance object = objectMap.get(objectName);
-			if (!parentObjectName.equals("request")) {
-				assert interfaceContainerMap.containsKey(objectName) : "Object name " + objectName + " for requried interface must have a defined identifier ";
-				objectMap.get(parentObjectName).getSatisfactionOfRequiredInterfaces().put(interfaceContainerMap.get(objectName), object);
+			String handleOfRequiredInterface = params[0];
+			String handleOfComponentInstanceThatProvidesTheInterface= params[3];
+			if (!handleOfRequiredInterface.equals("request")) {
+				if (!interfaceMembershipMap.containsKey(handleOfRequiredInterface)) {
+					throw new IllegalArgumentException("The state contains a literal " + l + ", which suggests that " + handleOfRequiredInterface
+							+ " is the handle of a requried interface. But this handle is not registered in the map. State is: " + state.stream().sorted((s1, s2) -> s1.compareTo(s2)).map(lit -> "\n\t" + lit).collect(Collectors.joining()));
+				}
+				String iFaceGroupHandle = interfaceMembershipMap.get(handleOfRequiredInterface);
+				ComponentInstance requiringCI = objectMap.get(interfaceGroupComponentMap.get(iFaceGroupHandle));
+				ComponentInstance providingCI = objectMap.get(handleOfComponentInstanceThatProvidesTheInterface);
+				String roleOfRequiredInterfaceInRequiringComponent = interfaceGroupRoleMap.get(iFaceGroupHandle);
+				Map<String, List<ComponentInstance>> satisfactionMapOfCIThatRequiresTheResolvedInterface = requiringCI.getSatisfactionOfRequiredInterfaces();
+				satisfactionMapOfCIThatRequiresTheResolvedInterface.computeIfAbsent(roleOfRequiredInterfaceInRequiringComponent, r -> new ArrayList<>()).add(providingCI);
 			}
 		});
 
@@ -245,7 +265,8 @@ public class HASCOUtil {
 					throw new IllegalStateException("No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName() + "!");
 				}
 				if (!parameterContainerMap.get(objectName).containsKey(p.getName())) {
-					throw new IllegalStateException("The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined! State: " + state.stream().sorted().map(l -> "\n\t" + l).collect(Collectors.joining()));
+					throw new IllegalStateException(
+							"The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined! State: " + state.stream().sorted().map(l -> "\n\t" + l).collect(Collectors.joining()));
 				}
 				String paramContainerName = parameterContainerMap.get(objectName).get(p.getName());
 				if (overwrittenDatacontainers.contains(paramContainerName)) {

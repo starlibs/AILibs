@@ -73,9 +73,6 @@ public class HASCOModelStatisticsComponentSelector extends TreeItem<HASCOModelSt
 		ObservableList<String> items = this.componentSelector.getItems();
 		for (ScoredSolutionCandidateInfo scoredSolutionCandidateInfo : this.model.getAllSeenSolutionCandidateFoundInfosUnordered()) {
 			ComponentInstance ci = this.model.deserializeComponentInstance(scoredSolutionCandidateInfo.getSolutionCandidateRepresentation());
-			if (!ci.matchesPathRestriction(selectionPath)) {
-				continue;
-			}
 
 			/* determine sub-component relevant for this path and add the respective component lexicographically correctly (unless it is already in the list) */
 			UnparametrizedComponentInstance uci = new UnparametrizedComponentInstance(ci).getSubComposition(reqInterfacePath);

@@ -1,7 +1,12 @@
 package ai.libs.hasco.test;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -14,21 +19,17 @@ import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.core.reduction.softcomp2planning.HASCOReduction;
 import ai.libs.jaicore.basic.algorithm.ASolutionCandidateFoundEvent;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
-import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
-import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
+import ai.libs.jaicore.components.serialization.CompositionSerializer;
+import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import ai.libs.jaicore.planning.core.Plan;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedPlan;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.BlindForwardDecompositionHTNPlanner;
-import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
-import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
-
-import static org.junit.Assert.assertEquals;
+import ai.libs.jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 
 public class NewReductionSandbox {
 	// For easy navigation within the console.
@@ -88,9 +89,10 @@ public class NewReductionSandbox {
 		BlindForwardDecompositionHTNPlanner<Double> algo = new BlindForwardDecompositionHTNPlanner<>(htnProblem, n -> 0.0);
 		//		algo.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 
-		new AlgorithmVisualizationWindow(algo).withMainPlugin(new GraphViewPlugin()).withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())));
+		//		new AlgorithmVisualizationWindow(algo).withMainPlugin(new GraphViewPlugin()).withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())));
 
 		int seenPlans = 0;
+		Set<String> seenSolutions = new HashSet<>();
 		while (algo.hasNext()) {
 			IAlgorithmEvent event = algo.nextWithException();
 			if (event instanceof ASolutionCandidateFoundEvent) {
@@ -98,31 +100,45 @@ public class NewReductionSandbox {
 				Plan plan = (Plan)((ASolutionCandidateFoundEvent) event).getSolutionCandidate();
 
 				/* reproduce the configuration solution from plan */
-				System.out.println(planCounter++ + ") " + "Solution plan:");
-				plan.getActions().forEach(a -> System.out.println("\t" + a.getEncoding()));
+				//				System.out.println(planCounter++ + ") " + "Solution plan:");
+				//				plan.getActions().forEach(a -> System.out.println("\t" + a.getEncoding()));
 				Monom finalState = HASCOUtil.getFinalStateOfPlan(htnProblem.getInit(), plan);
-				System.out.println("Final state: ");
-				finalState.forEach(l -> System.out.println("\t- " + l));
+				//				System.out.println("Final state: ");
+				//				finalState.forEach(l -> System.out.println("\t- " + l));
 
+				String serializedSolution = CompositionSerializer.serializeComponentInstance(HASCOUtil.getComponentInstanceFromState(problem.getComponents(), finalState, "solution", true)).toString();
+				if (seenSolutions.contains(serializedSolution)) {
+					System.err.println("SEEN");
+				}
+				seenSolutions.add(serializedSolution);
+				System.out.println(serializedSolution);
 				seenPlans ++;
 			}
 		}
 
-		//int expectedPlans = 378;
-		//assertEquals(expectedPlans, seenPlans);
+		int expectedPlans = 378;
+		assertEquals(expectedPlans, seenSolutions.size());
 
-		while (true) {
-			;
-		}
+		//		while (true) {
+		//			;
+		//		}
 	}
 
 	private String prettifyMethod(final OCIPMethod method) {
-		String tasknet = method.getNetwork().getLineBasedStringRepresentation();
+		TaskNetwork net = method.getNetwork();
+		Literal cur = net.getRoot();
+		StringBuilder sb = new StringBuilder();
+		while (cur != null) {
+			sb.append("\n\t\t- " + cur);
+			Collection<Literal> succ = net.getSuccessors(cur);
+			cur = succ.isEmpty() ? null : succ.iterator().next();
+		}
+		String tasknet = sb.toString();
 
 		return methodCounter++ + ") " + method.getName() + "(" + method.getParameters() + ")\n" +
 		"\ttask-name: " + method.getTask() + "\n" +
 		"\tpre-condition: " + method.getPrecondition() + "\n" +
-		"\ttask-network: \n\t" + tasknet + "\n" +
+		"\ttask-network: " + tasknet + "\n" +
 		"\toutputs: " + method.getOutputs() + "\n" +
 		"\teval-pre-condition: " + method.getEvaluablePrecondition() + "\n";
 	}

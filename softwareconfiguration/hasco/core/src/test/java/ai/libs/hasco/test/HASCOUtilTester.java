@@ -40,9 +40,9 @@ public class HASCOUtilTester {
 		params.add(new ConstantParam("[0.5,1.0]"));
 		state.add(new Literal("val", params));
 		ComponentInstance instance = HASCOUtil.getComponentInstanceFromState(new ComponentLoader(new File(pathToFiles + "testrsc/weka/weka-all-autoweka.json")).getComponents(), state, "solution", false);
-		assertEquals("[125.36470588235294, 253.74117647058824]", instance.getSatisfactionOfRequiredInterfaces().get("preprocessor").getSatisfactionOfRequiredInterfaces().get("eval").getParameterValue("A"));
+		assertEquals("[125.36470588235294, 253.74117647058824]", instance.getSatisfactionOfRequiredInterfaces().get("preprocessor").get(0).getSatisfactionOfRequiredInterfaces().get("eval").get(0).getParameterValue("A"));
 		instance = HASCOUtil.getComponentInstanceFromState(new ComponentLoader(new File(pathToFiles + "testrsc/weka/weka-all-autoweka.json")).getComponents(), state, "solution", true);
-		assertEquals("190", instance.getSatisfactionOfRequiredInterfaces().get("preprocessor").getSatisfactionOfRequiredInterfaces().get("eval").getParameterValue("A"));
+		assertEquals("190", instance.getSatisfactionOfRequiredInterfaces().get("preprocessor").get(0).getSatisfactionOfRequiredInterfaces().get("eval").get(0).getParameterValue("A"));
 	}
 
 	@Test

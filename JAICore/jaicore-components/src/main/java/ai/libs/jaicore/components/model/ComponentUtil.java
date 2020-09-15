@@ -1,6 +1,7 @@
 package ai.libs.jaicore.components.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.kvstore.KVStore;
-import ai.libs.jaicore.basic.sets.SetUtil;
 
 /**
  * The ComponentUtil class can be used to deal with Components in a convenient way. For instance, for a given component (type) it can be used to return a parameterized ComponentInstance.
@@ -204,7 +204,7 @@ public class ComponentUtil {
 				for (Component possiblePlugin : possiblePlugins) {
 					for (ComponentInstance reqICI : getAllAlgorithmSelectionInstances(possiblePlugin, components)) {
 						ComponentInstance copyOfCI = new ComponentInstance(ci.getComponent(), new HashMap<>(ci.getParameterValues()), new HashMap<>(ci.getSatisfactionOfRequiredInterfaces()));
-						copyOfCI.getSatisfactionOfRequiredInterfaces().put(requiredInterface.getId(), reqICI);
+						copyOfCI.getSatisfactionOfRequiredInterfaces().put(requiredInterface.getId(), Arrays.asList(reqICI));
 						tempList.add(copyOfCI);
 					}
 				}
@@ -262,7 +262,7 @@ public class ComponentUtil {
 
 	public static ComponentInstance getRandomParametrization(final ComponentInstance componentInstance, final Random rand) {
 		ComponentInstance randomParametrization = getRandomParameterizationOfComponent(componentInstance.getComponent(), rand);
-		componentInstance.getSatisfactionOfRequiredInterfaces().entrySet().forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), getRandomParametrization(x.getValue(), rand)));
+		componentInstance.getSatisfactionOfRequiredInterfaces().entrySet().forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), Arrays.asList(getRandomParametrization(x.getValue().get(0), rand))));
 		return randomParametrization;
 	}
 
@@ -290,39 +290,7 @@ public class ComponentUtil {
 		return false;
 	}
 
-	public static boolean isDefaultConfiguration(final ComponentInstance instance) {
-		for (Parameter p : instance.getParametersThatHaveBeenSetExplicitly()) {
-			if (p.isNumeric()) {
-				double defaultValue = Double.parseDouble(p.getDefaultValue().toString());
-				String parameterValue = instance.getParameterValue(p);
 
-				boolean isCompatibleWithDefaultValue = false;
-				if (parameterValue.contains("[")) {
-					List<String> intervalAsList = SetUtil.unserializeList(instance.getParameterValue(p));
-					isCompatibleWithDefaultValue = defaultValue >= Double.parseDouble(intervalAsList.get(0)) && defaultValue <= Double.parseDouble(intervalAsList.get(1));
-				} else {
-					isCompatibleWithDefaultValue = Math.abs(defaultValue - Double.parseDouble(parameterValue)) < 1E-8;
-				}
-				if (!isCompatibleWithDefaultValue) {
-					logger.info("{} has value {}, which does not subsume the default value {}", p.getName(), instance.getParameterValue(p), defaultValue);
-					return false;
-				} else {
-					logger.info("{} has value {}, which IS COMPATIBLE with the default value {}", p.getName(), instance.getParameterValue(p), defaultValue);
-				}
-			} else {
-				if (!instance.getParameterValue(p).equals(p.getDefaultValue().toString())) {
-					logger.info("{} has value {}, which is not the default {}", p.getName(), instance.getParameterValue(p), p.getDefaultValue());
-					return false;
-				}
-			}
-		}
-		for (ComponentInstance child : instance.getSatisfactionOfRequiredInterfaces().values()) {
-			if (!isDefaultConfiguration(child)) {
-				return false;
-			}
-		}
-		return true;
-	}
 
 	public static KVStore getStatsForComponents(final Collection<Component> components) {
 		KVStore stats = new KVStore();
@@ -385,14 +353,5 @@ public class ComponentUtil {
 		affectedComponents.forEach(x -> x.getRequiredInterfaceNames().stream().map(interfaceName -> getAffectedComponents(components, interfaceName)).forEach(recursiveResolvedComps::addAll));
 		affectedComponents.addAll(recursiveResolvedComps);
 		return affectedComponents;
-	}
-
-	public static String getComponentInstanceAsComponentNames(final ComponentInstance instance) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(instance.getComponent().getName());
-		if (!instance.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-			sb.append("{").append(instance.getSatisfactionOfRequiredInterfaces().values().stream().map(ComponentUtil::getComponentInstanceAsComponentNames).collect(Collectors.joining(","))).append("}");
-		}
-		return sb.toString();
 	}
 }

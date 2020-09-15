@@ -56,6 +56,7 @@ public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String>, ILog
 	protected Collection<TFDNode> getSuccessorsResultingFromResolvingComplexTask(final Monom state, final Literal taskToBeResolved, final List<Literal> remainingOtherTasks) throws InterruptedException {
 		Collection<TFDNode> successors = new ArrayList<>();
 		Collection<MethodInstance> applicableMethodInstances = this.util.getMethodInstancesForTaskThatAreApplicableInState(null, this.problem.getDomain().getMethods(), taskToBeResolved, state, remainingOtherTasks);
+		this.logger.debug("Identified {} applicable method instances." , applicableMethodInstances.size());
 		assert this.areLonelyMethodsContainedAtMostOnce(applicableMethodInstances);
 		for (MethodInstance instance : applicableMethodInstances) {
 
@@ -115,15 +116,16 @@ public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String>, ILog
 	@Override
 	public ISuccessorGenerator<TFDNode, String> getSuccessorGenerator() {
 		return l -> {
+			this.logger.debug("Starting node generation for node {}", l);
 			Monom state = l.getState();
 			List<Literal> currentlyRemainingTasks = new ArrayList<>(l.getRemainingTasks());
 			if (currentlyRemainingTasks.isEmpty()) {
 				return new ArrayList<>();
 			}
-			Literal nextTaskTmp = currentlyRemainingTasks.get(0);
+			Literal nextTask = currentlyRemainingTasks.get(0);
 			currentlyRemainingTasks.remove(0);
-			String nextTaskName = nextTaskTmp.getPropertyName();
-			Literal nextTask = new Literal(nextTaskName, nextTaskTmp.getParameters());
+			//			String nextTaskName = nextTask.getPropertyName();
+			//			Literal nextTask = new Literal(nextTaskName, nextTaskTmp.getParameters());
 
 			/* get the child nodes */
 			long creationStartTime = System.currentTimeMillis();
@@ -131,7 +133,7 @@ public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String>, ILog
 					: this.getSuccessorsResultingFromResolvingComplexTask(state, nextTask, currentlyRemainingTasks);
 
 			if (successors.isEmpty()) {
-				this.logger.warn("Could not produce any successors for next task {} and next task tmp {}", nextTask, nextTaskTmp);
+				this.logger.warn("Could not produce any successors for next task {}", nextTask);
 				return Arrays.asList();
 			}
 

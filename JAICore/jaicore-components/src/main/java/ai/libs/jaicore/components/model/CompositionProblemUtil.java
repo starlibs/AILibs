@@ -48,8 +48,8 @@ public class CompositionProblemUtil {
 			components.add(curInstance);
 			List<String> requiredInterfaceNames = curInstance.getComponent().getRequiredInterfaceIds();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
-				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
-				componentInstances.push(instance);
+				List<ComponentInstance> instances = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
+				instances.forEach(componentInstances::push);
 			}
 		}
 		return components;
@@ -71,8 +71,8 @@ public class CompositionProblemUtil {
 			builder.append(curInstance.getComponent().getName());
 			List<String> requiredInterfaceNames = curInstance.getComponent().getRequiredInterfaceIds();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
-				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
-				componentInstances.push(instance);
+				List<ComponentInstance> instances = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
+				instances.forEach(componentInstances::push);
 			}
 		}
 		return builder.toString();
@@ -94,8 +94,8 @@ public class CompositionProblemUtil {
 			components.add(curInstance.getComponent());
 			List<String> requiredInterfaceNames = curInstance.getComponent().getRequiredInterfaceIds();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
-				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
-				componentInstances.push(instance);
+				List<ComponentInstance> instances = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
+				instances.forEach(componentInstances::push);
 			}
 		}
 		return components;

@@ -295,7 +295,6 @@ public class Graph<T> {
 
 	public String getLineBasedStringRepresentation(final int offset) {
 		StringBuilder sb = new StringBuilder();
-		System.out.println(this.getSources());
 		for (T source : this.getSources()) {
 			sb.append(this.getLineBasedStringRepresentation(source, offset, new ArrayList<>()));
 		}

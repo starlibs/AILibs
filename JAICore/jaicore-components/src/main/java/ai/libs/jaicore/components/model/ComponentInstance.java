@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -17,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
@@ -39,7 +37,7 @@ public class ComponentInstance  implements Serializable {
 
 	/* The grounding of the component including parameter values and recursively resolved required interfaces. */
 	private final Map<String, String> parameterValues;
-	private final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces;
+	private final Map<String, List<ComponentInstance>> satisfactionOfRequiredInterfaces;
 
 	private final Map<String, String> annotations = new HashMap<>();
 
@@ -55,7 +53,8 @@ public class ComponentInstance  implements Serializable {
 		this.component = other.component;
 		this.parameterValues = new HashMap<>(other.parameterValues);
 		this.satisfactionOfRequiredInterfaces = new HashMap<>();
-		other.satisfactionOfRequiredInterfaces.entrySet().forEach(x -> this.satisfactionOfRequiredInterfaces.put(x.getKey(), new ComponentInstance(x.getValue())));
+		other.satisfactionOfRequiredInterfaces.entrySet().forEach(x -> this.satisfactionOfRequiredInterfaces.put(x.getKey(), new ArrayList<>()));
+		other.satisfactionOfRequiredInterfaces.entrySet().forEach(x -> x.getValue().forEach(ci -> this.satisfactionOfRequiredInterfaces.get(x.getKey()).add(new ComponentInstance(ci))));
 		other.annotations.entrySet().forEach(x -> this.annotations.put(x.getKey(), x.getValue()));
 	}
 
@@ -70,7 +69,7 @@ public class ComponentInstance  implements Serializable {
 	 *            The refinement of the required interfaces.
 	 */
 	public ComponentInstance(@JsonProperty("component") final Component component, @JsonProperty("parameterValues") final Map<String, String> parameterValues,
-			@JsonProperty("satisfactionOfRequiredInterfaces") final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
+			@JsonProperty("satisfactionOfRequiredInterfaces") final Map<String, List<ComponentInstance>> satisfactionOfRequiredInterfaces) {
 		super();
 		this.component = component;
 		this.parameterValues = parameterValues;
@@ -129,7 +128,7 @@ public class ComponentInstance  implements Serializable {
 	/**
 	 * @return This method returns a mapping of interface IDs to component instances.
 	 */
-	public Map<String, ComponentInstance> getSatisfactionOfRequiredInterfaces() {
+	public Map<String, List<ComponentInstance>> getSatisfactionOfRequiredInterfaces() {
 		return this.satisfactionOfRequiredInterfaces;
 	}
 
@@ -139,65 +138,12 @@ public class ComponentInstance  implements Serializable {
 	public Collection<Component> getContainedComponents() {
 		Collection<Component> components = new HashSet<>();
 		components.add(this.getComponent());
-		for (ComponentInstance ci : this.satisfactionOfRequiredInterfaces.values()) {
-			components.addAll(ci.getContainedComponents());
+		for (List<ComponentInstance> ciList : this.satisfactionOfRequiredInterfaces.values()) {
+			for (ComponentInstance ci : ciList) {
+				components.addAll(ci.getContainedComponents());
+			}
 		}
 		return components;
-	}
-
-	/**
-	 * This method checks, whether a given list of paths of refinements conforms the constraints for parameter refinements.
-	 *
-	 * @param paths
-	 *            A list of paths of refinements to be checked.
-	 * @return Returns true if everything is alright and false if there is an issue with the given paths.
-	 */
-	public boolean matchesPathRestrictions(final Collection<List<Pair<String, String>>> paths) {
-		for (List<Pair<String, String>> path : paths) {
-			if (!this.matchesPathRestriction(path)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * This method checks, whether a path of refinements conforms the constraints for parameter refinements.
-	 *
-	 * @param path
-	 *            A path of refinements to be checked.
-	 * @return Returns true if everything is alright and false if there is an issue with the given path.
-	 */
-	public boolean matchesPathRestriction(final List<Pair<String, String>> path) {
-		if (path.isEmpty()) {
-			return true;
-		}
-
-		/* if the first entry is on null, we interpret it as a filter on this component itself */
-		int i = 0;
-		if (path.get(0).getX() == null) {
-			String requiredComponent = path.get(0).getY();
-			if (!requiredComponent.equals("*") && !this.component.getName().equals(requiredComponent)) {
-				return false;
-			}
-			i = 1;
-		}
-
-		/* now go over the rest of the path and check every entry on conformity */
-		ComponentInstance current = this;
-		int n = path.size();
-		for (; i < n; i++) {
-			Pair<String, String> selection = path.get(i);
-			if (!current.getComponent().getRequiredInterfaceIds().contains(selection.getX())) {
-				throw new IllegalArgumentException("Invalid path restriction " + path + ": " + selection.getX() + " is not a required interface of " + current.getComponent().getName());
-			}
-			ComponentInstance instanceChosenForRequiredInterface = current.getSatisfactionOfRequiredInterfaces().get(selection.getX());
-			if (!selection.getY().equals("*") && !instanceChosenForRequiredInterface.getComponent().getName().equals(selection.getY())) {
-				return false;
-			}
-			current = instanceChosenForRequiredInterface;
-		}
-		return true;
 	}
 
 	@Override
@@ -250,7 +196,7 @@ public class ComponentInstance  implements Serializable {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getComponent().getName());
 		if (!this.satisfactionOfRequiredInterfaces.isEmpty()) {
-			sb.append(this.satisfactionOfRequiredInterfaces.entrySet().stream().map(x -> x.getValue().toComponentNameString()).collect(Collectors.toList()).toString());
+			sb.append(this.satisfactionOfRequiredInterfaces.entrySet().stream().map(x -> x.getValue().stream().map(ci -> ci.toComponentNameString()).collect(Collectors.joining())).collect(Collectors.toList()).toString());
 		}
 		return sb.toString();
 	}
@@ -280,7 +226,7 @@ public class ComponentInstance  implements Serializable {
 	public String getNestedComponentDescription() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getComponent().getName());
-		this.satisfactionOfRequiredInterfaces.values().stream().map(x -> " - " + x.getNestedComponentDescription()).forEach(sb::append);
+		this.satisfactionOfRequiredInterfaces.values().stream().map(x -> " - " + x.stream().map(ComponentInstance::getNestedComponentDescription).collect(Collectors.joining())).forEach(sb::append);
 		return sb.toString();
 	}
 
@@ -308,20 +254,5 @@ public class ComponentInstance  implements Serializable {
 		} else {
 			this.annotations.put(key, annotation);
 		}
-	}
-
-	public boolean isDefaultParametrized() {
-		for (Entry<String, String> paramEntry : this.parameterValues.entrySet()) {
-			Parameter p = this.component.getParameterWithName(paramEntry.getKey());
-			if ((p.isNumeric() && (double) p.getDefaultValue() != Double.parseDouble(paramEntry.getValue())) || (p.isCategorical() && !p.getDefaultValue().toString().equals(paramEntry.getValue()))) {
-				return false;
-			}
-		}
-		for (ComponentInstance ci : this.satisfactionOfRequiredInterfaces.values()) {
-			if (!ci.isDefaultParametrized()) {
-				return false;
-			}
-		}
-		return true;
 	}
 }

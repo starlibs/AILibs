@@ -58,12 +58,17 @@ public class TaskPlannerUtil implements ILoggingCustomizable {
 	public Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(final CNFFormula knowledge, final Collection<? extends Method> methods, final Literal task, final Monom state, final List<Literal> remainingProblems)
 			throws InterruptedException {
 		Collection<MethodInstance> applicableDerivedMethods = new ArrayList<>();
-		for (Method m : methods) {
-			if (m.getTask().getPropertyName().equals(task.getPropertyName())) {
-				Collection<MethodInstance> additionalInstances = this.getMethodInstancesForTaskThatAreApplicableInState(knowledge, m, task, state, remainingProblems);
-				assert !m.isLonely() || additionalInstances.size() <= 1 : "Computed more than one instantiations for lonely method: \n\t" + additionalInstances.stream().map(MethodInstance::toString).collect(Collectors.joining("\n\t"));
-				applicableDerivedMethods.addAll(additionalInstances);
-			}
+		List<Method> potentiallySuitableMethod = methods.stream().filter(m -> m.getTask().getPropertyName().equals(task.getPropertyName())).collect(Collectors.toList());
+		if (potentiallySuitableMethod.isEmpty()) {
+			this.logger.warn("There are NO methods that can resolve the task {}. This points to an ill-defined planning problem!", task);
+			return applicableDerivedMethods;
+		}
+		this.logger.debug("Identified {} methods that are suitable based on their name.", potentiallySuitableMethod.size());
+		for (Method m : potentiallySuitableMethod) {
+			this.logger.debug("Method {} is potentially suited to solve this task. Checking its applicability.", m.getName());
+			Collection<MethodInstance> additionalInstances = this.getMethodInstancesForTaskThatAreApplicableInState(knowledge, m, task, state, remainingProblems);
+			assert !m.isLonely() || additionalInstances.size() <= 1 : "Computed more than one instantiations for lonely method: \n\t" + additionalInstances.stream().map(MethodInstance::toString).collect(Collectors.joining("\n\t"));
+			applicableDerivedMethods.addAll(additionalInstances);
 		}
 		return applicableDerivedMethods;
 	}
@@ -75,6 +80,7 @@ public class TaskPlannerUtil implements ILoggingCustomizable {
 		Collection<MethodInstance> applicableDerivedMethodInstances = new ArrayList<>();
 		Collection<Map<VariableParam, LiteralParam>> maps = this.getMappingsThatMatchTasksAndMakesItApplicable(knowledge, method.getTask(), task, method.getPrecondition(), state);
 		for (Map<VariableParam, LiteralParam> grounding : maps) {
+			this.logger.debug("Now considering partial grounding {}", grounding);
 
 			/* create a copy of the grounding */
 			Map<VariableParam, ConstantParam> basicConstantGrounding = new HashMap<>();
@@ -157,10 +163,12 @@ public class TaskPlannerUtil implements ILoggingCustomizable {
 
 				/* create new objects for unassigned open output variables */
 				Set<ConstantParam> knownConstants = new HashSet<>(state.getConstantParams());
+				knownConstants.addAll(extendedGrounding.values());
 				for (Literal l : remainingProblems) {
 					knownConstants.addAll(l.getConstantParams());
 				}
 				Collection<VariableParam> unboundParams = SetUtil.difference(method.getParameters(), extendedGrounding.keySet());
+				this.logger.debug("Unbound parameters at this point: {}. Known constants: {}", unboundParams, knownConstants);
 
 				if (method instanceof OCMethod) {
 					Collection<VariableParam> unboundOutputParams = SetUtil.intersection(unboundParams, ((OCMethod) method).getOutputs());
@@ -329,6 +337,9 @@ public class TaskPlannerUtil implements ILoggingCustomizable {
 		/* if no precondition is to be matched, just match the params and return this binding */
 		if (preconditionOfMethodOrPrimitive.isEmpty()) {
 			int numParams = target.getParameters().size();
+			if (methodOrPrimitiveTask.getParameters().size() != numParams) {
+				throw new IllegalArgumentException("The target " + target + " has " + numParams + " parameters but the method or primitive task " + methodOrPrimitiveTask + " has " + methodOrPrimitiveTask.getParameters().size());
+			}
 			Map<VariableParam, LiteralParam> grounding = new HashMap<>();
 			for (int i = 0; i < numParams; i++) {
 				VariableParam paramOfPreconditionLiteral = (VariableParam) methodOrPrimitiveTask.getParameters().get(i);
@@ -337,6 +348,7 @@ public class TaskPlannerUtil implements ILoggingCustomizable {
 			}
 			Collection<Map<VariableParam, LiteralParam>> groundings = new ArrayList<>();
 			groundings.add(grounding);
+			this.logger.debug("There are no preconditions, so the valid groundings are {}", groundings);
 			return groundings;
 		}
 

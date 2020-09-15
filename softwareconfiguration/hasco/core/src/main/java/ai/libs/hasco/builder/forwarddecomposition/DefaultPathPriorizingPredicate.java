@@ -7,7 +7,7 @@ import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.core.IHascoAware;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.ComponentUtil;
+import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 
@@ -44,7 +44,7 @@ public class DefaultPathPriorizingPredicate<N> implements Predicate<N>, IHascoAw
 		if (inst == null) {
 			return true;
 		}
-		return ComponentUtil.isDefaultConfiguration(inst);
+		return ComponentInstanceUtil.isDefaultConfiguration(inst);
 	}
 
 	@Override

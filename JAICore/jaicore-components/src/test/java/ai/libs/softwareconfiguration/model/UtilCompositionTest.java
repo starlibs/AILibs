@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,17 +34,17 @@ public class UtilCompositionTest {
 		component1.addRequiredInterface("Interface1", "Interface1");
 		component1.addRequiredInterface("Interface2", "Interface2");
 		component2.addRequiredInterface("Interface1", "Interface1");
-		Map<String,ComponentInstance> sat1 = new HashMap<String,ComponentInstance>();
-		Map<String,ComponentInstance> sat2 = new HashMap<String,ComponentInstance>();
-		Map<String,ComponentInstance> sat3 = new HashMap<String,ComponentInstance>();
-		Map<String,ComponentInstance> sat4 = new HashMap<String,ComponentInstance>();
+		Map<String,List<ComponentInstance>> sat1 = new HashMap<>();
+		Map<String,List<ComponentInstance>> sat2 = new HashMap<>();
+		Map<String,List<ComponentInstance>> sat3 = new HashMap<>();
+		Map<String,List<ComponentInstance>> sat4 = new HashMap<>();
 		Map<String,String> parameterValues = new HashMap<String,String>();
 		ComponentInstance instance4 = new ComponentInstance(component4, parameterValues, sat4);
 		ComponentInstance instance3 = new ComponentInstance(component3, parameterValues, sat3);
-		sat2.put("Interface1", instance3);
+		sat2.put("Interface1", Arrays.asList(instance3));
 		ComponentInstance instance2 = new ComponentInstance(component2, parameterValues, sat2);
-		sat1.put("Interface1", instance2);
-		sat1.put("Interface2", instance4);
+		sat1.put("Interface1", Arrays.asList(instance2));
+		sat1.put("Interface2", Arrays.asList(instance4));
 		ComponentInstance instance1 = new ComponentInstance(component1, parameterValues, sat1);
 		List<Component> components = CompositionProblemUtil.getComponentsOfComposition(instance1);
 		for(int i = 0; i < groundTruth.size(); i++) {
