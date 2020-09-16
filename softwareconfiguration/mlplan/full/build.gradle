@@ -75,4 +75,9 @@ uploadArchives {
   	}
 }
 
+task runMLPlanExperimenter(type: JavaExec) {
+  classpath sourceSets.main.runtimeClasspath
+  main = "ai.libs.mlplan.experimenter.MLPlanExperimenter"
+  args = ["-c"]
+}
 

@@ -30,8 +30,12 @@ public interface IScikitLearnWrapperConfig extends IPythonConfig {
 	@DefaultValue(DEF_TEMP_FOLDER)
 	public File getTempFolder();
 
-	@Key("sklearn.wrapper.temp.dump_folder")
-	@DefaultValue(DEF_TEMP_FOLDER + "/model_dumps")
-	public File getModelDumpsDirectory();
+	@Key("sklearn.wrapper.temp.dump_folder_name")
+	@DefaultValue("model_dumps")
+	public String getModelDumpsDirectoryName();
+
+	default File getModelDumpsDirectory() {
+		return new File(this.getTempFolder(), this.getModelDumpsDirectoryName());
+	}
 
 }

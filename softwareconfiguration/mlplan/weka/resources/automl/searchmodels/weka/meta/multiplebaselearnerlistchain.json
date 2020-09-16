@@ -1,0 +1,25 @@
+{
+	"repository": "REMOVED_MultipleBaseLearnerListChain",
+	"include": [],
+	"components": [
+		{
+			"name": "MultipleBaseLearnerListChain",
+			"requiredInterface": [
+				{
+					"id": "classifier",
+					"name": "BaseClassifier"
+				},
+				{
+					"id": "chain",
+					"name": "MultipleBaseLearnerList"
+				}
+			],
+			"providedInterface": [
+				"ModelHelper",
+				"REMOVED_MultipleBaseLearnerList"
+			],
+			"parameter": [],
+			"dependencies": []
+		}
+	]
+}

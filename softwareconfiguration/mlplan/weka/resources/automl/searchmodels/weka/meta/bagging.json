@@ -1,0 +1,60 @@
+{
+	"repository": "weka.classifiers.meta.Bagging",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.meta.Bagging",
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BaseClassifier"
+				}
+			],
+			"providedInterface": [
+				"AbstractClassifier",
+				"MetaClassifier",
+				"WeightedInstancesHandler",
+				"PipelineClassifier"
+			],
+			"parameter": [
+				{
+					"name": "P",
+					"type": "int",
+					"default": 100.0,
+					"min": 10.0,
+					"max": 100.0,
+					"refineSplits": 8,
+					"minInterval": 5
+				},
+				{
+					"name": "I",
+					"type": "int",
+					"default": 10.0,
+					"min": 2.0,
+					"max": 128.0,
+					"refineSplits": 8,
+					"minInterval": 5
+				},
+				{
+					"name": "S",
+					"type": "cat",
+					"default": "1",
+					"values": [
+						"1"
+					]
+				},
+				{
+					"name": "O",
+					"type": "boolean",
+					"default": "false"
+				}
+			],
+			"dependencies": [
+				{
+					"pre": "O in {true}",
+					"post": "P in {100}"
+				}
+			]
+		}
+	]
+}

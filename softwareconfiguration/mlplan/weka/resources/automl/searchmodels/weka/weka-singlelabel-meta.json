@@ -60,8 +60,8 @@
     "dependencies" : [ ]
   },  {
     "name" : "weka.classifiers.meta.Stacking",
-    "requiredInterface" : [ {"id": "B", "name": "BaseClassifier"} ],
-    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "PipelineClassifier" ],
+    "requiredInterface" : [ {"id": "B", "name": "MultipleBaseLearnerList"} ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier" ],
     "parameter" : [ {
       "name" : "X",
       "type" : "cat",
@@ -74,7 +74,19 @@
       "values" : [ "1" ]
     } ],
     "dependencies" : [ ]
-  } ,
+  },{
+    "name" : "MultipleBaseLearnerListElement",
+    "requiredInterface" : [ {"id": "classifier", "name": "BaseClassifier"} ],
+    "providedInterface" : [ "ModelHelper", "MultipleBaseLearnerList" ],
+    "parameter" : [],
+    "dependencies" : [ ]
+  },{
+    "name" : "REMOVED_MultipleBaseLearnerListChain",
+    "requiredInterface" : [ {"id": "classifier", "name": "BaseClassifier"}, {"id": "chain", "name": "MultipleBaseLearnerList"} ],
+    "providedInterface" : [ "ModelHelper", "REMOVED_MultipleBaseLearnerList" ],
+    "parameter" : [],
+    "dependencies" : [ ]
+  },
   {
     "name" : "weka.classifiers.lazy.LWL",
     "requiredInterface" : [ {"id": "W", "name":"WeightedInstancesHandler" } ],
@@ -123,7 +135,7 @@
     "dependencies" : [ ]
   },{
     "name" : "weka.classifiers.meta.Bagging",
-    "requiredInterface" : [ ],
+    "requiredInterface" : [ {"id": "W", "name": "BaseClassifier"} ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler", "PipelineClassifier" ],
     "parameter" : [ {
       "name" : "P",
@@ -231,21 +243,32 @@
     } ]
   },  {
     "name" : "weka.classifiers.meta.ClassificationViaRegression",
-    "requiredInterface" : [ ],
+    "requiredInterface" : [ {"id": "W", "name": "Regressor" } ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "PipelineClassifier" ],
     "parameter" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "weka.classifiers.meta.LogitBoost",
-    "requiredInterface" : [ ],
+    "requiredInterface" : [ {"id": "W", "name": "BaseClassifier" } ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler", "PipelineClassifier" ],
     "parameter" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "weka.classifiers.meta.MultiClassClassifier",
-    "requiredInterface" : [ ],
+    "requiredInterface" : [  {"id": "W", "name": "BaseClassifier" } ],
     "providedInterface" : [ "AbstractClassifier",  "MetaClassifier", "PipelineClassifier" ],
-    "parameter" : [ ],
-    "dependencies" : [ ]
+    "parameter" : [ {
+    	"name": "M",
+    	"comment": "Sets the method to use. Valid values are 0 (1-against-all),  1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0)",
+    	"type": "cat",
+    	"values": [ "0", "1", "2", "3" ],
+    	"default": "0"
+    }, {
+    	"name": "P",
+    	"comment": "Use pairwise coupling (only has an effect for 1-against1)",
+    	"type": "boolean",
+    	"default": "false"
+    }  ],
+    "dependencies" : [ {"pre": "M in {1,2,3}", "post": "P in {false}"} ]
   }]
 }

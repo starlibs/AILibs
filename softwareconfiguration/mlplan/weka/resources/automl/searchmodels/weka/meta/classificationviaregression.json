@@ -1,0 +1,22 @@
+{
+	"repository": "weka.classifiers.meta.ClassificationViaRegression",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.meta.ClassificationViaRegression",
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "Regressor"
+				}
+			],
+			"providedInterface": [
+				"AbstractClassifier",
+				"MetaClassifier",
+				"PipelineClassifier"
+			],
+			"parameter": [],
+			"dependencies": []
+		}
+	]
+}

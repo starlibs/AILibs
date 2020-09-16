@@ -1,0 +1,46 @@
+{
+	"repository": "weka.classifiers.meta.MultiClassClassifier",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.meta.MultiClassClassifier",
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BaseClassifier"
+				}
+			],
+			"providedInterface": [
+				"AbstractClassifier",
+				"MetaClassifier",
+				"PipelineClassifier"
+			],
+			"parameter": [
+				{
+					"name": "M",
+					"comment": "Sets the method to use. Valid values are 0 (1-against-all),  1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0)",
+					"type": "cat",
+					"values": [
+						"0",
+						"1",
+						"2",
+						"3"
+					],
+					"default": "0"
+				},
+				{
+					"name": "P",
+					"comment": "Use pairwise coupling (only has an effect for 1-against1)",
+					"type": "boolean",
+					"default": "false"
+				}
+			],
+			"dependencies": [
+				{
+					"pre": "M in {1,2,3}",
+					"post": "P in {false}"
+				}
+			]
+		}
+	]
+}

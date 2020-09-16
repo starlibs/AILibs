@@ -1,0 +1,23 @@
+{
+	"repository": "weka.classifiers.meta.LogitBoost",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.meta.LogitBoost",
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BaseClassifier"
+				}
+			],
+			"providedInterface": [
+				"AbstractClassifier",
+				"MetaClassifier",
+				"WeightedInstancesHandler",
+				"PipelineClassifier"
+			],
+			"parameter": [],
+			"dependencies": []
+		}
+	]
+}

@@ -534,7 +534,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		String now = new SimpleDateFormat(DATE_FORMAT).format(new Date());
 		String memoryUsageInMB = String.valueOf((int) Runtime.getRuntime().totalMemory() / 1024 / 1024);
 		Map<String, String> valuesToWrite = new HashMap<>();
-		values.keySet().forEach(k -> valuesToWrite.put(k, values.get(k).toString()));
+		values.keySet().forEach(k -> valuesToWrite.put(k, values.get(k) + ""));
 		List<String> fieldsForWhichToIgnoreTime = this.config.getFieldsForWhichToIgnoreTime();
 		List<String> fieldsForWhichToIgnoreMemory = this.config.getFieldsForWhichToIgnoreMemory();
 		for (String result : values.keySet()) {
@@ -547,6 +547,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 				}
 			}
 		}
+		System.out.println(valuesToWrite);
 		Map<String, String> where = new HashMap<>();
 		where.putAll(conditions);
 		where.put(FIELD_ID, String.valueOf(exp.getId()));
