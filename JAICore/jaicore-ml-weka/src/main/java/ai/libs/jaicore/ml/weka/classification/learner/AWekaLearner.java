@@ -107,11 +107,11 @@ public abstract class AWekaLearner<P extends IPrediction, B extends IPredictionB
 			if (this.wrappedLearner instanceof MLPipeline) {
 				MLPipeline pipeline = (MLPipeline) this.wrappedLearner;
 				Classifier classifier = pipeline.getBaseClassifier();
-				ASSearch searcher = pipeline.getPreprocessors().get(0).getSearcher();
-				ASEvaluation evaluator = pipeline.getPreprocessors().get(0).getEvaluator();
+				ASSearch searcher = pipeline.getPreprocessors().isEmpty() ? null : pipeline.getPreprocessors().get(0).getSearcher();
+				ASEvaluation evaluator = pipeline.getPreprocessors().isEmpty() ? null : pipeline.getPreprocessors().get(0).getEvaluator();
 				return new ReconstructionPlan(
-						Arrays.asList(new ReconstructionInstruction(WekaClassifier.class.getMethod("createPipeline", String.class, List.class, String.class, List.class, String.class, List.class), searcher.getClass().getName(),
-								((OptionHandler) searcher).getOptions(), evaluator.getClass().getName(), ((OptionHandler) evaluator).getOptions(), classifier.getClass().getName(), ((OptionHandler) classifier).getOptions())));
+						Arrays.asList(new ReconstructionInstruction(WekaClassifier.class.getMethod("createPipeline", String.class, List.class, String.class, List.class, String.class, List.class), searcher != null ? searcher.getClass().getName() : null,
+								searcher != null ? ((OptionHandler) searcher).getOptions() : null, evaluator != null ? evaluator.getClass().getName() : null, evaluator != null ? ((OptionHandler) evaluator).getOptions() : null, classifier.getClass().getName(), ((OptionHandler) classifier).getOptions())));
 			} else {
 				return new ReconstructionPlan(Arrays.asList(new ReconstructionInstruction(WekaClassifier.class.getMethod("createBaseClassifier", String.class, List.class), this.name, this.getOptionsAsList())));
 			}
