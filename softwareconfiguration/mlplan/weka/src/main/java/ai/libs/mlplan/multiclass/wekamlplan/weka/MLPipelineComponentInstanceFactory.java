@@ -1,5 +1,6 @@
 package ai.libs.mlplan.multiclass.wekamlplan.weka;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,7 +11,8 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.serialization.ComponentNotFoundException;
 import ai.libs.jaicore.components.serialization.ComponentUtils;
@@ -26,15 +28,15 @@ import weka.core.OptionHandler;
  */
 public class MLPipelineComponentInstanceFactory {
 
-	private Collection<Component> components;
+	private Collection<IComponent> components;
 
 	/**
 	 * Creates a new factory object using the given configuration file
 	 *
 	 * @param components
 	 */
-	public MLPipelineComponentInstanceFactory(final Collection<Component> components) {
-		this.components = components;
+	public MLPipelineComponentInstanceFactory(final Collection<? extends IComponent> components) {
+		this.components = new ArrayList<>(components);
 	}
 
 	/**
@@ -65,15 +67,14 @@ public class MLPipelineComponentInstanceFactory {
 			ComponentInstance classifierCI = this.getComponentInstanceForPipelineElement(pipeline.getBaseClassifier());
 
 			// Pipeline
-			HashMap<String, ComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<>();
-			satisfactionOfRequiredInterfaces.put("preprocessor", preprocessorCI);
-			satisfactionOfRequiredInterfaces.put("classifier", classifierCI);
+			HashMap<String, Collection<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
+			satisfactionOfRequiredInterfaces.put("preprocessor", Arrays.asList(preprocessorCI));
+			satisfactionOfRequiredInterfaces.put("classifier", Arrays.asList(classifierCI));
 			return new ComponentInstance(ComponentUtils.getComponentByName("pipeline", this.components), new HashMap<String, String>(), satisfactionOfRequiredInterfaces);
 
 		} else {
 			// Pipeline is only classifier
-			return new ComponentInstance(ComponentUtils.getComponentByName(pipeline.getBaseClassifier().getClass().getName(), this.components), this.getParametersForPipelineElement(pipeline.getBaseClassifier()),
-					new HashMap<String, ComponentInstance>());
+			return new ComponentInstance(ComponentUtils.getComponentByName(pipeline.getBaseClassifier().getClass().getName(), this.components), this.getParametersForPipelineElement(pipeline.getBaseClassifier()), new HashMap<>());
 		}
 	}
 
@@ -90,8 +91,8 @@ public class MLPipelineComponentInstanceFactory {
 	 */
 	private ComponentInstance getComponentInstanceForPipelineElement(final Object pipelineElement, @SuppressWarnings("unchecked") final Pair<String, ComponentInstance>... satisfactionOfRegquiredInterfaces)
 			throws ComponentNotFoundException {
-		HashMap<String, ComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<>();
-		Arrays.stream(satisfactionOfRegquiredInterfaces).forEach(entry -> satisfactionOfRequiredInterfaces.put(entry.getKey(), entry.getValue()));
+		HashMap<String, Collection<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
+		Arrays.stream(satisfactionOfRegquiredInterfaces).forEach(entry -> satisfactionOfRequiredInterfaces.put(entry.getKey(), Arrays.asList(entry.getValue())));
 		return new ComponentInstance(ComponentUtils.getComponentByName(pipelineElement.getClass().getName(), this.components), this.getParametersForPipelineElement(pipelineElement), satisfactionOfRequiredInterfaces);
 	}
 

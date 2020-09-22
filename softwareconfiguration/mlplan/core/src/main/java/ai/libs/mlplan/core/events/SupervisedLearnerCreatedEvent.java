@@ -3,20 +3,20 @@ package ai.libs.mlplan.core.events;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.event.IEvent;
 
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 
 public class SupervisedLearnerCreatedEvent implements IEvent {
-	private final ComponentInstance instance;
+	private final IComponentInstance instance;
 	private final ISupervisedLearner<?, ?> classifier;
 	private final long timestamp = System.currentTimeMillis();
 
-	public SupervisedLearnerCreatedEvent(final ComponentInstance instance, final ISupervisedLearner<?, ?> classifier) {
+	public SupervisedLearnerCreatedEvent(final IComponentInstance instance, final ISupervisedLearner<?, ?> classifier) {
 		super();
 		this.instance = instance;
 		this.classifier = classifier;
 	}
 
-	public ComponentInstance getInstance() {
+	public IComponentInstance getInstance() {
 		return this.instance;
 	}
 

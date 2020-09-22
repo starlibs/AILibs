@@ -21,7 +21,7 @@ import com.google.common.eventbus.EventBus;
 
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.metamining.MetaMinerBasedSorter;
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
@@ -68,7 +68,7 @@ public class MetaMLPlan extends AbstractClassifier {
 
 	// Search results
 	private IWekaClassifier bestModel;
-	private transient Collection<Component> components;
+	private transient Collection<IComponent> components;
 
 	// For intermediate results
 	private transient EventBus eventBus = new EventBus();

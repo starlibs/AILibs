@@ -1,5 +1,6 @@
 package ai.libs.mlplan.core;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOUtil;
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.serialization.CompositionSerializer;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -21,16 +22,16 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 
 	private static final double EXPAND_NODE_SCORE = (-1) * Double.MAX_VALUE;
 
-	private final Collection<Component> components;
+	private final Collection<IComponent> components;
 	private final List<String> orderingOfComponents;
 	private final String nameOfMethodToResolveBareLearner;
 	private final String nameOfMethodToResolveLearnerInPipeline;
 	private Logger logger = LoggerFactory.getLogger(PreferenceBasedNodeEvaluator.class);
 	private boolean sentLogMessageForHavingEnteredSecondSubPhase = false;
 
-	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> orderingOfComponents, final String nameOfMethodToResolveBareLearner, final String nameOfMethodToResolveLearnerInPipeline) {
+	public PreferenceBasedNodeEvaluator(final Collection<? extends IComponent> components, final List<String> orderingOfComponents, final String nameOfMethodToResolveBareLearner, final String nameOfMethodToResolveLearnerInPipeline) {
 		super();
-		this.components = components;
+		this.components = new ArrayList<>(components);
 		this.orderingOfComponents = orderingOfComponents;
 		this.nameOfMethodToResolveBareLearner = nameOfMethodToResolveBareLearner;
 		this.nameOfMethodToResolveLearnerInPipeline = nameOfMethodToResolveLearnerInPipeline;
@@ -71,9 +72,9 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 			lastMethodBeforeSteppingToRandomCompletions = nameOfLastAppliedMethod.startsWith(this.nameOfMethodToResolveLearnerInPipeline);
 
 			if (instance.getSatisfactionOfRequiredInterfaces().containsKey("classifier")) {
-				classifierName = instance.getSatisfactionOfRequiredInterfaces().get("classifier").getComponent().getName();
+				classifierName = instance.getSatisfactionOfRequiredInterface("classifier").iterator().next().getComponent().getName();
 			} else if (instance.getSatisfactionOfRequiredInterfaces().containsKey("regressor")) {
-				classifierName = instance.getSatisfactionOfRequiredInterfaces().get("regressor").getComponent().getName();
+				classifierName = instance.getSatisfactionOfRequiredInterface("regressor").iterator().next().getComponent().getName();
 			} else {
 				this.logger.debug("Exact decision about pipeline fillup not recognizable in state yet. Returning {}.", EXPAND_NODE_SCORE);
 				return EXPAND_NODE_SCORE;

@@ -7,6 +7,9 @@ import java.util.Map;
 
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.serialization.ComponentLoader;
 
 /**
@@ -17,19 +20,19 @@ import ai.libs.jaicore.components.serialization.ComponentLoader;
  * @param <V>
  */
 public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparable<V>> extends SoftwareConfigurationProblem<V> {
-	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
+	private final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramRefinementConfig;
 
-	public RefinementConfiguredSoftwareConfigurationProblem(final Collection<Component> components, final String requiredInterface, final IObjectEvaluator<ComponentInstance, V> compositionEvaluator,
-			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig) {
+	public RefinementConfiguredSoftwareConfigurationProblem(final Collection<? extends IComponent> components, final String requiredInterface, final IObjectEvaluator<IComponentInstance, V> compositionEvaluator,
+			final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramRefinementConfig) {
 		this(new SoftwareConfigurationProblem<>(components, requiredInterface, compositionEvaluator), paramRefinementConfig);
 	}
 
-	public RefinementConfiguredSoftwareConfigurationProblem(final RefinementConfiguredSoftwareConfigurationProblem<V> problemTemplate, final Collection<Component> components,
-			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig) {
+	public RefinementConfiguredSoftwareConfigurationProblem(final RefinementConfiguredSoftwareConfigurationProblem<V> problemTemplate, final Collection<? extends IComponent> components,
+			final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramRefinementConfig) {
 		this(components, problemTemplate.getRequiredInterface(), problemTemplate.getCompositionEvaluator(), paramRefinementConfig);
 	}
 
-	public RefinementConfiguredSoftwareConfigurationProblem(final RefinementConfiguredSoftwareConfigurationProblem<V> problemTemplate, final IObjectEvaluator<ComponentInstance, V> evaluator) {
+	public RefinementConfiguredSoftwareConfigurationProblem(final RefinementConfiguredSoftwareConfigurationProblem<V> problemTemplate, final IObjectEvaluator<IComponentInstance, V> evaluator) {
 		this(problemTemplate.getComponents(), problemTemplate.getRequiredInterface(), evaluator, problemTemplate.getParamRefinementConfig());
 	}
 
@@ -37,16 +40,16 @@ public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparab
 		this(problemTemplate.getComponents(), requiredInterface, problemTemplate.getCompositionEvaluator(), problemTemplate.getParamRefinementConfig());
 	}
 
-	public RefinementConfiguredSoftwareConfigurationProblem(final File configurationFile, final String requiredInterface, final IObjectEvaluator<ComponentInstance, V> compositionEvaluator) throws IOException {
+	public RefinementConfiguredSoftwareConfigurationProblem(final File configurationFile, final String requiredInterface, final IObjectEvaluator<IComponentInstance, V> compositionEvaluator) throws IOException {
 		super(configurationFile, requiredInterface, compositionEvaluator);
 		this.paramRefinementConfig = new ComponentLoader(configurationFile).getParamConfigs();
 
 		/* check that parameter refinements are defined for all components */
-		for (Component c : this.getComponents()) {
+		for (IComponent c : this.getComponents()) {
 			if (!this.paramRefinementConfig.containsKey(c)) {
 				throw new IllegalArgumentException("Error in parsing config file " + configurationFile.getAbsolutePath() + ". Component " + c.getName() + " has not parameter refinement configs associated.");
 			}
-			for (Parameter p : c.getParameters()) {
+			for (IParameter p : c.getParameters()) {
 				if (p.isNumeric() && !this.paramRefinementConfig.get(c).containsKey(p)) {
 					throw new IllegalArgumentException("Error in parsing config file " + configurationFile.getAbsolutePath() + ". No refinement config was delivered for numeric parameter " + p.getName() + " of component " + c.getName());
 				}
@@ -54,12 +57,12 @@ public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparab
 		}
 	}
 
-	public RefinementConfiguredSoftwareConfigurationProblem(final SoftwareConfigurationProblem<V> coreProblem, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig) {
+	public RefinementConfiguredSoftwareConfigurationProblem(final SoftwareConfigurationProblem<V> coreProblem, final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramRefinementConfig) {
 		super(coreProblem);
 		this.paramRefinementConfig = paramRefinementConfig;
 	}
 
-	public Map<Component, Map<Parameter, ParameterRefinementConfiguration>> getParamRefinementConfig() {
+	public Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> getParamRefinementConfig() {
 		return this.paramRefinementConfig;
 	}
 

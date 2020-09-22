@@ -25,7 +25,7 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.basic.StatisticsUtil;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.MCCVSplitEvaluationEvent;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.ReservoirSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SimpleRandomSamplingFactory;
@@ -61,9 +61,9 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 	private File intermediateSizeDownsampledFile = new File("testrsc/sampled/intermediate/" + this.getInput().getName());
 
 	private final int[] anchorpointsTraining = new int[] { 8, 16, 64, 128 };
-	private Map<ISupervisedLearner<?, ?>, ComponentInstance> classifier2modelMap = new HashMap<>();
-	private Map<ComponentInstance, int[]> trainingTimesDuringSearch = new HashMap<>();
-	private Map<ComponentInstance, List<Integer>> trainingTimesDuringSelection = new HashMap<>();
+	private Map<ISupervisedLearner<?, ?>, IComponentInstance> classifier2modelMap = new HashMap<>();
+	private Map<IComponentInstance, int[]> trainingTimesDuringSearch = new HashMap<>();
+	private Map<IComponentInstance, List<Integer>> trainingTimesDuringSelection = new HashMap<>();
 	private int numTrainingInstancesUsedInSelection;
 	private MLPlan<IWekaClassifier> mlplan;
 
@@ -195,7 +195,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 		}
 	}
 
-	private Instances getTrainingTimeInstancesForClassifier(final ComponentInstance ci) {
+	private Instances getTrainingTimeInstancesForClassifier(final IComponentInstance ci) {
 		ArrayList<Attribute> attributes = new ArrayList<>();
 		attributes.add(new Attribute("numInstances"));
 		//		attributes.add(new Attribute("numInstancesSquared"));
@@ -238,14 +238,14 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 
 	@Subscribe
 	public void receiveExtrapolationFinishedEvent(final LearningCurveExtrapolatedEvent e) {
-		ComponentInstance ci = this.classifier2modelMap.get(e.getExtrapolator().getLearner());
+		IComponentInstance ci = this.classifier2modelMap.get(e.getExtrapolator().getLearner());
 		this.logger.info("Storing training times {} for classifier {}", Arrays.toString(e.getExtrapolator().getTrainingTimes()), ci);
 		this.trainingTimesDuringSearch.put(ci, e.getExtrapolator().getTrainingTimes());
 	}
 
 	@Subscribe
 	public void receiveMCCVFinishedEvent(final MCCVSplitEvaluationEvent e) {
-		ComponentInstance ci = this.classifier2modelMap.get(e.getClassifier());
+		IComponentInstance ci = this.classifier2modelMap.get(e.getClassifier());
 		this.logger.info("Storing training time {} for classifier {} in selection phase with {} training instances and {} validation instances", e.getSplitEvaluationTime(), ci, e.getNumInstancesUsedForTraining(),
 				e.getNumInstancesUsedForValidation());
 		if (this.numTrainingInstancesUsedInSelection == 0) {

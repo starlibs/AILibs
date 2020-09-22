@@ -20,6 +20,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.algorithm.exceptions.ExceptionInAlgorithmIterationException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.common.event.IRelaxedEventEmitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.timing.TimedComputation;
 
-public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable {
+public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable, IRelaxedEventEmitter {
 
 	/* Logger variables */
 	private Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
@@ -147,6 +148,10 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		this.getConfig().setProperty(IOwnerBasedAlgorithmConfig.K_TIMEOUT, timeout.milliseconds() + "");
 	}
 
+	public boolean isTimeoutDefined() {
+		return this.getTimeout().milliseconds() > 0;
+	}
+
 	public int getTimeoutPrecautionOffset() {
 		return this.timeoutPrecautionOffset;
 	}
@@ -169,6 +174,10 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			return true;
 		}
 		return false;
+	}
+
+	protected long getDeadline() {
+		return this.deadline;
 	}
 
 	protected Timeout getRemainingTimeToDeadline() {

@@ -15,6 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDependency;
+import ai.libs.jaicore.components.api.IParameterDomain;
 
 public class CompositionProblemUtil {
 
@@ -24,11 +29,11 @@ public class CompositionProblemUtil {
 		/* avoid instantiation */
 	}
 
-	public static Collection<Component> getComponentsThatResolveProblem(final SoftwareConfigurationProblem<?> configurationProblem) {
+	public static Collection<IComponent> getComponentsThatResolveProblem(final SoftwareConfigurationProblem<?> configurationProblem) {
 		return getComponentsThatProvideInterface(configurationProblem, configurationProblem.getRequiredInterface());
 	}
 
-	public static Collection<Component> getComponentsThatProvideInterface(final SoftwareConfigurationProblem<?> configurationProblem, final String requiredInterface){
+	public static Collection<IComponent> getComponentsThatProvideInterface(final SoftwareConfigurationProblem<?> configurationProblem, final String requiredInterface){
 		return configurationProblem.getComponents().stream().filter(c -> c.getProvidedInterfaces().contains(requiredInterface)).collect(Collectors.toList());
 	}
 
@@ -38,18 +43,16 @@ public class CompositionProblemUtil {
 	 * @param composition
 	 * @return List of components in right to left depth-first order
 	 */
-	public static List<ComponentInstance> getComponentInstancesOfComposition(final ComponentInstance composition) {
-		List<ComponentInstance> components = new LinkedList<>();
-		Deque<ComponentInstance> componentInstances = new ArrayDeque<>();
+	public static List<IComponentInstance> getComponentInstancesOfComposition(final IComponentInstance composition) {
+		List<IComponentInstance> components = new LinkedList<>();
+		Deque<IComponentInstance> componentInstances = new ArrayDeque<>();
 		componentInstances.push(composition);
-		ComponentInstance curInstance;
+		IComponentInstance curInstance;
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			components.add(curInstance);
-			List<String> requiredInterfaceNames = curInstance.getComponent().getRequiredInterfaceIds();
-			for (String requiredInterfaceName : requiredInterfaceNames) {
-				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
-				componentInstances.push(instance);
+			for (Collection<IComponentInstance> instances : curInstance.getSatisfactionOfRequiredInterfaces().values()) {
+				instances.forEach(componentInstances::push);
 			}
 		}
 		return components;
@@ -61,18 +64,16 @@ public class CompositionProblemUtil {
 	 * @param composition
 	 * @return String of all component names in right to left depth-first order
 	 */
-	public static String getComponentNamesOfComposition(final ComponentInstance composition) {
+	public static String getComponentNamesOfComposition(final IComponentInstance composition) {
 		StringBuilder builder = new StringBuilder();
-		Deque<ComponentInstance> componentInstances = new ArrayDeque<>();
+		Deque<IComponentInstance> componentInstances = new ArrayDeque<>();
 		componentInstances.push(composition);
-		ComponentInstance curInstance;
+		IComponentInstance curInstance;
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			builder.append(curInstance.getComponent().getName());
-			List<String> requiredInterfaceNames = curInstance.getComponent().getRequiredInterfaceIds();
-			for (String requiredInterfaceName : requiredInterfaceNames) {
-				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
-				componentInstances.push(instance);
+			for (Collection<IComponentInstance> instances : curInstance.getSatisfactionOfRequiredInterfaces().values()) {
+				instances.forEach(componentInstances::push);
 			}
 		}
 		return builder.toString();
@@ -84,26 +85,24 @@ public class CompositionProblemUtil {
 	 * @param composition
 	 * @return List of components in right to left depth-first order
 	 */
-	public static List<Component> getComponentsOfComposition(final ComponentInstance composition) {
-		List<Component> components = new LinkedList<>();
-		Deque<ComponentInstance> componentInstances = new ArrayDeque<>();
+	public static List<IComponent> getComponentsOfComposition(final IComponentInstance composition) {
+		List<IComponent> components = new LinkedList<>();
+		Deque<IComponentInstance> componentInstances = new ArrayDeque<>();
 		componentInstances.push(composition);
-		ComponentInstance curInstance;
+		IComponentInstance curInstance;
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			components.add(curInstance.getComponent());
-			List<String> requiredInterfaceNames = curInstance.getComponent().getRequiredInterfaceIds();
-			for (String requiredInterfaceName : requiredInterfaceNames) {
-				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
-				componentInstances.push(instance);
+			for (Collection<IComponentInstance> instances : curInstance.getSatisfactionOfRequiredInterfaces().values()) {
+				instances.forEach(componentInstances::push);
 			}
 		}
 		return components;
 	}
 
-	public static boolean isDependencyPremiseSatisfied(final Dependency dependency, final Map<Parameter, IParameterDomain> values) {
+	public static boolean isDependencyPremiseSatisfied(final IParameterDependency dependency, final Map<IParameter, IParameterDomain> values) {
 		logger.debug("Checking satisfcation of dependency {} with values {}", dependency, values);
-		for (Collection<Pair<Parameter, IParameterDomain>> condition : dependency.getPremise()) {
+		for (Collection<Pair<IParameter, IParameterDomain>> condition : dependency.getPremise()) {
 			boolean check = isDependencyConditionSatisfied(condition, values);
 			logger.trace("Result of check for condition {}: {}", condition, check);
 			if (!check) {
@@ -113,9 +112,9 @@ public class CompositionProblemUtil {
 		return true;
 	}
 
-	public static boolean isDependencyConditionSatisfied(final Collection<Pair<Parameter, IParameterDomain>> condition, final Map<Parameter, IParameterDomain> values) {
-		for (Pair<Parameter, IParameterDomain> conditionItem : condition) {
-			Parameter param = conditionItem.getX();
+	public static boolean isDependencyConditionSatisfied(final Collection<Pair<IParameter, IParameterDomain>> condition, final Map<IParameter, IParameterDomain> values) {
+		for (Pair<IParameter, IParameterDomain> conditionItem : condition) {
+			IParameter param = conditionItem.getX();
 			if (!values.containsKey(param)) {
 				throw new IllegalArgumentException("Cannot check condition " + condition + " as the value for parameter " + param.getName() + " is not defined in " + values);
 			}

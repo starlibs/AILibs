@@ -21,8 +21,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.automl.AbstractSearchSpaceConfigurationTest;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
-import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
@@ -57,7 +57,7 @@ public class MLPlanWekaSearchSpaceConfigurationTest extends AbstractSearchSpaceC
 	}
 
 	@Override
-	public void execute(final ComponentInstance componentInstance) throws ComponentInstantiationFailedException, InterruptedException, AlgorithmTimeoutedException, ExecutionException {
+	public void execute(final IComponentInstance componentInstance) throws ComponentInstantiationFailedException, InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		IWekaClassifier model = this.factory.getComponentInstantiation(componentInstance);
 		TimedComputation.compute(new Callable<Double>() {
 			@Override

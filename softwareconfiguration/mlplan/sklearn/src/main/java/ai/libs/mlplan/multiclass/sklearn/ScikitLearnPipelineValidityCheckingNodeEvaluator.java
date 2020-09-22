@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOUtil;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -37,9 +38,9 @@ public class ScikitLearnPipelineValidityCheckingNodeEvaluator extends PipelineVa
 		ComponentInstance instance = HASCOUtil.getSolutionCompositionFromState(this.getComponents(), path.getHead().getState(), false);
 		if (instance != null) {
 			/* check invalid classifiers for this kind of dataset */
-			ComponentInstance classifier;
+			IComponentInstance classifier;
 			if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
-				classifier = instance.getSatisfactionOfRequiredInterfaces().get("classifier");
+				classifier = instance.getSatisfactionOfRequiredInterface("classifier").iterator().next();
 			} else {
 				classifier = instance;
 			}
@@ -50,7 +51,7 @@ public class ScikitLearnPipelineValidityCheckingNodeEvaluator extends PipelineVa
 		return null;
 	}
 
-	private void checkValidity(final ComponentInstance classifier) throws ControlledNodeEvaluationException {
+	private void checkValidity(final IComponentInstance classifier) throws ControlledNodeEvaluationException {
 		String classifierName = classifier.getComponent().getName().toLowerCase();
 
 		if (this.containsNegativeValues && classifierName.matches("(.*)(multinomialnb)(.*)")) {

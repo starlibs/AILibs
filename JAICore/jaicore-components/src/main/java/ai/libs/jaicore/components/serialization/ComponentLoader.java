@@ -26,12 +26,14 @@ import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDomain;
+import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.model.BooleanParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.Dependency;
-import ai.libs.jaicore.components.model.IParameterDomain;
-import ai.libs.jaicore.components.model.Interface;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
@@ -45,15 +47,15 @@ public class ComponentLoader {
 	private static final String MSG_CANNOT_PARSE_LITERAL = "Cannot parse literal ";
 	private static final String MSG_DOMAIN_NOT_SUPPORTED = "Currently no support for parameters with domain \"";
 
-	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
-	private final Collection<Component> components = new ArrayList<>();
+	private final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
+	private final Collection<IComponent> components = new ArrayList<>();
 	private final Set<String> parsedFiles = new HashSet<>();
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	private final Map<String, JsonNode> parameterMap = new HashMap<>();
 	private final Set<String> uniqueComponentNames = new HashSet<>();
 
-	private final List<Interface> requiredInterfaces = new ArrayList<>();
+	private final List<IRequiredInterfaceDefinition> requiredInterfaces = new ArrayList<>();
 	private final Set<String> providedInterfaces = new HashSet<>();
 
 	private final Map<String, JsonNode> componentMap = new HashMap<>();
@@ -125,6 +127,9 @@ public class ComponentLoader {
 			Component c;
 			for (JsonNode component : describedComponents) {
 				c = new Component(component.get("name").asText());
+				if (c.getName().contains("-")) {
+					throw new IllegalArgumentException("Illegal component name " + c.getName() + ". No hyphens allowed. Please only use [a-zA-z0-9].");
+				}
 				this.componentMap.put(c.getName(), component);
 
 				if (!this.uniqueComponentNames.add(c.getName())) {
@@ -186,7 +191,7 @@ public class ComponentLoader {
 					}
 				}
 
-				Map<Parameter, ParameterRefinementConfiguration> paramConfig = new HashMap<>();
+				Map<IParameter, ParameterRefinementConfiguration> paramConfig = new HashMap<>();
 
 				for (JsonNode parameter : component.path("parameter")) {
 					// name of the parameter
@@ -305,11 +310,11 @@ public class ComponentLoader {
 
 					/* parse precondition */
 					String pre = dependency.get("pre").asText();
-					Collection<Collection<Pair<Parameter, IParameterDomain>>> premise = new ArrayList<>();
+					Collection<Collection<Pair<IParameter, IParameterDomain>>> premise = new ArrayList<>();
 					Collection<String> monoms = Arrays.asList(pre.split("\\|"));
 					for (String monom : monoms) {
 						Collection<String> literals = Arrays.asList(monom.split("&"));
-						Collection<Pair<Parameter, IParameterDomain>> monomInPremise = new ArrayList<>();
+						Collection<Pair<IParameter, IParameterDomain>> monomInPremise = new ArrayList<>();
 
 						for (String literal : literals) {
 							String[] parts = literal.trim().split(" ");
@@ -317,11 +322,11 @@ public class ComponentLoader {
 								throw new IllegalArgumentException(MSG_CANNOT_PARSE_LITERAL + literal + ". Literals must be of the form \"<a> P <b>\".");
 							}
 
-							Parameter param = c.getParameterWithName(parts[0]);
+							IParameter param = c.getParameterWithName(parts[0]);
 							String target = parts[2];
 							switch (parts[1]) {
 							case "=":
-								Pair<Parameter, IParameterDomain> eqConditionItem;
+								Pair<IParameter, IParameterDomain> eqConditionItem;
 								if (param.isNumeric()) {
 									double val = Double.parseDouble(target);
 									eqConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
@@ -334,7 +339,7 @@ public class ComponentLoader {
 								break;
 
 							case "in":
-								Pair<Parameter, IParameterDomain> inConditionItem;
+								Pair<IParameter, IParameterDomain> inConditionItem;
 								if (param.isNumeric()) {
 									Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
 									inConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
@@ -357,7 +362,7 @@ public class ComponentLoader {
 					}
 
 					/* parse postcondition */
-					Collection<Pair<Parameter, IParameterDomain>> conclusion = new ArrayList<>();
+					Collection<Pair<IParameter, IParameterDomain>> conclusion = new ArrayList<>();
 					String post = dependency.get("post").asText();
 					Collection<String> literals = Arrays.asList(post.split("&"));
 
@@ -372,11 +377,11 @@ public class ComponentLoader {
 							}
 						}
 
-						Parameter param = c.getParameterWithName(parts[0]);
+						IParameter param = c.getParameterWithName(parts[0]);
 						String target = parts[2];
 						switch (parts[1]) {
 						case "=":
-							Pair<Parameter, IParameterDomain> eqConditionItem;
+							Pair<IParameter, IParameterDomain> eqConditionItem;
 							if (param.isNumeric()) {
 								double val = Double.parseDouble(target);
 								eqConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
@@ -389,7 +394,7 @@ public class ComponentLoader {
 							break;
 
 						case "in":
-							Pair<Parameter, IParameterDomain> inConditionItem;
+							Pair<IParameter, IParameterDomain> inConditionItem;
 							if (param.isNumeric()) {
 								Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
 								inConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
@@ -441,7 +446,7 @@ public class ComponentLoader {
 	 * @return Returns the collection of required interfaces that cannot be resolved by a provided interface.
 	 */
 	public Collection<String> getUnresolvableRequiredInterfaces() {
-		return SetUtil.difference(this.requiredInterfaces.stream().map(Interface::getName).collect(Collectors.toList()), this.providedInterfaces);
+		return SetUtil.difference(this.requiredInterfaces.stream().map(IRequiredInterfaceDefinition::getName).collect(Collectors.toList()), this.providedInterfaces);
 	}
 
 	/**
@@ -456,14 +461,14 @@ public class ComponentLoader {
 	/**
 	 * @return The map describing for each component individually how its parameters may be refined.
 	 */
-	public Map<Component, Map<Parameter, ParameterRefinementConfiguration>> getParamConfigs() {
+	public Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> getParamConfigs() {
 		return this.paramConfigs;
 	}
 
 	/**
 	 * @return The collection of parsed components.
 	 */
-	public Collection<Component> getComponents() {
+	public Collection<IComponent> getComponents() {
 		return this.components;
 	}
 
@@ -472,8 +477,8 @@ public class ComponentLoader {
 	 * @param name The name of the component in question.
 	 * @return The component for the given name.
 	 */
-	public Component getComponentWithName(final String name) {
-		for (Component component : this.getComponents()) {
+	public IComponent getComponentWithName(final String name) {
+		for (IComponent component : this.getComponents()) {
 			if (component.getName().equals(name)) {
 				return component;
 			}

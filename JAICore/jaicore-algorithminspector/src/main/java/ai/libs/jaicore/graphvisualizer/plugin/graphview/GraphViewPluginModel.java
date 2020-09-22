@@ -1,13 +1,17 @@
 package ai.libs.jaicore.graphvisualizer.plugin.graphview;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
@@ -19,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceUtil;
+import ai.libs.jaicore.graphvisualizer.IColorMap;
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
 public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginView, GraphViewPluginController> {
@@ -35,10 +40,20 @@ public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginV
 	private final AtomicInteger nodeIdCounter = new AtomicInteger(0);
 
 	private Graph graph;
-	private ConcurrentMap<String, Node> searchGraphNodesToViewGraphNodesMap;
-	private ConcurrentMap<Node, String> viewGraphNodesToSearchGraphNodesMap;
+	private final ConcurrentMap<String, Node> searchGraphNodesToViewGraphNodesMap;
+	private final ConcurrentMap<Node, String> viewGraphNodesToSearchGraphNodesMap;
 
-	private ConcurrentMap<Node, Set<Edge>> nodeToConnectedEdgesMap;
+	private final ConcurrentMap<Node, Set<Edge>> nodeToConnectedEdgesMap;
+
+	private final ConcurrentMap<Node, Map<String, Object>> nodeProperties;
+
+	/* node color scheme */
+	private double nodeColoringMin;
+	private double nodeColoringMax;
+	private IColorMap colormap;
+	private String propertyToUseForColoring;
+
+	private boolean withPropertyLabels = false;
 
 	public GraphViewPluginModel() {
 		this(DEFAULT_STYLESHEET_FILE);
@@ -48,6 +63,7 @@ public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginV
 		this.searchGraphNodesToViewGraphNodesMap = new ConcurrentHashMap<>();
 		this.viewGraphNodesToSearchGraphNodesMap = new ConcurrentHashMap<>();
 		this.nodeToConnectedEdgesMap = new ConcurrentHashMap<>();
+		this.nodeProperties = new ConcurrentHashMap<>();
 
 		this.initializeGraph(searchGraphCSSPath);
 	}
@@ -56,7 +72,7 @@ public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginV
 		this.graph = new SingleGraph("Search Graph");
 
 		try {
-			this.graph.setAttribute("ui.stylesheet", ResourceUtil.readResourceFileToString(searchGraphCSSPath.getPath()));
+			this.graph.setAttribute("ui.stylesheet", FileUtil.readFileAsString(searchGraphCSSPath.getPath()));
 		} catch (IOException e) {
 			this.logger.warn("Could not load css stylesheet for graph view plugin. Continue without stylesheet", e);
 		}
@@ -125,6 +141,27 @@ public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginV
 		}
 	}
 
+	public void updateNodeProperties(final Object node, final Map<String, Object> properties) throws ViewGraphManipulationException {
+		if (node == null) {
+			throw new ViewGraphManipulationException("Cannot switch type of null node.");
+		}
+		Node viewNode = this.searchGraphNodesToViewGraphNodesMap.get(node);
+		this.updateNodeProperties(viewNode, properties);
+	}
+
+	public void updateNodeProperties(final Node node, final Map<String, Object> properties) {
+		this.nodeProperties.computeIfAbsent(node, n -> new HashMap<>()).putAll(properties);
+		if (properties.containsKey(this.propertyToUseForColoring)) {
+			Object valAsObject = properties.get(this.propertyToUseForColoring);
+			double val = valAsObject instanceof Double ? (double) valAsObject : Double.valueOf("" + valAsObject);
+			Color c = this.colormap.get(this.nodeColoringMin, this.nodeColoringMax, val);
+			node.setAttribute("ui.style", "fill-color: rgb(" + c.getRed() + "," + c.getGreen() + ", " + c.getBlue() + ");");
+			if (this.withPropertyLabels) {
+				node.setAttribute("ui.label", this.nodeProperties.get(node).entrySet().stream().map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining("\n")));
+			}
+		}
+	}
+
 	private boolean isLabeledAsRootNode(final Node node) {
 		return node.getAttribute(L_UI_CLASS) != null && node.getAttribute(L_UI_CLASS).equals("root");
 	}
@@ -145,7 +182,6 @@ public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginV
 			Node otherNode = edge.getNode0().equals(viewNode) ? edge.getNode1() : edge.getNode0();
 			Set<Edge> connectedEdgesOfOtherNode = this.nodeToConnectedEdgesMap.get(otherNode);
 			connectedEdgesOfOtherNode.remove(edge);
-			this.graph.removeEdge(edge);
 		}
 	}
 
@@ -179,5 +215,20 @@ public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginV
 		this.viewGraphNodesToSearchGraphNodesMap.clear();
 		this.nodeToConnectedEdgesMap.clear();
 		this.getView().update();
+	}
+
+	public void setPropertyBasedNodeColoring(final String propertyName, final IColorMap colorScheme, final double min, final double max) {
+		this.propertyToUseForColoring = propertyName;
+		this.colormap = colorScheme;
+		this.nodeColoringMin = min;
+		this.nodeColoringMax = max;
+	}
+
+	public boolean isWithPropertyLabels() {
+		return this.withPropertyLabels;
+	}
+
+	public void setWithPropertyLabels(final boolean withPropertyLabels) {
+		this.withPropertyLabels = withPropertyLabels;
 	}
 }

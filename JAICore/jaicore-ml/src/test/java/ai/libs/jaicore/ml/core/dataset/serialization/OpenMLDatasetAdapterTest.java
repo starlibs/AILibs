@@ -39,7 +39,7 @@ import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 @RunWith(Parameterized.class)
 public class OpenMLDatasetAdapterTest {
 
-	private static final boolean IGNORE_BIG_DATASETS = true;
+	private static final boolean IGNORE_BIG_DATASETS = false;
 	protected Logger logger = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER);
 
 	private static OpenmlConnector con = new OpenmlConnector();
@@ -73,18 +73,43 @@ public class OpenMLDatasetAdapterTest {
 		List<OpenMLProblemSet> problemSets = new ArrayList<>();
 		Arrays.asList(//
 				3, // kr-vs-kp
+				6, // letter
 				9, // autos
+				12, // mfeat-factors
+				14, // mfeat-fourier
+				16, // mfeat-karhunen
+				18, // mfeat-morph
+				21, // car
+				22, // mfeat-zernike
+				23, //cmc
 				24, // mushroom
+				26, // nursey
+				28, // optdigits
+				30, // page-blocks
+				31, // credit-g
+				32, // pendigits
+				36, // segment
+				38, // sick
 				39, // ecoli
 				44, // spambase
+				46, // splice
+				57, // hypothyroid
 				60, // waveform-5000
 				61, // iris
 				149, // CovPokElec
 				155, // pokerhand
+				179, // adult
+				180, // covertype
 				181, // yeast
 				182, // satimage
 				183, // abalone
+				184, // kropt
+				185, // baseball
 				273, // IMDB Drama
+				293, // covertype
+				300, // isolet
+				351, // codrna
+				354, // poker
 				554, // MNIST
 				1039, // hiva_agnostic
 				1101, // lymphoma_2classes

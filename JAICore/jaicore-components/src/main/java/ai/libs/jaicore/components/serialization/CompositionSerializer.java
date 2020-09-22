@@ -3,9 +3,10 @@ package ai.libs.jaicore.components.serialization;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 
 public class CompositionSerializer {
 
@@ -13,7 +14,7 @@ public class CompositionSerializer {
 		/* avoids instantiation */
 	}
 
-	public static ObjectNode serializeComponentInstance(final ComponentInstance instance) {
+	public static ObjectNode serializeComponentInstance(final IComponentInstance instance) {
 		Objects.requireNonNull(instance);
 		ObjectMapper om = new ObjectMapper();
 		ObjectNode on = om.createObjectNode();
@@ -29,7 +30,9 @@ public class CompositionSerializer {
 		/* define how required interfaces have been resolved */
 		ObjectNode requiredInterfaces = om.createObjectNode();
 		for (String requiredInterface : instance.getSatisfactionOfRequiredInterfaces().keySet()) {
-			requiredInterfaces.set(requiredInterface, serializeComponentInstance(instance.getSatisfactionOfRequiredInterfaces().get(requiredInterface)));
+			ArrayNode componentInstancesHere = om.createArrayNode();
+			instance.getSatisfactionOfRequiredInterfaces().get(requiredInterface).forEach(ci -> componentInstancesHere.add(serializeComponentInstance(ci)));
+			requiredInterfaces.set(requiredInterface, componentInstancesHere);
 		}
 		on.set("requiredInterfaces", requiredInterfaces);
 

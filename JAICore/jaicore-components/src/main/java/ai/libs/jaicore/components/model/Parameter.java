@@ -6,8 +6,11 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDomain;
+
 @JsonPropertyOrder({ "name", "defaultDomain", "defaultValue" })
-public class Parameter implements Serializable {
+public class Parameter implements IParameter, Serializable {
 	private static final long serialVersionUID = 8735407907221383716L;
 	private final String name;
 	private final IParameterDomain defaultDomain;
@@ -32,6 +35,7 @@ public class Parameter implements Serializable {
 		this.defaultValue = defaultValue;
 	}
 
+	@Override
 	public String getName() {
 		return this.name;
 	}

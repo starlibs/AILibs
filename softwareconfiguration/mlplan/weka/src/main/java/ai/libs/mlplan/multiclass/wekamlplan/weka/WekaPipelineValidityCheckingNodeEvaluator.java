@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOUtil;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.ml.weka.WekaUtil;
@@ -39,19 +40,19 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 		if (instance != null) {
 
 			/* check invalid preprocessor combinations */
-			ComponentInstance pp = instance.getSatisfactionOfRequiredInterfaces().get("preprocessor");
+			IComponentInstance pp = instance.getSatisfactionOfRequiredInterface("preprocessor").iterator().next();
 			if (pp != null && pp.getComponent().getName().contains("AttributeSelection")) {
-				ComponentInstance search = pp.getSatisfactionOfRequiredInterfaces().get("search");
-				ComponentInstance eval = pp.getSatisfactionOfRequiredInterfaces().get("eval");
+				IComponentInstance search = pp.getSatisfactionOfRequiredInterface("search").iterator().next();
+				IComponentInstance eval = pp.getSatisfactionOfRequiredInterface("eval").iterator().next();
 				if (search != null && eval != null && !WekaUtil.isValidPreprocessorCombination(search.getComponent().getName(), eval.getComponent().getName())) {
 					throw new ControlledNodeEvaluationException("The given combination of searcher and evaluator cannot be benchmarked since they are incompatible.");
 				}
 			}
 
 			/* check invalid classifiers for this kind of dataset */
-			ComponentInstance classifier;
+			IComponentInstance classifier;
 			if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
-				classifier = instance.getSatisfactionOfRequiredInterfaces().get("classifier");
+				classifier = instance.getSatisfactionOfRequiredInterface("classifier").iterator().next();
 			} else {
 				classifier = instance;
 			}
@@ -63,7 +64,7 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 		return null;
 	}
 
-	private void checkValidity(final ComponentInstance classifier) throws ControlledNodeEvaluationException {
+	private void checkValidity(final IComponentInstance classifier) throws ControlledNodeEvaluationException {
 		String classifierName = classifier.getComponent().getName().toLowerCase();
 
 		/* forbid M5regression algorithms on non-binary classes */

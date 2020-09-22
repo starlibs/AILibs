@@ -1,5 +1,6 @@
 package ai.libs.mlplan.multilabel.mekamlplan;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -8,10 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
-import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.classification.multilabel.learner.MekaClassifier;
 import meka.classifiers.multilabel.MultiLabelClassifier;
@@ -34,7 +35,7 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 	private static final Logger logger = LoggerFactory.getLogger(MekaPipelineFactory.class);
 
 	@Override
-	public IMekaClassifier getComponentInstantiation(final ComponentInstance ci) throws ComponentInstantiationFailedException {
+	public IMekaClassifier getComponentInstantiation(final IComponentInstance ci) throws ComponentInstantiationFailedException {
 		MultiLabelClassifier instance = null;
 		try {
 			instance = (MultiLabelClassifier) this.getClassifier(ci);
@@ -44,65 +45,67 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 		}
 	}
 
-	private Classifier getClassifier(final ComponentInstance ci) throws Exception {
+	private Classifier getClassifier(final IComponentInstance ci) throws Exception {
 		Classifier c = (Classifier) Class.forName(ci.getComponent().getName()).newInstance();
-		List<String> optionsList = this.getOptionsForParameterValues(ci);
+		List<String> optionsList = getOptionsForParameterValues(ci);
 
-		for (Entry<String, ComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+		for (Entry<String, Collection<IComponentInstance>> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
 				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}
+
+			IComponentInstance subCI = reqI.getValue().iterator().next();
 			if (!reqI.getKey().equals("B") && !(c instanceof SingleClassifierEnhancer) && !(reqI.getKey().equals("K") && ci.getComponent().getName().endsWith("SMO"))) {
 				logger.warn("Classifier {} is not a single classifier enhancer and still has an unexpected required interface: {}. Try to set this configuration in the form of options.", ci.getComponent().getName(), reqI);
 				optionsList.add("-" + reqI.getKey());
-				optionsList.add(reqI.getValue().getComponent().getName());
-				if (!reqI.getValue().getParameterValues().isEmpty() || !reqI.getValue().getSatisfactionOfRequiredInterfaces().isEmpty()) {
+				optionsList.add(subCI.getComponent().getName());
+				if (!subCI.getParameterValues().isEmpty() || !subCI.getSatisfactionOfRequiredInterfaces().isEmpty()) {
 					optionsList.add("--");
-					optionsList.addAll(this.getOptionsRecursively(reqI.getValue()));
+					optionsList.addAll(this.getOptionsRecursively(subCI));
 				}
 			}
 		}
 		if (c instanceof OptionHandler) {
 			((OptionHandler) c).setOptions(optionsList.toArray(new String[0]));
 		}
-		for (Entry<String, ComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+		for (Entry<String, Collection<IComponentInstance>> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
 				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}
+			IComponentInstance subCI = reqI.getValue().iterator().next();
 			if (reqI.getKey().equals("K") && ci.getComponent().getName().endsWith("SMO")) {
-				ComponentInstance kernelCI = reqI.getValue();
-				logger.debug("Set kernel for SMO to be {}", kernelCI.getComponent().getName());
-				Kernel k = (Kernel) Class.forName(kernelCI.getComponent().getName()).newInstance();
-				k.setOptions(this.getOptionsForParameterValues(kernelCI).toArray(new String[0]));
+				logger.debug("Set kernel for SMO to be {}", subCI.getComponent().getName());
+				Kernel k = (Kernel) Class.forName(subCI.getComponent().getName()).newInstance();
+				k.setOptions(getOptionsForParameterValues(subCI).toArray(new String[0]));
 			} else if (reqI.getKey().equals("B") && (c instanceof MultipleClassifiersCombiner)) {
-				Classifier[] classifiers = this.getListOfBaseLearners(reqI.getValue()).toArray(new Classifier[0]);
+				Classifier[] classifiers = this.getListOfBaseLearners(subCI).toArray(new Classifier[0]);
 				((MultipleClassifiersCombiner) c).setClassifiers(classifiers);
 			} else if (reqI.getKey().equals("W") && (c instanceof SingleClassifierEnhancer)) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Set {} as a base classifier for {}", reqI.getValue().getComponent().getName(), ci.getComponent().getName());
+					logger.trace("Set {} as a base classifier for {}", subCI.getComponent().getName(), ci.getComponent().getName());
 				}
-				((SingleClassifierEnhancer) c).setClassifier(this.getClassifier(reqI.getValue()));
+				((SingleClassifierEnhancer) c).setClassifier(this.getClassifier(subCI));
 			}
 		}
 
 		return c;
 	}
 
-	private List<Classifier> getListOfBaseLearners(final ComponentInstance ci) throws Exception {
+	private List<Classifier> getListOfBaseLearners(final IComponentInstance ci) throws Exception {
 		List<Classifier> baseLearnerList = new LinkedList<>();
 		if (ci.getComponent().getName().equals("MultipleBaseLearnerListElement")) {
-			baseLearnerList.add(this.getClassifier(ci.getSatisfactionOfRequiredInterfaces().get("classifier")));
+			baseLearnerList.add(this.getClassifier(ci.getSatisfactionOfRequiredInterface("classifier").iterator().next()));
 		} else if (ci.getComponent().getName().equals("MultipleBaseLearnerListChain")) {
-			baseLearnerList.add(this.getClassifier(ci.getSatisfactionOfRequiredInterfaces().get("classifier")));
-			baseLearnerList.addAll(this.getListOfBaseLearners(ci.getSatisfactionOfRequiredInterfaces().get("chain")));
+			baseLearnerList.add(this.getClassifier(ci.getSatisfactionOfRequiredInterface("classifier").iterator().next()));
+			baseLearnerList.addAll(this.getListOfBaseLearners(ci.getSatisfactionOfRequiredInterface("chain").iterator().next()));
 		}
 		return baseLearnerList;
 	}
 
-	public static List<String> getOptionsForParameterValues(final ComponentInstance ci) {
+	public static List<String> getOptionsForParameterValues(final IComponentInstance ci) {
 		List<String> optionsList = new LinkedList<>();
 		for (Entry<String, String> parameterValue : ci.getParameterValues().entrySet()) {
-			Parameter param = ci.getComponent().getParameterWithName(parameterValue.getKey());
+			IParameter param = ci.getComponent().getParameter(parameterValue.getKey());
 			if (param.isDefaultValue(parameterValue.getValue()) || parameterValue.getKey().toLowerCase().contains("activator") || parameterValue.getValue().equals("false")) {
 				continue;
 			}
@@ -111,8 +114,8 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 				optionsList.add("-" + parameterValue.getKey());
 			} else {
 				optionsList.add("-" + parameterValue.getKey());
-				if (ci.getComponent().getParameterWithName(parameterValue.getKey()).isNumeric()) {
-					NumericParameterDomain numDom = (NumericParameterDomain) ci.getComponent().getParameterWithName(parameterValue.getKey()).getDefaultDomain();
+				if (ci.getComponent().getParameter(parameterValue.getKey()).isNumeric()) {
+					NumericParameterDomain numDom = (NumericParameterDomain) ci.getComponent().getParameter(parameterValue.getKey()).getDefaultDomain();
 					if (numDom.isInteger()) {
 						optionsList.add(((int) Double.parseDouble(parameterValue.getValue())) + "");
 					} else {
@@ -127,25 +130,26 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 		return optionsList;
 	}
 
-	private List<String> getOptionsRecursively(final ComponentInstance ci) {
-		List<String> optionsList = this.getOptionsForParameterValues(ci);
+	private List<String> getOptionsRecursively(final IComponentInstance ci) {
+		List<String> optionsList = getOptionsForParameterValues(ci);
 
-		for (Entry<String, ComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+		for (Entry<String, Collection<IComponentInstance>> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
 				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}
 
 			optionsList.add("-" + reqI.getKey());
+			IComponentInstance subComponentInstance = reqI.getValue().iterator().next();
 			if (reqI.getKey().equals("B") || reqI.getKey().equals("K")) {
 				List<String> valueList = new LinkedList<>();
-				valueList.add(reqI.getValue().getComponent().getName());
-				valueList.addAll(this.getOptionsRecursively(reqI.getValue()));
+				valueList.add(subComponentInstance.getComponent().getName());
+				valueList.addAll(this.getOptionsRecursively(subComponentInstance));
 				optionsList.add(SetUtil.implode(valueList, " "));
 			} else {
-				optionsList.add(reqI.getValue().getComponent().getName());
-				if (!reqI.getValue().getParameterValues().isEmpty() || !reqI.getValue().getSatisfactionOfRequiredInterfaces().isEmpty()) {
+				optionsList.add(subComponentInstance.getComponent().getName());
+				if (!subComponentInstance.getParameterValues().isEmpty() || !subComponentInstance.getSatisfactionOfRequiredInterfaces().isEmpty()) {
 					optionsList.add("--");
-					optionsList.addAll(this.getOptionsRecursively(reqI.getValue()));
+					optionsList.addAll(this.getOptionsRecursively(subComponentInstance));
 				}
 			}
 		}

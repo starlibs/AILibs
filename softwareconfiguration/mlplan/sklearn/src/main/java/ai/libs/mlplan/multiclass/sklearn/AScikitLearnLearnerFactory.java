@@ -2,6 +2,7 @@ package ai.libs.mlplan.multiclass.sklearn;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -15,11 +16,11 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
-import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.ILearnerFactory;
@@ -51,7 +52,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 	}
 
 	@Override
-	public ScikitLearnWrapper<IPrediction, IPredictionBatch> getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
+	public ScikitLearnWrapper<IPrediction, IPredictionBatch> getComponentInstantiation(final IComponentInstance groundComponent) throws ComponentInstantiationFailedException {
 		this.logger.debug("Parse ground component instance {} to ScikitLearnWrapper object.", groundComponent);
 
 		StringBuilder constructInstruction = new StringBuilder();
@@ -77,14 +78,14 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 		}
 	}
 
-	public abstract String getPipelineBuildString(final ComponentInstance groundComponent, final Set<String> importSet);
+	public abstract String getPipelineBuildString(final IComponentInstance groundComponent, final Set<String> importSet);
 
-	public String extractSKLearnConstructInstruction(final ComponentInstance groundComponent, final Set<String> importSet) {
+	public String extractSKLearnConstructInstruction(final IComponentInstance groundComponent, final Set<String> importSet) {
 		StringBuilder sb = new StringBuilder();
 		if (groundComponent.getComponent().getName().startsWith("mlplan.util.model.make_forward")) {
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("source"), importSet));
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("source").iterator().next(), importSet));
 			sb.append(",");
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("base"), importSet));
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("base").iterator().next(), importSet));
 			return sb.toString();
 		}
 
@@ -111,9 +112,9 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 		} else if (groundComponent.getComponent().getName().contains("make_union"))
 
 		{
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("p1"), importSet));
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("p1").iterator().next(), importSet));
 			sb.append(",");
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("p2"), importSet));
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("p2").iterator().next(), importSet));
 		} else {
 			boolean first = true;
 			for (Entry<String, String> parameterValue : groundComponent.getParameterValues().entrySet()) {
@@ -123,7 +124,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 					sb.append(",");
 				}
 
-				Parameter param = groundComponent.getComponent().getParameterWithName(parameterValue.getKey());
+				IParameter param = groundComponent.getComponent().getParameter(parameterValue.getKey());
 
 				sb.append(parameterValue.getKey() + "=");
 				if (param.isNumeric()) {
@@ -151,7 +152,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 				}
 			}
 
-			for (Entry<String, ComponentInstance> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
+			for (Entry<String, Collection<IComponentInstance>> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
 				if (first) {
 					first = false;
 				} else {
@@ -159,7 +160,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 				}
 
 				sb.append(satReqI.getKey() + "=");
-				sb.append(this.extractSKLearnConstructInstruction(satReqI.getValue(), importSet));
+				sb.append(this.extractSKLearnConstructInstruction(satReqI.getValue().iterator().next(), importSet));
 			}
 		}
 		sb.append(")");

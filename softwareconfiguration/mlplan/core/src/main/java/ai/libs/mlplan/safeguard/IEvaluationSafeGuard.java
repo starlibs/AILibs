@@ -3,7 +3,7 @@ package ai.libs.mlplan.safeguard;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.Timeout;
 
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.mlplan.core.ITimeTrackingLearner;
 
 /**
@@ -30,7 +30,7 @@ public interface IEvaluationSafeGuard {
 	 * @return Returns true iff the component instance can likely be evaluated within the given timeout.
 	 * @throws Exception
 	 */
-	public boolean predictWillAdhereToTimeout(final ComponentInstance ci, Timeout timeout) throws Exception;
+	public boolean predictWillAdhereToTimeout(final IComponentInstance ci, Timeout timeout) throws Exception;
 
 	/**
 	 * Predicts the runtime that is required for inducing a model.
@@ -40,7 +40,7 @@ public interface IEvaluationSafeGuard {
 	 * @return The time needed for inducing a model.
 	 * @throws Exception
 	 */
-	public double predictInductionTime(final ComponentInstance ci, final ILabeledDataset<?> dTrain) throws Exception;
+	public double predictInductionTime(final IComponentInstance ci, final ILabeledDataset<?> dTrain) throws Exception;
 
 	/**
 	 * Predicts the runtime that is required for doing inference with the given model.
@@ -50,7 +50,7 @@ public interface IEvaluationSafeGuard {
 	 * @return The time needed for making predictions on the validation set.
 	 * @throws Exception
 	 */
-	public double predictInferenceTime(final ComponentInstance ci, final ILabeledDataset<?> dTrain, final ILabeledDataset<?> dTest) throws Exception;
+	public double predictInferenceTime(final IComponentInstance ci, final ILabeledDataset<?> dTrain, final ILabeledDataset<?> dTest) throws Exception;
 
 	/**
 	 * @param ci The component instance describing the model to predict the evaluation time for.
@@ -58,7 +58,7 @@ public interface IEvaluationSafeGuard {
 	 * @param metaFeaturesTest The meta features describing the data to do inference for.
 	 * @return The time needed for inducing a model and making predictions.
 	 */
-	default double predictEvaluationTime(final ComponentInstance ci, final ILabeledDataset<?> dTrain, final ILabeledDataset<?> dTest) throws Exception {
+	default double predictEvaluationTime(final IComponentInstance ci, final ILabeledDataset<?> dTrain, final ILabeledDataset<?> dTest) throws Exception {
 		return this.predictInductionTime(ci, dTrain) + this.predictInferenceTime(ci, dTrain, dTest);
 	}
 
@@ -68,7 +68,7 @@ public interface IEvaluationSafeGuard {
 	 * @param ci The component instance describing the model to update the actual information for.
 	 * @param wrappedLearner The learner that has been used to evaluate the component instance. It must be a time tracking learner.
 	 */
-	public void updateWithActualInformation(final ComponentInstance ci, final ITimeTrackingLearner wrappedLearner);
+	public void updateWithActualInformation(final IComponentInstance ci, final ITimeTrackingLearner wrappedLearner);
 
 	public void registerListener(Object listener);
 }

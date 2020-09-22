@@ -39,7 +39,7 @@ import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithm;
 import ai.libs.jaicore.components.serialization.CompositionSerializer;
 import ai.libs.jaicore.concurrent.GlobalTimer;
@@ -411,7 +411,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		/* evaluate each candidate */
 		final Semaphore sem = new Semaphore(0);
 		long timestampOfDeadline = this.timeOfStart + this.getTimeout().milliseconds() - 2000;
-		final IObjectEvaluator<ComponentInstance, Double> evaluator = this.getInput().getSelectionBenchmark();
+		final IObjectEvaluator<IComponentInstance, Double> evaluator = this.getInput().getSelectionBenchmark();
 		final double timeoutTolerance = TwoPhaseHASCO.this.getConfig().selectionPhaseTimeoutTolerance();
 		final String loggerNameForWorkers = this.getLoggerName() + ".worker";
 		for (HASCOSolutionCandidate<Double> c : ensembleToSelectFrom) {

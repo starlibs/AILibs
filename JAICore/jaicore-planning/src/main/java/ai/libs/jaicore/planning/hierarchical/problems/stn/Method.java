@@ -1,7 +1,10 @@
 package ai.libs.jaicore.planning.hierarchical.problems.stn;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.logic.fol.structure.Literal;
@@ -26,13 +29,33 @@ public class Method implements Serializable {
 		this.precondition = precondition;
 		this.network = network;
 		this.lonely = lonely;
+		if (!this.doAllParamsPreconditionOccurInParameterList()) {
+			Set<VariableParam> undeclaredVars = new HashSet<>();
+			for (Literal l : precondition) {
+				undeclaredVars.addAll(SetUtil.difference(l.getVariableParams(), this.parameters));
+			}
+			throw new IllegalArgumentException("Invalid method " + name + ". There are parameters in the precondition that do not occur in the parameter list:" + undeclaredVars.stream().map(v -> "\n\t- " + v.getName()).collect(Collectors.joining()));
+		}
 		if (!this.doAllParamsInNetworkOccurInParameterList()) {
-			throw new IllegalArgumentException("Invalid method instantiation for " + name + ". There are parameters in the task network that do not occur in the parameter list.");
+			Set<VariableParam> undeclaredVars = new HashSet<>();
+			for (Literal l : this.network.getItems()) {
+				undeclaredVars.addAll(SetUtil.difference(l.getVariableParams(), this.parameters));
+			}
+			throw new IllegalArgumentException("Invalid method " + name + ". There are parameters in the task network that do not occur in the parameter list:" + undeclaredVars.stream().map(v -> "\n\t- " + v.getName()).collect(Collectors.joining()));
 		}
 	}
 
 	private boolean doAllParamsInNetworkOccurInParameterList() {
 		for (Literal l : this.network.getItems()) {
+			if (!SetUtil.difference(l.getVariableParams(), this.parameters).isEmpty()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean doAllParamsPreconditionOccurInParameterList() {
+		for (Literal l : this.precondition) {
 			if (!SetUtil.difference(l.getVariableParams(), this.parameters).isEmpty()) {
 				return false;
 			}
@@ -128,7 +151,7 @@ public class Method implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Method [name=" + this.name + ", parameters=" + this.parameters + ", task=" + this.task + ", precondition=" + this.precondition + ", network=" + this.network + ", lonely=" + this.lonely + "]";
+		return "Method [name=" + this.name + ", parameters=" + this.parameters + ", task=" + this.task + ", precondition=" + this.precondition + ", network=" + this.network.getLineBasedStringRepresentation() + ", lonely=" + this.lonely + "]";
 	}
 
 }

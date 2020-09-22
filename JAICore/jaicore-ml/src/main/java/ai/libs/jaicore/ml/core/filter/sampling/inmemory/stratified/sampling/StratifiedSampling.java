@@ -68,7 +68,7 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 					this.stratiBuilder[i] = new DatasetDeriver<>(this.getInput());
 				}
 				if (this.stratiBuilder.length == 0) {
-					throw new IllegalStateException("No strati have been defined.");
+					throw new IllegalStateException("Stratification technique has not created any stratum.");
 				}
 				if (this.getInput().hashCode() != dsHash) {
 					throw new IllegalStateException("Original dataset has been modified!");

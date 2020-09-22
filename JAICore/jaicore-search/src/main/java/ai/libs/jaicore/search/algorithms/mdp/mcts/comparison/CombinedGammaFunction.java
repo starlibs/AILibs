@@ -4,7 +4,7 @@ public class CombinedGammaFunction implements IGammaFunction {
 	private final IGammaFunction shortTermGamma;
 	private final IGammaFunction longTermGamma;
 	private static final double MID_WEIGHT = 0.8;
-	private static final double ZERO_OFFSET = -2;
+	private static final double ZERO_OFFSET = -5;
 	private static final double LONG_TERM_BREAK = .1;
 	private final double slope;
 
@@ -27,7 +27,8 @@ public class CombinedGammaFunction implements IGammaFunction {
 		if (longTermWeight > LONG_TERM_BREAK && vLongTermGamma == 0) {
 			return 0;
 		}
-		return vLongTermGamma * longTermWeight + this.shortTermGamma.getNodeGamma(visits, nodeProbability, relativeDepth) * (1 - longTermWeight);
+		double vShortTermGamma = this.shortTermGamma.getNodeGamma(visits, nodeProbability, relativeDepth);
+		return vLongTermGamma * longTermWeight +  vShortTermGamma * (1 - longTermWeight);
 	}
 
 	public double getLongTermWeightBasedOnProbability(final double nodeProbability) {

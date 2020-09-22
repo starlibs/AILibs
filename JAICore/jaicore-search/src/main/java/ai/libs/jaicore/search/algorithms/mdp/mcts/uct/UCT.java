@@ -12,7 +12,7 @@ import ai.libs.jaicore.search.probleminputs.IMDP;
 
 public class UCT<N, A> extends MCTS<N, A> {
 
-	public UCT(final IMDP<N, A, Double> input, final double maxIterations, final double gamma, final double epsilon, final Random r, final boolean tabooExhaustedNodes) {
+	public UCT(final IMDP<N, A, Double> input, final int maxIterations, final double gamma, final double epsilon, final Random r, final boolean tabooExhaustedNodes) {
 		super(input, new UCBPolicy<>(gamma, input.isMaximizing()), new UniformRandomPolicy<>(r), maxIterations, gamma, epsilon, tabooExhaustedNodes);
 	}
 

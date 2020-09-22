@@ -3,13 +3,13 @@ package ai.libs.mlplan.core.events;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.event.IEvent;
 
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.mlplan.core.ITimeTrackingLearner;
 
 public class TimeTrackingLearnerEvaluationEvent implements IEvent {
 
 	private final long timestamp;
-	private final ComponentInstance ci;
+	private final IComponentInstance ci;
 	private final ISupervisedLearner<?, ?> learner;
 	private final Double actualFitTime;
 	private final Double actualPredictTime;
@@ -38,7 +38,7 @@ public class TimeTrackingLearnerEvaluationEvent implements IEvent {
 		return this.timestamp;
 	}
 
-	public ComponentInstance getComponentInstance() {
+	public IComponentInstance getComponentInstance() {
 		return this.ci;
 	}
 

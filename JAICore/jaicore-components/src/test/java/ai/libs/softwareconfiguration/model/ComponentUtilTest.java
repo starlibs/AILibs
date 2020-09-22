@@ -13,11 +13,11 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.components.serialization.ComponentLoader;
 
 /**
@@ -34,7 +34,7 @@ public class ComponentUtilTest {
 	private static final File COMPONENT_REPOSITORY = new File("testrsc/difficultproblem.json");
 
 	/* Collection of components that may be used in the single unit tests. */
-	private static Collection<Component> components;
+	private static Collection<IComponent> components;
 
 	@BeforeClass
 	public static void setup() throws IOException {
@@ -43,10 +43,10 @@ public class ComponentUtilTest {
 
 	@Test
 	public void testDefaultParameterization() {
-		for (Component component : components) {
+		for (IComponent component : components) {
 			L.info("Testing default parameterization for component {}", component.getName());
 			ComponentInstance ci = ComponentUtil.getDefaultParameterizationOfComponent(component);
-			for (Parameter param : component.getParameters()) {
+			for (IParameter param : component.getParameters()) {
 				if (param.getDefaultDomain() instanceof NumericParameterDomain) {
 					double expected = (Double) param.getDefaultValue();
 					double actual = Double.parseDouble(ci.getParameterValue(param.getName()));
@@ -62,10 +62,10 @@ public class ComponentUtilTest {
 
 	@Test
 	public void testRandomParameterization() {
-		for (Component component : components) {
+		for (IComponent component : components) {
 			L.info("Testing random parameterization for component {}", component.getName());
 			ComponentInstance ci = ComponentUtil.getRandomParameterizationOfComponent(component, new Random());
-			for (Parameter param : component.getParameters()) {
+			for (IParameter param : component.getParameters()) {
 				if (param.getDefaultDomain() instanceof NumericParameterDomain) {
 					assertTrue("Value for parameter " + param.getName() + " is not a correct value of its domain.", ((NumericParameterDomain) param.getDefaultDomain()).contains(Double.valueOf(ci.getParameterValue(param.getName()))));
 				} else {

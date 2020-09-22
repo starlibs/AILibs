@@ -17,13 +17,13 @@ import com.google.common.eventbus.Subscribe;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IEvaluatedSoftwareConfigurationSolution;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
-import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.EvaluatedSoftwareConfigurationSolution;
 import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
-public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
+public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C extends IEvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
 
 	/* logging */
 	private Logger localLogger = LoggerFactory.getLogger(OptimizingFactory.class);
@@ -32,7 +32,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 	private final SoftwareConfigurationAlgorithmFactory<P, C, V, ?> factoryForOptimizationAlgorithm;
 	private T constructedObject;
 	private V performanceOfObject;
-	private ComponentInstance componentInstanceOfObject;
+	private IComponentInstance componentInstanceOfObject;
 	private final SoftwareConfigurationAlgorithm<P, C, V> optimizer;
 
 	public OptimizingFactory(final OptimizingFactoryProblem<P, T, V> problem, final SoftwareConfigurationAlgorithmFactory<P, C, V, ?> factoryForOptimizationAlgorithm) {
@@ -104,7 +104,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 		return this.performanceOfObject;
 	}
 
-	public ComponentInstance getComponentInstanceOfObject() {
+	public IComponentInstance getComponentInstanceOfObject() {
 		return this.componentInstanceOfObject;
 	}
 

@@ -54,56 +54,63 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 		/* */
 		for (int i = 0; i < n; i++) {
 			Class<?> requiredType = argumentTypes[i];
-			boolean isThis = arguments[i].equals("this");
-			this.logger.debug("ARG {}: {} (required type: {})", i, arguments[i], requiredType);
+			boolean isNull = arguments[i] == null;
+			if (!isNull) {
+				boolean isThis = arguments[i].equals("this");
+				this.logger.debug("ARG {}: {} (required type: {})", i, arguments[i], requiredType);
 
-			/* if the required type is complex and requires serialization or deserialization, do this now */
-			if (this.doesTypeRequireSerializationDeserialization(requiredType)) {
-				try {
-					if (arguments[i] instanceof String) { // suppose that the object is given in serialized form, try to deserialize it
-						arguments[i] = requiredType.cast(new ObjectMapper().readValue(arguments[i].toString(), ReconstructionPlan.class).reconstructObject());
-					} else if (arguments[i] instanceof IReconstructible) { // if this is a reconstructible, serialize it
+				/* if the required type is complex and requires serialization or deserialization, do this now */
+				if (this.doesTypeRequireSerializationDeserialization(requiredType)) {
+					try {
+						if (arguments[i] instanceof String) { // suppose that the object is given in serialized form, try to deserialize it
+							arguments[i] = requiredType.cast(new ObjectMapper().readValue(arguments[i].toString(), ReconstructionPlan.class).reconstructObject());
+						} else if (arguments[i] instanceof IReconstructible) { // if this is a reconstructible, serialize it
 
-						String reconstructionCommand = new ObjectMapper().writeValueAsString(((IReconstructible) arguments[i]).getConstructionPlan());
-						arguments[i] = reconstructionCommand;
-						continue; // if we are serializing the object, we can (in fact MUST) stop the processing of the parameter here
-					} else {
-						throw new IllegalArgumentException(
-								"The " + i + "-th argument \"" + arguments[i] + "\" is neither a primitive (it's a " + arguments[i].getClass().getName() + ") nor a class object nor \"this\" and also not a reconstructible object.");
+							String reconstructionCommand = new ObjectMapper().writeValueAsString(((IReconstructible) arguments[i]).getConstructionPlan());
+							arguments[i] = reconstructionCommand;
+							continue; // if we are serializing the object, we can (in fact MUST) stop the processing of the parameter here
+						} else {
+							throw new IllegalArgumentException(
+									"The " + i + "-th argument \"" + arguments[i] + "\" is neither a primitive (it's a " + arguments[i].getClass().getName() + ") nor a class object nor \"this\" and also not a reconstructible object.");
+						}
+					} catch (IOException | ReconstructionException e) {
+						throw new IllegalArgumentException(e);
 					}
-				} catch (IOException | ReconstructionException e) {
-					throw new IllegalArgumentException(e);
+				}
+
+				/* check that correct type is transmitted */
+				Class<?> givenType = arguments[i].getClass();
+				if (!isThis && !TypeUtils.isAssignable(givenType, requiredType)) {
+
+					/* if the required type is not a class, there is no excuse to deviate */
+					if (requiredType != Class.class) {
+						throw new IllegalArgumentException(
+								"Cannot create instruction. Required type for " + i + "-th argument is " + requiredType + ". But the given object is " + arguments[i] + " (type: " + arguments[i].getClass().getName() + ")");
+					}
+
+					/* here we know that the required type is a class. Then try to get a class object from the parameter */
+					if (givenType != String.class) {
+						throw new IllegalArgumentException(
+								"Cannot create instruction. " + i + "-th argument is required to be a class object (" + argumentTypes[i].getName() + "). The provided object is neither a Class nor a String and hence cannot be derived.");
+					}
+
+					/* now we know that the given param is a String. Try to find the class for it */
+					try {
+						String className = (String) arguments[i];
+						if (className.startsWith("class:")) {
+							className = className.substring("class:".length());
+						}
+						if (className.startsWith("class ")) {
+							className = className.substring("class ".length());
+						}
+						arguments[i] = Class.forName(className);
+					} catch (ClassNotFoundException e) {
+						throw new IllegalArgumentException("Cannot create instruction. " + i + "-th argument is required to be a class object (" + argumentTypes[i].getName() + "). The provided object " + arguments[i]
+								+ " is a String that points to a class that does not exist! Cannot derive hence a class object.");
+					}
 				}
 			}
-
-			/* check that correct type is transmitted */
-			Class<?> givenType = arguments[i].getClass();
-			if (!isThis && !TypeUtils.isAssignable(givenType, requiredType)) {
-
-				/* if the required type is not a class, there is no excuse to deviate */
-				if (requiredType != Class.class) {
-					throw new IllegalArgumentException("Cannot create instruction. Required type for " + i + "-th argument is " + requiredType + ". But the given object is " + arguments[i] + " (type: " + arguments[i].getClass().getName() + ")");
-				}
-
-				/* here we know that the required type is a class. Then try to get a class object from the parameter */
-				if (givenType != String.class) {
-					throw new IllegalArgumentException("Cannot create instruction. " + i + "-th argument is required to be a class object (" + argumentTypes[i].getName() + "). The provided object is neither a Class nor a String and hence cannot be derived.");
-				}
-
-				/* now we know that the given param is a String. Try to find the class for it */
-				try {
-					String className = (String)arguments[i];
-					if (className.startsWith("class:")) {
-						className = className.substring("class:".length());
-					}
-					if (className.startsWith("class ")) {
-						className = className.substring("class ".length());
-					}
-					arguments[i] = Class.forName(className);
-				} catch (ClassNotFoundException e) {
-					throw new IllegalArgumentException("Cannot create instruction. " + i + "-th argument is required to be a class object (" + argumentTypes[i].getName() + "). The provided object " + arguments[i] + " is a String that points to a class that does not exist! Cannot derive hence a class object.");
-				}
-			}		}
+		}
 	}
 
 	public ReconstructionInstruction(final Method method, final Object... arguments) {
@@ -127,7 +134,7 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 		return !List.class.isAssignableFrom(clazz);
 	}
 
-	private Method getMethod() throws ClassNotFoundException, NoSuchMethodException  {
+	private Method getMethod() throws ClassNotFoundException, NoSuchMethodException {
 
 		String className = this.clazzName;
 		if (className.equals("Instances")) {
@@ -140,7 +147,7 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 		return m;
 	}
 
-	private Constructor<?> getConstructor() throws ClassNotFoundException, NoSuchMethodException  {
+	private Constructor<?> getConstructor() throws ClassNotFoundException, NoSuchMethodException {
 
 		String className = this.clazzName;
 		if (className.equals("Instances")) {
@@ -203,16 +210,16 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 			}
 			this.logger.info("Creating new object via {}.{}", method.getDeclaringClass().getName(), method.getName());
 			for (int i = 0; i < m; i++) {
-				this.logger.debug("{}:  {}: {}", i, this.arguments[i].getClass().getName(), this.arguments[i]);
+				this.logger.debug("{}:  {}: {}", i, this.arguments[i] != null ? this.arguments[i].getClass().getName() : null, this.arguments[i]);
 			}
 			try {
 				return method.invoke(null, this.arguments);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
-				this.logger.error("Error in invoking {}.{} with arguments: {} with class types {}.", this.clazzName, this.methodName, this.arguments, Arrays.stream(this.arguments).map(a -> a.getClass().getName()).collect(Collectors.toList()));
+				this.logger.error("Error in invoking {}.{} with arguments: {} with class types {}.", this.clazzName, this.methodName, this.arguments,
+						Arrays.stream(this.arguments).map(a -> a.getClass().getName()).collect(Collectors.toList()));
 				throw new ReconstructionException(e);
 			}
-		}
-		else {
+		} else {
 			try {
 				Constructor<?> c = this.getConstructor();
 				return c.newInstance(this.arguments);
