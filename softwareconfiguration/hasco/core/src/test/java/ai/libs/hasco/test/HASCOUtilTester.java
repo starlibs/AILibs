@@ -19,7 +19,7 @@ import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
@@ -39,9 +39,10 @@ public class HASCOUtilTester {
 		params.add(new ConstantParam("newVar10"));
 		params.add(new ConstantParam("[0.5,1.0]"));
 		state.add(new Literal("val", params));
-		ComponentInstance instance = HASCOUtil.getComponentInstanceFromState(new ComponentLoader(new File(pathToFiles + "testrsc/weka/weka-all-autoweka.json")).getComponents(), state, "solution", false);
+		ComponentSerialization serializer = new ComponentSerialization();
+		ComponentInstance instance = HASCOUtil.getComponentInstanceFromState(serializer.deserializeRepository(new File(pathToFiles + "testrsc/weka/weka-all-autoweka.json")), state, "solution", false);
 		assertEquals("[125.36470588235294, 253.74117647058824]", instance.getSatisfactionOfRequiredInterface("preprocessor").iterator().next().getSatisfactionOfRequiredInterface("eval").iterator().next().getParameterValue("A"));
-		instance = HASCOUtil.getComponentInstanceFromState(new ComponentLoader(new File(pathToFiles + "testrsc/weka/weka-all-autoweka.json")).getComponents(), state, "solution", true);
+		instance = HASCOUtil.getComponentInstanceFromState(serializer.deserializeRepository(new File(pathToFiles + "testrsc/weka/weka-all-autoweka.json")), state, "solution", true);
 		assertEquals("190", instance.getSatisfactionOfRequiredInterface("preprocessor").iterator().next().getSatisfactionOfRequiredInterfaces().get("eval").iterator().next().getParameterValue("A"));
 	}
 

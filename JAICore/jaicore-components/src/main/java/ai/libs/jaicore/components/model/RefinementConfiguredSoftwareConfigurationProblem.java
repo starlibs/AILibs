@@ -10,7 +10,7 @@ import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.api.IParameter;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 
 /**
  * In this problem, the core software configuration problem is extended by predefining how the the parameters may be refined
@@ -42,7 +42,7 @@ public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparab
 
 	public RefinementConfiguredSoftwareConfigurationProblem(final File configurationFile, final String requiredInterface, final IObjectEvaluator<IComponentInstance, V> compositionEvaluator) throws IOException {
 		super(configurationFile, requiredInterface, compositionEvaluator);
-		this.paramRefinementConfig = new ComponentLoader(configurationFile).getParamConfigs();
+		this.paramRefinementConfig = new ComponentSerialization().deserializeParamMap(configurationFile);
 
 		/* check that parameter refinements are defined for all components */
 		for (IComponent c : this.getComponents()) {

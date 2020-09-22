@@ -17,9 +17,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.mlplan.multiclass.sklearn.AScikitLearnLearnerFactory;
 import ai.libs.mlplan.multiclass.sklearn.ScikitLearnClassifierFactory;
@@ -41,7 +42,8 @@ public class ScikitLearnClassifierFactoryTest {
 
 	/* Components for testing the factory */
 	private static final File COMPONENT_REPO = new File("resources/automl/searchmodels/sklearn/ml-plan-ul.json");
-	private static ComponentLoader cl;
+	private static ComponentSerialization serializer = new ComponentSerialization();
+	private static IComponentRepository repository;
 
 	private static final String CLASSIFIER_NAME = "sklearn.ensemble.RandomForestClassifier";
 	private static final String CLASSIFIER_IMPORT = "from sklearn.ensemble import RandomForestClassifier\n";
@@ -74,7 +76,7 @@ public class ScikitLearnClassifierFactoryTest {
 		data.setClassIndex(data.numAttributes() - 1);
 		stratSplit = WekaUtil.getStratifiedSplit(data, SEED, TEST_SPLIT_RATIO);
 
-		cl = new ComponentLoader(COMPONENT_REPO);
+		repository = serializer.deserializeRepository(COMPONENT_REPO);
 
 		/* init factory */
 		factory = new ScikitLearnClassifierFactory();
@@ -82,7 +84,7 @@ public class ScikitLearnClassifierFactoryTest {
 
 	@Test
 	public void testExtractSingleClassifier() throws Exception {
-		IComponent classifierComponent = cl.getComponentWithName(CLASSIFIER_NAME);
+		IComponent classifierComponent = repository.getComponent(CLASSIFIER_NAME);
 		Set<String> importSet = new HashSet<>();
 		String constructInstruction = factory.extractSKLearnConstructInstruction(ComponentUtil.getDefaultParameterizationOfComponent(classifierComponent), importSet);
 
@@ -92,9 +94,9 @@ public class ScikitLearnClassifierFactoryTest {
 
 	@Test
 	public void testExtractTwoStepPipeline() throws Exception {
-		IComponent makePipe = cl.getComponentWithName(MAKE_PIPELINE_NAME);
-		IComponent preprocessorComponent = cl.getComponentWithName(PREPROCESSOR_NAME);
-		IComponent classifierComponent = cl.getComponentWithName(CLASSIFIER_NAME);
+		IComponent makePipe = repository.getComponent(MAKE_PIPELINE_NAME);
+		IComponent preprocessorComponent = repository.getComponent(PREPROCESSOR_NAME);
+		IComponent classifierComponent = repository.getComponent(CLASSIFIER_NAME);
 
 		ComponentInstance pipe = ComponentUtil.getDefaultParameterizationOfComponent(makePipe);
 		pipe.getSatisfactionOfRequiredInterfaces().put("preprocessor", Arrays.asList(ComponentUtil.getDefaultParameterizationOfComponent(preprocessorComponent)));
@@ -110,10 +112,10 @@ public class ScikitLearnClassifierFactoryTest {
 
 	@Test
 	public void testExtractMakeUnionPipeline() throws Exception {
-		IComponent makePipe = cl.getComponentWithName(MAKE_PIPELINE_NAME);
-		IComponent preprocessorComponent = cl.getComponentWithName(PREPROCESSOR_NAME);
-		IComponent classifierComponent = cl.getComponentWithName(CLASSIFIER_NAME);
-		IComponent makeUnion = cl.getComponentWithName(MAKE_UNION_NAME);
+		IComponent makePipe = repository.getComponent(MAKE_PIPELINE_NAME);
+		IComponent preprocessorComponent = repository.getComponent(PREPROCESSOR_NAME);
+		IComponent classifierComponent = repository.getComponent(CLASSIFIER_NAME);
+		IComponent makeUnion = repository.getComponent(MAKE_UNION_NAME);
 
 		ComponentInstance union = ComponentUtil.getDefaultParameterizationOfComponent(makeUnion);
 		for (String prep : new String[] { "p1", "p2" }) {
@@ -134,10 +136,10 @@ public class ScikitLearnClassifierFactoryTest {
 
 	@Test
 	public void testExtractMakeForwardPipeline() throws Exception {
-		IComponent makePipe = cl.getComponentWithName(MAKE_PIPELINE_NAME);
-		IComponent preprocessorComponent = cl.getComponentWithName(PREPROCESSOR_NAME);
-		IComponent classifierComponent = cl.getComponentWithName(CLASSIFIER_NAME);
-		IComponent makeForward = cl.getComponentWithName(MAKE_FORWARD_NAME);
+		IComponent makePipe = repository.getComponent(MAKE_PIPELINE_NAME);
+		IComponent preprocessorComponent = repository.getComponent(PREPROCESSOR_NAME);
+		IComponent classifierComponent = repository.getComponent(CLASSIFIER_NAME);
+		IComponent makeForward = repository.getComponent(MAKE_FORWARD_NAME);
 
 		ComponentInstance forward = ComponentUtil.getDefaultParameterizationOfComponent(makeForward);
 		for (String prep : new String[] { "base", "source" }) {

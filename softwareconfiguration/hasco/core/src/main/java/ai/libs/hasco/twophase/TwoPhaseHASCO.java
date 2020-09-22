@@ -41,7 +41,7 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithm;
-import ai.libs.jaicore.components.serialization.CompositionSerializer;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.concurrent.NamedTimerTask;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
@@ -65,6 +65,8 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 
 	private final double blowupInSelection;
 	private final double blowupInPostProcessing;
+
+	private final ComponentSerialization serializer = new ComponentSerialization();
 
 	/* statistics */
 	private long timeOfStart = -1;
@@ -210,7 +212,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 					this.logger.info("Entering phase 2.");
 					this.logger.debug("Solutions seen so far had the following (internal) errors and evaluation times (one per line): {}",
 							this.phase1ResultQueue.stream()
-							.map(e -> "\n\t" + MathExt.round(e.getScore(), 4) + " in " + e.getTimeToEvaluateCandidate() + "ms (" + CompositionSerializer.serializeComponentInstance(e.getComponentInstance()) + ")")
+							.map(e -> "\n\t" + MathExt.round(e.getScore(), 4) + " in " + e.getTimeToEvaluateCandidate() + "ms (" + this.serializer.serialize(e.getComponentInstance()) + ")")
 							.collect(Collectors.joining()));
 				}
 				this.post(new TwoPhaseHASCOPhaseSwitchEvent(this));
@@ -377,7 +379,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 			this.logger.info(
 					"We expect phase 2 to consume {}ms for {} candidates, and post-processing is assumed to take at most {}ms, which is a total remaining runtime of {}ms. {}ms are permitted by timeout. The following candidates are considered (one per line with the internal error of phase 1): {}",
 					expectedTimeForPhase2, ensembleToSelectFrom.size(), expectedPostprocessingTime, expectedMaximumRemainingRuntime, remainingTime,
-					ensembleToSelectFrom.stream().map(e -> "\n\t" + MathExt.round(e.getScore(), 4) + " in " + e.getTimeToEvaluateCandidate() + "ms (" + CompositionSerializer.serializeComponentInstance(e.getComponentInstance()) + ")")
+					ensembleToSelectFrom.stream().map(e -> "\n\t" + MathExt.round(e.getScore(), 4) + " in " + e.getTimeToEvaluateCandidate() + "ms (" + this.serializer.serialize(e.getComponentInstance()) + ")")
 					.collect(Collectors.joining()));
 		}
 		return ensembleToSelectFrom.stream().sorted((c1,c2) -> Double.compare(c1.getScore(), c2.getScore())).collect(Collectors.toList());
@@ -439,7 +441,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		if (bestEvaluatedSolution.isPresent()) {
 			TwoPhaseCandidateEvaluator selectedModel = bestEvaluatedSolution.get();
 			HASCOSolutionCandidate<Double> solution = selectedModel.getSolution();
-			this.logger.info("Selected a configuration: {}. Its internal score was {}. Selection score was {}", CompositionSerializer.serializeComponentInstance(solution.getComponentInstance()), solution.getScore(), selectedModel.getSelectionScore());
+			this.logger.info("Selected a configuration: {}. Its internal score was {}. Selection score was {}", this.serializer.serialize(solution.getComponentInstance()), solution.getScore(), selectedModel.getSelectionScore());
 			return solution;
 		} else {
 			this.logger.warn("Could not select any real solution in selection phase, just returning the best we have seen in HASCO.");
@@ -539,6 +541,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
+		this.serializer.setLoggerName(name + ".serializer");
 		this.setHASCOLoggerNameIfPossible();
 		super.setLoggerName(this.loggerName + "._orgraphsearch");
 	}

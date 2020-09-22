@@ -1,4 +1,4 @@
-package ai.libs.jaicore.components.serialization;
+package ai.libs.jaicore.components.exceptions;
 
 /**
  * This exception can be thrown if components define required interfaces which cannot be resolved with the so far seen provided interfaces of components.

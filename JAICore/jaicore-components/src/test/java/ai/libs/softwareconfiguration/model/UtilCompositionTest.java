@@ -15,11 +15,12 @@ import org.junit.Test;
 
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.model.CompositionProblemUtil;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 
 public class UtilCompositionTest {
 
@@ -57,7 +58,7 @@ public class UtilCompositionTest {
 
 	@Test
 	public void testNumberOfUnparametrizedCompositions() throws IOException {
-		ComponentLoader l = new ComponentLoader(new File("./testrsc/simplerecursiveproblem.json"));
-		assertEquals(4, ComponentUtil.getNumberOfUnparametrizedCompositions(l.getComponents(), "IFace"));
+		IComponentRepository repo = new ComponentSerialization().deserializeRepository(new File("./testrsc/simplerecursiveproblem.json"));
+		assertEquals(4, ComponentUtil.getNumberOfUnparametrizedCompositions(repo, "IFace"));
 	}
 }

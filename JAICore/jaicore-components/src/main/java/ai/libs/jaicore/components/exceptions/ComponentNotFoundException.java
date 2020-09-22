@@ -1,4 +1,4 @@
-package ai.libs.jaicore.components.serialization;
+package ai.libs.jaicore.components.exceptions;
 
 public class ComponentNotFoundException extends Exception {
 

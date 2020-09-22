@@ -20,7 +20,7 @@ import ai.libs.hasco.core.reduction.softcomp2planning.HASCOReduction;
 import ai.libs.jaicore.basic.algorithm.ASolutionCandidateFoundEvent;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.jaicore.components.serialization.CompositionSerializer;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.classical.problems.ceoc.CEOCOperation;
@@ -108,7 +108,7 @@ public class NewReductionSandbox {
 				//				finalState.forEach(l -> System.out.println("\t- " + l));
 
 				ComponentInstance solution = HASCOUtil.getComponentInstanceFromState(problem.getComponents(), finalState, "solution", true);
-				String serializedSolution = CompositionSerializer.serializeComponentInstance(solution).toString();
+				String serializedSolution = new ComponentSerialization().serialize(solution).toString();
 				if (seenSolutions.contains(serializedSolution)) {
 					System.err.println("SEEN");
 				}

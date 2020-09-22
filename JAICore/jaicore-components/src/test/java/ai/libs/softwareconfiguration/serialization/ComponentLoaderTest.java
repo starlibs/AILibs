@@ -15,20 +15,21 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 
 import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.model.BooleanParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 
 @SuppressWarnings("SimplifiableJUnitAssertion")
 public class ComponentLoaderTest {
 
 	@Test
 	public void testLoadFromFile() throws IOException {
-		ComponentLoader loader = new ComponentLoader(new File("testrsc/difficultproblem.json"));
-		List<IComponent> components = loader.getComponents().stream().sorted((c1,c2) -> c1.getName().compareTo(c2.getName())).collect(Collectors.toList());
+		IComponentRepository repo = new ComponentSerialization().deserializeRepository(new File("testrsc/difficultproblem.json"));
+		List<IComponent> components = repo.stream().sorted((c1,c2) -> c1.getName().compareTo(c2.getName())).collect(Collectors.toList());
 
 		/* check number of components */
 		assertEquals(2, components.size());
@@ -55,8 +56,8 @@ public class ComponentLoaderTest {
 		}
 
 		/* test parameters */
-		Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> parameterConfig = loader.getParamConfigs();
-		for (IComponent c : loader.getComponents()) {
+		Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> parameterConfig = new ComponentSerialization().deserializeParamMap(new File("testrsc/difficultproblem.json"));
+		for (IComponent c : components) {
 			assertNotNull(parameterConfig.get(c));
 		}
 		assertNotNull(parameterConfig.get(c1).get(params.get(2)));
@@ -75,10 +76,8 @@ public class ComponentLoaderTest {
 	}
 
 	public void testEqualityOfTwoLoadingProcedures(final String filename) throws IOException {
-		ComponentLoader loader1 = new ComponentLoader(new File(filename));
-		ComponentLoader loader2 = new ComponentLoader(new File(filename));
-		List<IComponent> components1 = new ArrayList<>(loader1.getComponents());
-		List<IComponent> components2 = new ArrayList<>(loader2.getComponents());
+		List<IComponent> components1 = new ArrayList<>(new ComponentSerialization().deserializeRepository(new File(filename)));
+		List<IComponent> components2 = new ArrayList<>(new ComponentSerialization().deserializeRepository(new File(filename)));
 		int n = components1.size();
 		for (int i = 0; i < n; i++) {
 			IComponent c1 = components1.get(i);
@@ -111,13 +110,13 @@ public class ComponentLoaderTest {
 			/* check overall equality of components */
 			assertEquals(c1, c2);
 		}
-		assertEquals(loader1.getComponents(), loader2.getComponents());
-		assertEquals(loader1.getParamConfigs(), loader2.getParamConfigs());
+		assertEquals(components1, components2);
+		assertEquals(new ComponentSerialization().deserializeParamMap(new File(filename)), new ComponentSerialization().deserializeParamMap(new File(filename)));
 	}
 
 	@Test
 	public void testLoadFromResource() throws IOException {
-		Collection<IComponent> components = new ComponentLoader(new File("testrsc/weka-all-autoweka.json")).getComponents();
+		Collection<IComponent> components = new ComponentSerialization().deserializeRepository(new File("testrsc/weka-all-autoweka.json"));
 		assertTrue(!components.isEmpty());
 	}
 

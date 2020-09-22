@@ -24,7 +24,7 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstanceUtil;
-import ai.libs.jaicore.components.serialization.CompositionSerializer;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.mlplan.core.AMLPlanBuilder;
@@ -111,7 +111,7 @@ public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabele
 					ComponentInstance ci = e.getComponentDescription();
 					ComponentInstance unparametrizedPipeline = ComponentInstanceUtil.getDefaultParametrization(ci);
 					if (!seenUnparametrizedComponents.contains(unparametrizedPipeline)) {
-						assertTrue("Component instance " + CompositionSerializer.serializeComponentInstance(ci) + " is the first of its kind but not default parametrized!", ComponentInstanceUtil.isDefaultConfiguration(ci));
+						assertTrue("Component instance " + new ComponentSerialization().serialize(ci) + " is the first of its kind but not default parametrized!", ComponentInstanceUtil.isDefaultConfiguration(ci));
 						seenUnparametrizedComponents.add(unparametrizedPipeline);
 					}
 				}
