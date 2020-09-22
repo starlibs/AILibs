@@ -1,5 +1,6 @@
 package ai.libs.mlplan.multiclass.wekamlplan.weka;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -11,7 +12,6 @@ import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
-import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
@@ -40,14 +40,14 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 			if (groundComponent.getComponent().getName().equals("pipeline")) {
 				IComponentInstance preprocessorCI = null;
 				/* Retrieve component instances of pipeline */
-				preprocessorCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor");
-				IComponentInstance evaluatorCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval");
-				IComponentInstance searcherCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search");
+				preprocessorCI = groundComponent.getSatisfactionOfRequiredInterface("preprocessor").iterator().next();
+				IComponentInstance evaluatorCI = preprocessorCI.getSatisfactionOfRequiredInterface("eval").iterator().next();
+				IComponentInstance searcherCI = preprocessorCI.getSatisfactionOfRequiredInterface("search").iterator().next();
 
 				ASEvaluation eval = ASEvaluation.forName(evaluatorCI.getComponent().getName(), this.getParameterList(evaluatorCI).toArray(new String[0]));
 				ASSearch search = ASSearch.forName(searcherCI.getComponent().getName(), this.getParameterList(searcherCI).toArray(new String[0]));
 
-				IWekaClassifier c = this.getComponentInstantiation(groundComponent.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER));
+				IWekaClassifier c = this.getComponentInstantiation(groundComponent.getSatisfactionOfRequiredInterface(L_CLASSIFIER).iterator().next());
 				this.logger.debug("Returning a MLPipeline object (aseval: {}, assearch: {}, classifier: {})", eval != null, search != null, c != null);
 				return new WekaClassifier(new MLPipeline(search, eval, c.getClassifier()));
 
@@ -59,26 +59,27 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 					((OptionHandler) c).setOptions(options.toArray(new String[0]));
 				}
 
-				for (Entry<String, ? extends IComponentInstance> reqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
+				for (Entry<String, Collection<IComponentInstance>> reqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
 					switch (reqI.getKey()) {
 					case "W":
 						if (c instanceof SingleClassifierEnhancer) { // suppose that this defines a base classifier
-							((SingleClassifierEnhancer) c).setClassifier(this.getComponentInstantiation(reqI.getValue()).getClassifier());
+							((SingleClassifierEnhancer) c).setClassifier(this.getComponentInstantiation(reqI.getValue().iterator().next()).getClassifier());
 						} else {
 							this.logger.error("Got required interface W but classifier {} is not single classifier enhancer", c.getClass().getName());
 						}
 						break;
 					case "K":
 						if (c instanceof SMO) {
-							Kernel k = (Kernel) Class.forName(reqI.getValue().getComponent().getName()).newInstance();
-							k.setOptions(this.getParameterList(reqI.getValue()).toArray(new String[0]));
+							IComponentInstance kernel = reqI.getValue().iterator().next();
+							Kernel k = (Kernel) Class.forName(kernel.getComponent().getName()).newInstance();
+							k.setOptions(this.getParameterList(kernel).toArray(new String[0]));
 							((SMO) c).setKernel(k);
 						} else {
 							this.logger.error("Got required interface K but classifier {} is not SMO", c.getClass().getName());
 						}
 						break;
 					case "B": // suppose that this defines a base classifier
-						Classifier baseClassifier = this.getComponentInstantiation(reqI.getValue()).getClassifier();
+						Classifier baseClassifier = this.getComponentInstantiation(reqI.getValue().iterator().next()).getClassifier();
 						if (c instanceof Stacking) {
 							((Stacking) c).setClassifiers(new Classifier[] { baseClassifier });
 						} else {
@@ -97,14 +98,14 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 		}
 	}
 
-	private List<IWekaClassifier> getListOfBaseLearners(final ComponentInstance ci) throws ComponentInstantiationFailedException {
+	private List<IWekaClassifier> getListOfBaseLearners(final IComponentInstance ci) throws ComponentInstantiationFailedException {
 		List<IWekaClassifier> baseLearnerList = new LinkedList<>();
 
 		if (ci.getComponent().getName().equals("MultipleBaseLearnerListElement")) {
-			baseLearnerList.add(this.getComponentInstantiation(ci.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER)));
+			baseLearnerList.add(this.getComponentInstantiation(ci.getSatisfactionOfRequiredInterface(L_CLASSIFIER).iterator().next()));
 		} else if (ci.getComponent().getName().equals("MultipleBaseLearnerListChain")) {
-			baseLearnerList.add(this.getComponentInstantiation(ci.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER)));
-			baseLearnerList.addAll(this.getListOfBaseLearners(ci.getSatisfactionOfRequiredInterfaces().get("chain")));
+			baseLearnerList.add(this.getComponentInstantiation(ci.getSatisfactionOfRequiredInterface(L_CLASSIFIER).iterator().next()));
+			baseLearnerList.addAll(this.getListOfBaseLearners(ci.getSatisfactionOfRequiredInterface("chain").iterator().next()));
 		}
 
 		return baseLearnerList;

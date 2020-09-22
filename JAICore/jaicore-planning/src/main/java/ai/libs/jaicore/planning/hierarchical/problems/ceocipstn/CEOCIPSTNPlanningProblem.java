@@ -75,6 +75,4 @@ public class CEOCIPSTNPlanningProblem extends CEOCSTNPlanningProblem {
 		fields.put("super", super.toString());
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
-	
-	
 }

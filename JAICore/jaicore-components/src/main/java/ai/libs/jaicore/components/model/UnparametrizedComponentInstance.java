@@ -1,8 +1,10 @@
 package ai.libs.jaicore.components.model;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -12,18 +14,18 @@ import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class UnparametrizedComponentInstance {
 	private final String componentName;
-	private final Map<String, UnparametrizedComponentInstance> satisfactionOfRequiredInterfaces;
+	private final Map<String, List<UnparametrizedComponentInstance>> satisfactionOfRequiredInterfaces;
 
-	public UnparametrizedComponentInstance(final String componentName, final Map<String, UnparametrizedComponentInstance> satisfactionOfRequiredInterfaces) {
+	public UnparametrizedComponentInstance(final String componentName, final Map<String, List<UnparametrizedComponentInstance>> satisfactionOfRequiredInterfaces) {
 		super();
 		this.componentName = componentName;
 		this.satisfactionOfRequiredInterfaces = satisfactionOfRequiredInterfaces;
 	}
 
 	public UnparametrizedComponentInstance(final IComponentInstance composition) {
-		Map<String, IComponentInstance> resolvedRequiredInterfaces = composition.getSatisfactionOfRequiredInterfaces();
+		Map<String, Collection<IComponentInstance>> resolvedRequiredInterfaces = composition.getSatisfactionOfRequiredInterfaces();
 		this.satisfactionOfRequiredInterfaces = new HashMap<>();
-		resolvedRequiredInterfaces.keySet().forEach(r -> this.satisfactionOfRequiredInterfaces.put(r, new UnparametrizedComponentInstance(resolvedRequiredInterfaces.get(r))));
+		resolvedRequiredInterfaces.keySet().forEach(r -> this.satisfactionOfRequiredInterfaces.put(r, resolvedRequiredInterfaces.get(r).stream().map(UnparametrizedComponentInstance::new).collect(Collectors.toList())));
 		this.componentName = composition.getComponent().getName();
 	}
 
@@ -31,7 +33,7 @@ public class UnparametrizedComponentInstance {
 		return this.componentName;
 	}
 
-	public Map<String, UnparametrizedComponentInstance> getSatisfactionOfRequiredInterfaces() {
+	public Map<String, List<UnparametrizedComponentInstance>> getSatisfactionOfRequiredInterfaces() {
 		return this.satisfactionOfRequiredInterfaces;
 	}
 
@@ -44,7 +46,8 @@ public class UnparametrizedComponentInstance {
 			if (!current.getSatisfactionOfRequiredInterfaces().containsKey(requiredInterface)) {
 				throw new IllegalArgumentException("Invalid path " + path + " (size " + path.size() + "). The component " + current.getComponentName() + " does not have a required interface with id \"" + requiredInterface + "\"");
 			}
-			current = current.getSatisfactionOfRequiredInterfaces().get(requiredInterface);
+			current = current.getSatisfactionOfRequiredInterfaces().get(requiredInterface).get(0);
+			throw new UnsupportedOperationException("This part of the code is currently not clean!");
 		}
 		return current;
 	}

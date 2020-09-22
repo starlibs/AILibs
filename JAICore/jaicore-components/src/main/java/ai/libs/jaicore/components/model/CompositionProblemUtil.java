@@ -20,7 +20,6 @@ import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IParameterDependency;
 import ai.libs.jaicore.components.api.IParameterDomain;
-import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 
 public class CompositionProblemUtil {
 
@@ -30,11 +29,11 @@ public class CompositionProblemUtil {
 		/* avoid instantiation */
 	}
 
-	public static Collection<Component> getComponentsThatResolveProblem(final SoftwareConfigurationProblem<?> configurationProblem) {
+	public static Collection<IComponent> getComponentsThatResolveProblem(final SoftwareConfigurationProblem<?> configurationProblem) {
 		return getComponentsThatProvideInterface(configurationProblem, configurationProblem.getRequiredInterface());
 	}
 
-	public static Collection<Component> getComponentsThatProvideInterface(final SoftwareConfigurationProblem<?> configurationProblem, final String requiredInterface){
+	public static Collection<IComponent> getComponentsThatProvideInterface(final SoftwareConfigurationProblem<?> configurationProblem, final String requiredInterface){
 		return configurationProblem.getComponents().stream().filter(c -> c.getProvidedInterfaces().contains(requiredInterface)).collect(Collectors.toList());
 	}
 
@@ -44,7 +43,7 @@ public class CompositionProblemUtil {
 	 * @param composition
 	 * @return List of components in right to left depth-first order
 	 */
-	public static List<IComponentInstance> getComponentInstancesOfComposition(final ComponentInstance composition) {
+	public static List<IComponentInstance> getComponentInstancesOfComposition(final IComponentInstance composition) {
 		List<IComponentInstance> components = new LinkedList<>();
 		Deque<IComponentInstance> componentInstances = new ArrayDeque<>();
 		componentInstances.push(composition);
@@ -52,10 +51,8 @@ public class CompositionProblemUtil {
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			components.add(curInstance);
-			List<String> requiredInterfaceNames = curInstance.getComponent().getRequiredInterfaces().stream().map(IRequiredInterfaceDefinition::getId).collect(Collectors.toList());
-			for (String requiredInterfaceName : requiredInterfaceNames) {
-				IComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
-				componentInstances.push(instance);
+			for (Collection<IComponentInstance> instances : curInstance.getSatisfactionOfRequiredInterfaces().values()) {
+				instances.forEach(componentInstances::push);
 			}
 		}
 		return components;
@@ -67,7 +64,7 @@ public class CompositionProblemUtil {
 	 * @param composition
 	 * @return String of all component names in right to left depth-first order
 	 */
-	public static String getComponentNamesOfComposition(final ComponentInstance composition) {
+	public static String getComponentNamesOfComposition(final IComponentInstance composition) {
 		StringBuilder builder = new StringBuilder();
 		Deque<IComponentInstance> componentInstances = new ArrayDeque<>();
 		componentInstances.push(composition);
@@ -75,10 +72,8 @@ public class CompositionProblemUtil {
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			builder.append(curInstance.getComponent().getName());
-			List<String> requiredInterfaceNames = curInstance.getComponent().getRequiredInterfaces().stream().map(IRequiredInterfaceDefinition::getId).collect(Collectors.toList());
-			for (String requiredInterfaceName : requiredInterfaceNames) {
-				IComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
-				componentInstances.push(instance);
+			for (Collection<IComponentInstance> instances : curInstance.getSatisfactionOfRequiredInterfaces().values()) {
+				instances.forEach(componentInstances::push);
 			}
 		}
 		return builder.toString();
@@ -90,7 +85,7 @@ public class CompositionProblemUtil {
 	 * @param composition
 	 * @return List of components in right to left depth-first order
 	 */
-	public static List<IComponent> getComponentsOfComposition(final ComponentInstance composition) {
+	public static List<IComponent> getComponentsOfComposition(final IComponentInstance composition) {
 		List<IComponent> components = new LinkedList<>();
 		Deque<IComponentInstance> componentInstances = new ArrayDeque<>();
 		componentInstances.push(composition);
@@ -98,9 +93,8 @@ public class CompositionProblemUtil {
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			components.add(curInstance.getComponent());
-			for (IRequiredInterfaceDefinition requiredInterface : curInstance.getComponent().getRequiredInterfaces()) {
-				IComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterface.getId());
-				componentInstances.push(instance);
+			for (Collection<IComponentInstance> instances : curInstance.getSatisfactionOfRequiredInterfaces().values()) {
+				instances.forEach(componentInstances::push);
 			}
 		}
 		return components;

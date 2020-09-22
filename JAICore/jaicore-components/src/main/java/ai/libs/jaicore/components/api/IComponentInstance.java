@@ -39,5 +39,7 @@ public interface IComponentInstance {
 	/**
 	 * @return This method returns a mapping of interface IDs to component instances.
 	 */
-	public Map<String, IComponentInstance> getSatisfactionOfRequiredInterfaces();
+	public Map<String, Collection<IComponentInstance>> getSatisfactionOfRequiredInterfaces();
+
+	public Collection<IComponentInstance> getSatisfactionOfRequiredInterface(String idOfRequiredInterface);
 }

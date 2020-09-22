@@ -13,11 +13,11 @@ import java.util.Set;
 import org.junit.Test;
 
 import ai.libs.hasco.core.HASCOUtil;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
-import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.serialization.ComponentLoader;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
@@ -40,21 +40,21 @@ public class HASCOUtilTester {
 		params.add(new ConstantParam("[0.5,1.0]"));
 		state.add(new Literal("val", params));
 		ComponentInstance instance = HASCOUtil.getComponentInstanceFromState(new ComponentLoader(new File(pathToFiles + "testrsc/weka/weka-all-autoweka.json")).getComponents(), state, "solution", false);
-		assertEquals("[125.36470588235294, 253.74117647058824]", instance.getSatisfactionOfRequiredInterfaces().get("preprocessor").getSatisfactionOfRequiredInterfaces().get("eval").getParameterValue("A"));
+		assertEquals("[125.36470588235294, 253.74117647058824]", instance.getSatisfactionOfRequiredInterface("preprocessor").iterator().next().getSatisfactionOfRequiredInterface("eval").iterator().next().getParameterValue("A"));
 		instance = HASCOUtil.getComponentInstanceFromState(new ComponentLoader(new File(pathToFiles + "testrsc/weka/weka-all-autoweka.json")).getComponents(), state, "solution", true);
-		assertEquals("190", instance.getSatisfactionOfRequiredInterfaces().get("preprocessor").getSatisfactionOfRequiredInterfaces().get("eval").getParameterValue("A"));
+		assertEquals("190", instance.getSatisfactionOfRequiredInterface("preprocessor").iterator().next().getSatisfactionOfRequiredInterfaces().get("eval").iterator().next().getParameterValue("A"));
 	}
 
 	@Test
 	public void testParameterDomainUpdates() throws Exception {
 		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(new File(pathToFiles + "testrsc/problemwithdependencies.json"), "IFace", n -> 0.0);
-		Component bComponent = problem.getComponents().stream().filter(c -> c.getName().equals("B")).findFirst().get();
-		Parameter dParameter = bComponent.getParameterWithName("d");
+		IComponent bComponent = problem.getComponents().stream().filter(c -> c.getName().equals("B")).findFirst().get();
+		IParameter dParameter = bComponent.getParameter("d");
 
 		/* first check that the domain is default if c is not set at all */
 		{
 			ComponentInstance inst = new ComponentInstance(bComponent, null, null);
-			Map<Parameter, IParameterDomain> newDomains = HASCOUtil.getUpdatedDomainsOfComponentParameters(inst);
+			Map<IParameter, IParameterDomain> newDomains = HASCOUtil.getUpdatedDomainsOfComponentParameters(inst);
 			assertEquals(dParameter.getDefaultDomain(), newDomains.get(dParameter));
 		}
 
@@ -63,7 +63,7 @@ public class HASCOUtilTester {
 			Map<String, String> parameterValues = new HashMap<>();
 			parameterValues.put("c", "false");
 			ComponentInstance inst = new ComponentInstance(bComponent, parameterValues, null);
-			Map<Parameter, IParameterDomain> newDomains = HASCOUtil.getUpdatedDomainsOfComponentParameters(inst);
+			Map<IParameter, IParameterDomain> newDomains = HASCOUtil.getUpdatedDomainsOfComponentParameters(inst);
 			assertEquals(dParameter.getDefaultDomain(), newDomains.get(dParameter));
 		}
 
@@ -72,7 +72,7 @@ public class HASCOUtilTester {
 			Map<String, String> parameterValues = new HashMap<>();
 			parameterValues.put("c", "true");
 			ComponentInstance inst = new ComponentInstance(bComponent, parameterValues, null);
-			Map<Parameter, IParameterDomain> newDomains = HASCOUtil.getUpdatedDomainsOfComponentParameters(inst);
+			Map<IParameter, IParameterDomain> newDomains = HASCOUtil.getUpdatedDomainsOfComponentParameters(inst);
 			Set<String> expectedValues = new HashSet<>();
 			expectedValues.add("blue");
 			expectedValues.add("white");

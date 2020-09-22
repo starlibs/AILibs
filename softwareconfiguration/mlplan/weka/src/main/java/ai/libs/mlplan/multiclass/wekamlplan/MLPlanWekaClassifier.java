@@ -24,7 +24,7 @@ import org.api4.java.common.event.IEventEmitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.core.MLPlan;
@@ -149,7 +149,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 		return this.builder.getAlgorithmConfig();
 	}
 
-	public Collection<Component> getComponents() throws IOException {
+	public Collection<IComponent> getComponents() throws IOException {
 		return this.builder.getComponents();
 	}
 

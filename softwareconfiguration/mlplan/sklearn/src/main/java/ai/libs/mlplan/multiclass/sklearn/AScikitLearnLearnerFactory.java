@@ -2,6 +2,7 @@ package ai.libs.mlplan.multiclass.sklearn;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -82,9 +83,9 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 	public String extractSKLearnConstructInstruction(final IComponentInstance groundComponent, final Set<String> importSet) {
 		StringBuilder sb = new StringBuilder();
 		if (groundComponent.getComponent().getName().startsWith("mlplan.util.model.make_forward")) {
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("source"), importSet));
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("source").iterator().next(), importSet));
 			sb.append(",");
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("base"), importSet));
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("base").iterator().next(), importSet));
 			return sb.toString();
 		}
 
@@ -111,9 +112,9 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 		} else if (groundComponent.getComponent().getName().contains("make_union"))
 
 		{
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("p1"), importSet));
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("p1").iterator().next(), importSet));
 			sb.append(",");
-			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("p2"), importSet));
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("p2").iterator().next(), importSet));
 		} else {
 			boolean first = true;
 			for (Entry<String, String> parameterValue : groundComponent.getParameterValues().entrySet()) {
@@ -151,7 +152,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 				}
 			}
 
-			for (Entry<String, ? extends IComponentInstance> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
+			for (Entry<String, Collection<IComponentInstance>> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
 				if (first) {
 					first = false;
 				} else {
@@ -159,7 +160,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 				}
 
 				sb.append(satReqI.getKey() + "=");
-				sb.append(this.extractSKLearnConstructInstruction(satReqI.getValue(), importSet));
+				sb.append(this.extractSKLearnConstructInstruction(satReqI.getValue().iterator().next(), importSet));
 			}
 		}
 		sb.append(")");

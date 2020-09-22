@@ -113,4 +113,9 @@ public class Interface implements IRequiredInterfaceDefinition, Serializable {
 		}
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return this.name;
+	}
 }

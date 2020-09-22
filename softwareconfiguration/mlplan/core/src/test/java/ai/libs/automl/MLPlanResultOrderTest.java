@@ -111,7 +111,7 @@ public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabele
 					ComponentInstance ci = e.getComponentDescription();
 					ComponentInstance unparametrizedPipeline = ComponentInstanceUtil.getDefaultParametrization(ci);
 					if (!seenUnparametrizedComponents.contains(unparametrizedPipeline)) {
-						assertTrue("Component instance " + CompositionSerializer.serializeComponentInstance(ci) + " is the first of its kind but not default parametrized!", ci.isDefaultParametrized());
+						assertTrue("Component instance " + CompositionSerializer.serializeComponentInstance(ci) + " is the first of its kind but not default parametrized!", ComponentInstanceUtil.isDefaultConfiguration(ci));
 						seenUnparametrizedComponents.add(unparametrizedPipeline);
 					}
 				}

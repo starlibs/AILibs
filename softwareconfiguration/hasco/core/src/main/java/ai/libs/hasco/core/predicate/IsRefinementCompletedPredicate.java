@@ -1,5 +1,6 @@
 package ai.libs.hasco.core.predicate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -11,11 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
-import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;
@@ -25,12 +26,12 @@ import ai.libs.jaicore.logic.fol.theories.EvaluablePredicate;
 public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 
 	private final Logger logger = LoggerFactory.getLogger(IsRefinementCompletedPredicate.class);
-	private final Collection<Component> components;
-	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
+	private final Collection<IComponent> components;
+	private final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> refinementConfiguration;
 
-	public IsRefinementCompletedPredicate(final Collection<Component> components, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration) {
+	public IsRefinementCompletedPredicate(final Collection<? extends IComponent> components, final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> refinementConfiguration) {
 		super();
-		this.components = components;
+		this.components = new ArrayList<>(components);
 		this.refinementConfiguration = refinementConfiguration;
 	}
 
@@ -66,9 +67,9 @@ public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 
 		/* determine current values for the params */
 		ComponentInstance groundComponent = HASCOUtil.getGroundComponentsFromState(state, this.components, false).get(objectContainer);
-		Component component = groundComponent.getComponent();
+		IComponent component = groundComponent.getComponent();
 		Map<String, String> componentParamContainers = HASCOUtil.getParameterContainerMap(state, objectContainer);
-		for (Parameter param : component.getParameters()) {
+		for (IParameter param : component.getParameters()) {
 			String containerOfParam = componentParamContainers.get(param.getName());
 			String currentValueOfParam = groundComponent.getParameterValue(param);
 			boolean variableHasBeenSet = state.contains(new Literal("overwritten('" + containerOfParam + "')"));

@@ -13,9 +13,10 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import treeminer.FrequentSubtreeFinder;
 import treeminer.TreeMiner;
@@ -67,7 +68,7 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	 */
 	private int patternMinSupport = 5;
 
-	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> componentParameters;
+	private Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> componentParameters;
 
 	/**
 	 * Creates a new pipeline characterizer that uses the given descriptions of
@@ -78,7 +79,7 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	 *            together with their refinements.
 	 */
 	public WEKAPipelineCharacterizer(
-			final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> componentParameters) {
+			final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> componentParameters) {
 		TreeMiner miner = new TreeMiner();
 		miner.setCountMultipleOccurrences(false);
 		miner.setOnlySearchForPatternsThatStartWithTheRoot(true);
@@ -128,7 +129,7 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	}
 
 	@Override
-	public void build(final List<ComponentInstance> pipelines) throws InterruptedException {
+	public void build(final List<? extends IComponentInstance> pipelines) throws InterruptedException {
 		// Convert the pipelines to String representations
 		logger.info("Converting training examples to trees. With support {}", this.patternMinSupport);
 
@@ -157,7 +158,7 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	}
 
 	@Override
-	public double[] characterize(final ComponentInstance pipeline) {
+	public double[] characterize(final IComponentInstance pipeline) {
 		// Make tree representation from this pipeline
 		String treeRepresentation = new ComponentInstanceStringConverter(this.ontologyConnector, new ArrayList<>(),
 				this.componentParameters).makeStringTreeRepresentation(pipeline);

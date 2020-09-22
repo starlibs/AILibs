@@ -14,19 +14,19 @@ public class ScikitLearnRULFactory extends AScikitLearnLearnerFactory {
 	@Override
 	public String getPipelineBuildString(final IComponentInstance groundComponent, final Set<String> importSet) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("timeseries_transformer"), importSet));
+		sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("timeseries_transformer").iterator().next(), importSet));
 		sb.append(",");
-		sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("data_cleaner"), importSet));
+		sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("data_cleaner").iterator().next(), importSet));
 		sb.append(",");
 		int i = 0;
-		while (groundComponent.getSatisfactionOfRequiredInterfaces().get(N_PREPROCESSOR + i) != null) {
-			if (!groundComponent.getSatisfactionOfRequiredInterfaces().get(N_PREPROCESSOR + i).getComponent().getName().equals("NoPreprocessor")) {
-				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get(N_PREPROCESSOR + i), importSet));
+		while (groundComponent.getSatisfactionOfRequiredInterface(N_PREPROCESSOR + i) != null) {
+			if (!groundComponent.getSatisfactionOfRequiredInterface(N_PREPROCESSOR + i).iterator().next().getComponent().getName().equals("NoPreprocessor")) {
+				sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface(N_PREPROCESSOR + i).iterator().next(), importSet));
 				sb.append(",");
 			}
 			i++;
 		}
-		sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("regressor"), importSet));
+		sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("regressor").iterator().next(), importSet));
 		return sb.toString();
 	}
 }

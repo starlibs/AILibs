@@ -13,7 +13,7 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 
 public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, IPrediction, IPredictionBatch> implements ITimeTrackingLearner {
@@ -21,7 +21,7 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 	private static final Logger LOGGER = LoggerFactory.getLogger(TimeTrackingLearnerWrapper.class);
 
 	private final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> wrappedSLClassifier;
-	private ComponentInstance ci;
+	private IComponentInstance ci;
 
 	private List<Long> fitTimes;
 	private List<Long> batchPredictTimes;
@@ -31,7 +31,7 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 	private Double predictedInferenceTime = null;
 	private Double score;
 
-	public TimeTrackingLearnerWrapper(final ComponentInstance ci, final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> wrappedLearner) {
+	public TimeTrackingLearnerWrapper(final IComponentInstance ci, final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> wrappedLearner) {
 		this.ci = ci;
 		this.wrappedSLClassifier = wrappedLearner;
 		this.fitTimes = new ArrayList<>();
@@ -80,7 +80,7 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 	}
 
 	@Override
-	public ComponentInstance getComponentInstance() {
+	public IComponentInstance getComponentInstance() {
 		return this.ci;
 	}
 

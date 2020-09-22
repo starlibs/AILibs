@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.Interface;
 import ai.libs.jaicore.components.model.UnparametrizedComponentInstance;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfo;
 import javafx.application.Platform;
@@ -47,8 +47,8 @@ public class HASCOModelStatisticsComponentSelector extends TreeItem<HASCOModelSt
 		this.componentSelector.valueProperty().addListener((observable, oldValue, newValue) -> {
 			HASCOModelStatisticsComponentSelector.this.getChildren().clear();
 			if (!newValue.equals("*")) {
-				List<Interface> requiredInterfacesOfThisChoice = model.getKnownComponents().get(newValue).getRequiredInterfaces();
-				for (Interface reqInterface : requiredInterfacesOfThisChoice) {
+				Collection<IRequiredInterfaceDefinition> requiredInterfacesOfThisChoice = model.getKnownComponents().get(newValue).getRequiredInterfaces();
+				for (IRequiredInterfaceDefinition reqInterface : requiredInterfacesOfThisChoice) {
 					String requiredInterfaceId = reqInterface.getId();
 					HASCOModelStatisticsComponentSelector.this.getChildren().add(new HASCOModelStatisticsComponentSelector(rootView, HASCOModelStatisticsComponentSelector.this, requiredInterfaceId, model));
 				}
@@ -73,9 +73,6 @@ public class HASCOModelStatisticsComponentSelector extends TreeItem<HASCOModelSt
 		ObservableList<String> items = this.componentSelector.getItems();
 		for (ScoredSolutionCandidateInfo scoredSolutionCandidateInfo : this.model.getAllSeenSolutionCandidateFoundInfosUnordered()) {
 			ComponentInstance ci = this.model.deserializeComponentInstance(scoredSolutionCandidateInfo.getSolutionCandidateRepresentation());
-			if (!ci.matchesPathRestriction(selectionPath)) {
-				continue;
-			}
 
 			/* determine sub-component relevant for this path and add the respective component lexicographically correctly (unless it is already in the list) */
 			UnparametrizedComponentInstance uci = new UnparametrizedComponentInstance(ci).getSubComposition(reqInterfacePath);

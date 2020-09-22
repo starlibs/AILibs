@@ -23,6 +23,7 @@ import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.core.events.HASCOSolutionEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
+import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -68,7 +69,7 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsTester extends HASCOTest
 					if (e instanceof HASCOSolutionEvent) {
 						@SuppressWarnings("unchecked")
 						HASCOSolutionCandidate<Double> s = ((HASCOSolutionEvent<Double>) e).getSolutionCandidate();
-						boolean isDefault = s.getComponentInstance().isDefaultParametrized();
+						boolean isDefault = ComponentInstanceUtil.isDefaultConfiguration(s.getComponentInstance());
 						assertTrue("Found default configured component instance after others that were not default-configured.", !haveSeenNonDefault || !isDefault);
 						assertTrue("Have not seen all expected default configuration prior to a non-default component instance.\nExpected: " + expectedDefaultConfigurations + "\nSeen: " + seenDefaultConfigurations + "\nCurrent component instance: " + s.getComponentInstance(), isDefault || seenDefaultConfigurations == expectedDefaultConfigurations);
 						if (isDefault) {

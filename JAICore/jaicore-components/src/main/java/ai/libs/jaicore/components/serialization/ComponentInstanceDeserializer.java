@@ -1,6 +1,7 @@
 package ai.libs.jaicore.components.serialization;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,13 +47,13 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 
 		Component component = this.possibleComponents.stream().filter(c -> c.getName().equals(componentName)).findFirst().orElseThrow(NoSuchElementException::new);
 
-		Map<String, IComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<>();
+		Map<String, Collection<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
 		// recursively resolve the requiredInterfaces
 		TreeNode n = p.get("requiredInterfaces");
 		Iterator<String> fields = n.fieldNames();
 		while (fields.hasNext()) {
 			String key = fields.next();
-			satisfactionOfRequiredInterfaces.put(key, this.readAsTree(n.get(key)));
+			satisfactionOfRequiredInterfaces.put(key, Arrays.asList(this.readAsTree(n.get(key))));
 		}
 		return new ComponentInstance(component, parameterValues, satisfactionOfRequiredInterfaces);
 	}

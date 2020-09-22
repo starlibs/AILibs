@@ -26,6 +26,7 @@ import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
@@ -46,8 +47,8 @@ public class ComponentLoader {
 	private static final String MSG_CANNOT_PARSE_LITERAL = "Cannot parse literal ";
 	private static final String MSG_DOMAIN_NOT_SUPPORTED = "Currently no support for parameters with domain \"";
 
-	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
-	private final Collection<Component> components = new ArrayList<>();
+	private final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
+	private final Collection<IComponent> components = new ArrayList<>();
 	private final Set<String> parsedFiles = new HashSet<>();
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
@@ -126,6 +127,9 @@ public class ComponentLoader {
 			Component c;
 			for (JsonNode component : describedComponents) {
 				c = new Component(component.get("name").asText());
+				if (c.getName().contains("-")) {
+					throw new IllegalArgumentException("Illegal component name " + c.getName() + ". No hyphens allowed. Please only use [a-zA-z0-9].");
+				}
 				this.componentMap.put(c.getName(), component);
 
 				if (!this.uniqueComponentNames.add(c.getName())) {
@@ -187,7 +191,7 @@ public class ComponentLoader {
 					}
 				}
 
-				Map<Parameter, ParameterRefinementConfiguration> paramConfig = new HashMap<>();
+				Map<IParameter, ParameterRefinementConfiguration> paramConfig = new HashMap<>();
 
 				for (JsonNode parameter : component.path("parameter")) {
 					// name of the parameter
@@ -457,14 +461,14 @@ public class ComponentLoader {
 	/**
 	 * @return The map describing for each component individually how its parameters may be refined.
 	 */
-	public Map<Component, Map<Parameter, ParameterRefinementConfiguration>> getParamConfigs() {
+	public Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> getParamConfigs() {
 		return this.paramConfigs;
 	}
 
 	/**
 	 * @return The collection of parsed components.
 	 */
-	public Collection<Component> getComponents() {
+	public Collection<IComponent> getComponents() {
 		return this.components;
 	}
 
@@ -473,8 +477,8 @@ public class ComponentLoader {
 	 * @param name The name of the component in question.
 	 * @return The component for the given name.
 	 */
-	public Component getComponentWithName(final String name) {
-		for (Component component : this.getComponents()) {
+	public IComponent getComponentWithName(final String name) {
+		for (IComponent component : this.getComponents()) {
 			if (component.getName().equals(name)) {
 				return component;
 			}
