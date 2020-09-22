@@ -1,0 +1,31 @@
+{
+	"repository": "base-index",
+	"include": [
+		"./bayesnet.json",
+		"./decisionstump.json",
+		"./decisiontable.json",
+		"./ibk.json",
+		"./j48.json",
+		"./jrip.json",
+		"./kstar.json",
+		"./lmt.json",
+		"./logistic.json",
+		"./m5p.json",
+		"./m5rules.json",
+		"./multilayerperceptron.json",
+		"./naivebayes.json",
+		"./naivebayesmultinomial.json",
+		"./oner.json",
+		"./part.json",
+		"./randomforest.json",
+		"./randomtree.json",
+		"./reptree.json",
+		"./simplelinearregression.json",
+		"./simplelogistic.json",
+		"./smo_kernel/index.json",
+		"./smo.json",
+		"./votedperceptron.json",
+		"./zeror.json"
+	],
+	"components": []
+}

@@ -1,0 +1,19 @@
+{
+  "repository" : "weka.classifiers.rules.OneR",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.rules.OneR",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "BoostableBaseClassifier", "PipelineClassifier" ],
+    "parameter" : [ {
+      "name" : "B",
+      "type" : "int",
+      "default" : 6.0,
+      "min" : 1.0,
+      "max" : 32.0,
+      "refineSplits" : 8,
+      "minInterval" : 1
+    } ],
+    "dependencies" : [ ]
+  } ]
+}
