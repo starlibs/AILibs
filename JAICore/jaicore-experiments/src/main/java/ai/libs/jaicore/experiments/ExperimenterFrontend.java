@@ -155,7 +155,7 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 				((AlgorithmBenchmarker) this.evaluator).setExperimentSpecificTimeout(this.experimentSpecificTimeout);
 			}
 		}
-		this.preRunHooks.forEach(h -> ((AlgorithmBenchmarker)this.evaluator).addPreRunHook(h));
+		this.preRunHooks.forEach(((AlgorithmBenchmarker)this.evaluator)::addPreRunHook);
 	}
 
 	private ExperimentRunner getExperimentRunner() throws ExperimentDBInteractionFailedException {

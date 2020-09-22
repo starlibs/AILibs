@@ -1,6 +1,8 @@
 package ai.libs.jaicore.components.api;
 
-public interface IRequiredInterfaceDefinition {
+import java.io.Serializable;
+
+public interface IRequiredInterfaceDefinition extends Serializable {
 
 	/**
 	 * @return the name of the interface

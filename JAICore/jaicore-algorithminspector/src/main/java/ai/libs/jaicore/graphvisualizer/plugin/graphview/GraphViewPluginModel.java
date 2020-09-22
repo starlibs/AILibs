@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.graphvisualizer.IColorMap;
-import ai.libs.jaicore.graphvisualizer.SeismicColorMap;
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
 public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginView, GraphViewPluginController> {
@@ -155,7 +154,7 @@ public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginV
 		if (properties.containsKey(this.propertyToUseForColoring)) {
 			Object valAsObject = properties.get(this.propertyToUseForColoring);
 			double val = valAsObject instanceof Double ? (double) valAsObject : Double.valueOf("" + valAsObject);
-			Color c = new SeismicColorMap().get(this.nodeColoringMin, this.nodeColoringMax, val);
+			Color c = this.colormap.get(this.nodeColoringMin, this.nodeColoringMax, val);
 			node.setAttribute("ui.style", "fill-color: rgb(" + c.getRed() + "," + c.getGreen() + ", " + c.getBlue() + ");");
 			if (this.withPropertyLabels) {
 				node.setAttribute("ui.label", this.nodeProperties.get(node).entrySet().stream().map(e -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining("\n")));
@@ -183,7 +182,6 @@ public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginV
 			Node otherNode = edge.getNode0().equals(viewNode) ? edge.getNode1() : edge.getNode0();
 			Set<Edge> connectedEdgesOfOtherNode = this.nodeToConnectedEdgesMap.get(otherNode);
 			connectedEdgesOfOtherNode.remove(edge);
-			// this.graph.removeEdge(edge);
 		}
 	}
 

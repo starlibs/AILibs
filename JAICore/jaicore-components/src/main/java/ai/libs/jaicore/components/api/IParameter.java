@@ -1,6 +1,8 @@
 package ai.libs.jaicore.components.api;
 
-public interface IParameter {
+import java.io.Serializable;
+
+public interface IParameter extends Serializable {
 
 	public String getName();
 

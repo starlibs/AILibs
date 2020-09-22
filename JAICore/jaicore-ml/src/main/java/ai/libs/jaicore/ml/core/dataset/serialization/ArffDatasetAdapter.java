@@ -321,7 +321,6 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						instanceReadMode = true;
 						if (relationMetaData.containsKey(K_CLASS_INDEX) && relationMetaData.getAsInt(K_CLASS_INDEX) >= 0) {
 							dataset = createDataset(relationMetaData, attributes);
-							IntBasedCategoricalAttribute targetAtt = ((IntBasedCategoricalAttribute)attributes.get(relationMetaData.getAsInt(K_CLASS_INDEX)));
 						} else {
 							LOGGER.warn("Invalid class index in the dataset's meta data ({}): Assuming last column to be the target attribute!", relationMetaData.get(K_CLASS_INDEX));
 							relationMetaData.put(K_CLASS_INDEX, attributes.size() - 1);

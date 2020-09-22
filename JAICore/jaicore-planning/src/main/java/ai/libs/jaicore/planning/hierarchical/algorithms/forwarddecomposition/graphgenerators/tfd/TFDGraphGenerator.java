@@ -124,8 +124,6 @@ public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String>, ILog
 			}
 			Literal nextTask = currentlyRemainingTasks.get(0);
 			currentlyRemainingTasks.remove(0);
-			//			String nextTaskName = nextTask.getPropertyName();
-			//			Literal nextTask = new Literal(nextTaskName, nextTaskTmp.getParameters());
 
 			/* get the child nodes */
 			long creationStartTime = System.currentTimeMillis();

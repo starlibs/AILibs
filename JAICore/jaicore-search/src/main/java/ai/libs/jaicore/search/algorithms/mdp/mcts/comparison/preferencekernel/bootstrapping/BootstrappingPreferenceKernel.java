@@ -44,9 +44,6 @@ public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N,
 	private final IBootstrapConfigurator bootstrapConfigurator;
 
 	private final int maxNumSamplesInHistory;
-	// private final int maxNumSamplesInBootstrap;
-	// private final int numBootstrapsPerChild;
-
 	private final Random random;
 	private final Map<N, List<List<A>>> rankingsForNodes = new HashMap<>();
 	private final int minSamplesToCreateRankings = 1;
@@ -60,7 +57,6 @@ public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N,
 		this.bootstrapParameterComputer = bootstrapParameterComputer;
 		this.bootstrapConfigurator = bootstrapConfigurator;
 		this.random = random;
-		//		this.minSamplesToCreateRankings = minSamplesToCreateRankings;
 		this.maxNumSamplesInHistory = maxNumSamplesInHistory;
 	}
 

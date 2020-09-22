@@ -46,8 +46,11 @@ public class UnparametrizedComponentInstance {
 			if (!current.getSatisfactionOfRequiredInterfaces().containsKey(requiredInterface)) {
 				throw new IllegalArgumentException("Invalid path " + path + " (size " + path.size() + "). The component " + current.getComponentName() + " does not have a required interface with id \"" + requiredInterface + "\"");
 			}
-			current = current.getSatisfactionOfRequiredInterfaces().get(requiredInterface).get(0);
-			throw new UnsupportedOperationException("This part of the code is currently not clean!");
+			List<UnparametrizedComponentInstance> provisionOfRequiredInterface = current.getSatisfactionOfRequiredInterfaces().get(requiredInterface);
+			if (provisionOfRequiredInterface.size() > 1) {
+				throw new UnsupportedOperationException("Currently it is not possible to filter along paths with several instances!!");
+			}
+			current = provisionOfRequiredInterface.get(0);
 		}
 		return current;
 	}

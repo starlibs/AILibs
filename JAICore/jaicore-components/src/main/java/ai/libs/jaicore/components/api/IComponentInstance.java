@@ -1,9 +1,10 @@
 package ai.libs.jaicore.components.api;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
-public interface IComponentInstance {
+public interface IComponentInstance extends Serializable {
 
 	public IComponent getComponent();
 

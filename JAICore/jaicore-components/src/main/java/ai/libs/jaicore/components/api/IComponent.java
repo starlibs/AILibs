@@ -1,8 +1,9 @@
 package ai.libs.jaicore.components.api;
 
+import java.io.Serializable;
 import java.util.Collection;
 
-public interface IComponent {
+public interface IComponent extends Serializable {
 
 	/**
 	 * @return Name of the component

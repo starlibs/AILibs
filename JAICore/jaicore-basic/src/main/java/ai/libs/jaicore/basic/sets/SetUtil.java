@@ -1261,5 +1261,12 @@ public class SetUtil {
 		return subSample;
 	}
 
+	public static double sum(final Collection<? extends Number> nums) {
+		double sum = 0;
+		for (Number n : nums) {
+			sum += n.doubleValue();
+		}
+		return sum;
+	}
 
 }

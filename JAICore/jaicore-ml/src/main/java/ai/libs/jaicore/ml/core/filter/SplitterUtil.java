@@ -32,7 +32,7 @@ public class SplitterUtil {
 		Logger logger = LoggerFactory.getLogger(loggerName != null ? loggerName : SplitterUtil.class.getName());
 		boolean isReproducible = dataset instanceof IReconstructible;
 		logger.info("Creating splitter");
-		FilterBasedDatasetSplitter<D> splitter = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<D>(), relativeTrainSize, new Random(seed));
+		FilterBasedDatasetSplitter<D> splitter = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), relativeTrainSize, new Random(seed));
 		if (loggerName != null) {
 			logger.info("Setting loggername of splitter to {}", loggerName);
 			splitter.setLoggerName(loggerName);

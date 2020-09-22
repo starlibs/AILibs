@@ -3,7 +3,6 @@ package ai.libs.jaicore.graphvisualizer;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -30,7 +29,7 @@ public class SeismicColorMap implements IColorMap {
 		}
 	}
 
-	public static void main(final String[] args) throws IOException {
+	public static void main(final String[] args) {
 
 		double min = 0;
 		double max = 1;
@@ -41,7 +40,6 @@ public class SeismicColorMap implements IColorMap {
 		for (int i = 0; i < 100; i++)  {
 			double v = min + (i * 1.0 / 100) * (max - min);
 			Color c = cm.get(min, max, v);
-			System.out.println(c);
 			for (int j = 0; j < 100; j++) {
 				for (int k = 0; k < 5; k ++) {
 					image.setRGB(i * 5 + k, j, c.getRGB());

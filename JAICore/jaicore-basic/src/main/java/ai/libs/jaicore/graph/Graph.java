@@ -193,7 +193,7 @@ public class Graph<T> {
 		while (!open.isEmpty()) {
 			T next = open.remove(0);
 			descendants.add(next);
-			this.getSuccessors(next).forEach(n -> open.add(n));
+			this.getSuccessors(next).forEach(open::add);
 		}
 		descendants.remove(item);
 		return descendants;

@@ -27,7 +27,6 @@ public class CombinedGammaFunction implements IGammaFunction {
 		if (longTermWeight > LONG_TERM_BREAK && vLongTermGamma == 0) {
 			return 0;
 		}
-		//		System.out.println(nodeProbability + "/" + longTermWeight + " -> " + vLongTermGamma);
 		double vShortTermGamma = this.shortTermGamma.getNodeGamma(visits, nodeProbability, relativeDepth);
 		return vLongTermGamma * longTermWeight +  vShortTermGamma * (1 - longTermWeight);
 	}

@@ -56,7 +56,7 @@ public class NodePropertyChangedEvent<T> extends AAlgorithmEvent implements Grap
 		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
-		NodePropertyChangedEvent other = (NodePropertyChangedEvent) obj;
+		NodePropertyChangedEvent<?> other = (NodePropertyChangedEvent<?>) obj;
 		if (this.changedProperties == null) {
 			if (other.changedProperties != null) {
 				return false;
