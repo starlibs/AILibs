@@ -1,0 +1,32 @@
+{
+  "repository" : "meka.classifiers.multilabel.HASEL",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.HASEL",
+    "providedInterface" : [ "MLClassifier", "BasicMLClassifier" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "AbstractClassifier"
+    } ],
+    "comment" : "LEFT OUT: _k  The number of labels in each partition __ should be 1 <= k < (L/2) where L is the total number of labels. LEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m)",
+    "parameter" : [ {
+      "name" : "P",
+      "comment" : "Sets the pruning value, defining an infrequent labelset as one which occurs <= P times in the data (P = 0 defaults to LC). default: 0 (LC)",
+      "type" : "int",
+      "default" : 0,
+      "min" : 0,
+      "max" : 5,
+      "minInterval" : 1,
+      "refineSplits" : 6
+    }, {
+      "name" : "N",
+      "comment" : "Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m)",
+      "type" : "int",
+      "default" : 0,
+      "min" : 0,
+      "max" : 5,
+      "minInterval" : 1,
+      "refineSplits" : 6
+    } ]
+  } ]
+}

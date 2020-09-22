@@ -1,0 +1,19 @@
+{
+  "repository" : "meka.classifiers.multilabel.meta.FilteredClassifier",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.meta.FilteredClassifier",
+    "providedInterface" : [ "MLClassifier", "MetaMLClassifier" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "BasicMLClassifier"
+    } ],
+    "parameter" : [ {
+      "name" : "F",
+      "comment" : "The number of iterations of EM to carry out (default: 10). REMARK: Here we could also use a subcomponent for filters!",
+      "type" : "cat",
+      "default" : "weka.filters.supervised.attribute.Discretize -R first_last -precision 6",
+      "values" : [ "weka.filters.supervised.attribute.Discretize -R first_last -precision 6" ]
+    } ]
+  } ]
+}

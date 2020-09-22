@@ -1,0 +1,40 @@
+{
+  "repository" : "meka.classifiers.multilabel.meta.RandomSubspaceML",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.meta.RandomSubspaceML",
+    "providedInterface" : [ "MLClassifier", "MetaMLClassifier" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "ProblemTransformationMethod"
+    } ],
+    "parameter" : [ {
+      "name" : "P",
+      "comment" : "Size of each bag, as a percentage of total training size (default 67)",
+      "type" : "int",
+      "default" : 67,
+      "min" : 10,
+      "max" : 100,
+      "refineSplits" : 8,
+      "minInterval" : 5
+    }, {
+      "name" : "I",
+      "comment" : "The number of models (default: 10)",
+      "type" : "int",
+      "default" : 10,
+      "min" : 10,
+      "max" : 50,
+      "refineSplits" : 8,
+      "minInterval" : 1
+    }, {
+      "name" : "A",
+      "comment" : "Size of attribute space, as a percentage of total attribute space size (must be between 1 and 100, default: 50)",
+      "type" : "int",
+      "default" : 50,
+      "min" : 10,
+      "max" : 100,
+      "minInterval" : 5,
+      "refineSplits" : 8
+    } ]
+  } ]
+}

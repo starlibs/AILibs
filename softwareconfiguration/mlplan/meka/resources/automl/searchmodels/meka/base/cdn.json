@@ -1,0 +1,31 @@
+{
+  "repository" : "meka.classifiers.multilabel.CDN",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.CDN",
+    "providedInterface" : [ "MLClassifier", "BasicMLClassifier", "ProblemTransformationMethod" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "AbstractClassifier"
+    } ],
+    "parameter" : [ {
+      "name" : "I",
+      "comment" : "The total number of iterations. default: 1000 ",
+      "type" : "int",
+      "default" : 1000,
+      "min" : 100,
+      "max" : 1000,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "Ic",
+      "comment" : "The number of collection iterations. default: 100 ",
+      "type" : "int",
+      "default" : 100,
+      "min" : 1,
+      "max" : 100,
+      "refineSplits" : 8,
+      "minInterval" : 1
+    } ]
+  } ]
+}

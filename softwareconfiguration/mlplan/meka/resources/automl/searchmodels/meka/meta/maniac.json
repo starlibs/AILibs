@@ -1,0 +1,36 @@
+{
+  "repository" : "meka.classifiers.multilabel.Maniac",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.Maniac",
+    "providedInterface" : [ "MLClassifier", "BasicMLClassifier" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "BasicMLClassifier"
+    } ],
+    "parameter" : [ {
+      "name" : "compression",
+      "comment" : "Compression factor of the autoencoders, each level of autoencoders will compress the labels to factor times previous layer size. (default: 0.85)",
+      "type" : "double",
+      "default" : 0.85,
+      "min" : 0.01,
+      "max" : 0.99,
+      "minInterval" : 0.05,
+      "refineSplits" : 2
+    }, {
+      "name" : "numberAutoencoders",
+      "comment" : "Number of autoencoders, i.e. number of hidden layers +1. Note that this can be also used as the number of autoencoders to use in the optimization search, autoencoders will be added until this number is reached and then the best configuration in terms of number of layers is selects. (default: 4)",
+      "type" : "int",
+      "default" : 4,
+      "min" : 1,
+      "max" : 10,
+      "minInterval" : 1,
+      "refineSplits" : 2
+    }, {
+      "name" : "optimizeAE",
+      "comment" : "Number of autoencoders, i.e. number of hidden layers +1. Note that this can be also used as the number of autoencoders to use in the optimization search, autoencoders will be added until this number is reached and then the best configuration in terms of number of layers is selects. (default: 4)",
+      "type" : "boolean",
+      "default" : "false"
+    } ]
+  } ]
+}
