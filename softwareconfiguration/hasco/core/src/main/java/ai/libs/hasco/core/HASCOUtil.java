@@ -20,11 +20,13 @@ import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
 import ai.libs.hasco.core.reduction.softcomp2planning.HASCOReduction;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDependency;
+import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.Dependency;
-import ai.libs.jaicore.components.model.IParameterDomain;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
@@ -95,12 +97,12 @@ public class HASCOUtil {
 		return parameterContainerMap;
 	}
 
-	public static Map<ComponentInstance, Map<Parameter, String>> getParametrizations(final Monom state, final Collection<Component> components, final boolean resolveIntervals) {
+	public static Map<ComponentInstance, Map<IParameter, String>> getParametrizations(final Monom state, final Collection<Component> components, final boolean resolveIntervals) {
 		Map<String, ComponentInstance> objectMap = new HashMap<>();
 		Map<String, Map<String, String>> parameterContainerMap = new HashMap<>(); // stores for each object the name of the container of each parameter
 		Map<String, String> parameterValues = new HashMap<>();
 
-		Map<ComponentInstance, Map<Parameter, String>> parameterValuesPerComponentInstance = new HashMap<>();
+		Map<ComponentInstance, Map<IParameter, String>> parameterValuesPerComponentInstance = new HashMap<>();
 
 		Collection<String> overwrittenDataContainers = getOverwrittenDatacontainersInState(state);
 
@@ -140,11 +142,11 @@ public class HASCOUtil {
 
 		/* update the configurations of the objects */
 		for (Entry<String, ComponentInstance> entry : objectMap.entrySet()) {
-			Map<Parameter, String> paramValuesForThisComponent = new HashMap<>();
+			Map<IParameter, String> paramValuesForThisComponent = new HashMap<>();
 			String objectName = entry.getKey();
 			ComponentInstance object = entry.getValue();
 			parameterValuesPerComponentInstance.put(object, paramValuesForThisComponent);
-			for (Parameter p : object.getComponent().getParameters()) {
+			for (IParameter p : object.getComponent().getParameters()) {
 
 				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName() + "!";
 				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined!";
@@ -240,7 +242,7 @@ public class HASCOUtil {
 		for (Entry<String, ComponentInstance> entry : objectMap.entrySet()) {
 			String objectName = entry.getKey();
 			ComponentInstance object = entry.getValue();
-			for (Parameter p : object.getComponent().getParameters()) {
+			for (IParameter p : object.getComponent().getParameters()) {
 				if (!parameterContainerMap.containsKey(objectName)) {
 					throw new IllegalStateException("No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName() + "!");
 				}
@@ -292,7 +294,7 @@ public class HASCOUtil {
 		return HASCOUtil.getGroundComponentsFromState(state, components, resolveIntervals).get(name);
 	}
 
-	public static Map<Parameter, IParameterDomain> getUpdatedDomainsOfComponentParameters(final Monom state, final Component component, final String objectIdentifierInState) {
+	public static Map<IParameter, IParameterDomain> getUpdatedDomainsOfComponentParameters(final Monom state, final Component component, final String objectIdentifierInState) {
 		Map<String, String> parameterContainerMap = new HashMap<>();
 		Map<String, String> parameterContainerMapInv = new HashMap<>();
 		Map<String, String> parameterValues = new HashMap<>();
@@ -317,8 +319,8 @@ public class HASCOUtil {
 		}
 
 		/* determine current values of the parameters of this component instance */
-		Map<Parameter, String> paramValuesForThisComponentInstance = new HashMap<>();
-		for (Parameter p : component.getParameters()) {
+		Map<IParameter, String> paramValuesForThisComponentInstance = new HashMap<>();
+		for (IParameter p : component.getParameters()) {
 			if (!parameterContainerMap.containsKey(p.getName())) {
 				throw new IllegalStateException("The data container for parameter " + p.getName() + " of " + objectIdentifierInState + " is not defined!");
 			}
@@ -340,7 +342,7 @@ public class HASCOUtil {
 		return getUpdatedDomainsOfComponentParameters(instance);
 	}
 
-	private static String getParamValue(final Parameter p, final String assignedValue, final boolean resolveIntervals) {
+	private static String getParamValue(final IParameter p, final String assignedValue, final boolean resolveIntervals) {
 		if (assignedValue == null) {
 			throw new IllegalArgumentException("Cannot determine true value for assigned param value " + assignedValue + " for parameter " + p.getName());
 		}
@@ -365,12 +367,12 @@ public class HASCOUtil {
 		return interpretedValue;
 	}
 
-	public static Map<Parameter, IParameterDomain> getUpdatedDomainsOfComponentParameters(final ComponentInstance componentInstance) {
-		Component component = componentInstance.getComponent();
+	public static Map<IParameter, IParameterDomain> getUpdatedDomainsOfComponentParameters(final ComponentInstance componentInstance) {
+		IComponent component = componentInstance.getComponent();
 
 		/* initialize all params for which a decision has been made already with their respective value */
-		Map<Parameter, IParameterDomain> domains = new HashMap<>();
-		for (Parameter p : componentInstance.getParametersThatHaveBeenSetExplicitly()) {
+		Map<IParameter, IParameterDomain> domains = new HashMap<>();
+		for (IParameter p : componentInstance.getParametersThatHaveBeenSetExplicitly()) {
 			if (p.isNumeric()) {
 				NumericParameterDomain defaultDomain = (NumericParameterDomain) p.getDefaultDomain();
 				Interval interval = SetUtil.unserializeInterval(componentInstance.getParameterValue(p));
@@ -381,21 +383,21 @@ public class HASCOUtil {
 		}
 
 		/* initialize all others with the default domain */
-		for (Parameter p : componentInstance.getParametersThatHaveNotBeenSetExplicitly()) {
+		for (IParameter p : componentInstance.getParametersThatHaveNotBeenSetExplicitly()) {
 			domains.put(p, p.getDefaultDomain());
 		}
 		assert (domains.keySet().equals(component.getParameters())) : "There are parameters for which no current domain was derived.";
 
 		/* update domains based on the dependencies defined for this component */
-		for (Dependency dependency : component.getDependencies()) {
+		for (IParameterDependency dependency : component.getParameterDependencies()) {
 			if (ai.libs.jaicore.components.model.CompositionProblemUtil.isDependencyPremiseSatisfied(dependency, domains)) {
 				logger.info("Premise of dependency {} is satisfied, applying its conclusions ...", dependency);
-				for (Pair<Parameter, IParameterDomain> newDomain : dependency.getConclusion()) {
+				for (Pair<IParameter, IParameterDomain> newDomain : dependency.getConclusion()) {
 					/*
 					 * directly use the concluded domain if the current value is NOT subsumed by it. Otherwise, just
 					 * stick to the current domain
 					 */
-					Parameter param = newDomain.getX();
+					IParameter param = newDomain.getX();
 					IParameterDomain concludedDomain = newDomain.getY();
 					if (!componentInstance.getParametersThatHaveBeenSetExplicitly().contains(param)) {
 						domains.put(param, concludedDomain);

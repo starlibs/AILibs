@@ -25,6 +25,7 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.basic.StatisticsUtil;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.MCCVSplitEvaluationEvent;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.ReservoirSampling;
@@ -195,7 +196,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 		}
 	}
 
-	private Instances getTrainingTimeInstancesForClassifier(final ComponentInstance ci) {
+	private Instances getTrainingTimeInstancesForClassifier(final IComponentInstance ci) {
 		ArrayList<Attribute> attributes = new ArrayList<>();
 		attributes.add(new Attribute("numInstances"));
 		//		attributes.add(new Attribute("numInstancesSquared"));

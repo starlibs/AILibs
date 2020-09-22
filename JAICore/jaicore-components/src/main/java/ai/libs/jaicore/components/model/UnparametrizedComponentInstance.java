@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class UnparametrizedComponentInstance {
@@ -19,8 +20,8 @@ public class UnparametrizedComponentInstance {
 		this.satisfactionOfRequiredInterfaces = satisfactionOfRequiredInterfaces;
 	}
 
-	public UnparametrizedComponentInstance(final ComponentInstance composition) {
-		Map<String, ComponentInstance> resolvedRequiredInterfaces = composition.getSatisfactionOfRequiredInterfaces();
+	public UnparametrizedComponentInstance(final IComponentInstance composition) {
+		Map<String, IComponentInstance> resolvedRequiredInterfaces = composition.getSatisfactionOfRequiredInterfaces();
 		this.satisfactionOfRequiredInterfaces = new HashMap<>();
 		resolvedRequiredInterfaces.keySet().forEach(r -> this.satisfactionOfRequiredInterfaces.put(r, new UnparametrizedComponentInstance(resolvedRequiredInterfaces.get(r))));
 		this.componentName = composition.getComponent().getName();

@@ -8,10 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
-import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.classification.multilabel.learner.MekaClassifier;
 import meka.classifiers.multilabel.MultiLabelClassifier;
@@ -34,7 +34,7 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 	private static final Logger logger = LoggerFactory.getLogger(MekaPipelineFactory.class);
 
 	@Override
-	public IMekaClassifier getComponentInstantiation(final ComponentInstance ci) throws ComponentInstantiationFailedException {
+	public IMekaClassifier getComponentInstantiation(final IComponentInstance ci) throws ComponentInstantiationFailedException {
 		MultiLabelClassifier instance = null;
 		try {
 			instance = (MultiLabelClassifier) this.getClassifier(ci);
@@ -44,11 +44,11 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 		}
 	}
 
-	private Classifier getClassifier(final ComponentInstance ci) throws Exception {
+	private Classifier getClassifier(final IComponentInstance ci) throws Exception {
 		Classifier c = (Classifier) Class.forName(ci.getComponent().getName()).newInstance();
 		List<String> optionsList = this.getOptionsForParameterValues(ci);
 
-		for (Entry<String, ComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+		for (Entry<String, ? extends IComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
 				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}
@@ -65,12 +65,12 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 		if (c instanceof OptionHandler) {
 			((OptionHandler) c).setOptions(optionsList.toArray(new String[0]));
 		}
-		for (Entry<String, ComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+		for (Entry<String, IComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
 				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}
 			if (reqI.getKey().equals("K") && ci.getComponent().getName().endsWith("SMO")) {
-				ComponentInstance kernelCI = reqI.getValue();
+				IComponentInstance kernelCI = reqI.getValue();
 				logger.debug("Set kernel for SMO to be {}", kernelCI.getComponent().getName());
 				Kernel k = (Kernel) Class.forName(kernelCI.getComponent().getName()).newInstance();
 				k.setOptions(this.getOptionsForParameterValues(kernelCI).toArray(new String[0]));
@@ -88,7 +88,7 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 		return c;
 	}
 
-	private List<Classifier> getListOfBaseLearners(final ComponentInstance ci) throws Exception {
+	private List<Classifier> getListOfBaseLearners(final IComponentInstance ci) throws Exception {
 		List<Classifier> baseLearnerList = new LinkedList<>();
 		if (ci.getComponent().getName().equals("MultipleBaseLearnerListElement")) {
 			baseLearnerList.add(this.getClassifier(ci.getSatisfactionOfRequiredInterfaces().get("classifier")));
@@ -99,10 +99,10 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 		return baseLearnerList;
 	}
 
-	public static List<String> getOptionsForParameterValues(final ComponentInstance ci) {
+	public static List<String> getOptionsForParameterValues(final IComponentInstance ci) {
 		List<String> optionsList = new LinkedList<>();
 		for (Entry<String, String> parameterValue : ci.getParameterValues().entrySet()) {
-			Parameter param = ci.getComponent().getParameterWithName(parameterValue.getKey());
+			IParameter param = ci.getComponent().getParameter(parameterValue.getKey());
 			if (param.isDefaultValue(parameterValue.getValue()) || parameterValue.getKey().toLowerCase().contains("activator") || parameterValue.getValue().equals("false")) {
 				continue;
 			}
@@ -111,8 +111,8 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 				optionsList.add("-" + parameterValue.getKey());
 			} else {
 				optionsList.add("-" + parameterValue.getKey());
-				if (ci.getComponent().getParameterWithName(parameterValue.getKey()).isNumeric()) {
-					NumericParameterDomain numDom = (NumericParameterDomain) ci.getComponent().getParameterWithName(parameterValue.getKey()).getDefaultDomain();
+				if (ci.getComponent().getParameter(parameterValue.getKey()).isNumeric()) {
+					NumericParameterDomain numDom = (NumericParameterDomain) ci.getComponent().getParameter(parameterValue.getKey()).getDefaultDomain();
 					if (numDom.isInteger()) {
 						optionsList.add(((int) Double.parseDouble(parameterValue.getValue())) + "");
 					} else {
@@ -127,10 +127,10 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 		return optionsList;
 	}
 
-	private List<String> getOptionsRecursively(final ComponentInstance ci) {
+	private List<String> getOptionsRecursively(final IComponentInstance ci) {
 		List<String> optionsList = this.getOptionsForParameterValues(ci);
 
-		for (Entry<String, ComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+		for (Entry<String, ? extends IComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
 				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}

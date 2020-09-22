@@ -5,7 +5,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 
 public class CompositionSerializer {
 
@@ -13,7 +13,7 @@ public class CompositionSerializer {
 		/* avoids instantiation */
 	}
 
-	public static ObjectNode serializeComponentInstance(final ComponentInstance instance) {
+	public static ObjectNode serializeComponentInstance(final IComponentInstance instance) {
 		Objects.requireNonNull(instance);
 		ObjectMapper om = new ObjectMapper();
 		ObjectNode on = om.createObjectNode();

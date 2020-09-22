@@ -6,8 +6,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
+
 @JsonPropertyOrder({ "id", "name", "optional", "min", "max" })
-public class Interface implements Serializable {
+public class Interface implements IRequiredInterfaceDefinition, Serializable {
 	private static final long serialVersionUID = -668580435561427897L;
 	private final String id;
 	private final String name;
@@ -38,18 +40,22 @@ public class Interface implements Serializable {
 		this.max = max;
 	}
 
+	@Override
 	public String getId() {
 		return this.id;
 	}
 
+	@Override
 	public String getName() {
 		return this.name;
 	}
 
+	@Override
 	public int getMin() {
 		return this.min;
 	}
 
+	@Override
 	public int getMax() {
 		return this.max;
 	}

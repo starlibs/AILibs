@@ -15,11 +15,11 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
-import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.ILearnerFactory;
@@ -51,7 +51,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 	}
 
 	@Override
-	public ScikitLearnWrapper<IPrediction, IPredictionBatch> getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
+	public ScikitLearnWrapper<IPrediction, IPredictionBatch> getComponentInstantiation(final IComponentInstance groundComponent) throws ComponentInstantiationFailedException {
 		this.logger.debug("Parse ground component instance {} to ScikitLearnWrapper object.", groundComponent);
 
 		StringBuilder constructInstruction = new StringBuilder();
@@ -77,9 +77,9 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 		}
 	}
 
-	public abstract String getPipelineBuildString(final ComponentInstance groundComponent, final Set<String> importSet);
+	public abstract String getPipelineBuildString(final IComponentInstance groundComponent, final Set<String> importSet);
 
-	public String extractSKLearnConstructInstruction(final ComponentInstance groundComponent, final Set<String> importSet) {
+	public String extractSKLearnConstructInstruction(final IComponentInstance groundComponent, final Set<String> importSet) {
 		StringBuilder sb = new StringBuilder();
 		if (groundComponent.getComponent().getName().startsWith("mlplan.util.model.make_forward")) {
 			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("source"), importSet));
@@ -123,7 +123,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 					sb.append(",");
 				}
 
-				Parameter param = groundComponent.getComponent().getParameterWithName(parameterValue.getKey());
+				IParameter param = groundComponent.getComponent().getParameter(parameterValue.getKey());
 
 				sb.append(parameterValue.getKey() + "=");
 				if (param.isNumeric()) {
@@ -151,7 +151,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 				}
 			}
 
-			for (Entry<String, ComponentInstance> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
+			for (Entry<String, ? extends IComponentInstance> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
 				if (first) {
 					first = false;
 				} else {

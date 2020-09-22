@@ -11,6 +11,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
@@ -33,11 +35,11 @@ public class UtilCompositionTest {
 		component1.addRequiredInterface("Interface1", "Interface1");
 		component1.addRequiredInterface("Interface2", "Interface2");
 		component2.addRequiredInterface("Interface1", "Interface1");
-		Map<String,ComponentInstance> sat1 = new HashMap<String,ComponentInstance>();
-		Map<String,ComponentInstance> sat2 = new HashMap<String,ComponentInstance>();
-		Map<String,ComponentInstance> sat3 = new HashMap<String,ComponentInstance>();
-		Map<String,ComponentInstance> sat4 = new HashMap<String,ComponentInstance>();
-		Map<String,String> parameterValues = new HashMap<String,String>();
+		Map<String, IComponentInstance> sat1 = new HashMap<>();
+		Map<String, IComponentInstance> sat2 = new HashMap<>();
+		Map<String, IComponentInstance> sat3 = new HashMap<>();
+		Map<String, IComponentInstance> sat4 = new HashMap<>();
+		Map<String, String> parameterValues = new HashMap<String, String>();
 		ComponentInstance instance4 = new ComponentInstance(component4, parameterValues, sat4);
 		ComponentInstance instance3 = new ComponentInstance(component3, parameterValues, sat3);
 		sat2.put("Interface1", instance3);
@@ -45,8 +47,8 @@ public class UtilCompositionTest {
 		sat1.put("Interface1", instance2);
 		sat1.put("Interface2", instance4);
 		ComponentInstance instance1 = new ComponentInstance(component1, parameterValues, sat1);
-		List<Component> components = CompositionProblemUtil.getComponentsOfComposition(instance1);
-		for(int i = 0; i < groundTruth.size(); i++) {
+		List<IComponent> components = CompositionProblemUtil.getComponentsOfComposition(instance1);
+		for (int i = 0; i < groundTruth.size(); i++) {
 			assertEquals(components.get(i), groundTruth.get(i));
 		}
 	}

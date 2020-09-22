@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.model.BooleanParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.Component;
@@ -36,9 +37,9 @@ public class ComponentLoaderTest {
 
 		/* check parameter names of first component */
 		assertEquals(5, c1.getParameters().size());
-		List<Parameter> params = c1.getParameters().stream().sorted((p1,p2) -> p1.getName().compareTo(p2.getName())).collect(Collectors.toList());
+		List<IParameter> params = c1.getParameters().stream().sorted((p1,p2) -> p1.getName().compareTo(p2.getName())).collect(Collectors.toList());
 		for (int i = 1; i <= 5; i++) {
-			Parameter p =  params.get(i - 1);
+			IParameter p =  params.get(i - 1);
 			assertEquals("a" + i, p.getName());
 			switch (i) {
 
@@ -88,13 +89,13 @@ public class ComponentLoaderTest {
 			assertEquals(c1.getName(), c2.getName());
 
 			/* check equality of parameters */
-			List<Parameter> parameters1 = new ArrayList<>(c1.getParameters());
-			List<Parameter> parameters2 = new ArrayList<>(c2.getParameters());
+			List<IParameter> parameters1 = new ArrayList<>(c1.getParameters());
+			List<IParameter> parameters2 = new ArrayList<>(c2.getParameters());
 			int m = parameters1.size();
 			assertEquals(m, parameters2.size());
 			for (int j = 0; j < m; j++) {
-				Parameter p1 = parameters1.get(j);
-				Parameter p2 = parameters2.get(j);
+				IParameter p1 = parameters1.get(j);
+				IParameter p2 = parameters2.get(j);
 				assertEquals(p1.getName(), p2.getName());
 				assertEquals(p1.getDefaultValue(), p2.getDefaultValue());
 				assertEquals(p1.getDefaultDomain(), p2.getDefaultDomain());
@@ -106,7 +107,7 @@ public class ComponentLoaderTest {
 			assertEquals(c1.getProvidedInterfaces(), c2.getProvidedInterfaces());
 
 			/* check equality of dependencies */
-			assertEquals(c1.getDependencies(), c2.getDependencies());
+			assertEquals(c1.getParameterDependencies(), c2.getParameterDependencies());
 
 			/* check overall equality of components */
 			assertEquals(c1, c2);

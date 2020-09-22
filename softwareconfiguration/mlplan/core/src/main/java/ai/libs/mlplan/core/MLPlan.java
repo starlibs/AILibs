@@ -39,8 +39,8 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
-import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.optimizingfactory.OptimizingFactory;
 import ai.libs.jaicore.components.optimizingfactory.OptimizingFactoryProblem;
 import ai.libs.jaicore.ml.core.dataset.DatasetUtil;
@@ -58,7 +58,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 
 	private L selectedClassifier;
 	private double internalValidationErrorOfSelectedClassifier;
-	private ComponentInstance componentInstanceOfSelectedClassifier;
+	private IComponentInstance componentInstanceOfSelectedClassifier;
 
 	private final IMLPlanBuilder<L, ?> builder;
 	private TwoPhaseHASCOBuilder<TFDNode, String> twoPhaseHASCOFactory;
@@ -330,7 +330,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 		return this.selectedClassifier;
 	}
 
-	public ComponentInstance getComponentInstanceOfSelectedClassifier() {
+	public IComponentInstance getComponentInstanceOfSelectedClassifier() {
 		return this.componentInstanceOfSelectedClassifier;
 	}
 

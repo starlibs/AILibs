@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
 
@@ -45,7 +46,7 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 
 		Component component = this.possibleComponents.stream().filter(c -> c.getName().equals(componentName)).findFirst().orElseThrow(NoSuchElementException::new);
 
-		Map<String, ComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<>();
+		Map<String, IComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<>();
 		// recursively resolve the requiredInterfaces
 		TreeNode n = p.get("requiredInterfaces");
 		Iterator<String> fields = n.fieldNames();

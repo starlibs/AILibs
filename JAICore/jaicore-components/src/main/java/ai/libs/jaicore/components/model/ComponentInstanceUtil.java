@@ -5,6 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDependency;
+import ai.libs.jaicore.components.api.IParameterDomain;
+
 /**
  * The ComponentInstanceUtil provides some utilities to deal with component instances.
  * For instance, it may be used to check whether a ComponentInstance conforms the dependencies
@@ -39,9 +44,9 @@ public class ComponentInstanceUtil {
 	 * @throws Exception with explanation if it is not valid
 	 */
 	public static void checkComponentInstantiation(final ComponentInstance ci) {
-		Map<Parameter, IParameterDomain> refinedDomainMap = new HashMap<>();
+		Map<IParameter, IParameterDomain> refinedDomainMap = new HashMap<>();
 
-		for (Parameter param : ci.getComponent().getParameters()) {
+		for (IParameter param : ci.getComponent().getParameters()) {
 			if (param.getDefaultDomain() instanceof NumericParameterDomain) {
 				double parameterValue = Double.parseDouble(ci.getParameterValue(param));
 				refinedDomainMap.put(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), parameterValue, parameterValue));
@@ -50,7 +55,7 @@ public class ComponentInstanceUtil {
 			}
 		}
 
-		for (Dependency dependency : ci.getComponent().getDependencies()) {
+		for (IParameterDependency dependency : ci.getComponent().getParameterDependencies()) {
 			if (CompositionProblemUtil.isDependencyPremiseSatisfied(dependency, refinedDomainMap) && !CompositionProblemUtil.isDependencyConditionSatisfied(dependency.getConclusion(), refinedDomainMap)) {
 				throw new IllegalStateException("Problem with dependency " + dependency);
 			}
@@ -61,13 +66,13 @@ public class ComponentInstanceUtil {
 		StringBuilder sb = new StringBuilder();
 		sb.append(ci.getComponent().getName());
 		if (!ci.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-			sb.append("(").append(ci.getSatisfactionOfRequiredInterfaces().values().stream().map(ComponentInstanceUtil::toComponentNameString).collect(Collectors.joining(", "))).append(")");
+			sb.append("(").append(ci.getSatisfactionOfRequiredInterfaces().values().stream().map(cii -> ComponentInstanceUtil.toComponentNameString((ComponentInstance)cii)).collect(Collectors.joining(", "))).append(")");
 		}
 		return sb.toString();
 	}
 
-	public static ComponentInstance getDefaultParametrization(final ComponentInstance ci) {
-		Map<String, ComponentInstance> defaultRequiredInterfaces = new HashMap<>();
+	public static ComponentInstance getDefaultParametrization(final IComponentInstance ci) {
+		Map<String, IComponentInstance> defaultRequiredInterfaces = new HashMap<>();
 		ci.getSatisfactionOfRequiredInterfaces().forEach((name, ciReq) -> defaultRequiredInterfaces.put(name, getDefaultParametrization(ciReq)));
 		return new ComponentInstance(ci.getComponent(), new HashMap<>(), defaultRequiredInterfaces);
 	}

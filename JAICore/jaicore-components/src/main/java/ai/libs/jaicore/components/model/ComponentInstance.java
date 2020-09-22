@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -19,6 +18,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 /**
@@ -29,17 +31,17 @@ import ai.libs.jaicore.logging.ToJSONStringUtil;
  *
  */
 @JsonPropertyOrder(alphabetic = true)
-public class ComponentInstance  implements Serializable {
+public class ComponentInstance  implements IComponentInstance, Serializable {
 
 	/* Auto-generated serial version UID. */
 	private static final long serialVersionUID = 714378153827839502L;
 
 	/* The component which serves as a kind of "type". */
-	private final Component component;
+	private final IComponent component;
 
 	/* The grounding of the component including parameter values and recursively resolved required interfaces. */
 	private final Map<String, String> parameterValues;
-	private final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces;
+	private final Map<String, IComponentInstance> satisfactionOfRequiredInterfaces;
 
 	private final Map<String, String> annotations = new HashMap<>();
 
@@ -55,7 +57,7 @@ public class ComponentInstance  implements Serializable {
 		this.component = other.component;
 		this.parameterValues = new HashMap<>(other.parameterValues);
 		this.satisfactionOfRequiredInterfaces = new HashMap<>();
-		other.satisfactionOfRequiredInterfaces.entrySet().forEach(x -> this.satisfactionOfRequiredInterfaces.put(x.getKey(), new ComponentInstance(x.getValue())));
+		other.satisfactionOfRequiredInterfaces.entrySet().forEach(x -> this.satisfactionOfRequiredInterfaces.put(x.getKey(), new ComponentInstance((ComponentInstance)x.getValue())));
 		other.annotations.entrySet().forEach(x -> this.annotations.put(x.getKey(), x.getValue()));
 	}
 
@@ -69,8 +71,8 @@ public class ComponentInstance  implements Serializable {
 	 * @param satisfactionOfRequiredInterfaces
 	 *            The refinement of the required interfaces.
 	 */
-	public ComponentInstance(@JsonProperty("component") final Component component, @JsonProperty("parameterValues") final Map<String, String> parameterValues,
-			@JsonProperty("satisfactionOfRequiredInterfaces") final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
+	public ComponentInstance(@JsonProperty("component") final IComponent component, @JsonProperty("parameterValues") final Map<String, String> parameterValues,
+			@JsonProperty("satisfactionOfRequiredInterfaces") final Map<String, IComponentInstance> satisfactionOfRequiredInterfaces) {
 		super();
 		this.component = component;
 		this.parameterValues = parameterValues;
@@ -80,13 +82,15 @@ public class ComponentInstance  implements Serializable {
 	/**
 	 * @return The <code>Component</code> to this <code>ComponentInstance</code>.
 	 */
-	public Component getComponent() {
+	@Override
+	public IComponent getComponent() {
 		return this.component;
 	}
 
 	/**
 	 * @return The parameters and how their values were set.
 	 */
+	@Override
 	public Map<String, String> getParameterValues() {
 		return this.parameterValues;
 	}
@@ -94,7 +98,8 @@ public class ComponentInstance  implements Serializable {
 	/**
 	 * @return The set of parameters of which the values have been set explicitly.
 	 */
-	public Collection<Parameter> getParametersThatHaveBeenSetExplicitly() {
+	@Override
+	public Collection<IParameter> getParametersThatHaveBeenSetExplicitly() {
 		if (this.parameterValues == null) {
 			return new ArrayList<>();
 		}
@@ -104,7 +109,8 @@ public class ComponentInstance  implements Serializable {
 	/**
 	 * @return The set of parameters of which the values have not been set explicitly.
 	 */
-	public Collection<Parameter> getParametersThatHaveNotBeenSetExplicitly() {
+	@Override
+	public Collection<IParameter> getParametersThatHaveNotBeenSetExplicitly() {
 		return SetUtil.difference(this.component.getParameters(), this.getParametersThatHaveBeenSetExplicitly());
 	}
 
@@ -113,7 +119,8 @@ public class ComponentInstance  implements Serializable {
 	 *            The parameter for which the value shall be returned.
 	 * @return The value of the parameter.
 	 */
-	public String getParameterValue(final Parameter param) {
+	@Override
+	public String getParameterValue(final IParameter param) {
 		return this.getParameterValue(param.getName());
 	}
 
@@ -122,6 +129,7 @@ public class ComponentInstance  implements Serializable {
 	 *            The name of the parameter for which the value is requested.
 	 * @return The value of the parameter with the given name.
 	 */
+	@Override
 	public String getParameterValue(final String paramName) {
 		return this.parameterValues.get(paramName);
 	}
@@ -129,18 +137,19 @@ public class ComponentInstance  implements Serializable {
 	/**
 	 * @return This method returns a mapping of interface IDs to component instances.
 	 */
-	public Map<String, ComponentInstance> getSatisfactionOfRequiredInterfaces() {
+	@Override
+	public Map<String, IComponentInstance> getSatisfactionOfRequiredInterfaces() {
 		return this.satisfactionOfRequiredInterfaces;
 	}
 
 	/**
 	 * @return A collection of all components contained (recursively) in this <code>ComponentInstance</code>.
 	 */
-	public Collection<Component> getContainedComponents() {
-		Collection<Component> components = new HashSet<>();
+	public Collection<IComponent> getContainedComponents() {
+		Collection<IComponent> components = new HashSet<>();
 		components.add(this.getComponent());
-		for (ComponentInstance ci : this.satisfactionOfRequiredInterfaces.values()) {
-			components.addAll(ci.getContainedComponents());
+		for (IComponentInstance ci : this.satisfactionOfRequiredInterfaces.values()) {
+			components.addAll(((ComponentInstance)ci).getContainedComponents());
 		}
 		return components;
 	}
@@ -184,14 +193,14 @@ public class ComponentInstance  implements Serializable {
 		}
 
 		/* now go over the rest of the path and check every entry on conformity */
-		ComponentInstance current = this;
+		IComponentInstance current = this;
 		int n = path.size();
 		for (; i < n; i++) {
 			Pair<String, String> selection = path.get(i);
-			if (!current.getComponent().getRequiredInterfaceIds().contains(selection.getX())) {
+			if (!((Component)current.getComponent()).getRequiredInterfaceIds().contains(selection.getX())) {
 				throw new IllegalArgumentException("Invalid path restriction " + path + ": " + selection.getX() + " is not a required interface of " + current.getComponent().getName());
 			}
-			ComponentInstance instanceChosenForRequiredInterface = current.getSatisfactionOfRequiredInterfaces().get(selection.getX());
+			IComponentInstance instanceChosenForRequiredInterface = current.getSatisfactionOfRequiredInterfaces().get(selection.getX());
 			if (!selection.getY().equals("*") && !instanceChosenForRequiredInterface.getComponent().getName().equals(selection.getY())) {
 				return false;
 			}
@@ -250,7 +259,7 @@ public class ComponentInstance  implements Serializable {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getComponent().getName());
 		if (!this.satisfactionOfRequiredInterfaces.isEmpty()) {
-			sb.append(this.satisfactionOfRequiredInterfaces.entrySet().stream().map(x -> x.getValue().toComponentNameString()).collect(Collectors.toList()).toString());
+			sb.append(this.satisfactionOfRequiredInterfaces.entrySet().stream().map(x -> ((ComponentInstance)x.getValue()).toComponentNameString()).collect(Collectors.toList()).toString());
 		}
 		return sb.toString();
 	}
@@ -280,7 +289,7 @@ public class ComponentInstance  implements Serializable {
 	public String getNestedComponentDescription() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getComponent().getName());
-		this.satisfactionOfRequiredInterfaces.values().stream().map(x -> " - " + x.getNestedComponentDescription()).forEach(sb::append);
+		this.satisfactionOfRequiredInterfaces.values().stream().map(x -> " - " + ((ComponentInstance)x).getNestedComponentDescription()).forEach(sb::append);
 		return sb.toString();
 	}
 
@@ -308,20 +317,5 @@ public class ComponentInstance  implements Serializable {
 		} else {
 			this.annotations.put(key, annotation);
 		}
-	}
-
-	public boolean isDefaultParametrized() {
-		for (Entry<String, String> paramEntry : this.parameterValues.entrySet()) {
-			Parameter p = this.component.getParameterWithName(paramEntry.getKey());
-			if ((p.isNumeric() && (double) p.getDefaultValue() != Double.parseDouble(paramEntry.getValue())) || (p.isCategorical() && !p.getDefaultValue().toString().equals(paramEntry.getValue()))) {
-				return false;
-			}
-		}
-		for (ComponentInstance ci : this.satisfactionOfRequiredInterfaces.values()) {
-			if (!ci.isDefaultParametrized()) {
-				return false;
-			}
-		}
-		return true;
 	}
 }

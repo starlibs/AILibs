@@ -7,11 +7,12 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.IParameterDomain;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
@@ -33,15 +34,15 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 	private static final String L_CLASSIFIER = "classifier";
 
 	@Override
-	public IWekaClassifier getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
+	public IWekaClassifier getComponentInstantiation(final IComponentInstance groundComponent) throws ComponentInstantiationFailedException {
 		this.logger.debug("Instantiate weka classifier from component instance {}.", groundComponent);
 		try {
 			if (groundComponent.getComponent().getName().equals("pipeline")) {
-				ComponentInstance preprocessorCI = null;
+				IComponentInstance preprocessorCI = null;
 				/* Retrieve component instances of pipeline */
 				preprocessorCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor");
-				ComponentInstance evaluatorCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval");
-				ComponentInstance searcherCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search");
+				IComponentInstance evaluatorCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval");
+				IComponentInstance searcherCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search");
 
 				ASEvaluation eval = ASEvaluation.forName(evaluatorCI.getComponent().getName(), this.getParameterList(evaluatorCI).toArray(new String[0]));
 				ASSearch search = ASSearch.forName(searcherCI.getComponent().getName(), this.getParameterList(searcherCI).toArray(new String[0]));
@@ -58,7 +59,7 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 					((OptionHandler) c).setOptions(options.toArray(new String[0]));
 				}
 
-				for (Entry<String, ComponentInstance> reqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
+				for (Entry<String, ? extends IComponentInstance> reqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
 					switch (reqI.getKey()) {
 					case "W":
 						if (c instanceof SingleClassifierEnhancer) { // suppose that this defines a base classifier
@@ -109,12 +110,12 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 		return baseLearnerList;
 	}
 
-	private List<String> getParameterList(final ComponentInstance ci) {
+	private List<String> getParameterList(final IComponentInstance ci) {
 		List<String> parameters = new LinkedList<>();
 
 		for (Entry<String, String> parameterValues : ci.getParameterValues().entrySet()) {
 
-			Parameter param = ci.getComponent().getParameterWithName(parameterValues.getKey());
+			IParameter param = ci.getComponent().getParameter(parameterValues.getKey());
 			boolean isDefault = param.isDefaultValue(parameterValues.getValue());
 
 			if (parameterValues.getKey().toLowerCase().endsWith("activator") || parameterValues.getValue().equals("REMOVED") || isDefault) {
@@ -125,7 +126,7 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 				parameters.add("-" + parameterValues.getKey());
 			}
 
-			IParameterDomain domain = ci.getComponent().getParameterWithName(parameterValues.getKey()).getDefaultDomain();
+			IParameterDomain domain = ci.getComponent().getParameter(parameterValues.getKey()).getDefaultDomain();
 			if (parameterValues.getValue() != null && !parameterValues.getValue().equals("") && !parameterValues.getValue().equals("true") && !parameterValues.getValue().equals("false")) {
 				if (domain instanceof NumericParameterDomain && ((NumericParameterDomain) domain).isInteger()) {
 					parameters.add((int) Double.parseDouble(parameterValues.getValue()) + "");

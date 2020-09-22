@@ -26,12 +26,13 @@ import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDomain;
+import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.model.BooleanParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.Dependency;
-import ai.libs.jaicore.components.model.IParameterDomain;
-import ai.libs.jaicore.components.model.Interface;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
@@ -53,7 +54,7 @@ public class ComponentLoader {
 	private final Map<String, JsonNode> parameterMap = new HashMap<>();
 	private final Set<String> uniqueComponentNames = new HashSet<>();
 
-	private final List<Interface> requiredInterfaces = new ArrayList<>();
+	private final List<IRequiredInterfaceDefinition> requiredInterfaces = new ArrayList<>();
 	private final Set<String> providedInterfaces = new HashSet<>();
 
 	private final Map<String, JsonNode> componentMap = new HashMap<>();
@@ -305,11 +306,11 @@ public class ComponentLoader {
 
 					/* parse precondition */
 					String pre = dependency.get("pre").asText();
-					Collection<Collection<Pair<Parameter, IParameterDomain>>> premise = new ArrayList<>();
+					Collection<Collection<Pair<IParameter, IParameterDomain>>> premise = new ArrayList<>();
 					Collection<String> monoms = Arrays.asList(pre.split("\\|"));
 					for (String monom : monoms) {
 						Collection<String> literals = Arrays.asList(monom.split("&"));
-						Collection<Pair<Parameter, IParameterDomain>> monomInPremise = new ArrayList<>();
+						Collection<Pair<IParameter, IParameterDomain>> monomInPremise = new ArrayList<>();
 
 						for (String literal : literals) {
 							String[] parts = literal.trim().split(" ");
@@ -317,11 +318,11 @@ public class ComponentLoader {
 								throw new IllegalArgumentException(MSG_CANNOT_PARSE_LITERAL + literal + ". Literals must be of the form \"<a> P <b>\".");
 							}
 
-							Parameter param = c.getParameterWithName(parts[0]);
+							IParameter param = c.getParameterWithName(parts[0]);
 							String target = parts[2];
 							switch (parts[1]) {
 							case "=":
-								Pair<Parameter, IParameterDomain> eqConditionItem;
+								Pair<IParameter, IParameterDomain> eqConditionItem;
 								if (param.isNumeric()) {
 									double val = Double.parseDouble(target);
 									eqConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
@@ -334,7 +335,7 @@ public class ComponentLoader {
 								break;
 
 							case "in":
-								Pair<Parameter, IParameterDomain> inConditionItem;
+								Pair<IParameter, IParameterDomain> inConditionItem;
 								if (param.isNumeric()) {
 									Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
 									inConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
@@ -357,7 +358,7 @@ public class ComponentLoader {
 					}
 
 					/* parse postcondition */
-					Collection<Pair<Parameter, IParameterDomain>> conclusion = new ArrayList<>();
+					Collection<Pair<IParameter, IParameterDomain>> conclusion = new ArrayList<>();
 					String post = dependency.get("post").asText();
 					Collection<String> literals = Arrays.asList(post.split("&"));
 
@@ -372,11 +373,11 @@ public class ComponentLoader {
 							}
 						}
 
-						Parameter param = c.getParameterWithName(parts[0]);
+						IParameter param = c.getParameterWithName(parts[0]);
 						String target = parts[2];
 						switch (parts[1]) {
 						case "=":
-							Pair<Parameter, IParameterDomain> eqConditionItem;
+							Pair<IParameter, IParameterDomain> eqConditionItem;
 							if (param.isNumeric()) {
 								double val = Double.parseDouble(target);
 								eqConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
@@ -389,7 +390,7 @@ public class ComponentLoader {
 							break;
 
 						case "in":
-							Pair<Parameter, IParameterDomain> inConditionItem;
+							Pair<IParameter, IParameterDomain> inConditionItem;
 							if (param.isNumeric()) {
 								Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
 								inConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
@@ -441,7 +442,7 @@ public class ComponentLoader {
 	 * @return Returns the collection of required interfaces that cannot be resolved by a provided interface.
 	 */
 	public Collection<String> getUnresolvableRequiredInterfaces() {
-		return SetUtil.difference(this.requiredInterfaces.stream().map(Interface::getName).collect(Collectors.toList()), this.providedInterfaces);
+		return SetUtil.difference(this.requiredInterfaces.stream().map(IRequiredInterfaceDefinition::getName).collect(Collectors.toList()), this.providedInterfaces);
 	}
 
 	/**

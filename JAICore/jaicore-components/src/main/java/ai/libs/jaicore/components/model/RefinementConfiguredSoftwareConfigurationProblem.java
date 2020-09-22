@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.serialization.ComponentLoader;
 
 /**
@@ -46,7 +47,7 @@ public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparab
 			if (!this.paramRefinementConfig.containsKey(c)) {
 				throw new IllegalArgumentException("Error in parsing config file " + configurationFile.getAbsolutePath() + ". Component " + c.getName() + " has not parameter refinement configs associated.");
 			}
-			for (Parameter p : c.getParameters()) {
+			for (IParameter p : c.getParameters()) {
 				if (p.isNumeric() && !this.paramRefinementConfig.get(c).containsKey(p)) {
 					throw new IllegalArgumentException("Error in parsing config file " + configurationFile.getAbsolutePath() + ". No refinement config was delivered for numeric parameter " + p.getName() + " of component " + c.getName());
 				}

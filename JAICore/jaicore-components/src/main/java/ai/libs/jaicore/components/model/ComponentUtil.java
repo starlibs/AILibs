@@ -16,6 +16,10 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.kvstore.KVStore;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 
 /**
  * The ComponentUtil class can be used to deal with Components in a convenient way. For instance, for a given component (type) it can be used to return a parameterized ComponentInstance.
@@ -39,7 +43,7 @@ public class ComponentUtil {
 	 */
 	public static ComponentInstance getDefaultParameterizationOfComponent(final Component component) {
 		Map<String, String> parameterValues = new HashMap<>();
-		for (Parameter p : component.getParameters()) {
+		for (IParameter p : component.getParameters()) {
 			parameterValues.put(p.getName(), p.getDefaultValue() + "");
 		}
 		return componentInstanceWithNoRequiredInterfaces(component, parameterValues);
@@ -54,11 +58,11 @@ public class ComponentUtil {
 	 *            The Random instance for making the random decisions.
 	 * @return An instantiation of the component with valid random parameterization.
 	 */
-	public static ComponentInstance getRandomParameterizationOfComponent(final Component component, final Random rand) {
+	public static ComponentInstance getRandomParameterizationOfComponent(final IComponent component, final Random rand) {
 		ComponentInstance ci;
 		do {
 			Map<String, String> parameterValues = new HashMap<>();
-			for (Parameter p : component.getParameters()) {
+			for (IParameter p : component.getParameters()) {
 				if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
 					String[] values = ((CategoricalParameterDomain) p.getDefaultDomain()).getValues();
 					parameterValues.put(p.getName(), values[rand.nextInt(values.length)]);
@@ -87,7 +91,7 @@ public class ComponentUtil {
 	public static ComponentInstance minParameterizationOfComponent(final Component component) {
 
 		Map<String, String> parameterValues = new HashMap<>();
-		for (Parameter p : component.getParameters()) {
+		for (IParameter p : component.getParameters()) {
 			if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
 				parameterValues.put(p.getName(), p.getDefaultValue() + "");
 			} else {
@@ -110,7 +114,7 @@ public class ComponentUtil {
 
 	public static ComponentInstance maxParameterizationOfComponent(final Component component) {
 		Map<String, String> parameterValues = new HashMap<>();
-		for (Parameter p : component.getParameters()) {
+		for (IParameter p : component.getParameters()) {
 			if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
 				parameterValues.put(p.getName(), p.getDefaultValue() + "");
 			} else {
@@ -131,16 +135,16 @@ public class ComponentUtil {
 		return ci;
 	}
 
-	private static ComponentInstance componentInstanceWithNoRequiredInterfaces(final Component component, final Map<String, String> parameterValues) {
+	private static ComponentInstance componentInstanceWithNoRequiredInterfaces(final IComponent component, final Map<String, String> parameterValues) {
 		return new ComponentInstance(component, parameterValues, new HashMap<>());
 	}
 
 	public static List<ComponentInstance> categoricalParameterizationsOfComponent(final Component component) {
 		Map<String, String> parameterValues = new HashMap<>();
 		List<ComponentInstance> parameterizedInstances = new ArrayList<>();
-		List<Parameter> categoricalParameters = new ArrayList<>();
+		List<IParameter> categoricalParameters = new ArrayList<>();
 		int maxParameterIndex = 0;
-		for (Parameter p : component.getParameters()) {
+		for (IParameter p : component.getParameters()) {
 			if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
 				String[] values = ((CategoricalParameterDomain) p.getDefaultDomain()).getValues();
 				if (values.length > maxParameterIndex) {
@@ -196,7 +200,7 @@ public class ComponentUtil {
 		Collection<ComponentInstance> instanceList = new LinkedList<>();
 		instanceList.add(ComponentUtil.getDefaultParameterizationOfComponent(rootComponent));
 
-		for (Interface requiredInterface : rootComponent.getRequiredInterfaces()) {
+		for (IRequiredInterfaceDefinition requiredInterface : rootComponent.getRequiredInterfaces()) {
 			List<ComponentInstance> tempList = new LinkedList<>();
 
 			Collection<Component> possiblePlugins = ComponentUtil.getComponentsProvidingInterface(components, requiredInterface.getName());
@@ -260,8 +264,8 @@ public class ComponentUtil {
 		return numCandidates;
 	}
 
-	public static ComponentInstance getRandomParametrization(final ComponentInstance componentInstance, final Random rand) {
-		ComponentInstance randomParametrization = getRandomParameterizationOfComponent(componentInstance.getComponent(), rand);
+	public static IComponentInstance getRandomParametrization(final IComponentInstance componentInstance, final Random rand) {
+		IComponentInstance randomParametrization = getRandomParameterizationOfComponent(componentInstance.getComponent(), rand);
 		componentInstance.getSatisfactionOfRequiredInterfaces().entrySet().forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), getRandomParametrization(x.getValue(), rand)));
 		return randomParametrization;
 	}
@@ -290,8 +294,8 @@ public class ComponentUtil {
 		return false;
 	}
 
-	public static boolean isDefaultConfiguration(final ComponentInstance instance) {
-		for (Parameter p : instance.getParametersThatHaveBeenSetExplicitly()) {
+	public static boolean isDefaultConfiguration(final IComponentInstance instance) {
+		for (IParameter p : instance.getParametersThatHaveBeenSetExplicitly()) {
 			if (p.isNumeric()) {
 				double defaultValue = Double.parseDouble(p.getDefaultValue().toString());
 				String parameterValue = instance.getParameterValue(p);
@@ -316,7 +320,7 @@ public class ComponentUtil {
 				}
 			}
 		}
-		for (ComponentInstance child : instance.getSatisfactionOfRequiredInterfaces().values()) {
+		for (IComponentInstance child : instance.getSatisfactionOfRequiredInterfaces().values()) {
 			if (!isDefaultConfiguration(child)) {
 				return false;
 			}
@@ -337,7 +341,7 @@ public class ComponentUtil {
 		for (Component c : components) {
 			numComponents++;
 
-			for (Parameter p : c.getParameters()) {
+			for (IParameter p : c.getParameters()) {
 				if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
 					numCatParams++;
 					if (p.getDefaultDomain() instanceof BooleanParameterDomain) {
@@ -387,7 +391,7 @@ public class ComponentUtil {
 		return affectedComponents;
 	}
 
-	public static String getComponentInstanceAsComponentNames(final ComponentInstance instance) {
+	public static String getComponentInstanceAsComponentNames(final IComponentInstance instance) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(instance.getComponent().getName());
 		if (!instance.getSatisfactionOfRequiredInterfaces().isEmpty()) {
