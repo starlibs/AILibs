@@ -1,0 +1,10 @@
+{
+  "repository" : "InvalidNumberReplacementTransformer",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "InvalidNumberReplacementTransformer",
+    "providedInterface" : [ "DataCleaner" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ ]
+  } ]
+}

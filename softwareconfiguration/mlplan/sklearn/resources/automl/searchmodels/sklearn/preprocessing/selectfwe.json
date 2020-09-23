@@ -1,0 +1,21 @@
+{
+  "repository" : "sklearn.feature_selection.SelectFwe",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.feature_selection.SelectFwe",
+    "providedInterface" : [ "sklearn.feature_selection.SelectFwe", "FeatureSelection", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ {
+      "id" : "score_func",
+      "name" : "sklearn.feature_selection.f_classif"
+    } ],
+    "parameter" : [ {
+      "name" : "alpha",
+      "type" : "double",
+      "default" : 0.025,
+      "min" : 0.0,
+      "max" : 0.05,
+      "minInterval" : 0.001,
+      "refineSplits" : 2
+    } ]
+  } ]
+}

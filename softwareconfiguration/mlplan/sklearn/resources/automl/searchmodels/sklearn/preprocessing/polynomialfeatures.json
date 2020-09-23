@@ -1,0 +1,25 @@
+{
+  "repository" : "sklearn.preprocessing.PolynomialFeatures",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.preprocessing.PolynomialFeatures",
+    "providedInterface" : [ "sklearn.preprocessing.PolynomialFeatures", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "degree",
+      "default" : 2,
+      "type" : "cat",
+      "values" : [ 2 ]
+    }, {
+      "name" : "include_bias",
+      "default" : "False",
+      "type" : "cat",
+      "values" : [ "False" ]
+    }, {
+      "name" : "interaction_only",
+      "default" : "False",
+      "type" : "cat",
+      "values" : [ "False" ]
+    } ]
+  } ]
+}

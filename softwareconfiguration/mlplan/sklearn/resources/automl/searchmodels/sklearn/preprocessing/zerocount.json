@@ -1,0 +1,10 @@
+{
+  "repository" : "tpot.builtins.ZeroCount",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "tpot.builtins.ZeroCount",
+    "providedInterface" : [ "tpot.builtins.ZeroCount", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ ]
+  } ]
+}

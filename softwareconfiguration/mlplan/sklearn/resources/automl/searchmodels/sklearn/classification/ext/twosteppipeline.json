@@ -1,0 +1,24 @@
+{
+	"repository": "sklearn.pipeline.make_pipeline",
+	"include": [],
+	"components": [
+		{
+			"name": "sklearn.pipeline.make_pipeline",
+			"providedInterface": [
+				"MLPipeline",
+				"AbstractClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "classifier",
+					"name": "BasicClassifier"
+				},
+				{
+					"id": "preprocessor",
+					"name": "AbstractPreprocessor"
+				}
+			],
+			"parameter": []
+		}
+	]
+}

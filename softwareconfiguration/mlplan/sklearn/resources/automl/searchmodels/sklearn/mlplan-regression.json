@@ -1,21 +1,9 @@
 {
-	"repository" : "ML-Plan for Regression in Scikit-Learn",
-	"include": ["./sklearn-regressors.json", "./scikit-learn-preprocessors-tpot.json"],
-	"components" : [
-	  	{
-	  	    "name" : "sklearn.pipeline.make_pipeline",
-	  	    "providedInterface" : [ "MLPipeline", "AbstractRegressor" ],
-	  	    "requiredInterface" : [
-	  	     	{ 
-	  	    		"id": "regressor",
-	  	    		"name": "BasicRegressor"
-	  	    	},
-	  	    	{
-	  	    		"id": "preprocessor",
-	  	    		"name": "AbstractPreprocessor"
-	  	    	}
-			],
-	    	"parameter" : [ ]
-	    }
-	]
+	"repository": "ML-Plan for Regression in Scikit-Learn",
+	"include": [
+		"./regression/base/index.json",
+		"./preprocessing/index.json",
+		"./regression/ext/twosteppipeline.json"
+	],
+	"components": [	]
 }

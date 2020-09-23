@@ -1,0 +1,21 @@
+{
+  "repository" : "sklearn.feature_selection.SelectFromModel",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.feature_selection.SelectFromModel",
+    "providedInterface" : [ "sklearn.feature_selection.SelectFromModel", "FeatureSelection", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ {
+      "id" : "estimator",
+      "name" : "sklearn.ensemble.ExtraTreesClassifier"
+    } ],
+    "parameter" : [ {
+      "name" : "threshold",
+      "type" : "double",
+      "default" : 0.505,
+      "min" : 0.0,
+      "max" : 1.01,
+      "minInterval" : 0.05,
+      "refineSplits" : 2
+    } ]
+  } ]
+}

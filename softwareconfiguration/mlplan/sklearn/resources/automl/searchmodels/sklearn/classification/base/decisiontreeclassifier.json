@@ -1,0 +1,39 @@
+{
+  "repository" : "sklearn.tree.DecisionTreeClassifier",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.tree.DecisionTreeClassifier",
+    "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "criterion",
+      "default" : "gini",
+      "type" : "cat",
+      "values" : [ "gini", "entropy" ]
+    }, {
+      "name" : "max_depth",
+      "type" : "int",
+      "default" : 6,
+      "min" : 1,
+      "max" : 11,
+      "minInterval" : 1,
+      "refineSplits" : 2
+    }, {
+      "name" : "min_samples_split",
+      "type" : "int",
+      "default" : 11,
+      "min" : 2,
+      "max" : 21,
+      "minInterval" : 1,
+      "refineSplits" : 2
+    }, {
+      "name" : "min_samples_leaf",
+      "type" : "int",
+      "default" : 11,
+      "min" : 1,
+      "max" : 21,
+      "minInterval" : 1,
+      "refineSplits" : 2
+    } ]
+  } ]
+}
