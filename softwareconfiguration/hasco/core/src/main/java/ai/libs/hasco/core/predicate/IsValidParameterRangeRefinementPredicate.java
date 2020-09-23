@@ -17,12 +17,12 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
-import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.IParameterDomain;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;
@@ -33,13 +33,13 @@ public class IsValidParameterRangeRefinementPredicate implements EvaluablePredic
 
 	private final Logger logger = LoggerFactory.getLogger(IsValidParameterRangeRefinementPredicate.class);
 
-	private final Collection<Component> components;
-	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
+	private final Collection<IComponent> components;
+	private final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> refinementConfiguration;
 	private final Map<ComponentInstance, Double> knownCompositionsAndTheirScore = new HashMap<>();
 
-	public IsValidParameterRangeRefinementPredicate(final Collection<Component> components, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration) {
+	public IsValidParameterRangeRefinementPredicate(final Collection<? extends IComponent> components, final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> refinementConfiguration) {
 		super();
-		this.components = components;
+		this.components = new ArrayList<>(components);
 		this.refinementConfiguration = refinementConfiguration;
 	}
 
@@ -56,16 +56,16 @@ public class IsValidParameterRangeRefinementPredicate implements EvaluablePredic
 		String componentIdentifier = partialGrounding[1].getName();
 		String parameterName = partialGrounding[2].getName();
 
-		Component component;
-		Optional<Component> searchedComponent = this.components.stream().filter(c -> c.getName().equals(componentName)).findAny();
+		IComponent component;
+		Optional<IComponent> searchedComponent = this.components.stream().filter(c -> c.getName().equals(componentName)).findAny();
 		if (searchedComponent.isPresent()) {
 			component = searchedComponent.get();
 		} else {
 			throw new IllegalArgumentException("Could not find matching component.");
 		}
 
-		Optional<Parameter> optParam = component.getParameters().stream().filter(p -> p.getName().equals(parameterName)).findAny();
-		Parameter param;
+		Optional<IParameter> optParam = component.getParameters().stream().filter(p -> p.getName().equals(parameterName)).findAny();
+		IParameter param;
 		if (optParam.isPresent()) {
 			param = optParam.get();
 		} else {
@@ -82,7 +82,7 @@ public class IsValidParameterRangeRefinementPredicate implements EvaluablePredic
 		ComponentInstance instance = HASCOUtil.getComponentInstanceFromState(this.components, state, componentIdentifier, false);
 		this.logger.debug("Derived component instance to be refined: {}. Parameter to refine: {}. Current value of parameter: {}", instance, param, currentParamValue);
 		try {
-			Map<Parameter, IParameterDomain> paramDomains = HASCOUtil.getUpdatedDomainsOfComponentParameters(instance);
+			Map<IParameter, IParameterDomain> paramDomains = HASCOUtil.getUpdatedDomainsOfComponentParameters(instance);
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Parameter domains are: {}", paramDomains.keySet().stream().map(k -> "\n\t" + k + ": " + paramDomains.get(k)).collect(Collectors.joining()));
 			}

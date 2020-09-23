@@ -6,6 +6,8 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
@@ -40,6 +42,7 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 	private final int numObjects;
 	private final IntList winVector;
 	private DoubleList skillVector;
+	private Logger logger = LoggerFactory.getLogger(PLMMAlgorithm.class);
 
 	public PLMMAlgorithm(final PLInferenceProblem input) {
 		this(input, null, null);
@@ -162,6 +165,7 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 			}
 			updatedVector.add(this.winVector.getInt(t) / denominator);
 		}
+		this.logger.debug("Updated vector: {}", updatedVector);
 		return updatedVector;
 	}
 
@@ -195,6 +199,16 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 
 	public DoubleList getSkillVector() {
 		return this.skillVector;
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
 	}
 
 }

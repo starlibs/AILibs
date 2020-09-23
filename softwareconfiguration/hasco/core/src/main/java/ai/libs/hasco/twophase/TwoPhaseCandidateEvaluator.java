@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOSolutionCandidate;
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.timing.TimedComputation;
 
@@ -21,7 +21,7 @@ public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizabl
 	private Logger logger = LoggerFactory.getLogger(TwoPhaseCandidateEvaluator.class);
 
 	/* input variables */
-	private final IObjectEvaluator<ComponentInstance, Double> evaluator;
+	private final IObjectEvaluator<IComponentInstance, Double> evaluator;
 	private final long selectionPhaseDeadline;
 	private final HASCOSolutionCandidate<Double> c;
 
@@ -39,7 +39,7 @@ public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizabl
 	private final Semaphore sem;
 
 	public TwoPhaseCandidateEvaluator(final HASCOSolutionCandidate<Double> c, final long selectionPhaseDeadline, final double timeoutTolerance, final double blowupInSelection, final double blowupInPostProcessing,
-			final IObjectEvaluator<ComponentInstance, Double> evaluator, final Semaphore sem) {
+			final IObjectEvaluator<IComponentInstance, Double> evaluator, final Semaphore sem) {
 		super();
 		this.c = c;
 		this.selectionPhaseDeadline = selectionPhaseDeadline;

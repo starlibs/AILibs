@@ -15,8 +15,9 @@ import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.Component;
-import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.IMultiFidelityObjectEvaluator;
@@ -31,13 +32,13 @@ public class HyperBandTest {
 
 	@BeforeClass
 	public static void setup() {
-		Collection<Component> components = new ArrayList<>();
+		Collection<IComponent> components = new ArrayList<>();
 		Component a = new Component("A");
 		a.addParameter(new Parameter("p1", new NumericParameterDomain(false, 0.0, 100.0), 50.0));
 		components.add(a);
 
 		String requiredInterface = "A";
-		IMultiFidelityObjectEvaluator<ComponentInstance, Double> evaluator = new IMultiFidelityObjectEvaluator<ComponentInstance, Double>() {
+		IMultiFidelityObjectEvaluator<IComponentInstance, Double> evaluator = new IMultiFidelityObjectEvaluator<IComponentInstance, Double>() {
 			@Override
 			public double getMaxBudget() {
 				return 5.0;
@@ -49,7 +50,7 @@ public class HyperBandTest {
 			}
 
 			@Override
-			public Double evaluate(final ComponentInstance t, final double budget) throws InterruptedException, ObjectEvaluationFailedException {
+			public Double evaluate(final IComponentInstance t, final double budget) throws InterruptedException, ObjectEvaluationFailedException {
 				return new Random().nextDouble();
 			}
 		};

@@ -9,7 +9,7 @@ import ai.libs.jaicore.search.probleminputs.MDPUtils;
 
 public class BRUE<N, A> extends MCTS<N, A>  {
 
-	public BRUE(final IMDP<N, A, Double> input, final double maxIterations, final double gamma, final double epsilon, final Random random, final boolean tabooExhaustedNodes) {
+	public BRUE(final IMDP<N, A, Double> input, final int maxIterations, final double gamma, final double epsilon, final Random random, final boolean tabooExhaustedNodes) {
 		super(input, new BRUEPolicy<>(input.isMaximizing(), MDPUtils.getTimeHorizon(gamma, epsilon), new Random(random.nextLong())), new UniformRandomPolicy<>(new Random(random.nextLong())), maxIterations, gamma, epsilon, tabooExhaustedNodes);
 	}
 

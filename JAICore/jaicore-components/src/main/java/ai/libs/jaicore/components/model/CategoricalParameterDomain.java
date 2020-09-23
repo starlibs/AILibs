@@ -8,6 +8,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import ai.libs.jaicore.components.api.IParameterDomain;
+
 public class CategoricalParameterDomain implements IParameterDomain {
 	private final String[] values;
 

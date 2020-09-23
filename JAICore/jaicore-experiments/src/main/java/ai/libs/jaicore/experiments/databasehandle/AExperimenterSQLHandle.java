@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -473,6 +474,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public List<ExperimentDBEntry> createOrGetExperiments(final List<Experiment> experiments) throws ExperimentDBInteractionFailedException {
+		Objects.requireNonNull(this.keyFields, "No key fields set!");
 		if (experiments == null || experiments.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
@@ -534,7 +536,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		String now = new SimpleDateFormat(DATE_FORMAT).format(new Date());
 		String memoryUsageInMB = String.valueOf((int) Runtime.getRuntime().totalMemory() / 1024 / 1024);
 		Map<String, String> valuesToWrite = new HashMap<>();
-		values.keySet().forEach(k -> valuesToWrite.put(k, values.get(k).toString()));
+		values.keySet().forEach(k -> valuesToWrite.put(k, values.get(k) != null ? values.get(k).toString() : null));
 		List<String> fieldsForWhichToIgnoreTime = this.config.getFieldsForWhichToIgnoreTime();
 		List<String> fieldsForWhichToIgnoreMemory = this.config.getFieldsForWhichToIgnoreMemory();
 		for (String result : values.keySet()) {

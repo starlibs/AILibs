@@ -14,7 +14,7 @@ import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraph
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness;
 
 public class BestFirstForwardDecompositionReducer<V extends Comparable<V>> extends
-AForwardDecompositionReducer<CostSensitiveHTNPlanningProblem<IHTNPlanningProblem, V>, IEvaluatedGraphSearchBasedPlan<TFDNode, String, V>, GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V>, EvaluatedSearchGraphPath<TFDNode, String, V>> {
+AForwardDecompositionReducer<CostSensitiveHTNPlanningProblem<? extends IHTNPlanningProblem, V>, IEvaluatedGraphSearchBasedPlan<TFDNode, String, V>, GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V>, EvaluatedSearchGraphPath<TFDNode, String, V>> {
 	private final SimpleForwardDecompositionReducer simpleReducer = new SimpleForwardDecompositionReducer();
 	private GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<TFDNode, String, V> transformer;
 
@@ -33,7 +33,7 @@ AForwardDecompositionReducer<CostSensitiveHTNPlanningProblem<IHTNPlanningProblem
 	}
 
 	@Override
-	public GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V> encodeProblem(final CostSensitiveHTNPlanningProblem<IHTNPlanningProblem, V> problem) {
+	public GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V> encodeProblem(final CostSensitiveHTNPlanningProblem<? extends IHTNPlanningProblem, V> problem) {
 		GraphSearchInput<TFDNode, String> searchInput = this.simpleReducer.encodeProblem(problem.getCorePlanningProblem());
 		if (this.transformer.getNodeEvaluator() == null) {
 			throw new IllegalStateException("No node evaluator has been set in the transformer!");

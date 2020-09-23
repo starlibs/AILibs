@@ -265,10 +265,8 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				sparseValue = sparseValue.trim(); // remove leading or trailing white spaces.
 				int indexOfFirstSpace = sparseValue.indexOf(' ');
 				int indexOfAttribute = Integer.parseInt(sparseValue.substring(0, indexOfFirstSpace));
-				if (indexOfAttribute > targetIndex) {
-					indexOfAttribute--;
-				}
 				String attributeValue = sparseValue.substring(indexOfFirstSpace + 1);
+				assert !parsedSparseInstance.containsKey(indexOfAttribute) : "The attribute index " + indexOfAttribute + " has already been set!";
 				parsedSparseInstance.put(indexOfAttribute, attributes.get(indexOfAttribute).deserializeAttributeValue(attributeValue));
 			}
 			return parsedSparseInstance;
@@ -371,13 +369,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	private static void serializeData(final BufferedWriter bw, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
 		bw.write(EArffItem.DATA.getValue() + "\n");
 		for (ILabeledInstance instance : data) {
-			if (instance instanceof DenseInstance) {
-				Object[] atts = instance.getAttributes();
-				bw.write(IntStream.range(0, atts.length).mapToObj(x -> serializeAttributeValue(data.getInstanceSchema().getAttribute(x), atts[x])).collect(Collectors.joining(",")));
-				bw.write(",");
-				bw.write(serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
-				bw.write("\n");
-			} else {
+			if (instance instanceof SparseInstance) {
 				StringBuilder sb = new StringBuilder();
 				Map<Integer, Object> attributeValues = ((SparseInstance) instance).getAttributeMap();
 				List<Integer> keys = new ArrayList<>(attributeValues.keySet());
@@ -393,6 +385,13 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				sb.append(serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
 				sb.append("}\n");
 				bw.write(sb.toString());
+			}
+			else {
+				Object[] atts = instance.getAttributes();
+				bw.write(IntStream.range(0, atts.length).mapToObj(x -> serializeAttributeValue(data.getInstanceSchema().getAttribute(x), atts[x])).collect(Collectors.joining(",")));
+				bw.write(",");
+				bw.write(serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
+				bw.write("\n");
 			}
 		}
 	}

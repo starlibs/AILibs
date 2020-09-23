@@ -50,11 +50,8 @@ public class WekaInstance extends ElementDecorator<Instance> implements IWekaIns
 	}
 
 	private Object transformAttributeValueToData(final Attribute att) {
-		if (att.isNominal() || att.isString() || att.isRelationValued() || att.isDate() || att.isRegular()) {
-			return att.value((int) this.getElement().value(att));
-		} else {
-			return this.getElement().value(att);
-		}
+		double internalValue = this.getElement().value(att);
+		return att.isNumeric() ? internalValue : att.value((int) internalValue);
 	}
 
 	@Override

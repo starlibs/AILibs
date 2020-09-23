@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.IInstance;
@@ -122,10 +123,16 @@ public class AttributeBasedStratifier implements IStratifier, ILoggingCustomizab
 				throw new IllegalArgumentException("Attribute index for stratified splits must only equal the number of attributes if the dataset is labeled, because then the label column id is the number of attributes!");
 			}
 		}
+		this.logger.debug("Forming the strati over {} attributes.", this.attributeIndices.size());
 
 		/* now compute the set of strati labels. There is one stratum for each element in the cartesian product of
 		 * all possible combinations of (maybe discretized) values for the given attribute indices */
-		Map<Integer, Set<Object>> attributeValues = DatasetPropertyComputer.computeAttributeValues(dataset, this.attributeIndices, this.numCPUs);
+		DatasetPropertyComputer dpc = new DatasetPropertyComputer();
+		dpc.setLoggerName(this.getLoggerName() + ".dpc");
+		Map<Integer, Set<Object>> attributeValues = dpc.computeAttributeValues(dataset, this.attributeIndices, this.numCPUs);
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug("The values for the different attributes are: {}", attributeValues.entrySet().stream().map(e -> "\n\t" + e.getKey() + ": " + e.getValue()).collect(Collectors.toList()));
+		}
 		this.discretizeAttributeValues(attributeValues);
 		List<Set<Object>> sets = new ArrayList<>(attributeValues.values());
 		Set<List<Object>> cartesianProduct = Sets.cartesianProduct(sets);

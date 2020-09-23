@@ -2,7 +2,7 @@ package ai.libs.jaicore.components.serialization;
 
 import java.util.Collection;
 
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
 
 public class ComponentUtils {
 
@@ -10,8 +10,8 @@ public class ComponentUtils {
 		/* avoids instantiation */
 	}
 
-	public static Component getComponentByName(final String componentName, final Collection<Component> components) throws ComponentNotFoundException {
-		for (Component component : components) {
+	public static IComponent getComponentByName(final String componentName, final Collection<? extends IComponent> components) throws ComponentNotFoundException {
+		for (IComponent component : components) {
 			if (component.getName().equals(componentName)) {
 				return component;
 			}

@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
-import ai.libs.jaicore.components.model.Component;
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.IMultiFidelityObjectEvaluator;
 
@@ -19,11 +19,11 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.IMultiFidelityObjectEvaluato
  */
 public class MultiFidelitySoftwareConfigurationProblem<V extends Comparable<V>> extends SoftwareConfigurationProblem<V> {
 
-	public MultiFidelitySoftwareConfigurationProblem(final File configurationFile, final String requestedInterface, final IMultiFidelityObjectEvaluator<ComponentInstance, V> compositionEvaluator) throws IOException {
+	public MultiFidelitySoftwareConfigurationProblem(final File configurationFile, final String requestedInterface, final IMultiFidelityObjectEvaluator<IComponentInstance, V> compositionEvaluator) throws IOException {
 		super(configurationFile, requestedInterface, compositionEvaluator);
 	}
 
-	public MultiFidelitySoftwareConfigurationProblem(final Collection<Component> components, final String requestedInterface, final IMultiFidelityObjectEvaluator<ComponentInstance, V> compositionEvaluator) {
+	public MultiFidelitySoftwareConfigurationProblem(final Collection<IComponent> components, final String requestedInterface, final IMultiFidelityObjectEvaluator<IComponentInstance, V> compositionEvaluator) {
 		super(components, requestedInterface, compositionEvaluator);
 	}
 
@@ -32,8 +32,8 @@ public class MultiFidelitySoftwareConfigurationProblem<V extends Comparable<V>> 
 	}
 
 	@Override
-	public IMultiFidelityObjectEvaluator<ComponentInstance, V> getCompositionEvaluator() {
-		return (IMultiFidelityObjectEvaluator<ComponentInstance, V>) super.getCompositionEvaluator();
+	public IMultiFidelityObjectEvaluator<IComponentInstance, V> getCompositionEvaluator() {
+		return (IMultiFidelityObjectEvaluator<IComponentInstance, V>) super.getCompositionEvaluator();
 	}
 
 }

@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.serialization.ComponentLoader;
 import ai.libs.jaicore.ml.classification.multilabel.dataset.IMekaInstances;
@@ -78,7 +79,7 @@ public class MekaPipelineFactoryTest {
 		AtomicDouble currentPercentage = new AtomicDouble(0.0);
 		double step = 0.05;
 		IntStream.range(0, list.size()).parallel().forEach(i -> {
-			System.out.println(ComponentUtil.getComponentInstanceAsComponentNames(list.get(i)));
+			System.out.println(ComponentInstanceUtil.getComponentInstanceAsComponentNames(list.get(i)));
 			int currentI = i;
 			IntStream.range(0, 5).forEach(s -> {
 				try {

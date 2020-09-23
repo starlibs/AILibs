@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.hasco.builder.HASCOBuilder;
 import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFD;
 import ai.libs.jaicore.basic.FileUtil;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
@@ -88,11 +89,11 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 			i++;
 			this.LOGGER.info("Considering composition {}/{}", i, n);
 
-			List<ComponentInstance> queue = new LinkedList<>();
+			List<IComponentInstance> queue = new LinkedList<>();
 			queue.add(ciToInstantiate);
 			this.LOGGER.trace("Sample parameters for contained components.");
 			while (!queue.isEmpty()) {
-				ComponentInstance currentCI = queue.remove(0);
+				IComponentInstance currentCI = queue.remove(0);
 				if (!currentCI.getComponent().getParameters().isEmpty()) {
 					ComponentInstance parametrization = null;
 					try {
@@ -103,7 +104,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 					}
 				}
 				if (!currentCI.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-					queue.addAll(currentCI.getSatisfactionOfRequiredInterfaces().values());
+					currentCI.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> queue.addAll(cil));
 				}
 			}
 			if (ciToInstantiate.getComponent().getRequiredInterfaces().size() == ciToInstantiate.getSatisfactionOfRequiredInterfaces().size()) {
@@ -137,12 +138,12 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 			/* compute version of composition in which all parameters are set to their minimum */
 			i++;
 			this.LOGGER.info("Considering composition {}/{}", i, n);
-			List<ComponentInstance> queue = new LinkedList<>();
+			List<IComponentInstance> queue = new LinkedList<>();
 			queue.add(ciToInstantiate);
 			while (!queue.isEmpty()) {
-				ComponentInstance currentCI = queue.remove(0);
+				IComponentInstance currentCI = queue.remove(0);
 				if (!currentCI.getComponent().getParameters().isEmpty()) {
-					ComponentInstance parametrization = null;
+					IComponentInstance parametrization = null;
 					try {
 						parametrization = ComponentUtil.minParameterizationOfComponent(currentCI.getComponent());
 						currentCI.getParameterValues().putAll(parametrization.getParameterValues());
@@ -151,7 +152,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 					}
 				}
 				if (!currentCI.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-					queue.addAll(currentCI.getSatisfactionOfRequiredInterfaces().values());
+					currentCI.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> queue.addAll(cil));
 				}
 			}
 			if (ciToInstantiate.getComponent().getRequiredInterfaces().size() == ciToInstantiate.getSatisfactionOfRequiredInterfaces().size()) {
@@ -184,14 +185,14 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 			i++;
 			this.LOGGER.info("Considering composition {}/{}", i, n);
 
-			List<ComponentInstance> queue = new LinkedList<>();
+			List<IComponentInstance> queue = new LinkedList<>();
 			queue.add(ciToInstantiate);
 
 			this.LOGGER.trace("Sample parameters for contained components.");
 			while (!queue.isEmpty()) {
-				ComponentInstance currentCI = queue.remove(0);
+				IComponentInstance currentCI = queue.remove(0);
 				if (!currentCI.getComponent().getParameters().isEmpty()) {
-					ComponentInstance parametrization = null;
+					IComponentInstance parametrization = null;
 					while (parametrization == null) {
 						try {
 							parametrization = ComponentUtil.maxParameterizationOfComponent(currentCI.getComponent());
@@ -202,7 +203,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 					currentCI.getParameterValues().putAll(parametrization.getParameterValues());
 				}
 				if (!currentCI.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-					queue.addAll(currentCI.getSatisfactionOfRequiredInterfaces().values());
+					currentCI.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> queue.addAll(cil));
 				}
 			}
 			if (ciToInstantiate.getComponent().getRequiredInterfaces().size() == ciToInstantiate.getSatisfactionOfRequiredInterfaces().size()) {
@@ -230,30 +231,30 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		this.stringBuilder = new StringBuilder();
 
 		for (ComponentInstance componentInstance : this.allComponentInstances) {
-			List<ComponentInstance> componentInstanceClonesWithAllPosibleCategoricalParameters = new ArrayList<>();
-			List<ComponentInstance> queue = new LinkedList<>();
+			List<IComponentInstance> componentInstanceClonesWithAllPosibleCategoricalParameters = new ArrayList<>();
+			List<IComponentInstance> queue = new LinkedList<>();
 			queue.add(componentInstance);
 			while (!queue.isEmpty()) {
-				ComponentInstance currentCI = queue.remove(0);
+				IComponentInstance currentCI = queue.remove(0);
 				if (!currentCI.getComponent().getParameters().isEmpty()) {
-					List<ComponentInstance> parameterizedComponentInstances = new ArrayList<>();
+					List<IComponentInstance> parameterizedComponentInstances = new ArrayList<>();
 					String currentComponentName = currentCI.getComponent().getName();
 					try {
 						parameterizedComponentInstances.addAll(ComponentUtil.categoricalParameterizationsOfComponent(currentCI.getComponent()));
 					} catch (Exception e) {
 						this.LOGGER.warn("Could not instantiate component instance {} with categorical parameters", componentInstance, e);
 					}
-					for (ComponentInstance parameterization : parameterizedComponentInstances) {
-						ComponentInstance option = new ComponentInstance(componentInstance);
-						List<ComponentInstance> optionQueue = new LinkedList<>();
+					for (IComponentInstance parameterization : parameterizedComponentInstances) {
+						IComponentInstance option = new ComponentInstance(componentInstance);
+						List<IComponentInstance> optionQueue = new LinkedList<>();
 						optionQueue.add(option);
 						while (!optionQueue.isEmpty()) {
-							ComponentInstance currentOption = optionQueue.remove(0);
+							IComponentInstance currentOption = optionQueue.remove(0);
 							if (!currentOption.getComponent().getParameters().isEmpty() && currentOption.getComponent().getName().equals(currentComponentName)) {
 								currentOption.getParameterValues().putAll(parameterization.getParameterValues());
 							}
 							if (!currentOption.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-								optionQueue.addAll(currentOption.getSatisfactionOfRequiredInterfaces().values());
+								currentOption.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> optionQueue.addAll(cil));
 							}
 
 						}
@@ -261,10 +262,10 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 					}
 				}
 				if (currentCI.getComponent().getRequiredInterfaces().size() == currentCI.getSatisfactionOfRequiredInterfaces().size()) {
-					queue.addAll(currentCI.getSatisfactionOfRequiredInterfaces().values());
+					currentCI.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> queue.addAll(cil));
 				}
 			}
-			for (ComponentInstance instance : componentInstanceClonesWithAllPosibleCategoricalParameters.stream().distinct().collect(Collectors.toList())) {
+			for (IComponentInstance instance : componentInstanceClonesWithAllPosibleCategoricalParameters.stream().distinct().collect(Collectors.toList())) {
 				numberOfPipelinesFound++;
 				if (this.doesExecutionFail(instance)) {
 					numberOfErrorsFound++;
@@ -281,7 +282,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		assertEquals(this.stringBuilder.toString(), 0, numberOfErrorsFound, 0.0001);
 	}
 
-	private boolean doesExecutionFail(final ComponentInstance componentInstance) throws Exception {
+	private boolean doesExecutionFail(final IComponentInstance componentInstance) throws Exception {
 		try {
 			this.execute(componentInstance);
 			return false;
@@ -299,7 +300,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		}
 	}
 
-	public abstract void execute(final ComponentInstance componentInstance) throws Exception;
+	public abstract void execute(final IComponentInstance componentInstance) throws Exception;
 
 	public abstract String getReasonForFailure(Exception e);
 

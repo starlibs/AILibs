@@ -12,6 +12,7 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
@@ -56,6 +57,34 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 		this.handle = databaseHandle;
 		this.experimentConfig = config;
 		this.logger.info("Successfully created and initialized ExperimentDatabasePreparer.");
+	}
+
+	/**
+	 * Installs not all but only a sub-sample of the defined experiments.
+	 * The experiments are sampled based on Latin Hypercube sampling.
+	 *
+	 * @param numberOfExperiments
+	 * @return
+	 * @throws AlgorithmExecutionCanceledException
+	 * @throws InterruptedException
+	 * @throws IllegalExperimentSetupException
+	 * @throws AlgorithmTimeoutedException
+	 * @throws ExperimentAlreadyExistsInDatabaseException
+	 * @throws ExperimentDBInteractionFailedException
+	 */
+	public List<ExperimentDBEntry> installSubGridOfExperiments(final int numberOfExperiments) throws AlgorithmTimeoutedException, IllegalExperimentSetupException, InterruptedException, AlgorithmExecutionCanceledException, ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException {
+
+		/* setup the table */
+		this.logger.info("Creating experiment table if not existent.");
+		this.handle.setup(this.experimentConfig);
+		this.logger.info("Table ready. Now synchronizing experiments.");
+
+		List<List<String>> tmpPossibleKeyCombinations = this.configAnalyzer.getAllPossibleKeyCombinationsAsList();
+		Collection<List<String>> chosenExperiments = SetUtil.getSubGridRelationFromRelation(tmpPossibleKeyCombinations, numberOfExperiments);
+		Collection<Map<String, String>> experimentsAsMaps = this.configAnalyzer.mapListTuplesToKeyValueMap(chosenExperiments);
+		List<ExperimentDBEntry> entries = this.handle.createOrGetExperiments(experimentsAsMaps.stream().map(t -> new Experiment(this.memoryLimit, this.cpuLimit, t)).collect(Collectors.toList()));
+		this.logger.info("Ids of {} inserted entries: {}", entries.size(), entries.stream().map(ExperimentDBEntry::getId).collect(Collectors.toList()));
+		return entries;
 	}
 
 	/**

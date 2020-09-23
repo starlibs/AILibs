@@ -174,6 +174,31 @@ public class Graph<T> {
 		return Collections.unmodifiableSet(this.predecessors.get(item));
 	}
 
+	public Set<T> getSiblings(final T item) {
+		Set<T> siblings = new HashSet<>();
+		for (T parent : this.getPredecessors(item)) {
+			for (T child : this.getSuccessors(parent))  {
+				if (!child.equals(item)) {
+					siblings.add(child);
+				}
+			}
+		}
+		return siblings;
+	}
+
+	public Set<T> getDescendants(final T item) {
+		List<T> open = new ArrayList<>();
+		open.add(item);
+		Set<T> descendants = new HashSet<>();
+		while (!open.isEmpty()) {
+			T next = open.remove(0);
+			descendants.add(next);
+			this.getSuccessors(next).forEach(open::add);
+		}
+		descendants.remove(item);
+		return descendants;
+	}
+
 	public Set<T> getConnected(final T item) {
 		Set<T> connected = new HashSet<>();
 		connected.addAll(this.getSuccessors(item));

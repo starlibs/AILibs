@@ -21,7 +21,7 @@ import org.junit.runners.Parameterized.Parameter;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.regression.loss.dataset.AsymmetricLoss;
@@ -29,9 +29,9 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
+import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.core.IProblemType;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
 import ai.libs.mlplan.core.PreferenceBasedNodeEvaluator;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
@@ -87,7 +87,7 @@ public abstract class AbstractMLPlanBuilderTest {
 		if (this.doesProblemTypeAdoptAvailablePreferredComponents()) {
 			assertEquals(FileUtil.readFileAsList(FileUtil.getExistingFileWithHighestPriority(this.problemType.getPreferredComponentListFromResource())), this.getBuilder().getPreferredComponents());
 		}
-		Collection<Component> components = this.getBuilder().getComponents();
+		Collection<IComponent> components = this.getBuilder().getComponents();
 		if (this.getBuilder().getPreferredComponents() != null) {
 			for (String cName : this.getBuilder().getPreferredComponents()) {
 				assertTrue("Preferred component with name " + cName + " does not exist in component repository.", components.stream().anyMatch(c -> c.getName().equals(cName)));

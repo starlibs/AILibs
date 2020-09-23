@@ -1051,7 +1051,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 			switch (this.getState()) {
 			case CREATED:
 				AlgorithmInitializedEvent initEvent = this.activate();
-				this.bfLogger.info("Initializing BestFirst search {} with the following configuration:\n\tCPUs: {}\n\tTimeout: {}ms\n\tNode Evaluator: {}\n\tConsidering node evaluator optimistic: {}\n\tListening to solutions delivered by node evaluator: {}\n\tInitial score upper bound: {}", this, this.getConfig().cpus(), this.getConfig().timeout(), this.nodeEvaluator, this.considerNodeEvaluationOptimistic, this.solutionReportingNodeEvaluator, this.getBestScoreKnownToExist());
+				this.bfLogger.info("Initializing BestFirst search {} with the following configuration:\n\tCPUs: {}\n\tTimeout: {}ms\n\tGraph Generator: {}\n\tNode Evaluator: {}\n\tConsidering node evaluator optimistic: {}\n\tListening to solutions delivered by node evaluator: {}\n\tInitial score upper bound: {}", this, this.getConfig().cpus(), this.getConfig().timeout(), this.graphGenerator.getClass(), this.nodeEvaluator, this.considerNodeEvaluationOptimistic, this.solutionReportingNodeEvaluator, this.getBestScoreKnownToExist());
 				int additionalCPUs = this.getConfig().cpus() - 1;
 				if (additionalCPUs > 0) {
 					this.parallelizeNodeExpansion(additionalCPUs);
@@ -1287,6 +1287,10 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 		this.loggerName = name;
 		this.bfLogger = LoggerFactory.getLogger(name);
 		this.bfLogger.info("Activated logger {} with name {}", name, this.bfLogger.getName());
+		if (this.graphGenerator instanceof ILoggingCustomizable) {
+			this.bfLogger.info("Setting logger of graph generator to {}.gg", name);
+			((ILoggingCustomizable) this.graphGenerator).setLoggerName(this.loggerName + ".gg");
+		}
 		if (this.nodeEvaluator instanceof ILoggingCustomizable) {
 			this.bfLogger.info("Setting logger of node evaluator {} to {}.nodeevaluator", this.nodeEvaluator, name);
 			((ILoggingCustomizable) this.nodeEvaluator).setLoggerName(name + ".nodeevaluator");

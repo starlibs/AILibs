@@ -3,6 +3,7 @@ package ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer
 import org.api4.java.ai.graphsearch.problem.IPathSearch;
 import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -73,5 +74,8 @@ public class IteratingGraphSearchOptimizer<I extends IPathSearchWithPathEvaluati
 		return this.baseAlgorithm;
 	}
 
-
+	@Override
+	public void setTimeout(final Timeout to) {
+		this.baseAlgorithm.setTimeout(to);
+	}
 }

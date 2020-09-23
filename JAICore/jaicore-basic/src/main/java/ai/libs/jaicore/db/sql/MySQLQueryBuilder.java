@@ -52,7 +52,7 @@ public class MySQLQueryBuilder implements ISQLQueryBuilder {
 				sb2.append(", ");
 			}
 			sb1.append(entry.getKey());
-			sb2.append("\"" + entry.getValue().toString().replace("\"", "\\\"") + "\"");
+			sb2.append("\"" + entry.getValue().toString().replace("\\", "\\\\").replace("\"", "\\\"") + "\"");
 		}
 		return "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
 	}
@@ -87,7 +87,7 @@ public class MySQLQueryBuilder implements ISQLQueryBuilder {
 				sbValues.append(",\n ");
 			}
 			sbValues.append("(");
-			sbValues.append(datarow.stream().map(s -> "\"" + s.toString().replace("\"", "\\\"") + "\"").collect(Collectors.joining(", ")));
+			sbValues.append(datarow.stream().map(s -> "\"" + s.toString().replace("\\", "\\\\").replace("\"", "\\\"") + "\"").collect(Collectors.joining(", ")));
 			sbValues.append(")");
 		}
 		sbMain.append(sbValues);

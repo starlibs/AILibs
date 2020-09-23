@@ -3,6 +3,7 @@ package ai.libs.mlplan.safeguard;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.Timeout;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.mlplan.core.ITimeTrackingLearner;
 
@@ -21,27 +22,30 @@ public class AlwaysEvaluateSafeGuard implements IEvaluationSafeGuard {
 	}
 
 	@Override
-	public boolean predictWillAdhereToTimeout(final ComponentInstance ci, final Timeout timeout) throws Exception {
-		ci.putAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME, "0.0");
-		ci.putAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME, "0.0");
+	public boolean predictWillAdhereToTimeout(final IComponentInstance ci, final Timeout timeout) throws Exception {
+		if (!(ci instanceof ComponentInstance)) {
+			throw new IllegalArgumentException("Only works with ComponentInstance objects");
+		}
+		((ComponentInstance)ci).putAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME, "0.0");
+		((ComponentInstance)ci).putAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME, "0.0");
 		// always predict that it will adhere to the timeout, no matter what timeout is given.
 		return true;
 	}
 
 	@Override
-	public double predictInductionTime(final ComponentInstance ci, final ILabeledDataset<?> dTrain) throws Exception {
+	public double predictInductionTime(final IComponentInstance ci, final ILabeledDataset<?> dTrain) throws Exception {
 		// predict it will be induced instantly.
 		return 0;
 	}
 
 	@Override
-	public double predictInferenceTime(final ComponentInstance ci, final ILabeledDataset<?> dTrain, final ILabeledDataset<?> dTest) throws Exception {
+	public double predictInferenceTime(final IComponentInstance ci, final ILabeledDataset<?> dTrain, final ILabeledDataset<?> dTest) throws Exception {
 		// predict it will be induced instantly.
 		return 0;
 	}
 
 	@Override
-	public void updateWithActualInformation(final ComponentInstance ci, final ITimeTrackingLearner learner) {
+	public void updateWithActualInformation(final IComponentInstance ci, final ITimeTrackingLearner learner) {
 		// nothing to remember here
 	}
 

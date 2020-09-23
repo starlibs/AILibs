@@ -6,11 +6,13 @@ import org.junit.rules.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.logging.LoggerUtil;
+
 public abstract class Tester implements ILoggingCustomizable {
 
-	protected final static Logger LOGGER = LoggerFactory.getLogger("testers");
+	protected final static Logger LOGGER = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER);
 
-	protected Logger logger = LoggerFactory.getLogger("testers." + this.getClass().getSimpleName().toLowerCase());
+	protected Logger logger = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER + "." + this.getClass().getSimpleName().toLowerCase());
 
 	@Rule
 	public Timeout globalTimeout = Timeout.seconds(120); // no test should run longer than two minutes

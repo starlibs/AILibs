@@ -8,7 +8,7 @@ import ai.libs.jaicore.search.probleminputs.IMDP;
 
 public class PlackettLuceMCTS<N, A> extends MCTS<N, A> {
 
-	public PlackettLuceMCTS(final IMDP<N, A, Double> input, final IPreferenceKernel<N, A> preferenceKernel, final double maxIterations, final double gamma, final double epsilon, final Random randomForTreePolicy, final Random randomForDefaultPolicy, final boolean tabooExhaustedNodes) {
+	public PlackettLuceMCTS(final IMDP<N, A, Double> input, final IPreferenceKernel<N, A> preferenceKernel, final int maxIterations, final double gamma, final double epsilon, final Random randomForTreePolicy, final Random randomForDefaultPolicy, final boolean tabooExhaustedNodes) {
 		super(input, new PlackettLucePolicy<>(preferenceKernel, randomForTreePolicy), new UniformRandomPolicy<>(randomForDefaultPolicy), maxIterations, gamma, epsilon, tabooExhaustedNodes);
 	}
 }

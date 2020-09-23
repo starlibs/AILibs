@@ -6,7 +6,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 
 public interface ITimeTrackingLearner extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 
@@ -18,7 +18,7 @@ public interface ITimeTrackingLearner extends ISupervisedLearner<ILabeledInstanc
 
 	public List<Long> getInstancePredictionTimesInMS();
 
-	public ComponentInstance getComponentInstance();
+	public IComponentInstance getComponentInstance();
 
 	public void setPredictedInductionTime(final String inductionTime);
 
