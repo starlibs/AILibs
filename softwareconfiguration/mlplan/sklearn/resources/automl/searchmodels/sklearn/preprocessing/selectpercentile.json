@@ -1,0 +1,21 @@
+{
+  "repository" : "sklearn.feature_selection.SelectPercentile",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.feature_selection.SelectPercentile",
+    "providedInterface" : [ "sklearn.feature_selection.SelectPercentile", "FeatureSelection", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ {
+      "id" : "score_func",
+      "name" : "sklearn.feature_selection.f_classif"
+    } ],
+    "parameter" : [ {
+      "name" : "percentile",
+      "type" : "int",
+      "default" : 50,
+      "min" : 1,
+      "max" : 100,
+      "minInterval" : 1,
+      "refineSplits" : 2
+    } ]
+  } ]
+}

@@ -1,0 +1,5 @@
+{
+  "repository" : "base-index",
+  "include" : [ "./bcc.json", "./bpnn.json", "./br.json", "./brq.json", "./cc.json", "./ccq.json", "./cdn.json", "./cdt.json", "./ct.json", "./dbpnn.json", "./fw.json", "./hasel.json", "./lc.json", "./majoritylabelset.json", "./mcc.json", "./pcc.json", "./pmcc.json", "./ps.json", "./pst.json", "./rakel.json", "./rakeld.json", "./rt.json" ],
+  "components" : [ ]
+}

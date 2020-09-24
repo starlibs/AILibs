@@ -1,0 +1,10 @@
+{
+  "repository" : "sklearn.naive_bayes.GaussianNB",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.naive_bayes.GaussianNB",
+    "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ ]
+  } ]
+}

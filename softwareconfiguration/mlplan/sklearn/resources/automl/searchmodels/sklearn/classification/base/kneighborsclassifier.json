@@ -1,0 +1,28 @@
+{
+  "repository" : "sklearn.neighbors.KNeighborsClassifier",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.neighbors.KNeighborsClassifier",
+    "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "n_neighbors",
+      "type" : "int",
+      "default" : 51,
+      "min" : 1,
+      "max" : 100,
+      "minInterval" : 1,
+      "refineSplits" : 2
+    }, {
+      "name" : "weights",
+      "default" : "uniform",
+      "type" : "cat",
+      "values" : [ "uniform", "distance" ]
+    }, {
+      "name" : "p",
+      "default" : 1,
+      "type" : "cat",
+      "values" : [ 1, 2 ]
+    } ]
+  } ]
+}

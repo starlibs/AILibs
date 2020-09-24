@@ -1,0 +1,24 @@
+{
+  "repository" : "sklearn.cluster.FeatureAgglomeration",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.cluster.FeatureAgglomeration",
+    "providedInterface" : [ "sklearn.cluster.FeatureAgglomeration", "AgglomerationPreprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "linkage",
+      "default" : "ward",
+      "type" : "cat",
+      "values" : [ "ward", "complete", "average" ]
+    }, {
+      "name" : "affinity",
+      "default" : "euclidean",
+      "type" : "cat",
+      "values" : [ "euclidean", "l1", "l2", "manhattan", "cosine" ]
+    } ],
+    "dependency" : [ {
+      "pre" : "linkage in {ward}",
+      "post" : "affinity in {euclidean}"
+    } ]
+  } ]
+}

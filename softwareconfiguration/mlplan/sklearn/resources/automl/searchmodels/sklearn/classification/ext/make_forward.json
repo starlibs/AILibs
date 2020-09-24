@@ -1,0 +1,24 @@
+{
+	"repository": "mlplan.util.model.make_forward",
+	"include": [],
+	"components": [
+		{
+			"name": "mlplan.util.model.make_forward",
+			"providedInterface": [
+				"AbstractPreprocessor",
+				"MakeForward"
+			],
+			"requiredInterface": [
+				{
+					"id": "base",
+					"name": "BasicPreprocessor"
+				},
+				{
+					"id": "source",
+					"name": "AbstractPreprocessor"
+				}
+			],
+			"parameter": []
+		}
+	]
+}

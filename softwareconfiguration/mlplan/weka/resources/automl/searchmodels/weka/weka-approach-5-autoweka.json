@@ -1,18 +1,13 @@
 {
-	"repository" : "WEKA - Auto-WEKA Searchspace",
-	"include": ["./weka-classifiers-approach-5.json", "./weka-preprocessors-autoweka.json"],
-	"components" : [ {
-	  	    "name" : "pipeline",
-	  	    "providedInterface" : [ "MLPipeline", "AbstractClassifier" ],
-	  	    "requiredInterface" : [
-	  	    	{
-	  	    		"id": "preprocessor",
-	  	    		"name": "AbstractPreprocessor"
-	  	    	}, { 
-	  	    		"id": "classifier",
-	  	    		"name": "BaseClassifier"
-	  	    	}
-			],
-	    	"parameter" : [ ]
-	    }]
+	"repository": "WEKA - Auto-WEKA Searchspace",
+	"include": [
+		"./ext/twosteppipeline.json",
+		"./weka-full-preprocessing.json",
+    	"./base/naivebayes.json",
+    	"./base/smo_kernel/index.json",
+    	"./base/smo.json",
+    	"./base/ibk.json",
+    	"./base/j48.json",
+    	"./base/randomforest.json"
+	]
 }

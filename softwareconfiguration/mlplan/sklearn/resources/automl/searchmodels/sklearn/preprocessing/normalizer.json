@@ -1,0 +1,15 @@
+{
+  "repository" : "sklearn.preprocessing.Normalizer",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.preprocessing.Normalizer",
+    "providedInterface" : [ "sklearn.preprocessing.Normalizer", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "norm",
+      "default" : "l1",
+      "type" : "cat",
+      "values" : [ "l1", "l2", "max" ]
+    } ]
+  } ]
+}

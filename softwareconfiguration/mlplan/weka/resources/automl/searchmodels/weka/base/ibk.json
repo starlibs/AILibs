@@ -1,0 +1,48 @@
+{
+	"repository": "weka.classifiers.lazy.IBk",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.lazy.IBk",
+			"requiredInterface": [],
+			"providedInterface": [
+				"AbstractClassifier",
+				"WekaBaseClassifier",
+				"WeightedInstancesHandler",
+				"BaseClassifier",
+				"PipelineClassifier"
+			],
+			"parameter": [
+				{
+					"name": "E",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "F",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "K",
+					"type": "int",
+					"default": 1.0,
+					"min": 1.0,
+					"max": 64.0,
+					"refineSplits": 8,
+					"minInterval": 1
+				},
+				{
+					"name": "X",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "I",
+					"type": "boolean",
+					"default": "false"
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,46 @@
+{
+  "repository" : "meka.classifiers.multilabel.BPNN",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.BPNN",
+    "providedInterface" : [ "MLClassifier", "BasicMLClassifier", "ProblemTransformationMethod" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "H",
+      "comment" : "Sets the number of hidden units default: 10",
+      "type" : "int",
+      "default" : "10",
+      "min" : "1",
+      "max" : "100",
+      "refineSplits" : 8,
+      "minInterval" : 5
+    }, {
+      "name" : "E",
+      "comment" : "Sets the maximum number of epochs default: 1000 (auto_cut_out)",
+      "type" : "int",
+      "default" : 1000,
+      "min" : 10,
+      "max" : 10000,
+      "refineSplits" : 8,
+      "minInterval" : 100
+    }, {
+      "name" : "r",
+      "comment" : "Sets the learning rate (tyically somewhere between 'very small' and 0.1) default: 0.1",
+      "type" : "double",
+      "default" : 0.1,
+      "min" : 0.001,
+      "max" : 0.1,
+      "refineSplits" : 8,
+      "minInterval" : 1.0E-4
+    }, {
+      "name" : "m",
+      "comment" : "Sets the momentum (typically somewhere between 0.1 and 0.9) default: 0.1",
+      "type" : "double",
+      "default" : 0.1,
+      "min" : 0.1,
+      "max" : 0.9,
+      "refineSplits" : 8,
+      "minInterval" : 0.05
+    } ]
+  } ]
+}

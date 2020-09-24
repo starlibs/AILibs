@@ -1,0 +1,21 @@
+{
+  "repository" : "meka.classifiers.multilabel.CCq",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.CCq",
+    "providedInterface" : [ "MLClassifier", "BasicMLClassifier", "ProblemTransformationMethod" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "AbstractClassifier"
+    } ],
+    "parameter" : [ {
+      "name" : "P",
+      "type" : "double",
+      "min" : 0.2,
+      "max" : 0.8,
+      "default" : 0.8,
+      "minInterval" : 0.01,
+      "refineSplits" : 8
+    } ]
+  } ]
+}

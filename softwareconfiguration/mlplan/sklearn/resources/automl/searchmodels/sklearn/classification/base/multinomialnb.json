@@ -1,0 +1,20 @@
+{
+  "repository" : "sklearn.naive_bayes.MultinomialNB",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.naive_bayes.MultinomialNB",
+    "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "alpha",
+      "default" : 0.001,
+      "type" : "cat",
+      "values" : [ 0.001, 0.01, 0.1, 1.0, 100.0, 100.0 ]
+    }, {
+      "name" : "fit_prior",
+      "default" : "True",
+      "type" : "cat",
+      "values" : [ "True", "False" ]
+    } ]
+  } ]
+}

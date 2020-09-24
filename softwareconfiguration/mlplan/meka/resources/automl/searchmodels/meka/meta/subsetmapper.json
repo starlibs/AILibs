@@ -1,0 +1,13 @@
+{
+  "repository" : "meka.classifiers.multilabel.meta.SubsetMapper",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.meta.SubsetMapper",
+    "providedInterface" : [ "MLClassifier", "MetaMLClassifier" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "ProblemTransformationMethod"
+    } ],
+    "parameter" : [ ]
+  } ]
+}

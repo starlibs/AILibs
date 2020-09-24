@@ -1,0 +1,87 @@
+{
+  "repository" : "weka.classifiers.trees.RandomTree",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.trees.RandomTree",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "RandomizableBaseClassifier", "PipelineClassifier" ],
+    "parameter" : [ {
+      "name" : "M",
+      "type" : "int",
+      "default" : 1.0,
+      "min" : 1.0,
+      "max" : 64.0,
+      "refineSplits" : 8,
+      "minInterval" : 1
+    }, {
+      "name" : "featuresActivator",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0", "1" ]
+    }, {
+      "name" : "K",
+      "type" : "int",
+      "default" : "0",
+      "min" : 0,
+      "max" : 32,
+      "refineSplits" : 8,
+      "minInterval" : 1
+    }, {
+      "name" : "depthActivator",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0", "1" ]
+    }, {
+      "name" : "depth",
+      "type" : "cat",
+      "values" : [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 ],
+      "default" : "0"
+    }, {
+      "name" : "backActivator",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0", "1" ]
+    }, {
+      "name" : "N",
+      "type" : "int",
+      "default" : "0",
+      "min" : 0.0,
+      "max" : 5.0,
+      "refineSplits" : 8,
+      "minInterval" : 1
+    }, {
+      "name" : "U",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "B",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+    	"name": "V",
+    	"type": "cat",
+    	"default": "0.001",
+    	"values": ["0.1", "1.0", "10.0", "0.0001", "0.001", "0.01", "100.0", "1e-06", "1e-05"]
+    
+    }  ],
+    "dependencies" : [ {
+      "pre" : "featuresActivator in {0}",
+      "post" : "K in {0}"
+    }, {
+      "pre" : "featuresActivator in {1}",
+      "post" : "K in [2.0,32.0]"
+    }, {
+      "pre" : "depthActivator in {0}",
+      "post" : "depth in {0}"
+    }, {
+      "pre" : "depthActivator in {1}",
+      "post" : "depth in [2.0,20.0]"
+    }, {
+      "pre" : "backActivator in {0}",
+      "post" : "N in {0}"
+    }, {
+      "pre" : "backActivator in {1}",
+      "post" : "N in [2.0,5.0]"
+    } ]
+  } ]
+}

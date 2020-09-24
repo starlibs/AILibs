@@ -1,0 +1,21 @@
+{
+  "repository" : "weka.classifiers.meta.AttributeSelectedClassifier",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.meta.AttributeSelectedClassifier",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler", "PipelineClassifier" ],
+    "parameter" : [ {
+      "name" : "E",
+      "type" : "cat",
+      "default" : "weka.attributeSelection.CfsSubsetEval",
+      "values" : [ "weka.attributeSelection.CfsSubsetEval", "weka.attributeSelection.CfsSubsetEval -L" ]
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "weka.attributeSelection.BestFirst",
+      "values" : [ "weka.attributeSelection.BestFirst", "weka.attributeSelection.BestFirst -D 1", "weka.attributeSelection.GreedyStepwise" ]
+    } ],
+    "dependencies" : [ ]
+  } ]
+}

@@ -1,0 +1,22 @@
+{
+  "repository" : "meka.classifiers.multilabel.meta.CM",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.meta.CM",
+    "providedInterface" : [ "MLClassifier", "MetaMLClassifier" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "BasicMLClassifier"
+    } ],
+    "parameter" : [ {
+      "comment" : "Sets the number of models (default 10)",
+      "name" : "I",
+      "type" : "int",
+      "default" : 10,
+      "min" : 10,
+      "max" : 50,
+      "refineSplits" : 4,
+      "minInterval" : 1
+    } ]
+  } ]
+}

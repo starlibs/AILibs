@@ -1,0 +1,10 @@
+{
+  "repository" : "sklearn.preprocessing.StandardScaler",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.preprocessing.StandardScaler",
+    "providedInterface" : [ "sklearn.preprocessing.StandardScaler", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ ]
+  } ]
+}

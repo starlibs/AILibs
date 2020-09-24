@@ -1,0 +1,52 @@
+{
+  "repository" : "meka.classifiers.multilabel.CDT",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.CDT",
+    "providedInterface" : [ "MLClassifier", "BasicMLClassifier" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "AbstractClassifier"
+    } ],
+    "parameter" : [ {
+      "name" : "H",
+      "comment" : "Determines the width of the trellis (use 0 for chain; use _1 for a square trellis, i.e., width of sqrt(number of labels)). ",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0", "-1" ]
+    }, {
+      "name" : "L",
+      "comment" : "Determines the neighbourhood density (the number of neighbours for each node in the trellis). CAUTION: default obtained from source code. No idea about good other values ",
+      "type" : "int",
+      "default" : 1,
+      "min" : 1,
+      "max" : 5,
+      "minInterval" : 1,
+      "refineSplits" : 5
+    }, {
+      "comment" : "The dependency heuristic to use in rearranging the trellis (None by default). ",
+      "name" : "X",
+      "type" : "cat",
+      "default" : "None",
+      "values" : [ "lbf", "C", "I", "Ib", "H", "Hbf", "X", "F", "L", "None" ]
+    }, {
+      "name" : "I",
+      "comment" : "The total number of iterations. default: 1000 ",
+      "type" : "int",
+      "default" : 1000,
+      "min" : 100,
+      "max" : 1000,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "Ic",
+      "comment" : "The number of collection iterations. default: 100 ",
+      "type" : "int",
+      "default" : 100,
+      "min" : 1,
+      "max" : 100,
+      "refineSplits" : 8,
+      "minInterval" : 1
+    } ]
+  } ]
+}
