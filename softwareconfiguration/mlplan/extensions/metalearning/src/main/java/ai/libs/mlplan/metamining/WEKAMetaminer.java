@@ -12,11 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.metamining.IMetaMiner;
-import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
-import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.WEKAPipelineCharacterizer;
 import ai.libs.mlplan.metamining.similaritymeasures.F3Optimizer;
@@ -44,7 +42,7 @@ public class WEKAMetaminer implements IMetaMiner {
 	private IRelativeRankMatrixComputer similarityComputer = new RelativeRankMatricComputer();
 	private IPipelineCharacterizer pipelineCharacterizer;
 
-	public WEKAMetaminer(final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramConfigs) {
+	public WEKAMetaminer(final INumericParameterRefinementConfigurationMap paramConfigs) {
 		this.pipelineCharacterizer = new WEKAPipelineCharacterizer(paramConfigs);
 	}
 

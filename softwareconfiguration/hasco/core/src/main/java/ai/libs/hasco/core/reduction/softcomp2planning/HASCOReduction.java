@@ -16,11 +16,11 @@ import ai.libs.hasco.core.predicate.IsValidParameterRangeRefinementPredicate;
 import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.logic.fol.structure.CNFFormula;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
@@ -62,7 +62,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 	private static final String REFINE_PARAMETER_PREFIX = "2_tRefineParam";
 	private static final String DECLARE_CLOSED_PREFIX = "2_declareClosed";
 	private static final String REDEF_VALUE_PREFIX = "2_redefValue";
-	private static final String OMIT_RESOLUTION_PREFIX = "2_omitResolution";
+	private static final String OMIT_RESOLUTION_PREFIX = "1_omitResolution";
 
 	private static final String COMPONENT_OF_C2 = "component(c2)";
 
@@ -70,13 +70,13 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 
 	/* working variables */
 	private Collection<IComponent> components;
-	private Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramRefinementConfig;
+	private INumericParameterRefinementConfigurationMap paramRefinementConfig;
 
 	public static Monom getInitState() {
 		return new Monom("component('request')");
 	}
 
-	public static List<CEOCOperation> getOperations(final Collection<? extends IComponent> components, final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramRefinementConfig) {
+	public static List<CEOCOperation> getOperations(final Collection<? extends IComponent> components, final INumericParameterRefinementConfigurationMap paramRefinementConfig) {
 		List<CEOCOperation> operations = new ArrayList<>();
 		for (IComponent c : components) {
 			String cName = c.getName();
@@ -104,7 +104,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 					List<LiteralParam> valParams = new ArrayList<>();
 					valParams.add(new VariableParam(paramIdentifier));
 					if (p.isNumeric()) {
-						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(cHandle, '" + pName + "', '" + paramRefinementConfig.get(c).get(p).getFocusPoint() + "')"));
+						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(cHandle, '" + pName + "', '" + paramRefinementConfig.getRefinement(c, p).getFocusPoint() + "')"));
 						NumericParameterDomain np = (NumericParameterDomain) p.getDefaultDomain();
 						valParams.add(new ConstantParam("[" + np.getMin() + "," + np.getMax() + "]"));
 					} else {
@@ -310,7 +310,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 
 				network.add(new Literal(RESOLVE_SINGLE + ri + "(iGroupHandle, iHandle, cHandle)"));
 
-				String condition = "!anyOmitted(iGroupHandle,'" + ri + "')";
+				String condition = "!anyOmitted(iGroupHandle)";
 				methods.add(
 						new OCIPMethod("doResolve" + ri, methodParams, new Literal(RESOLVE_SINGLE_OPTIONAL + ri + "(iGroupHandle, iHandle, cHandle)"), new Monom(condition), new TaskNetwork(network), false, methodOutputs, new Monom()));
 				network = new ArrayList<>();

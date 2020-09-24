@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -15,12 +14,12 @@ import org.apache.commons.math3.geometry.partitioning.Region.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfiguration;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.model.CompositionProblemUtil;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import treeminer.util.TreeRepresentationUtils;
 
 public class ComponentInstanceStringConverter extends Thread {
@@ -42,9 +41,9 @@ public class ComponentInstanceStringConverter extends Thread {
 
 	private List<String> convertedPipelines;
 
-	private Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> componentParameters;
+	private INumericParameterRefinementConfigurationMap componentParameters;
 
-	public ComponentInstanceStringConverter(final IOntologyConnector ontologyConnector, final List<? extends IComponentInstance> cIs, final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> componentParameters) {
+	public ComponentInstanceStringConverter(final IOntologyConnector ontologyConnector, final List<? extends IComponentInstance> cIs, final INumericParameterRefinementConfigurationMap componentParameters) {
 		this.ontologyConnector = ontologyConnector;
 		this.cIs = new ArrayList<>(cIs);
 		this.convertedPipelines = new ArrayList<>(cIs.size());
@@ -197,7 +196,7 @@ public class ComponentInstanceStringConverter extends Thread {
 	}
 
 	private void resolveNumericParameter(final IComponentInstance componentInstance, final IParameter parameter, final String parameterName, final List<String> parameterRefinement) {
-		ParameterRefinementConfiguration parameterRefinementConfiguration = this.componentParameters.get(componentInstance.getComponent()).get(parameter);
+		INumericParameterRefinementConfiguration parameterRefinementConfiguration = this.componentParameters.getRefinement(componentInstance.getComponent(), parameter);
 		NumericParameterDomain parameterDomain = ((NumericParameterDomain) parameter.getDefaultDomain());
 		Interval currentInterval = null;
 		Interval nextInterval = new Interval(parameterDomain.getMin(), parameterDomain.getMax());

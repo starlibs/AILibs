@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfiguration;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IParameterDependency;
 import ai.libs.jaicore.components.api.IParameterDomain;
@@ -130,7 +131,7 @@ public class CompositionProblemUtil {
 		return true;
 	}
 
-	public static List<Interval> getNumericParameterRefinement(final Interval interval, final double focus, final boolean integer, final ParameterRefinementConfiguration refinementConfig) {
+	public static List<Interval> getNumericParameterRefinement(final Interval interval, final double focus, final boolean integer, final INumericParameterRefinementConfiguration refinementConfig) {
 
 		double inf = interval.getInf();
 		double sup = interval.getSup();

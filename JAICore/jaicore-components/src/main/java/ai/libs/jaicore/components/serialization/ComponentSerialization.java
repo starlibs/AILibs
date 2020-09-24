@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,9 +30,9 @@ import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.api.IComponentRepository;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.model.BooleanParameterDomain;
@@ -40,8 +41,9 @@ import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentRepository;
 import ai.libs.jaicore.components.model.Dependency;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
+import ai.libs.jaicore.components.model.NumericParameterRefinementConfiguration;
+import ai.libs.jaicore.components.model.NumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.model.Parameter;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 
 public class ComponentSerialization implements ILoggingCustomizable {
 
@@ -87,12 +89,17 @@ public class ComponentSerialization implements ILoggingCustomizable {
 	}
 
 	public JsonNode readRepositoryFile(final File jsonFile) throws IOException {
-		return this.readRepositoryFile(jsonFile, new ArrayList<>(), new HashMap<>());
+		return this.readRepositoryFile(jsonFile, new HashMap<>());
 	}
 
-	private JsonNode readRepositoryFile(final File jsonFile, final List<String> parsedFiles, final Map<String, JsonNode> parameterMap) throws IOException {
-		this.logger.debug("Parse file {}...", jsonFile.getAbsolutePath());
+	public JsonNode readRepositoryFile(final File jsonFile, final Map<String, String> templateVars) throws IOException {
+		return this.readRepositoryFile(jsonFile, templateVars, new ArrayList<>());
+	}
 
+	private JsonNode readRepositoryFile(final File jsonFile, final Map<String, String> templateVars, final List<String> parsedFiles) throws IOException {
+
+		/* read in file as string */
+		this.logger.info("Parse file {} with environment variables: {}", jsonFile.getAbsolutePath(), templateVars);
 		String jsonDescription;
 		if (jsonFile instanceof ResourceFile) {
 			jsonDescription = ResourceUtil.readResourceFileToString(((ResourceFile) jsonFile).getPathName());
@@ -100,15 +107,24 @@ public class ComponentSerialization implements ILoggingCustomizable {
 			jsonDescription = FileUtil.readFileAsString(jsonFile);
 		}
 		jsonDescription = jsonDescription.replaceAll("/\\*(.*)\\*/", "");
+		for (Entry<String, String> replacementRule : templateVars.entrySet()) {
+			jsonDescription = jsonDescription.replace("{$" + replacementRule.getKey() + "}", replacementRule.getValue());
+		}
 
+		/* convert the string into a JsonNode */
 		ObjectMapper om = new ObjectMapper();
 		JsonNode rootNode = om.readTree(jsonDescription);
-
-		for (JsonNode elem : rootNode.path("parameters")) {
-			parameterMap.put(elem.get("name").asText(), elem);
+		JsonNode compNode = rootNode.get("components");
+		if (!compNode.isArray()) {
+			throw new IllegalArgumentException("Components field in repository file " + jsonFile.getAbsolutePath() + " is not defined or not an array!");
 		}
-		JsonNode includes = rootNode.path("include");
+		ArrayNode compNodeAsArray = (ArrayNode)compNode;
+		if (this.logger.isInfoEnabled()) {
+			compNodeAsArray.forEach(n -> this.logger.info("Adding component {}", n));
+		}
 
+		/* if there are includes, resolve them now and attach the components of all of them to the component array */
+		JsonNode includes = rootNode.path("include");
 		File baseFolder = jsonFile.getParentFile();
 		for (JsonNode includePathNode : includes) {
 			String path = includePathNode.asText();
@@ -121,29 +137,38 @@ public class ComponentSerialization implements ILoggingCustomizable {
 
 			if (!parsedFiles.contains(subFile.getCanonicalPath())) {
 				parsedFiles.add(subFile.getCanonicalPath());
-				this.readRepositoryFile(subFile);
+				this.logger.debug("Recursively including component repository from {}.", subFile);
+				JsonNode subRepository = this.readRepositoryFile(subFile, templateVars);
+				JsonNode compsInSubRepository = subRepository.get("components");
+				ArrayNode compsInSubRepositoryAsArray = (ArrayNode)compsInSubRepository;
+				compNodeAsArray.addAll(compsInSubRepositoryAsArray);
+
 			}
 		}
 		return rootNode;
 	}
 
 	public IComponentRepository deserializeRepository(final File jsonFile) throws IOException {
-		return this.deserializeRepository(this.readRepositoryFile(jsonFile));
+		return this.deserializeRepository(jsonFile, new HashMap<>());
+	}
+
+	public IComponentRepository deserializeRepository(final File jsonFile, final Map<String, String> templateVars) throws IOException {
+		return this.deserializeRepository(this.readRepositoryFile(jsonFile, templateVars));
 	}
 
 	public IComponentRepository deserializeRepository(final String repository) throws IOException {
 		return this.deserializeRepository(new ObjectMapper().readTree(repository));
 	}
 
-	public Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> deserializeParamMap(final File jsonFile) throws IOException {
+	public INumericParameterRefinementConfigurationMap deserializeParamMap(final File jsonFile) throws IOException {
 		return this.deserializeParamMap(this.readRepositoryFile(jsonFile));
 	}
 
-	public Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> deserializeParamMap(final String json) throws IOException {
+	public INumericParameterRefinementConfigurationMap deserializeParamMap(final String json) throws IOException {
 		return this.deserializeParamMap(new ObjectMapper().readTree(json));
 	}
 
-	public Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> deserializeParamMap(final JsonNode rootNode) {
+	public INumericParameterRefinementConfigurationMap deserializeParamMap(final JsonNode rootNode) {
 		return this.deserializeRepositoryAndParamConfig(rootNode).getY();
 	}
 
@@ -151,9 +176,9 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		return this.deserializeRepositoryAndParamConfig(rootNode).getX();
 	}
 
-	public Pair<IComponentRepository, Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>>> deserializeRepositoryAndParamConfig(final JsonNode rootNode) {
+	public Pair<IComponentRepository, INumericParameterRefinementConfigurationMap> deserializeRepositoryAndParamConfig(final JsonNode rootNode) {
 
-		Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
+		NumericParameterRefinementConfigurationMap paramConfigs = new NumericParameterRefinementConfigurationMap();
 		Map<String, JsonNode> parameterMap = new HashMap<>();
 		Set<String> uniqueComponentNames = new HashSet<>();
 
@@ -232,7 +257,7 @@ public class ComponentSerialization implements ILoggingCustomizable {
 					}
 				}
 
-				Map<IParameter, ParameterRefinementConfiguration> paramConfig = new HashMap<>();
+				Map<String, NumericParameterRefinementConfiguration> paramConfig = new HashMap<>();
 
 				for (JsonNode parameter : component.path("parameter")) {
 					// name of the parameter
@@ -303,10 +328,10 @@ public class ComponentSerialization implements ILoggingCustomizable {
 							throw new IllegalArgumentException("Please specify a strictly positive parameter value for \"minInterval\" for the parameter \"" + p.getName() + "\" in component \"" + c.getName() + "\"");
 						}
 						if (type.endsWith("-log")) {
-							paramConfig.put(p, new ParameterRefinementConfiguration(parameter.get("focus").asDouble(), parameter.get("basis").asDouble(), boolParamValues[1], (int) doubleParamValues[3], doubleParamValues[4]));
+							paramConfig.put(p.getName(), new NumericParameterRefinementConfiguration(parameter.get("focus").asDouble(), parameter.get("basis").asDouble(), boolParamValues[1], (int) doubleParamValues[3], doubleParamValues[4]));
 
 						} else {
-							paramConfig.put(p, new ParameterRefinementConfiguration(boolParamValues[1], (int) doubleParamValues[3], doubleParamValues[4]));
+							paramConfig.put(p.getName(), new NumericParameterRefinementConfiguration(boolParamValues[1], (int) doubleParamValues[3], doubleParamValues[4]));
 						}
 						break;
 					case "bool":
@@ -458,7 +483,7 @@ public class ComponentSerialization implements ILoggingCustomizable {
 					c.addDependency(new Dependency(premise, conclusion));
 				}
 
-				paramConfigs.put(c, paramConfig);
+				paramConfigs.put(c.getName(), paramConfig);
 				repository.add(c);
 			}
 		}

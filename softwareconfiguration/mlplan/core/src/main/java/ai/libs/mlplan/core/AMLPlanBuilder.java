@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -36,8 +35,7 @@ import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.components.api.IComponent;
-import ai.libs.jaicore.components.api.IParameter;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
@@ -216,7 +214,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 		return this.serializer.deserializeRepository(this.searchSpaceFile);
 	}
 
-	public Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> getComponentParameterConfigurations() throws IOException {
+	public INumericParameterRefinementConfigurationMap getComponentParameterConfigurations() throws IOException {
 		return this.serializer.deserializeParamMap(this.searchSpaceFile);
 	}
 

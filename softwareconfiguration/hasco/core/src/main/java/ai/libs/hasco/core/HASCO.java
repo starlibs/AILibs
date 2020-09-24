@@ -309,6 +309,11 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger for {} with name {}", this.getId(), name);
 		super.setLoggerName(this.loggerName + "._swConfigAlgo");
+
+		/* set logger in planning problem evaluator */
+		((HASCOReductionSolutionEvaluator<?>)this.planningProblem.getPlanEvaluator()).setLoggerName(name + ".planevaluator");
+
+		/* set logger in benchmark */
 		if (this.getInput().getCompositionEvaluator() instanceof ILoggingCustomizable) {
 			this.logger.info("Setting logger of HASCO solution evaluator {} to {}.solutionevaluator.", this.getInput().getCompositionEvaluator().getClass().getName(), name);
 			((ILoggingCustomizable) this.getInput().getCompositionEvaluator()).setLoggerName(name + ".solutionevaluator");

@@ -336,4 +336,9 @@ public class Component implements IComponent, Serializable {
 		throw new NoSuchElementException("There is no parameter with id " + name);
 	}
 
+	@Override
+	public boolean hasRequiredInterfaceWithId(final String id) {
+		return this.requiredInterfaces.stream().anyMatch(ri -> ri.getId().equals(id));
+	}
+
 }

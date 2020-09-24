@@ -26,6 +26,8 @@ public interface IComponent extends Serializable {
 	 */
 	public IRequiredInterfaceDefinition getRequiredInterfaceDescriptionById(String id);
 
+	public boolean hasRequiredInterfaceWithId(String id);
+
 	/**
 	 * @return The parameters of this component
 	 */

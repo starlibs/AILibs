@@ -252,6 +252,9 @@ public class ComponentInstance  implements IComponentInstance, Serializable {
 
 	@Override
 	public Collection<IComponentInstance> getSatisfactionOfRequiredInterface(final String idOfRequiredInterface) {
+		if (!this.component.hasRequiredInterfaceWithId(idOfRequiredInterface)) {
+			throw new IllegalArgumentException("\"" + idOfRequiredInterface + "\" is not a valid required interface id of component " + this.component.getName()+ ". Valid ids are: " + this.component.getRequiredInterfaces().stream().map(ri -> "\n\t- " + ri.getId()).collect(Collectors.joining()));
+		}
 		return this.satisfactionOfRequiredInterfaces.get(idOfRequiredInterface);
 	}
 }

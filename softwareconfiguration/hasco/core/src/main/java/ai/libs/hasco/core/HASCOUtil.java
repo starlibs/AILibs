@@ -23,13 +23,13 @@ import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IParameterDependency;
 import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
 import ai.libs.jaicore.logic.fol.structure.Literal;
@@ -64,7 +64,7 @@ public class HASCOUtil {
 		/* avoid instantiation */
 	}
 
-	public static <N, A> IPathSearchInput<N, A> getSearchProblem(final Collection<? extends IComponent> components, final String requiredInterface, final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramRefinementConfig,
+	public static <N, A> IPathSearchInput<N, A> getSearchProblem(final Collection<? extends IComponent> components, final String requiredInterface, final INumericParameterRefinementConfigurationMap paramRefinementConfig,
 			final IHASCOPlanningReduction<N, A> plan2searchReduction) {
 		HASCOReduction<Double> hascoReduction = new HASCOReduction<>();
 		SoftwareConfigurationProblem<Double> coreProblem = new SoftwareConfigurationProblem<>(components, requiredInterface, n -> 0.0);
@@ -209,7 +209,7 @@ public class HASCOUtil {
 				String objectName = params[3];
 				Optional<? extends IComponent> component = components.stream().filter(c -> c.getName().equals(componentName)).findAny();
 				if (!component.isPresent()) {
-					throw new IllegalStateException("Error when treating literal " + l + ". Could not find component with name \"" + componentName + "\". List of known components: "
+					throw new IllegalStateException("Error when treating literal " + l + ". The provided list of components has no component with name \"" + componentName + "\". List of known components: "
 							+ components.stream().map(c -> "\n\t" + c.getName()).collect(Collectors.joining()));
 				}
 				ComponentInstance object = new ComponentInstance(component.get(), new HashMap<>(), new HashMap<>());

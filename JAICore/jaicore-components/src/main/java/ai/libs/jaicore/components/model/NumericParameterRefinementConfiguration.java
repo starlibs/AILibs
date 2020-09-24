@@ -1,6 +1,8 @@
 package ai.libs.jaicore.components.model;
 
-public class ParameterRefinementConfiguration {
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfiguration;
+
+public class NumericParameterRefinementConfiguration implements INumericParameterRefinementConfiguration {
 	private final boolean initRefinementOnLogScale;
 	private final double focusPoint;
 	private final double logBasis;
@@ -8,11 +10,11 @@ public class ParameterRefinementConfiguration {
 	private final int refinementsPerStep;
 	private final double intervalLength;
 
-	public ParameterRefinementConfiguration(final boolean initWithExtremalPoints, final int refinementsPerStep, final double intervalLength) {
+	public NumericParameterRefinementConfiguration(final boolean initWithExtremalPoints, final int refinementsPerStep, final double intervalLength) {
 		this(Double.NaN, 0, initWithExtremalPoints, refinementsPerStep, intervalLength);
 	}
 
-	public ParameterRefinementConfiguration(final double focusPoint, final double logBasis, final boolean initWithExtremalPoints, final int refinementsPerStep, final double intervalLength) {
+	public NumericParameterRefinementConfiguration(final double focusPoint, final double logBasis, final boolean initWithExtremalPoints, final int refinementsPerStep, final double intervalLength) {
 		super();
 		this.focusPoint = focusPoint;
 		this.logBasis = logBasis;
@@ -22,26 +24,32 @@ public class ParameterRefinementConfiguration {
 		this.intervalLength = intervalLength;
 	}
 
+	@Override
 	public boolean isInitRefinementOnLogScale() {
 		return this.initRefinementOnLogScale;
 	}
 
+	@Override
 	public double getFocusPoint() {
 		return this.focusPoint;
 	}
 
+	@Override
 	public double getLogBasis() {
 		return this.logBasis;
 	}
 
+	@Override
 	public boolean isInitWithExtremalPoints() {
 		return this.initWithExtremalPoints;
 	}
 
+	@Override
 	public int getRefinementsPerStep() {
 		return this.refinementsPerStep;
 	}
 
+	@Override
 	public double getIntervalLength() {
 		return this.intervalLength;
 	}
@@ -89,7 +97,7 @@ public class ParameterRefinementConfiguration {
 		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
-		ParameterRefinementConfiguration other = (ParameterRefinementConfiguration) obj;
+		NumericParameterRefinementConfiguration other = (NumericParameterRefinementConfiguration) obj;
 		if (Double.doubleToLongBits(this.focusPoint) != Double.doubleToLongBits(other.focusPoint)) {
 			return false;
 		}

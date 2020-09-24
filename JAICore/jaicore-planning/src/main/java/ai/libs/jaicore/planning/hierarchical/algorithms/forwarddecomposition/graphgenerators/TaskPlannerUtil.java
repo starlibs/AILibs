@@ -76,7 +76,8 @@ public class TaskPlannerUtil implements ILoggingCustomizable {
 	public Collection<MethodInstance> getMethodInstancesForTaskThatAreApplicableInState(final CNFFormula knowledge, final Method method, final Literal task, final Monom state, final List<Literal> remainingProblems)
 			throws InterruptedException {
 
-		this.logger.info("Determine instances of method {} that are applicable in current state for task {}. Complete agenda: {}", method.getName(), task, remainingProblems);
+		this.logger.info("Determine instances of method {} that are applicable in current state for task {}. Complete agenda: {}. Enable TRACE to see current state.", method.getName(), task, remainingProblems);
+		this.logger.trace("State is {}", state);
 		Collection<MethodInstance> applicableDerivedMethodInstances = new ArrayList<>();
 		Collection<Map<VariableParam, LiteralParam>> maps = this.getMappingsThatMatchTasksAndMakesItApplicable(knowledge, method.getTask(), task, method.getPrecondition(), state);
 		for (Map<VariableParam, LiteralParam> grounding : maps) {

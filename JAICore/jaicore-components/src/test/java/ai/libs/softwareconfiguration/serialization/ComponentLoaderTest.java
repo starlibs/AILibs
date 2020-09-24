@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,12 +17,13 @@ import org.junit.Test;
 
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentRepository;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.model.BooleanParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
+import ai.libs.jaicore.logging.LoggerUtil;
 
 @SuppressWarnings("SimplifiableJUnitAssertion")
 public class ComponentLoaderTest {
@@ -56,13 +58,13 @@ public class ComponentLoaderTest {
 		}
 
 		/* test parameters */
-		Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> parameterConfig = new ComponentSerialization().deserializeParamMap(new File("testrsc/difficultproblem.json"));
+		INumericParameterRefinementConfigurationMap parameterConfig = new ComponentSerialization().deserializeParamMap(new File("testrsc/difficultproblem.json"));
 		for (IComponent c : components) {
-			assertNotNull(parameterConfig.get(c));
+			assertNotNull(parameterConfig.getParameterNamesForWhichARefinementIsDefined(c));
 		}
-		assertNotNull(parameterConfig.get(c1).get(params.get(2)));
-		assertNotNull(parameterConfig.get(c1).get(params.get(3)));
-		assertNotNull(parameterConfig.get(c1).get(params.get(4)));
+		assertNotNull(parameterConfig.getRefinement(c1, params.get(2)));
+		assertNotNull(parameterConfig.getRefinement(c1, params.get(3)));
+		assertNotNull(parameterConfig.getRefinement(c1, params.get(4)));
 	}
 
 	@Test
@@ -73,6 +75,32 @@ public class ComponentLoaderTest {
 	@Test
 	public void testEqualityOfTwoLoadingProceduresOnAutoWekaSearchSpace() throws IOException {
 		this.testEqualityOfTwoLoadingProcedures("testrsc/weka/weka-all-autoweka.json");
+	}
+
+	@Test
+	public void testVariableReplacement() throws IOException {
+		Map<String, String> replacement = new HashMap<>();
+		String compNameA = "CompA";
+		String compNameB = "CompB";
+		replacement.put("nameOfA", compNameA);
+		replacement.put("typeOfa", "boolean");
+		replacement.put("defaultOfa", "true");
+		replacement.put("nameOfParama", "a");
+		replacement.put("nameOfB", compNameB);
+		replacement.put("domainOfb", "[\"v1\", \"v2\", \"v3\", \"v4\", \"v5\"]");
+		replacement.put("defaultOfb", "v4");
+		replacement.put("nameOfParamb", "b");
+		IComponentRepository repo = new ComponentSerialization(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM).deserializeRepository(new File("testrsc/problemwithvars/main.json"), replacement);
+		IComponent compA = repo.getComponent(compNameA);
+		IParameter param = compA.getParameter("a");
+		assertTrue(param.getDefaultDomain() instanceof BooleanParameterDomain);
+		assertEquals(true, param.getDefaultValue());
+
+
+		IComponent compB = repo.getComponent(compNameB);
+		IParameter paramb = compB.getParameter("b");
+		assertTrue(paramb.getDefaultDomain() instanceof CategoricalParameterDomain);
+		assertEquals("v4", paramb.getDefaultValue());
 	}
 
 	public void testEqualityOfTwoLoadingProcedures(final String filename) throws IOException {

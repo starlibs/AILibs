@@ -2,14 +2,11 @@ package ai.libs.hasco.twophase;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 
-import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
-import ai.libs.jaicore.components.api.IParameter;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
 
@@ -22,7 +19,7 @@ public class TwoPhaseSoftwareConfigurationProblem extends RefinementConfiguredSo
 		this.selectionBenchmark = selectionBenchmark;
 	}
 
-	public TwoPhaseSoftwareConfigurationProblem(final SoftwareConfigurationProblem<Double> coreProblem, final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramRefinementConfig,
+	public TwoPhaseSoftwareConfigurationProblem(final SoftwareConfigurationProblem<Double> coreProblem, final INumericParameterRefinementConfigurationMap paramRefinementConfig,
 			final IObjectEvaluator<IComponentInstance, Double> selectionBenchmark) {
 		super(coreProblem, paramRefinementConfig);
 		this.selectionBenchmark = selectionBenchmark;
