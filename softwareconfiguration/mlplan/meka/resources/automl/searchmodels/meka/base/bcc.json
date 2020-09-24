@@ -1,0 +1,19 @@
+{
+  "repository" : "meka.classifiers.multilabel.BCC",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.BCC",
+    "providedInterface" : [ "MLClassifier", "BasicMLClassifier" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "AbstractClassifier"
+    } ],
+    "parameter" : [ {
+      "name" : "X",
+      "comment" : "The way to measure dependencies. default: lbf (frequencies only) | TODO: No label dependence still missing as an option",
+      "type" : "cat",
+      "default" : "lbf",
+      "values" : [ "lbf", "C", "I", "Ib", "H", "Hbf", "X", "F", "L", "None" ]
+    } ]
+  } ]
+}

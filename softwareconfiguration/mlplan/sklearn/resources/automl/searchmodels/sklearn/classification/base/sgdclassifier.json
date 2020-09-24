@@ -1,0 +1,54 @@
+{
+  "repository" : "sklearn.linear_model.SGDClassifier",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.linear_model.SGDClassifier",
+    "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "loss",
+      "default" : "hinge",
+      "type" : "cat",
+      "values" : [ "log", "hinge", "modified_huber", "squared_hinge", "perceptron" ]
+    }, {
+      "name" : "penalty",
+      "default" : "l2",
+      "type" : "cat",
+      "values" : [ "l2", "l1", "elasticnet" ]
+    }, {
+      "name" : "alpha",
+      "default" : 1.0E-4,
+      "type" : "cat",
+      "values" : [ 0.0, 0.1, 0.01, 0.001, 1.0E-4 ]
+    }, {
+      "name" : "learning_rate",
+      "default" : "optimal",
+      "type" : "cat",
+      "values" : [ "invscaling", "constant", "optimal", "adaptive" ]
+    }, {
+      "name" : "fit_intercept",
+      "default" : "True",
+      "type" : "cat",
+      "values" : [ "True", "False" ]
+    }, {
+      "name" : "l1_ratio",
+      "default" : 0.15,
+      "type" : "cat",
+      "values" : [ 0.25, 0.15, 0.0, 1.0, 0.75, 0.5 ]
+    }, {
+      "name" : "eta0",
+      "default" : 0.0,
+      "type" : "double",
+      "min" : 0.0,
+      "max" : 1.0,
+      "minInterval" : 0.01,
+      "refineSplits" : 8
+    }, {
+      "name" : "power_t",
+      "default" : "0.5",
+      "type" : "cat",
+      "values" : [ 0.5, 0.0, 1.0, 0.1, 100.0, 10.0, 50.0 ]
+    } ],
+    "dependencies" : [ ]
+  } ]
+}

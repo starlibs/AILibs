@@ -1,0 +1,21 @@
+{
+	"repository": "weka.attributeSelection.SymmetricalUncertAttributeEval",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.attributeSelection.SymmetricalUncertAttributeEval",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rankBasedEvaluator"
+			],
+			"parameter": [
+				{
+					"name": "M",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

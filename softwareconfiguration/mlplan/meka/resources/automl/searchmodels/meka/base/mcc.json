@@ -1,0 +1,37 @@
+{
+  "repository" : "meka.classifiers.multilabel.MCC",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.MCC",
+    "providedInterface" : [ "MLClassifier", "BasicMLClassifier" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "AbstractClassifier"
+    } ],
+    "parameter" : [ {
+      "name" : "Is",
+      "comment" : "The number of iterations to search the chain space at train time. default: 0",
+      "type" : "int",
+      "default" : 0,
+      "min" : 0,
+      "max" : 1500,
+      "minInterval" : 5,
+      "refineSplits" : 8
+    }, {
+      "name" : "Iy",
+      "comment" : "The number of iterations to search the output space at test time. default: 10",
+      "type" : "int",
+      "default" : 10,
+      "min" : 0,
+      "max" : 100,
+      "minInterval" : 1,
+      "refineSplits" : 8
+    }, {
+      "name" : "P",
+      "comment" : "Sets the payoff function. Any of those listed in regular evaluation output will do (e.g., 'Exact match'). default: Exact match",
+      "type" : "cat",
+      "default" : "Exact match",
+      "values" : [ "Accuracy", "Jaccard index", "Hamming score", "Exact match", "Jaccard distance", "Hamming loss", "ZeroOne loss", "Harmonic score", "One error", "Rank loss", "Avg precision", "Log Loss (lim. L)", "Log Loss (lim. D)", "Micro Precision", "Micro Recall", "Macro Precision", "Macro Recall", "F1 (micro averaged)", "F1 (macro averaged by example)", "F1 (macro averaged by label)", "AUPRC (macro averaged)", "AUROC (macro averaged)", "Levenshtein distance" ]
+    } ]
+  } ]
+}

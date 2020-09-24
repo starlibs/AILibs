@@ -1,0 +1,39 @@
+{
+  "repository" : "sklearn.svm.LinearSVC",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.svm.LinearSVC",
+    "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "penalty",
+      "default" : "l1",
+      "type" : "cat",
+      "values" : [ "l1", "l2" ]
+    }, {
+      "name" : "loss",
+      "default" : "squared_hinge",
+      "type" : "cat",
+      "values" : [ "squared_hinge" ]
+    }, {
+      "name" : "tol",
+      "default" : 1.0E-5,
+      "type" : "cat",
+      "values" : [ 1.0E-5, 1.0E-4, 0.001, 0.01, 0.1 ]
+    }, {
+      "name" : "C",
+      "default" : 1.0E-4,
+      "type" : "cat",
+      "values" : [ 1.0E-4, 0.001, 0.01, 0.1, 0.5, 1.0, 5.0, 10.0, 15.0, 20.0, 25.0 ]
+    }, {
+      "name" : "dual",
+      "default" : "True",
+      "type" : "cat",
+      "values" : [ "True", "False" ]
+    } ],
+    "dependencies" : [ {
+      "pre" : "dual in {True}",
+      "post" : "penalty in {l2}"
+    } ]
+  } ]
+}

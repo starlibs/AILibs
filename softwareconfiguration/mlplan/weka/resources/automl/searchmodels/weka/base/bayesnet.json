@@ -1,0 +1,20 @@
+{
+  "repository" : "weka.classifiers.bayes.BayesNet",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.bayes.BayesNet",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "PipelineClassifier" ],
+    "parameter" : [ {
+      "name" : "D",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "Q",
+      "type" : "cat",
+      "default" : "weka.classifiers.bayes.net.search.local.K2",
+      "values" : [ "weka.classifiers.bayes.net.search.local.K2", "weka.classifiers.bayes.net.search.local.HillClimber", "weka.classifiers.bayes.net.search.local.LAGDHillClimber", "weka.classifiers.bayes.net.search.local.SimulatedAnnealing", "weka.classifiers.bayes.net.search.local.TabuSearch", "weka.classifiers.bayes.net.search.local.TAN" ]
+    } ],
+    "dependencies" : [ ]
+  } ]
+}

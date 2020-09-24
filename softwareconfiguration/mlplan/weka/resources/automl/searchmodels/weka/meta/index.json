@@ -1,0 +1,5 @@
+{
+  "repository" : "meta-index",
+  "include" : [ "./adaboostm1.json", "./additiveregression.json", "./attributeselectedclassifier.json", "./bagging.json", "./classificationviaregression.json", "./logitboost.json", "./lwl.json", "./multiclassclassifier.json", "./randomcommittee.json", "./randomsubspace.json", "./stacking.json", "./vote.json" ],
+  "components" : [ ]
+}

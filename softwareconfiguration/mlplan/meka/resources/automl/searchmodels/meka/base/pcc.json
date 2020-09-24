@@ -1,0 +1,13 @@
+{
+  "repository" : "meka.classifiers.multilabel.PCC",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.PCC",
+    "providedInterface" : [ "MLClassifier", "BasicMLClassifier" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "AbstractClassifier"
+    } ],
+    "parameter" : [ ]
+  } ]
+}

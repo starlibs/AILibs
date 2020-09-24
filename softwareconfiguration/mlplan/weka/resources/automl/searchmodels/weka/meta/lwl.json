@@ -1,0 +1,27 @@
+{
+  "repository" : "weka.classifiers.lazy.LWL",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.lazy.LWL",
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "WeightedInstancesHandler"
+    } ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "PipelineClassifier" ],
+    "parameter" : [ {
+      "name" : "K",
+      "type" : "cat",
+      "default" : "-1",
+      "values" : [ "-1", "10", "30", "60", "90", "120" ]
+    }, {
+      "name" : "U",
+      "type" : "int",
+      "default" : 0,
+      "min" : 0,
+      "max" : 4,
+      "refineSplits" : 5,
+      "minInterval" : 1
+    } ],
+    "dependencies" : [ ]
+  } ]
+}

@@ -1,0 +1,21 @@
+{
+  "repository" : "sklearn.neural_network.MLPClassifier",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.neural_network.MLPClassifier",
+    "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "alpha",
+      "default" : 1.0E-4,
+      "type" : "cat",
+      "values" : [ 1.0E-4, 0.001, 0.01, 0.1 ]
+    }, {
+      "name" : "learning_rate_init",
+      "default" : 0.001,
+      "type" : "cat",
+      "values" : [ 0.001, 0.01, 0.1, 0.5, 1.0 ]
+    } ],
+    "dependencies" : [ ]
+  } ]
+}

@@ -1,0 +1,5 @@
+{
+  "repository" : "preprocessing-index",
+  "include" : [ "./binarizer.json", "./f_classif.json", "./fastica.json", "./featureagglomeration.json", "./maxabsscaler.json", "./minmaxscaler.json", "./normalizer.json", "./nystroem.json", "./onehotencoder.json", "./pca.json", "./polynomialfeatures.json", "./rbfsampler.json", "./rfe.json", "./robustscaler.json", "./selectfrommodel.json", "./selectfwe.json", "./selectpercentile.json", "./standardscaler.json", "./variancethreshold.json", "./zerocount.json" ],
+  "components" : [ ]
+}

@@ -1,0 +1,9 @@
+{
+	"repository": "WEKA Full Searchspace",
+	"include": [
+		"./ext/twosteppipeline.json",
+		"./weka-full-base.json",
+		"./weka-full-meta.json",
+		"./preprocessing/index.json"
+	]
+}
