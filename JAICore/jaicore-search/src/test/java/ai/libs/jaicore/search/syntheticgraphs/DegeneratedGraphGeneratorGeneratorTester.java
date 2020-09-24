@@ -1,7 +1,7 @@
 package ai.libs.jaicore.search.syntheticgraphs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -16,8 +16,8 @@ import java.util.Set;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -50,8 +50,8 @@ public class DegeneratedGraphGeneratorGeneratorTester {
 
 		Object[][] data = new Object[combos][2];
 		int i = 0;
-		for (int bf = 2; bf <= MAX_BF; bf+=2) {
-			for (int depth = 1; depth <= MAX_DEPTH; depth ++) {
+		for (int bf = 2; bf <= MAX_BF; bf += 2) {
+			for (int depth = 1; depth <= MAX_DEPTH; depth++) {
 				data[i][0] = bf;
 				data[i][1] = depth;
 				i++;
@@ -60,7 +60,7 @@ public class DegeneratedGraphGeneratorGeneratorTester {
 		return Arrays.asList(data);
 	}
 
-	@Before
+	@BeforeEach
 	public void setupTest() {
 		int numDeadEnds = this.branchingFactor / 2;
 		this.input = new DegeneratedGraphSearchProblem(new Random(0), numDeadEnds, this.branchingFactor, this.depth);
@@ -71,17 +71,17 @@ public class DegeneratedGraphGeneratorGeneratorTester {
 			return 1;
 		}
 		int deadEnds = this.branchingFactor / 2;
-		return (int)(Math.pow(this.branchingFactor - deadEnds, depth - 1) * this.branchingFactor);
+		return (int) (Math.pow(this.branchingFactor - deadEnds, depth - 1) * this.branchingFactor);
 	}
 
 	private int getNumOfSolutionsInDepth(final int depth) {
 		int innerNodes = 0;
 		int deadEnds = this.branchingFactor / 2;
 		for (int k = 0; k < depth; k++) {
-			innerNodes += (int)Math.pow(this.branchingFactor  - deadEnds, k);
+			innerNodes += (int) Math.pow(this.branchingFactor - deadEnds, k);
 		}
 		int deadEndSolutions = innerNodes * deadEnds;
-		return (int)(Math.pow(this.branchingFactor - deadEnds, depth) + deadEndSolutions);
+		return (int) (Math.pow(this.branchingFactor - deadEnds, depth) + deadEndSolutions);
 	}
 
 	@Test
@@ -90,18 +90,17 @@ public class DegeneratedGraphGeneratorGeneratorTester {
 		int offspringsPerInnerLevel = this.branchingFactor - leafsPerInnerLevel;
 		int leafsOnLastLevel = this.branchingFactor;
 
-		for (int islandSize = 1; islandSize <= 3; islandSize ++) {
+		for (int islandSize = 1; islandSize <= 3; islandSize++) {
 			int expectedMaxLeafs = -1;
 			if (islandSize < leafsOnLastLevel) {
 				expectedMaxLeafs = 1;
-			}
-			else if (islandSize < leafsOnLastLevel * offspringsPerInnerLevel + leafsPerInnerLevel) { // try to unify the nodes under the last inner node
+			} else if (islandSize < leafsOnLastLevel * offspringsPerInnerLevel + leafsPerInnerLevel) { // try to unify the nodes under the last inner node
 				expectedMaxLeafs = leafsOnLastLevel;
-			}
-			else {
+			} else {
 				return;
 			}
-			assertEquals("Degenerated tree with bf " + this.branchingFactor + " and depth " + this.depth + " and max island size " + islandSize + " should have a maximum of " + expectedMaxLeafs + " leafs per island.", expectedMaxLeafs, this.input.getGraphGenerator().getMaxNumberOfLeafsInEverySubtreeOfMaxLength(BigInteger.valueOf(islandSize)).intValueExact());
+			assertEquals(expectedMaxLeafs, this.input.getGraphGenerator().getMaxNumberOfLeafsInEverySubtreeOfMaxLength(BigInteger.valueOf(islandSize)).intValueExact(),
+					"Degenerated tree with bf " + this.branchingFactor + " and depth " + this.depth + " and max island size " + islandSize + " should have a maximum of " + expectedMaxLeafs + " leafs per island.");
 		}
 	}
 
@@ -131,7 +130,7 @@ public class DegeneratedGraphGeneratorGeneratorTester {
 			long expectedNodesInThisLayer = this.getNumOfNodesInDepth(d);
 			Set<BigInteger> idsInLayer = idsPerLayer.get(d);
 			for (long i = 0; i < expectedNodesInThisLayer; i++) {
-				assertTrue("Id " + i + " is missing in layer of depth " + d + ". Total expected number of nodes: " + expectedNodesInThisLayer + ". Ids: " + idsInLayer, idsInLayer.contains(BigInteger.valueOf(i)));
+				assertTrue(idsInLayer.contains(BigInteger.valueOf(i)), "Id " + i + " is missing in layer of depth " + d + ". Total expected number of nodes: " + expectedNodesInThisLayer + ". Ids: " + idsInLayer);
 			}
 		}
 		assertEquals(totalSolutionsExpected, solutions);

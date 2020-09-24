@@ -1,6 +1,6 @@
 package ai.libs.automl.mlplan.multiclass.wekamlplan.sklearn;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,7 +35,7 @@ public class MLPlanScikitLearnClassificationResultDeliveryTester extends AutoMLA
 		} catch (TrainingException | PredictionException | InterruptedException | DatasetDeserializationFailedException | SplitFailedException e) {
 			throw new AlgorithmCreationException(e);
 		}
-		assertTrue("The majority classifier already needs too much time: " + baseTime, baseTime < 60);
+		assertTrue(baseTime < 60, "The majority classifier already needs too much time: " + baseTime);
 		Timeout totalTimeout = new Timeout(Math.min(100, 10 + (data.size() + data.getNumAttributes()) / 1000 + 15 * baseTime), TimeUnit.SECONDS);
 		builder.withTimeOut(totalTimeout); // time out at most 100 seconds
 		builder.withCandidateEvaluationTimeOut(new Timeout(totalTimeout.seconds() / 2, TimeUnit.SECONDS));

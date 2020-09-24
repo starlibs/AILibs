@@ -1,7 +1,7 @@
 package ai.libs.jaicore.search.syntheticgraphs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -13,7 +13,7 @@ import java.util.Random;
 import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.datastructure.graph.ILabeledPath;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -35,7 +35,7 @@ public class DegeneratedGraphTreasureIslandTester extends SyntheticGraphTester {
 	private int exactIslandSize;
 	private final BigInteger numberOfIslandsWithTreasure;
 	private IIslandModel islandModel;
-	private ChaoticMeansTreasureModel  treasureGenerator;
+	private ChaoticMeansTreasureModel treasureGenerator;
 	private DegeneratedGraphSearchWithPathEvaluationsProblem searchProblem;
 
 	public DegeneratedGraphTreasureIslandTester(final int branchingFactor, final int depth, final int maxIslandSize, final int numberOfIslandsWithTreasure) {
@@ -57,12 +57,12 @@ public class DegeneratedGraphTreasureIslandTester extends SyntheticGraphTester {
 
 		Object[][] data = new Object[combos][4];
 		int i = 0;
-		for (int bf = 2; bf <= MAX_BF; bf+=2) {
+		for (int bf = 2; bf <= MAX_BF; bf += 2) {
 			for (int depth = 1; depth <= MAX_DEPTH; depth++) {
 				for (int islandSize = 1; islandSize <= MAX_ISLANDSIZE; islandSize++) {
 					data[i][0] = bf;
 					data[i][1] = depth;
-					data[i][2] = (int)Math.min(Math.pow(bf / 2, depth), islandSize);
+					data[i][2] = (int) Math.min(Math.pow(bf / 2, depth), islandSize);
 					data[i][3] = 1;
 					i++;
 				}
@@ -73,19 +73,20 @@ public class DegeneratedGraphTreasureIslandTester extends SyntheticGraphTester {
 		return dataAsList;
 	}
 
-	@Before
+	@BeforeEach
 	public void setupTest() throws PathEvaluationException, InterruptedException {
 		this.islandModel = new EqualSizedIslandsModel(this.maxIslandSize);
 		this.treasureGenerator = new ChaoticMeansTreasureModel(this.numberOfIslandsWithTreasure.intValue(), this.islandModel, 0);
 		this.treasureGenerator.setLoggerName(this.getLoggerName() + ".treasuregen");
-		this.searchProblem = new DegeneratedGraphSearchWithPathEvaluationsProblem(new Random(0), this.branchingFactor / 2,this.branchingFactor, this.depth, this.treasureGenerator);
+		this.searchProblem = new DegeneratedGraphSearchWithPathEvaluationsProblem(new Random(0), this.branchingFactor / 2, this.branchingFactor, this.depth, this.treasureGenerator);
 		this.treasureGenerator.setGraphSearchInput(this.searchProblem);
 		DegeneratedGraphGenerator gg = this.searchProblem.getGraphGenerator();
 		this.searchProblem.getPathEvaluator().evaluate(new SearchGraphPath<>(gg.getRootGenerator().getRoot())); // this triggers the generation of treasures
 		this.exactIslandSize = gg.getMaxNumberOfLeafsInEverySubtreeOfMaxLength(this.maxIslandSize).intValueExact();
-		this.logger.info("Now considering graph with bf {}, depth {}, (exact) island size {} (max configured size was {}), and {} islands with treasure.", this.branchingFactor, this.depth, this.exactIslandSize, this.maxIslandSize.intValueExact(), this.numberOfIslandsWithTreasure.intValue());
-		assertTrue("Treasures have not been distribued.", this.treasureGenerator.isTreasuresDistributed());
-		assertEquals("The treasure model is not correct.", this.numberOfIslandsWithTreasure.intValueExact(), this.treasureGenerator.getTreasureIslands().size());
+		this.logger.info("Now considering graph with bf {}, depth {}, (exact) island size {} (max configured size was {}), and {} islands with treasure.", this.branchingFactor, this.depth, this.exactIslandSize,
+				this.maxIslandSize.intValueExact(), this.numberOfIslandsWithTreasure.intValue());
+		assertTrue(this.treasureGenerator.isTreasuresDistributed(), "Treasures have not been distribued.");
+		assertEquals(this.numberOfIslandsWithTreasure.intValueExact(), this.treasureGenerator.getTreasureIslands().size(), "The treasure model is not correct.");
 	}
 
 	@Override

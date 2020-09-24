@@ -43,9 +43,9 @@ public class HASCOBuilderTest {
 		this.checkThatParamsAreSetAppropriatelyByBuilder(builder);
 		HASCOViaFD<Double> hasco = builder.getAlgorithm();
 		assertEquals(IteratingGraphSearchOptimizerFactory.class, hasco.getSearchFactory().getClass());
-		assertEquals(DepthFirstSearchFactory.class, ((IteratingGraphSearchOptimizerFactory)hasco.getSearchFactory()).getBaseAlgorithmFactory().getClass());
+		assertEquals(DepthFirstSearchFactory.class, ((IteratingGraphSearchOptimizerFactory) hasco.getSearchFactory()).getBaseAlgorithmFactory().getClass());
 		assertEquals(IteratingGraphSearchOptimizer.class, hasco.getSearch().getClass());
-		assertEquals(DepthFirstSearch.class, ((IteratingGraphSearchOptimizer)hasco.getSearch()).getBaseAlgorithm().getClass());
+		assertEquals(DepthFirstSearch.class, ((IteratingGraphSearchOptimizer) hasco.getSearch()).getBaseAlgorithm().getClass());
 	}
 
 	@Test
@@ -73,9 +73,9 @@ public class HASCOBuilderTest {
 		this.checkThatParamsAreSetAppropriatelyByBuilder(builder);
 		hasco = builder.getAlgorithm();
 		assertEquals(IteratingGraphSearchOptimizerFactory.class, hasco.getSearchFactory().getClass());
-		assertEquals(DepthFirstSearchFactory.class, ((IteratingGraphSearchOptimizerFactory)hasco.getSearchFactory()).getBaseAlgorithmFactory().getClass());
+		assertEquals(DepthFirstSearchFactory.class, ((IteratingGraphSearchOptimizerFactory) hasco.getSearchFactory()).getBaseAlgorithmFactory().getClass());
 		assertEquals(IteratingGraphSearchOptimizer.class, hasco.getSearch().getClass());
-		assertEquals(DepthFirstSearch.class, ((IteratingGraphSearchOptimizer)hasco.getSearch()).getBaseAlgorithm().getClass());
+		assertEquals(DepthFirstSearch.class, ((IteratingGraphSearchOptimizer) hasco.getSearch()).getBaseAlgorithm().getClass());
 	}
 
 	@Test(expected = IllegalStateException.class)

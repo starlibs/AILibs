@@ -10,10 +10,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.core.exception.TrainingException;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
@@ -39,7 +39,7 @@ public class MekaPipelineFactoryTest {
 	private static MekaPipelineFactory mpf;
 	private static IMekaInstances dTrain;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws Exception {
 		cl = new ComponentLoader(SSC);
 		mpf = new MekaPipelineFactory();
@@ -48,11 +48,11 @@ public class MekaPipelineFactoryTest {
 		dTrain = new MekaInstances(data);
 	}
 
-	@Before
+	@BeforeEach
 	public void init() {
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testValidDefaultConfigInstantiation() throws ComponentInstantiationFailedException, TrainingException, InterruptedException {
 		Collection<ComponentInstance> algorithmSelections = ComponentUtil.getAllAlgorithmSelectionInstances("MLClassifier", cl.getComponents());

@@ -1,7 +1,7 @@
 package ai.libs.jaicore.search.syntheticgraphs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -15,7 +15,7 @@ import java.util.Set;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -79,7 +79,7 @@ public class BalancedGraphGeneratorGeneratorTester {
 
 		/* check that all ids per layer have been enumerated */
 		for (int d = 0; d < this.depth; d++) {
-			long expectedNodesInThisLayer = (long)Math.pow(this.branchingFactor, d);
+			long expectedNodesInThisLayer = (long) Math.pow(this.branchingFactor, d);
 			Set<BigInteger> idsInLayer = idsPerLayer.get(d);
 			for (long i = 0; i < expectedNodesInThisLayer; i++) {
 				assertTrue(idsInLayer.contains(BigInteger.valueOf(i)));

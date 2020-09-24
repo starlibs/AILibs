@@ -1,8 +1,8 @@
 package ai.libs.automl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +17,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,8 +69,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		hasco.setTimeout(new Timeout(30, TimeUnit.SECONDS));
 		try {
 			hasco.call();
-		}
-		catch (AlgorithmTimeoutedException e) {
+		} catch (AlgorithmTimeoutedException e) {
 			/* expected behavior */
 		}
 		assertTrue(true);
@@ -121,7 +120,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		this.stringBuilder.append(numberOfErrorsFound);
 		this.stringBuilder.append(" errors found.");
 
-		assertEquals(this.stringBuilder.toString(), 0, numberOfErrorsFound, 0.0001);
+		assertEquals(0, numberOfErrorsFound, 0.0001, this.stringBuilder.toString());
 	}
 
 	@Test
@@ -169,7 +168,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		this.stringBuilder.append(numberOfErrorsFound);
 		this.stringBuilder.append(" errors found.");
 
-		assertEquals(this.stringBuilder.toString(), 0, numberOfErrorsFound, 0.0001);
+		assertEquals(0, numberOfErrorsFound, 0.0001, this.stringBuilder.toString());
 	}
 
 	@Test
@@ -220,7 +219,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		this.stringBuilder.append(numberOfErrorsFound);
 		this.stringBuilder.append(" errors found.");
 
-		assertEquals(this.stringBuilder.toString(), 0, numberOfErrorsFound, 0.0001);
+		assertEquals(0, numberOfErrorsFound, 0.0001, this.stringBuilder.toString());
 	}
 
 	@Test
@@ -279,15 +278,14 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		this.stringBuilder.append(numberOfErrorsFound);
 		this.stringBuilder.append(" errors found.");
 
-		assertEquals(this.stringBuilder.toString(), 0, numberOfErrorsFound, 0.0001);
+		assertEquals(0, numberOfErrorsFound, 0.0001, this.stringBuilder.toString());
 	}
 
 	private boolean doesExecutionFail(final IComponentInstance componentInstance) throws Exception {
 		try {
 			this.execute(componentInstance);
 			return false;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			this.stringBuilder.append("\n\n========================================================================================\n");
 			this.stringBuilder.append("Could not execute pipeline:\n");
 			this.stringBuilder.append(CompositionSerializer.serializeComponentInstance(componentInstance));

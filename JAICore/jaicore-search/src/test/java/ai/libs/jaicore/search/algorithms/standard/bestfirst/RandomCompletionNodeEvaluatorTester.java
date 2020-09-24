@@ -198,7 +198,8 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		this.testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 2, 10);
 	}
 
-	public void testThatAScoreIsReturnedIfExactlyKSampleSucceed(final int cities, final int k, final int n) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
+	public void testThatAScoreIsReturnedIfExactlyKSampleSucceed(final int cities, final int k, final int n)
+			throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
 
 		final int NUM_SEEDS = 5;
 		final int NUM_SAMPLES = n;
@@ -259,8 +260,8 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		assertEquals(numRepetitions, observedSolutions.get());
 	}
 
-	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> getNodeEvaluator(final int problemDifficulty, final IObjectEvaluator<ILabeledPath<EnhancedTTSPState, String>, Double> oe, final int seed,
-			final int numSamples, final int maxSamples, final int timeoutForNodeEvaluationInMs) {
+	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> getNodeEvaluator(final int problemDifficulty, final IObjectEvaluator<ILabeledPath<EnhancedTTSPState, String>, Double> oe, final int seed, final int numSamples,
+			final int maxSamples, final int timeoutForNodeEvaluationInMs) {
 
 		/* create search that is the basis for the analysis (provides the nodes to be analyzed and the graph generator) */
 		StandardBestFirst<EnhancedTTSPState, String, Double> bf = this.getBF(problemDifficulty, n -> n.getNodes().size() * 1.0);

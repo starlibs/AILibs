@@ -1,8 +1,8 @@
 package ai.libs.automl.mlplan.test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +34,7 @@ public class WekaRegressionMLPlanResultDeliveryTester extends AutoMLAlgorithmFor
 			this.logger.info("Creating ML-Plan instance.");
 			MLPlanWekaBuilder builder = MLPlanWekaBuilder.forRegression();
 			int baseTime = Math.max(5, (int) Math.ceil(1.2 * this.getTrainTimeOfMajorityClassifier(data) / 1000.0));
-			assertTrue("The majority classifier already needs too much time: " + baseTime, baseTime < 60);
+			assertTrue(baseTime < 60, "The majority classifier already needs too much time: " + baseTime);
 			Timeout totalTimeout = new Timeout(Math.min(90, (data.size() + data.getNumAttributes()) / 1000 + 10 * baseTime), TimeUnit.SECONDS);
 			builder.withTimeOut(totalTimeout); // time out at most 90 seconds
 			builder.withCandidateEvaluationTimeOut(new Timeout(totalTimeout.seconds() / 2, TimeUnit.SECONDS));
@@ -58,13 +58,13 @@ public class WekaRegressionMLPlanResultDeliveryTester extends AutoMLAlgorithmFor
 		BestFirst<?, ?, ?, ?> bf = ((BestFirst<?, ?, ?, ?>) mlplan.getSearch());
 		assertNotNull(bf);
 		IPathEvaluator<?, ?, ?> pe = bf.getNodeEvaluator();
-		assertTrue("Expecting the node evaluator to be an alternative node evaluator, but is of type: " + pe.getClass(), pe instanceof AlternativeNodeEvaluator);
+		assertTrue(pe instanceof AlternativeNodeEvaluator, "Expecting the node evaluator to be an alternative node evaluator, but is of type: " + pe.getClass());
 		AlternativeNodeEvaluator<?, ?, ?> ape = (AlternativeNodeEvaluator<?, ?, ?>) pe;
 		while (ape.getPrimaryNodeEvaluator() instanceof AlternativeNodeEvaluator<?, ?, ?>) {
 			ape = (AlternativeNodeEvaluator<?, ?, ?>) ape.getPrimaryNodeEvaluator();
 		}
-		assertTrue("The ML-Plan searcher uses a node evaluator that does not use " + WekaPipelineValidityCheckingNodeEvaluator.class.getName() + " as its eventual primary node evaluator. The evaluator is: " + ape,
-				ape.getPrimaryNodeEvaluator() instanceof WekaPipelineValidityCheckingNodeEvaluator);
+		assertTrue(ape.getPrimaryNodeEvaluator() instanceof WekaPipelineValidityCheckingNodeEvaluator,
+				"The ML-Plan searcher uses a node evaluator that does not use " + WekaPipelineValidityCheckingNodeEvaluator.class.getName() + " as its eventual primary node evaluator. The evaluator is: " + ape);
 	}
 
 	public int getTrainTimeOfMajorityClassifier(final ILabeledDataset<?> data) throws TrainingException, InterruptedException, DatasetDeserializationFailedException {

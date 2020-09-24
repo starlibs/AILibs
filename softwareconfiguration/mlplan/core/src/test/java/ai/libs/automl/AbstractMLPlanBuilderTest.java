@@ -1,8 +1,8 @@
 package ai.libs.automl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.algorithm.Timeout;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
@@ -70,8 +70,8 @@ public abstract class AbstractMLPlanBuilderTest {
 
 	@Test
 	public void testProblemTypeCompleteness() {
-		assertNotNull("No learner factory defined for problem type " + this.problemType, this.problemType.getLearnerFactory());
-		assertNotNull("No search/select splitter defined for problem type " + this.problemType, this.problemType.getSearchSelectionDatasetSplitter());
+		assertNotNull(this.problemType.getLearnerFactory(), "No learner factory defined for problem type " + this.problemType);
+		assertNotNull(this.problemType.getSearchSelectionDatasetSplitter(), "No search/select splitter defined for problem type " + this.problemType);
 		assertNotNull("No search space config (resource) defined for problem type " + this.problemType, this.problemType.getSearchSpaceConfigFileFromResource());
 		assertNotNull("No HASCO method 1 defined for problem type " + this.problemType, this.problemType.getLastHASCOMethodPriorToParameterRefinementOfBareLearner());
 		assertNotNull("No HASCO method 2 defined for problem type " + this.problemType, this.problemType.getLastHASCOMethodPriorToParameterRefinementOfPipeline());
@@ -90,12 +90,12 @@ public abstract class AbstractMLPlanBuilderTest {
 		Collection<IComponent> components = this.getBuilder().getComponents();
 		if (this.getBuilder().getPreferredComponents() != null) {
 			for (String cName : this.getBuilder().getPreferredComponents()) {
-				assertTrue("Preferred component with name " + cName + " does not exist in component repository.", components.stream().anyMatch(c -> c.getName().equals(cName)));
+				assertTrue(components.stream().anyMatch(c -> c.getName().equals(cName)), "Preferred component with name " + cName + " does not exist in component repository.");
 			}
 		}
 		assertEquals(this.problemType.getRequestedInterface(), builder.getRequestedInterface());
 		assertEquals(this.problemType.getSearchSelectionDatasetSplitter(), builder.getSearchSelectionDatasetSplitter());
-		assertTrue("There should be no preferred node evaluators by default.", builder.getPreferredNodeEvaluators().isEmpty());
+		assertTrue(builder.getPreferredNodeEvaluators().isEmpty(), "There should be no preferred node evaluators by default.");
 	}
 
 	protected boolean doesProblemTypeAdoptAvailablePreferredComponents() {

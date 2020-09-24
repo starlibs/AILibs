@@ -1,7 +1,7 @@
 package ai.libs.automl.mlplan.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileReader;
@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.hasco.twophase.TwoPhaseHASCO;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
@@ -39,7 +39,7 @@ public class MLPlanConfigConsistencyTester {
 	private final Timeout timeoutForSingleSolutionEvaluation = new Timeout(60, TimeUnit.SECONDS);
 	private Instances data;
 
-	@Before
+	@BeforeEach
 	public void init() throws IOException {
 		this.data = new Instances(new FileReader(new File("testrsc/car.arff"))); // read the file intentionally into the Instances format!
 		this.data.setClassIndex(this.data.numAttributes() - 1);

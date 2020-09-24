@@ -1,8 +1,8 @@
 package ai.libs.jaicore.search.syntheticgraphs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +17,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.datastructure.graph.ILabeledPath;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearch;
@@ -61,19 +61,19 @@ public abstract class SyntheticGraphTester extends Tester {
 				int island = im.getIsland(path).intValueExact(); // this must not be a big number in this test
 				int size = islandSizes.computeIfAbsent(island, i -> 0) + 1;
 				maxSize = Math.max(maxSize, size);
-				assertTrue("The maximum size of islands is not correct. There is now an island with size " + size, maxSize <= expectedMaxSizeOfAnyIsland);
+				assertTrue(maxSize <= expectedMaxSizeOfAnyIsland, "The maximum size of islands is not correct. There is now an island with size " + size);
 				islandSizes.put(island, size);
 				if (this.isPathATreasure(path)) {
 					treasureIslands.add(island);
-					treasureCount ++;
-					assertFalse("The number of expected treasure paths has been exceeed.", treasureCount > expectedNumberOfTreasureIslands * expectedMaxSizeOfAnyIsland);
+					treasureCount++;
+					assertFalse(treasureCount > expectedNumberOfTreasureIslands * expectedMaxSizeOfAnyIsland, "The number of expected treasure paths has been exceeed.");
 				}
 			}
 		}
-		assertEquals("The number of islands is not correct.", expectedNumberOfIslands, islandSizes.keySet().size());
+		assertEquals(expectedNumberOfIslands, islandSizes.keySet().size(), "The number of islands is not correct.");
 		int minSize = islandSizes.values().stream().min((x, y) -> Integer.compare(x, y)).get();
-		assertTrue("There is an island of size only " + minSize + " while required minimum is " + expectedMinSizeOfAnyIsland, minSize >= expectedMinSizeOfAnyIsland);
-		assertEquals("The number of expected treasure islands is not correct.", expectedNumberOfTreasureIslands, treasureIslands.size());
-		assertTrue("The number of expected treasure paths is too low.", treasureCount >= expectedNumberOfTreasureIslands * expectedMinSizeOfAnyIsland);
+		assertTrue(minSize >= expectedMinSizeOfAnyIsland, "There is an island of size only " + minSize + " while required minimum is " + expectedMinSizeOfAnyIsland);
+		assertEquals(expectedNumberOfTreasureIslands, treasureIslands.size(), "The number of expected treasure islands is not correct.");
+		assertTrue(treasureCount >= expectedNumberOfTreasureIslands * expectedMinSizeOfAnyIsland, "The number of expected treasure paths is too low.");
 	}
 }

@@ -1,9 +1,9 @@
 package ai.libs.automl;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.junit.FixMethodOrder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.junit.runners.Parameterized;
@@ -69,8 +69,8 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 	public void testThatModelIsTrained()
 			throws DatasetDeserializationFailedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ObjectEvaluationFailedException, SplitFailedException, AlgorithmCreationException, IOException {
 		try {
-			assertTrue("There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks(), GlobalTimer.getInstance().getActiveTasks().isEmpty());
-			assertFalse("The thread should not be interrupted when calling the AutoML-tool!", Thread.currentThread().isInterrupted());
+			assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty(), "There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks());
+			assertFalse(Thread.currentThread().isInterrupted(), "The thread should not be interrupted when calling the AutoML-tool!");
 
 			/* load dataset and get splits */
 			this.logger.info("Loading dataset {} for test.", this.problemSet.getName());
@@ -104,21 +104,21 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 			});
 			ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> c = algorithm.call();
 			long runtime = System.currentTimeMillis() - start;
-			assertTrue("Algorithm timeout violated. Runtime was " + runtime + ", but configured timeout was " + algorithm.getTimeout(), runtime < algorithm.getTimeout().milliseconds());
-			assertFalse("The thread should not be interrupted after calling the AutoML-tool!", Thread.currentThread().isInterrupted());
+			assertTrue(runtime < algorithm.getTimeout().milliseconds(), "Algorithm timeout violated. Runtime was " + runtime + ", but configured timeout was " + algorithm.getTimeout());
+			assertFalse(Thread.currentThread().isInterrupted(), "The thread should not be interrupted after calling the AutoML-tool!");
 			this.logger.info("Identified classifier {} as solution to the problem.", c);
-			assertNotNull("The algorithm as not returned any classifier.", c);
+			assertNotNull(c, "The algorithm as not returned any classifier.");
 
 			/* free memory */
 			trainTestSplit = null;
 			this.problemSet = null;
 
 			/* compute error rate */
-			assertTrue("At least 10 instances must be classified!", test.size() >= 10);
+			assertTrue(test.size() >= 10, "At least 10 instances must be classified!");
 			IClassifierEvaluator evaluator = new PreTrainedPredictionBasedClassifierEvaluator(test, this.getTestMeasure());
 			double score = evaluator.evaluate(c);
 			Thread.sleep(algorithm.getTimeout().seconds() / 20);
-			assertTrue("There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks(), GlobalTimer.getInstance().getActiveTasks().isEmpty());
+			assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty(), "There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks());
 			this.logger.info("Error rate of solution {} ({}) on {} is: {}", c.getClass().getName(), c, datasetname, score);
 		} catch (AlgorithmTimeoutedException e) {
 			fail("No solution was found in the given timeout. Stack trace: " + Arrays.stream(e.getStackTrace()).map(se -> "\n\t" + se.toString()).collect(Collectors.joining()));

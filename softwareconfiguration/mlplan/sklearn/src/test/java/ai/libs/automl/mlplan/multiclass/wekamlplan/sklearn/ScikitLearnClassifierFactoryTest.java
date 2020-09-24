@@ -1,7 +1,7 @@
 package ai.libs.automl.mlplan.multiclass.wekamlplan.sklearn;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.model.ComponentInstance;
@@ -67,7 +67,7 @@ public class ScikitLearnClassifierFactoryTest {
 	private static List<Instances> stratSplit;
 	private static AScikitLearnLearnerFactory factory;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws FileNotFoundException, IOException, InterruptedException, SplitFailedException {
 		/* load dataset */
 		Instances data = new Instances(new FileReader(TEST_DATASET));
@@ -86,8 +86,8 @@ public class ScikitLearnClassifierFactoryTest {
 		Set<String> importSet = new HashSet<>();
 		String constructInstruction = factory.extractSKLearnConstructInstruction(ComponentUtil.getDefaultParameterizationOfComponent(classifierComponent), importSet);
 
-		assertTrue("Import set does not contain the import for the classifier", importSet.contains(CLASSIFIER_IMPORT));
-		assertEquals("The extracted construct instruction deviates from the expected value", EXPECTED_CLASSIFIER, constructInstruction);
+		assertTrue(importSet.contains(CLASSIFIER_IMPORT), "Import set does not contain the import for the classifier");
+		assertEquals(EXPECTED_CLASSIFIER, constructInstruction, "The extracted construct instruction deviates from the expected value");
 	}
 
 	@Test
@@ -103,9 +103,9 @@ public class ScikitLearnClassifierFactoryTest {
 		Set<String> importSet = new HashSet<>();
 		String actualConstructInstruction = factory.extractSKLearnConstructInstruction(pipe, importSet);
 
-		assertEquals("Unexpected number of imports in the import set", 3, importSet.size());
-		assertTrue("Not all necessary imports occurred in the import set.", importSet.containsAll(Arrays.asList(PREPROCESSOR_IMPORT, CLASSIFIER_IMPORT, MAKE_PIPELINE_IMPORT)));
-		assertEquals("The actual construct instruction does not match the expected.", EXPECTED_TWO_STEP_PIPE, actualConstructInstruction);
+		assertEquals(3, importSet.size(), "Unexpected number of imports in the import set");
+		assertTrue(importSet.containsAll(Arrays.asList(PREPROCESSOR_IMPORT, CLASSIFIER_IMPORT, MAKE_PIPELINE_IMPORT)), "Not all necessary imports occurred in the import set.");
+		assertEquals(EXPECTED_TWO_STEP_PIPE, actualConstructInstruction, "The actual construct instruction does not match the expected.");
 	}
 
 	@Test
@@ -127,9 +127,9 @@ public class ScikitLearnClassifierFactoryTest {
 		Set<String> importSet = new HashSet<>();
 		String actualConstructInstruction = factory.extractSKLearnConstructInstruction(pipe, importSet);
 
-		assertEquals("Unexpected number of imports in the import set", 4, importSet.size());
-		assertTrue("Not all necessary imports occurred in the import set.", importSet.containsAll(Arrays.asList(MAKE_UNION_IMPORT, PREPROCESSOR_IMPORT, CLASSIFIER_IMPORT, MAKE_PIPELINE_IMPORT)));
-		assertEquals("The actual construct instruction does not match the expected", EXPECTED_SIMPLE_MAKE_UNION_PIPE, actualConstructInstruction);
+		assertEquals(4, importSet.size(), "Unexpected number of imports in the import set");
+		assertTrue(importSet.containsAll(Arrays.asList(MAKE_UNION_IMPORT, PREPROCESSOR_IMPORT, CLASSIFIER_IMPORT, MAKE_PIPELINE_IMPORT)), "Not all necessary imports occurred in the import set.");
+		assertEquals(EXPECTED_SIMPLE_MAKE_UNION_PIPE, actualConstructInstruction, "The actual construct instruction does not match the expected");
 	}
 
 	@Test
@@ -151,9 +151,9 @@ public class ScikitLearnClassifierFactoryTest {
 		Set<String> importSet = new HashSet<>();
 		String actualConstructInstruction = factory.extractSKLearnConstructInstruction(pipe, importSet);
 
-		assertEquals("Unexpected number of imports in the import set", 3, importSet.size());
-		assertTrue("Not all necessary imports occurred in the import set.", importSet.containsAll(Arrays.asList(PREPROCESSOR_IMPORT, CLASSIFIER_IMPORT, MAKE_PIPELINE_IMPORT)));
-		assertEquals("The actual construct instruction does not match the expected", EXPECTED_SIMPLE_MAKE_FORWARD_PIPE, actualConstructInstruction);
+		assertEquals(3, importSet.size(), "Unexpected number of imports in the import set");
+		assertTrue(importSet.containsAll(Arrays.asList(PREPROCESSOR_IMPORT, CLASSIFIER_IMPORT, MAKE_PIPELINE_IMPORT)), "Not all necessary imports occurred in the import set.");
+		assertEquals(EXPECTED_SIMPLE_MAKE_FORWARD_PIPE, actualConstructInstruction, "The actual construct instruction does not match the expected");
 	}
 
 }

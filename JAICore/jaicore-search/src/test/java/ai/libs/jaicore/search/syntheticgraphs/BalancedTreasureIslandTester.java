@@ -1,7 +1,7 @@
 package ai.libs.jaicore.search.syntheticgraphs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -10,7 +10,7 @@ import java.util.Collection;
 import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.datastructure.graph.ILabeledPath;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -34,7 +34,7 @@ public class BalancedTreasureIslandTester extends SyntheticGraphTester {
 
 	private int exactIslandSize;
 	private IIslandModel islandModel;
-	private ChaoticMeansTreasureModel  treasureGenerator;
+	private ChaoticMeansTreasureModel treasureGenerator;
 	private BalancedGraphSearchWithPathEvaluationsProblem searchProblem;
 
 	public BalancedTreasureIslandTester(final int branchingFactor, final int depth, final int distanceToIslands, final int numberOfIslandsWithTreasure) {
@@ -43,7 +43,7 @@ public class BalancedTreasureIslandTester extends SyntheticGraphTester {
 		this.depth = depth;
 		this.distanceToIslands = distanceToIslands;
 		this.numberOfIslandsWithTreasure = numberOfIslandsWithTreasure;
-		this.numberOfIslands = (int)Math.pow(branchingFactor, distanceToIslands);
+		this.numberOfIslands = (int) Math.pow(branchingFactor, distanceToIslands);
 	}
 
 	// creates the test data
@@ -61,17 +61,17 @@ public class BalancedTreasureIslandTester extends SyntheticGraphTester {
 				data[i][0] = bf;
 				data[i][1] = depth;
 				data[i][2] = Math.min(3, depth);
-				data[i][3] = Math.min(2, (int)Math.pow(bf, (int)data[i][2] - 1));
+				data[i][3] = Math.min(2, (int) Math.pow(bf, (int) data[i][2] - 1));
 				i++;
 			}
 		}
 		return Arrays.asList(data);
 	}
 
-	@Before
+	@BeforeEach
 	public void setupTest() throws PathEvaluationException, InterruptedException {
 
-		this.islandModel = new EqualSizedIslandsModel(BigInteger.valueOf((long)Math.pow(this.branchingFactor, this.depth - this.distanceToIslands)));
+		this.islandModel = new EqualSizedIslandsModel(BigInteger.valueOf((long) Math.pow(this.branchingFactor, this.depth - this.distanceToIslands)));
 		this.treasureGenerator = new ChaoticMeansTreasureModel(this.numberOfIslandsWithTreasure, this.islandModel, 0);
 		this.treasureGenerator.setLoggerName(this.getLoggerName() + ".treasuregen");
 		this.searchProblem = new BalancedGraphSearchWithPathEvaluationsProblem(this.branchingFactor, this.depth, this.treasureGenerator);
@@ -83,16 +83,17 @@ public class BalancedTreasureIslandTester extends SyntheticGraphTester {
 
 		/* now compute exact size of islands */
 		this.exactIslandSize = BalancedGraphGeneratorGenerator.getNumberOfLeafsUnderANonTerminalNodeInDepth(this.distanceToIslands, this.branchingFactor, this.depth);
-		this.logger.info("Now considering graph with bf {}, depth {}, (exact) island size {} (configured distance to islands was {}), and {} islands with treasure.", this.branchingFactor, this.depth, this.exactIslandSize, this.distanceToIslands, this.numberOfIslandsWithTreasure);
-		assertEquals("Island size is not computed correctly.", (int)Math.pow(this.branchingFactor, this.depth - this.distanceToIslands), this.exactIslandSize);
+		this.logger.info("Now considering graph with bf {}, depth {}, (exact) island size {} (configured distance to islands was {}), and {} islands with treasure.", this.branchingFactor, this.depth, this.exactIslandSize,
+				this.distanceToIslands, this.numberOfIslandsWithTreasure);
+		assertEquals((int) Math.pow(this.branchingFactor, this.depth - this.distanceToIslands), this.exactIslandSize, "Island size is not computed correctly.");
 
 		/* check that the island model is correct*/
 		assertEquals(this.numberOfIslands, root.getNumberOfSubtreesWithMaxNumberOfNodes(BigInteger.valueOf(this.exactIslandSize)).intValueExact());
-		assertEquals ("Island model has a wrong imagination of the number of islands.", this.numberOfIslands, this.islandModel.getNumberOfIslands().intValueExact());
+		assertEquals(this.numberOfIslands, this.islandModel.getNumberOfIslands().intValueExact(), "Island model has a wrong imagination of the number of islands.");
 
 		/* check that treasures have been distributed and that their number is correct */
-		assertTrue("Treasures have not been distribued.", this.treasureGenerator.isTreasuresDistributed());
-		assertEquals("The treasure model is not correct.", this.numberOfIslandsWithTreasure, this.treasureGenerator.getTreasureIslands().size());
+		assertTrue(this.treasureGenerator.isTreasuresDistributed(), "Treasures have not been distribued.");
+		assertEquals(this.numberOfIslandsWithTreasure, this.treasureGenerator.getTreasureIslands().size(), "The treasure model is not correct.");
 	}
 
 	@Override

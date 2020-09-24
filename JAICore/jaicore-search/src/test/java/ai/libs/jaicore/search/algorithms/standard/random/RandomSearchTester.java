@@ -1,7 +1,7 @@
 package ai.libs.jaicore.search.algorithms.standard.random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
@@ -31,7 +31,7 @@ public class RandomSearchTester extends GraphSearchSolutionIteratorTester {
 		while (rs.hasNext()) {
 			IAlgorithmEvent e = rs.nextWithException();
 			if (e instanceof GraphSearchSolutionCandidateFoundEvent) {
-				SearchGraphPath<?, ?> path = (SearchGraphPath<?, ?>)((GraphSearchSolutionCandidateFoundEvent) e).getSolutionCandidate();
+				SearchGraphPath<?, ?> path = (SearchGraphPath<?, ?>) ((GraphSearchSolutionCandidateFoundEvent) e).getSolutionCandidate();
 				System.out.println(path.getHead());
 				solutions.add(path);
 			}
