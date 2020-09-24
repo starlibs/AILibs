@@ -12,7 +12,8 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +43,7 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsTester extends HASCOTest
 		return getBuilder().withProblem(problem).getAlgorithm();
 	}
 
+	@Tag("long-test")
 	@Test
 	public void testThatDefaultParametrizationsAreEvaluatedFirst() throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 
@@ -71,22 +73,21 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsTester extends HASCOTest
 						HASCOSolutionCandidate<Double> s = ((HASCOSolutionEvent<Double>) e).getSolutionCandidate();
 						boolean isDefault = ComponentInstanceUtil.isDefaultConfiguration(s.getComponentInstance());
 						assertTrue("Found default configured component instance after others that were not default-configured.", !haveSeenNonDefault || !isDefault);
-						assertTrue("Have not seen all expected default configuration prior to a non-default component instance.\nExpected: " + expectedDefaultConfigurations + "\nSeen: " + seenDefaultConfigurations + "\nCurrent component instance: " + s.getComponentInstance(), isDefault || seenDefaultConfigurations == expectedDefaultConfigurations);
+						assertTrue("Have not seen all expected default configuration prior to a non-default component instance.\nExpected: " + expectedDefaultConfigurations + "\nSeen: " + seenDefaultConfigurations
+								+ "\nCurrent component instance: " + s.getComponentInstance(), isDefault || seenDefaultConfigurations == expectedDefaultConfigurations);
 						if (isDefault) {
-							seenDefaultConfigurations ++;
-						}
-						else {
+							seenDefaultConfigurations++;
+						} else {
 							haveSeenNonDefault = true;
 						}
 					}
-				}
-				catch (AlgorithmTimeoutedException ex) {
+				} catch (AlgorithmTimeoutedException ex) {
 					/* break */
 					this.logger.info("Received timeout without having observed any problem; passing to next test.");
 					break;
 				}
 			}
-			assertEquals(expectedDefaultConfigurations , seenDefaultConfigurations);
+			assertEquals(expectedDefaultConfigurations, seenDefaultConfigurations);
 		}
 	}
 }

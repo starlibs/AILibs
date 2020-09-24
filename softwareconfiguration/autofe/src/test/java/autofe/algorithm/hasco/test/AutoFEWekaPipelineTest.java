@@ -2,7 +2,7 @@ package autofe.algorithm.hasco.test;
 
 import autofe.util.test.DataSetUtilsTest;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.graph.Graph;
 import ai.libs.jaicore.ml.weka.WekaUtil;

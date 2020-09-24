@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.api4.java.datastructure.kvstore.IKVStore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.db.DatabaseUtil;

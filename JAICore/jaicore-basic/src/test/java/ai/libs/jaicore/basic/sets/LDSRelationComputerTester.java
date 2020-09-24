@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.sets.algorithms.RelationComputerTester;

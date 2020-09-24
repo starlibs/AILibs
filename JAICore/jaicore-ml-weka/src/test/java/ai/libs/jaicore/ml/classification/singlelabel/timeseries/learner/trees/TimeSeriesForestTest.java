@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

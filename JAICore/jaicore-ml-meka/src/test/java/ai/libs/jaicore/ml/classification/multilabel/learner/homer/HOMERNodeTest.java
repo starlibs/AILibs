@@ -11,7 +11,7 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;

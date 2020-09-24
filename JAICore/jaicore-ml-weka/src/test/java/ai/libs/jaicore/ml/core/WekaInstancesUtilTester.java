@@ -14,7 +14,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;

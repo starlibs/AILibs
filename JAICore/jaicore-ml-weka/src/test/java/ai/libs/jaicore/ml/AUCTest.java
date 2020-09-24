@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.AreaUnderPrecisionRecallCurve;
 import ai.libs.jaicore.ml.classification.loss.dataset.AreaUnderROCCurve;

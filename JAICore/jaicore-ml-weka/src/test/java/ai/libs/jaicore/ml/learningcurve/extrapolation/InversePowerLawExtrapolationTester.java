@@ -4,7 +4,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
@@ -25,10 +26,12 @@ import weka.core.converters.ConverterUtils.DataSource;
 public class InversePowerLawExtrapolationTester {
 	private static final Logger logger = LoggerFactory.getLogger(InversePowerLawExtrapolationTester.class);
 
-	@Test(expected = InvalidAnchorPointsException.class)
+	@Test
 	public void testExceptionForIncorrectAnchorpoints() throws Exception {
-		LearningCurveExtrapolator extrapolator = this.createExtrapolationMethod(new int[] { 1, 2, 3 });
-		extrapolator.extrapolateLearningCurve();
+		Assertions.assertThrows(InvalidAnchorPointsException.class, () -> {
+			LearningCurveExtrapolator extrapolator = this.createExtrapolationMethod(new int[] { 1, 2, 3 });
+			extrapolator.extrapolateLearningCurve();
+		});
 	}
 
 	@Test

@@ -11,7 +11,7 @@ import org.api4.java.ai.ml.core.dataset.schema.IInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.db.DBTester;
 import ai.libs.jaicore.db.IDatabaseAdapter;

@@ -8,7 +8,7 @@ import java.util.List;
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassificationPredictionBatch;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class MultiLabelClassificationPredictionBatchTest {
 

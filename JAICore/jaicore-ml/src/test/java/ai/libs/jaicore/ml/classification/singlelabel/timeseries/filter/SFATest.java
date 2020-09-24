@@ -6,7 +6,7 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 

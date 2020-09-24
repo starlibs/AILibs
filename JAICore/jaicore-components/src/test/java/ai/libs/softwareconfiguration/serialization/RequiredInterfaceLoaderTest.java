@@ -5,7 +5,8 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,9 +52,11 @@ public class RequiredInterfaceLoaderTest {
 		assertEquals(1, reqInterface.getMax());
 	}
 
-	@Test(expected = IOException.class)
+	@Test
 	public void test5() throws IOException {
-		this.createRequiredInterface(this.rootNode.path("requiredInterface").get(4));
+		Assertions.assertThrows(IOException.class, () -> {
+			this.createRequiredInterface(this.rootNode.path("requiredInterface").get(4));
+		});
 	}
 
 	@Test
@@ -63,24 +66,32 @@ public class RequiredInterfaceLoaderTest {
 		assertEquals(6, reqInterface.getMax());
 	}
 
-	@Test(expected = IOException.class)
+	@Test
 	public void test7() throws IOException {
-		this.createRequiredInterface(this.rootNode.path("requiredInterface").get(6));
+		Assertions.assertThrows(IOException.class, () -> {
+			this.createRequiredInterface(this.rootNode.path("requiredInterface").get(6));
+		});
 	}
 
-	@Test(expected = IOException.class)
+	@Test
 	public void test8() throws IOException {
-		this.createRequiredInterface(this.rootNode.path("requiredInterface").get(7));
+		Assertions.assertThrows(IOException.class, () -> {
+			this.createRequiredInterface(this.rootNode.path("requiredInterface").get(7));
+		});
 	}
 
-	@Test(expected = IOException.class)
+	@Test
 	public void test9() throws IOException {
-		this.createRequiredInterface(this.rootNode.path("requiredInterface").get(8));
+		Assertions.assertThrows(IOException.class, () -> {
+			this.createRequiredInterface(this.rootNode.path("requiredInterface").get(8));
+		});
 	}
 
-	@Test(expected = IOException.class)
+	@Test
 	public void test10() throws IOException {
-		this.createRequiredInterface(this.rootNode.path("requiredInterface").get(9));
+		Assertions.assertThrows(IOException.class, () -> {
+			this.createRequiredInterface(this.rootNode.path("requiredInterface").get(9));
+		});
 	}
 
 	private JsonNode getRootNodeFromJson(final File jsonFile) throws IOException {

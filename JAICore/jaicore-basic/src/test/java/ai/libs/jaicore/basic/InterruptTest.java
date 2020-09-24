@@ -1,8 +1,8 @@
 package ai.libs.jaicore.basic;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,7 +14,8 @@ import java.util.stream.Collectors;
 import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.awaitility.Awaitility;
-import org.junit.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,9 +57,10 @@ public class InterruptTest {
 	}
 
 	public void checkPreconditions() {
-		assertTrue("There are still active tasks of some previous test!!", GlobalTimer.getInstance().getActiveTasks().isEmpty());
+		assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty(), "There are still active tasks of some previous test!!");
 	}
 
+	@Tag("medium-test")
 	@Test
 	public void testSimpleInterruptDuringExecution() throws ExecutionException, InterruptedException {
 		for (int i = 0; i < NUMBER_ITERATIONS_SIMPLE; i++) {
@@ -76,6 +78,7 @@ public class InterruptTest {
 		}
 	}
 
+	@Tag("short-test")
 	@Test
 	public void testThatNoInterruptIsFiredIfExecutionFinishesInTime() throws AlgorithmTimeoutedException, ExecutionException, InterruptedException {
 		for (int i = 0; i < NUMBER_ITERATIONS_SIMPLE; i++) {
@@ -94,6 +97,7 @@ public class InterruptTest {
 	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 */
+	@Tag("long-test")
 	@Test
 	public void testNestedInterruptDuringExecutionWithOuterSignifiantlyEarlier() throws ExecutionException, InterruptedException {
 
@@ -123,6 +127,7 @@ public class InterruptTest {
 	 * @throws InterruptedException
 	 * @throws AlgorithmTimeoutedException
 	 */
+	@Tag("long-test")
 	@Test
 	public void testNestedInterruptDuringExecutionWithOuterSignifiantlyLater() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();
@@ -157,6 +162,7 @@ public class InterruptTest {
 	 * @throws InterruptedException
 	 * @throws AlgorithmTimeoutedException
 	 */
+	@Tag("long-test")
 	@Test
 	public void testNestedInterruptDuringExecutionWithOuterAndInnerAtSameTime() throws ExecutionException {
 		this.checkPreconditions();
@@ -178,16 +184,17 @@ public class InterruptTest {
 
 			if (caughtException != null) {
 				/* this is expected behavior */
-				assertFalse("The executing thread is interrupted after a computation block!", Thread.interrupted());
+				assertFalse(Thread.interrupted(), "The executing thread is interrupted after a computation block!");
 				assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty());
-				assertFalse("There are open interrupts: " + Interrupter.get().getAllUnresolvedInterruptsOfThread(Thread.currentThread()).stream().map(Interrupt::getReasonForInterruption).collect(Collectors.toList()),
-						Interrupter.get().hasCurrentThreadOpenInterrupts());
+				assertFalse(Interrupter.get().hasCurrentThreadOpenInterrupts(),
+						"There are open interrupts: " + Interrupter.get().getAllUnresolvedInterruptsOfThread(Thread.currentThread()).stream().map(Interrupt::getReasonForInterruption).collect(Collectors.toList()));
 			} else {
 				fail("No exception was thrown, but an AlgorithmTimedoutedException should have been thrown!");
 			}
 		}
 	}
 
+	@Tag("long-test")
 	@Test
 	public void testTwistedInterruptDuringExecutionWithOuterSignifiantlyEarlier() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();
@@ -209,7 +216,7 @@ public class InterruptTest {
 				boolean interrupted = Thread.interrupted();
 				logger.debug("Now resolving the interrupt. Current interrupted flag state: {}", interrupted);
 				Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
-				assertTrue("There are still active tasks!", GlobalTimer.getInstance().getActiveTasks().isEmpty());
+				assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty(), "There are still active tasks!");
 				assertFalse(Interrupter.get().hasCurrentThreadOpenInterrupts());
 
 				/* this is just to make sonarqube happy */
@@ -221,6 +228,7 @@ public class InterruptTest {
 		}
 	}
 
+	@Tag("long-test")
 	@Test
 	public void testTwistedInterruptDuringExecutionWithOuterSignifiantlyLater() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();
@@ -251,6 +259,7 @@ public class InterruptTest {
 		}
 	}
 
+	@Tag("long-test")
 	@Test
 	public void testTwistedTrackedInterruptDuringExecutionWithOuterAndInnerAtSameTime() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();
@@ -258,7 +267,7 @@ public class InterruptTest {
 		int outerEarlier = 0;
 		for (int i = 0; i < NUMBER_ITERATIONS_OVERLAPPING; i++) {
 			logger.info("Starting iteration {}/{} of testTwistedTrackedInterruptDuringExecutionWithOuterAndInnerAtSameTime", i + 1, NUMBER_ITERATIONS_OVERLAPPING);
-			assertTrue("There are still active tasks!", GlobalTimer.getInstance().getActiveTasks().isEmpty());
+			assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty(), "There are still active tasks!");
 
 			/* test that InterruptException is thrown and that no interrupts are open */
 			InterruptionTimerTask task = new InterruptionTimerTask("outer interrupt");
@@ -270,7 +279,7 @@ public class InterruptTest {
 			} catch (InterruptedException e) {
 				outerEarlier++;
 				Interrupter.get().markInterruptAsResolved(Thread.currentThread(), task);
-				assertTrue("There has been an interrupted exception, but the task has not fired! Stack trace: " + Arrays.stream(e.getStackTrace()).map(s -> "\n\t" + s).collect(Collectors.toList()), task.isTriggered());
+				assertTrue(task.isTriggered(), "There has been an interrupted exception, but the task has not fired! Stack trace: " + Arrays.stream(e.getStackTrace()).map(s -> "\n\t" + s).collect(Collectors.toList()));
 				assertTrue(task.isFinished());
 
 				/* this is just to make sonarqube happy */
@@ -300,10 +309,10 @@ public class InterruptTest {
 
 			assertTrue(!Thread.currentThread().isInterrupted());
 			assertTrue(task.isFinished());
-			assertTrue("Interrupter has still unresolved interrupts: " + Interrupter.get().getAllUnresolvedInterrupts().stream().map(Interrupt::getReasonForInterruption).collect(Collectors.toList()),
-					Interrupter.get().getAllUnresolvedInterrupts().isEmpty());
+			assertTrue(Interrupter.get().getAllUnresolvedInterrupts().isEmpty(),
+					"Interrupter has still unresolved interrupts: " + Interrupter.get().getAllUnresolvedInterrupts().stream().map(Interrupt::getReasonForInterruption).collect(Collectors.toList()));
 			Collection<TrackableTimerTask> activeTasks = GlobalTimer.getInstance().getActiveTasks();
-			assertTrue("There are still " + activeTasks.size() + " active tasks: " + activeTasks, activeTasks.isEmpty());
+			assertTrue(activeTasks.isEmpty(), "There are still " + activeTasks.size() + " active tasks: " + activeTasks);
 			logger.debug("Finished. Inner earlier: {}. Outer earlier: {}", innerEarlier, outerEarlier);
 		}
 	}

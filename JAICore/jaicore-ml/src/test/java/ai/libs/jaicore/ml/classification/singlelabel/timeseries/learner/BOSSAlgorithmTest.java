@@ -9,7 +9,7 @@ import org.aeonbits.owner.ConfigCache;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;

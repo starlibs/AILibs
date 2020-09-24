@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.api4.java.ai.ml.regression.evaluation.IRegressionPrediction;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
 

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.DatasetFileSorter;

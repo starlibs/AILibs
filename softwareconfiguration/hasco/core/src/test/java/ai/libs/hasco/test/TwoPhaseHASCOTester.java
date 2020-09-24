@@ -16,7 +16,8 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.awaitility.Awaitility;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +54,7 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 		return twoPhaseHASCO;
 	}
 
+	@Tag("long-test")
 	@Test
 	public void testThatEnsembleConsideredBySelectionProcedureIsOrderedByScores() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTestProblemSetCreationException {
 		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(((SoftwareConfigurationProblemSet) this.getProblemSet()).getSimpleRecursiveProblemInput());
@@ -65,6 +67,7 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 		}
 	}
 
+	@Tag("medium-test")
 	@Test
 	public void testThatBestSolutionFoundByHASCOIsSuccessfullyEvaluatedInPhase2() throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(((SoftwareConfigurationProblemSet) this.getProblemSet()).getSimpleProblemInputForGeneralTestPurposes());
@@ -75,6 +78,7 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 				twoPhaseHASCO.getSelectionPhaseEvaluationRunners().containsKey(bestCandidateOfPhase1) && twoPhaseHASCO.getSelectionPhaseEvaluationRunners().get(bestCandidateOfPhase1) != null);
 	}
 
+	@Tag("long-test")
 	@Test
 	public void testThatHalfOfSelectionPoolIsSuccessfullyEvaluated() throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(((SoftwareConfigurationProblemSet) this.getProblemSet()).getSimpleRecursiveProblemInput());
@@ -89,6 +93,7 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 		this.logger.info("The first {}/{} solutions have been evaluated successfully.", n, selectionPoolForPhase2.size());
 	}
 
+	@Tag("long-test")
 	@Test
 	public void testThatTimeoutsUsedForComputationsInPhase2CorrespondToThoseObservedInPhase1()
 			throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
@@ -126,6 +131,7 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 		}
 	}
 
+	@Tag("long-test")
 	@Test
 	public void testCorrectTimeoutsAndAdherenceOfWorkers() throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 

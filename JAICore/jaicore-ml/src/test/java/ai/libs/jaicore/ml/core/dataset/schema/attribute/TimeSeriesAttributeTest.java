@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.core.dataset.schema.attribute;
 
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 

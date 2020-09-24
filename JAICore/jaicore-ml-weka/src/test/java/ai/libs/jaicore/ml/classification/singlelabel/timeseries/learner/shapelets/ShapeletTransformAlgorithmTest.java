@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.FStat;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.IQualityMeasure;

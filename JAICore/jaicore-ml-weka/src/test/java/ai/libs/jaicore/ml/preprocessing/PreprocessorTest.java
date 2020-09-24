@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.algorithm.IAlgorithm;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;

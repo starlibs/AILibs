@@ -13,7 +13,8 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.core.reduction.softcomp2planning.HASCOReduction;
@@ -69,6 +70,7 @@ public class NewReductionSandbox {
 
 	}
 
+	@Tag("long-test")
 	@Test
 	public void listIFace() throws IOException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		/* load original software configuration problem */
@@ -88,9 +90,9 @@ public class NewReductionSandbox {
 
 		/* solve the HTN planning problem */
 		BlindForwardDecompositionHTNPlanner<Double> algo = new BlindForwardDecompositionHTNPlanner<>(htnProblem, n -> 0.0);
-		//		algo.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
+		// algo.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 
-		//		new AlgorithmVisualizationWindow(algo).withMainPlugin(new GraphViewPlugin()).withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())));
+		// new AlgorithmVisualizationWindow(algo).withMainPlugin(new GraphViewPlugin()).withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())));
 
 		int seenPlans = 0;
 		Set<String> seenSolutions = new HashSet<>();
@@ -98,14 +100,14 @@ public class NewReductionSandbox {
 			IAlgorithmEvent event = algo.nextWithException();
 			if (event instanceof ASolutionCandidateFoundEvent) {
 
-				Plan plan = (Plan)((ASolutionCandidateFoundEvent) event).getSolutionCandidate();
+				Plan plan = (Plan) ((ASolutionCandidateFoundEvent) event).getSolutionCandidate();
 
 				/* reproduce the configuration solution from plan */
-				//				System.out.println(planCounter++ + ") " + "Solution plan:");
-				//				plan.getActions().forEach(a -> System.out.println("\t" + a.getEncoding()));
+				// System.out.println(planCounter++ + ") " + "Solution plan:");
+				// plan.getActions().forEach(a -> System.out.println("\t" + a.getEncoding()));
 				Monom finalState = HASCOUtil.getFinalStateOfPlan(htnProblem.getInit(), plan);
-				//				System.out.println("Final state: ");
-				//				finalState.forEach(l -> System.out.println("\t- " + l));
+				// System.out.println("Final state: ");
+				// finalState.forEach(l -> System.out.println("\t- " + l));
 
 				ComponentInstance solution = HASCOUtil.getComponentInstanceFromState(problem.getComponents(), finalState, "solution", true);
 				String serializedSolution = CompositionSerializer.serializeComponentInstance(solution).toString();
@@ -114,16 +116,16 @@ public class NewReductionSandbox {
 				}
 				seenSolutions.add(serializedSolution);
 				System.out.println(serializedSolution);
-				seenPlans ++;
+				seenPlans++;
 			}
 		}
 
 		int expectedPlans = 378;
 		assertEquals(expectedPlans, seenSolutions.size());
 
-		//		while (true) {
-		//			;
-		//		}
+		// while (true) {
+		// ;
+		// }
 	}
 
 	private String prettifyMethod(final OCIPMethod method) {
@@ -137,18 +139,12 @@ public class NewReductionSandbox {
 		}
 		String tasknet = sb.toString();
 
-		return methodCounter++ + ") " + method.getName() + "(" + method.getParameters() + ")\n" +
-		"\ttask-name: " + method.getTask() + "\n" +
-		"\tpre-condition: " + method.getPrecondition() + "\n" +
-		"\ttask-network: " + tasknet + "\n" +
-		"\toutputs: " + method.getOutputs() + "\n" +
-		"\teval-pre-condition: " + method.getEvaluablePrecondition() + "\n";
+		return methodCounter++ + ") " + method.getName() + "(" + method.getParameters() + ")\n" + "\ttask-name: " + method.getTask() + "\n" + "\tpre-condition: " + method.getPrecondition() + "\n" + "\ttask-network: " + tasknet + "\n"
+				+ "\toutputs: " + method.getOutputs() + "\n" + "\teval-pre-condition: " + method.getEvaluablePrecondition() + "\n";
 	}
 
 	private String prettifyOperation(final CEOCOperation operation) {
-		return operationCounter++ + ") " + operation.getName() + "(" + operation.getParams() + ")\n" +
-				"\tpre-comndition: " + operation.getPrecondition() + "\n" +
-				"\tadd-list: " + operation.getAddLists() + "\n" +
-				"\tdelete-list: " + operation.getDeleteLists() + "\n";
+		return operationCounter++ + ") " + operation.getName() + "(" + operation.getParams() + ")\n" + "\tpre-comndition: " + operation.getPrecondition() + "\n" + "\tadd-list: " + operation.getAddLists() + "\n" + "\tdelete-list: "
+				+ operation.getDeleteLists() + "\n";
 	}
 }

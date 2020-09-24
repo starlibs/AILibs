@@ -10,10 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Test;
-
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.neighbors.ShotgunEnsembleClassifier;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.neighbors.ShotgunEnsembleLearnerAlgorithm;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test suite for the
@@ -77,32 +75,40 @@ public class ShotgunEnsembleClassifierTest {
 		assertArrayEquals(expectation, mostFrequentLabels.stream().mapToInt(i -> i).toArray());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessOfConstructorForInvalidFactors1() {
-		// Too low factor.
-		double factor = -1e5;
-		new ShotgunEnsembleClassifier(this.minWindowLength, this.maxWindowLength, this.meanNormalization, factor);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			// Too low factor.
+			double factor = -1e5;
+			new ShotgunEnsembleClassifier(this.minWindowLength, this.maxWindowLength, this.meanNormalization, factor);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessOfConstructorForInvalidFactors2() {
-		// Too low factor.
-		double factor = 0;
-		new ShotgunEnsembleClassifier(this.minWindowLength, this.maxWindowLength, this.meanNormalization, factor);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			// Too low factor.
+			double factor = 0;
+			new ShotgunEnsembleClassifier(this.minWindowLength, this.maxWindowLength, this.meanNormalization, factor);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessOfConstructorForInvalidFactors3() {
-		// Too high factor.
-		double factor = 1 + 1e5;
-		new ShotgunEnsembleClassifier(this.minWindowLength, this.maxWindowLength, this.meanNormalization, factor);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			// Too high factor.
+			double factor = 1 + 1e5;
+			new ShotgunEnsembleClassifier(this.minWindowLength, this.maxWindowLength, this.meanNormalization, factor);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessOfConstructorForInvalidFactors4() {
-		// Too high factor.
-		double factor = 2;
-		new ShotgunEnsembleClassifier(this.minWindowLength, this.maxWindowLength, this.meanNormalization, factor);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			// Too high factor.
+			double factor = 2;
+			new ShotgunEnsembleClassifier(this.minWindowLength, this.maxWindowLength, this.meanNormalization, factor);
+		});
 	}
 
 	@Test

@@ -3,7 +3,7 @@ package ai.libs.jaicore.experiments;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.db.IDatabaseConfig;
 import ai.libs.jaicore.db.sql.SQLAdapter;

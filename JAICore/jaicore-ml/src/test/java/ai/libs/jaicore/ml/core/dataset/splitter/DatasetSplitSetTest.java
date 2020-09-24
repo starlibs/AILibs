@@ -17,7 +17,7 @@ import org.api4.java.common.reconstruction.IReconstructionPlan;
 import org.api4.java.common.reconstruction.ReconstructionException;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;

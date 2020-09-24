@@ -9,7 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * This test checks the basic functionalities provided by the ResourceUtil class which provides a convenient API for handling resource files.

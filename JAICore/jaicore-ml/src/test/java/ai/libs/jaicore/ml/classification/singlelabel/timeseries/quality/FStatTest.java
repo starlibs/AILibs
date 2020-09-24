@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.FStat;
 import junit.framework.Assert;

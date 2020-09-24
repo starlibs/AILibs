@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.api4.java.common.math.IVector;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.ranking.dyad.general.DyadSupplier;

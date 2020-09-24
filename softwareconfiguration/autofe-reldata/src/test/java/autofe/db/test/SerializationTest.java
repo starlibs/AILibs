@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import autofe.db.model.database.Attribute;
 import autofe.db.model.database.AttributeType;

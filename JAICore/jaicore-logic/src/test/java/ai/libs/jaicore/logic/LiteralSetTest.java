@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;

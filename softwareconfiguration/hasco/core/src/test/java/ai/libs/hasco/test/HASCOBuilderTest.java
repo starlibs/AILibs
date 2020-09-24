@@ -8,7 +8,9 @@ import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.hasco.builder.HASCOBuilder;
 import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFD;
@@ -36,6 +38,7 @@ public class HASCOBuilderTest {
 		this.simpleProblem = this.problemset.getSimpleProblemInputForGeneralTestPurposes();
 	}
 
+	@Tag("short-test")
 	@SuppressWarnings("rawtypes")
 	@Test
 	public void testDFSFactorySetting() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
@@ -48,6 +51,7 @@ public class HASCOBuilderTest {
 		assertEquals(DepthFirstSearch.class, ((IteratingGraphSearchOptimizer) hasco.getSearch()).getBaseAlgorithm().getClass());
 	}
 
+	@Tag("short-test")
 	@Test
 	public void testBestFirstFactorySetting() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		HASCOViaFDBuilder<Double, ?> builder = HASCOBuilder.get(this.simpleProblem).withBestFirst().withBlindSearch();
@@ -57,6 +61,7 @@ public class HASCOBuilderTest {
 		assertEquals(BestFirst.class, hasco.getSearch().getClass());
 	}
 
+	@Tag("short-test")
 	@SuppressWarnings("rawtypes")
 	@Test
 	public void testThatSearchFactoryCanBeOverWritten() {
@@ -78,9 +83,12 @@ public class HASCOBuilderTest {
 		assertEquals(DepthFirstSearch.class, ((IteratingGraphSearchOptimizer) hasco.getSearch()).getBaseAlgorithm().getClass());
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Tag("short-test")
+	@Test
 	public void testThatBestFirstFailsWithoutFurtherSpecification() {
-		HASCOBuilder.get(this.simpleProblem).withBestFirst().getAlgorithm();
+		Assertions.assertThrows(IllegalStateException.class, () -> {
+			HASCOBuilder.get(this.simpleProblem).withBestFirst().getAlgorithm();
+		});
 	}
 
 	private void checkThatParamsAreSetAppropriatelyByBuilder(final HASCOBuilder<?, ?, ?, ?> builder) {

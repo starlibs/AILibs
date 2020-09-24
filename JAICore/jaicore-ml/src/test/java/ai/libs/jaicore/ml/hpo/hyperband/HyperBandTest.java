@@ -13,7 +13,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;

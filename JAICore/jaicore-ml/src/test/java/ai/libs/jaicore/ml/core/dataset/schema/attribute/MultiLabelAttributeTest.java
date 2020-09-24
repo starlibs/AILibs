@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IMultiLabelAttribute;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiLabelAttribute;
 

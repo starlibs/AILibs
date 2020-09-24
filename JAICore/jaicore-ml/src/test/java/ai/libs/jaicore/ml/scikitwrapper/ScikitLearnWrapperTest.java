@@ -19,7 +19,7 @@ import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
 import org.api4.java.ai.ml.regression.evaluation.IRegressionPrediction;
 import org.api4.java.ai.ml.regression.evaluation.IRegressionResultBatch;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;

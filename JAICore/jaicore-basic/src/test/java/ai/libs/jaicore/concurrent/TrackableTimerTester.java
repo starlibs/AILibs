@@ -7,7 +7,7 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.interrupt.InterruptionTimerTask;

@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.problems.scheduling.IJobSchedulingInput;
 import ai.libs.jaicore.problems.scheduling.Job;

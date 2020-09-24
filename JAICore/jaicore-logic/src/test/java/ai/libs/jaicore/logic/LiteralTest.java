@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.LiteralParam;

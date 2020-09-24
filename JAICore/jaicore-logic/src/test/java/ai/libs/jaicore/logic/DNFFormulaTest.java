@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.logic.fol.structure.Clause;
 import ai.libs.jaicore.logic.fol.structure.DNFFormula;

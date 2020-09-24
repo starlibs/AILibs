@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class R2ScoreTest extends ARegressionLossTest {
 

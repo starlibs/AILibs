@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 

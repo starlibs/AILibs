@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter.derivate
 
 import static org.junit.Assert.assertArrayEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.transform.vector.derivate.KeoghDerivate;
 

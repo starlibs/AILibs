@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runners.Parameterized.Parameters;
 import org.openml.apiconnector.io.OpenmlConnector;
 

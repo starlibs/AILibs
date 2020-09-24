@@ -11,7 +11,7 @@ import java.util.List;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;

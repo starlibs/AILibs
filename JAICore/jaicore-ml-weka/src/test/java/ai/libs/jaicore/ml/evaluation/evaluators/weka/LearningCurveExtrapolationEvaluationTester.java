@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.evaluation.evaluators.weka;
 import java.io.File;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 

@@ -12,7 +12,7 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

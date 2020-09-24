@@ -14,7 +14,8 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +72,7 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 		return hascoObjects;
 	}
 
+	@Tag("long-test")
 	@Test
 	public void sanityCheckOfSearchGraph() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmTestProblemSetCreationException {
 		for (Pair<HASCO<N, A, Double>, Integer> pairOfHASCOAndNumOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
@@ -86,6 +88,7 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 		}
 	}
 
+	@Tag("medium-test")
 	@Test
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmTestProblemSetCreationException {
 		for (Pair<HASCO<N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
@@ -94,6 +97,7 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 		}
 	}
 
+	@Tag("medium-test")
 	@Test
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		for (Pair<HASCO<N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
@@ -122,6 +126,7 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 		assertEquals("All " + numberOfExpectedSolutions + " solutions were found, but " + solutions.size() + " solutions were returned in total, i.e. there are solutions returned twice", numberOfExpectedSolutions, solutions.size());
 	}
 
+	@Tag("medium-test")
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testThatIteratorReturnsEachPossibleSolution() throws AlgorithmTestProblemSetCreationException {

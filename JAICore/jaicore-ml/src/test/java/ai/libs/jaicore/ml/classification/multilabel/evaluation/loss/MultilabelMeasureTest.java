@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.multilabel.MultiLabelClassification;
 

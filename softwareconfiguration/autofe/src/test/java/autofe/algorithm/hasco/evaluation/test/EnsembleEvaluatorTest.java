@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;

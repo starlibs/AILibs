@@ -2,7 +2,7 @@ package ai.libs.jaicore.basic.complexity;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.complexity.StretchingComplexity;
 

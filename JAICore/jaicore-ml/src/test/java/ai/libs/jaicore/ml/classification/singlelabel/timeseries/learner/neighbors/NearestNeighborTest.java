@@ -8,12 +8,12 @@ import java.util.PriorityQueue;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.metric.EuclideanDistance;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.neighbors.NearestNeighborClassifier;
 
 /**
  * Test suite for the
@@ -231,25 +231,28 @@ public class NearestNeighborTest {
 	 * @throws TrainingException
 	 * @throws PredictionException
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testPredictionOnSingleInstanceWithNullInstanceThrowsIllegalArgumentException() throws TrainingException, PredictionException {
-		// For single instance prediciton.
-		NearestNeighborClassifier classifier = new NearestNeighborClassifier(6, new EuclideanDistance());
-		classifier.train(this.dataset);
-		classifier.predict((double[]) null);
-
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			// For single instance prediciton.
+			NearestNeighborClassifier classifier = new NearestNeighborClassifier(6, new EuclideanDistance());
+			classifier.train(this.dataset);
+			classifier.predict((double[]) null);
+		});
 	}
 
 	/**
 	 * Tests if IllegalArgumetnExceptions are thrown when making calls with
 	 * <code>null</code> objects.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testPredictionOnDatasetWithNullInstanceThrowsIllegalArgumentException() throws TrainingException, PredictionException {
-		// For prediction on dataset
-		NearestNeighborClassifier classifier = new NearestNeighborClassifier(6, new EuclideanDistance());
-		classifier.train(this.dataset);
-		classifier.predict((TimeSeriesDataset2) null);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			// For prediction on dataset
+			NearestNeighborClassifier classifier = new NearestNeighborClassifier(6, new EuclideanDistance());
+			classifier.train(this.dataset);
+			classifier.predict((TimeSeriesDataset2) null);
+		});
 
 	}
 

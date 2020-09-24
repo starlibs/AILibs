@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.classification.loss.instance;
 import static org.junit.Assert.assertEquals;
 
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 

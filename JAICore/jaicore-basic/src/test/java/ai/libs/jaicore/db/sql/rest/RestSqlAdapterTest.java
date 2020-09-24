@@ -14,7 +14,7 @@ import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.datastructure.kvstore.IKVStore;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.db.DBTester;

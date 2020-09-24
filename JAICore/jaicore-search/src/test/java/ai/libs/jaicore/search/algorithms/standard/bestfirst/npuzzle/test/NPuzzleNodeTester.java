@@ -3,7 +3,7 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.npuzzle.test;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.problems.npuzzle.NPuzzleState;
 

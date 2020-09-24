@@ -10,7 +10,7 @@ import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;

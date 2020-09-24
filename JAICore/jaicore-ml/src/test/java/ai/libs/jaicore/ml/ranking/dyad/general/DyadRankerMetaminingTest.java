@@ -17,7 +17,7 @@ import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import org.api4.java.common.math.IVector;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
