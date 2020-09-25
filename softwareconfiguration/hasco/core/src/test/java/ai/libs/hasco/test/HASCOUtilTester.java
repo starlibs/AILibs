@@ -33,7 +33,7 @@ public class HASCOUtilTester {
 	public void testComponentInstanceBuilder() throws Exception {
 		File compfile = new File(pathToFiles + "testrsc/simpleproblemwithtwocomponentsandnumericparam.json");
 		Monom state = new Monom(
-				"resolves(request, A, A, solution) & parameterContainer(A, a, solution, newVar2) & val(newVar3, v2) & closed(newVar3) & parameterContainer(B, b, newVar5, newVar6) & parameterContainer(B, a, newVar5, newVar7) & parameterContainer(A, b, solution, newVar3) & parameterFocus(solution, a, NaN) & val(newVar6, v3) & val(newVar7, true) & interfaceMember(newVar4, newVar1) & component(solution) & component(request) & overwritten(newVar7) & overwritten(newVar6) & component(newVar5) & resolves(newVar4, IFA, B, newVar5) & overwritten(newVar3) & interfaceGroup(A, i1, solution, newVar1) & overwritten(newVar2)");
+				"resolves(request, A, A, solution) & parameterContainer(A, a, solution, newVar2) & val(newVar3, v2) & closed(newVar3) & parameterContainer(B, b, newVar5, newVar6) & parameterContainer(B, a, newVar5, newVar7) & parameterContainer(A, b, solution, newVar3) & parameterFocus(solution, a, NaN) & val(newVar6, v3) & val(newVar7, true) & interfaceMember(newVar4, newVar1, 1) & component(solution) & component(request) & overwritten(newVar7) & overwritten(newVar6) & component(newVar5) & resolves(newVar4, IFA, B, newVar5) & overwritten(newVar3) & interfaceGroup(A, i1, solution, newVar1) & overwritten(newVar2)");
 		state.add(new Literal("val", Arrays.asList(new ConstantParam("newVar2"), new ConstantParam("[12.5, 13.5]")))); // add this separately, because the comma in the interval cannot be handled by the monom constructor
 		ComponentSerialization serializer = new ComponentSerialization();
 

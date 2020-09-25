@@ -58,9 +58,12 @@ public class ComponentSerialization implements ILoggingCustomizable {
 	public static final String FIELD_COMPONENTS = "components";
 	public static final String FIELD_CONSTRAINTS = "constraints";
 	public static final String FIELD_PARAMETERS = "parameters";
+
+	public static final String DTYPE_DOUBLE ="double";
+	public static final String DTYPE_INT ="int";
+
 	private static final String FIELD_DEFAULT = "default";
 	private static final String MSG_CANNOT_PARSE_LITERAL = "Cannot parse literal ";
-	private static final String MSG_DOMAIN_NOT_SUPPORTED = "Currently no support for parameters with domain \"";
 
 	private static final Pattern PATTERN_DEPENDENCY = Pattern.compile("(\\S+)\\s*(?:(=)(.*)|(in) (\\[.*\\]|\\{.*\\}))");
 
@@ -127,10 +130,13 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		ObjectMapper om = new ObjectMapper();
 		JsonNode rootNode = om.readTree(jsonDescription);
 		JsonNode compNode = rootNode.get(FIELD_COMPONENTS);
-		if (!compNode.isArray()) {
+		if (compNode != null && !compNode.isArray()) {
 			throw new IllegalArgumentException("Components field in repository file " + jsonFile.getAbsolutePath() + " is not defined or not an array!");
 		}
-		ArrayNode compNodeAsArray = (ArrayNode) compNode;
+		ArrayNode compNodeAsArray = compNode != null ? (ArrayNode) compNode : om.createArrayNode();
+		if (compNode == null) {
+			((ObjectNode)rootNode).set(FIELD_COMPONENTS, compNodeAsArray);
+		}
 		if (this.logger.isInfoEnabled()) {
 			compNodeAsArray.forEach(n -> this.logger.info("Adding component {}", n));
 		}
@@ -206,9 +212,9 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		JsonNode defValNode = parameter.get(FIELD_DEFAULT);
 		String type = parameter.get("type").asText();
 		switch (type) {
-		case "int":
+		case DTYPE_INT:
 		case "int-log":
-		case "double":
+		case DTYPE_DOUBLE:
 		case "double-log":
 			if (!parameter.has("min")) {
 				throw new IllegalArgumentException("No min value defined for parameter " + name);
@@ -250,7 +256,7 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		this.checkThatParameterDefinitionHasNameAndType(parameter);
 		String name = parameter.get("name").asText();
 		String type = parameter.get("type").asText();
-		if (!type.startsWith("int") && !type.startsWith("double")) {
+		if (!type.startsWith(DTYPE_INT) && !type.startsWith(DTYPE_DOUBLE)) {
 			throw new IllegalArgumentException("Parameter type is " + type + " and hence not numeric!");
 		}
 
@@ -407,7 +413,7 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		paramConfigs.put(component.get("name").asText(), map);
 		for (JsonNode parameter : component.get(FIELD_PARAMETERS)) {
 			String type = parameter.get("type").asText();
-			if (type.startsWith("int") || type.startsWith("double")) {
+			if (type.startsWith(DTYPE_INT) || type.startsWith(DTYPE_DOUBLE)) {
 				map.put(parameter.get("name").asText(), this.deserializeParamRefinement(parameter));
 			}
 		}

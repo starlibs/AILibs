@@ -265,7 +265,7 @@ public class HASCOUtil {
 			ComponentInstance requiringCI = entry.getValue();
 			String requiringCIReference = entry.getKey();
 			for (IRequiredInterfaceDefinition ri : requiringCI.getComponent().getRequiredInterfaces()) {
-				String reqInterfaceId = ri.getName();
+				String reqInterfaceId = ri.getId();
 				List<IComponentInstance> realizations = new ArrayList<>();
 				if (orderedRequiredInterfaceMap.containsKey(requiringCIReference) && orderedRequiredInterfaceMap.get(requiringCIReference).containsKey(reqInterfaceId)) {
 					Map<Integer, ComponentInstance> provisionsOfThisInterface = orderedRequiredInterfaceMap.get(requiringCIReference).get(reqInterfaceId);

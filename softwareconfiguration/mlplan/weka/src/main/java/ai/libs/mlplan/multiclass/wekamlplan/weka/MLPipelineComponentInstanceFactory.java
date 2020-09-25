@@ -71,7 +71,7 @@ public class MLPipelineComponentInstanceFactory {
 			HashMap<String, List<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
 			satisfactionOfRequiredInterfaces.put("preprocessor", Arrays.asList(preprocessorCI));
 			satisfactionOfRequiredInterfaces.put("classifier", Arrays.asList(classifierCI));
-			return new ComponentInstance(ComponentUtil.getComponentByName("pipeline", this.components), new HashMap<String, String>(), satisfactionOfRequiredInterfaces);
+			return new ComponentInstance(ComponentUtil.getComponentByName("pipeline", this.components), new HashMap<>(), satisfactionOfRequiredInterfaces);
 
 		} else {
 			// Pipeline is only classifier
