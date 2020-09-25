@@ -2,6 +2,7 @@ package ai.libs.jaicore.components.api;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public interface IComponentInstance extends Serializable {
@@ -40,7 +41,7 @@ public interface IComponentInstance extends Serializable {
 	/**
 	 * @return This method returns a mapping of interface IDs to component instances.
 	 */
-	public Map<String, Collection<IComponentInstance>> getSatisfactionOfRequiredInterfaces();
+	public Map<String, List<IComponentInstance>> getSatisfactionOfRequiredInterfaces();
 
-	public Collection<IComponentInstance> getSatisfactionOfRequiredInterface(String idOfRequiredInterface);
+	public List<IComponentInstance> getSatisfactionOfRequiredInterface(String idOfRequiredInterface);
 }

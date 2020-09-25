@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,11 +14,12 @@ import org.junit.Test;
 
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.model.CompositionProblemUtil;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 
 public class UtilCompositionTest {
 
@@ -37,10 +37,10 @@ public class UtilCompositionTest {
 		component1.addRequiredInterface("Interface1", "Interface1");
 		component1.addRequiredInterface("Interface2", "Interface2");
 		component2.addRequiredInterface("Interface1", "Interface1");
-		Map<String, Collection<IComponentInstance>> sat1 = new HashMap<>();
-		Map<String, Collection<IComponentInstance>> sat2 = new HashMap<>();
-		Map<String, Collection<IComponentInstance>> sat3 = new HashMap<>();
-		Map<String, Collection<IComponentInstance>> sat4 = new HashMap<>();
+		Map<String, List<IComponentInstance>> sat1 = new HashMap<>();
+		Map<String, List<IComponentInstance>> sat2 = new HashMap<>();
+		Map<String, List<IComponentInstance>> sat3 = new HashMap<>();
+		Map<String, List<IComponentInstance>> sat4 = new HashMap<>();
 		Map<String, String> parameterValues = new HashMap<>();
 		ComponentInstance instance4 = new ComponentInstance(component4, parameterValues, sat4);
 		ComponentInstance instance3 = new ComponentInstance(component3, parameterValues, sat3);
@@ -57,7 +57,7 @@ public class UtilCompositionTest {
 
 	@Test
 	public void testNumberOfUnparametrizedCompositions() throws IOException {
-		ComponentLoader l = new ComponentLoader(new File("./testrsc/simplerecursiveproblem.json"));
-		assertEquals(4, ComponentUtil.getNumberOfUnparametrizedCompositions(l.getComponents(), "IFace"));
+		IComponentRepository repo = new ComponentSerialization().deserializeRepository(new File("./testrsc/simplerecursiveproblem.json"));
+		assertEquals(4, ComponentUtil.getNumberOfUnparametrizedCompositions(repo, "IFace"));
 	}
 }

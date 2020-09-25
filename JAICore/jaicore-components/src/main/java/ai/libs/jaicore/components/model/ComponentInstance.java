@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,7 @@ public class ComponentInstance  implements IComponentInstance, Serializable {
 
 	/* The grounding of the component including parameter values and recursively resolved required interfaces. */
 	private final Map<String, String> parameterValues;
-	private final Map<String, Collection<IComponentInstance>> satisfactionOfRequiredInterfaces;
+	private final Map<String, List<IComponentInstance>> satisfactionOfRequiredInterfaces;
 
 	private final Map<String, String> annotations = new HashMap<>();
 
@@ -70,7 +71,7 @@ public class ComponentInstance  implements IComponentInstance, Serializable {
 	 *            The refinement of the required interfaces.
 	 */
 	public ComponentInstance(@JsonProperty("component") final IComponent component, @JsonProperty("parameterValues") final Map<String, String> parameterValues,
-			@JsonProperty("satisfactionOfRequiredInterfaces") final Map<String, Collection<IComponentInstance>> satisfactionOfRequiredInterfaces) {
+			@JsonProperty("satisfactionOfRequiredInterfaces") final Map<String, List<IComponentInstance>> satisfactionOfRequiredInterfaces) {
 		super();
 		this.component = component;
 		this.parameterValues = parameterValues;
@@ -136,7 +137,7 @@ public class ComponentInstance  implements IComponentInstance, Serializable {
 	 * @return This method returns a mapping of interface IDs to component instances.
 	 */
 	@Override
-	public Map<String, Collection<IComponentInstance>> getSatisfactionOfRequiredInterfaces() {
+	public Map<String, List<IComponentInstance>> getSatisfactionOfRequiredInterfaces() {
 		return this.satisfactionOfRequiredInterfaces;
 	}
 
@@ -251,7 +252,10 @@ public class ComponentInstance  implements IComponentInstance, Serializable {
 	}
 
 	@Override
-	public Collection<IComponentInstance> getSatisfactionOfRequiredInterface(final String idOfRequiredInterface) {
+	public List<IComponentInstance> getSatisfactionOfRequiredInterface(final String idOfRequiredInterface) {
+		if (!this.component.hasRequiredInterfaceWithId(idOfRequiredInterface)) {
+			throw new IllegalArgumentException("\"" + idOfRequiredInterface + "\" is not a valid required interface id of component " + this.component.getName()+ ". Valid ids are: " + this.component.getRequiredInterfaces().stream().map(ri -> "\n\t- " + ri.getId()).collect(Collectors.joining()));
+		}
 		return this.satisfactionOfRequiredInterfaces.get(idOfRequiredInterface);
 	}
 }

@@ -3,19 +3,19 @@ package ai.libs.hasco.core.events;
 import ai.libs.jaicore.components.model.ComponentInstance;
 
 public class HASCOSolutionEvaluationEvent<T, V extends Comparable<V>> {
-	private final ComponentInstance composition;
+	private final ComponentInstance componentInstance;
 	private final T solution;
 	private final V score;
 
-	public HASCOSolutionEvaluationEvent(final ComponentInstance composition, final T solution, final V score) {
+	public HASCOSolutionEvaluationEvent(final ComponentInstance componentInstance, final T solution, final V score) {
 		super();
-		this.composition = composition;
+		this.componentInstance = componentInstance;
 		this.solution = solution;
 		this.score = score;
 	}
 
-	public ComponentInstance getComposition() {
-		return this.composition;
+	public ComponentInstance getComponentInstance() {
+		return this.componentInstance;
 	}
 
 	public T getSolution() {

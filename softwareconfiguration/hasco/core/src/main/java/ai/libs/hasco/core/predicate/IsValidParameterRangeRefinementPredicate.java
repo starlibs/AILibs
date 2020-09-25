@@ -18,12 +18,13 @@ import org.slf4j.LoggerFactory;
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfiguration;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
@@ -34,10 +35,10 @@ public class IsValidParameterRangeRefinementPredicate implements EvaluablePredic
 	private final Logger logger = LoggerFactory.getLogger(IsValidParameterRangeRefinementPredicate.class);
 
 	private final Collection<IComponent> components;
-	private final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> refinementConfiguration;
+	private final INumericParameterRefinementConfigurationMap refinementConfiguration;
 	private final Map<ComponentInstance, Double> knownCompositionsAndTheirScore = new HashMap<>();
 
-	public IsValidParameterRangeRefinementPredicate(final Collection<? extends IComponent> components, final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> refinementConfiguration) {
+	public IsValidParameterRangeRefinementPredicate(final Collection<? extends IComponent> components, final INumericParameterRefinementConfigurationMap refinementConfiguration) {
 		super();
 		this.components = new ArrayList<>(components);
 		this.refinementConfiguration = refinementConfiguration;
@@ -93,7 +94,7 @@ public class IsValidParameterRangeRefinementPredicate implements EvaluablePredic
 				Interval currentInterval = new Interval(currentlyActiveDomain.getMin(), currentlyActiveDomain.getMax());
 				assert (!hasBeenSetBefore || (currentInterval.getInf() == Double.valueOf(SetUtil.unserializeList(currentParamValue).get(0)) && currentInterval.getSup() == Double
 						.valueOf(SetUtil.unserializeList(currentParamValue).get(1)))) : "The derived currently active domain of an explicitly set parameter deviates from the domain specified in the state!";
-				ParameterRefinementConfiguration refinementConfig = this.refinementConfiguration.get(component).get(param);
+				INumericParameterRefinementConfiguration refinementConfig = this.refinementConfiguration.getRefinement(component, param);
 				if (refinementConfig == null) {
 					throw new IllegalArgumentException("No refinement configuration for parameter \"" + parameterName + "\" of component \"" + componentName + "\" has been supplied!");
 				}

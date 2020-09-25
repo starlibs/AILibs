@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.serialization.CompositionSerializer;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
@@ -64,7 +64,7 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 
 		/* now check whether this is a pipeline */
 		String nameOfLastAppliedMethod = appliedMethods.get(appliedMethods.size() - 1);
-		String compactStringOfCI = CompositionSerializer.serializeComponentInstance(instance).toString();
+		String compactStringOfCI = new ComponentSerialization().serialize(instance).toString();
 		this.logger.debug("The associated component instance is {}. Constitutes a pipeline? {}. Name of last applied method: {}", compactStringOfCI, isPipeline ? "yes" : "no", nameOfLastAppliedMethod);
 		Double score = EXPAND_NODE_SCORE;
 		boolean lastMethodBeforeSteppingToRandomCompletions = false;

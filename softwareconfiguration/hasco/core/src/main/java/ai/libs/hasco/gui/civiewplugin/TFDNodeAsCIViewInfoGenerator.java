@@ -2,6 +2,7 @@ package ai.libs.hasco.gui.civiewplugin;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
 
 import ai.libs.hasco.core.HASCOUtil;
@@ -61,7 +62,7 @@ public class TFDNodeAsCIViewInfoGenerator implements NodeInfoGenerator<BackPoint
 		}
 		sb.append("</table>");
 
-		for (Entry<String, Collection<IComponentInstance>> subComponent : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+		for (Entry<String, List<IComponentInstance>> subComponent : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			sb.append(subComponent.getKey());
 			subComponent.getValue().forEach(subCi -> sb.append(this.visualizeComponentInstance(subCi)));
 		}

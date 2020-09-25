@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
@@ -25,8 +24,8 @@ import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
-import ai.libs.jaicore.components.api.IParameter;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
+import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
 import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
@@ -58,7 +57,7 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 	private Collection<IComponent> components;
 	private String requiredInterface;
 	private IObjectEvaluator<IComponentInstance, V> evaluator;
-	private Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramRefinementConfig;
+	private INumericParameterRefinementConfigurationMap paramRefinementConfig;
 	private RefinementConfiguredSoftwareConfigurationProblem<V> problem;
 
 	private IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver;
@@ -136,6 +135,13 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 	}
 
 	public void setProblemInput(final RefinementConfiguredSoftwareConfigurationProblem<V> problemInput) {
+		for (IComponent c : problemInput.getComponents()) {
+			for (IRequiredInterfaceDefinition ri : c.getRequiredInterfaces()) {
+				if (!ri.isOrdered()) {
+					throw new IllegalArgumentException("HASCO does currently not support non-ordered required-interfaces of components, but required interface \"" + ri.getId() + "\" of component \"" + c.getName() + "\" is not ordered!");
+				}
+			}
+		}
 		this.problem = problemInput;
 	}
 
@@ -228,11 +234,11 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 		return this.getSelf();
 	}
 
-	public Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> getParamRefinementConfig() {
+	public INumericParameterRefinementConfigurationMap getParamRefinementConfig() {
 		return this.paramRefinementConfig;
 	}
 
-	public B withParamRefinementConfig(final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramRefinementConfig) {
+	public B withParamRefinementConfig(final INumericParameterRefinementConfigurationMap paramRefinementConfig) {
 		this.paramRefinementConfig = paramRefinementConfig;
 		this.compileProblemIfPossible();
 		return this.getSelf();

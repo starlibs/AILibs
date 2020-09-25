@@ -1,6 +1,5 @@
 package ai.libs.mlplan.multilabel.mekamlplan;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -49,7 +48,7 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 		Classifier c = (Classifier) Class.forName(ci.getComponent().getName()).newInstance();
 		List<String> optionsList = getOptionsForParameterValues(ci);
 
-		for (Entry<String, Collection<IComponentInstance>> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+		for (Entry<String, List<IComponentInstance>> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
 				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}
@@ -68,7 +67,7 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 		if (c instanceof OptionHandler) {
 			((OptionHandler) c).setOptions(optionsList.toArray(new String[0]));
 		}
-		for (Entry<String, Collection<IComponentInstance>> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+		for (Entry<String, List<IComponentInstance>> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
 				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}
@@ -133,7 +132,7 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 	private List<String> getOptionsRecursively(final IComponentInstance ci) {
 		List<String> optionsList = getOptionsForParameterValues(ci);
 
-		for (Entry<String, Collection<IComponentInstance>> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+		for (Entry<String, List<IComponentInstance>> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
 				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}

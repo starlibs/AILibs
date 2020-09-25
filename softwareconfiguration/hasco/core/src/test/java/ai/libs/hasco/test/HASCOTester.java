@@ -26,7 +26,7 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.jaicore.components.serialization.CompositionSerializer;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.util.CycleDetectedResult;
 import ai.libs.jaicore.search.util.DeadEndDetectedResult;
@@ -36,6 +36,7 @@ import ai.libs.jaicore.search.util.SanityCheckResult;
 public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends SoftwareConfigurationAlgorithmTester {
 
 	private Logger logger = LoggerFactory.getLogger(HASCOTester.class);
+	private ComponentSerialization serializer = new ComponentSerialization(this.getLoggerName() + ".serialization");
 
 	@Override
 	public abstract HASCO<N, A, Double> getAlgorithmForSoftwareConfigurationProblem(RefinementConfiguredSoftwareConfigurationProblem<Double> problem);
@@ -113,7 +114,7 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 			@Subscribe
 			public void registerSolution(final HASCOSolutionEvent<Double> e) {
 				solutions.add(e.getSolutionCandidate().getComponentInstance());
-				HASCOTester.this.logger.info("Found solution {}", CompositionSerializer.serializeComponentInstance(e.getSolutionCandidate().getComponentInstance()));
+				HASCOTester.this.logger.info("Found solution {}", HASCOTester.this.serializer.serialize(e.getSolutionCandidate().getComponentInstance()));
 			}
 		});
 		hasco.call();
@@ -136,7 +137,7 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 			for (IAlgorithmEvent e : hasco) {
 				if (e instanceof HASCOSolutionEvent) {
 					solutions.add(((HASCOSolutionEvent<Double>) e).getSolutionCandidate().getComponentInstance());
-					this.logger.info("Found solution {}", CompositionSerializer.serializeComponentInstance(((HASCOSolutionEvent<Double>) e).getSolutionCandidate().getComponentInstance()));
+					this.logger.info("Found solution {}", this.serializer.serialize(((HASCOSolutionEvent<Double>) e).getSolutionCandidate().getComponentInstance()));
 				}
 			}
 			this.logger.info("Finished HASCO, now evaluating numbers of found solutions.");

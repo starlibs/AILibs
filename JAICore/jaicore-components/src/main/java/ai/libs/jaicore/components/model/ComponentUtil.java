@@ -20,6 +20,7 @@ import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
+import ai.libs.jaicore.components.exceptions.ComponentNotFoundException;
 
 /**
  * The ComponentUtil class can be used to deal with Components in a convenient way. For instance, for a given component (type) it can be used to return a parameterized ComponentInstance.
@@ -355,5 +356,15 @@ public class ComponentUtil {
 		affectedComponents.forEach(x -> x.getRequiredInterfaces().stream().map(iface -> getAffectedComponents(components, iface.getName())).forEach(recursiveResolvedComps::addAll));
 		affectedComponents.addAll(recursiveResolvedComps);
 		return affectedComponents;
+	}
+
+	public static IComponent getComponentByName(final String componentName, final Collection<? extends IComponent> components) throws ComponentNotFoundException {
+		for (IComponent component : components) {
+			if (component.getName().equals(componentName)) {
+				return component;
+			}
+		}
+
+		throw new ComponentNotFoundException("No Component with this name loaded: " + componentName);
 	}
 }
