@@ -25,6 +25,7 @@ import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
+import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
 import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
@@ -134,6 +135,13 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 	}
 
 	public void setProblemInput(final RefinementConfiguredSoftwareConfigurationProblem<V> problemInput) {
+		for (IComponent c : problemInput.getComponents()) {
+			for (IRequiredInterfaceDefinition ri : c.getRequiredInterfaces()) {
+				if (!ri.isOrdered()) {
+					throw new IllegalArgumentException("HASCO does currently not support non-ordered required-interfaces of components, but required interface \"" + ri.getId() + "\" of component \"" + c.getName() + "\" is not ordered!");
+				}
+			}
+		}
 		this.problem = problemInput;
 	}
 

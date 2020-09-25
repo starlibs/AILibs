@@ -1,6 +1,7 @@
 package ai.libs.softwareconfiguration.serialization;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -31,6 +32,8 @@ public class RequiredInterfaceLoaderTest extends Tester {
 		assertTrue(reqInterface.isOptional());
 		assertEquals(1, reqInterface.getMin());
 		assertEquals(1, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
 	}
 
 	@Test
@@ -38,6 +41,8 @@ public class RequiredInterfaceLoaderTest extends Tester {
 		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(1));
 		assertEquals(1, reqInterface.getMin());
 		assertEquals(1, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
 	}
 
 	@Test
@@ -45,6 +50,8 @@ public class RequiredInterfaceLoaderTest extends Tester {
 		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(2));
 		assertEquals(1, reqInterface.getMin());
 		assertEquals(1, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
 	}
 
 	@Test
@@ -52,6 +59,8 @@ public class RequiredInterfaceLoaderTest extends Tester {
 		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(3));
 		assertEquals(0, reqInterface.getMin());
 		assertEquals(1, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -64,6 +73,8 @@ public class RequiredInterfaceLoaderTest extends Tester {
 		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(5));
 		assertEquals(2, reqInterface.getMin());
 		assertEquals(6, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
 	}
 
 	@Test
@@ -71,6 +82,8 @@ public class RequiredInterfaceLoaderTest extends Tester {
 		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(6));
 		assertEquals(2, reqInterface.getMin());
 		assertEquals(2, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
 	}
 
 	@Test
@@ -78,6 +91,8 @@ public class RequiredInterfaceLoaderTest extends Tester {
 		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(7));
 		assertEquals(1, reqInterface.getMin());
 		assertEquals(2, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
 	}
 
 	@Test
@@ -86,6 +101,8 @@ public class RequiredInterfaceLoaderTest extends Tester {
 		assertTrue(reqInterface.isOptional());
 		assertEquals(1, reqInterface.getMin());
 		assertEquals(2, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
 	}
 
 	@Test
@@ -94,5 +111,17 @@ public class RequiredInterfaceLoaderTest extends Tester {
 		assertTrue(reqInterface.isOptional());
 		assertEquals(2, reqInterface.getMin());
 		assertEquals(2, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
+	}
+
+	@Test
+	public void test11() throws IOException {
+		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(10));
+		assertFalse(reqInterface.isOptional());
+		assertEquals(2, reqInterface.getMin());
+		assertEquals(2, reqInterface.getMax());
+		assertFalse(reqInterface.isOrdered());
+		assertTrue(reqInterface.isUniqueComponents());
 	}
 }

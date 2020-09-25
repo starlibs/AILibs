@@ -2,7 +2,6 @@ package ai.libs.mlplan.multiclass.sklearn;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -152,7 +151,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 				}
 			}
 
-			for (Entry<String, Collection<IComponentInstance>> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
+			for (Entry<String, List<IComponentInstance>> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
 				if (first) {
 					first = false;
 				} else {

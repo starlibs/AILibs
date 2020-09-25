@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -47,7 +48,7 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 
 		Component component = this.possibleComponents.stream().filter(c -> c.getName().equals(componentName)).findFirst().orElseThrow(NoSuchElementException::new);
 
-		Map<String, Collection<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
+		Map<String, List<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
 		// recursively resolve the requiredInterfaces
 		TreeNode n = p.get("requiredInterfaces");
 		Iterator<String> fields = n.fieldNames();

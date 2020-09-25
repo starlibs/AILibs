@@ -1,6 +1,7 @@
 package ai.libs.hasco.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,13 +25,20 @@ import ai.libs.jaicore.logging.LoggerUtil;
 
 public class NewReductionSandbox extends Tester {
 
+	private static final File folderToTestResources = new File("../../../JAICore/jaicore-components/testrsc/");
 	private static final String reqInterface = "IFace";
-	private static final File tinyProblem = new File("../../../JAICore/jaicore-components/testrsc/tinyproblemwithlists.json");
-	private static final File smallProblem = new File("../../../JAICore/jaicore-components/testrsc/simpleproblemwithlists.json");
+	private static final File tinyProblem = new File(folderToTestResources + File.separator + "tinyproblemwithlists.json");
+	private static final File tinyProblemWithUniqueness = new File(folderToTestResources + File.separator + "tinyproblemwithuniquelists.json");
+	private static final File smallProblem = new File(folderToTestResources + File.separator + "simpleproblemwithlists.json");
 
 	@Test
 	public void testCorrectNumberOfSolutionsInListInterfacesOnTinyProblem() throws IOException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		this.test(tinyProblem, 3);
+	}
+
+	@Test
+	public void testCorrectNumberOfSolutionsInUniqueListInterfacesOnTinyProblem() throws IOException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+		this.test(tinyProblemWithUniqueness, 2);
 	}
 
 	@Test
@@ -45,7 +53,7 @@ public class NewReductionSandbox extends Tester {
 		HASCOViaFD<Double> hasco = HASCOBuilder.get(problem).withBlindSearch().getAlgorithm();
 		hasco.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 
-		//		new AlgorithmVisualizationWindow(hasco).withMainPlugin(new GraphViewPlugin(), new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())));
+		//		new AlgorithmVisualizationWindow(hasco).withMainPlugin(new GraphViewPlugin()).withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())));
 
 		/* enumerate all solutions */
 		Set<String> seenSolutions = new HashSet<>();
@@ -55,7 +63,7 @@ public class NewReductionSandbox extends Tester {
 				@SuppressWarnings("unchecked")
 				ComponentInstance solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate().getComponentInstance();
 				String serializedSolution = new ComponentSerialization().serialize(solution).toString();
-				//				assertFalse ("Double solution " + serializedSolution, seenSolutions.contains(serializedSolution));
+				assertFalse("Double solution " + serializedSolution, seenSolutions.contains(serializedSolution));
 				seenSolutions.add(serializedSolution);
 				LOGGER.info("Registered {}-th solution: {}", seenSolutions.size(), serializedSolution);
 			}

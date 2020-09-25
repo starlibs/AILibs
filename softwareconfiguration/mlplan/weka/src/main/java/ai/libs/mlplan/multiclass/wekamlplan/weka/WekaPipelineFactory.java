@@ -1,6 +1,5 @@
 package ai.libs.mlplan.multiclass.wekamlplan.weka;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -59,7 +58,7 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 					((OptionHandler) c).setOptions(options.toArray(new String[0]));
 				}
 
-				for (Entry<String, Collection<IComponentInstance>> reqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
+				for (Entry<String, List<IComponentInstance>> reqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
 					switch (reqI.getKey()) {
 					case "W":
 						if (c instanceof SingleClassifierEnhancer) { // suppose that this defines a base classifier

@@ -40,6 +40,17 @@ dependencies {
 ## Specifying Component Domains
 Describe here the JSON format we use.
 
+### Required Interface Definitions
+
+| directive 	| type 	|  semantic 	| default value  	| Remarks |
+|:-------------:|----	|:---:		|------			|------			|
+| optional	| boolean | whether or not the required interface must be satisfied | false | is orthogonal to min |
+| unique	| boolean | whether or not components must be used at most once to satisfy the interface | false | |
+| ordered	| boolean | whether or not the order of realizations is relevant | true | |
+| min		| int+ | minimum number of realizations if realized at all | 1 | can be positive even if optional |
+| max		| int+ | maximum number of realizations if realized at all | max | must never be smaller than min |
+
+
 ## Loading and Serializing Component Descriptions and Repositories
 The basis for all serialization and deserialization of component descriptions is the `ComponentSerialization` class.
 It contains all relevant methods to load component repositories from files and serialize them again.

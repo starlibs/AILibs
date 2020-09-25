@@ -42,7 +42,7 @@ public class SoftwareConfigurationProblem<V extends Comparable<V>> {
 		this(problem.getComponents(), problem.requiredInterface, problem.compositionEvaluator);
 	}
 
-	public Collection<IComponent> getComponents() {
+	public IComponentRepository getComponents() {
 		return this.components;
 	}
 

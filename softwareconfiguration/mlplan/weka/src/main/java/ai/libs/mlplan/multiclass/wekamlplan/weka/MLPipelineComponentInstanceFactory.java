@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.aeonbits.owner.util.Collections;
@@ -67,7 +68,7 @@ public class MLPipelineComponentInstanceFactory {
 			ComponentInstance classifierCI = this.getComponentInstanceForPipelineElement(pipeline.getBaseClassifier());
 
 			// Pipeline
-			HashMap<String, Collection<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
+			HashMap<String, List<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
 			satisfactionOfRequiredInterfaces.put("preprocessor", Arrays.asList(preprocessorCI));
 			satisfactionOfRequiredInterfaces.put("classifier", Arrays.asList(classifierCI));
 			return new ComponentInstance(ComponentUtil.getComponentByName("pipeline", this.components), new HashMap<String, String>(), satisfactionOfRequiredInterfaces);
@@ -91,7 +92,7 @@ public class MLPipelineComponentInstanceFactory {
 	 */
 	private ComponentInstance getComponentInstanceForPipelineElement(final Object pipelineElement, @SuppressWarnings("unchecked") final Pair<String, ComponentInstance>... satisfactionOfRegquiredInterfaces)
 			throws ComponentNotFoundException {
-		HashMap<String, Collection<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
+		HashMap<String, List<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
 		Arrays.stream(satisfactionOfRegquiredInterfaces).forEach(entry -> satisfactionOfRequiredInterfaces.put(entry.getKey(), Arrays.asList(entry.getValue())));
 		return new ComponentInstance(ComponentUtil.getComponentByName(pipelineElement.getClass().getName(), this.components), this.getParametersForPipelineElement(pipelineElement), satisfactionOfRequiredInterfaces);
 	}

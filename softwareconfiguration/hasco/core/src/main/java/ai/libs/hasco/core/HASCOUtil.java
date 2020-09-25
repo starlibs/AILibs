@@ -27,6 +27,7 @@ import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMa
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IParameterDependency;
 import ai.libs.jaicore.components.api.IParameterDomain;
+import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
@@ -196,9 +197,12 @@ public class HASCOUtil {
 		Map<String, Map<String, String>> parameterContainerMap = new HashMap<>(); // stores for each object the name of the container of each parameter
 		Map<String, String> parameterValues = new HashMap<>();
 		Map<String, String> interfaceMembershipMap = new HashMap<>();
+		Map<String, Integer> interfaceIndexMap = new HashMap<>();
 		Map<String, String> interfaceGroupComponentMap = new HashMap<>(); // stores for each interface group to which component instance it belongs
 		Map<String, String> interfaceGroupRoleMap = new HashMap<>(); // stores for each interface group the role it has for the component
 		Collection<String> overwrittenDatacontainers = getOverwrittenDatacontainersInState(state);
+		Map<String, Map<String, Map<Integer, ComponentInstance>>> orderedRequiredInterfaceMap = new HashMap<>(); // stores for each ci reference and each of its ri references the map that assigns to the slot number the concrete component
+		// instance
 
 		/* create (empty) component instances, detect containers for parameter values, and register the values of the data containers */
 		for (Literal l : state) {
@@ -230,8 +234,9 @@ public class HASCOUtil {
 				interfaceGroupRoleMap.put(params[3], params[1]);
 				break;
 
-			case LITERAL_INTERFACEMEMBERSHIP: // first argument is the interface, second is the interface group it belongs to
+			case LITERAL_INTERFACEMEMBERSHIP: // first argument is the interface, second is the interface group it belongs to, third argument is the index of the realization
 				interfaceMembershipMap.put(params[0], params[1]);
+				interfaceIndexMap.put(params[0], Integer.parseInt(params[2]));
 				break;
 			default:
 				/* simply ignore other cases */
@@ -243,20 +248,39 @@ public class HASCOUtil {
 		state.stream().filter(l -> l.getPropertyName().equals(LITERAL_RESOLVES)).forEach(l -> {
 			String[] params = l.getParameters().stream().map(LiteralParam::getName).collect(Collectors.toList()).toArray(new String[] {});
 			String handleOfRequiredInterface = params[0];
-			String handleOfComponentInstanceThatProvidesTheInterface= params[3];
+			String handleOfComponentInstanceThatProvidesTheInterface = params[3];
 			if (!handleOfRequiredInterface.equals("request")) {
 				if (!interfaceMembershipMap.containsKey(handleOfRequiredInterface)) {
 					throw new IllegalArgumentException("The state contains a literal " + l + ", which suggests that " + handleOfRequiredInterface
 							+ " is the handle of a requried interface. But this handle is not registered in the map. State is: " + state.stream().sorted((s1, s2) -> s1.compareTo(s2)).map(lit -> "\n\t" + lit).collect(Collectors.joining()));
 				}
 				String iFaceGroupHandle = interfaceMembershipMap.get(handleOfRequiredInterface);
-				ComponentInstance requiringCI = objectMap.get(interfaceGroupComponentMap.get(iFaceGroupHandle));
+				String handleOfComponentInstanceThatRequiresTheInterface = interfaceGroupComponentMap.get(iFaceGroupHandle);
 				ComponentInstance providingCI = objectMap.get(handleOfComponentInstanceThatProvidesTheInterface);
-				String roleOfRequiredInterfaceInRequiringComponent = interfaceGroupRoleMap.get(iFaceGroupHandle);
-				Map<String, Collection<IComponentInstance>> satisfactionMapOfCIThatRequiresTheResolvedInterface = requiringCI.getSatisfactionOfRequiredInterfaces();
-				satisfactionMapOfCIThatRequiresTheResolvedInterface.computeIfAbsent(roleOfRequiredInterfaceInRequiringComponent, r -> new ArrayList<>()).add(providingCI);
+				int indexOfRealization = interfaceIndexMap.get(handleOfRequiredInterface);
+				orderedRequiredInterfaceMap.computeIfAbsent(handleOfComponentInstanceThatRequiresTheInterface, rci -> new HashMap<>()).computeIfAbsent(interfaceGroupRoleMap.get(iFaceGroupHandle), gri -> new HashMap<>()).put(indexOfRealization, providingCI);
 			}
 		});
+		for (Entry<String, ComponentInstance> entry : objectMap.entrySet()) {
+			ComponentInstance requiringCI = entry.getValue();
+			String requiringCIReference = entry.getKey();
+			for (IRequiredInterfaceDefinition ri : requiringCI.getComponent().getRequiredInterfaces()) {
+				String reqInterfaceId = ri.getName();
+				List<IComponentInstance> realizations = new ArrayList<>();
+				if (orderedRequiredInterfaceMap.containsKey(requiringCIReference) && orderedRequiredInterfaceMap.get(requiringCIReference).containsKey(reqInterfaceId)) {
+					Map<Integer, ComponentInstance> provisionsOfThisInterface = orderedRequiredInterfaceMap.get(requiringCIReference).get(reqInterfaceId);
+					int n = provisionsOfThisInterface.size();
+					for (int i = 1; i <= n; i++) { // indices here start at 1
+						if (!provisionsOfThisInterface.containsKey(i)) {
+							throw new IllegalArgumentException(
+									"The realizations of the required interface " + requiringCI + " of component " + requiringCI.getComponent().getName() + " is not consecutive! Here is the map: \n" + provisionsOfThisInterface);
+						}
+						realizations.add(provisionsOfThisInterface.get(i));
+					}
+				}
+				requiringCI.getSatisfactionOfRequiredInterfaces().put(reqInterfaceId, realizations);
+			}
+		}
 
 		/* set the explicitly defined parameters (e.g. overwritten containers) in the component instances */
 		for (Entry<String, ComponentInstance> entry : objectMap.entrySet()) {

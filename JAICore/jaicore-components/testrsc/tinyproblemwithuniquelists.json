@@ -1,0 +1,31 @@
+{
+	"repository": "list-requiredinterface-reduction",
+	"components": [
+		{
+			"name": "COMPA",
+			"requiredInterface": [
+				{
+					"id": "rif1",
+					"name": "rif1",
+					"min": 0,
+					"max": 2,
+					"unique": true
+				}
+			],
+			"providedInterface": [
+				"IFace"
+			],
+			"parameters": [],
+			"dependencies": []
+		},
+		{
+			"name": "COMPB",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rif1"
+			],
+			"parameters": [],
+			"dependencies": []
+		}
+	]
+}

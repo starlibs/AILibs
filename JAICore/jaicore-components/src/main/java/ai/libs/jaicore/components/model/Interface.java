@@ -20,7 +20,7 @@ public class Interface implements IRequiredInterfaceDefinition, Serializable {
 	private final Integer max;
 
 	@JsonCreator
-	public Interface(@JsonProperty("id") final String id, @JsonProperty("name") final String name, @JsonProperty("optional") final Boolean optional, @JsonProperty("ordered") final Boolean ordered, @JsonProperty("uniquecomponents") final Boolean uniqueComponents, @JsonProperty("min") final Integer min, @JsonProperty("max") final Integer max) {
+	public Interface(@JsonProperty("id") final String id, @JsonProperty("name") final String name, @JsonProperty("optional") final Boolean optional, @JsonProperty("uniquecomponents") final Boolean uniqueComponents, @JsonProperty("ordered") final Boolean ordered, @JsonProperty("min") final Integer min, @JsonProperty("max") final Integer max) {
 		this.id = id;
 		this.name = name;
 		this.optional = optional;
