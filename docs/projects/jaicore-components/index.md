@@ -50,6 +50,69 @@ Describe here the JSON format we use.
 | min		| int+ | minimum number of realizations if realized at all | 1 | can be positive even if optional |
 | max		| int+ | maximum number of realizations if realized at all | max | must never be smaller than min |
 
+### Constraints for Instantiation
+It is possible to define constraints on instantiation of components.
+To this end, just add an array node named `constraints` to the repository description.
+Constraints consist of a *premise* and a *conclusion*, both of which are descriptions of (parameterless) component instances.
+If the premise is entailed in a concrete component instance, the constraint becomes relevant.
+Now the constraint can be either *positive* or *negative*.
+If it is positive, the conclusion must *also* be contained in the instance.
+If it is negative, the conclusion must *not* be contained in the instance.
+By default, constraints are positive.
+
+A concrete example for a specification of such constraints is as follows:
+```json
+{
+    "constraints":[
+        {
+            "positive":false,
+            "premise":{
+                "component":"COMPA",
+                "requiredInterfaces":{
+                    "rif1":[
+                        {
+                            "component":"COMPB"
+                        }
+                    ]
+                }
+            },
+            "conclusion":{
+                "component":"COMPA",
+                "requiredInterfaces":{
+                    "rif2":[
+                        {
+                            "component":"COMPC"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "positive":true,
+            "premise":{
+                "component":"COMPA",
+                "requiredInterfaces":{
+                    "rif2":[
+                        {
+                            "component":"COMPD"
+                        }
+                    ]
+                }
+            },
+            "conclusion":{
+                "component":"COMPA",
+                "requiredInterfaces":{
+                    "rif1":[
+                        {
+                            "component":"COMPB"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
+```
 
 ## Loading and Serializing Component Descriptions and Repositories
 The basis for all serialization and deserialization of component descriptions is the `ComponentSerialization` class.

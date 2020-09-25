@@ -1,6 +1,7 @@
 package ai.libs.softwareconfiguration.serialization;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -16,6 +17,8 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 
 import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstanceConstraint;
 import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.api.IParameter;
@@ -143,9 +146,35 @@ public class ComponentLoaderTest {
 	}
 
 	@Test
-	public void testLoadFromResource() throws IOException {
-		Collection<IComponent> components = new ComponentSerialization().deserializeRepository(new File("testrsc/weka-all-autoweka.json"));
-		assertTrue(!components.isEmpty());
-	}
+	public void testConstraints() throws IOException {
+		IComponentRepository repo = new ComponentSerialization(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM).deserializeRepository(new File("testrsc/tinyproblemwithconstraints.json"));
+		Collection<IComponentInstanceConstraint> constraintsAsSet = repo.getConstraints();
+		assertFalse(constraintsAsSet.isEmpty());
+		assertEquals(2, constraintsAsSet.size());
+		List<IComponentInstanceConstraint> constraints = new ArrayList<>(constraintsAsSet);
 
+		/* check first (negative) constraint */
+		IComponentInstanceConstraint c1 = constraints.get(0);
+		assertFalse(c1.isPositive());
+		IComponentInstance premisePattern1 = c1.getPremisePattern();
+		IComponentInstance conclusionPattern1 = c1.getConclusionPattern();
+		assertEquals("COMPA", premisePattern1.getComponent().getName());
+		assertEquals("COMPA", conclusionPattern1.getComponent().getName());
+		assertTrue(premisePattern1.getParameterValues().isEmpty());
+		assertTrue(conclusionPattern1.getParameterValues().isEmpty());
+		assertEquals("COMPB", premisePattern1.getSatisfactionOfRequiredInterface("rif1").iterator().next().getComponent().getName());
+		assertEquals("COMPC", conclusionPattern1.getSatisfactionOfRequiredInterface("rif2").iterator().next().getComponent().getName());
+
+		/* check first (positive) constraint */
+		IComponentInstanceConstraint c2 = constraints.get(1);
+		assertTrue(c2.isPositive());
+		IComponentInstance premisePattern2 = c2.getPremisePattern();
+		IComponentInstance conclusionPattern2 = c2.getConclusionPattern();
+		assertEquals("COMPA", premisePattern2.getComponent().getName());
+		assertEquals("COMPA", conclusionPattern2.getComponent().getName());
+		assertTrue(premisePattern2.getParameterValues().isEmpty());
+		assertTrue(conclusionPattern2.getParameterValues().isEmpty());
+		assertEquals("COMPD", premisePattern2.getSatisfactionOfRequiredInterface("rif2").iterator().next().getComponent().getName());
+		assertEquals("COMPB", conclusionPattern2.getSatisfactionOfRequiredInterface("rif1").iterator().next().getComponent().getName());
+	}
 }

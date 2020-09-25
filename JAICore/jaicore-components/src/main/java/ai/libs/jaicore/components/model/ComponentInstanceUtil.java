@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -222,8 +223,6 @@ public class ComponentInstanceUtil {
 		return true;
 	}
 
-
-
 	/**
 	 * @return A collection of all components contained (recursively) in this <code>ComponentInstance</code>.
 	 */
@@ -245,5 +244,39 @@ public class ComponentInstanceUtil {
 			sb.append("{").append(instance.getSatisfactionOfRequiredInterfaces().values().stream().map(ciList -> ciList.stream().map(ComponentInstanceUtil::getComponentInstanceAsComponentNames).collect(Collectors.joining())).collect(Collectors.joining(","))).append("}");
 		}
 		return sb.toString();
+	}
+
+	public static boolean isSubInstance(final IComponentInstance sub, final IComponentInstance sup) {
+
+		/* check component name */
+		if (!sub.getComponent().getName().equals(sup.getComponent().getName())) {
+			return false;
+		}
+
+		/* check parameters */
+		Map<String, String> parametersOfSub = sub.getParameterValues();
+		Map<String, String> parametersOfSup = sup.getParameterValues();
+		for (Entry<String, String> p : parametersOfSub.entrySet()) {
+			if (!parametersOfSup.containsKey(p.getKey()) || !parametersOfSup.get(p.getKey()).equals(p.getValue())) {
+				return false;
+			}
+		}
+
+		/* check required interfaces */
+		for (Entry<String, List<IComponentInstance>> provisionsOfSub : sub.getSatisfactionOfRequiredInterfaces().entrySet()) {
+			int n = provisionsOfSub.getValue().size();
+			List<IComponentInstance> provisionsOfSup = sup.getSatisfactionOfRequiredInterface(provisionsOfSub.getKey());
+			if (provisionsOfSup.size() < n) {
+				return false;
+			}
+			for (int i = 0; i < n; i++) {
+				if (!isSubInstance(provisionsOfSub.getValue().get(i), provisionsOfSup.get(i))) {
+					return false;
+				}
+			}
+		}
+
+		/* if no incompatibility was found, return true */
+		return true;
 	}
 }

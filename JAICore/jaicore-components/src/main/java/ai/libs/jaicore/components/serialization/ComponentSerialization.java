@@ -34,6 +34,7 @@ import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstanceConstraint;
 import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.api.IParameter;
@@ -43,6 +44,7 @@ import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.model.BooleanParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.model.ComponentInstanceConstraint;
 import ai.libs.jaicore.components.model.ComponentRepository;
 import ai.libs.jaicore.components.model.Dependency;
 import ai.libs.jaicore.components.model.Interface;
@@ -53,8 +55,9 @@ import ai.libs.jaicore.components.model.Parameter;
 
 public class ComponentSerialization implements ILoggingCustomizable {
 
-	private static final String FIELD_COMPONENTS = "components";
-	private static final String FIELD_PARAMETERS = "parameters";
+	public static final String FIELD_COMPONENTS = "components";
+	public static final String FIELD_CONSTRAINTS = "constraints";
+	public static final String FIELD_PARAMETERS = "parameters";
 	private static final String FIELD_DEFAULT = "default";
 	private static final String MSG_CANNOT_PARSE_LITERAL = "Cannot parse literal ";
 	private static final String MSG_DOMAIN_NOT_SUPPORTED = "Currently no support for parameters with domain \"";
@@ -411,6 +414,24 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		return paramConfigs;
 	}
 
+	public IComponentInstanceConstraint deserializeConstraint(final Collection<IComponent> components, final JsonNode constraint) {
+		boolean positive = !constraint.has("positive") || constraint.get("positive").asBoolean();
+		if (!constraint.has("premise")) {
+			throw new IllegalArgumentException("Constraint has no premise: " + constraint);
+		}
+		if (!constraint.has("conclusion")) {
+			throw new IllegalArgumentException("Constraint has no conclusion: " + constraint);
+		}
+		try {
+			IComponentInstance premise= new ComponentInstanceDeserializer(components).readAsTree(constraint.get("premise"));
+
+			IComponentInstance conclusion = new ComponentInstanceDeserializer(components).readAsTree(constraint.get("conclusion"));
+			return new ComponentInstanceConstraint(positive, premise, conclusion);
+		} catch (IOException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
 	public Pair<IComponentRepository, INumericParameterRefinementConfigurationMap> deserializeRepositoryAndParamConfig(final JsonNode rootNode) {
 
 		NumericParameterRefinementConfigurationMap paramConfigs = new NumericParameterRefinementConfigurationMap();
@@ -418,10 +439,8 @@ public class ComponentSerialization implements ILoggingCustomizable {
 
 		Map<String, JsonNode> componentMap = new HashMap<>();
 
-		/* create empty repository */
-		ComponentRepository repository = new ComponentRepository();
-
-		// get the array of components
+		/* create repository with components */
+		Collection<IComponent> components = new ArrayList<>();
 		JsonNode describedComponents = rootNode.path(FIELD_COMPONENTS);
 		if (describedComponents != null) {
 			for (JsonNode component : describedComponents) {
@@ -432,14 +451,23 @@ public class ComponentSerialization implements ILoggingCustomizable {
 				if (!uniqueComponentNames.add(c.getName())) {
 					throw new IllegalArgumentException("Noticed a component with duplicative component name: " + c.getName());
 				}
-				repository.add(c);
+				components.add(c);
 
 				/* derive parameter refinement description */
 				Map<String, NumericParameterRefinementConfiguration> paramConfig = ((NumericParameterRefinementConfigurationMap) this.deserializeParamRefinementConfiguration(component)).get(c.getName());
 				paramConfigs.put(c.getName(), paramConfig);
 			}
 		}
-		return new Pair<>(repository, paramConfigs);
+
+		/* now parse constraints */
+		Collection<IComponentInstanceConstraint> constraints = new ArrayList<>();
+		if (rootNode.has(FIELD_CONSTRAINTS)) {
+			for (JsonNode constraint : rootNode.get(FIELD_CONSTRAINTS)) {
+				constraints.add(this.deserializeConstraint(components, constraint));
+			}
+		}
+
+		return new Pair<>(new ComponentRepository(components, constraints), paramConfigs);
 	}
 
 	@Override
