@@ -2,6 +2,7 @@ package ai.libs.hasco.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,8 +15,8 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,8 +147,8 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 			}
 			this.logger.info("Finished HASCO, now evaluating numbers of found solutions.");
 			Set<Object> uniqueSolutions = new HashSet<>(solutions);
-			assertEquals("Only found " + uniqueSolutions.size() + "/" + numberOfExpectedSolutions + " solutions", numberOfExpectedSolutions, uniqueSolutions.size());
-			assertEquals("All " + numberOfExpectedSolutions + " solutions were found, but " + solutions.size() + " solutions were returned in total, i.e. there are solutions returned twice", numberOfExpectedSolutions, solutions.size());
+			assertEquals(numberOfExpectedSolutions, uniqueSolutions.size(), "Only found " + uniqueSolutions.size() + "/" + numberOfExpectedSolutions + " solutions");
+			assertEquals(numberOfExpectedSolutions, solutions.size(), "All " + numberOfExpectedSolutions + " solutions were found, but " + solutions.size() + " solutions were returned in total, i.e. there are solutions returned twice");
 		}
 
 	}

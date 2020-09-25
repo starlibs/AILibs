@@ -87,7 +87,7 @@ public class PartialOrderedSetTest {
 	 */
 	@Test
 	public void testAddABeforeB() {
-		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+		Assertions.assertThrows(IllegalStateException.class, () -> {
 			String e = "e";
 			this.set.addABeforeB(A, e);
 			this.set.addABeforeB(e, B);
