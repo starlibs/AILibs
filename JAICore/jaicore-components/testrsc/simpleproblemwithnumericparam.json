@@ -4,7 +4,7 @@
     "name" : "A",
     "requiredInterface" : [ ],
     "providedInterface" : [ "IFace" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "a",
       "type" : "double",
       "min" : 1,

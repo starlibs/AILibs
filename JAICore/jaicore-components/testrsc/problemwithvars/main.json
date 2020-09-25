@@ -8,7 +8,7 @@
 			"providedInterface": [
 				"IFace"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "{$nameOfParama}",
 					"type": "{$typeOfa}",

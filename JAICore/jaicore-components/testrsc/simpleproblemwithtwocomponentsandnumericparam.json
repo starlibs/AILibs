@@ -10,7 +10,7 @@
 			"providedInterface": [
 				"IFace"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "a",
 					"type": "double",
@@ -38,7 +38,7 @@
 			"providedInterface": [
 				"IFA"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "a",
 					"type": "boolean",

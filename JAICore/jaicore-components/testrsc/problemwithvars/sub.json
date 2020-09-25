@@ -7,7 +7,7 @@
 			"providedInterface": [
 				"IFace"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "{$nameOfParamb}",
 					"type": "cat",

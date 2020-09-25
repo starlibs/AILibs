@@ -186,23 +186,34 @@ public class Component implements IComponent, Serializable {
 	}
 
 	/**
+	 * Adds a new required interface to the component
+	 *
+	 * @param ri The required interface definition
+	 */
+	public void addRequiredInterface(final IRequiredInterfaceDefinition ri) {
+		this.requiredInterfaces.add(ri);
+	}
+
+	/**
 	 * Adds an additional required interface with an ID (local identifier) and an interface name (provided interface of another Component) to the required interfaces of this Component.
 	 *
 	 * @param interfaceID
 	 *            The local identifier to reference the specific required interface.
 	 * @param interfaceName
 	 *            The provided interface of another component.
+	 * @param uniqueComponents
+	 * 			  Whether or not this is a set interface (every component must be attached at most once)
 	 * @param min
 	 *            Minimun times the interface is required?
 	 * @param max
 	 *            Maximum times the interface is required?
 	 */
-	public void addRequiredInterface(final String interfaceID, final String interfaceName, final Integer min, final Integer max) {
-		this.requiredInterfaces.add(new Interface(interfaceID, interfaceName, min, max));
+	public void addRequiredInterface(final String interfaceID, final String interfaceName, final boolean optional, final boolean uniqueComponents, final boolean ordered, final Integer min, final Integer max) {
+		this.addRequiredInterface(new Interface(interfaceID, interfaceName, optional, uniqueComponents, ordered, min, max));
 	}
 
 	public void addRequiredInterface(final String interfaceID, final String interfaceName) {
-		this.addRequiredInterface(interfaceID, interfaceName, 1, 1);
+		this.addRequiredInterface(interfaceID, interfaceName, false, false, false, 1, 1);
 	}
 
 	/**

@@ -14,7 +14,7 @@
 			"providedInterface": [
 				"IFace"
 			],
-			"parameter": [],
+			"parameters": [],
 			"dependencies": []
 		},
 		{
@@ -23,7 +23,7 @@
 			"providedInterface": [
 				"rif1"
 			],
-			"parameter": [],
+			"parameters": [],
 			"dependencies": []
 		}
 	]

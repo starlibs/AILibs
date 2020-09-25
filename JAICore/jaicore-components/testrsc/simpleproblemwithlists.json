@@ -20,7 +20,7 @@
 			"providedInterface": [
 				"IFace"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "a",
 					"type": "cat",
@@ -40,7 +40,7 @@
 			"providedInterface": [
 				"rif1"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "t",
 					"type": "cat",
@@ -65,7 +65,7 @@
 			"providedInterface": [
 				"rif2"
 			],
-			"parameter": [],
+			"parameters": [],
 			"dependencies": []
 		},
 		{
@@ -74,7 +74,7 @@
 			"providedInterface": [
 				"rif3"
 			],
-			"parameter": [],
+			"parameters": [],
 			"dependencies": []
 		},
 		{
@@ -83,7 +83,7 @@
 			"providedInterface": [
 				"rif3"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "x",
 					"type": "cat",

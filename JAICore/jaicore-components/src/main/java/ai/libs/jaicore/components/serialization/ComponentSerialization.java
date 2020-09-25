@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
@@ -30,16 +32,20 @@ import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDependency;
 import ai.libs.jaicore.components.api.IParameterDomain;
+import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.model.BooleanParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentRepository;
 import ai.libs.jaicore.components.model.Dependency;
+import ai.libs.jaicore.components.model.Interface;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.NumericParameterRefinementConfiguration;
 import ai.libs.jaicore.components.model.NumericParameterRefinementConfigurationMap;
@@ -47,10 +53,13 @@ import ai.libs.jaicore.components.model.Parameter;
 
 public class ComponentSerialization implements ILoggingCustomizable {
 
-	private static final String STR_VALUES = "values";
-	private static final String STR_DEFAULT = "default";
+	private static final String FIELD_COMPONENTS = "components";
+	private static final String FIELD_PARAMETERS = "parameters";
+	private static final String FIELD_DEFAULT = "default";
 	private static final String MSG_CANNOT_PARSE_LITERAL = "Cannot parse literal ";
 	private static final String MSG_DOMAIN_NOT_SUPPORTED = "Currently no support for parameters with domain \"";
+
+	private static final Pattern PATTERN_DEPENDENCY = Pattern.compile("(\\S+)\\s*(?:(=)(.*)|(in) (\\[.*\\]|\\{.*\\}))");
 
 	private Logger logger = LoggerFactory.getLogger(ComponentSerialization.class);
 
@@ -69,7 +78,7 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		ObjectNode on = om.createObjectNode();
 
 		/* define component and params */
-		on.put("component", instance.getComponent().getName());
+		on.put(FIELD_COMPONENTS, instance.getComponent().getName());
 		ObjectNode params = om.createObjectNode();
 		for (String paramName : instance.getParameterValues().keySet()) {
 			params.put(paramName, instance.getParameterValues().get(paramName));
@@ -114,11 +123,11 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		/* convert the string into a JsonNode */
 		ObjectMapper om = new ObjectMapper();
 		JsonNode rootNode = om.readTree(jsonDescription);
-		JsonNode compNode = rootNode.get("components");
+		JsonNode compNode = rootNode.get(FIELD_COMPONENTS);
 		if (!compNode.isArray()) {
 			throw new IllegalArgumentException("Components field in repository file " + jsonFile.getAbsolutePath() + " is not defined or not an array!");
 		}
-		ArrayNode compNodeAsArray = (ArrayNode)compNode;
+		ArrayNode compNodeAsArray = (ArrayNode) compNode;
 		if (this.logger.isInfoEnabled()) {
 			compNodeAsArray.forEach(n -> this.logger.info("Adding component {}", n));
 		}
@@ -139,8 +148,8 @@ public class ComponentSerialization implements ILoggingCustomizable {
 				parsedFiles.add(subFile.getCanonicalPath());
 				this.logger.debug("Recursively including component repository from {}.", subFile);
 				JsonNode subRepository = this.readRepositoryFile(subFile, templateVars);
-				JsonNode compsInSubRepository = subRepository.get("components");
-				ArrayNode compsInSubRepositoryAsArray = (ArrayNode)compsInSubRepository;
+				JsonNode compsInSubRepository = subRepository.get(FIELD_COMPONENTS);
+				ArrayNode compsInSubRepositoryAsArray = (ArrayNode) compsInSubRepository;
 				compNodeAsArray.addAll(compsInSubRepositoryAsArray);
 
 			}
@@ -176,10 +185,235 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		return this.deserializeRepositoryAndParamConfig(rootNode).getX();
 	}
 
+	private void checkThatParameterDefinitionHasNameAndType(final JsonNode parameter) {
+		if (!parameter.has("name")) {
+			throw new IllegalArgumentException("No name defined for parameter node \"" + parameter + "\"");
+		}
+		if (!parameter.has("type")) {
+			throw new IllegalArgumentException("No type defined for parameter \"" + parameter.get("name").asText() + "\"");
+		}
+	}
+
+	public IParameter deserializeParameter(final JsonNode parameter) {
+		this.checkThatParameterDefinitionHasNameAndType(parameter);
+		String name = parameter.get("name").asText();
+		if (!parameter.has(FIELD_DEFAULT)) {
+			throw new IllegalArgumentException("No default value defined for parameter \"" + name + "\"");
+		}
+		JsonNode defValNode = parameter.get(FIELD_DEFAULT);
+		String type = parameter.get("type").asText();
+		switch (type) {
+		case "int":
+		case "int-log":
+		case "double":
+		case "double-log":
+			if (!parameter.has("min")) {
+				throw new IllegalArgumentException("No min value defined for parameter " + name);
+			}
+			if (!parameter.has("max")) {
+				throw new IllegalArgumentException("No max value defined for parameter " + name);
+			}
+			double min = parameter.get("min").asDouble();
+			double max = parameter.get("max").asDouble();
+			return new Parameter(name, new NumericParameterDomain(type.equals("int") || type.equals("int-log"), min, max), defValNode.asDouble());
+
+		case "bool":
+		case "boolean":
+			return new Parameter(name, new BooleanParameterDomain(), defValNode.asBoolean());
+
+		case "cat":
+		case "categoric":
+		case "categorical":
+			if (!parameter.has("values")) {
+				throw new IllegalArgumentException("Categorical parameter \"" + name + "\" has no field \"values\" for the possible values defined!");
+			}
+			JsonNode valuesNode = parameter.get("values");
+			List<String> values = new LinkedList<>();
+			if (valuesNode.isTextual()) {
+				values.addAll(Arrays.stream(valuesNode.asText().split(",")).collect(Collectors.toList()));
+			} else {
+				for (JsonNode value : valuesNode) {
+					values.add(value.asText());
+				}
+			}
+			return new Parameter(name, new CategoricalParameterDomain(values), defValNode.asText());
+
+		default:
+			throw new IllegalArgumentException("Unsupported parameter type " + type);
+		}
+	}
+
+	public NumericParameterRefinementConfiguration deserializeParamRefinement(final JsonNode parameter) {
+		this.checkThatParameterDefinitionHasNameAndType(parameter);
+		String name = parameter.get("name").asText();
+		String type = parameter.get("type").asText();
+		if (!type.startsWith("int") && !type.startsWith("double")) {
+			throw new IllegalArgumentException("Parameter type is " + type + " and hence not numeric!");
+		}
+
+		if (!parameter.has("refineSplits")) {
+			throw new IllegalArgumentException("Please specify the parameter \"refineSplits\" for the parameter \"" + name + "\" in component \"" + name + "\"");
+		}
+		if (!parameter.has("minInterval")) {
+			throw new IllegalArgumentException("Please specify a strictly positive parameter value for \"minInterval\" for the parameter \"" + name + "\" in component \"" + name + "\"");
+		}
+		boolean initWithExtremal = false;
+		int refineSplits = parameter.get("refineSplits").asInt();
+		int minInterval = parameter.get("minInterval").asInt();
+		if (type.endsWith("-log")) {
+			return new NumericParameterRefinementConfiguration(parameter.get("focus").asDouble(), parameter.get("basis").asDouble(), initWithExtremal, refineSplits, minInterval);
+		} else {
+			return new NumericParameterRefinementConfiguration(initWithExtremal, refineSplits, minInterval);
+		}
+	}
+
+	public Pair<IParameter, IParameterDomain> deserializeDependencyConditionTerm(final IComponent component, final String condition) {
+		Matcher m = PATTERN_DEPENDENCY.matcher(condition.trim());
+		if (!m.find()) {
+			throw new IllegalArgumentException(MSG_CANNOT_PARSE_LITERAL + condition.trim() + ". Literals must be of the form \"<a> P <b>\" where P is either '=' or 'in'.");
+		}
+
+		String lhs = m.group(1).trim();
+		String cond = (m.group(2) != null ? m.group(2) : m.group(4)).trim();
+		String rhs = (cond.equals("=") ? m.group(3) : m.group(5)).trim();
+		IParameter param = component.getParameter(lhs);
+		if (param.isNumeric()) {
+			return this.deserializeDependencyConditionTermForNumericalParam(param, lhs, cond, rhs);
+		}
+		else if (param.isCategorical()) {
+			return this.deserializeDependencyConditionTermForCategoricalParam(param, lhs, cond, rhs);
+		}
+		else {
+			throw new IllegalArgumentException("Parameter \"" + param.getName() + "\" must be numeric or categorical!");
+		}
+	}
+
+	public Pair<IParameter, IParameterDomain> deserializeDependencyConditionTermForCategoricalParam(final IParameter param, final String lhs, final String comp, final String rhs) {
+		switch (comp) {
+		case "=":
+			return new Pair<>(param, new CategoricalParameterDomain(new String[] { rhs }));
+		case "in":
+			if (!rhs.startsWith("[") && !rhs.startsWith("{")) {
+				throw new IllegalArgumentException("Illegal literal \"" + lhs + "\" in \"" + rhs + "\". This should be a set, but the target is not described by [...] or {...}");
+			}
+			Collection<String> values = rhs.startsWith("[") ? SetUtil.unserializeList(rhs) : SetUtil.unserializeSet(rhs);
+			return new Pair<>(param, new CategoricalParameterDomain(values));
+		default:
+			throw new IllegalArgumentException(MSG_CANNOT_PARSE_LITERAL + lhs + " " + comp + " " + rhs + ". Currently no support for predicate \"" + comp + "\".");
+		}
+	}
+
+	public Pair<IParameter, IParameterDomain> deserializeDependencyConditionTermForNumericalParam(final IParameter param, final String lhs, final String comp, final String rhs) {
+		switch (comp) {
+		case "=":
+			double val = Double.parseDouble(rhs);
+			return new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
+		case "in":
+			Interval interval = SetUtil.unserializeInterval("[" + rhs.substring(1, rhs.length() - 1) + "]");
+			return new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
+		default:
+			throw new IllegalArgumentException(MSG_CANNOT_PARSE_LITERAL + lhs + " " + comp + " " + rhs + ". Currently no support for predicate \"" + comp + "\".");
+		}
+	}
+
+	public IParameterDependency deserializeParameterDependency(final IComponent c, final JsonNode dependency) {
+
+		/* parse precondition */
+		String pre = dependency.get("pre").asText();
+		Collection<Collection<Pair<IParameter, IParameterDomain>>> premise = new ArrayList<>();
+		Collection<String> monoms = Arrays.asList(pre.split("\\|"));
+		for (String monom : monoms) {
+			Collection<String> literals = Arrays.asList(monom.split("&"));
+			Collection<Pair<IParameter, IParameterDomain>> monomInPremise = new ArrayList<>();
+			for (String literal : literals) {
+				monomInPremise.add(this.deserializeDependencyConditionTerm(c, literal));
+			}
+			premise.add(monomInPremise);
+		}
+
+		/* parse postcondition */
+		Collection<Pair<IParameter, IParameterDomain>> conclusion = new ArrayList<>();
+		String post = dependency.get("post").asText();
+		Collection<String> literals = Arrays.asList(post.split("&"));
+		for (String literal : literals) {
+			conclusion.add(this.deserializeDependencyConditionTerm(c, literal));
+		}
+		return new Dependency(premise, conclusion);
+	}
+
+	public IRequiredInterfaceDefinition deserializeRequiredInterface(final JsonNode requiredInterface) {
+
+		/* read in relevant variables for required interface definition */
+		if (!requiredInterface.has("id")) {
+			throw new IllegalArgumentException("No id has been specified for a required interface " + requiredInterface);
+		}
+		if (!requiredInterface.has("name")) {
+			throw new IllegalArgumentException("No name has been specified for a required interface " + requiredInterface);
+		}
+		String id = requiredInterface.get("id").asText();
+		boolean optional = requiredInterface.has("optional") && requiredInterface.get("optional").asBoolean(); // default is false
+		boolean unique = requiredInterface.has("unique") && requiredInterface.get("unique").asBoolean(); // default is false
+		boolean ordered = !requiredInterface.has("ordered") || requiredInterface.get("ordered").asBoolean(); // default is true
+		int min = requiredInterface.has("min") ? requiredInterface.get("min").asInt() : 1;
+		int max = requiredInterface.has("max") ? requiredInterface.get("max").asInt() : min;
+		if (min > max) {
+			throw new IllegalArgumentException(min + " = min > max = " + max + " for required interface " + requiredInterface);
+		}
+		return new Interface(id, requiredInterface.get("name").asText(), optional, unique, ordered, min, max);
+	}
+
+	public IComponent deserializeComponent(final JsonNode component) {
+		Component c = new Component(component.get("name").asText());
+		if (c.getName().contains("-")) {
+			throw new IllegalArgumentException("Illegal component name " + c.getName() + ". No hyphens allowed. Please only use [a-zA-z0-9].");
+		}
+
+		// add provided interfaces
+		for (JsonNode providedInterface : component.path("providedInterface")) {
+			c.addProvidedInterface(providedInterface.asText());
+		}
+
+		// add required interfaces
+		for (JsonNode requiredInterface : component.path("requiredInterface")) {
+			try {
+				c.addRequiredInterface(this.deserializeRequiredInterface(requiredInterface));
+			}
+			catch (IllegalArgumentException e) {
+				throw new IllegalArgumentException("Error when parsing required interface of component \"" + c.getName() + "\"", e);
+			}
+		}
+
+		/* attach parameters */
+		for (JsonNode parameter : component.get(FIELD_PARAMETERS)) {
+			c.addParameter(this.deserializeParameter(parameter));
+		}
+
+		/* now parse dependencies */
+		if (component.has("dependencies")) {
+			for (JsonNode dependency : component.get("dependencies")) {
+				c.addDependency(this.deserializeParameterDependency(c, dependency));
+			}
+		}
+
+		return c;
+	}
+
+	public INumericParameterRefinementConfigurationMap deserializeParamRefinementConfiguration(final JsonNode component) {
+		NumericParameterRefinementConfigurationMap paramConfigs = new NumericParameterRefinementConfigurationMap();
+		Map<String, NumericParameterRefinementConfiguration> map = new HashMap<>();
+		paramConfigs.put(component.get("name").asText(), map);
+		for (JsonNode parameter : component.get(FIELD_PARAMETERS)) {
+			String type = parameter.get("type").asText();
+			if (type.startsWith("int") || type.startsWith("double")) {
+				map.put(parameter.get("name").asText(), this.deserializeParamRefinement(parameter));
+			}
+		}
+		return paramConfigs;
+	}
+
 	public Pair<IComponentRepository, INumericParameterRefinementConfigurationMap> deserializeRepositoryAndParamConfig(final JsonNode rootNode) {
 
 		NumericParameterRefinementConfigurationMap paramConfigs = new NumericParameterRefinementConfigurationMap();
-		Map<String, JsonNode> parameterMap = new HashMap<>();
 		Set<String> uniqueComponentNames = new HashSet<>();
 
 		Map<String, JsonNode> componentMap = new HashMap<>();
@@ -188,303 +422,21 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		ComponentRepository repository = new ComponentRepository();
 
 		// get the array of components
-		JsonNode describedComponents = rootNode.path("components");
+		JsonNode describedComponents = rootNode.path(FIELD_COMPONENTS);
 		if (describedComponents != null) {
-			Component c;
 			for (JsonNode component : describedComponents) {
-				c = new Component(component.get("name").asText());
-				if (c.getName().contains("-")) {
-					throw new IllegalArgumentException("Illegal component name " + c.getName() + ". No hyphens allowed. Please only use [a-zA-z0-9].");
-				}
-				componentMap.put(c.getName(), component);
 
+				/* derive component */
+				IComponent c = this.deserializeComponent(component);
+				componentMap.put(c.getName(), component);
 				if (!uniqueComponentNames.add(c.getName())) {
 					throw new IllegalArgumentException("Noticed a component with duplicative component name: " + c.getName());
 				}
-
-				// add provided interfaces
-
-				for (JsonNode providedInterface : component.path("providedInterface")) {
-					c.addProvidedInterface(providedInterface.asText());
-				}
-
-				// add required interfaces
-				for (JsonNode requiredInterface : component.path("requiredInterface")) {
-					if (!requiredInterface.has("id")) {
-						throw new IllegalArgumentException("No id has been specified for a required interface of " + c.getName());
-					}
-					if (!requiredInterface.has("name")) {
-						throw new IllegalArgumentException("No name has been specified for a required interface of " + c.getName());
-					}
-					// BEWARE: any changes here must also be reflected on the Interface.java @JsonCreator so that
-					if (requiredInterface.has("optional")) {
-						if (!requiredInterface.has("min") && !requiredInterface.has("max")) {
-							if (requiredInterface.get("optional").asBoolean()) {
-								c.addRequiredInterface(requiredInterface.get("id").asText(),
-										requiredInterface.get("name").asText(),
-										0,
-										1);
-							} else {
-								c.addRequiredInterface(requiredInterface.get("id").asText(),
-										requiredInterface.get("name").asText(),
-										1,
-										1);
-							}
-						} else {
-							throw new IllegalArgumentException("When specifying \"optional\" for a required interface, both\"min\" and \"max\" must be omitted");
-						}
-					} else { // optional is missing
-						if (!requiredInterface.has("min") && !requiredInterface.has("max")) {
-							c.addRequiredInterface(requiredInterface.get("id").asText(),
-									requiredInterface.get("name").asText(),
-									1,
-									1);
-						}
-						else if (requiredInterface.has("min") && requiredInterface.has("max")) {
-							int min = requiredInterface.get("min").asInt();
-							int max = requiredInterface.get("max").asInt();
-							if (min <= max) {
-								c.addRequiredInterface(requiredInterface.get("id").asText(),
-										requiredInterface.get("name").asText(),
-										requiredInterface.get("min").asInt(),
-										requiredInterface.get("max").asInt());
-							} else {
-								throw new IllegalArgumentException("When declaring a required interface, \"min\" should be lesser than \"max\"");
-							}
-						} else {
-							throw new IllegalArgumentException("If not specifying \"optional\" for a required interface, either both \"min\" and \"max\" must be specified or none at all");
-						}
-					}
-				}
-
-				Map<String, NumericParameterRefinementConfiguration> paramConfig = new HashMap<>();
-
-				for (JsonNode parameter : component.path("parameter")) {
-					// name of the parameter
-					String name = parameter.get("name").asText();
-					// possible string params
-					String[] stringParams = new String[] { "type", STR_VALUES, STR_DEFAULT };
-					String[] stringParamValues = new String[stringParams.length];
-					// possible boolean params
-					String[] boolParams = new String[] { STR_DEFAULT, "includeExtremals" };
-					boolean[] boolParamValues = new boolean[boolParams.length];
-					// possible double params
-					String[] doubleParams = new String[] { STR_DEFAULT, "min", "max", "refineSplits", "minInterval" };
-					double[] doubleParamValues = new double[doubleParams.length];
-
-					if (parameterMap.containsKey(name)) {
-						JsonNode commonParameter = parameterMap.get(name);
-						// get string parameter values from common parameter
-						for (int i = 0; i < stringParams.length; i++) {
-							if (commonParameter.get(stringParams[i]) != null) {
-								stringParamValues[i] = commonParameter.get(stringParams[i]).asText();
-							}
-						}
-						// get double parameter values from common parameter
-						for (int i = 0; i < doubleParams.length; i++) {
-							if (commonParameter.get(doubleParams[i]) != null) {
-								doubleParamValues[i] = commonParameter.get(doubleParams[i]).asDouble();
-							}
-						}
-						// get boolean parameter values from common parameter
-						for (int i = 0; i < boolParams.length; i++) {
-							if (commonParameter.get(boolParams[i]) != null) {
-								boolParamValues[i] = commonParameter.get(boolParams[i]).asBoolean();
-							}
-						}
-					}
-
-					// get string parameter values from current parameter
-					for (int i = 0; i < stringParams.length; i++) {
-						if (parameter.get(stringParams[i]) != null) {
-							stringParamValues[i] = parameter.get(stringParams[i]).asText();
-						}
-					}
-					// get double parameter values from current parameter
-					for (int i = 0; i < doubleParams.length; i++) {
-						if (parameter.get(doubleParams[i]) != null) {
-							doubleParamValues[i] = parameter.get(doubleParams[i]).asDouble();
-						}
-					}
-					// get boolean parameter values from current parameter
-					for (int i = 0; i < boolParams.length; i++) {
-						if (parameter.get(boolParams[i]) != null) {
-							boolParamValues[i] = parameter.get(boolParams[i]).asBoolean();
-						}
-					}
-
-					Parameter p = null;
-					String type = stringParamValues[Arrays.stream(stringParams).collect(Collectors.toList()).indexOf("type")];
-					switch (type) {
-					case "int":
-					case "int-log":
-					case "double":
-					case "double-log":
-						p = new Parameter(name, new NumericParameterDomain(type.equals("int") || type.equals("int-log"), doubleParamValues[1], doubleParamValues[2]), doubleParamValues[0]);
-						if (doubleParamValues[3] == 0) {
-							throw new IllegalArgumentException("Please specify the parameter \"refineSplits\" for the parameter \"" + p.getName() + "\" in component \"" + c.getName() + "\"");
-						}
-						if (doubleParamValues[4] <= 0) {
-							throw new IllegalArgumentException("Please specify a strictly positive parameter value for \"minInterval\" for the parameter \"" + p.getName() + "\" in component \"" + c.getName() + "\"");
-						}
-						if (type.endsWith("-log")) {
-							paramConfig.put(p.getName(), new NumericParameterRefinementConfiguration(parameter.get("focus").asDouble(), parameter.get("basis").asDouble(), boolParamValues[1], (int) doubleParamValues[3], doubleParamValues[4]));
-
-						} else {
-							paramConfig.put(p.getName(), new NumericParameterRefinementConfiguration(boolParamValues[1], (int) doubleParamValues[3], doubleParamValues[4]));
-						}
-						break;
-					case "bool":
-					case "boolean":
-						p = new Parameter(name, new BooleanParameterDomain(), boolParamValues[0]);
-						break;
-					case "cat":
-						if (parameter.get(STR_VALUES) != null && parameter.get(STR_VALUES).isTextual()) {
-							p = new Parameter(name, new CategoricalParameterDomain(Arrays.stream(stringParamValues[1].split(",")).collect(Collectors.toList())), stringParamValues[2]);
-						} else {
-							List<String> values = new LinkedList<>();
-
-							if (parameter.get(STR_VALUES) != null) {
-								for (JsonNode value : parameter.get(STR_VALUES)) {
-									values.add(value.asText());
-								}
-							} else if (parameterMap.containsKey(name)) {
-								for (JsonNode value : parameterMap.get(name).get(STR_VALUES)) {
-									values.add(value.asText());
-								}
-							} else {
-								this.logger.error("Warning: Categorical parameter {} in component {} without value list.", name, c.getName());
-							}
-							try {
-								p = new Parameter(name, new CategoricalParameterDomain(values), stringParamValues[2]);
-							}
-							catch (Exception e) {
-								throw new IllegalArgumentException("Error in parsing definition of component " + c.getName() + ".", e);
-							}
-						}
-						break;
-					default:
-						throw new IllegalArgumentException("Unsupported parameter type " + type);
-					}
-					if (p != null) {
-						c.addParameter(p);
-					}
-				}
-
-				/* now parse dependencies */
-				for (JsonNode dependency : component.path("dependencies")) {
-
-					/* parse precondition */
-					String pre = dependency.get("pre").asText();
-					Collection<Collection<Pair<IParameter, IParameterDomain>>> premise = new ArrayList<>();
-					Collection<String> monoms = Arrays.asList(pre.split("\\|"));
-					for (String monom : monoms) {
-						Collection<String> literals = Arrays.asList(monom.split("&"));
-						Collection<Pair<IParameter, IParameterDomain>> monomInPremise = new ArrayList<>();
-
-						for (String literal : literals) {
-							String[] parts = literal.trim().split(" ");
-							if (parts.length != 3) {
-								throw new IllegalArgumentException(MSG_CANNOT_PARSE_LITERAL + literal + ". Literals must be of the form \"<a> P <b>\".");
-							}
-
-							IParameter param = c.getParameterWithName(parts[0]);
-							String target = parts[2];
-							switch (parts[1]) {
-							case "=":
-								Pair<IParameter, IParameterDomain> eqConditionItem;
-								if (param.isNumeric()) {
-									double val = Double.parseDouble(target);
-									eqConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
-								} else if (param.isCategorical()) {
-									eqConditionItem = new Pair<>(param, new CategoricalParameterDomain(new String[] { target }));
-								} else {
-									throw new IllegalArgumentException(MSG_DOMAIN_NOT_SUPPORTED+ param.getDefaultDomain().getClass().getName() + "\"");
-								}
-								monomInPremise.add(eqConditionItem);
-								break;
-
-							case "in":
-								Pair<IParameter, IParameterDomain> inConditionItem;
-								if (param.isNumeric()) {
-									Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
-									inConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
-								} else if (param.isCategorical()) {
-									if (!target.startsWith("[") && !target.startsWith("{")) {
-										throw new IllegalArgumentException("Illegal literal \"" + literal + "\" in the postcondition of dependency. This should be a set, but the target is not described by [...] or {...}");
-									}
-									Collection<String> values = target.startsWith("[") ? SetUtil.unserializeList(target) : SetUtil.unserializeSet(target);
-									inConditionItem = new Pair<>(param, new CategoricalParameterDomain(values));
-								} else {
-									throw new IllegalArgumentException(MSG_DOMAIN_NOT_SUPPORTED + param.getDefaultDomain().getClass().getName() + "\"");
-								}
-								monomInPremise.add(inConditionItem);
-								break;
-							default:
-								throw new IllegalArgumentException(MSG_CANNOT_PARSE_LITERAL + literal + ". Currently no support for predicate \"" + parts[1] + "\".");
-							}
-						}
-						premise.add(monomInPremise);
-					}
-
-					/* parse postcondition */
-					Collection<Pair<IParameter, IParameterDomain>> conclusion = new ArrayList<>();
-					String post = dependency.get("post").asText();
-					Collection<String> literals = Arrays.asList(post.split("&"));
-
-					for (String literal : literals) {
-						String[] parts = literal.trim().split(" ");
-						if (parts.length < 3) {
-							throw new IllegalArgumentException(MSG_CANNOT_PARSE_LITERAL + literal + ". Literals must be of the form \"<a> P <b>\".");
-						}
-						if (parts.length > 3) {
-							for (int i = 3; i < parts.length; i++) {
-								parts[2] += " " + parts[i];
-							}
-						}
-
-						IParameter param = c.getParameterWithName(parts[0]);
-						String target = parts[2];
-						switch (parts[1]) {
-						case "=":
-							Pair<IParameter, IParameterDomain> eqConditionItem;
-							if (param.isNumeric()) {
-								double val = Double.parseDouble(target);
-								eqConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
-							} else if (param.isCategorical()) {
-								eqConditionItem = new Pair<>(param, new CategoricalParameterDomain(new String[] { target }));
-							} else {
-								throw new IllegalArgumentException(MSG_DOMAIN_NOT_SUPPORTED + param.getDefaultDomain().getClass().getName() + "\"");
-							}
-							conclusion.add(eqConditionItem);
-							break;
-
-						case "in":
-							Pair<IParameter, IParameterDomain> inConditionItem;
-							if (param.isNumeric()) {
-								Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
-								inConditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
-							} else if (param.isCategorical()) {
-								if (!target.startsWith("[") && !target.startsWith("{")) {
-									throw new IllegalArgumentException("Illegal literal \"" + literal + "\" in the postcondition of dependency. This should be a set, but the target is not described by [...] or {...}");
-								}
-								Collection<String> values = target.startsWith("[") ? SetUtil.unserializeList(target) : SetUtil.unserializeSet(target);
-								inConditionItem = new Pair<>(param, new CategoricalParameterDomain(values));
-							} else {
-								throw new IllegalArgumentException(MSG_DOMAIN_NOT_SUPPORTED + param.getDefaultDomain().getClass().getName() + "\"");
-							}
-							conclusion.add(inConditionItem);
-							break;
-						default:
-							throw new IllegalArgumentException(MSG_CANNOT_PARSE_LITERAL + literal + ". Currently no support for predicate \"" + parts[1] + "\".");
-						}
-					}
-					/* add dependency to the component */
-					c.addDependency(new Dependency(premise, conclusion));
-				}
-
-				paramConfigs.put(c.getName(), paramConfig);
 				repository.add(c);
+
+				/* derive parameter refinement description */
+				Map<String, NumericParameterRefinementConfiguration> paramConfig = ((NumericParameterRefinementConfigurationMap) this.deserializeParamRefinementConfiguration(component)).get(c.getName());
+				paramConfigs.put(c.getName(), paramConfig);
 			}
 		}
 		return new Pair<>(repository, paramConfigs);
