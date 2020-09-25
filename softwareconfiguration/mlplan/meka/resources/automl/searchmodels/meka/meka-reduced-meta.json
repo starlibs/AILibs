@@ -1,0 +1,14 @@
+{
+	"repository": "MEKA Meta Learners for Multi-Label Classification",
+	"include": [
+		"./meta/mbr.json",
+		"./meta/subsetmapper.json",
+		"./meta/randomsubspaceml.json",
+		"./meta/mlcbmad.json",
+		"./meta/baggingml.json",
+		"./meta/baggingmldup.json",
+		"./meta/ensembleml.json",
+		"./meta/em.json",
+		"./meta/cm.json"
+	]
+}

@@ -1,0 +1,6 @@
+{
+	"repository": "MEKA - Base Algorithms for Multi-Label Classification",
+	"include": [
+		"./base/index.json"
+	]
+}

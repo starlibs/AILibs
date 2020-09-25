@@ -1,0 +1,5 @@
+{
+  "repository" : "timeseries-index",
+  "include" : [ "./featureaugmenter.json", "./tsfresh.json" ],
+  "components" : [ ]
+}

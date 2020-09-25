@@ -1,0 +1,6 @@
+{
+  "repository" : "WEKA Full Preprocessors",
+  "include": [
+  	"./preprocessing/index.json"
+  ]
+}

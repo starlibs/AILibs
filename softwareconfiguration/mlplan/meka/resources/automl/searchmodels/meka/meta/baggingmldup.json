@@ -1,0 +1,31 @@
+{
+  "repository" : "meka.classifiers.multilabel.meta.BaggingMLdup",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.meta.BaggingMLdup",
+    "providedInterface" : [ "MLClassifier", "MetaMLClassifier", "ProblemTransformationMethod" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "BasicMLClassifier"
+    } ],
+    "parameter" : [ {
+      "comment" : "Sets the number of models (default 10)",
+      "name" : "I",
+      "type" : "int",
+      "default" : 10,
+      "min" : 10,
+      "max" : 50,
+      "refineSplits" : 4,
+      "minInterval" : 1
+    }, {
+      "name" : "P",
+      "comment" : "Size of each bag, as a percentage of total training size (default 67)",
+      "type" : "int",
+      "default" : 67,
+      "min" : 10,
+      "max" : 100,
+      "refineSplits" : 8,
+      "minInterval" : 5
+    } ]
+  } ]
+}

@@ -1,0 +1,10 @@
+{
+  "repository" : "sklearn.preprocessing.MaxAbsScaler",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.preprocessing.MaxAbsScaler",
+    "providedInterface" : [ "sklearn.preprocessing.MaxAbsScaler", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ ]
+  } ]
+}

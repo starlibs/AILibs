@@ -1,0 +1,5 @@
+{
+  "repository" : "datacleaner-index",
+  "include" : [ "./invalidnumberreplacementtransformer.json" ],
+  "components" : [ ]
+}

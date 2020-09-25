@@ -1,0 +1,43 @@
+{
+  "repository" : "tsfresh.transformers.FeatureAugmenter",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "tsfresh.transformers.FeatureAugmenter",
+    "providedInterface" : [ "TimeseriesTransformer" ],
+    "requiredInterface" : [ {
+      "id" : "default_fc_parameters",
+      "name" : "tsfreshFeatureSet"
+    } ],
+    "parameter" : [ {
+      "name" : "disable_progressbar",
+      "default" : "True",
+      "type" : "cat",
+      "values" : [ "True" ]
+    }, {
+      "name" : "column_id",
+      "default" : "instance_id",
+      "type" : "cat",
+      "values" : [ "instance_id" ]
+    }, {
+      "name" : "column_sort",
+      "default" : "timestep",
+      "type" : "cat",
+      "values" : [ "timestep" ]
+    }, {
+      "name" : "column_kind",
+      "default" : "sensor",
+      "type" : "cat",
+      "values" : [ "sensor" ]
+    }, {
+      "name" : "column_value",
+      "default" : "value",
+      "type" : "cat",
+      "values" : [ "value" ]
+    }, {
+      "name" : "n_jobs",
+      "default" : "0",
+      "type" : "cat",
+      "values" : [ "0" ]
+    } ]
+  } ]
+}

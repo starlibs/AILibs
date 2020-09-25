@@ -1,0 +1,13 @@
+{
+  "repository" : "meka.classifiers.multilabel.meta.MBR",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.meta.MBR",
+    "providedInterface" : [ "MLClassifier", "MetaMLClassifier", "ProblemTransformationMethod" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "meka.classifiers.multilabel.BR"
+    } ],
+    "parameter" : [ ]
+  } ]
+}

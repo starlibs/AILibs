@@ -1,0 +1,10 @@
+{
+  "repository" : "meka.classifiers.multilabel.MajorityLabelset",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.MajorityLabelset",
+    "providedInterface" : [ "MLClassifier", "BasicMLClassifier" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ ]
+  } ]
+}

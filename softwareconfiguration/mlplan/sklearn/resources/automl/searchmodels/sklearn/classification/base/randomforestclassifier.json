@@ -1,0 +1,49 @@
+{
+  "repository" : "sklearn.ensemble.RandomForestClassifier",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.ensemble.RandomForestClassifier",
+    "providedInterface" : [ "EnsembleClassifier", "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "n_estimators",
+      "default" : 100,
+      "type" : "int",
+      "min" : 100,
+      "max" : 100,
+      "minInterval" : 1,
+      "refineSplits" : 2
+    }, {
+      "name" : "criterion",
+      "default" : "gini",
+      "type" : "cat",
+      "values" : [ "gini", "entropy" ]
+    }, {
+      "name" : "max_features",
+      "type" : "cat",
+      "default" : "auto",
+      "values" : [ "auto", "sqrt", "log2" ]
+    }, {
+      "name" : "min_samples_split",
+      "type" : "int",
+      "default" : 11,
+      "min" : 2,
+      "max" : 21,
+      "minInterval" : 1,
+      "refineSplits" : 2
+    }, {
+      "name" : "min_samples_leaf",
+      "type" : "int",
+      "default" : 11,
+      "min" : 1,
+      "max" : 21,
+      "minInterval" : 1,
+      "refineSplits" : 2
+    }, {
+      "name" : "bootstrap",
+      "default" : "True",
+      "type" : "cat",
+      "values" : [ "True", "False" ]
+    } ]
+  } ]
+}

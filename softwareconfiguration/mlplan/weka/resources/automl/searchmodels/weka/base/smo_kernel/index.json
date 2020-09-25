@@ -1,0 +1,10 @@
+{
+	"repository": "base-index",
+	"include": [
+		"./normalizedpolykernel.json",
+		"./polykernel.json",
+		"./puk.json",
+		"./rbfkernel.json"
+	],
+	"components": []
+}
