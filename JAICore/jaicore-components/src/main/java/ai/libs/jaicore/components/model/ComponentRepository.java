@@ -47,7 +47,7 @@ public class ComponentRepository extends ArrayList<IComponent> implements ICompo
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((this.constraints == null) ? 0 : this.constraints.hashCode());
+		result = prime * result + this.constraints.hashCode();
 		return result;
 	}
 
