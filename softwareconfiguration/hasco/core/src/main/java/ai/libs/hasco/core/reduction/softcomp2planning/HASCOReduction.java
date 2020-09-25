@@ -295,6 +295,9 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				methodParams.addAll(methodInputs);
 				methodParams.addAll(methodOutputs);
 				methods.add(new OCIPMethod("resolveGroup" + ri.getName(), methodParams, new Literal(RESOLVE_IFACE_GROUP_PREFIX + ri.getName() + "(cHandle, iGroupHandle)"), new Monom(), new TaskNetwork(network), false, methodOutputs, new Monom()));
+				if (ri.isOptional()) {
+					methods.add(new OCIPMethod("ignoreGroup" + ri.getName(), methodParams, new Literal(RESOLVE_IFACE_GROUP_PREFIX + ri.getName() + "(cHandle, iGroupHandle)"), new Monom(), new TaskNetwork(), false, methodOutputs, new Monom()));
+				}
 			}
 		}
 		return methods;

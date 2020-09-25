@@ -23,12 +23,13 @@ import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfiguratio
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logging.LoggerUtil;
 
-public class NewReductionSandbox extends Tester {
+public class ListBasedRequiredInterfaceSolutionProductionTester extends Tester {
 
 	private static final File folderToTestResources = new File("../../../JAICore/jaicore-components/testrsc/");
 	private static final String reqInterface = "IFace";
 	private static final File tinyProblem = new File(folderToTestResources + File.separator + "tinyproblemwithlists.json");
 	private static final File tinyProblemWithUniqueness = new File(folderToTestResources + File.separator + "tinyproblemwithuniquelists.json");
+	private static final File tinyProblemWithOptional = new File(folderToTestResources + File.separator + "tinyproblemwithoptionallists.json");
 	private static final File smallProblem = new File(folderToTestResources + File.separator + "simpleproblemwithlists.json");
 
 	@Test
@@ -39,6 +40,11 @@ public class NewReductionSandbox extends Tester {
 	@Test
 	public void testCorrectNumberOfSolutionsInUniqueListInterfacesOnTinyProblem() throws IOException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		this.test(tinyProblemWithUniqueness, 2);
+	}
+
+	@Test
+	public void testCorrectNumberOfSolutionsInOptionalListInterfacesOnTinyProblem() throws IOException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+		this.test(tinyProblemWithOptional, 4);
 	}
 
 	@Test
