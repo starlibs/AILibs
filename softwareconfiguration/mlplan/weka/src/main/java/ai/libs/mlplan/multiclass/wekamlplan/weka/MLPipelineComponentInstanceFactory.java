@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.aeonbits.owner.util.Collections;
@@ -13,9 +14,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.exceptions.ComponentNotFoundException;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.serialization.ComponentNotFoundException;
-import ai.libs.jaicore.components.serialization.ComponentUtils;
+import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 import ai.libs.jaicore.ml.weka.classification.pipeline.SupervisedFilterSelector;
 import weka.core.OptionHandler;
@@ -67,14 +68,14 @@ public class MLPipelineComponentInstanceFactory {
 			ComponentInstance classifierCI = this.getComponentInstanceForPipelineElement(pipeline.getBaseClassifier());
 
 			// Pipeline
-			HashMap<String, Collection<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
+			HashMap<String, List<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
 			satisfactionOfRequiredInterfaces.put("preprocessor", Arrays.asList(preprocessorCI));
 			satisfactionOfRequiredInterfaces.put("classifier", Arrays.asList(classifierCI));
-			return new ComponentInstance(ComponentUtils.getComponentByName("pipeline", this.components), new HashMap<String, String>(), satisfactionOfRequiredInterfaces);
+			return new ComponentInstance(ComponentUtil.getComponentByName("pipeline", this.components), new HashMap<>(), satisfactionOfRequiredInterfaces);
 
 		} else {
 			// Pipeline is only classifier
-			return new ComponentInstance(ComponentUtils.getComponentByName(pipeline.getBaseClassifier().getClass().getName(), this.components), this.getParametersForPipelineElement(pipeline.getBaseClassifier()), new HashMap<>());
+			return new ComponentInstance(ComponentUtil.getComponentByName(pipeline.getBaseClassifier().getClass().getName(), this.components), this.getParametersForPipelineElement(pipeline.getBaseClassifier()), new HashMap<>());
 		}
 	}
 
@@ -91,9 +92,9 @@ public class MLPipelineComponentInstanceFactory {
 	 */
 	private ComponentInstance getComponentInstanceForPipelineElement(final Object pipelineElement, @SuppressWarnings("unchecked") final Pair<String, ComponentInstance>... satisfactionOfRegquiredInterfaces)
 			throws ComponentNotFoundException {
-		HashMap<String, Collection<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
+		HashMap<String, List<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
 		Arrays.stream(satisfactionOfRegquiredInterfaces).forEach(entry -> satisfactionOfRequiredInterfaces.put(entry.getKey(), Arrays.asList(entry.getValue())));
-		return new ComponentInstance(ComponentUtils.getComponentByName(pipelineElement.getClass().getName(), this.components), this.getParametersForPipelineElement(pipelineElement), satisfactionOfRequiredInterfaces);
+		return new ComponentInstance(ComponentUtil.getComponentByName(pipelineElement.getClass().getName(), this.components), this.getParametersForPipelineElement(pipelineElement), satisfactionOfRequiredInterfaces);
 	}
 
 	/**

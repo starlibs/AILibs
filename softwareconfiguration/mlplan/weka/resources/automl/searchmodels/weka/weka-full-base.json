@@ -1,0 +1,7 @@
+{
+	"repository": "WEKA Full Base Models",
+	"comment": "All base models from WEKA",
+	"include": [
+		"./base/index.json"
+	]
+}

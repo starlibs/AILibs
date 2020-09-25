@@ -1,0 +1,21 @@
+{
+	"repository": "repo",
+	"include": ["./sub.json"],
+	"components": [
+		{
+			"name": "{$nameOfA}",
+			"requiredInterface": [],
+			"providedInterface": [
+				"IFace"
+			],
+			"parameters": [
+				{
+					"name": "{$nameOfParama}",
+					"type": "{$typeOfa}",
+					"default": "{$defaultOfa}"
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

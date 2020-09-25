@@ -1,0 +1,24 @@
+{
+  "repository" : "sklearn.naive_bayes.BernoulliNB",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.naive_bayes.BernoulliNB",
+    "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "alpha",
+      "default" : 0.001,
+      "type" : "cat",
+      "values" : [ 0.001, 0.01, 0.1, 1.0, 10.0, 100.0 ]
+    }, {
+      "name" : "fit_prior",
+      "default" : "True",
+      "type" : "cat",
+      "values" : [ "True", "False" ]
+    } ],
+    "dependencies" : [ {
+      "pre" : "fit_prior in {True}",
+      "post" : "alpha in {0.02,0.01,0.0124}"
+    } ]
+  } ]
+}

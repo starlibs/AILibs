@@ -29,8 +29,7 @@ import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedExcepti
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
-import ai.libs.jaicore.components.serialization.CompositionSerializer;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.mlplan.core.IProblemType;
 
@@ -44,18 +43,19 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 	protected final List<ComponentInstance> allComponentInstances;
 	protected StringBuilder stringBuilder;
 	protected final File searchSpaceFile;
+	protected final ComponentSerialization compSerializer = new ComponentSerialization();
 
 	public AbstractSearchSpaceConfigurationTest(final IProblemType<?> problemType) throws IOException {
 		this.problemType = problemType;
 		this.searchSpaceFile = FileUtil.getExistingFileWithHighestPriority(this.problemType.getSearchSpaceConfigFileFromResource(), this.problemType.getSearchSpaceConfigFromFileSystem());
-		this.allComponentInstances = new ArrayList<>(ComponentUtil.getAllAlgorithmSelectionInstances(this.problemType.getRequestedInterface(), new ComponentLoader(this.searchSpaceFile).getComponents()));
+		this.allComponentInstances = new ArrayList<>(ComponentUtil.getAllAlgorithmSelectionInstances(this.problemType.getRequestedInterface(), this.compSerializer.deserializeRepository(this.searchSpaceFile)));
 
 	}
 
 	@Test
 	public void testNoExceptionsInGraphGeneration() throws Exception {
 		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(this.searchSpaceFile, this.problemType.getRequestedInterface(), ci -> {
-			this.LOGGER.info("Evaluating ci {}", CompositionSerializer.serializeComponentInstance(ci));
+			this.LOGGER.info("Evaluating ci {}", this.compSerializer.serialize(ci));
 			try {
 				ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner = this.problemType.getLearnerFactory().getComponentInstantiation(ci);
 			} catch (ComponentInstantiationFailedException e) {
@@ -288,7 +288,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		} catch (Exception e) {
 			this.stringBuilder.append("\n\n========================================================================================\n");
 			this.stringBuilder.append("Could not execute pipeline:\n");
-			this.stringBuilder.append(CompositionSerializer.serializeComponentInstance(componentInstance));
+			this.stringBuilder.append(this.compSerializer.serialize(componentInstance));
 			this.stringBuilder.append("\n");
 			this.stringBuilder.append("Unknown Reason\n" + this.getReasonForFailure(e));
 			if (FAIL_IMMEDIATELY) {

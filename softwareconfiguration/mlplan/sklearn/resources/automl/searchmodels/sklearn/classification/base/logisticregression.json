@@ -1,0 +1,25 @@
+{
+  "repository" : "sklearn.linear_model.LogisticRegression",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.linear_model.LogisticRegression",
+    "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "penalty",
+      "type" : "cat",
+      "default" : "l2",
+      "values" : [ "l2", "none" ]
+    }, {
+      "name" : "C",
+      "default" : 1.0,
+      "type" : "cat",
+      "values" : [ 1.0E-4, 0.001, 0.01, 0.1, 0.5, 1.0, 5.0, 10.0, 15.0, 20.0, 25.0 ]
+    }, {
+      "name" : "dual",
+      "default" : "False",
+      "type" : "cat",
+      "values" : [ "False" ]
+    } ]
+  } ]
+}

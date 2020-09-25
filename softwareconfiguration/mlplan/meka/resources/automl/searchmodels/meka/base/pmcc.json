@@ -1,0 +1,65 @@
+{
+  "repository" : "meka.classifiers.multilabel.PMCC",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.PMCC",
+    "providedInterface" : [ "MLClassifier", "BasicMLClassifier" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "AbstractClassifier"
+    } ],
+    "parameter" : [ {
+      "name" : "M",
+      "comment" : "The population size (of chains) __ should be smaller than the total number of chains evaluated (Is) default: 10",
+      "type" : "int",
+      "default" : 10,
+      "min" : 1,
+      "max" : 50,
+      "minInterval" : 1,
+      "refineSplits" : 8
+    }, {
+      "name" : "O",
+      "comment" : "Use temperature: cool the chain down over time (from the beginning of the chain) __ can be faster default: 0 (no temperature)",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0", "1" ]
+    }, {
+      "name" : "B",
+      "comment" : "If using O = 1 for temperature, this sets the Beta constant default: 0.03",
+      "type" : "double",
+      "default" : 0.03,
+      "min" : 0.01,
+      "max" : 0.99,
+      "minInterval" : 0.001,
+      "refineSplits" : 8
+    }, {
+      "name" : "Is",
+      "comment" : "The number of iterations to search the chain space at train time. default: 0",
+      "type" : "int",
+      "default" : 0,
+      "min" : 0,
+      "max" : 1500,
+      "minInterval" : 5,
+      "refineSplits" : 8
+    }, {
+      "name" : "Iy",
+      "comment" : "The number of iterations to search the output space at test time. default: 10",
+      "type" : "int",
+      "default" : 10,
+      "min" : 0,
+      "max" : 100,
+      "minInterval" : 1,
+      "refineSplits" : 8
+    }, {
+      "name" : "P",
+      "comment" : "Sets the payoff function. Any of those listed in regular evaluation output will do (e.g., 'Exact match'). default: Exact match",
+      "type" : "cat",
+      "default" : "Exact match",
+      "values" : [ "Accuracy", "Jaccard index", "Hamming score", "Exact match", "Jaccard distance", "Hamming loss", "ZeroOne loss", "Harmonic score", "One error", "Rank loss", "Avg precision", "Log Loss (lim. L)", "Log Loss (lim. D)", "Micro Precision", "Micro Recall", "Macro Precision", "Macro Recall", "F1 (micro averaged)", "F1 (macro averaged by example)", "F1 (macro averaged by label)", "AUPRC (macro averaged)", "AUROC (macro averaged)", "Levenshtein distance" ]
+    } ],
+    "dependencies" : [ {
+      "pre" : "O in {1}",
+      "post" : "B in [0.03,0.03]"
+    } ]
+  } ]
+}

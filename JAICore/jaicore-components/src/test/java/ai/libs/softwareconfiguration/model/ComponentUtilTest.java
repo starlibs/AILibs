@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Random;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -14,11 +13,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 
 /**
  * Tests whether the methods provided by the ComponentUtil work properly.
@@ -34,11 +34,11 @@ public class ComponentUtilTest {
 	private static final File COMPONENT_REPOSITORY = new File("testrsc/difficultproblem.json");
 
 	/* Collection of components that may be used in the single unit tests. */
-	private static Collection<IComponent> components;
+	private static IComponentRepository components;
 
 	@BeforeAll
 	public static void setup() throws IOException {
-		components = new ComponentLoader(COMPONENT_REPOSITORY).getComponents();
+		components = new ComponentSerialization().deserializeRepository(COMPONENT_REPOSITORY);
 	}
 
 	@Test

@@ -1,0 +1,15 @@
+{
+  "repository" : "sklearn.dummy.DummyClassifier",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.dummy.DummyClassifier",
+    "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "strategy",
+      "type" : "cat",
+      "values" : [ "stratified", "most_frequent", "prior" ],
+      "default" : "stratified"
+    } ]
+  } ]
+}

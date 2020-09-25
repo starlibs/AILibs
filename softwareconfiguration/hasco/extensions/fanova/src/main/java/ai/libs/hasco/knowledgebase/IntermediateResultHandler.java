@@ -47,7 +47,7 @@ public class IntermediateResultHandler {
 	public void receiveSolutionEvaluationEvent(final HASCOSolutionEvaluationEvent<?, ?> solution) throws JsonProcessingException, SQLException {
 		Map<String, String> map = new HashMap<>();
 		ObjectMapper mapper = new ObjectMapper();
-		String composition = mapper.writeValueAsString(solution.getComposition());
+		String composition = mapper.writeValueAsString(solution.getComponentInstance());
 		map.put("composition", composition);
 		//// outer split
 		map.put("test_evaluation_technique", this.testEvalTechnique);

@@ -1,0 +1,13 @@
+{
+  "repository" : "meka.classifiers.multilabel.FW",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "meka.classifiers.multilabel.FW",
+    "providedInterface" : [ "MLClassifier", "BasicMLClassifier", "ProblemTransformationMethod" ],
+    "requiredInterface" : [ {
+      "id" : "W",
+      "name" : "AbstractClassifier"
+    } ],
+    "parameter" : [ ]
+  } ]
+}

@@ -45,6 +45,13 @@ dependencies {
 ```
 
 # Usage
+## Obtaining a Software Configuration Problem Object
+```java
+RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(problemFile, "interfacename", n -> 0.0);
+```
+Here, we have a benchmark that always assigns 0 to any solution.
+Replace it with a different benchmark to do something meaningful.
+
 ## Obtaining an HASCO instance
 The easiest way to use HASCO is to use the HASCO builder.
 
@@ -134,6 +141,13 @@ for (int i = 0; i < 10; i++) {
 	hasco.nextWithException(); // UCT draws the same paths multiple times, so we see solutions several times here
 }
 ```
+
+## Serializing Component Instances to JSON
+```java
+new ComponentSerialization().serialize(ci)
+```
+Here, `ci` is your `IComponentInstance` object.
+
 
 # THE HASCO Reduction
 HASCO solves the software configuration problem by conducting a double reduction step.

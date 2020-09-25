@@ -1,0 +1,100 @@
+{
+	"repository": "list-requiredinterface-reduction",
+	"components": [
+		{
+			"name": "COMPA",
+			"requiredInterface": [
+				{
+					"id": "rif1",
+					"name": "rif1",
+					"optional": "true"
+				},
+				{
+					"id": "rif2",
+					"name": "rif2",
+					"optional": "true"
+				}
+			],
+			"providedInterface": [
+				"IFace"
+			],
+			"parameters": [],
+			"dependencies": []
+		},
+		{
+			"name": "COMPB",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rif1"
+			],
+			"parameters": [],
+			"dependencies": []
+		},
+		{
+			"name": "COMPC",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rif2"
+			],
+			"parameters": [],
+			"dependencies": []
+		},
+		{
+			"name": "COMPD",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rif2"
+			],
+			"parameters": [],
+			"dependencies": []
+		}
+	],
+	"constraints": [
+		{
+			"positive": false,
+			"premise": {
+				"component": "COMPA",
+				"requiredInterfaces": {
+					"rif1": [
+						{
+							"component": "COMPB"
+						}
+					]
+				}
+			},
+			"conclusion": {
+				"component": "COMPA",
+				"requiredInterfaces": {
+					"rif2": [
+						{
+							"component": "COMPC"
+						}
+					]
+				}
+			}
+		},
+		{
+			"positive": true,
+			"premise": {
+				"component": "COMPA",
+				"requiredInterfaces": {
+					"rif2": [
+						{
+							"component": "COMPD"
+						}
+					]
+				}
+			},
+			"conclusion": {
+				"component": "COMPA",
+				"requiredInterfaces": {
+					"rif1": [
+						{
+							"component": "COMPB"
+						}
+					]
+				}
+			}
+		}
+	]
+}

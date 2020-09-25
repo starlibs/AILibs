@@ -18,11 +18,12 @@ import org.junit.jupiter.api.Test;
 import com.google.common.util.concurrent.AtomicDouble;
 
 import ai.libs.jaicore.basic.FileUtil;
+import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 import ai.libs.jaicore.components.model.ComponentUtil;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.classification.multilabel.dataset.IMekaInstances;
 import ai.libs.jaicore.ml.classification.multilabel.dataset.MekaInstances;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
@@ -35,13 +36,13 @@ public class MekaPipelineFactoryTest {
 	private static final File SSC = FileUtil.getExistingFileWithHighestPriority(EMLPlanMekaProblemType.CLASSIFICATION_MULTILABEL.getSearchSpaceConfigFileFromResource(),
 			EMLPlanMekaProblemType.CLASSIFICATION_MULTILABEL.getSearchSpaceConfigFromFileSystem());
 
-	private static ComponentLoader cl;
+	private static IComponentRepository repository;
 	private static MekaPipelineFactory mpf;
 	private static IMekaInstances dTrain;
 
 	@BeforeAll
 	public static void setup() throws Exception {
-		cl = new ComponentLoader(SSC);
+		repository = new ComponentSerialization().deserializeRepository(SSC);
 		mpf = new MekaPipelineFactory();
 		Instances data = new Instances(new FileReader(new File("testrsc/flags.arff")));
 		MLUtils.prepareData(data);
@@ -55,7 +56,7 @@ public class MekaPipelineFactoryTest {
 	@Disabled
 	@Test
 	public void testValidDefaultConfigInstantiation() throws ComponentInstantiationFailedException, TrainingException, InterruptedException {
-		Collection<ComponentInstance> algorithmSelections = ComponentUtil.getAllAlgorithmSelectionInstances("MLClassifier", cl.getComponents());
+		Collection<ComponentInstance> algorithmSelections = ComponentUtil.getAllAlgorithmSelectionInstances("MLClassifier", repository);
 		List<ComponentInstance> list = new ArrayList<>(algorithmSelections);
 
 		double currentPercentage = 0.0;
@@ -72,7 +73,7 @@ public class MekaPipelineFactoryTest {
 
 	@Test
 	public void testValidRandomConfigInstantiation() throws ComponentInstantiationFailedException, TrainingException, InterruptedException {
-		Collection<ComponentInstance> algorithmSelections = ComponentUtil.getAllAlgorithmSelectionInstances("MLClassifier", cl.getComponents());
+		Collection<ComponentInstance> algorithmSelections = ComponentUtil.getAllAlgorithmSelectionInstances("MLClassifier", repository);
 		List<ComponentInstance> list = new ArrayList<>(algorithmSelections);
 
 		AtomicInteger count = new AtomicInteger(0);

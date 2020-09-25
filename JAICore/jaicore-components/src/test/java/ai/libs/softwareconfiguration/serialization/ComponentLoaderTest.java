@@ -1,6 +1,7 @@
 package ai.libs.softwareconfiguration.serialization;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -8,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,20 +17,24 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstanceConstraint;
+import ai.libs.jaicore.components.api.IComponentRepository;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.model.BooleanParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
+import ai.libs.jaicore.logging.LoggerUtil;
 
 @SuppressWarnings("SimplifiableJUnitAssertion")
 public class ComponentLoaderTest {
 
 	@Test
 	public void testLoadFromFile() throws IOException {
-		ComponentLoader loader = new ComponentLoader(new File("testrsc/difficultproblem.json"));
-		List<IComponent> components = loader.getComponents().stream().sorted((c1,c2) -> c1.getName().compareTo(c2.getName())).collect(Collectors.toList());
+		IComponentRepository repo = new ComponentSerialization().deserializeRepository(new File("testrsc/difficultproblem.json"));
+		List<IComponent> components = repo.stream().sorted((c1,c2) -> c1.getName().compareTo(c2.getName())).collect(Collectors.toList());
 
 		/* check number of components */
 		assertEquals(2, components.size());
@@ -55,13 +61,13 @@ public class ComponentLoaderTest {
 		}
 
 		/* test parameters */
-		Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> parameterConfig = loader.getParamConfigs();
-		for (IComponent c : loader.getComponents()) {
-			assertNotNull(parameterConfig.get(c));
+		INumericParameterRefinementConfigurationMap parameterConfig = new ComponentSerialization().deserializeParamMap(new File("testrsc/difficultproblem.json"));
+		for (IComponent c : components) {
+			assertNotNull(parameterConfig.getParameterNamesForWhichARefinementIsDefined(c));
 		}
-		assertNotNull(parameterConfig.get(c1).get(params.get(2)));
-		assertNotNull(parameterConfig.get(c1).get(params.get(3)));
-		assertNotNull(parameterConfig.get(c1).get(params.get(4)));
+		assertNotNull(parameterConfig.getRefinement(c1, params.get(2)));
+		assertNotNull(parameterConfig.getRefinement(c1, params.get(3)));
+		assertNotNull(parameterConfig.getRefinement(c1, params.get(4)));
 	}
 
 	@Test
@@ -74,11 +80,35 @@ public class ComponentLoaderTest {
 		this.testEqualityOfTwoLoadingProcedures("testrsc/weka/weka-all-autoweka.json");
 	}
 
+	@Test
+	public void testVariableReplacement() throws IOException {
+		Map<String, String> replacement = new HashMap<>();
+		String compNameA = "CompA";
+		String compNameB = "CompB";
+		replacement.put("nameOfA", compNameA);
+		replacement.put("typeOfa", "boolean");
+		replacement.put("defaultOfa", "true");
+		replacement.put("nameOfParama", "a");
+		replacement.put("nameOfB", compNameB);
+		replacement.put("domainOfb", "[\"v1\", \"v2\", \"v3\", \"v4\", \"v5\"]");
+		replacement.put("defaultOfb", "v4");
+		replacement.put("nameOfParamb", "b");
+		IComponentRepository repo = new ComponentSerialization(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM).deserializeRepository(new File("testrsc/problemwithvars/main.json"), replacement);
+		IComponent compA = repo.getComponent(compNameA);
+		IParameter param = compA.getParameter("a");
+		assertTrue(param.getDefaultDomain() instanceof BooleanParameterDomain);
+		assertEquals(true, param.getDefaultValue());
+
+
+		IComponent compB = repo.getComponent(compNameB);
+		IParameter paramb = compB.getParameter("b");
+		assertTrue(paramb.getDefaultDomain() instanceof CategoricalParameterDomain);
+		assertEquals("v4", paramb.getDefaultValue());
+	}
+
 	public void testEqualityOfTwoLoadingProcedures(final String filename) throws IOException {
-		ComponentLoader loader1 = new ComponentLoader(new File(filename));
-		ComponentLoader loader2 = new ComponentLoader(new File(filename));
-		List<IComponent> components1 = new ArrayList<>(loader1.getComponents());
-		List<IComponent> components2 = new ArrayList<>(loader2.getComponents());
+		List<IComponent> components1 = new ArrayList<>(new ComponentSerialization().deserializeRepository(new File(filename)));
+		List<IComponent> components2 = new ArrayList<>(new ComponentSerialization().deserializeRepository(new File(filename)));
 		int n = components1.size();
 		for (int i = 0; i < n; i++) {
 			IComponent c1 = components1.get(i);
@@ -111,14 +141,40 @@ public class ComponentLoaderTest {
 			/* check overall equality of components */
 			assertEquals(c1, c2);
 		}
-		assertEquals(loader1.getComponents(), loader2.getComponents());
-		assertEquals(loader1.getParamConfigs(), loader2.getParamConfigs());
+		assertEquals(components1, components2);
+		assertEquals(new ComponentSerialization().deserializeParamMap(new File(filename)), new ComponentSerialization().deserializeParamMap(new File(filename)));
 	}
 
 	@Test
-	public void testLoadFromResource() throws IOException {
-		Collection<IComponent> components = new ComponentLoader(new File("testrsc/weka-all-autoweka.json")).getComponents();
-		assertTrue(!components.isEmpty());
-	}
+	public void testConstraints() throws IOException {
+		IComponentRepository repo = new ComponentSerialization(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM).deserializeRepository(new File("testrsc/tinyproblemwithconstraints.json"));
+		Collection<IComponentInstanceConstraint> constraintsAsSet = repo.getConstraints();
+		assertFalse(constraintsAsSet.isEmpty());
+		assertEquals(2, constraintsAsSet.size());
+		List<IComponentInstanceConstraint> constraints = new ArrayList<>(constraintsAsSet);
 
+		/* check first (negative) constraint */
+		IComponentInstanceConstraint c1 = constraints.get(0);
+		assertFalse(c1.isPositive());
+		IComponentInstance premisePattern1 = c1.getPremisePattern();
+		IComponentInstance conclusionPattern1 = c1.getConclusionPattern();
+		assertEquals("COMPA", premisePattern1.getComponent().getName());
+		assertEquals("COMPA", conclusionPattern1.getComponent().getName());
+		assertTrue(premisePattern1.getParameterValues().isEmpty());
+		assertTrue(conclusionPattern1.getParameterValues().isEmpty());
+		assertEquals("COMPB", premisePattern1.getSatisfactionOfRequiredInterface("rif1").iterator().next().getComponent().getName());
+		assertEquals("COMPC", conclusionPattern1.getSatisfactionOfRequiredInterface("rif2").iterator().next().getComponent().getName());
+
+		/* check first (positive) constraint */
+		IComponentInstanceConstraint c2 = constraints.get(1);
+		assertTrue(c2.isPositive());
+		IComponentInstance premisePattern2 = c2.getPremisePattern();
+		IComponentInstance conclusionPattern2 = c2.getConclusionPattern();
+		assertEquals("COMPA", premisePattern2.getComponent().getName());
+		assertEquals("COMPA", conclusionPattern2.getComponent().getName());
+		assertTrue(premisePattern2.getParameterValues().isEmpty());
+		assertTrue(conclusionPattern2.getParameterValues().isEmpty());
+		assertEquals("COMPD", premisePattern2.getSatisfactionOfRequiredInterface("rif2").iterator().next().getComponent().getName());
+		assertEquals("COMPB", conclusionPattern2.getSatisfactionOfRequiredInterface("rif1").iterator().next().getComponent().getName());
+	}
 }

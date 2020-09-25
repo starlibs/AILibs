@@ -1,0 +1,24 @@
+{
+	"repository": "sklearn.pipeline.make_union",
+	"include": [],
+	"components": [
+		{
+			"name": "sklearn.pipeline.make_union",
+			"providedInterface": [
+				"AbstractPreprocessor",
+				"MakeUnion"
+			],
+			"requiredInterface": [
+				{
+					"id": "p1",
+					"name": "BasicPreprocessor"
+				},
+				{
+					"id": "p2",
+					"name": "BasicPreprocessor"
+				}
+			],
+			"parameter": []
+		}
+	]
+}

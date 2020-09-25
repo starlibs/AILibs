@@ -1,6 +1,5 @@
 package ai.libs.jaicore.components.model;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,7 @@ public class UnparametrizedComponentInstance {
 	}
 
 	public UnparametrizedComponentInstance(final IComponentInstance composition) {
-		Map<String, Collection<IComponentInstance>> resolvedRequiredInterfaces = composition.getSatisfactionOfRequiredInterfaces();
+		Map<String, List<IComponentInstance>> resolvedRequiredInterfaces = composition.getSatisfactionOfRequiredInterfaces();
 		this.satisfactionOfRequiredInterfaces = new HashMap<>();
 		resolvedRequiredInterfaces.keySet().forEach(r -> this.satisfactionOfRequiredInterfaces.put(r, resolvedRequiredInterfaces.get(r).stream().map(UnparametrizedComponentInstance::new).collect(Collectors.toList())));
 		this.componentName = composition.getComponent().getName();

@@ -1,0 +1,13 @@
+{
+  "repository" : "tpot.builtins.StackingEstimator",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "tpot.builtins.StackingEstimator",
+    "providedInterface" : [ "AbstractPreprocessor", "Stacking" ],
+    "requiredInterface" : [ {
+      "id" : "estimator",
+      "name" : "BaseLearner"
+    } ],
+    "parameter" : [ ]
+  } ]
+}

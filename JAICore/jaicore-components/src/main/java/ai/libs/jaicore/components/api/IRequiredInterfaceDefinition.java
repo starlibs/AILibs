@@ -15,12 +15,30 @@ public interface IRequiredInterfaceDefinition extends Serializable {
 	public String getId();
 
 	/**
-	 * @return minimum number of required realizations
+	 * @return Tells whether the order of realizations of this interface is relevant or not.
+	 */
+	public boolean isOrdered();
+
+	/**
+	 * @return Tells whether there is a limitation that each component must be contained at most once
+	 */
+	public boolean isUniqueComponents();
+
+	/**
+	 * @return Tells whether the required interface is optional
+	 */
+	public boolean isOptional();
+
+	/**
+	 * The minimum can be greater than 0 even if the interface is optional.
+	 * In that case, the semantic is: Either the interface is not satisfied or it has at least this number of realizations.
+	 *
+	 * @return minimum number of required realizations if satisfied at all
 	 */
 	public int getMin();
 
 	/**
-	 * @return maximium number of allowed realizations
+	 * @return maximum number of allowed realizations
 	 */
 	public int getMax();
 }

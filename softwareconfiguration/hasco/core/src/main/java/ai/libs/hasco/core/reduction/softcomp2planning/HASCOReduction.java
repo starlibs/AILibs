@@ -16,11 +16,11 @@ import ai.libs.hasco.core.predicate.IsValidParameterRangeRefinementPredicate;
 import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.logic.fol.structure.CNFFormula;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
@@ -48,6 +48,7 @@ public class HASCOReduction<V extends Comparable<V>>
 implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>, ComponentInstance, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>, IEvaluatedPlan<V>> {
 
 	private static final boolean CONFIGURE_PARAMS = true; // this could be determined automatically later
+	private static final Map<CNFFormula, Monom> EMPTY_PRECONDITION = new HashMap<>();
 
 	// component selection
 	private static final String RESOLVE_COMPONENT_IFACE_PREFIX = "1_tResolve";
@@ -62,7 +63,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 	private static final String REFINE_PARAMETER_PREFIX = "2_tRefineParam";
 	private static final String DECLARE_CLOSED_PREFIX = "2_declareClosed";
 	private static final String REDEF_VALUE_PREFIX = "2_redefValue";
-	private static final String OMIT_RESOLUTION_PREFIX = "2_omitResolution";
+	private static final String OMIT_RESOLUTION_PREFIX = "1_omitResolution";
 
 	private static final String COMPONENT_OF_C2 = "component(c2)";
 
@@ -70,23 +71,24 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 
 	/* working variables */
 	private Collection<IComponent> components;
-	private Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramRefinementConfig;
+	private INumericParameterRefinementConfigurationMap paramRefinementConfig;
 
 	public static Monom getInitState() {
 		return new Monom("component('request')");
 	}
 
-	public static List<CEOCOperation> getOperations(final Collection<? extends IComponent> components, final Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> paramRefinementConfig) {
+	public static List<CEOCOperation> getOperations(final Collection<? extends IComponent> components, final INumericParameterRefinementConfigurationMap paramRefinementConfig) {
 		List<CEOCOperation> operations = new ArrayList<>();
 		for (IComponent c : components) {
 			String cName = c.getName();
 			for (String i : c.getProvidedInterfaces()) {
 				List<VariableParam> opParams = new ArrayList<>();
+				opParams.add(new VariableParam("iGroupHandle")); // handle for the required interface to be resolved here
 				opParams.add(new VariableParam("iHandle")); // handle for the required interface to be resolved here
 				opParams.add(new VariableParam("cHandle")); // handle for the new component instance we create
 				int j = 0;
 				Map<CNFFormula, Monom> addList = new HashMap<>();
-				Monom standardKnowledgeAboutNewComponent = new Monom("component(cHandle) & resolves(iHandle, '" + i + "', '" + cName + "'," + " cHandle" + ")");
+				Monom standardKnowledgeAboutNewComponent = new Monom("component(cHandle) & resolves(iHandle, '" + i + "', '" + cName + "'," + " cHandle" + ") & usedin('" + cName + "', iGroupHandle)");
 				for (IParameter p : c.getParameters()) {
 					String pName = p.getName();
 					String paramIdentifier = "p" + (++j);
@@ -104,7 +106,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 					List<LiteralParam> valParams = new ArrayList<>();
 					valParams.add(new VariableParam(paramIdentifier));
 					if (p.isNumeric()) {
-						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(cHandle, '" + pName + "', '" + paramRefinementConfig.get(c).get(p).getFocusPoint() + "')"));
+						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(cHandle, '" + pName + "', '" + paramRefinementConfig.getRefinement(c, p).getFocusPoint() + "')"));
 						NumericParameterDomain np = (NumericParameterDomain) p.getDefaultDomain();
 						valParams.add(new ConstantParam("[" + np.getMin() + "," + np.getMax() + "]"));
 					} else {
@@ -130,10 +132,15 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 			}
 		}
 
+		/* operations to require uniqueness of components in group interface */
+		Map<CNFFormula, Monom> addListUniqueness = new HashMap<>();
+		addListUniqueness.put(new CNFFormula(), new Monom("uniqueComponents(iGroupHandle)"));
+		operations.add(new CEOCOperation("1_requireUniqueness", "iGroupHandle", new Monom(), addListUniqueness, EMPTY_PRECONDITION, ""));
+
 		/* operations for interface definitions */
 		Map<CNFFormula, Monom> addList = new HashMap<>();
-		addList.put(new CNFFormula(), new Monom("interfaceMember(iHandle, iGroupHandle)"));
-		CEOCOperation defInterfaceOp = new CEOCOperation("1_defineInterface", "iGroupHandle, iHandle", new Monom(), addList, new HashMap<>(), "");
+		addList.put(new CNFFormula(), new Monom("interfaceMember(iHandle, iGroupHandle, iIndex)"));
+		CEOCOperation defInterfaceOp = new CEOCOperation("1_defineInterface", "iGroupHandle, iHandle, iIndex", new Monom(), addList, new HashMap<>(), "");
 		operations.add(defInterfaceOp);
 
 
@@ -226,7 +233,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 
 				/* configure task network for this method */
 				List<Literal> network = new ArrayList<>();
-				network.add(new Literal(SATISFY_PREFIX + i + "With" + cName + "(iHandle, cHandle" + satisfyOpArgumentsSB.toString() + ")"));
+				network.add(new Literal(SATISFY_PREFIX + i + "With" + cName + "(iGroupHandle, iHandle, cHandle" + satisfyOpArgumentsSB.toString() + ")"));
 				int r = 0;
 				for (IRequiredInterfaceDefinition ir : requiredInterfaces) {
 					outputParams.add(new VariableParam("iSubGroup_" + (r+1)));
@@ -249,12 +256,12 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				List<VariableParam> methodParams = new ArrayList<>();
 				methodParams.addAll(inputParams);
 				methodParams.addAll(outputParams);
-				methods.add(new OCIPMethod("resolve" + i + "With" + cName, methodParams, new Literal(RESOLVE_SINGLE + i + "(iGroupHandle, iHandle, cHandle)"), new Monom(), new TaskNetwork(network), false, outputParams, new Monom()));
+				methods.add(new OCIPMethod("resolve" + i + "With" + cName, methodParams, new Literal(RESOLVE_SINGLE + i + "(iGroupHandle, iHandle, cHandle)"), new Monom("!uniqueComponents(iGroupHandle)"), new TaskNetwork(network), false, outputParams, new Monom()));
+				methods.add(new OCIPMethod("resolveUniquely" + i + "With" + cName, methodParams, new Literal(RESOLVE_SINGLE + i + "(iGroupHandle, iHandle, cHandle)"), new Monom("uniqueComponents(iGroupHandle) & !usedin('" + c.getName() + "', iGroupHandle)"), new TaskNetwork(network), false, outputParams, new Monom()));
 			}
 		}
 		return methods;
 	}
-
 
 	public static List<OCIPMethod> getMethodsToResolveInterfaceGroup(final Collection<? extends IComponent> components) {
 		List<OCIPMethod> methods = new ArrayList<>();
@@ -265,26 +272,32 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				List<VariableParam> methodInputs = Arrays.asList(new VariableParam("cHandle"), new VariableParam("iGroupHandle"));
 				List<VariableParam> methodOutputs = new ArrayList<>();
 				List<Literal> network = new ArrayList<>();
+				if (ri.isUniqueComponents()) {
+					network.add(new Literal("1_requireUniqueness(iGroupHandle)"));
+				}
 				for (int j = 1; j <= ri.getMax(); j++) {
 					methodOutputs.add(new VariableParam("ri_" + j));
 					methodOutputs.add(new VariableParam("cHandle_" + j));
-					network.add(new Literal("1_defineInterface(iGroupHandle, ri_" + j +")"));
+					network.add(new Literal("1_defineInterface(iGroupHandle, ri_" + j +", '" + j + "')"));
 				}
 
 				// Tasks: tResolveSingle<i>(c1, c2_1)... tResolveSingle<i>(c1, c2_<min(I)>)
 				for (int j = 1; j <= ri.getMin(); j++) {
-					network.add(new Literal(RESOLVE_SINGLE + ri + "(iGroupHandle, ri_" + j + ", cHandle_" + j + ")"));
+					network.add(new Literal(RESOLVE_SINGLE + ri.getName() + "(iGroupHandle, ri_" + j + ", cHandle_" + j + ")"));
 				}
 
 				// Tasks: tResolveSingleOptional<i>(c1, c2_<min(I)+1>)... tResolveSingleOptional<i>(c1, c2_<max(I)>)
 				for (int j = ri.getMin() + 1; j <= ri.getMax(); j++) {
-					network.add(new Literal(RESOLVE_SINGLE_OPTIONAL + ri + "(iGroupHandle, ri_" + j + ", cHandle_" + j + ")"));
+					network.add(new Literal(RESOLVE_SINGLE_OPTIONAL + ri.getName() + "(iGroupHandle, ri_" + j + ", cHandle_" + j + ")"));
 				}
 
 				List<VariableParam> methodParams = new ArrayList<>();
 				methodParams.addAll(methodInputs);
 				methodParams.addAll(methodOutputs);
 				methods.add(new OCIPMethod("resolveGroup" + ri.getName(), methodParams, new Literal(RESOLVE_IFACE_GROUP_PREFIX + ri.getName() + "(cHandle, iGroupHandle)"), new Monom(), new TaskNetwork(network), false, methodOutputs, new Monom()));
+				if (ri.isOptional()) {
+					methods.add(new OCIPMethod("ignoreGroup" + ri.getName(), methodParams, new Literal(RESOLVE_IFACE_GROUP_PREFIX + ri.getName() + "(cHandle, iGroupHandle)"), new Monom(), new TaskNetwork(), false, methodOutputs, new Monom()));
+				}
 			}
 		}
 		return methods;
@@ -308,16 +321,16 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 				methodParams.add(new VariableParam("iHandle"));
 				methodParams.add(new VariableParam("cHandle"));
 
-				network.add(new Literal(RESOLVE_SINGLE + ri + "(iGroupHandle, iHandle, cHandle)"));
+				network.add(new Literal(RESOLVE_SINGLE + ri.getName() + "(iGroupHandle, iHandle, cHandle)"));
 
-				String condition = "!anyOmitted(iGroupHandle,'" + ri + "')";
+				String condition = "!anyOmitted(iGroupHandle)";
 				methods.add(
-						new OCIPMethod("doResolve" + ri, methodParams, new Literal(RESOLVE_SINGLE_OPTIONAL + ri + "(iGroupHandle, iHandle, cHandle)"), new Monom(condition), new TaskNetwork(network), false, methodOutputs, new Monom()));
+						new OCIPMethod("doResolve" + ri.getName(), methodParams, new Literal(RESOLVE_SINGLE_OPTIONAL + ri.getName() + "(iGroupHandle, iHandle, cHandle)"), new Monom(condition), new TaskNetwork(network), false, methodOutputs, new Monom()));
 				network = new ArrayList<>();
 
 				// <<=| doNotResolve<i>(c1, c2) |=>>
 				network.add(new Literal(OMIT_RESOLUTION_PREFIX + "(iGroupHandle, iHandle, cHandle)"));
-				methods.add(new OCIPMethod("doNotResolve" + ri, methodParams, new Literal(RESOLVE_SINGLE_OPTIONAL + ri + "(iGroupHandle, iHandle, cHandle)"), new Monom(), new TaskNetwork(network), false, methodOutputs, new Monom()));
+				methods.add(new OCIPMethod("doNotResolve" + ri.getName(), methodParams, new Literal(RESOLVE_SINGLE_OPTIONAL + ri.getName() + "(iGroupHandle, iHandle, cHandle)"), new Monom(), new TaskNetwork(network), false, methodOutputs, new Monom()));
 			}
 		}
 

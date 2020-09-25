@@ -1,45 +1,8 @@
 {
 	"repository": "Test Classification",
-	"components": [
-		{
-			"name": "sklearn.pipeline.make_pipeline",
-			"providedInterface": [
-				"MLPipeline",
-				"AbstractClassifier"
-			],
-			"requiredInterface": [
-				{
-					"id": "preprocessor",
-					"name": "AbstractPreprocessor"
-				},
-				{
-					"id": "classifier",
-					"name": "BasicClassifier"
-				}
-			],
-			"parameter": []
-		},
-		{
-			"name": "sklearn.preprocessing.MaxAbsScaler",
-			"providedInterface": [
-				"sklearn.preprocessing.MaxAbsScaler",
-				"Preprocessing",
-				"AbstractPreprocessor",
-				"BasicPreprocessor"
-			],
-			"requiredInterface": [],
-			"parameter": []
-		},
-		{
-			"name": "sklearn.naive_bayes.GaussianNB",
-			"providedInterface": [
-				"sklearn.naive_bayes.GaussianNB",
-				"AbstractClassifier",
-				"BasicClassifier",
-				"BaseLearner"
-			],
-			"requiredInterface": [],
-			"parameter": []
-		}
+	"include": [
+		"./classification/ext/twosteppipeline.json",
+		"./preprocessing/maxabsscaler.json",
+		"./classification/base/gaussiannb.json"
 	]
 }

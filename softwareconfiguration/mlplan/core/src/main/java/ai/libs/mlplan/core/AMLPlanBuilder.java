@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -36,9 +35,8 @@ import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.components.api.IComponent;
-import ai.libs.jaicore.components.api.IParameter;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -64,6 +62,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	private static final File DEF_ALGORITHM_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_ALGORITHM_CONFIG, FS_ALGORITHM_CONFIG);
 
 	/* problem description aspects */
+	private final ComponentSerialization serializer = new ComponentSerialization();
 	private File searchSpaceFile;
 	private String requestedHASCOInterface;
 	private String nameOfHASCOMethodToResolveBareLearner;
@@ -212,11 +211,11 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	}
 
 	public Collection<IComponent> getComponents() throws IOException {
-		return new ComponentLoader(this.searchSpaceFile).getComponents();
+		return this.serializer.deserializeRepository(this.searchSpaceFile);
 	}
 
-	public Map<IComponent, Map<IParameter, ParameterRefinementConfiguration>> getComponentParameterConfigurations() throws IOException {
-		return new ComponentLoader(this.searchSpaceFile).getParamConfigs();
+	public INumericParameterRefinementConfigurationMap getComponentParameterConfigurations() throws IOException {
+		return this.serializer.deserializeParamMap(this.searchSpaceFile);
 	}
 
 	/**
@@ -470,6 +469,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
+		this.serializer.setLoggerName(name + ".serializer");
 		this.loggerName = name;
 	}
 

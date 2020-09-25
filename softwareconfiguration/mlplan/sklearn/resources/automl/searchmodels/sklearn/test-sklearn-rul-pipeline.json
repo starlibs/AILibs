@@ -1,32 +1,9 @@
 {
     "repository": "Tiny RUL",
+    "include": [
+    	"./regression/ext/rulepipeline.json"
+    ],
     "components": [
-        {
-            "name": "sklearn.pipeline.make_pipeline",
-            "providedInterface": [
-                "MLPipeline",
-                "AbstractRegressor"
-            ],
-            "requiredInterface": [
-                {
-                    "id": "regressor",
-                    "name": "BasicRegressor"
-                },
-                {
-                    "id": "timeseries_transformer",
-                    "name": "TimeseriesTransformer"
-                },
-                {
-                    "id": "data_cleaner",
-                    "name": "DataCleaner"
-                },
-                {
-                    "id": "preprocessor0",
-                    "name": "BasicPreprocessor"
-                }
-            ],
-            "parameter": []
-        },
         {
             "name": "tsfresh.transformers.FeatureAugmenter",
             "providedInterface": [

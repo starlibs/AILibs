@@ -1,0 +1,10 @@
+{
+  "repository" : "sklearn.preprocessing.RobustScaler",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.preprocessing.RobustScaler",
+    "providedInterface" : [ "sklearn.preprocessing.RobustScaler", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ ]
+  } ]
+}

@@ -1,6 +1,6 @@
 package ai.libs.automl;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -24,7 +24,7 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstanceUtil;
-import ai.libs.jaicore.components.serialization.CompositionSerializer;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.mlplan.core.AMLPlanBuilder;
@@ -45,7 +45,7 @@ public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabele
 
 	private MLPlan<L> mlplan;
 
-	private MLPlan<L> prepare(final AMLPlanBuilder<L, ?> builder) throws DatasetDeserializationFailedException, IOException {
+	private MLPlan<L> prepare(final AMLPlanBuilder<L, ?> builder) throws DatasetDeserializationFailedException, IOException{
 		builder.withDataset(OpenMLDatasetReader.deserializeDataset(39));
 		List<String> preferredComponents = builder.getPreferredComponents().stream().limit(10).collect(Collectors.toList());
 		final AtomicInteger observedIndex = new AtomicInteger(-1);
@@ -58,15 +58,16 @@ public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabele
 			}
 		}); // remove validity checks here in this test to really cover all potentially relevant algorithms
 		builder.withSearchPhaseEvaluatorFactory(() -> (p -> {
-			String classOfClassifier = ((TimeTrackingLearnerWrapper) p).getComponentInstance().getComponent().getName();
+			String classOfClassifier = ((TimeTrackingLearnerWrapper)p).getComponentInstance().getComponent().getName();
 			int indexOfClassifier = preferredComponents.indexOf(classOfClassifier);
 			if (indexOfClassifier == observedIndex.get() + 1) {
 				observedIndex.incrementAndGet();
 				if (observedIndex.get() == preferredComponents.size() - 1) {
 					this.mlplan.cancel();
 				}
-			} else {
-				assertTrue(indexOfClassifier <= observedIndex.get(), "Current index of observed components is " + observedIndex.get() + ", but the component for which an evaluation is requested has index " + indexOfClassifier);
+			}
+			else {
+				assertTrue ("Current index of observed components is " + observedIndex.get() + ", but the component for which an evaluation is requested has index " + indexOfClassifier, indexOfClassifier <= observedIndex.get());
 			}
 			return 0.5; // evaluate all pipelines to 0.5. This implies that none of them is pursued before the whole first part of the tree has been considered.
 		}));
@@ -89,7 +90,8 @@ public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabele
 				}
 			});
 			mlplan.call();
-		} catch (AlgorithmExecutionCanceledException e) {
+		}
+		catch (AlgorithmExecutionCanceledException e) {
 			/* this is intentional */
 		}
 	}
@@ -109,13 +111,14 @@ public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabele
 					ComponentInstance ci = e.getComponentDescription();
 					ComponentInstance unparametrizedPipeline = ComponentInstanceUtil.getDefaultParametrization(ci);
 					if (!seenUnparametrizedComponents.contains(unparametrizedPipeline)) {
-						assertTrue(ComponentInstanceUtil.isDefaultConfiguration(ci), "Component instance " + CompositionSerializer.serializeComponentInstance(ci) + " is the first of its kind but not default parametrized!");
+						assertTrue("Component instance " + new ComponentSerialization().serialize(ci) + " is the first of its kind but not default parametrized!", ComponentInstanceUtil.isDefaultConfiguration(ci));
 						seenUnparametrizedComponents.add(unparametrizedPipeline);
 					}
 				}
 			});
 			mlplan.call();
-		} catch (AlgorithmExecutionCanceledException e) {
+		}
+		catch (AlgorithmExecutionCanceledException e) {
 			/* this is intentional */
 		}
 	}

@@ -6,8 +6,8 @@ import java.util.Random;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithmTestProblemSet;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
+import ai.libs.jaicore.components.exceptions.UnresolvableRequiredInterfaceException;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.jaicore.components.serialization.UnresolvableRequiredInterfaceException;
 
 public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<RefinementConfiguredSoftwareConfigurationProblem<Double>> {
 

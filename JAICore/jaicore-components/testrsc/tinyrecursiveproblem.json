@@ -12,7 +12,7 @@
 			"providedInterface": [
 				"IFace"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "a",
 					"type": "boolean",
@@ -32,7 +32,7 @@
 			"providedInterface": [
 				"Q"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "b",
 					"type": "boolean",
@@ -47,7 +47,7 @@
 			"providedInterface": [
 				"R"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "c",
 					"type": "int",

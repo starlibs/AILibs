@@ -3,8 +3,8 @@ package ai.libs.hasco.test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -52,7 +52,7 @@ public class PerformanceKnowledgeBaseTest extends Tester {
 		paramValues3.put("Param2", "Val2");
 		paramValues3.put("Param3", "13");
 
-		HashMap<String, Collection<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
+		HashMap<String, List<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
 
 		ComponentInstance ci1 = new ComponentInstance(comp, paramValues1, satisfactionOfRequiredInterfaces);
 		ComponentInstance ci2 = new ComponentInstance(comp, paramValues2, satisfactionOfRequiredInterfaces);

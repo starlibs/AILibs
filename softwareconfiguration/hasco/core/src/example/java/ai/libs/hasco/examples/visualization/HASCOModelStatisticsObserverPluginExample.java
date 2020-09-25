@@ -13,9 +13,9 @@ import ai.libs.hasco.builder.HASCOBuilder;
 import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFD;
 import ai.libs.hasco.core.events.HASCOSolutionEvent;
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
+import ai.libs.jaicore.components.exceptions.UnresolvableRequiredInterfaceException;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.jaicore.components.serialization.CompositionSerializer;
-import ai.libs.jaicore.components.serialization.UnresolvableRequiredInterfaceException;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
@@ -34,7 +34,7 @@ public class HASCOModelStatisticsObserverPluginExample {
 
 			@Subscribe
 			public void receiveSolution(final HASCOSolutionEvent<?> solutionEvent) {
-				System.out.println(CompositionSerializer.serializeComponentInstance(solutionEvent.getSolutionCandidate().getComponentInstance()));
+				System.out.println(new ComponentSerialization().serialize(solutionEvent.getSolutionCandidate().getComponentInstance()));
 
 			}
 		});

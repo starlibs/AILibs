@@ -1,77 +1,11 @@
 {
-    "repository": "Test Weka Classification Pipeline",
-    "components": [
-        {
-            "name": "pipeline",
-            "providedInterface": [
-                "MLPipeline",
-                "AbstractClassifier"
-            ],
-            "requiredInterface": [
-                {
-                    "id": "preprocessor",
-                    "name": "AbstractPreprocessor"
-                },
-                {
-                    "id": "classifier",
-                    "name": "PipelineClassifier"
-                }
-            ],
-            "parameter": []
-        },
-        {
-            "name": "weka.attributeSelection.AttributeSelection",
-            "providedInterface": [
-                "AbstractPreprocessor"
-            ],
-            "requiredInterface": [
-                {
-                    "id": "eval",
-                    "name": "evaluator"
-                },
-                {
-                    "id": "search",
-                    "name": "searcher"
-                }
-            ],
-            "parameter": [
-            ],
-            "dependencies": []
-        },
-        {
-            "name": "weka.attributeSelection.CfsSubsetEval",
-            "requiredInterface": [],
-            "providedInterface": [
-                "evaluator"
-            ],
-            "parameter": [
-            ],
-            "dependencies": []
-        },
-        {
-            "name": "weka.attributeSelection.BestFirst",
-            "requiredInterface": [],
-            "providedInterface": [
-                "searcher"
-            ],
-            "parameter": [
-            ],
-            "dependencies": []
-        },
-        {
-            "name": "weka.classifiers.trees.J48",
-            "requiredInterface": [],
-            "providedInterface": [
-                "AbstractClassifier",
-                "WekaBaseClassifier",
-                "BaseClassifier",
-                "WeightedInstancesHandler",
-                "PipelineClassifier"
-            ],
-            "parameter": [
-            ],
-            "dependencies": [
-            ]
-        }
-    ]
+	"repository": "Test Weka Classification Pipeline",
+	"include": [
+		"./ext/twosteppipeline.json",
+		"./preprocessing/asnoranker.json",
+		"./preprocessing/cfssubseteval.json",
+		"./preprocessing/bestfirst.json",
+		"./base/j48.json"
+	],
+	"components": []
 }

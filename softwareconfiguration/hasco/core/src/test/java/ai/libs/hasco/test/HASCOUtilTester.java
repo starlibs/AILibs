@@ -1,26 +1,26 @@
 package ai.libs.hasco.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
 
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
@@ -31,23 +31,37 @@ public class HASCOUtilTester {
 
 	@Test
 	public void testComponentInstanceBuilder() throws Exception {
+		File compfile = new File(pathToFiles + "testrsc/simpleproblemwithtwocomponentsandnumericparam.json");
 		Monom state = new Monom(
-				"iface(R) & 	iface(WekaBaseClassifier) & 	def(newVar7)& 	def(newVar3)& 	parameterFocus(newVar3, A, -1.0) & 	iface(BaseClassifier) & 	component(request) & 	iface(weka.attributeSelection.InfoGainAttributeEval) & 	def(newVar12) & 	parameterContainer(weka.attributeSelection.PrincipalComponents, R, newVar3, newVar10) & 	resolves(newVar1, evaluator, weka.attributeSelection.PrincipalComponents, newVar3) & 	component(newVar4) & 	overwritten(newVar8) & 	iface(weka.attributeSelection.SymmetricalUncertAttributeEval) & 	iface(evaluator) & 	resolves(solution, AbstractPreprocessor, weka.attributeSelection.AttributeSelection, newVar1) & 	parameterContainer(weka.attributeSelection.AttributeSelection, M, newVar1, newVar5) & 	iface(weka.attributeSelection.ReliefFAttributeEval) & 	iface(weka.classifiers.functions.Logistic) & 	iface(weka.attributeSelection.Ranker) & 	iface(searcher) & 	interfaceIdentifier(weka.attributeSelection.AttributeSelection, search, newVar1, newVar4) & 	iface(weka.classifiers.bayes.NaiveBayesMultinomial) & 	def(newVar8) & 	parameterContainer(weka.attributeSelection.PrincipalComponents, A, newVar3, newVar9) & 	parameterFocus(newVar3, R, 0.95) & 	def(newVar4) & 	parameterContainer(weka.attributeSelection.PrincipalComponents, C, newVar3, newVar7) & 	iface(M) & 	iface(weka.attributeSelection.CorrelationAttributeEval) & 	component(solution) & 	val(newVar6, 1) & 	iface(weka.classifiers.bayes.NaiveBayes) & 	val(newVar8, true) & 	overwritten(newVar7) & 	iface(D) & 	component(newVar3) & 	resolves(newVar1, searcher, weka.attributeSelection.Ranker, newVar4) & 	val(newVar11, false) & 	iface(H) & 	parameterContainer(weka.attributeSelection.PrincipalComponents, O, newVar3, newVar8) & 	resolves(solution, BaseClassifier, weka.classifiers.bayes.NaiveBayes, newVar2) & 	def(newVar9) & 	parameterContainer(weka.classifiers.bayes.NaiveBayes, K, newVar2, newVar12) & 	interfaceIdentifier(pipeline, preprocessor, solution, newVar1) & 	def(newVar5) & 	iface(weka.attributeSelection.GreedyStepwise) & 	iface(MLPipeline) & 	val(newVar12, true) & 	def(newVar1) & 	parameterContainer(weka.attributeSelection.PrincipalComponents, numActivator, newVar3, newVar6) & 	iface(C) & 	iface(AbstractClassifier) & 	iface(Test) & 	overwritten(newVar6) & 	iface(weka.attributeSelection.PrincipalComponents) & 	iface(weka.attributeSelection.AttributeSelection) & 	def(newVar10) & 	component(newVar2) & 	overwritten(newVar12) & 	iface(pipeline) & 	iface(weka.attributeSelection.CfsSubsetEval) & 	iface(S) & 	interfaceIdentifier(pipeline, classifier, solution, newVar2) & 	iface(AbstractPreprocessor) & 	val(newVar7, true) & 	iface(weka.attributeSelection.GainRatioAttributeEval) & 	val(newVar5, true) & 	def(newVar6) & 	iface(weka.classifiers.bayes.BayesNet) & 	def(newVar2) & 	iface(B) & 	resolves(request, AbstractClassifier, pipeline, solution) & 	def(newVar11) & 	overwritten(newVar9) & 	component(newVar1) & 	iface(weka.attributeSelection.BestFirst) & 	overwritten(newVar11) & 	interfaceIdentifier(weka.attributeSelection.AttributeSelection, eval, newVar1, newVar3) & 	iface(weka.attributeSelection.OneRAttributeEval) & 	parameterContainer(weka.classifiers.bayes.NaiveBayes, D, newVar2, newVar11)");
-		List<ConstantParam> params = new ArrayList<>();
-		params.add(new ConstantParam("newVar9"));
-		params.add(new ConstantParam("[125.36470588235294, 253.74117647058824]"));
-		state.add(new Literal("val", params));
-		params.clear();
-		params.add(new ConstantParam("newVar10"));
-		params.add(new ConstantParam("[0.5,1.0]"));
-		state.add(new Literal("val", params));
-		ComponentInstance instance = HASCOUtil.getComponentInstanceFromState(new ComponentLoader(new File(pathToFiles + "testrsc/weka/weka-all-autoweka.json")).getComponents(), state, "solution", false);
-		assertEquals("[125.36470588235294, 253.74117647058824]", instance.getSatisfactionOfRequiredInterface("preprocessor").iterator().next().getSatisfactionOfRequiredInterface("eval").iterator().next().getParameterValue("A"));
-		instance = HASCOUtil.getComponentInstanceFromState(new ComponentLoader(new File(pathToFiles + "testrsc/weka/weka-all-autoweka.json")).getComponents(), state, "solution", true);
-		assertEquals("190", instance.getSatisfactionOfRequiredInterface("preprocessor").iterator().next().getSatisfactionOfRequiredInterfaces().get("eval").iterator().next().getParameterValue("A"));
+				"resolves(request, A, A, solution) & parameterContainer(A, a, solution, newVar2) & val(newVar3, v2) & closed(newVar3) & parameterContainer(B, b, newVar5, newVar6) & parameterContainer(B, a, newVar5, newVar7) & parameterContainer(A, b, solution, newVar3) & parameterFocus(solution, a, NaN) & val(newVar6, v3) & val(newVar7, true) & interfaceMember(newVar4, newVar1, 1) & component(solution) & component(request) & overwritten(newVar7) & overwritten(newVar6) & component(newVar5) & resolves(newVar4, IFA, B, newVar5) & overwritten(newVar3) & interfaceGroup(A, i1, solution, newVar1) & overwritten(newVar2)");
+		state.add(new Literal("val", Arrays.asList(new ConstantParam("newVar2"), new ConstantParam("[12.5, 13.5]")))); // add this separately, because the comma in the interval cannot be handled by the monom constructor
+		ComponentSerialization serializer = new ComponentSerialization();
+
+		/* test that parameters have the correct interval value */
+		ComponentInstance solution = HASCOUtil.getComponentInstanceFromState(serializer.deserializeRepository(compfile), state, "solution", false);
+		assertNotNull(solution);
+		assertEquals("A", solution.getComponent().getName());
+		assertEquals("[12.5, 13.5]", solution.getParameterValue("a"));
+		assertEquals("v2", solution.getParameterValue("b"));
+		IComponentInstance ciSub = solution.getSatisfactionOfRequiredInterface("i1").iterator().next();
+		assertNotNull(ciSub);
+		assertEquals("B", ciSub.getComponent().getName());
+		assertEquals("true", ciSub.getParameterValue("a"));
+		assertEquals("v3", ciSub.getParameterValue("b"));
+
+		/* now test that the value is correctly resolved (middle of the interval) */
+		solution = HASCOUtil.getComponentInstanceFromState(serializer.deserializeRepository(compfile), state, "solution", true);
+		assertNotNull(solution);
+		assertEquals("A", solution.getComponent().getName());
+		assertEquals(13.0, Double.parseDouble(solution.getParameterValue("a")), 0.0);
+		assertEquals("v2", solution.getParameterValue("b"));
+		ciSub = solution.getSatisfactionOfRequiredInterface("i1").iterator().next();
+		assertNotNull(ciSub);
+		assertEquals("B", ciSub.getComponent().getName());
+		assertEquals("true", ciSub.getParameterValue("a"));
+		assertEquals("v3", ciSub.getParameterValue("b"));
 	}
 
-	@Tag("short-test")
 	@Test
 	public void testParameterDomainUpdates() throws Exception {
 		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(new File(pathToFiles + "testrsc/problemwithdependencies.json"), "IFace", n -> 0.0);

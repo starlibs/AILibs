@@ -1,0 +1,41 @@
+{
+  "repository" : "sklearn.ensemble.ExtraTreesClassifier",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.ensemble.ExtraTreesClassifier",
+    "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
+    "requiredInterface" : [ ],
+    "parameter" : [ {
+      "name" : "criterion",
+      "default" : "gini",
+      "type" : "cat",
+      "values" : [ "gini", "entropy" ]
+    }, {
+      "name" : "max_features",
+      "type" : "cat",
+      "default" : "auto",
+      "values" : [ "auto", "sqrt", "log2" ]
+    }, {
+      "name" : "min_samples_split",
+      "type" : "int",
+      "default" : 2,
+      "min" : 2,
+      "max" : 21,
+      "minInterval" : 1,
+      "refineSplits" : 2
+    }, {
+      "name" : "min_samples_leaf",
+      "type" : "int",
+      "default" : 11,
+      "min" : 1,
+      "max" : 21,
+      "minInterval" : 1,
+      "refineSplits" : 2
+    }, {
+      "name" : "bootstrap",
+      "type" : "cat",
+      "default" : "False",
+      "values" : [ "True", "False" ]
+    } ]
+  } ]
+}

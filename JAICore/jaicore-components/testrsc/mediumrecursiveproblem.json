@@ -12,7 +12,7 @@
 			"providedInterface": [
 				"IFace"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "a",
 					"type": "boolean",
@@ -27,7 +27,7 @@
 			"providedInterface": [
 				"IFace"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "b",
 					"type": "cat",
@@ -54,7 +54,7 @@
 			"providedInterface": [
 				"Q"
 			],
-			"parameter": [],
+			"parameters": [],
 			"dependencies": []
 		},
 		{
@@ -64,7 +64,7 @@
 			"providedInterface": [
 				"Q"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "d1",
 					"type": "boolean",
@@ -88,7 +88,7 @@
 			"providedInterface": [
 				"R"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "e",
 					"type": "boolean",
@@ -103,7 +103,7 @@
 			"providedInterface": [
 				"R"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "f",
 					"type": "boolean",

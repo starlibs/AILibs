@@ -119,6 +119,10 @@
     <level value="warn" />
   </logger>
   
+  <logger name="testedalgorithm.search.gg.util">
+    <level value="warn" />
+  </logger>
+  
   <logger name="testedalgorithm.search._algorithm">
     <level value="warn" />
   </logger>

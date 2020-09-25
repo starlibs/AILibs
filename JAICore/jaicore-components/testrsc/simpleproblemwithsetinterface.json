@@ -1,0 +1,40 @@
+{
+	"repository": "SimpleProblemWithSetInterface",
+	"components": [
+		{
+			"name": "A",
+			"requiredInterface": [
+				{
+					"id": "rif1",
+					"name": "rif1",
+					"type": "set",
+					"min": 0,
+					"max": 2
+				}
+			],
+			"providedInterface": [
+				"IFace"
+			],
+			"parameters": [],
+			"dependencies": []
+		},
+		{
+			"name": "B",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rif1"
+			],
+			"parameters": [],
+			"dependencies": []
+		},
+		{
+			"name": "C",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rif1"
+			],
+			"parameters": [],
+			"dependencies": []
+		}
+	]
+}
