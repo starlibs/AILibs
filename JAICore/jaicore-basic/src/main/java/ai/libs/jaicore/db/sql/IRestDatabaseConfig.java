@@ -1,4 +1,4 @@
-package ai.libs.jaicore.db.sql.rest;
+package ai.libs.jaicore.db.sql;
 
 import org.aeonbits.owner.Reloadable;
 

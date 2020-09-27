@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.db.DBTester;
 import ai.libs.jaicore.db.IDatabaseAdapter;
-import ai.libs.jaicore.db.sql.rest.IRestDatabaseConfig;
-import ai.libs.jaicore.db.sql.rest.RestSqlAdapter;
+import ai.libs.jaicore.db.sql.IRestDatabaseConfig;
+import ai.libs.jaicore.db.sql.RestSqlAdapter;
 
 public class MySQLMapperTest extends DBTester {
 

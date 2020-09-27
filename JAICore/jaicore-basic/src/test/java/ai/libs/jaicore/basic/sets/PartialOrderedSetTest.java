@@ -7,8 +7,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -31,7 +31,7 @@ public class PartialOrderedSetTest {
 	 * Sets up set with a newly created {@link PartialOrderedSet} with the order
 	 * a < b, a < c; b < c; c < d.
 	 */
-	@Before
+	@BeforeEach
 	public void prepareSet() {
 		this.set = new PartialOrderedSet<>();
 		this.set.addABeforeB(A, B);

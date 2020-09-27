@@ -9,7 +9,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.problems.scheduling.IJobSchedulingInput;
@@ -55,7 +55,7 @@ public class JobSchedulingTest {
 	private static int tardinessOfJob2 = 20;
 	private static int tardinessOfJob3 = 16;
 
-	@BeforeClass
+	@BeforeAll
 	public static void createStandardProblemBuilder() {
 
 		JobSchedulingProblemBuilder builder = new JobSchedulingProblemBuilder();

@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 
 import org.junit.jupiter.api.Tag;
 
-@Tag("long-test")
-@Target({ ElementType.TYPE })
+@Tag("medium-test")
+@Target({ ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MediumTest {
 

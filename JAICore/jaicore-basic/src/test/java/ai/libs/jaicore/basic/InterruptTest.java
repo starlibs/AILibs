@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.awaitility.Awaitility;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +23,8 @@ import ai.libs.jaicore.concurrent.TrackableTimerTask;
 import ai.libs.jaicore.interrupt.Interrupt;
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.interrupt.InterruptionTimerTask;
+import ai.libs.jaicore.test.LongTest;
+import ai.libs.jaicore.test.MediumTest;
 import ai.libs.jaicore.timing.TimedComputation;
 
 public class InterruptTest {
@@ -60,7 +61,7 @@ public class InterruptTest {
 		assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty(), "There are still active tasks of some previous test!!");
 	}
 
-	@Tag("medium-test")
+	@MediumTest
 	@Test
 	public void testSimpleInterruptDuringExecution() throws ExecutionException, InterruptedException {
 		for (int i = 0; i < NUMBER_ITERATIONS_SIMPLE; i++) {
@@ -78,7 +79,7 @@ public class InterruptTest {
 		}
 	}
 
-	@Tag("short-test")
+	@MediumTest
 	@Test
 	public void testThatNoInterruptIsFiredIfExecutionFinishesInTime() throws AlgorithmTimeoutedException, ExecutionException, InterruptedException {
 		for (int i = 0; i < NUMBER_ITERATIONS_SIMPLE; i++) {
@@ -97,7 +98,7 @@ public class InterruptTest {
 	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 */
-	@Tag("long-test")
+	@LongTest
 	@Test
 	public void testNestedInterruptDuringExecutionWithOuterSignifiantlyEarlier() throws ExecutionException, InterruptedException {
 
@@ -127,7 +128,7 @@ public class InterruptTest {
 	 * @throws InterruptedException
 	 * @throws AlgorithmTimeoutedException
 	 */
-	@Tag("long-test")
+	@LongTest
 	@Test
 	public void testNestedInterruptDuringExecutionWithOuterSignifiantlyLater() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();
@@ -162,7 +163,7 @@ public class InterruptTest {
 	 * @throws InterruptedException
 	 * @throws AlgorithmTimeoutedException
 	 */
-	@Tag("long-test")
+	@LongTest
 	@Test
 	public void testNestedInterruptDuringExecutionWithOuterAndInnerAtSameTime() throws ExecutionException {
 		this.checkPreconditions();
@@ -194,7 +195,7 @@ public class InterruptTest {
 		}
 	}
 
-	@Tag("long-test")
+	@LongTest
 	@Test
 	public void testTwistedInterruptDuringExecutionWithOuterSignifiantlyEarlier() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();
@@ -228,7 +229,7 @@ public class InterruptTest {
 		}
 	}
 
-	@Tag("long-test")
+	@LongTest
 	@Test
 	public void testTwistedInterruptDuringExecutionWithOuterSignifiantlyLater() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();
@@ -259,7 +260,7 @@ public class InterruptTest {
 		}
 	}
 
-	@Tag("long-test")
+	@LongTest
 	@Test
 	public void testTwistedTrackedInterruptDuringExecutionWithOuterAndInnerAtSameTime() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();

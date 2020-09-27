@@ -60,6 +60,7 @@ public class GraphConstructionTest {
 	public void testThatNewNodesAreSources() {
 		String node1 = "a";
 		Graph<String> g = new Graph<>();
+		g.addItem(node1);
 		assertTrue(g.getSources().contains(node1));
 	}
 
@@ -67,6 +68,7 @@ public class GraphConstructionTest {
 	public void testThatNewNodesAreSinks() {
 		String node1 = "a";
 		Graph<String> g = new Graph<>();
+		g.addItem(node1);
 		assertTrue(g.getSinks().contains(node1));
 	}
 }

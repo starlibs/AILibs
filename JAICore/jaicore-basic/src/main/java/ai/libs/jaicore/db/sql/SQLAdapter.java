@@ -35,7 +35,7 @@ import ai.libs.jaicore.db.IDatabaseConfig;
  *
  */
 @SuppressWarnings("serial")
-public class SQLAdapter implements IDatabaseAdapter {
+class SQLAdapter implements IDatabaseAdapter {
 
 	private transient Logger logger = LoggerFactory.getLogger(SQLAdapter.class);
 
@@ -606,6 +606,9 @@ public class SQLAdapter implements IDatabaseAdapter {
 		StringBuilder sqlMainTable = new StringBuilder();
 		StringBuilder keyFieldsSB = new StringBuilder();
 		sqlMainTable.append("CREATE TABLE IF NOT EXISTS `" + tablename + "` (");
+		if (!types.containsKey(nameOfPrimaryField)) {
+			throw new IllegalArgumentException("No type definition given for primary field!");
+		}
 		sqlMainTable.append("`" + nameOfPrimaryField + "` " + types.get(nameOfPrimaryField) + " NOT NULL AUTO_INCREMENT,");
 		for (String key : fieldnames) {
 			if (!types.containsKey(key)) {
@@ -622,5 +625,27 @@ public class SQLAdapter implements IDatabaseAdapter {
 			this.logger.info("Executing query: {}", sqlMainTable);
 			stmt.execute(sqlMainTable.toString());
 		}
+	}
+
+	@Override
+	public int delete(final String table, final Map<String, ? extends Object> conditions) throws SQLException {
+		StringBuilder conditionSB = new StringBuilder();
+		for (Entry<String, ? extends Object> entry : conditions.entrySet()) {
+			if (conditionSB.length() > 0) {
+				conditionSB.append(STR_SPACE_AND);
+			}
+			if (entry.getValue() != null) {
+				conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
+			} else {
+				conditionSB.append(entry.getKey());
+				conditionSB.append(" IS NULL");
+			}
+		}
+		return this.update("DELETE FROM `" + table + "` " + STR_SPACE_WHERE + " " + conditionSB);
+	}
+
+	@Override
+	public boolean doesTableExist(final String tablename) throws IOException, SQLException {
+		return this.getResultsOfQuery("SHOW TABLES").stream().anyMatch(r -> r.values().iterator().next().equals(tablename));
 	}
 }

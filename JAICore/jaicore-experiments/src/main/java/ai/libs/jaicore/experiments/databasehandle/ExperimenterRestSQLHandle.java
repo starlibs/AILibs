@@ -1,7 +1,7 @@
 package ai.libs.jaicore.experiments.databasehandle;
 
-import ai.libs.jaicore.db.sql.rest.IRestDatabaseConfig;
-import ai.libs.jaicore.db.sql.rest.RestSqlAdapter;
+import ai.libs.jaicore.db.sql.IRestDatabaseConfig;
+import ai.libs.jaicore.db.sql.RestSqlAdapter;
 
 public class ExperimenterRestSQLHandle extends AExperimenterSQLHandle {
 

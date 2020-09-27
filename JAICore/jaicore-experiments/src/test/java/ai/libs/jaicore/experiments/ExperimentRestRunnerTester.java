@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import ai.libs.jaicore.db.sql.rest.IRestDatabaseConfig;
+import ai.libs.jaicore.db.sql.IRestDatabaseConfig;
 import ai.libs.jaicore.experiments.databasehandle.ExperimenterRestSQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
