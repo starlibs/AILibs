@@ -13,7 +13,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SimpleRandomSa
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.ipl.InversePowerLawExtrapolationMethod;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
+import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 
 public class MLPlanWithLearningCurvePredictionResultDeliveryTester extends AutoMLAlgorithmForClassificationResultProductionTester {
 

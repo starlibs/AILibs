@@ -27,8 +27,8 @@ import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.classification.multilabel.dataset.IMekaInstances;
 import ai.libs.jaicore.ml.classification.multilabel.dataset.MekaInstances;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
-import ai.libs.mlplan.multilabel.mekamlplan.EMLPlanMekaProblemType;
-import ai.libs.mlplan.multilabel.mekamlplan.MekaPipelineFactory;
+import ai.libs.mlplan.meka.EMLPlanMekaProblemType;
+import ai.libs.mlplan.meka.MekaPipelineFactory;
 import meka.core.MLUtils;
 import weka.core.Instances;
 

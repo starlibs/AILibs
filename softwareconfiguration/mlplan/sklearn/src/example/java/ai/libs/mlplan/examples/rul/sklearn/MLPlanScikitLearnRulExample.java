@@ -22,8 +22,8 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.sklearn.EMLPlanScikitLearnProblemType;
-import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
+import ai.libs.mlplan.sklearn.EMLPlanScikitLearnProblemType;
+import ai.libs.mlplan.sklearn.builder.MLPlanScikitLearnBuilder;
 
 public class MLPlanScikitLearnRulExample {
 

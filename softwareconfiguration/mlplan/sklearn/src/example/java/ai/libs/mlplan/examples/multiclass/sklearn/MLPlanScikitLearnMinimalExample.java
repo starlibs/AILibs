@@ -9,7 +9,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
-import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
+import ai.libs.mlplan.sklearn.builder.MLPlanScikitLearnBuilder;
 
 public class MLPlanScikitLearnMinimalExample {
 

@@ -11,8 +11,8 @@ import ai.libs.automl.AutoMLAlgorithmCoreFunctionalityTester;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.wekamlplan.EMLPlanWekaProblemType;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
+import ai.libs.mlplan.weka.EMLPlanWekaProblemType;
+import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 
 public class MLPlanCoreFunctionalityTester extends AutoMLAlgorithmCoreFunctionalityTester {
 

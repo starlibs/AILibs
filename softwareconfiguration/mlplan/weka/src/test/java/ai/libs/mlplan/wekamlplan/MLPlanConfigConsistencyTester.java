@@ -24,7 +24,7 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.Rando
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.PipelineEvaluator;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
+import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 import weka.core.Instances;
 
 /**

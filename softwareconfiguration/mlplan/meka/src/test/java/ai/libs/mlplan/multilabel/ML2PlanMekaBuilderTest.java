@@ -8,8 +8,8 @@ import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFail
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.automl.AbstractMLPlanBuilderTest;
-import ai.libs.mlplan.multilabel.mekamlplan.EMLPlanMekaProblemType;
-import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
+import ai.libs.mlplan.meka.EMLPlanMekaProblemType;
+import ai.libs.mlplan.meka.ML2PlanMekaBuilder;
 
 public class ML2PlanMekaBuilderTest extends AbstractMLPlanBuilderTest {
 

@@ -13,7 +13,7 @@ import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.db.sql.SQLAdapter;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
+import ai.libs.mlplan.weka.weka.MLPipelineComponentInstanceFactory;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;

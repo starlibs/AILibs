@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
+import ai.libs.mlplan.weka.weka.WekaMLPlanWekaClassifier;
 
 public class WekaMLPlanWekaClassifierCoverageTest {
 
