@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPState;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.TimeAwareNodeEvaluator;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
+import ai.libs.jaicore.test.MediumTest;
 import ai.libs.jaicore.timing.TimedComputation;
 
 public abstract class TimeAwareNodeEvaluatorTester<T extends TimeAwareNodeEvaluator<EnhancedTTSPState, String, Double>> extends NodeEvaluatorTester<T> {
@@ -27,6 +28,7 @@ public abstract class TimeAwareNodeEvaluatorTester<T extends TimeAwareNodeEvalua
 	public abstract T getTimedNodeEvaluator(int timeoutInMS);
 
 	@Test
+	@MediumTest
 	public void testTimeoutAdherence() throws InterruptedException, ExecutionException, TimeoutException {
 		T ne = this.getTimedNodeEvaluator(TIMEOUT);
 		ne.setLoggerName("testednodeevaluator");

@@ -25,7 +25,6 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.algorithm.exceptions.ExceptionInAlgorithmIterationException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -61,12 +60,6 @@ public abstract class GeneralAlgorithmTester extends Tester {
 	@BeforeAll
 	public static void initClass() {
 		GlobalTimer.getInstance(); // this is to avoid that the timeout timer is spawned as a thread of a specific group
-	}
-
-	@BeforeEach
-	public void initTest() throws InterruptedException {
-		Thread.sleep(500);
-		System.gc(); // run garbage collection
 	}
 
 	@ParameterizedTest

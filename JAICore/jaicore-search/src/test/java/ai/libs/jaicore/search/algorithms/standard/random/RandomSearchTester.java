@@ -12,6 +12,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.algorithm.IAlgorithmTestProblemSet;
@@ -39,6 +40,7 @@ public class RandomSearchTester extends GraphSearchSolutionIteratorTester {
 	}
 
 	@ParameterizedTest
+	@MethodSource("getProblemSets")
 	public void testDifferentSequencesForDifferentSeeds(final IAlgorithmTestProblemSet<?> problem) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTestProblemSetCreationException {
 		int seed1 = 0;
 		int seed2 = 4711;
@@ -46,6 +48,7 @@ public class RandomSearchTester extends GraphSearchSolutionIteratorTester {
 	}
 
 	@ParameterizedTest
+	@MethodSource("getProblemSets")
 	public void testDeterminismForGivenSeed(final IAlgorithmTestProblemSet<?> problem) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTestProblemSetCreationException {
 		int seed = 4711;
 		assertEquals(this.getTourOfSequences(problem, seed), this.getTourOfSequences(problem, seed));

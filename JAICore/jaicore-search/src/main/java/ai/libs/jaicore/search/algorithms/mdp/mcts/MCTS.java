@@ -295,23 +295,24 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 						this.tabooLastActionOfPath(path);
 					}
 
-					if (scores.contains(null)) {
-						this.logger.warn("Found playout with null-score. Ignoring this run.");
-						this.summarizeIteration(System.currentTimeMillis() - timeStart, timeSpentInActionApplicabilityComputationThisIteration, timeSpentInSuccessorGenerationThisIteration, invocationsOfTreePolicyInThisIteration,
-								invocationsOfDefaultPolicyInThisIteration, timeSpentInTreePolicyQueriesThisIteration, timeSpentInTreePolicyUpdatesThisIteration, timeSpentInDefaultPolicyThisIteration);
-						return this.nextWithException();
-					}
-
-					/* update tree policy with accumulated score */
+					/* decide whether to show a progress report */
 					int progress = (int) Math.round(this.iterations * 100.0 / this.maxIterations);
 					if (progress > this.lastProgressReport && progress % 5 == 0) {
 						this.logger.info("Progress: {}%", Math.round(this.iterations * 100.0 / this.maxIterations));
 						this.lastProgressReport = progress;
 					}
 
+					boolean hasNullScore = scores.contains(null);
+					//										if (hasNullScore) {
+					//											this.logger.warn("Found playout with null-score. Ignoring this run.");
+					//											this.summarizeIteration(System.currentTimeMillis() - timeStart, timeSpentInActionApplicabilityComputationThisIteration, timeSpentInSuccessorGenerationThisIteration, invocationsOfTreePolicyInThisIteration,
+					//													invocationsOfDefaultPolicyInThisIteration, timeSpentInTreePolicyQueriesThisIteration, timeSpentInTreePolicyUpdatesThisIteration, timeSpentInDefaultPolicyThisIteration);
+					//											return this.nextWithException();
+					//										}
+
 					/* create and publish roll-out event */
 					boolean isGoalPath = this.mdp.isTerminalState(path.getHead());
-					double totalUndiscountedScore = scores.stream().reduce(0.0, (a, b) -> a.doubleValue() + b.doubleValue());
+					double totalUndiscountedScore = hasNullScore ? Double.NaN : scores.stream().reduce(0.0, (a, b) -> a.doubleValue() + b.doubleValue());
 					this.logger.info("Found playout of length {}. Head is goal: {}. (Undiscounted) score of path is {}.", path.getNumberOfNodes(), isGoalPath, totalUndiscountedScore);
 					this.logger.debug("Found leaf node with score {}. Now propagating this score over the path with actions {}. Leaf state is: {}.", totalUndiscountedScore, path.getArcs(), path.getHead());
 					if (!path.isPoint()) {

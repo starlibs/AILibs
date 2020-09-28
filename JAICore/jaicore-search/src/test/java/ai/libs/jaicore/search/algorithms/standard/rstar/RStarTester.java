@@ -9,6 +9,7 @@ import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 
+import ai.libs.jaicore.basic.algorithm.IAlgorithmTestProblemSet;
 import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic;
 
@@ -32,22 +33,22 @@ public class RStarTester extends GraphSearchSolutionIteratorTester {
 	}
 
 	@Override
-	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall(final IAlgorithmTestProblemSet<Object> problemSet) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		assertTrue(true);
 	}
 
 	@Override
-	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall(final IAlgorithmTestProblemSet<Object> problemSet) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		assertTrue(true);
 	}
 
 	@Override
-	public void testThatIteratorReturnsEachPossibleSolution() {
+	public void testThatIteratorReturnsEachPossibleSolution(final IAlgorithmTestProblemSet<Object> problemSet) {
 		assertTrue(true);
 	}
 
 	@Override
-	public void testThatIteratorReturnsEachPossibleSolutionWithParallelization() {
+	public void testThatIteratorReturnsEachPossibleSolutionWithParallelization(final IAlgorithmTestProblemSet<Object> problemSet) {
 		assertTrue(true);
 	}
 }

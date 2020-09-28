@@ -47,7 +47,12 @@ public class SPUCBPolicy<N, A> extends UCBPolicy<N, A> implements ILoggingCustom
 		double accumulatedScores = 0;
 		for (int i = l - 2; i >= 0; i--) {
 			NodeLabel<A> nl = this.getLabelOfNode(nodes.get(i));
-			accumulatedScores = scores.get(i) + this.getGamma() * accumulatedScores;
+			if (accumulatedScores != Double.NaN && scores.get(i) != null) {
+				accumulatedScores = scores.get(i) + this.getGamma() * accumulatedScores;
+			}
+			else if (accumulatedScores != Double.NaN) {
+				accumulatedScores = Double.NaN;
+			}
 			this.squaredObservations.put(nl, this.squaredObservations.computeIfAbsent(nl, label -> 0.0) + Math.pow(accumulatedScores, 2));
 		}
 	}

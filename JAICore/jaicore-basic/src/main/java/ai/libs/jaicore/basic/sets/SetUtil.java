@@ -1264,6 +1264,9 @@ public class SetUtil {
 	public static double sum(final Collection<? extends Number> nums) {
 		double sum = 0;
 		for (Number n : nums) {
+			if (n == null) {
+				return Double.NaN;
+			}
 			sum += n.doubleValue();
 		}
 		return sum;

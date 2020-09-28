@@ -1,11 +1,10 @@
 package ai.libs.jaicore.search.algorithms.mdp.mcts.uct;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -13,6 +12,7 @@ import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.EBehaviorForNotFullyExploredStates;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.IPathUpdatablePolicy;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.NodeLabel;
@@ -24,7 +24,7 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 	private final double gamma; // discount factor to consider when interpreting the scores
 	private final boolean maximize;
 
-	private EBehaviorForNotFullyExploredStates behaviorWhenActionForNotFullyExploredStateIsRequested = EBehaviorForNotFullyExploredStates.EXCEPTION;
+	private EBehaviorForNotFullyExploredStates behaviorWhenActionForNotFullyExploredStateIsRequested;
 
 	private final Map<N, NodeLabel<A>> labels = new HashMap<>();
 
@@ -65,7 +65,7 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 			N node = nodes.get(i);
 			A action = arcs.get(i);
 			NodeLabel<A> label = this.labels.computeIfAbsent(node, n -> new NodeLabel<>());
-			double rewardForThisAction = scores.get(i);
+			double rewardForThisAction = scores.get(i) != null ? scores.get(i) : Double.NaN;
 			accumulatedDiscountedReward = rewardForThisAction + this.gamma * accumulatedDiscountedReward;
 			label.addRewardForAction(action, accumulatedDiscountedReward);
 			label.addPull(action);
@@ -83,6 +83,12 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 		/* if an applicable action has not been tried, play it to get some initial idea */
 		List<A> actionsThatHaveNotBeenTriedYet = possibleActions.stream().filter(a -> !this.labels.containsKey(node)).collect(Collectors.toList());
 		if (!actionsThatHaveNotBeenTriedYet.isEmpty()) {
+			if (this.behaviorWhenActionForNotFullyExploredStateIsRequested == EBehaviorForNotFullyExploredStates.EXCEPTION) {
+				throw new IllegalStateException("Tree policy should only be consulted for nodes for which each child has been used at least once.");
+			}
+			else if (this.behaviorWhenActionForNotFullyExploredStateIsRequested == EBehaviorForNotFullyExploredStates.BEST) {
+				throw new UnsupportedOperationException("Can currently only work with RANDOM or EXCEPTION");
+			}
 			A action = actionsThatHaveNotBeenTriedYet.get(0);
 			this.logger.info("Dictating action {}, because this was never played before.", action);
 			return action;
@@ -92,36 +98,22 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 		NodeLabel<A> labelOfNode = this.labels.get(node);
 		this.logger.debug("All actions have been tried. Label is: {}", labelOfNode);
 		Map<A, Double> scores = new HashMap<>();
-		boolean hasUnexploredAction = false;
 		for (A action : possibleActions) {
 			assert labelOfNode.getVisits() != 0 : "Visits of action " + action + " cannot be 0 if we already used this action before!";
 			this.logger.trace("Considering action {}, which has {} visits and cummulative rewards {}.", action, labelOfNode.getNumPulls(action), labelOfNode.getAccumulatedRewardsOfAction(action));
 			Double score = this.getScore(node, action);
-			if (score.isNaN()) {
-				if (this.behaviorWhenActionForNotFullyExploredStateIsRequested == EBehaviorForNotFullyExploredStates.EXCEPTION) {
-					throw new IllegalStateException("Score of action " + action + " is NaN, which it must not be the case!");
-				}
-				hasUnexploredAction = true;
-			} else {
+			if (!score.isNaN()) {
 				scores.put(action, score);
-				assert !score.isNaN() : "The score of action " + action + " is NaN, which cannot be the case.";
 			}
 		}
 
 		/* finalize the choice */
-		A choice = null;
-		if (!hasUnexploredAction || this.behaviorWhenActionForNotFullyExploredStateIsRequested == EBehaviorForNotFullyExploredStates.BEST) {
-			choice = this.getActionBasedOnScores(scores);
-		} else {
-			List<A> shuffledList = new ArrayList<>(possibleActions);
-			Collections.shuffle(shuffledList);
-			choice = shuffledList.get(0);
+		if (scores.isEmpty()) {
+			this.logger.warn("All children have score NaN. Returning a random one.");
+			return SetUtil.getRandomElement(possibleActions, 0);
 		}
-
-		/* quick sanity check */
-		if (choice == null) {
-			throw new IllegalStateException("Would return null, but this must not be the case! Check the method that chooses an action given the scores.");
-		}
+		A choice = this.getActionBasedOnScores(scores);
+		Objects.requireNonNull(choice, "Would return null, but this must not be the case! Check the method that chooses an action given the scores.");
 		this.logger.info("Recommending action {}.", choice);
 		return choice;
 	}

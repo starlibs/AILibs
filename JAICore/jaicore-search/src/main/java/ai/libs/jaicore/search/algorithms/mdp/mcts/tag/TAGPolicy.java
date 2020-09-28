@@ -146,7 +146,12 @@ public class TAGPolicy<T, A> implements IPathUpdatablePolicy<T, A, Double>, ILog
 			/* update list of best observed scores */
 			Map<A, PriorityQueue<Double>> actionMap = this.statsPerNode.computeIfAbsent(node, n -> new HashMap<>());
 			PriorityQueue<Double> bestScores = actionMap.computeIfAbsent(action, a -> this.isMaximize ? new PriorityQueue<>((c1, c2) -> Double.compare(c2, c1)) : new PriorityQueue<>());
-			accumulatedScores += scores.get(i); // no discounting used here
+			if (accumulatedScores != Double.NaN && scores.get(i) != null) {
+				accumulatedScores += scores.get(i); // no discounting used here
+			}
+			else if (accumulatedScores != Double.NaN) {
+				accumulatedScores = Double.NaN;
+			}
 			if (bestScores.size() < this.s) {
 				bestScores.add(accumulatedScores);
 			} else if (bestScores.peek() < accumulatedScores) {

@@ -26,8 +26,6 @@ import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.datastructure.graph.ILabeledPath;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -39,10 +37,9 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeExpansion
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.RCNEPathCompletionFailedException;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
+import ai.libs.jaicore.test.MediumTest;
 
 public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double>> {
-
-	private static final Logger logger = LoggerFactory.getLogger(RandomCompletionNodeEvaluatorTester.class);
 
 	/**
 	 * Tests that the random completion evaluation is really random in the sense that changing the seed changes the behavior.
@@ -58,6 +55,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 	 * @throws RCNEPathCompletionFailedException
 	 */
 	@Test
+	@MediumTest
 	public void testThatEvaluationDependsOnSeed() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, RCNEPathCompletionFailedException {
 
 		final int NUM_SEEDS = 5;
