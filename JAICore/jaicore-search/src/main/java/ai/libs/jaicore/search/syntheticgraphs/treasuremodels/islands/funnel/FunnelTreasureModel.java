@@ -76,15 +76,15 @@ public class FunnelTreasureModel extends AIslandTreasureModel {
 			this.getIslandModel().setRootNode(path.getRoot());
 			this.distributeTreasures();
 		}
-		BigInteger positionOnIsland = this.getIslandModel().getPositionOnIsland(path).add(BigInteger.ONE);
-		BigInteger island = this.getIslandModel().getIsland(path);
+		BigInteger positionOnIsland = this.getPositionOnIsland(path);
+		BigInteger island = this.getIsland(path);
 		if (!this.plateausOfIslands.containsKey(island)) {
 			this.plateausOfIslands.put(island, this.plateauMinForNonTreasures + (this.plateauMaxForNonTreasures - this.plateauMinForNonTreasures) * new Random(path.hashCode() + (long)this.seed).nextDouble());
 		}
 		double plateauOfIsland = this.plateausOfIslands.get(island);
 
 		/* compute important island positions for distribution */
-		BigInteger islandSize = this.getIslandModel().getSizeOfIsland(path);
+		BigInteger islandSize = this.getIsland(path);
 		if (positionOnIsland.compareTo(islandSize) > 0) {
 			throw new IllegalStateException("Position on island cannot be greater than the island itself.");
 		}
@@ -119,5 +119,14 @@ public class FunnelTreasureModel extends AIslandTreasureModel {
 	@Override
 	public double getMinimumAchievable() {
 		return this.minimumAchievable;
+	}
+
+	@Override
+	public boolean isPathToTreasureIsland(final ILabeledPath<ITransparentTreeNode, Integer> path) {
+		if (this.indicesOfIslands.isEmpty()) {
+			this.getIslandModel().setRootNode(path.getRoot());
+			this.distributeTreasures();
+		}
+		return this.indicesOfIslands.contains(this.getIsland(path));
 	}
 }
