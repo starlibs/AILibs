@@ -25,11 +25,9 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.junit.FixMethodOrder;
-import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runners.MethodSorters;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -48,12 +46,9 @@ import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
  * @author fmohr
  *
  */
-@RunWith(Parameterized.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 
-	@Parameter(0)
-	public OpenMLProblemSet problemSet;
 
 	public abstract IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(ILabeledDataset<?> data) throws AlgorithmCreationException, IOException;
 
@@ -65,17 +60,18 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 
 	}
 
-	@Test
-	public void testThatModelIsTrained()
+	@ParameterizedTest
+	@MethodSource("getDatasets")
+	public void testThatModelIsTrained(final OpenMLProblemSet problemSet)
 			throws DatasetDeserializationFailedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ObjectEvaluationFailedException, SplitFailedException, AlgorithmCreationException, IOException {
 		try {
 			assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty(), "There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks());
 			assertFalse(Thread.currentThread().isInterrupted(), "The thread should not be interrupted when calling the AutoML-tool!");
 
 			/* load dataset and get splits */
-			this.logger.info("Loading dataset {} for test.", this.problemSet.getName());
-			String datasetname = this.problemSet.getName();
-			List<ILabeledDataset<?>> trainTestSplit = this.getTrainTestSplit(this.problemSet.getDataset());
+			this.logger.info("Loading dataset {} for test.", problemSet.getName());
+			String datasetname = problemSet.getName();
+			List<ILabeledDataset<?>> trainTestSplit = this.getTrainTestSplit(problemSet.getDataset());
 			ILabeledDataset<?> train = trainTestSplit.get(0);
 			ILabeledDataset<?> test = trainTestSplit.get(1);
 			if (train.getNumAttributes() != test.getNumAttributes()) {
@@ -111,7 +107,6 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 
 			/* free memory */
 			trainTestSplit = null;
-			this.problemSet = null;
 
 			/* compute error rate */
 			assertTrue(test.size() >= 10, "At least 10 instances must be classified!");

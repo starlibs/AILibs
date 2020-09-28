@@ -1,17 +1,16 @@
 package ai.libs.automl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.provider.Arguments;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.dataset.DatasetUtil;
@@ -35,9 +34,7 @@ public abstract class AutoMLAlgorithmForClassificationResultProductionTester ext
 		return SplitterUtil.getLabelStratifiedTrainTestSplit(myDataset, new Random(0), .7);
 	}
 
-	// creates the test data
-	@Parameters(name = "{0}")
-	public static Collection<OpenMLProblemSet[]> data() throws DatasetDeserializationFailedException {
+	public static Stream<Arguments> getDatasets() throws DatasetDeserializationFailedException {
 		try {
 			List<OpenMLProblemSet> problemSets = new ArrayList<>();
 			problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
@@ -72,11 +69,7 @@ public abstract class AutoMLAlgorithmForClassificationResultProductionTester ext
 			problemSets.add(new OpenMLProblemSet(41066)); // secom
 			// problemSets.add(new OpenMLProblemSet(41705)); // ASP-POTASSCO-classification # THIS ARFF CANNOT BE PARSED BY THE PYTHON ARFF LOADERS
 
-			OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
-			for (int i = 0; i < data.length; i++) {
-				data[i][0] = problemSets.get(i);
-			}
-			return Arrays.asList(data);
+			return problemSets.stream().map(Arguments::of);
 		} catch (Exception e) {
 			throw new DatasetDeserializationFailedException(e);
 		}
