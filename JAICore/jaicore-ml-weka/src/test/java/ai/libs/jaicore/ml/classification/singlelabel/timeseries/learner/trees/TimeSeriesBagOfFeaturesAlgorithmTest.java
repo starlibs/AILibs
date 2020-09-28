@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
 

@@ -3,6 +3,7 @@ package ai.libs.mlplan.gui.outofsampleplots;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
@@ -77,7 +78,7 @@ public class OutOfSampleErrorPlotPluginController extends ASimpleMVCPluginContro
 					this.logger.warn("Received processed SolutionCandidateFoundEvent, but the score {} cannot be parsed to a double.", scoredSolutionCandidateInfo.getScore());
 					return;
 				} catch (Exception e) {
-					this.logger.error("Could not train classifier! " + e.toString());
+					this.logger.error("Could not train classifier! \n" + ExceptionUtils.getMessage(e));
 				}
 			}
 		}
@@ -85,7 +86,7 @@ public class OutOfSampleErrorPlotPluginController extends ASimpleMVCPluginContro
 
 	private IClassifier deserializeClassifier(final String serializedClassifier) throws Exception {
 		ReconstructionPlan plan = new ObjectMapper().readValue(serializedClassifier, ReconstructionPlan.class);
-		return (IClassifier)plan.reconstructObject();
+		return (IClassifier) plan.reconstructObject();
 	}
 
 	private double parseScoreToDouble(final String score) throws NumberFormatException {

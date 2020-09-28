@@ -12,16 +12,15 @@ import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
 public class CachingMonteCarloCrossValidationSplitSetGenerator<D extends ILabeledDataset<?>> extends MonteCarloCrossValidationSplitSetGenerator<D> {
 
 	private Map<Integer, IDatasetSplitSet<D>> cache = new HashMap<>();
-	
-	public CachingMonteCarloCrossValidationSplitSetGenerator(IRandomDatasetSplitter<D> datasetSplitter, int repeats,
-			Random random) {
+
+	public CachingMonteCarloCrossValidationSplitSetGenerator(final IRandomDatasetSplitter<D> datasetSplitter, final int repeats, final Random random) {
 		super(datasetSplitter, repeats, random);
 	}
 
 	@Override
-	public IDatasetSplitSet<D> nextSplitSet(final D data) throws InterruptedException, SplitFailedException {
+	public synchronized IDatasetSplitSet<D> nextSplitSet(final D data) throws InterruptedException, SplitFailedException {
 		int hashCode = data.hashCode();
-		if(!cache.containsKey(hashCode)) {
+		if (!this.cache.containsKey(hashCode)) {
 			this.cache.put(hashCode, super.nextSplitSet(data));
 		}
 		return this.cache.get(hashCode);

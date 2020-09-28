@@ -4,7 +4,7 @@ logo: mlplan-logo.png
 title: ML-Plan
 subtitle: ML-Plan subtitle
 navigation_mode: anchor
-version: 0.1.5
+version: 0.2.3
 navigation:
     - { id: "overview", link: "overview", title: "Overview" }
     - { id: "installation", link: "installation", title: "Installation" }
@@ -43,7 +43,7 @@ You can bind in ML-Plan via a Maven dependency (using Maven central as repositor
 ```
 <dependency>
   <groupId>ai.libs</groupId>
-  <artifactId>mlplan</artifactId>
+  <artifactId>mlplan-full</artifactId>
   <version>{{ page.version }}</version>
 </dependency>
 ```
@@ -51,20 +51,43 @@ You can bind in ML-Plan via a Maven dependency (using Maven central as repositor
 ### Gradle 
 ```gradle
 dependencies {
-    implementation 'ai.libs:mlplan:{{ page.version }}'
+    implementation 'ai.libs:mlplan-full:{{ page.version }}'
 }
 ```
 
+If you only need specific projects, you can also install only `mlplan-weka`, `mlplan-sklearn`, or `mlplan-meka`.
+The full distribution comes with an CLI and some GUI plugins.
+
 ## Usage
-The shortest way to obtain an optimized WEKA classifier via ML-Plan for your data object `data` is to run
+ML-Plan works with the api4.org dataset specification, which has native support for ARFF files and openml:
 ```java
-Classifier optimizedClassifier = AbstractMLPlanBuilder.forWeka().withDataset(data).build().call();
+ILabeledDataset d1 = OpenMLDatasetReader.deserializeDataset(3);
+ILabeledDataset d2 = ArffDatasetAdapter.readDataset(new File("path/to/your/arff"));
 ```
-An analogous call exists for scikit-learn pipelines.
+
+If you have your data loaded in an object called `data`, the shortest way to obtain an optimized classifier via ML-Plan for your data is to run
+```java
+IClassifier c = new MLPlanWekaBuilder().withDataset(data).build().call()
+```
+Analogously, to create a classifier based on sklearn, you can call
+```java
+ScikitLearnWrapper c = MLPlanScikitLearnBuilder.forClassification().withDataset(data).build().call();
+```
 Here, several default parameters apply that you may usually want to customize.
 
 ### Customizing ML-Plan
 This is just a quick overview of the most important configurations of ML-Plan.
+The general process is to make the configurations in the builder, build ML-Plan, and invoke its `call` method:
+```java
+AMLPlanBuilder builder = ... // see below how to get your builder
+
+/* configure the builder */
+...
+
+MLPlan mlplan = builder.build();
+ISupervisedLearner learner = mlplan.call();
+```
+Depending on the concrete context (WEKA, sklearn, classification/regression, etc.), the involved types are more specific than the above general types.
 
 #### Creating an ML-Plan builder for your learning framework
 Depending on the library you want to work with, you then can construct a WEKA or scikit-learn related builder for ML-Plan.
@@ -75,14 +98,34 @@ For library-specific aspects, there may be additional methods for the respective
 Note that ML-Plan for scikit-learn is also Java-based, i.e. we do not have a Python version of ML-Plan only for being able to cope with scikit-learn. Instead, ML-Plan can be configured to work with scikit-learn as the library to be used.
 
 ##### ML-Plan for WEKA
+If you are interested in standard classification tasks such as binary or multinomial classification, create an ML-Plan builder as follows.
+
 ```java
-MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forWeka();
+MLPlanWekaBuilder builder = MLPlanWekaBuilder.forClassification();
+```
+
+If you have a regression problem instead you may be get an appropriate ML-Plan builder like this:
+
+```java
+MLPlanWekaBuilder builder = MLPlanWekaBuilder.forRegression();
 ```
 
 ##### ML-Plan for scikit-learn
+ML-Plan for scikit-learn can also be instantiated for both classification, and regression. The way the builders are obtained are analogous to how we create these for WEKA:
+
+Use
+
 ```java
-MLPlanSKLearnBuilder builder = AbstractMLPlanBuilder.forSKLearn();
+MLPlanScikitLearnBuilder builder = MLPlanScikitLearnBuilder.forClassification();
 ```
+
+for obtaining an ML-Plan builder to work with scikit-learn to tackle standard classification problems and 
+
+```java
+MLPlanScikitLearnBuilder builder = MLPlanScikitLearnBuilder.forRegression();
+```
+
+to obtain a builder which pre-configures the builder ready for tackling regression problems with scikit-learn.
 
 **Note**: If you want to use ML-Plan for scikit-learn, then ML-Plan assumes Python 3.5 or higher to be active (invoked when calling `python` on the command line), and the following packages must be installed:
 `liac-arff`,
@@ -93,8 +136,18 @@ MLPlanSKLearnBuilder builder = AbstractMLPlanBuilder.forSKLearn();
 `sys`,
 `warnings`,
 `scipy`,
-`scikit-learn`.
+`scikit-learn`,
+`tpot`,
+`pandas`,
+`xgboost`.
 Please make sure that you really have `liac-arff` installed, and **not** the `arff` package.
+
+If you want to be sure that ML-Plan uses the correct python installation on your machine, you can create a file `conf/python.properties` in the ML-Plan folder with the following layout:
+```
+path = <folder where your python3 binary resides>
+pythonCmd = <optional: name of your python3 binary>
+```
+
 
 ##### Multi-Label ML-Plan for MEKA (ML2-Plan)
 ```java
@@ -108,36 +161,46 @@ Instances myDataset = new Instances(new FileReader(new File("my-dataset-file.arf
 MLUtils.prepareData(myDataset);
 ```
 
+#### Configuring the number of CPUs
+```java
+/* set the number of CPUs allowed for search to 4 */
+builder.withNumCpus(4);
+```
+
 #### Configuring timeouts
 With the `builder` variable being configured as above, you can specify timeouts for ML-Plan as a whole, as well as timeouts for the evaluation of a single solution candidate or nodes in the search.
 By default, all these timeouts are set to 60 seconds.
 ```java
 /* set the global timeout of ML-Plan to 1 hour: */
-builder.withTimeOut(new TimeOut(3600, TimeUnit.SECONDS));
+builder.withTimeOut(new Timeout(3600, TimeUnit.SECONDS));
 
 /* set the timeout of a node in the search graph (evaluation of all random completions of a node): */
-builder.withNodeEvaluationTimeOut(new TimeOut(300, TimeUnit.SECONDS));
+builder.withNodeEvaluationTimeOut(new Timeout(300, TimeUnit.SECONDS));
 
 /* set the timeout of a single solution candidate */
-builder.withCandidateEvaluationTimeOut(new TimeOut(300, TimeUnit.SECONDS));
+builder.withCandidateEvaluationTimeOut(new Timeout(300, TimeUnit.SECONDS));
 ```
 
-#### Running ML-Plan with your data
-We currently work with the Instances data format of the WEKA library:
+#### Configuring the portion used for the selection phase
 ```java
-/* Load your training dataset with WEKA's instances */
-Instances trainDataset = new Instances(new FileReader("myDataset.arff"));
+builder.withPortionOfDataReservedForSelection(.3); // use 30% of the data for selection
+builder.withPortionOfDataReservedForSelection(.0); // disable selection phase
+```
 
-/* configure the builder to use the given data */
-builder.withDataset(trainDataset);
+#### Configuring the cross validation technique to evaluate candidates
+```java
+builder.withMCCVBasedCandidateEvaluationInSearchPhase(3, .8); // use 3 repetitions with 80%/20% splits each
+```
 
-/* build and call ML-Plan */
-MLPlan mlplan = builder.build();
-Classifier chosenClassifier = mlplan.call();
+#### Working with WEKA objects
+If you want to use ML-Plan with the typical types of the WEKA library such as `Instances` and `Classifier`, you can use the `WekaInstances` wrapper class, and obtain the classifier object directly from ML-Plan:
+```java
+Instances dataset = new Instances(new FileReader("path/to.arff")); // set the class index appropriately
+Classifier c = new MLPlanWekaBuilder().withDataset(new WekaInstances(dataset)).build().call().getClassifier();
 ```
 
 ### JavaDoc
 JavaDoc is available [here](https://javadoc.io/doc/ai.libs/mlplan/).
 
 ### Contribute
-ML-Plan is currently developed in the [softwareconfiguration folder of AILibs on github.com](https://github.com/fmohr/AILibs/tree/master/softwareconfiguration/mlplan).
+ML-Plan is currently developed in the [softwareconfiguration folder of AILibs on github.com](https://github.com/starlibs/AILibs/tree/master/softwareconfiguration/mlplan).

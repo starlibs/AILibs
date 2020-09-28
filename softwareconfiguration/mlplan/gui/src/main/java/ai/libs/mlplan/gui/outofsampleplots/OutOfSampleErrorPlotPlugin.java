@@ -13,12 +13,16 @@ public class OutOfSampleErrorPlotPlugin extends ASimpleMVCPlugin<OutOfSampleErro
 	private final ILabeledDataset<?> trainData;
 	private final ILabeledDataset<?> testData;
 
-	public OutOfSampleErrorPlotPlugin(final ILabeledDataset<?> trainData, final ILabeledDataset<?> testData) {
-		super();
+	public OutOfSampleErrorPlotPlugin(final String title, final ILabeledDataset<?> trainData, final ILabeledDataset<?> testData) {
+		super(title);
 		this.trainData = trainData;
 		this.testData = testData;
 		this.getController().setTrain(trainData);
 		this.getController().setTest(testData);
+	}
+
+	public OutOfSampleErrorPlotPlugin(final ILabeledDataset<?> trainData, final ILabeledDataset<?> testData) {
+		this("Out-of-Sample Error Timeline", trainData, testData);
 	}
 
 	public ILabeledDataset<?> getTrainData() {

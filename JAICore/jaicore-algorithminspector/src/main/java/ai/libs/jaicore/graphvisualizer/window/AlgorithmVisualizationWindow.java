@@ -65,7 +65,7 @@ public class AlgorithmVisualizationWindow implements Runnable {
 		this.setup(this.historyRecorder.getHistory());
 	}
 
-	private AlgorithmVisualizationWindow(final AlgorithmEventHistory history) {
+	public AlgorithmVisualizationWindow(final AlgorithmEventHistory history) {
 		this.historyRecorder = null;
 		this.setup(history);
 	}
@@ -80,7 +80,7 @@ public class AlgorithmVisualizationWindow implements Runnable {
 
 		/* initialize controls and launch the window */
 		this.initializeControls();
-		DefaultGUIEventBus.getInstance().registerListener(this.algorithmEventHistoryPuller);
+		DefaultGUIEventBus.getInstance().registerAlgorithmEventHistoryEntryDeliverer(this.algorithmEventHistoryPuller);
 		Platform.runLater(this);
 	}
 
@@ -209,9 +209,6 @@ public class AlgorithmVisualizationWindow implements Runnable {
 
 		this.pluginTabPane = new TabPane();
 		centerSplitLayout.getItems().add(this.pluginTabPane);
-		if (this.mainPlugin != null) {
-			centerSplitLayout.getItems().add(this.mainPlugin.getView().getNode());
-		}
 
 		this.rootLayout.setCenter(centerSplitLayout);
 	}
@@ -227,8 +224,8 @@ public class AlgorithmVisualizationWindow implements Runnable {
 	}
 
 	private void addPluginToTabList(final IGUIPlugin plugin) {
-		Tab pluginTab = new Tab(plugin.getView().getTitle(), plugin.getView().getNode());
-		this.pluginTabPane.getTabs().add(pluginTab);
+		Tab pluginTab = new Tab(plugin.getTitle(), plugin.getView().getNode());
+		Platform.runLater(() -> this.pluginTabPane.getTabs().add(pluginTab));
 	}
 
 	/**

@@ -3,10 +3,11 @@ package ai.libs.jaicore.experiments;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.db.IDatabaseAdapter;
 import ai.libs.jaicore.db.IDatabaseConfig;
-import ai.libs.jaicore.db.sql.SQLAdapter;
+import ai.libs.jaicore.db.sql.DatabaseAdapterFactory;
 
 /**
  * Tests the class {@link ExperimentAdditionalTableLoader}. Integration tests
@@ -34,7 +35,7 @@ public class ExperimentAdditionalTableLoaderTest {
 	 */
 	@Test
 	public void testCreateTables() throws IOException, SQLException {
-		SQLAdapter adapter = new SQLAdapter(DB_CONFIG);
+		IDatabaseAdapter adapter = DatabaseAdapterFactory.get(DB_CONFIG);
 		ExperimentAdditionalTableLoader.executeStatementsFromDirectory("test_resource", adapter);
 		adapter.update("DROP TABLE IF EXISTS test");
 		adapter.update("DROP TABLE IF EXISTS test2");

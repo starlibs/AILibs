@@ -5,7 +5,7 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttributeValue;
 
-public class NumericAttribute extends AAttribute implements INumericAttribute{
+public class NumericAttribute extends AAttribute implements INumericAttribute {
 
 	private static final long serialVersionUID = 657993241775006166L;
 
@@ -24,20 +24,20 @@ public class NumericAttribute extends AAttribute implements INumericAttribute{
 	}
 
 	private double getAttributeValueAsDouble(final Object attributeValue) {
-		if (attributeValue == null) {
+		if (attributeValue == null || attributeValue.toString().trim().isEmpty()) {
 			return Double.NaN;
 		}
 		if (attributeValue instanceof INumericAttributeValue) {
 			return ((INumericAttributeValue) attributeValue).getValue();
 		} else if (attributeValue instanceof Integer) {
-			return ((Integer) attributeValue) * 1.0;
+			return ((Integer) attributeValue);
 		} else if (attributeValue instanceof Long) {
-			return ((Long) attributeValue) * 1.0;
+			return ((Long) attributeValue);
 		} else if (attributeValue instanceof Double) {
 			return (Double) attributeValue;
-		} else if (attributeValue instanceof String && NumberUtils.isCreatable((String)attributeValue)) {
-			return NumberUtils.createDouble((String)attributeValue);
-		}else {
+		} else if (attributeValue instanceof String && NumberUtils.isCreatable((String) attributeValue)) {
+			return NumberUtils.createDouble((String) attributeValue);
+		} else {
 			throw new IllegalArgumentException("No valid attribute value " + attributeValue + " for attribute " + this.getClass().getName());
 		}
 	}
@@ -73,19 +73,22 @@ public class NumericAttribute extends AAttribute implements INumericAttribute{
 	@Override
 	public String serializeAttributeValue(final Object value) {
 		if (value == null) {
-			return "?";
+			return null;
 		}
-		return this.getAttributeValueAsDouble(value) + "";
+		Double doubleValue = this.getAttributeValueAsDouble(value);
+
+		if (doubleValue % 1 == 0) {
+			if (doubleValue > Integer.MAX_VALUE) {
+				return doubleValue.longValue() + "";
+			} else {
+				return doubleValue.intValue() + "";
+			}
+		}
+		return doubleValue + "";
 	}
 
 	@Override
 	public Double deserializeAttributeValue(final String string) {
-		if (string.equals("?")) {
-			return null;
-		} else {
-			return Double.parseDouble(string);
-		}
+		return string.equals("null") ? null : Double.parseDouble(string);
 	}
-
-
 }

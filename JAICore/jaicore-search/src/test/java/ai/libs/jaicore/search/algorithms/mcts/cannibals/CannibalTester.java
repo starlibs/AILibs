@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.problems.cannibals.CannibalProblem;
 import ai.libs.jaicore.search.algorithms.standard.astar.AStar;

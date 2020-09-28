@@ -5,7 +5,7 @@ import org.api4.java.common.math.IVector;
 /**
  * Represents the gradient of a function that is differentiable.
  *
- * @author Helena Graf, Mirko J�rgens
+ * @author Helena Graf, Mirko Jürgens
  *
  */
 public interface IGradientFunction {

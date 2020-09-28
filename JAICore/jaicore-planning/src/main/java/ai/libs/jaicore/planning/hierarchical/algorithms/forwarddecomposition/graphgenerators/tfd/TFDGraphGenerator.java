@@ -1,6 +1,7 @@
 package ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
@@ -27,9 +29,9 @@ import ai.libs.jaicore.planning.hierarchical.problems.stn.Method;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.MethodInstance;
 import ai.libs.jaicore.search.model.NodeExpansionDescription;
 
-public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String> {
+public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String>, ILoggingCustomizable {
 
-	private static Logger logger = LoggerFactory.getLogger(TFDGraphGenerator.class);
+	private Logger logger = LoggerFactory.getLogger(TFDGraphGenerator.class);
 	protected TaskPlannerUtil util = new TaskPlannerUtil(null);
 	protected final IHTNPlanningProblem problem;
 	protected final Map<String, Operation> primitiveTasks = new HashMap<>();
@@ -54,6 +56,7 @@ public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String> {
 	protected Collection<TFDNode> getSuccessorsResultingFromResolvingComplexTask(final Monom state, final Literal taskToBeResolved, final List<Literal> remainingOtherTasks) throws InterruptedException {
 		Collection<TFDNode> successors = new ArrayList<>();
 		Collection<MethodInstance> applicableMethodInstances = this.util.getMethodInstancesForTaskThatAreApplicableInState(null, this.problem.getDomain().getMethods(), taskToBeResolved, state, remainingOtherTasks);
+		this.logger.debug("Identified {} applicable method instances." , applicableMethodInstances.size());
 		assert this.areLonelyMethodsContainedAtMostOnce(applicableMethodInstances);
 		for (MethodInstance instance : applicableMethodInstances) {
 
@@ -113,21 +116,26 @@ public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String> {
 	@Override
 	public ISuccessorGenerator<TFDNode, String> getSuccessorGenerator() {
 		return l -> {
+			this.logger.debug("Starting node generation for node {}", l);
 			Monom state = l.getState();
 			List<Literal> currentlyRemainingTasks = new ArrayList<>(l.getRemainingTasks());
 			if (currentlyRemainingTasks.isEmpty()) {
 				return new ArrayList<>();
 			}
-			Literal nextTaskTmp = currentlyRemainingTasks.get(0);
+			Literal nextTask = currentlyRemainingTasks.get(0);
 			currentlyRemainingTasks.remove(0);
-			String nextTaskName = nextTaskTmp.getPropertyName();
-			Literal nextTask = new Literal(nextTaskName, nextTaskTmp.getParameters());
 
 			/* get the child nodes */
 			long creationStartTime = System.currentTimeMillis();
 			Collection<TFDNode> successors = this.primitiveTasks.containsKey(nextTask.getPropertyName()) ? this.getSuccessorsResultingFromResolvingPrimitiveTask(state, nextTask, currentlyRemainingTasks)
 					: this.getSuccessorsResultingFromResolvingComplexTask(state, nextTask, currentlyRemainingTasks);
-			logger.info("Node generation finished and took {}ms", System.currentTimeMillis() - creationStartTime);
+
+			if (successors.isEmpty()) {
+				this.logger.warn("Could not produce any successors for next task {}", nextTask);
+				return Arrays.asList();
+			}
+
+			this.logger.info("Node generation finished and took {}ms. Generated {} successors.", System.currentTimeMillis() - creationStartTime, successors.size());
 
 			/* change order in remaining tasks based on numbered prefixes */
 			successors = successors.stream().map(this::orderRemainingTasksByPriority).collect(Collectors.toList());
@@ -181,5 +189,16 @@ public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String> {
 		fields.put("problem", this.problem);
 		fields.put("primitiveTasks", this.primitiveTasks);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
+		this.util.setLoggerName(name + ".util");
 	}
 }

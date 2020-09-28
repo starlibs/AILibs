@@ -579,7 +579,9 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 	 */
 	protected void initGraph() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
 		if (!this.initialized) {
+			this.bfLogger.info("Start graph initialization.");
 			this.initialized = true;
+			this.bfLogger.debug("Compute labels of root node(s)");
 			for (N n0 : this.rootGenerator.getRoots()) {
 				BackPointerPath<N, A, V> root = this.newNode(null, n0, null);
 				if (root == null) {
@@ -602,6 +604,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 					this.openLock.unlock();
 				}
 			}
+			this.bfLogger.info("Finished graph initialization.");
 		}
 	}
 
@@ -796,6 +799,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 	@Override
 	protected EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> registerSolution(final EvaluatedSearchGraphPath<N, A, V> solutionPath) {
 		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent = super.registerSolution(solutionPath); // this emits an event on the event bus
+		this.bfLogger.debug("Successfully registered solution on parent level, now adding the solution to the local queue.");
 		assert !this.solutions.contains(solutionEvent.getSolutionCandidate()) : "Registering solution " + solutionEvent.getSolutionCandidate() + " for the second time!";
 		this.solutions.add(solutionEvent.getSolutionCandidate());
 		synchronized (this.pendingSolutionFoundEvents) {
@@ -1047,7 +1051,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 			switch (this.getState()) {
 			case CREATED:
 				AlgorithmInitializedEvent initEvent = this.activate();
-				this.bfLogger.info("Initializing BestFirst search {} with the following configuration:\n\tCPUs: {}\n\tTimeout: {}ms\n\tNode Evaluator: {}\n\tConsidering node evaluator optimistic: {}\n\tListening to solutions delivered by node evaluator: {}\n\tInitial score upper bound: {}", this, this.getConfig().cpus(), this.getConfig().timeout(), this.nodeEvaluator, this.considerNodeEvaluationOptimistic, this.solutionReportingNodeEvaluator, this.getBestScoreKnownToExist());
+				this.bfLogger.info("Initializing BestFirst search {} with the following configuration:\n\tCPUs: {}\n\tTimeout: {}ms\n\tGraph Generator: {}\n\tNode Evaluator: {}\n\tConsidering node evaluator optimistic: {}\n\tListening to solutions delivered by node evaluator: {}\n\tInitial score upper bound: {}", this, this.getConfig().cpus(), this.getConfig().timeout(), this.graphGenerator.getClass(), this.nodeEvaluator, this.considerNodeEvaluationOptimistic, this.solutionReportingNodeEvaluator, this.getBestScoreKnownToExist());
 				int additionalCPUs = this.getConfig().cpus() - 1;
 				if (additionalCPUs > 0) {
 					this.parallelizeNodeExpansion(additionalCPUs);
@@ -1283,6 +1287,10 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 		this.loggerName = name;
 		this.bfLogger = LoggerFactory.getLogger(name);
 		this.bfLogger.info("Activated logger {} with name {}", name, this.bfLogger.getName());
+		if (this.graphGenerator instanceof ILoggingCustomizable) {
+			this.bfLogger.info("Setting logger of graph generator to {}.gg", name);
+			((ILoggingCustomizable) this.graphGenerator).setLoggerName(this.loggerName + ".gg");
+		}
 		if (this.nodeEvaluator instanceof ILoggingCustomizable) {
 			this.bfLogger.info("Setting logger of node evaluator {} to {}.nodeevaluator", this.nodeEvaluator, name);
 			((ILoggingCustomizable) this.nodeEvaluator).setLoggerName(name + ".nodeevaluator");

@@ -1,0 +1,6 @@
+{
+	"repository": "Test Meka Classification Pipeline",
+	"include": [
+		"./base/majoritylabelset.json"
+	]
+}

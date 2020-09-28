@@ -6,10 +6,8 @@ import static org.junit.Assert.assertTrue;
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.random.Well1024a;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import ai.libs.jaicore.basic.StatisticsUtil;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
 
 /**
  * Test-suite to test the StatisticsUtil.
@@ -26,7 +24,7 @@ public class StatisticsUtilTest {
 	private static double[] negSampleA;
 	private static double[] negSampleB;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() {
 		double[][] samples = generateDistributionSamples(new NormalDistribution(new Well1024a(0), 0.0, 1.0), new NormalDistribution(new Well1024a(2), 0.0, 1.0));
 		posSampleA = samples[0];

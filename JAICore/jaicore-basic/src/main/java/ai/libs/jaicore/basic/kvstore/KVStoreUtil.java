@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.db.sql.SQLAdapter;
+import ai.libs.jaicore.db.IDatabaseAdapter;
 
 /**
  * A util for serializing and deserializing {@link KVStoreCollection}s from and to certain formats.
@@ -54,8 +54,8 @@ public class KVStoreUtil {
 			String[] cellFormattingSplit = store.getAsString(cellFormatting).split("#");
 			List<String> cleanedCellFormatting = Arrays.stream(cellFormattingSplit).filter(x -> !x.equals("")).collect(Collectors.toList());
 
-			String rowValue = store.getAsString(rowIndex).replaceAll("\\_", "\\\\_");
-			String columnValue = store.getAsString(columnIndex).replaceAll("\\_", "\\\\_");
+			String rowValue = store.getAsString(rowIndex).replace("\\_", "\\\\_");
+			String columnValue = store.getAsString(columnIndex).replace("\\_", "\\\\_");
 
 			StringBuilder tableEntryBuilder = new StringBuilder();
 			for (String cellKey : cleanedCellFormatting) {
@@ -101,8 +101,8 @@ public class KVStoreUtil {
 			String[] cellFormattingSplit = store.getAsString(cellFormatting).split("#");
 			List<String> cleanedCellFormatting = Arrays.stream(cellFormattingSplit).filter(x -> !x.equals("")).collect(Collectors.toList());
 
-			String rowValue = store.getAsString(rowIndex).replaceAll("\\_", "\\\\_");
-			String columnValue = store.getAsString(columnIndex).replaceAll("\\_", "\\\\_");
+			String rowValue = store.getAsString(rowIndex).replace("\\_", "\\\\_");
+			String columnValue = store.getAsString(columnIndex).replace("\\_", "\\\\_");
 
 			StringBuilder tableEntryBuilder = new StringBuilder();
 			for (String cellKey : cleanedCellFormatting) {
@@ -275,7 +275,7 @@ public class KVStoreUtil {
 	 * @return A collection of {@link IKVStore}s containing the data of the result set.
 	 * @throws SQLException Thrown, if there were problems regarding the processing of the SQL result set.
 	 */
-	public static KVStoreCollection readFromMySQLQuery(final SQLAdapter adapter, final String query, final Map<String, String> commonFields) throws SQLException {
+	public static KVStoreCollection readFromMySQLQuery(final IDatabaseAdapter adapter, final String query, final Map<String, String> commonFields) throws SQLException {
 		return addCommonFields(new KVStoreCollection(adapter.getResultsOfQuery(query)), commonFields);
 	}
 
@@ -289,7 +289,7 @@ public class KVStoreUtil {
 	 * @throws SQLException
 	 * @throws Exception
 	 */
-	public static KVStoreCollection readFromMySQLTable(final SQLAdapter adapter, final String table, final Map<String, String> commonFields) throws SQLException {
+	public static KVStoreCollection readFromMySQLTable(final IDatabaseAdapter adapter, final String table, final Map<String, String> commonFields) throws SQLException {
 		return addCommonFields(new KVStoreCollection(adapter.getRowsOfTable(table)), commonFields);
 
 	}

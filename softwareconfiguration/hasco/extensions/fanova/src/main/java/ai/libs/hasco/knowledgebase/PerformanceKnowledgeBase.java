@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -22,17 +23,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import ai.libs.jaicore.basic.StringUtil;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.CompositionProblemUtil;
 import ai.libs.jaicore.components.model.Dependency;
-import ai.libs.jaicore.components.model.IParameterDomain;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
-import ai.libs.jaicore.components.model.Util;
 import ai.libs.jaicore.components.serialization.ParameterDeserializer;
 import ai.libs.jaicore.components.serialization.ParameterDomainDeserializer;
-import ai.libs.jaicore.db.sql.SQLAdapter;
+import ai.libs.jaicore.db.IDatabaseAdapter;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -52,7 +55,7 @@ public class PerformanceKnowledgeBase {
 
 	private static final String LABEL_PERFORMANCE_SAMPLES = "performance_samples";
 
-	private SQLAdapter sqlAdapter;
+	private IDatabaseAdapter sqlAdapter;
 	private Map<String, HashMap<ComponentInstance, Double>> performanceSamples;
 	/** This is map contains a String */
 	private Map<String, HashMap<String, List<Pair<ParameterConfiguration, Double>>>> performanceSamplesByIdentifier;
@@ -66,14 +69,13 @@ public class PerformanceKnowledgeBase {
 	 *
 	 */
 	private class ParameterConfiguration {
-		private final List<Pair<Parameter, String>> values;
+		private final List<Pair<IParameter, String>> values;
 
-		public ParameterConfiguration(final ComponentInstance composition) {
-			ArrayList<Pair<Parameter, String>> temp = new ArrayList<>();
-			List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(composition);
-			for (ComponentInstance compInst : componentInstances) {
-				List<Parameter> parameters = compInst.getComponent().getParameters().getTotalOrder();
-				for (Parameter parameter : parameters) {
+		public ParameterConfiguration(final IComponentInstance composition) {
+			ArrayList<Pair<IParameter, String>> temp = new ArrayList<>();
+			List<IComponentInstance> componentInstances = CompositionProblemUtil.getComponentInstancesOfComposition(composition);
+			for (IComponentInstance compInst : componentInstances) {
+				for (IParameter parameter : compInst.getComponent().getParameters()) {
 					String value;
 					if (compInst.getParametersThatHaveBeenSetExplicitly().contains(parameter)) {
 						value = compInst.getParameterValues().get(parameter.getName());
@@ -101,12 +103,12 @@ public class PerformanceKnowledgeBase {
 			return new EqualsBuilder().append(this.values, other.values).isEquals();
 		}
 
-		public List<Pair<Parameter, String>> getValues() {
+		public List<Pair<IParameter, String>> getValues() {
 			return this.values;
 		}
 	}
 
-	public PerformanceKnowledgeBase(final SQLAdapter sqlAdapter) {
+	public PerformanceKnowledgeBase(final IDatabaseAdapter sqlAdapter) {
 		super();
 		this.sqlAdapter = sqlAdapter;
 		this.performanceInstancesByIdentifier = new HashMap<>();
@@ -119,7 +121,7 @@ public class PerformanceKnowledgeBase {
 		this.performanceInstancesIndividualComponents = new HashMap<>();
 	}
 
-	private Attribute getAttribute(final ComponentInstance ci, final Parameter parameter) {
+	private Attribute getAttribute(final IComponentInstance ci, final IParameter parameter) {
 		IParameterDomain domain = parameter.getDefaultDomain();
 		if (domain instanceof CategoricalParameterDomain) {
 			CategoricalParameterDomain catDomain = (CategoricalParameterDomain) domain;
@@ -136,13 +138,12 @@ public class PerformanceKnowledgeBase {
 		}
 	}
 
-	public Instances getInstancesForCI(final ComponentInstance ci) {
+	public Instances getInstancesForCI(final IComponentInstance ci) {
 		// Create Instances pipeline for this pipeline type
 		Instances instances = null;
 		// Add parameter domains as attributes
-		List<Parameter> parameters = ci.getComponent().getParameters().getTotalOrder();
-		ArrayList<Attribute> attributes = new ArrayList<>(parameters.size());
-		for (Parameter parameter : parameters) {
+		ArrayList<Attribute> attributes = new ArrayList<>();
+		for (IParameter parameter : ci.getComponent().getParameters()) {
 			attributes.add(this.getAttribute(ci, parameter));
 		}
 		Attribute scoreAttr = new Attribute("performance_score");
@@ -152,14 +153,14 @@ public class PerformanceKnowledgeBase {
 		return instances;
 	}
 
-	public Instances getInstancesForCIList(final List<ComponentInstance> componentInstances) {
+	public Instances getInstancesForCIList(final List<IComponentInstance> componentInstances) {
 		// Create Instances pipeline for this pipeline type
 		Instances instances = null;
 		ArrayList<Attribute> allAttributes = new ArrayList<>();
-		for (ComponentInstance ci : componentInstances) {
-			List<Parameter> parameters = ci.getComponent().getParameters().getTotalOrder();
+		for (IComponentInstance ci : componentInstances) {
+			Collection<IParameter> parameters = ci.getComponent().getParameters();
 			ArrayList<Attribute> attributes = new ArrayList<>(parameters.size());
-			for (Parameter parameter : parameters) {
+			for (IParameter parameter : parameters) {
 				attributes.add(this.getAttribute(ci, parameter));
 			}
 			allAttributes.addAll(attributes);
@@ -171,8 +172,8 @@ public class PerformanceKnowledgeBase {
 		return instances;
 	}
 
-	public void addPerformanceSample(final String benchmarkName, final ComponentInstance componentInstance, final double score, final boolean addToDB) {
-		String identifier = Util.getComponentNamesOfComposition(componentInstance);
+	public void addPerformanceSample(final String benchmarkName, final IComponentInstance componentInstance, final double score, final boolean addToDB) {
+		String identifier = CompositionProblemUtil.getComponentNamesOfComposition(componentInstance);
 
 		if (this.performanceInstancesByIdentifier.get(benchmarkName) == null) {
 			HashMap<String, Instances> newMap = new HashMap<>();
@@ -184,11 +185,11 @@ public class PerformanceKnowledgeBase {
 
 		if (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier)) {
 			// Add parameter domains as attributes
-			List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(componentInstance);
+			List<IComponentInstance> componentInstances = CompositionProblemUtil.getComponentInstancesOfComposition(componentInstance);
 			this.performanceInstancesByIdentifier.get(benchmarkName).put(identifier, this.getInstancesForCIList(componentInstances));
 		}
-		List<ComponentInstance> componentInstances = Util.getComponentInstancesOfComposition(componentInstance);
-		for (ComponentInstance ci : componentInstances) {
+		List<IComponentInstance> componentInstances = CompositionProblemUtil.getComponentInstancesOfComposition(componentInstance);
+		for (IComponentInstance ci : componentInstances) {
 			if (!this.performanceInstancesIndividualComponents.get(benchmarkName).containsKey(ci.getComponent().getName())) {
 				this.performanceInstancesIndividualComponents.get(benchmarkName).put(ci.getComponent().getName(), this.getInstancesForCI(ci));
 			}
@@ -198,10 +199,10 @@ public class PerformanceKnowledgeBase {
 		Instances instances = this.performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
 		DenseInstance instance = new DenseInstance(instances.numAttributes());
 		ParameterConfiguration config = new ParameterConfiguration(componentInstance);
-		List<Pair<Parameter, String>> values = config.getValues();
+		List<Pair<IParameter, String>> values = config.getValues();
 		for (int i = 0; i < instances.numAttributes() - 1; i++) {
 			Attribute attr = instances.attribute(i);
-			Parameter param = values.get(i).getLeft();
+			IParameter param = values.get(i).getLeft();
 			if (values.get(i).getRight() != null) {
 				if (param.isCategorical()) {
 					String value = values.get(i).getRight();
@@ -229,7 +230,7 @@ public class PerformanceKnowledgeBase {
 		this.performanceInstancesByIdentifier.get(benchmarkName).get(identifier).add(instance);
 
 		// Add Instance for individual component
-		for (ComponentInstance ci : componentInstances) {
+		for (IComponentInstance ci : componentInstances) {
 			this.performanceInstancesIndividualComponents.get(benchmarkName).get(ci.getComponent().getName()).add(this.getInstanceForIndividualCI(benchmarkName, ci, score));
 		}
 
@@ -238,14 +239,14 @@ public class PerformanceKnowledgeBase {
 		}
 	}
 
-	public Instance getInstanceForIndividualCI(final String benchmarkName, final ComponentInstance ci, final double score) {
+	public Instance getInstanceForIndividualCI(final String benchmarkName, final IComponentInstance ci, final double score) {
 		Instances instancesInd = this.performanceInstancesIndividualComponents.get(benchmarkName).get(ci.getComponent().getName());
 		DenseInstance instanceInd = new DenseInstance(instancesInd.numAttributes());
 		for (int i = 0; i < instancesInd.numAttributes() - 1; i++) {
 			Attribute attr = instancesInd.attribute(i);
 			String attrFQN = attr.name();
 			String attrName = attrFQN.substring(attrFQN.indexOf("::") + 2);
-			Parameter param = ci.getComponent().getParameterWithName(attrName);
+			IParameter param = ci.getComponent().getParameter(attrName);
 			String value;
 			if (ci.getParametersThatHaveBeenSetExplicitly().contains(param)) {
 				value = ci.getParameterValues().get(param.getName());
@@ -313,7 +314,7 @@ public class PerformanceKnowledgeBase {
 		}
 	}
 
-	public void addPerformanceSampleToDB(final String benchmarkName, final ComponentInstance componentInstance, final double score) {
+	public void addPerformanceSampleToDB(final String benchmarkName, final IComponentInstance componentInstance, final double score) {
 		try {
 			Map<String, String> map = new HashMap<>();
 			map.put("benchmark", benchmarkName);
@@ -421,7 +422,7 @@ public class PerformanceKnowledgeBase {
 		if (!this.performanceInstancesByIdentifier.containsKey(benchmarkName)) {
 			return false;
 		}
-		String identifier = Util.getComponentNamesOfComposition(composition);
+		String identifier = CompositionProblemUtil.getComponentNamesOfComposition(composition);
 		if (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier)) {
 			return false;
 		}
@@ -459,7 +460,7 @@ public class PerformanceKnowledgeBase {
 		if (!this.performanceInstancesByIdentifier.containsKey(benchmarkName)) {
 			return false;
 		}
-		String identifier = Util.getComponentNamesOfComposition(composition);
+		String identifier = CompositionProblemUtil.getComponentNamesOfComposition(composition);
 		if (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier)) {
 			return false;
 		}
@@ -497,7 +498,7 @@ public class PerformanceKnowledgeBase {
 	}
 
 	public Instances getPerformanceSamples(final String benchmarkName, final ComponentInstance composition) {
-		String identifier = Util.getComponentNamesOfComposition(composition);
+		String identifier = CompositionProblemUtil.getComponentNamesOfComposition(composition);
 		return this.performanceInstancesByIdentifier.get(benchmarkName).get(identifier);
 	}
 
@@ -520,7 +521,7 @@ public class PerformanceKnowledgeBase {
 	}
 
 	public void setPerformanceSamples(final Instances instances, final ComponentInstance composition, final String benchmarkName) {
-		String identifier = Util.getComponentNamesOfComposition(composition);
+		String identifier = CompositionProblemUtil.getComponentNamesOfComposition(composition);
 
 		if (!this.performanceInstancesByIdentifier.containsKey(benchmarkName)) {
 			HashMap<String, Instances> newMap = new HashMap<>();

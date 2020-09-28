@@ -2,6 +2,8 @@ package ai.libs.jaicore.ml.regression.loss.dataset;
 
 import java.util.List;
 
+import org.api4.java.ai.ml.regression.evaluation.IRegressionPrediction;
+
 public class AsymmetricLoss2 extends ARegressionMeasure {
 
 	private double dividerUnderestimation = 10;
@@ -16,11 +18,11 @@ public class AsymmetricLoss2 extends ARegressionMeasure {
 	}
 
 	@Override
-	public double score(final List<? extends Double> expected, final List<? extends Double> predicted) {
+	public double score(final List<? extends Double> expected, final List<? extends IRegressionPrediction> predicted) {
 		this.checkConsistency(expected, predicted);
 		double loss = 0;
 		for (int i = 0; i < expected.size(); i++) {
-			Double difference = predicted.get(i) - expected.get(i);
+			Double difference = predicted.get(i).getPrediction() - expected.get(i);
 			if (difference < 0) {
 				loss += Math.exp(-(difference / this.dividerUnderestimation)) - 1;
 			} else {

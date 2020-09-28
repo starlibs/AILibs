@@ -5,23 +5,18 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter.SFA;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter.SlidingWindowBuilder;
 
-@RunWith(JUnit4.class)
 public class SFATest {
 
-	double[] timeseries1;
-	double[] timeseries2;
-	TimeSeriesDataset2 dataset;
+	private double[] timeseries1;
+	private double[] timeseries2;
+	private TimeSeriesDataset2 dataset;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.timeseries2 = new double[] { 1, 2, 4, 3, 5, 2, 4, 3 };
 		double[][] matrix = new double[1][8];

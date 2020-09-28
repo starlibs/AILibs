@@ -12,7 +12,7 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,12 +26,13 @@ import ai.libs.jaicore.search.exampleproblems.enhancedttsp.EnhancedTTSPSimpleGra
 import ai.libs.jaicore.search.exampleproblems.enhancedttsp.EnhancedTTSPSimpleSolutionPredicate;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.jaicore.test.MediumTest;
 
 public abstract class NodeEvaluatorTester<N extends IPathEvaluator<EnhancedTTSPState, String, Double>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(NodeEvaluatorTester.class);
 	private static final int INTERRUPT_TRIGGER = 3000;
-	private static final int INTERRUPT_TOLERANCE = 50;
+	private static final int INTERRUPT_TOLERANCE = 100;
 
 	public abstract N getNodeEvaluator();
 
@@ -40,6 +41,7 @@ public abstract class NodeEvaluatorTester<N extends IPathEvaluator<EnhancedTTSPS
 	public abstract Collection<BackPointerPath<EnhancedTTSPState, String, Double>> getNodesToTestInDifficultProblem(int numNodes);
 
 	@Test
+	@MediumTest
 	public void testInterruptibility() throws InterruptedException, AlgorithmException, PathEvaluationException {
 		for (BackPointerPath<EnhancedTTSPState, String, Double> node : this.getNodesToTestInDifficultProblem(1)) {
 
@@ -64,6 +66,7 @@ public abstract class NodeEvaluatorTester<N extends IPathEvaluator<EnhancedTTSPS
 					long runtime = System.currentTimeMillis() - start;
 					assertTrue("The interrupt took " + (runtime - INTERRUPT_TRIGGER) + "ms to be processed.", runtime < INTERRUPT_TRIGGER + INTERRUPT_TOLERANCE);
 					logger.info("Interruption registered. Runtime was {}ms", runtime);
+					Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
 				} else {
 					throw e;
 				}

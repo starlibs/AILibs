@@ -3,6 +3,7 @@ package ai.libs.jaicore.ml.scikitwrapper;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,7 +14,11 @@ import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import org.aeonbits.owner.ConfigCache;
+import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
@@ -34,65 +39,58 @@ import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
+import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
-import ai.libs.jaicore.processes.OS;
+import ai.libs.jaicore.processes.EOperatingSystem;
 import ai.libs.jaicore.processes.ProcessIDNotRetrievableException;
 import ai.libs.jaicore.processes.ProcessUtil;
+import ai.libs.python.IPythonConfig;
 
 /**
  * Wraps a Scikit-Learn Python process by utilizing a template to start a classifier in Scikit with the given classifier.
  *
- * Usage:
- * Set the constructInstruction to exactly the command how the classifier should be instantiated. E.g. "LinearRegression()" or "MLPRegressor(solver = 'lbfg')".
+ * Usage: Set the constructInstruction to exactly the command how the classifier should be instantiated. E.g. "LinearRegression()" or "MLPRegressor(solver = 'lbfg')".
  *
- * Set the imports to exactly what the additional imports lines that are necessary to run the construction command must look like. It is up to the user to decide whether fully
- * qualified names or only the class name themself are used as long as the import is on par with the construct call.
- * E.g (without namespace in construct call) "from sklearn.linear_model import LinearRegression" or (without namespace) "import sklearn.linear_model"
- * createImportStatementFromImportFolder might help to import an own folder of modules. It initializes the folder to be utilizable as a source of modules.
- * Depending on the shape of the construct call the keepNamespace flag must be set (as described above).
+ * Set the imports to exactly what the additional imports lines that are necessary to run the construction command must look like. It is up to the user to decide whether fully qualified names or only the class name themself are used as long
+ * as the import is on par with the construct call. E.g (without namespace in construct call) "from sklearn.linear_model import LinearRegression" or (without namespace) "import sklearn.linear_model" createImportStatementFromImportFolder
+ * might help to import an own folder of modules. It initializes the folder to be utilizable as a source of modules. Depending on the shape of the construct call the keepNamespace flag must be set (as described above).
  *
  * Before starting the classification it must be set whether the given dataset is a categorical or a regression task (setIsRegression).
  *
- * If the task is a multi target prediction, setTargets must be used to define which columns of the dataset are the targets.
- * If no targets are defined it is assumed that only the last column is the target vector.
+ * If the task is a multi target prediction, setTargets must be used to define which columns of the dataset are the targets. If no targets are defined it is assumed that only the last column is the target vector.
  *
  * Moreover, the outputFolder might be set to something else but the default (setOutputFolder).
  *
  * Now buildClassifier can be run.
  *
- * If classifyInstances is run with the same ScikitLearnWrapper instance after training, the previously trained model is used for testing.
- * If another model shall be used or there was no training prior to classifyInstances, the model must be set with setModelPath.
+ * If classifyInstances is run with the same ScikitLearnWrapper instance after training, the previously trained model is used for testing. If another model shall be used or there was no training prior to classifyInstances, the model must be
+ * set with setModelPath.
  *
- * After a multi target prediction the results might be more accessible with the unflattened representation that can be obtained with getRawLastClassificationResults.
- * For debug purposes the wrapper might be set to be verbose with setIsVerbose.
+ * After a multi target prediction the results might be more accessible with the unflattened representation that can be obtained with getRawLastClassificationResults. For debug purposes the wrapper might be set to be verbose with
+ * setIsVerbose.
  *
  * @author wever
+ * @author fmohr
  * @author scheiblm
  */
 public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B>
-		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
-	private static final String PYTHON_FILE_EXT = ".py";
-	private static final String MODEL_DUMP_FILE_EXT = ".pcl";
-	private static final String RESULT_FILE_EXT = ".json";
+implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 
 	private static final Logger L = LoggerFactory.getLogger(ScikitLearnWrapper.class);
+	private static final IScikitLearnWrapperConfig CONF = ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class);
 
-	private static final File TMP_FOLDER = new File("tmp"); // Folder to put the serialized arff files and the scripts in.
+	private IPythonConfig pythonConfig = ConfigFactory.create(IPythonConfig.class);
 
-	private static final File MODEL_DUMPS_DIRECTORY = new File(TMP_FOLDER, "model_dumps");
-	private static final boolean VERBOSE = true; // If true the output stream of the python process is printed.
 	private boolean listenToPidFromProcess; // If true, the PID is obtained from the python process being started by listening to according output.
-	private static final boolean DELETE_TEMPORARY_FILES_ON_EXIT = false;
 
 	private File scikitTemplate; // Path to the used python template.
 	private ILabeledDataset<ILabeledInstance> dataset;
 
 	/* Problem definition fields */
-	private EBasicProblemType problemType;
-	private String pathVariable;
+	private EScikitLearnProblemType problemType;
 	private int[] targetColumns = new int[0]; // Defines which of the columns in the arff file represent the target vectors. If not set, the last column is assumed to be the target vector.
 
 	/* Identifying the wrapped sklearn instance. */
@@ -100,7 +98,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	private File modelFile;
 	private File trainArff;
 
-	private final boolean withoutModelDump;
+	private final boolean withModelDump;
 
 	private String constructInstruction;
 
@@ -109,25 +107,22 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * The outer list represents the rows whilst the inner list represents the x target values in this row.
 	 */
 	private List<List<Double>> rawLastClassificationResults = null;
-	private String anacondaEnvironment;
 	private long seed;
 	private Timeout timeout;
 
 	/**
 	 * Starts a new wrapper and creates its underlying script with the given parameters.
 	 *
-	 * @param constructInstruction String that defines what constructor to call for the classifier and with which parameters to call it.
-	 * @param imports Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
-	 * @throws IOException The script could not be created.
+	 * @param constructInstruction
+	 *            String that defines what constructor to call for the classifier and with which parameters to call it.
+	 * @param imports
+	 *            Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
+	 * @throws IOException
+	 *             The script could not be created.
 	 */
-	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withoutModelDump, final EBasicProblemType problemType) throws IOException {
-		if (ProcessUtil.getOS() == OS.MAC || ProcessUtil.getOS() == OS.LINUX) {
-			this.listenToPidFromProcess = true;
-		} else {
-			this.listenToPidFromProcess = false;
-		}
-
-		this.withoutModelDump = withoutModelDump;
+	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withModelDump, final EScikitLearnProblemType problemType) throws IOException {
+		this.listenToPidFromProcess = (ProcessUtil.getOS() == EOperatingSystem.MAC || ProcessUtil.getOS() == EOperatingSystem.LINUX);
+		this.withModelDump = withModelDump;
 		this.constructInstruction = constructInstruction;
 		this.setProblemType(problemType);
 
@@ -135,15 +130,15 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		String hashCode = StringUtils.join(constructInstruction, imports).hashCode() + "";
 		this.configurationUID = hashCode.startsWith("-") ? hashCode.replace("-", "1") : "0" + hashCode;
 
-		if (!TMP_FOLDER.exists()) {
-			TMP_FOLDER.mkdirs();
+		if (!CONF.getTempFolder().exists()) {
+			CONF.getTempFolder().mkdirs();
 		}
 
 		File scriptFile = this.getSKLearnScriptFile();
 		if (!scriptFile.createNewFile() && L.isDebugEnabled()) {
 			L.debug("Script file for configuration UID {} already exists in {}", this.configurationUID, scriptFile.getAbsolutePath());
 		}
-		if (DELETE_TEMPORARY_FILES_ON_EXIT) {
+		if (CONF.getDeleteFileOnExit()) {
 			scriptFile.deleteOnExit();
 		}
 
@@ -156,17 +151,32 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	/**
 	 * Starts a new wrapper and creates its underlying script with the given parameters.
 	 *
-	 * @param constructInstruction String that defines what constructor to call for the classifier and with which parameters to call it.
-	 * @param imports Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
-	 * @throws IOException The script could not be created.
+	 * @param constructInstruction
+	 *            String that defines what constructor to call for the classifier and with which parameters to call it.
+	 * @param imports
+	 *            Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
+	 * @throws IOException
+	 *             The script could not be created.
 	 */
-	public ScikitLearnWrapper(final String constructInstruction, final String imports, final EBasicProblemType problemType) throws IOException {
-		this(constructInstruction, imports, false, problemType);
+	public ScikitLearnWrapper(final String constructInstruction, final String imports, final EScikitLearnProblemType problemType) throws IOException {
+		this(constructInstruction, imports, true, problemType);
 	}
 
-	public ScikitLearnWrapper(final String constructInstruction, final String imports, final File trainedModelPath, final EBasicProblemType problemType) throws IOException {
-		this(constructInstruction, imports, false, problemType);
+	public ScikitLearnWrapper(final String constructInstruction, final String imports, final File trainedModelPath, final EScikitLearnProblemType problemType) throws IOException {
+		this(constructInstruction, imports, true, problemType);
 		this.modelFile = trainedModelPath;
+	}
+
+	public EScikitLearnProblemType getProblemType() {
+		return this.problemType;
+	}
+
+	public IPythonConfig getPythonConfig() {
+		return this.pythonConfig;
+	}
+
+	public void setPythonConfig(final IPythonConfig pythonConfig) {
+		this.pythonConfig = pythonConfig;
 	}
 
 	/**
@@ -174,33 +184,38 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 */
 	private File getSKLearnScriptFile() {
 		Objects.requireNonNull(this.configurationUID);
-		return new File(TMP_FOLDER, this.configurationUID + PYTHON_FILE_EXT);
+		return new File(CONF.getTempFolder(), this.configurationUID + CONF.getPythonFileExtension());
 	}
 
 	/**
-	 * @param arffName The name of the test arff file.
+	 * @param arffName
+	 *            The name of the test arff file.
 	 * @return The file where the results are to be stored.
 	 */
 	private File getResultFile(final String arffName) {
-		return new File(MODEL_DUMPS_DIRECTORY, arffName + "_" + this.configurationUID + RESULT_FILE_EXT);
+		return new File(CONF.getModelDumpsDirectory(), arffName + "_" + this.configurationUID + CONF.getResultFileExtension());
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void fit(final ILabeledDataset<? extends ILabeledInstance> data) throws TrainingException, InterruptedException {
 		try {
+
 			/* Ensure model dump directory exists and get the name of the dump */
-			MODEL_DUMPS_DIRECTORY.mkdirs();
+			CONF.getModelDumpsDirectory().mkdirs();
 			String arffName = this.getArffName(data);
 			this.trainArff = this.getArffFile(data, arffName);
 			this.dataset = (ILabeledDataset<ILabeledInstance>) data.createEmptyCopy();
 
-			if (!this.withoutModelDump) {
-				this.modelFile = new File(MODEL_DUMPS_DIRECTORY, this.configurationUID + "_" + arffName + MODEL_DUMP_FILE_EXT);
-				ScikitLearnWrapper<P, B>.SKLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new SKLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff).withOutputFile(this.modelFile);
-				if (this.anacondaEnvironment != null) {
-					skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
-				}
+			if (data.getLabelAttribute() instanceof ICategoricalAttribute) {
+				this.problemType = EScikitLearnProblemType.CLASSIFICATION;
+			} else if (data.getLabelAttribute() instanceof INumericAttribute && this.problemType != EScikitLearnProblemType.RUL) {
+				this.problemType = EScikitLearnProblemType.REGRESSION;
+			}
+
+			if (this.withModelDump) {
+				this.modelFile = new File(CONF.getModelDumpsDirectory(), this.configurationUID + "_" + arffName + CONF.getPickleFileExtension());
+				ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff).withOutputFile(this.modelFile);
 				skLearnWrapperCommandBuilder.withSeed(this.seed);
 				skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 				String[] trainCommand = skLearnWrapperCommandBuilder.toCommandArray();
@@ -208,7 +223,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				if (L.isDebugEnabled()) {
 					L.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
 				}
-				DefaultProcessListener listener = new DefaultProcessListener(VERBOSE, this.listenToPidFromProcess);
+				DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
 				this.runProcess(trainCommand, listener);
 
 				if (!listener.getErrorOutput().isEmpty()) {
@@ -226,14 +241,17 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	/**
 	 * Dumps given Instances in an arff file if this hash does not already exist.
 	 *
-	 * @param data Instances to be serialized.
-	 * @param fileName Name of the created file.
+	 * @param data
+	 *            Instances to be serialized.
+	 * @param fileName
+	 *            Name of the created file.
 	 * @return File object corresponding to the arff file.
-	 * @throws IOException During the serialization of the data as an arff file something went wrong.
+	 * @throws IOException
+	 *             During the serialization of the data as an arff file something went wrong.
 	 */
-	private File getArffFile(final ILabeledDataset<? extends ILabeledInstance> data, final String arffName) throws IOException {
-		File arffOutputFile = new File(TMP_FOLDER, arffName + ".arff");
-		if (DELETE_TEMPORARY_FILES_ON_EXIT) {
+	private synchronized File getArffFile(final ILabeledDataset<? extends ILabeledInstance> data, final String arffName) throws IOException {
+		File arffOutputFile = new File(CONF.getTempFolder(), arffName + ".arff");
+		if (CONF.getDeleteFileOnExit()) {
 			arffOutputFile.deleteOnExit();
 		}
 		/* If Instances with the same Instance (given the hash is collision resistant) is already serialized, there is no need for doing it once more. */
@@ -255,6 +273,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	@Override
 	public B predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
 		ILabeledDataset<ILabeledInstance> data;
+		Objects.requireNonNull(this.dataset, "No dataset has been set. Either train the learner or load it from a model.");
 		try {
 			data = this.dataset.createEmptyCopy();
 		} catch (DatasetCreationException e1) {
@@ -262,7 +281,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		}
 		Arrays.stream(dTest).forEach(data::add);
 
-		MODEL_DUMPS_DIRECTORY.mkdirs();
+		CONF.getModelDumpsDirectory().mkdirs();
 		String arffName = this.getArffName(data);
 		File testArff;
 		try {
@@ -273,11 +292,9 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		File outputFile = this.getResultFile(arffName);
 		outputFile.getParentFile().mkdirs();
 
-		if (!this.withoutModelDump) {
-			ScikitLearnWrapper<P, B>.SKLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new SKLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff).withModelFile(this.modelFile).withOutputFile(outputFile);
-			if (this.anacondaEnvironment != null) {
-				skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
-			}
+		/* create prediction file */
+		if (this.withModelDump) {
+			ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff).withModelFile(this.modelFile).withOutputFile(outputFile);
 			skLearnWrapperCommandBuilder.withSeed(this.seed);
 			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
@@ -287,15 +304,13 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			}
 
 			try {
-				this.runProcess(testCommand, new DefaultProcessListener(VERBOSE, this.listenToPidFromProcess));
+				this.runProcess(testCommand, new DefaultProcessListener(this.listenToPidFromProcess));
 			} catch (IOException e) {
 				throw new PredictionException("Could not run scikit-learn classifier.", e);
 			}
 		} else {
-			ScikitLearnWrapper<P, B>.SKLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new SKLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff).withTestArffFile(testArff).withOutputFile(outputFile);
-			if (this.anacondaEnvironment != null) {
-				skLearnWrapperCommandBuilder.withAnacondaEnvironment(this.anacondaEnvironment);
-			}
+			ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff).withTestArffFile(testArff)
+					.withOutputFile(outputFile);
 			skLearnWrapperCommandBuilder.withSeed(this.seed);
 			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
@@ -303,11 +318,16 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				L.debug("Run train test mode with {}", Arrays.toString(testCommand));
 			}
 
-			DefaultProcessListener listener = new DefaultProcessListener(VERBOSE, this.listenToPidFromProcess);
+			DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
 			try {
 				this.runProcess(testCommand, listener);
 				if (!listener.getErrorOutput().isEmpty()) {
-					throw new PredictionException(listener.getErrorOutput());
+					if (listener.getErrorOutput().toLowerCase().contains("convergence")) {
+						// ignore convergence warning
+						L.warn("Learner {} could not converge. Consider increase number of iterations.", this.constructInstruction);
+					} else {
+						throw new PredictionException(listener.getErrorOutput());
+					}
 				}
 			} catch (InterruptedException | PredictionException e) {
 				throw e;
@@ -320,22 +340,26 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		try {
 			/* Parse the result */
 			fileContent = FileUtil.readFileAsString(outputFile);
-			if (DELETE_TEMPORARY_FILES_ON_EXIT) {
-				java.nio.file.Files.delete(outputFile.toPath());
+			if (CONF.getDeleteFileOnExit()) {
+				Files.delete(outputFile.toPath());
 			}
 			ObjectMapper objMapper = new ObjectMapper();
 			this.rawLastClassificationResults = objMapper.readValue(fileContent, List.class);
 		} catch (IOException e) {
-			throw new PredictionException("Could not read result file or parse the json content to a list", e);
+			throw new PredictionException("Could not read result file or parse the json content to a list.", e);
 		}
 
 		/* Since Scikit supports multiple target results but Weka does not, the results have to be flattened.
 		 * The structured results of the last classifyInstances call is accessable over
 		 * getRawLastClassificationResults().
 		 * */
-		if (this.problemType == EBasicProblemType.CLASSIFICATION) {
-			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification((int) (double) x)).collect(Collectors.toList()));
-		} else if (this.problemType == EBasicProblemType.RUL) {
+		if (this.problemType == EScikitLearnProblemType.CLASSIFICATION) {
+			if (this.rawLastClassificationResults.get(0).size() == 1) { // classifier cannot predict any probabilities. Thus, create pseudo probability from the obtained output
+				int numClasses = ((ICategoricalAttribute) this.dataset.getLabelAttribute()).getLabels().size();
+				return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification(numClasses, x.intValue())).collect(Collectors.toList()));
+			}
+			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().map(x -> x.stream().mapToDouble(y -> y).toArray()).map(SingleLabelClassification::new).collect(Collectors.toList()));
+		} else if (this.problemType == EScikitLearnProblemType.RUL || this.problemType == EScikitLearnProblemType.REGRESSION) {
 			if (L.isInfoEnabled()) {
 				L.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()));
 			}
@@ -348,11 +372,14 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	/**
 	 * Makes the given folder a module to be usable as an import for python and creates a string that adds the folder to the python environment and then imports the folder itself as a module.
 	 *
-	 * @param importsFolder Folder to be added as a module.
-	 * @param keepNamespace If true, a class must be called by the modules' name plus the class name. This is only important if multiple modules are imported and the classes' names are
-	 *            ambiguous. Keep in mind that the constructor call for the classifier must be created accordingly.
+	 * @param importsFolder
+	 *            Folder to be added as a module.
+	 * @param keepNamespace
+	 *            If true, a class must be called by the modules' name plus the class name. This is only important if multiple modules are imported and the classes' names are ambiguous. Keep in mind that the constructor call for the
+	 *            classifier must be created accordingly.
 	 * @return String which can be appended to other imports to care for the folder to be added as a module.
-	 * @throws IOException The __init__.py couldn't be created in the given folder (which is necessary to declare it as a module).
+	 * @throws IOException
+	 *             The __init__.py couldn't be created in the given folder (which is necessary to declare it as a module).
 	 */
 	public static String createImportStatementFromImportFolder(final File importsFolder, final boolean keepNamespace) throws IOException {
 		if (importsFolder == null || !importsFolder.exists() || importsFolder.list().length == 0) {
@@ -371,7 +398,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		result.append("\n");
 		result.append("sys.path.append(r'" + absoluteFolderPath + "')\n");
 		for (File module : importsFolder.listFiles()) {
-			if (!module.getName().startsWith("__")) {
+			if (!module.getName().startsWith("__") && module.getName().endsWith(".py")) {
 				/* Either import the module by its name. Then the classes of it have to be referenced by the fully qualified name. */
 				if (keepNamespace) {
 					result.append("import " + module.getName().substring(0, module.getName().length() - 3) + "\n");
@@ -392,8 +419,10 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	/**
 	 * Returns a map with the values for the script template.
 	 *
-	 * @param constructInstruction String that defines what constructor to call for the classifier and with which parameters to call it.
-	 * @param imports Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
+	 * @param constructInstruction
+	 *            String that defines what constructor to call for the classifier and with which parameters to call it.
+	 * @param imports
+	 *            Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
 	 * @return A map to call the template engine with.
 	 */
 	private Map<String, Object> getTemplateValueMap(final String constructInstruction, final String imports) {
@@ -414,19 +443,11 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		return this.rawLastClassificationResults;
 	}
 
-	public void setProblemType(final EBasicProblemType problemType) {
+	public void setProblemType(final EScikitLearnProblemType problemType) {
 		if (this.problemType != problemType) {
 			this.problemType = problemType;
 			this.scikitTemplate = new File(ResourceUtil.getResourceAsTempFile(this.problemType.getRessourceScikitTemplate()));
 		}
-	}
-
-	public void setPathVariable(final String pathVariable) {
-		this.pathVariable = pathVariable;
-	}
-
-	public void setAnacondaEnvironment(final String env) {
-		this.anacondaEnvironment = env;
 	}
 
 	public void setSeed(final long seed) {
@@ -452,7 +473,8 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	/**
 	 * Returns a hash for the given Instances based on the Weka implementation of hashCode(). Additionally the sign is replaces by an additional 0/1.
 	 *
-	 * @param data Instances to get a hash code for.
+	 * @param data
+	 *            Instances to get a hash code for.
 	 * @return A hash for the given Instances.
 	 */
 	private String getArffName(final ILabeledDataset<? extends ILabeledInstance> data) {
@@ -462,18 +484,14 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	}
 
 	/**
-	 * Starts a process with the given attributes. The first String in the array is
-	 * the executed program.
+	 * Starts a process with the given attributes. The first String in the array is the executed program.
 	 */
 	private void runProcess(final String[] parameters, final AProcessListener listener) throws InterruptedException, IOException {
 		if (L.isDebugEnabled()) {
 			String call = Arrays.toString(parameters).replace(",", "");
 			L.debug("Starting process {}", call.substring(1, call.length() - 1));
 		}
-		ProcessBuilder processBuilder = new ProcessBuilder(parameters).directory(TMP_FOLDER);
-		if (this.pathVariable != null) {
-			processBuilder.environment().put("PATH", this.pathVariable);
-		}
+		ProcessBuilder processBuilder = new ProcessBuilder(parameters).directory(CONF.getTempFolder());
 		Process process = processBuilder.start();
 		try {
 			L.debug("Started process with PID: {}", ProcessUtil.getPID(process));
@@ -492,12 +510,12 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 *
 	 * @author wever
 	 */
-	private enum WrapperExecutionMode {
+	private enum EWrapperExecutionMode {
 		TRAIN("train"), TEST("test"), TRAIN_TEST("traintest");
 
 		private String name;
 
-		private WrapperExecutionMode(final String name) {
+		private EWrapperExecutionMode(final String name) {
 			this.name = name;
 		}
 
@@ -508,12 +526,12 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	}
 
 	/**
-	 * This class is a utility for building commands for the process builder in order to run the wrapped python script for sklearn.
-	 * Furthermore, it will require the relevant information to be set before successfully returning a command list.
+	 * This class is a utility for building commands for the process builder in order to run the wrapped python script for sklearn. Furthermore, it will require the relevant information to be set before successfully returning a command
+	 * list.
 	 *
 	 * @author wever
 	 */
-	private class SKLearnWrapperCommandBuilder {
+	private class ScikitLearnWrapperCommandBuilder {
 
 		private static final String ARFF_FLAG = "--arff";
 		private static final String TEST_ARFF_FLAG = "--testarff";
@@ -524,40 +542,39 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 
 		private String arffFile;
 		private String testArffFile;
-		private WrapperExecutionMode mode;
+		private EWrapperExecutionMode mode;
 		private String modelFile;
 		private String outputFile;
-		private String anacondaEnvironment;
 		private long seed;
 		private Timeout timeout;
 
-		private SKLearnWrapperCommandBuilder() {
+		private ScikitLearnWrapperCommandBuilder() {
 
 		}
 
-		public SKLearnWrapperCommandBuilder withTestArffFile(final File testArffFile) {
+		public ScikitLearnWrapperCommandBuilder withTestArffFile(final File testArffFile) {
 			this.testArffFile = testArffFile.getAbsolutePath();
 			return this;
 		}
 
-		public SKLearnWrapperCommandBuilder withTrainMode() {
-			return this.withMode(WrapperExecutionMode.TRAIN);
+		public ScikitLearnWrapperCommandBuilder withTrainMode() {
+			return this.withMode(EWrapperExecutionMode.TRAIN);
 		}
 
-		public SKLearnWrapperCommandBuilder withTestMode() {
-			return this.withMode(WrapperExecutionMode.TEST);
+		public ScikitLearnWrapperCommandBuilder withTestMode() {
+			return this.withMode(EWrapperExecutionMode.TEST);
 		}
 
-		public SKLearnWrapperCommandBuilder withTrainTestMode() {
-			return this.withMode(WrapperExecutionMode.TRAIN_TEST);
+		public ScikitLearnWrapperCommandBuilder withTrainTestMode() {
+			return this.withMode(EWrapperExecutionMode.TRAIN_TEST);
 		}
 
-		private SKLearnWrapperCommandBuilder withMode(final WrapperExecutionMode execMode) {
+		private ScikitLearnWrapperCommandBuilder withMode(final EWrapperExecutionMode execMode) {
 			this.mode = execMode;
 			return this;
 		}
 
-		private SKLearnWrapperCommandBuilder withModelFile(final File modelFile) {
+		private ScikitLearnWrapperCommandBuilder withModelFile(final File modelFile) {
 			if (!modelFile.exists()) {
 				throw new IllegalArgumentException("Model dump does not exist");
 			}
@@ -565,12 +582,12 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			return this;
 		}
 
-		private SKLearnWrapperCommandBuilder withOutputFile(final File outputFile) {
+		private ScikitLearnWrapperCommandBuilder withOutputFile(final File outputFile) {
 			this.outputFile = outputFile.getAbsolutePath();
 			return this;
 		}
 
-		private SKLearnWrapperCommandBuilder withArffFile(final File arffFile) {
+		private ScikitLearnWrapperCommandBuilder withArffFile(final File arffFile) {
 			if (!arffFile.exists()) {
 				throw new IllegalArgumentException("Arff File does not exist.");
 			}
@@ -578,17 +595,12 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			return this;
 		}
 
-		private SKLearnWrapperCommandBuilder withAnacondaEnvironment(final String env) {
-			this.anacondaEnvironment = env;
-			return this;
-		}
-
-		private SKLearnWrapperCommandBuilder withSeed(final long seed) {
+		private ScikitLearnWrapperCommandBuilder withSeed(final long seed) {
 			this.seed = seed;
 			return this;
 		}
 
-		private SKLearnWrapperCommandBuilder withTimeout(final Timeout timeout) {
+		private ScikitLearnWrapperCommandBuilder withTimeout(final Timeout timeout) {
 			this.timeout = timeout;
 			return this;
 		}
@@ -605,24 +617,29 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			}
 
 			List<String> processParameters = new ArrayList<>();
-			OS os = ProcessUtil.getOS();
-			if (this.anacondaEnvironment != null) {
-				if (os == OS.MAC) {
+			EOperatingSystem os = ProcessUtil.getOS();
+			if (ScikitLearnWrapper.this.pythonConfig != null && ScikitLearnWrapper.this.pythonConfig.getAnacondaEnvironment() != null) {
+				if (os == EOperatingSystem.MAC) {
 					processParameters.add("source");
 					processParameters.add("~/anaconda3/etc/profile.d/conda.sh");
 					processParameters.add("&&");
 				}
 				processParameters.add("conda");
 				processParameters.add("activate");
-				processParameters.add(this.anacondaEnvironment);
+				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getAnacondaEnvironment());
 				processParameters.add("&&");
 			}
-			if (this.timeout != null && os == OS.LINUX) {
+			if (this.timeout != null && os == EOperatingSystem.LINUX) {
 				L.info("Executing with timeout {}s", this.timeout.seconds());
 				processParameters.add("timeout");
 				processParameters.add(this.timeout.seconds() - 5 + "");
 			}
-			processParameters.add("python");
+			if (ScikitLearnWrapper.this.pythonConfig != null && ScikitLearnWrapper.this.pythonConfig.getPath() != null) {
+				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getPath() + File.separator + ScikitLearnWrapper.this.pythonConfig.getPythonCommand());
+			} else {
+
+				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getPythonCommand());
+			}
 			processParameters.add("-u"); // Force python to run stdout and stderr unbuffered.
 			processParameters.add(scriptFile.getAbsolutePath()); // Script to be executed.
 
@@ -633,10 +650,12 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				processParameters.addAll(Arrays.asList(TEST_ARFF_FLAG, this.testArffFile));
 			}
 			processParameters.addAll(Arrays.asList(OUTPUT_FLAG, this.outputFile));
-			processParameters.add(ScikitLearnWrapper.this.problemType.getScikitLearnCommandLineFlag());
+			if (!ScikitLearnWrapper.this.problemType.getScikitLearnCommandLineFlag().isEmpty()) {
+				processParameters.add(ScikitLearnWrapper.this.problemType.getScikitLearnCommandLineFlag());
+			}
 			processParameters.addAll(Arrays.asList(SEED_FLAG, String.valueOf(this.seed)));
 
-			if (this.mode == WrapperExecutionMode.TEST) {
+			if (this.mode == EWrapperExecutionMode.TEST) {
 				Objects.requireNonNull(this.modelFile);
 				processParameters.addAll(Arrays.asList(MODEL_FLAG, this.modelFile));
 			}
@@ -648,11 +667,11 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				}
 			}
 			/* All additional parameters that the script shall consider. */
-			StringJoiner stringJoiner = new StringJoiner(" ");
-			for (String parameter : processParameters) {
-				stringJoiner.add(parameter);
-			}
-			if (os == OS.MAC) {
+			if (os == EOperatingSystem.MAC) {
+				StringJoiner stringJoiner = new StringJoiner(" ");
+				for (String parameter : processParameters) {
+					stringJoiner.add(parameter);
+				}
 				return new String[] { "sh", "-c", stringJoiner.toString() };
 			} else {
 				return processParameters.toArray(new String[] {});

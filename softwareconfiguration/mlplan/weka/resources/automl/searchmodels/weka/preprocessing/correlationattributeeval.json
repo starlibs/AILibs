@@ -1,0 +1,15 @@
+{
+	"repository": "weka.attributeSelection.CorrelationAttributeEval",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.attributeSelection.CorrelationAttributeEval",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rankBasedEvaluator"
+			],
+			"parameters": [],
+			"dependencies": []
+		}
+	]
+}

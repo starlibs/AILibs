@@ -4,17 +4,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Test;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.Arguments;
 
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
+import ai.libs.jaicore.basic.algorithm.IAlgorithmTestProblemSet;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.logic.fol.util.ForwardChainer;
 import ai.libs.jaicore.logic.fol.util.ForwardChainingProblem;
@@ -22,20 +22,12 @@ import ai.libs.jaicore.logic.problems.ForwardChainingProblemSet;
 
 public class ForwardChainingTest extends GeneralAlgorithmTester {
 
-	@Parameters(name = "problemset = {0}")
-	public static Collection<Object[]> data() {
-		List<Object> problemSets = new ArrayList<>();
+	public static Stream<Arguments> getProblemSets() {
+		List<Arguments> problemSets = new ArrayList<>();
 
 		/* add N-Queens (as a graph search problem set) */
-		problemSets.add(new ForwardChainingProblemSet());
-		List<Collection<Object>> input = new ArrayList<>();
-		input.add(problemSets);
-
-		Object[][] data = new Object[problemSets.size()][1];
-		for (int i = 0; i < data.length; i++) {
-			data[i][0] = problemSets.get(i);
-		}
-		return Arrays.asList(data);
+		problemSets.add(Arguments.of(new ForwardChainingProblemSet()));
+		return problemSets.stream();
 	}
 
 	@Test
@@ -75,19 +67,19 @@ public class ForwardChainingTest extends GeneralAlgorithmTester {
 	}
 
 	@Override
-	public void testInterrupt() {
+	public void testInterrupt(final IAlgorithmTestProblemSet<?> problemSet) {
 		// can't produce difficult enough problems
 		assertTrue(true);
 	}
 
 	@Override
-	public void testCancel() {
+	public void testCancel(final IAlgorithmTestProblemSet<?> problemSet) {
 		// can't produce difficult enough problems
 		assertTrue(true);
 	}
 
 	@Override
-	public void testTimeout() {
+	public void testTimeout(final IAlgorithmTestProblemSet<?> problemSet) {
 		// can't produce difficult enough problems
 		assertTrue(true);
 	}

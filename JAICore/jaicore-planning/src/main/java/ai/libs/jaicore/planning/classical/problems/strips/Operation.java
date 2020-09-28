@@ -1,8 +1,11 @@
 package ai.libs.jaicore.planning.classical.problems.strips;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 
+import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.logic.fol.structure.VariableParam;
 
@@ -21,6 +24,12 @@ public class Operation implements Serializable {
 		this.name = name;
 		this.params = params;
 		this.precondition = precondition;
+		for (Literal l : precondition) {
+			Collection<VariableParam> missingParams = SetUtil.difference(l.getVariableParams(), params);
+			if (!missingParams.isEmpty()) {
+				throw new IllegalArgumentException("Operation " + name + " has parameters in the precondition that are not defined in the param list: " + missingParams);
+			}
+		}
 	}
 
 	public String getName() {

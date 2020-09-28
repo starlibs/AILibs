@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.learningcurve.extrapolation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.ipl.InversePowerLawLearningCurve;
 

@@ -3,7 +3,7 @@ package ai.libs.jaicore.search.gui.plugins.rollouthistograms;
 import ai.libs.jaicore.graphvisualizer.events.gui.Histogram;
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import javafx.application.Platform;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.StackPane;
 
 /**
  *
@@ -12,13 +12,13 @@ import javafx.scene.layout.FlowPane;
  * @param <BalancedTreeNode>
  *            The node class
  */
-public class SearchRolloutHistogramPluginView extends ASimpleMVCPluginView<SearchRolloutHistogramPluginModel, SearchRolloutHistogramPluginController, FlowPane> {
+public class SearchRolloutHistogramPluginView extends ASimpleMVCPluginView<SearchRolloutHistogramPluginModel, SearchRolloutHistogramPluginController, StackPane> {
 
 	private final Histogram histogram;
 	private final int n = 100;
 
 	public SearchRolloutHistogramPluginView(final SearchRolloutHistogramPluginModel model) {
-		super(model, new FlowPane());
+		super(model, new StackPane());
 		this.histogram = new Histogram(this.n);
 		this.histogram.setTitle("Search Rollout Performances");
 		Platform.runLater(() -> {
@@ -38,11 +38,6 @@ public class SearchRolloutHistogramPluginView extends ASimpleMVCPluginView<Searc
 	@Override
 	public void clear() {
 		Platform.runLater(this.histogram::clear);
-	}
-
-	@Override
-	public String getTitle() {
-		return "Search Rollout Statistics";
 	}
 
 }

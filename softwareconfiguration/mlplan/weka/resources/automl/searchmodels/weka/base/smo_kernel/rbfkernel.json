@@ -1,0 +1,18 @@
+{
+  "repository" : "weka.classifiers.functions.supportVector.RBFKernel",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.functions.supportVector.RBFKernel",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "K" ],
+    "parameters" : [ {
+      "name" : "G",
+      "type" : "double",
+      "min" : 1.0E-4,
+      "max" : 1.0,
+      "default" : 0.01,
+      "minInterval" : 5.0E-4,
+      "refineSplits" : 8
+    } ]
+  } ]
+}

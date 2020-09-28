@@ -5,7 +5,6 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.Timeout;
-import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.common.event.IEvent;
@@ -16,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstanceUtil;
@@ -33,7 +33,7 @@ import ai.libs.mlplan.safeguard.IEvaluationSafeGuard;
  *
  * @author fmohr
  */
-public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, Double> implements IInformedObjectEvaluatorExtension<Double>, ILoggingCustomizable {
+public class PipelineEvaluator extends TimedObjectEvaluator<IComponentInstance, Double> implements ILoggingCustomizable {
 
 	private static final String DEFAULT_PIPELINE_EVALUATOR_ID = "PipelineEvaluator";
 
@@ -44,7 +44,6 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 	private final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> learnerFactory;
 	private final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> benchmark;
 	private final Timeout timeoutForEvaluation;
-	private Double bestScore = 1.0;
 
 	private IEvaluationSafeGuard safeGuard;
 
@@ -82,9 +81,8 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Double evaluateSupervised(final ComponentInstance c) throws InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluateSupervised(final IComponentInstance c) throws InterruptedException, ObjectEvaluationFailedException {
 		this.logger.debug("Received request to evaluate component instance {}", c);
 		this.logger.debug("Query evaluation safe guard whether to evaluate this component instance for the given timeout {}.", this.timeoutForEvaluation);
 		try {
@@ -99,17 +97,16 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 		}
 
 		try {
-			if (this.benchmark instanceof IInformedObjectEvaluatorExtension) {
-				((IInformedObjectEvaluatorExtension<Double>) this.benchmark).informAboutBestScore(this.bestScore);
-			}
 
 			this.logger.debug("Instantiate learner from component instance.");
 			ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner = this.learnerFactory.getComponentInstantiation(c);
 			this.eventBus.post(new SupervisedLearnerCreatedEvent(c, learner)); // inform listeners about the creation of the classifier
 
 			ITimeTrackingLearner trackableLearner = new TimeTrackingLearnerWrapper(c, learner);
-			trackableLearner.setPredictedInductionTime(c.getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME));
-			trackableLearner.setPredictedInferenceTime(c.getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME));
+			if (c instanceof ComponentInstance) {
+				trackableLearner.setPredictedInductionTime(((ComponentInstance)c).getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME));
+				trackableLearner.setPredictedInferenceTime(((ComponentInstance)c).getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME));
+			}
 
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, (learner instanceof ScikitLearnWrapper) ? learner.toString() : learner.getClass().getName());
@@ -131,21 +128,16 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 	}
 
 	@Override
-	public void informAboutBestScore(final Double bestScore) {
-		this.bestScore = bestScore;
-	}
-
-	@Override
-	public Timeout getTimeout(final ComponentInstance item) {
+	public Timeout getTimeout(final IComponentInstance item) {
 		return this.timeoutForEvaluation;
 	}
 
 	@Override
-	public String getMessage(final ComponentInstance item) {
+	public String getMessage(final IComponentInstance item) {
 		return "Pipeline evaluation phase";
 	}
 
-	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> getBenchmark() {
+	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getBenchmark() {
 		return this.benchmark;
 	}
 
@@ -163,6 +155,10 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 
 	public String getPipelineEvaluatorID() {
 		return this.pipelineEvaluatorID;
+	}
+
+	public IEvaluationSafeGuard getSafeGuard() {
+		return this.safeGuard;
 	}
 
 	/**

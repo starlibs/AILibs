@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.core.learner;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
+import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.core.exception.LearnerConfigurationFailedException;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
@@ -27,14 +29,20 @@ public abstract class ASupervisedLearner<I extends ILabeledInstance, D extends I
 
 	@Override
 	public P fitAndPredict(final D dTrain, final I xTest) throws TrainingException, PredictionException, InterruptedException {
-		this.fit(dTrain);
-		return this.predict(xTest);
+		I[] xTestAsArray = (I[]) Array.newInstance(xTest.getClass(), 1);
+		xTestAsArray[0] = xTest;
+		return (P) this.fitAndPredict(dTrain, xTestAsArray).get(0);
 	}
 
 	@Override
 	public B fitAndPredict(final D dTrain, final I[] xTest) throws TrainingException, PredictionException, InterruptedException {
-		this.fit(dTrain);
-		return this.predict(xTest);
+		try {
+			ILabeledDataset dTest = dTrain.createEmptyCopy();
+			Arrays.stream(xTest).forEach(dTest::add);
+			return this.fitAndPredict(dTrain, (D) dTest);
+		} catch (DatasetCreationException e) {
+			throw new PredictionException("Could not create test dataset from array of instances");
+		}
 	}
 
 	@Override

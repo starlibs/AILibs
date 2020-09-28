@@ -5,13 +5,12 @@ import java.io.File;
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
-import ai.libs.hasco.core.HASCOFactory;
+import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFDBuilder;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
-import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
 
@@ -30,7 +29,7 @@ public interface IMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, I
 	 * This is the splitter that splits the given input data into data for the search phase and for the selection phase
 	 * @return
 	 */
-	public IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<? extends ILabeledInstance>> getSearchSelectionDatasetSplitter();
+	public IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> getSearchSelectionDatasetSplitter();
 
 	/**
 	 * This is the factory that will be used to create the pipeline evaluators for evaluation during search time
@@ -39,6 +38,8 @@ public interface IMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, I
 	 */
 	public ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getLearnerEvaluationFactoryForSearchPhase();
 
+	public IDeterministicPredictionPerformanceMeasure<?, ?> getMetricForSearchPhase();
+
 	/**
 	 * This is the factory that will be used to create the pipeline evaluators for evaluation during selection time
 	 * @return
@@ -46,13 +47,15 @@ public interface IMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, I
 	 */
 	public ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getLearnerEvaluationFactoryForSelectionPhase();
 
+	public IDeterministicPredictionPerformanceMeasure<?, ?> getMetricForSelectionPhase();
+
 	public String getRequestedInterface();
 
 	public File getSearchSpaceConfigFile();
 
 	public ILearnerFactory<L> getLearnerFactory();
 
-	public HASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> getHASCOFactory();
+	public HASCOViaFDBuilder<Double, ?> getHASCOFactory();
 
 	public MLPlanClassifierConfig getAlgorithmConfig();
 

@@ -1,0 +1,46 @@
+{
+  "repository" : "sklearn.linear_model.Ridge",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.linear_model.Ridge",
+    "providedInterface" : [ "BasicRegressor", "BaseLearner", "AbstractRegressor" ],
+    "requiredInterface" : [ ],
+    "parameters" : [ {
+      "name" : "alpha",
+      "type" : "double",
+      "default" : 1.0,
+      "min" : 0.0,
+      "max" : 5.0,
+      "minInterval" : 0.1,
+      "refineSplits" : 8
+    }, {
+      "name" : "fit_intercept",
+      "type" : "cat",
+      "values" : [ "True", "False" ],
+      "default" : "True"
+    }, {
+      "name" : "normalize",
+      "type" : "cat",
+      "values" : [ "True", "False" ],
+      "default" : "False"
+    }, {
+      "name" : "copy_X",
+      "type" : "cat",
+      "values" : [ "True" ],
+      "default" : "True"
+    }, {
+      "name" : "max_iter",
+      "type" : "int",
+      "default" : 1000,
+      "min" : 1,
+      "max" : 10000,
+      "minInterval" : 20,
+      "refineSplits" : 8
+    }, {
+      "name" : "solver",
+      "type" : "cat",
+      "values" : [ "auto", "svd", "cholesky", "lsqr", "sparse_cg", "sag", "saga" ],
+      "default" : "auto"
+    } ]
+  } ]
+}

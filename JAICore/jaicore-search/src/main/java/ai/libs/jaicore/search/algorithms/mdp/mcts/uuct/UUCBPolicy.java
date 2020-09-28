@@ -66,7 +66,7 @@ public class UUCBPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double> {
 
 	@Override
 	public void updatePath(final ILabeledPath<N, A> path, final List<Double> scores) {
-		double playoutScore = scores.stream().reduce((x, y) -> x + y).get(); // we neither discount nor care for the segmentation of the scores
+		double playoutScore = SetUtil.sum(scores); // we neither discount nor care for the segmentation of the scores
 		double s = playoutScore;
 		path.getPathToParentOfHead().getNodes().forEach(n -> {
 			DoubleList obs = this.observations.computeIfAbsent(n, node -> new HashMap<>()).computeIfAbsent(path.getOutArc(n), x -> new DoubleArrayList());

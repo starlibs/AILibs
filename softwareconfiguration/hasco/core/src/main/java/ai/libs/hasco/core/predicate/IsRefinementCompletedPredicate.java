@@ -1,5 +1,6 @@
 package ai.libs.hasco.core.predicate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -11,12 +12,13 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfiguration;
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
-import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.Parameter;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
@@ -25,12 +27,12 @@ import ai.libs.jaicore.logic.fol.theories.EvaluablePredicate;
 public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 
 	private final Logger logger = LoggerFactory.getLogger(IsRefinementCompletedPredicate.class);
-	private final Collection<Component> components;
-	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
+	private final Collection<IComponent> components;
+	private final INumericParameterRefinementConfigurationMap refinementConfiguration;
 
-	public IsRefinementCompletedPredicate(final Collection<Component> components, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration) {
+	public IsRefinementCompletedPredicate(final Collection<? extends IComponent> components, final INumericParameterRefinementConfigurationMap refinementConfiguration) {
 		super();
-		this.components = components;
+		this.components = new ArrayList<>(components);
 		this.refinementConfiguration = refinementConfiguration;
 	}
 
@@ -66,9 +68,9 @@ public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 
 		/* determine current values for the params */
 		ComponentInstance groundComponent = HASCOUtil.getGroundComponentsFromState(state, this.components, false).get(objectContainer);
-		Component component = groundComponent.getComponent();
+		IComponent component = groundComponent.getComponent();
 		Map<String, String> componentParamContainers = HASCOUtil.getParameterContainerMap(state, objectContainer);
-		for (Parameter param : component.getParameters()) {
+		for (IParameter param : component.getParameters()) {
 			String containerOfParam = componentParamContainers.get(param.getName());
 			String currentValueOfParam = groundComponent.getParameterValue(param);
 			boolean variableHasBeenSet = state.contains(new Literal("overwritten('" + containerOfParam + "')"));
@@ -77,7 +79,7 @@ public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 			assert variableHasBeenSet == groundComponent.getParametersThatHaveBeenSetExplicitly().contains(param);
 			assert !variableHasBeenClosed || variableHasBeenSet : "Parameter " + param.getName() + " of component " + component.getName() + " with default domain " + param.getDefaultDomain() + " has been closed but no value has been set.";
 
-			ParameterRefinementConfiguration refinementConfig = this.refinementConfiguration.get(component).get(param);
+			INumericParameterRefinementConfiguration refinementConfig = this.refinementConfiguration.getRefinement(component, param);
 
 			if (param.isNumeric()) {
 				double min = 0;
@@ -93,9 +95,9 @@ public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 				double lengthStopCriterion = refinementConfig.getIntervalLength();
 				double length = max - min;
 
-				if (refinementConfig.isInitRefinementOnLogScale() && (max / min - 1) > lengthStopCriterion || ! refinementConfig.isInitRefinementOnLogScale() && length > lengthStopCriterion) {
+				if (refinementConfig.isInitRefinementOnLogScale() && (max / min - 1) > lengthStopCriterion || !refinementConfig.isInitRefinementOnLogScale() && length > lengthStopCriterion) {
 					this.logger.info("Test for isRefinementCompletedPredicate({},{}) is negative. Interval length of [{},{}] is {}. Required length to consider an interval atomic is {}", params[0].getName(), objectContainer, min, max,
-							length, this.refinementConfiguration.get(component).get(param).getIntervalLength());
+							length, refinementConfig.getIntervalLength());
 					return false;
 				}
 			} else if (param.getDefaultDomain() instanceof CategoricalParameterDomain) { // categorical params can be refined iff the have not been set and closed before

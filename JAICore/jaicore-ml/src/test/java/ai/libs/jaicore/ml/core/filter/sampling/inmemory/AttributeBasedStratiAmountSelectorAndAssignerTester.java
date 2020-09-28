@@ -1,8 +1,7 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotEquals;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -11,14 +10,14 @@ import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
-import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.AttributeBasedStratifier;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.DiscretizationHelper.DiscretizationStrategy;
 import ai.libs.jaicore.ml.core.util.TestDatasetGenerator;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -30,10 +29,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 	public void testNumberAllAttributesCategoricalSerial() {
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices));
+		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
 		selectorAndAssigner.setNumCPUs(1);
-		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
+		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(6, computedNumber);
 	}
 
@@ -41,10 +40,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 	public void testNumberAllAttributesCategoricalParallel() {
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices));
+		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
 		selectorAndAssigner.setNumCPUs(4);
-		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
+		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(6, computedNumber);
 	}
 
@@ -52,10 +51,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 	public void testNumberOnlyTargetAttributeCategoricalSerial() {
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices));
+		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
 		selectorAndAssigner.setNumCPUs(1);
-		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
+		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(3, computedNumber);
 	}
 
@@ -63,10 +62,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 	public void testNumberOnlyTargetAttributeCategoricalParallel() {
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices));
+		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
 		selectorAndAssigner.setNumCPUs(4);
-		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
+		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(3, computedNumber);
 	}
 
@@ -74,67 +73,55 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 	public void testAssignmentOnlyTargetAttributeCategoricalSerial() {
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices));
+		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
 		selectorAndAssigner.setNumCPUs(1);
-		selectorAndAssigner.init(dataset);
+		selectorAndAssigner.createStrati(dataset);
 		IntList stratiAssignment = new IntArrayList();
 		for (ILabeledInstance i : dataset) {
-			stratiAssignment.add(selectorAndAssigner.assignToStrati(i));
+			stratiAssignment.add(selectorAndAssigner.getStratum(i));
 		}
 		// Number of strati must be 3
 		assertEquals(3, new HashSet<>(stratiAssignment).size());
-
-		assertTrue("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0) == stratiAssignment.getInt(2));
-
-		assertFalse("Instances 1 and 2 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(1));
-
-		assertFalse("Instances 1 and 4 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(3));
-
-		assertFalse("Instances 2 and 3 need to be in the different strati", stratiAssignment.getInt(1) == stratiAssignment.getInt(2));
-
-		assertFalse("Instances 2 and 4 need to be in the different strati", stratiAssignment.getInt(1) == stratiAssignment.getInt(3));
-
-		assertFalse("Instances 3 and 4 need to be in the different strati", stratiAssignment.getInt(2) == stratiAssignment.getInt(3));
+		assertEquals("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0), stratiAssignment.getInt(2));
+		assertNotEquals("Instances 1 and 2 need to be in the different strati.",stratiAssignment.getInt(0), stratiAssignment.getInt(1));
+		assertNotEquals("Instances 1 and 4 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(3));
+		assertNotEquals("Instances 2 and 3 need to be in the different strati", stratiAssignment.getInt(1), stratiAssignment.getInt(2));
+		assertNotEquals("Instances 2 and 4 need to be in the different strati", stratiAssignment.getInt(1), stratiAssignment.getInt(3));
+		assertNotEquals("Instances 3 and 4 need to be in the different strati", stratiAssignment.getInt(2), stratiAssignment.getInt(3));
 	}
 
 	@Test
 	public void testAssignmentOnlyTargetAttributeCategoricalParallel() {
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices));
+		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
 		selectorAndAssigner.setNumCPUs(4);
-		selectorAndAssigner.init(dataset);
+		selectorAndAssigner.createStrati(dataset);
 		IntList stratiAssignment = new IntArrayList();
 		for (ILabeledInstance i : dataset) {
-			stratiAssignment.add(selectorAndAssigner.assignToStrati(i));
+			stratiAssignment.add(selectorAndAssigner.getStratum(i));
 		}
 		// Number of strati must be 3
 		assertEquals(3, new HashSet<>(stratiAssignment).size());
-
-		assertTrue("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0) == stratiAssignment.getInt(2));
-
-		assertFalse("Instances 1 and 2 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(1));
-
-		assertFalse("Instances 1 and 4 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(3));
-
-		assertFalse("Instances 2 and 3 need to be in the different strati", stratiAssignment.getInt(1) == stratiAssignment.getInt(2));
-
-		assertFalse("Instances 2 and 4 need to be in the different strati", stratiAssignment.getInt(1) == stratiAssignment.getInt(3));
-
-		assertFalse("Instances 3 and 4 need to be in the different strati", stratiAssignment.getInt(2) == stratiAssignment.getInt(3));
+		assertEquals("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0), stratiAssignment.getInt(2));
+		assertNotEquals("Instances 1 and 2 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(1));
+		assertNotEquals("Instances 1 and 4 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(3));
+		assertNotEquals("Instances 2 and 3 need to be in the different strati", stratiAssignment.getInt(1), stratiAssignment.getInt(2));
+		assertNotEquals("Instances 2 and 4 need to be in the different strati", stratiAssignment.getInt(1), stratiAssignment.getInt(3));
+		assertNotEquals("Instances 3 and 4 need to be in the different strati", stratiAssignment.getInt(2), stratiAssignment.getInt(3));
 	}
 
 	@Test
 	public void testNumberAllAttributesMixedEqualLengthSerial() {
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetMixed();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices),
+		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_LENGTH, 2);
 		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
 		selectorAndAssigner.setNumCPUs(1);
-		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
+		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(8, computedNumber);
 	}
 
@@ -142,11 +129,11 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 	public void testNumberAllAttributesMixedEqualLengthParallel() {
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetMixed();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices),
+		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_LENGTH, 2);
 		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
 		selectorAndAssigner.setNumCPUs(4);
-		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
+		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(8, computedNumber);
 	}
 
@@ -154,11 +141,11 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 	public void testNumberAllAttributesMixedEqualSizeSerial() {
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetMixed();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices),
+		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
 		selectorAndAssigner.setNumCPUs(1);
-		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
+		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(8, computedNumber);
 	}
 
@@ -166,11 +153,11 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 	public void testNumberAllAttributesMixedEqualSizeParallel() {
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetMixed();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices),
+		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
 		selectorAndAssigner.setNumCPUs(4);
-		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
+		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(8, computedNumber);
 	}
 
@@ -178,54 +165,44 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 	public void testAssignmentOnlyTargetAttributeMixedSerial() {
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetMixed();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices),
+		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
 		selectorAndAssigner.setNumCPUs(1);
-		selectorAndAssigner.init(dataset);
+		selectorAndAssigner.createStrati(dataset);
 		IntList stratiAssignment = new IntArrayList();
 		for (ILabeledInstance i : dataset) {
-			stratiAssignment.add(selectorAndAssigner.assignToStrati(i));
+			stratiAssignment.add(selectorAndAssigner.getStratum(i));
 		}
 		// Number of strati must be 2
 		assertEquals(2, new HashSet<>(stratiAssignment).size());
-
-		assertTrue("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0) == stratiAssignment.getInt(2));
-
-		assertTrue("Instances 1 and 4 need to be in the same stratum", stratiAssignment.getInt(0) == stratiAssignment.getInt(3));
-
-		assertFalse("Instances 1 and 2 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(1));
-
-		assertFalse("Instances 1 and 5 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(4));
-
-		assertFalse("Instances 1 and 6 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(5));
+		assertEquals("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0), stratiAssignment.getInt(2));
+		assertEquals("Instances 1 and 4 need to be in the same stratum", stratiAssignment.getInt(0), stratiAssignment.getInt(3));
+		assertNotEquals("Instances 1 and 2 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(1));
+		assertNotEquals("Instances 1 and 5 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(4));
+		assertNotEquals("Instances 1 and 6 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(5));
 	}
 
 	@Test
 	public void testAssignmentOnlyTargetAttributeMixedParallel() {
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetMixed();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(Arrays.asList(attributeIndices),
+		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
 		selectorAndAssigner.setNumCPUs(4);
-		selectorAndAssigner.init(dataset);
+		selectorAndAssigner.createStrati(dataset);
 		IntList stratiAssignment = new IntArrayList();
 		for (ILabeledInstance i : dataset) {
-			stratiAssignment.add(selectorAndAssigner.assignToStrati(i));
+			stratiAssignment.add(selectorAndAssigner.getStratum(i));
 		}
 		// Number of strati must be 2
 		assertEquals(2, new HashSet<>(stratiAssignment).size());
-
-		assertTrue("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0) == stratiAssignment.getInt(2));
-
-		assertTrue("Instances 1 and 4 need to be in the same stratum", stratiAssignment.getInt(0) == stratiAssignment.getInt(3));
-
-		assertFalse("Instances 1 and 2 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(1));
-
-		assertFalse("Instances 1 and 5 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(4));
-
-		assertFalse("Instances 1 and 6 need to be in the different strati", stratiAssignment.getInt(0) == stratiAssignment.getInt(5));
+		assertEquals("Instances 1 and 3 need to be in the same stratum", stratiAssignment.getInt(0), stratiAssignment.getInt(2));
+		assertEquals("Instances 1 and 4 need to be in the same stratum", stratiAssignment.getInt(0), stratiAssignment.getInt(3));
+		assertNotEquals("Instances 1 and 2 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(1));
+		assertNotEquals("Instances 1 and 5 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(4));
+		assertNotEquals("Instances 1 and 6 need to be in the different strati", stratiAssignment.getInt(0), stratiAssignment.getInt(5));
 	}
 
 	public ILabeledDataset<ILabeledInstance> createToyDatasetOnlyCategorical() {

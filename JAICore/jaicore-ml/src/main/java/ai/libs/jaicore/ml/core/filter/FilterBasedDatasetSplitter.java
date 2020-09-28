@@ -26,9 +26,13 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISa
 public class FilterBasedDatasetSplitter<D extends IDataset<?>> implements IDatasetSplitter<D>, IFoldSizeConfigurableRandomDatasetSplitter<D>, ILoggingCustomizable {
 
 	private final ISamplingAlgorithmFactory<D, ?> samplerFactory;
-	private double relSampleSize;
-	private Random random;
+	private final double relSampleSize;
+	private final Random random;
 	private Logger logger = LoggerFactory.getLogger(FilterBasedDatasetSplitter.class);
+
+	public FilterBasedDatasetSplitter(final ISamplingAlgorithmFactory<D, ?> samplerFactory) {
+		this(samplerFactory, Double.NaN, null);
+	}
 
 	public FilterBasedDatasetSplitter(final ISamplingAlgorithmFactory<D, ?> samplerFactory, final double relSampleSize, final Random random) {
 		super();
@@ -39,6 +43,9 @@ public class FilterBasedDatasetSplitter<D extends IDataset<?>> implements IDatas
 
 	@Override
 	public List<D> split(final D data) throws SplitFailedException, InterruptedException {
+		if (this.random == null || Double.isNaN(this.relSampleSize)) {
+			throw new IllegalStateException("The splitter has not been initialized with a random source and relative sample size configured. Provide these explicitly in the split method or in the initialization.");
+		}
 		return this.split(data, this.random, this.relSampleSize);
 	}
 

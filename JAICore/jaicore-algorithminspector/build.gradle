@@ -19,6 +19,8 @@ dependencies {
 	compile("$gsCore")
 	compile("$gsUIJavaFX")
 	compile("$gsAlgo")
+	
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }
 
 javafx {

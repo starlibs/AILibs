@@ -3,7 +3,6 @@ package ai.libs.jaicore.timing;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -12,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
-public class TimeRecordingObjectEvaluator<T, V extends Comparable<V>> implements IObjectEvaluator<T, V>, IInformedObjectEvaluatorExtension<V>, ILoggingCustomizable{
+public class TimeRecordingObjectEvaluator<T, V extends Comparable<V>> implements IObjectEvaluator<T, V>, ILoggingCustomizable{
 	private Logger logger = LoggerFactory.getLogger(TimeRecordingObjectEvaluator.class);
 	private final IObjectEvaluator<T, V> baseEvaluator;
 	private final Map<T, Integer> consumedTimes = new HashMap<>();
@@ -25,9 +24,12 @@ public class TimeRecordingObjectEvaluator<T, V extends Comparable<V>> implements
 	@Override
 	public V evaluate(final T object) throws InterruptedException, ObjectEvaluationFailedException {
 		long start = System.currentTimeMillis();
+		this.logger.info("Starting timed evaluation.");
 		V score = this.baseEvaluator.evaluate(object);
 		long end = System.currentTimeMillis();
-		this.consumedTimes.put(object, (int) (end - start));
+		int runtime = (int) (end - start);
+		this.logger.info("Finished evaluation in {}ms. Score is {}", runtime, score);
+		this.consumedTimes.put(object, runtime);
 		return score;
 	}
 
@@ -46,15 +48,6 @@ public class TimeRecordingObjectEvaluator<T, V extends Comparable<V>> implements
 		fields.put("consumedTimes", this.consumedTimes);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public void informAboutBestScore(final V bestScore) {
-		if(this.baseEvaluator instanceof IInformedObjectEvaluatorExtension) {
-			((IInformedObjectEvaluatorExtension<V>) this.baseEvaluator).informAboutBestScore(bestScore);
-		}
-	}
-
 	@Override
 	public String getLoggerName() {
 		return this.logger.getName();

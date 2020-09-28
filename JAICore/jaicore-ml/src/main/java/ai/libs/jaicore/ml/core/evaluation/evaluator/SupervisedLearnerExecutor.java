@@ -2,7 +2,6 @@ package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
 import java.util.List;
 
-import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
@@ -16,6 +15,8 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ai.libs.jaicore.logging.LoggerUtil;
 
 public class SupervisedLearnerExecutor implements ISupervisedLearnerExecutor, ILoggingCustomizable {
 
@@ -44,6 +45,9 @@ public class SupervisedLearnerExecutor implements ISupervisedLearnerExecutor, IL
 		} catch (InterruptedException e) {
 			long now = System.currentTimeMillis();
 			this.logger.info("Learner was interrupted during prediction after a runtime of {}ms for training and {}ms for testing ({}ms total walltime).", endTrainTime - startTrainTime, now - endTrainTime, now - startTrainTime);
+			if (Thread.currentThread().isInterrupted()) {
+				this.logger.warn("Observed an InterruptedException while evaluating a learner of type {} ({}) AND the thread is interrupted. This should never happen! Here is the detailed information: {}", learner.getClass(), learner, LoggerUtil.getExceptionInfo(e));
+			}
 			throw new LearnerExecutionInterruptedException(startTrainTime, endTrainTime, endTrainTime, System.currentTimeMillis());
 		} catch (PredictionException e) {
 			this.logger.info("Prediction failed with exception {}.", e.getClass().getName());
@@ -71,18 +75,9 @@ public class SupervisedLearnerExecutor implements ISupervisedLearnerExecutor, IL
 		long endTestTime = System.currentTimeMillis();
 
 		/* create difference table */
-		int numTestInstances = test.size();
 		TypelessPredictionDiff diff = new TypelessPredictionDiff();
-		for (int j = 0; j < numTestInstances; j++) {
-			Object prediction;
-			if (predictions.get(j) instanceof IMultiLabelClassification) {
-				prediction = predictions.get(j);
-			} else {
-				prediction = predictions.get(j).getPrediction();
-			}
-			Object groundTruth = test.get(j).getLabel();
-
-			diff.addPair(groundTruth, prediction);
+		for (int i = 0; i < predictions.size(); i++) {
+			diff.addPair(test.get(i).getLabel(), predictions.get(i));
 		}
 		return new LearnerRunReport(train, test, trainingStartTime, trainingEndTime, start, endTestTime, diff);
 	}

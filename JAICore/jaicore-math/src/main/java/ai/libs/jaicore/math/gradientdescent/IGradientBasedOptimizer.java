@@ -7,7 +7,7 @@ import org.api4.java.common.math.IVector;
  * differentiable function and the derivation of said function to solve an
  * optimization problem.
  *
- * @author Helena Graf, Mirko J�rgens
+ * @author Helena Graf, Mirko Jürgens
  *
  */
 public interface IGradientBasedOptimizer {

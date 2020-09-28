@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,7 @@ import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.db.IDatabaseAdapter;
 import ai.libs.jaicore.db.IDatabaseConfig;
-import ai.libs.jaicore.db.sql.SQLAdapter;
+import ai.libs.jaicore.db.sql.DatabaseAdapterFactory;
 import ai.libs.jaicore.experiments.Experiment;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
 import ai.libs.jaicore.experiments.ExperimentSetAnalyzer;
@@ -44,9 +45,9 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	private static final String FIELD_ID = "experiment_id";
 	private static final String FIELD_MEMORY = "memory";
 	private static final String FIELD_MEMORY_MAX = FIELD_MEMORY + "_max";
-	private static final String FIELD_HOST = "host";
-	private static final String FIELD_EXECUTOR = "executor";
-	private static final String FIELD_NUMCPUS = "cpus";
+	public static final String FIELD_HOST = "host";
+	public static final String FIELD_EXECUTOR = "executor";
+	public static final String FIELD_NUMCPUS = "cpus";
 	private static final String FIELD_TIME = "time";
 	private static final String FIELD_TIME_START = FIELD_TIME + "_started";
 	private static final String FIELD_TIME_END = FIELD_TIME + "_end";
@@ -103,7 +104,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		if (config.getDBTableName() == null) {
 			throw new IllegalArgumentException("DB table must not be null in experiment config.");
 		}
-		this.adapter = new SQLAdapter(config.getDBDriver(), config.getDBHost(), config.getDBUsername(), config.getDBPassword(), config.getDBDatabaseName(), null, config.getDBSSL() == null || config.getDBSSL());
+		this.adapter = DatabaseAdapterFactory.get(config);
 		this.tablename = config.getDBTableName();
 	}
 
@@ -163,7 +164,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	 * That is it throws an exception iff the setup method hasn't been successfully called yet.
 	 * @throws IllegalStateException thrown if setup wasn't called.
 	 */
-	protected void assertSetup() throws IllegalStateException{
+	protected void assertSetup() {
 		if (this.config == null || this.keyFields == null) {
 			throw new IllegalStateException(ERROR_NOSETUP);
 		}
@@ -171,8 +172,8 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public void setup(final IExperimentSetConfig config) throws ExperimentDBInteractionFailedException {
-		if(this.config != null) {
-			if(this.config.equals(config)) {
+		if (this.config != null) {
+			if (this.config.equals(config)) {
 				this.logger.info("Setup was called repeatedly with the same configuration. Ignoring the subsequent call.", new IllegalStateException());
 				return;
 			} else {
@@ -274,7 +275,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public List<ExperimentDBEntry> getRandomOpenExperiments(int limit) throws ExperimentDBInteractionFailedException {
-		if(limit == -1) {
+		if (limit == -1) {
 			// select a feasible limit:
 			limit = 10;
 		}
@@ -292,8 +293,8 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public Optional<ExperimentDBEntry> startNextExperiment(final String executorInfo) throws ExperimentDBInteractionFailedException {
-		if(this.cachedHost == null) {
-			// failed to retrieve  host information.
+		if (this.cachedHost == null) {
+			// failed to retrieve host information.
 			throw new ExperimentUpdateFailedException(new IllegalStateException("Host information is unavailable."));
 		}
 
@@ -324,36 +325,32 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		// The trick is to tell mysql to update the last insert id with the single affected row:
 		// See: https://stackoverflow.com/questions/1388025
 		// This is a MySQL specific solution.
-		sb.append(" WHERE target_table.time_started IS NULL"
-				+ " AND last_insert_id(target_table.experiment_id)"
-				+ " LIMIT 1");
+		sb.append(" WHERE target_table.time_started IS NULL" + " AND last_insert_id(target_table.experiment_id)" + " LIMIT 1");
 
 		int startedExperimentId;
 		try {
 			// Update and get the affected rows
 			// Use insert because we are interested in the `last_insert_id` field that is returned as a generated key.
 			int[] affectedKeys = this.adapter.insert(sb.toString(), new String[0]);
-			if(affectedKeys == null){
+			if (affectedKeys == null) {
 				throw new IllegalStateException("The database adapter did not return the id of the updated experiment. The sql query executed was: \n" + sb.toString());
-			} else if(affectedKeys.length > 1) {
+			} else if (affectedKeys.length > 1) {
 				throw new IllegalStateException("BUG: The sql query affected more than one row. It is supposed to only update a single row: \n" + sb.toString());
 			} else if (affectedKeys.length == 0) {
 				this.logger.info("No experiment with time_started=null could be found. So no experiment could be started.");
 				return Optional.empty();
-			}
-			else {
+			} else {
 				startedExperimentId = affectedKeys[0];
 			}
 		} catch (Exception ex) {
 			throw new ExperimentDBInteractionFailedException(ex);
 		}
 		ExperimentDBEntry experimentWithId = this.getExperimentWithId(startedExperimentId);
-		if(experimentWithId == null) {
+		if (experimentWithId == null) {
 			throw new ExperimentDBInteractionFailedException(new RuntimeException(String.format("BUG: The updated experiment with id, `%d`, could not be fetched. ", startedExperimentId)));
 		}
 		return Optional.of(experimentWithId);
 	}
-
 
 	@Override
 	public List<ExperimentDBEntry> getRunningExperiments() throws ExperimentDBInteractionFailedException {
@@ -477,6 +474,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public List<ExperimentDBEntry> createOrGetExperiments(final List<Experiment> experiments) throws ExperimentDBInteractionFailedException {
+		Objects.requireNonNull(this.keyFields, "No key fields set!");
 		if (experiments == null || experiments.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
@@ -538,7 +536,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		String now = new SimpleDateFormat(DATE_FORMAT).format(new Date());
 		String memoryUsageInMB = String.valueOf((int) Runtime.getRuntime().totalMemory() / 1024 / 1024);
 		Map<String, String> valuesToWrite = new HashMap<>();
-		values.keySet().forEach(k -> valuesToWrite.put(k, values.get(k).toString()));
+		values.keySet().forEach(k -> valuesToWrite.put(k, values.get(k) != null ? values.get(k).toString() : null));
 		List<String> fieldsForWhichToIgnoreTime = this.config.getFieldsForWhichToIgnoreTime();
 		List<String> fieldsForWhichToIgnoreMemory = this.config.getFieldsForWhichToIgnoreMemory();
 		for (String result : values.keySet()) {
@@ -610,14 +608,14 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		queryStringSB.append(" WHERE `experiment_id` = ").append(expId);
 		try {
 			List<IKVStore> selectResult = this.adapter.query(queryStringSB.toString());
-			if(selectResult.isEmpty()) {
+			if (selectResult.isEmpty()) {
 				throw new IllegalArgumentException("The given experiment was not found: " + exp);
 			}
-			if(selectResult.size() > 1) {
+			if (selectResult.size() > 1) {
 				throw new IllegalStateException("The experiment with primary id " + exp.getId() + " exists multiple times.");
 			}
 			IKVStore selectedRow = selectResult.get(0);
-			if(selectedRow.get(FIELD_TIME_START) != null) {
+			if (selectedRow.get(FIELD_TIME_START) != null) {
 				return true;
 			}
 		} catch (SQLException | IOException ex) {

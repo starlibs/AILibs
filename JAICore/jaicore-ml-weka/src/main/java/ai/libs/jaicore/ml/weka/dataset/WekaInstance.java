@@ -32,10 +32,9 @@ public class WekaInstance extends ElementDecorator<Instance> implements IWekaIns
 		boolean isInteger = this.getElement().classAttribute().isNominal();
 		double classValue = this.getElement().classValue();
 		if (isInteger) {
-			int intClassValue = (int)classValue; // do NOT return this value directly. The explicit cast into a new variable is required, because the var remains a double elsewise. Maybe this is a Java bug
+			int intClassValue = (int) classValue; // do NOT return this value directly. The explicit cast into a new variable is required, because the var remains a double elsewise. Maybe this is a Java bug
 			return intClassValue;
-		}
-		else {
+		} else {
 			return classValue;
 		}
 	}
@@ -51,11 +50,8 @@ public class WekaInstance extends ElementDecorator<Instance> implements IWekaIns
 	}
 
 	private Object transformAttributeValueToData(final Attribute att) {
-		if (att.isNominal() || att.isString() || att.isRelationValued() || att.isDate() || att.isRegular()) {
-			return att.value((int) this.getElement().value(att));
-		} else {
-			return this.getElement().value(att);
-		}
+		double internalValue = this.getElement().value(att);
+		return att.isNumeric() ? internalValue : att.value((int) internalValue);
 	}
 
 	@Override
@@ -112,6 +108,11 @@ public class WekaInstance extends ElementDecorator<Instance> implements IWekaIns
 			return false;
 		}
 		return WekaUtil.areInstancesEqual(this.getElement(), ((WekaInstance) obj).getElement());
+	}
+
+	@Override
+	public String toString() {
+		return this.getElement().toString();
 	}
 
 }

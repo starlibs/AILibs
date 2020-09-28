@@ -31,8 +31,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.WaitForSamplingStepEvent
  */
 public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorithm<D> {
 	private Logger logger = LoggerFactory.getLogger(StratifiedSampling.class);
-	private IStratiAmountSelector stratiAmountSelector;
-	private IStratiAssigner stratiAssigner;
+	private IStratifier stratificationTechnique;
 	private Random random;
 	private DatasetDeriver<D>[] stratiBuilder = null;
 	private boolean allDatapointsAssigned = false;
@@ -48,10 +47,9 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 	 * @param random
 	 *            Random object for sampling inside of the strati.
 	 */
-	public StratifiedSampling(final IStratiAmountSelector stratiAmountSelector, final IStratiAssigner stratiAssigner, final Random random, final D input) {
+	public StratifiedSampling(final IStratifier stratificationTechnique, final Random random, final D input) {
 		super(input);
-		this.stratiAmountSelector = stratiAmountSelector;
-		this.stratiAssigner = stratiAssigner;
+		this.stratificationTechnique = stratificationTechnique;
 		this.random = random;
 	}
 
@@ -62,19 +60,16 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 		case CREATED:
 			if (!this.allDatapointsAssigned) {
 				int dsHash = this.getInput().hashCode();
-				this.stratiAmountSelector.setNumCPUs(this.getNumCPUs());
-				this.stratiAssigner.setNumCPUs(this.getNumCPUs());
+				this.stratificationTechnique.setNumCPUs(this.getNumCPUs());
 
 				/* create strati builder */
-				this.stratiBuilder = (DatasetDeriver<D>[]) Array.newInstance(DatasetDeriver.class, this.stratiAmountSelector.selectStratiAmount(this.getInput()));
+				this.stratiBuilder = (DatasetDeriver<D>[]) Array.newInstance(DatasetDeriver.class, this.stratificationTechnique.createStrati(this.getInput()));
 				for (int i = 0; i < this.stratiBuilder.length; i++) {
 					this.stratiBuilder[i] = new DatasetDeriver<>(this.getInput());
 				}
 				if (this.stratiBuilder.length == 0) {
-					throw new IllegalStateException("No strati have been defined.");
+					throw new IllegalStateException("Stratification technique has not created any stratum.");
 				}
-
-				this.stratiAssigner.init(this.getInput(), this.stratiBuilder.length);
 				if (this.getInput().hashCode() != dsHash) {
 					throw new IllegalStateException("Original dataset has been modified!");
 				}
@@ -95,7 +90,7 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 						this.checkAndConductTermination();
 					}
 					this.logger.debug("Computing stratum for next data point {}", datapoint);
-					int assignedStratum = this.stratiAssigner.assignToStrati(datapoint);
+					int assignedStratum = this.stratificationTechnique.getStratum(datapoint);
 					if (assignedStratum < 0 || assignedStratum >= this.stratiBuilder.length) {
 						throw new AlgorithmException("No existing strati for index " + assignedStratum);
 					} else {
@@ -242,15 +237,8 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 	@Override
 	public void setLoggerName(final String loggername) {
 		this.logger = LoggerFactory.getLogger(loggername);
-		if (this.stratiAssigner instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) this.stratiAssigner).setLoggerName(loggername + ".assigner");
-		}
-		if (this.stratiAmountSelector instanceof ILoggingCustomizable) {
-			if (this.stratiAmountSelector != this.stratiAssigner) {
-				((ILoggingCustomizable) this.stratiAmountSelector).setLoggerName(loggername + ".stratiamountselector");
-			} else {
-				this.logger.info("Strati assigner and amount selector are the same object. Using .assigner for logging.");
-			}
+		if (this.stratificationTechnique instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.stratificationTechnique).setLoggerName(loggername + ".stratifier");
 		}
 	}
 

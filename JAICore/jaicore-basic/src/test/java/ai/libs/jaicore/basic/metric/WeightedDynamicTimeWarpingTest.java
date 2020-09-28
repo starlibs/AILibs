@@ -3,7 +3,7 @@ package ai.libs.jaicore.basic.metric;
 import static org.junit.Assert.assertEquals;
 
 import org.api4.java.common.metric.IScalarDistance;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.metric.ScalarDistanceUtil;
 import ai.libs.jaicore.basic.metric.WeightedDynamicTimeWarping;

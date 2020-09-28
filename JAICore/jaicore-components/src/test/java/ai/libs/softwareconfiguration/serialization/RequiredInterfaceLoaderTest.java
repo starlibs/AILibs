@@ -1,144 +1,130 @@
 package ai.libs.softwareconfiguration.serialization;
 
-import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.basic.ResourceFile;
-import ai.libs.jaicore.basic.ResourceUtil;
-import ai.libs.jaicore.components.model.Interface;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 
-@SuppressWarnings("SimplifiableJUnitAssertion")
-public class RequiredInterfaceLoaderTest {
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-    JsonNode rootNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-    public RequiredInterfaceLoaderTest() throws IOException {
-        this.rootNode = getRootNodeFromJson(new File("testrsc/required_interface_syntax.json"));
-    }
+import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
+import ai.libs.jaicore.logging.LoggerUtil;
 
-    @Test
-    public void test1() throws IOException {
-        Interface reqInterface = createRequiredInterface(rootNode.path("requiredInterface").get(0));
-        assertTrue("Expected min = 0", reqInterface.getMin() == 0);
-        assertTrue("Expected max = 1", reqInterface.getMax() == 1);
-    }
+public class RequiredInterfaceLoaderTest extends Tester {
 
-    @Test
-    public void test2() throws IOException {
-        Interface reqInterface = createRequiredInterface(rootNode.path("requiredInterface").get(1));
-        assertTrue("Expected min = 1", reqInterface.getMin() == 1);
-        assertTrue("Expected max = 1", reqInterface.getMax() == 1);
-    }
+	private final JsonNode rootNode;
+	private final ComponentSerialization serializer = new ComponentSerialization(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 
-    @Test
-    public void test3() throws IOException {
-        Interface reqInterface = createRequiredInterface(rootNode.path("requiredInterface").get(2));
-        assertTrue("Expected min = 1", reqInterface.getMin() == 1);
-        assertTrue("Expected max = 1", reqInterface.getMax() == 1);
-    }
+	public RequiredInterfaceLoaderTest() throws IOException {
+		this.rootNode = new ObjectMapper().readTree(new File("testrsc/required_interface_syntax.json"));
+	}
 
-    @Test
-    public void test4() throws IOException {
-        Interface reqInterface = createRequiredInterface(rootNode.path("requiredInterface").get(3));
-        assertTrue("Expected min = 0", reqInterface.getMin() == 0);
-        assertTrue("Expected max = 1", reqInterface.getMax() == 1);
-    }
+	@Test
+	public void test1() throws IOException {
+		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(0));
+		assertTrue(reqInterface.isOptional());
+		assertEquals(1, reqInterface.getMin());
+		assertEquals(1, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
+	}
 
-    @Test(expected = IOException.class)
-    public void test5() throws IOException {
-        createRequiredInterface(rootNode.path("requiredInterface").get(4));
-    }
+	@Test
+	public void test2() throws IOException {
+		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(1));
+		assertEquals(1, reqInterface.getMin());
+		assertEquals(1, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
+	}
 
-    @Test
-    public void test6() throws IOException {
-        Interface reqInterface = createRequiredInterface(rootNode.path("requiredInterface").get(5));
-        assertTrue("Expected min = 2", reqInterface.getMin() == 2);
-        assertTrue("Expected max = 6", reqInterface.getMax() == 6);
-    }
+	@Test
+	public void test3() throws IOException {
+		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(2));
+		assertEquals(1, reqInterface.getMin());
+		assertEquals(1, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
+	}
 
-    @Test(expected = IOException.class)
-    public void test7() throws IOException {
-        createRequiredInterface(rootNode.path("requiredInterface").get(6));
-    }
+	@Test
+	public void test4() throws IOException {
+		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(3));
+		assertEquals(0, reqInterface.getMin());
+		assertEquals(1, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
+	}
 
-    @Test(expected = IOException.class)
-    public void test8() throws IOException {
-        createRequiredInterface(rootNode.path("requiredInterface").get(7));
-    }
+	@Test
+	public void test5() throws IOException {
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(4));
+		});
+	}
 
-    @Test(expected = IOException.class)
-    public void test9() throws IOException {
-        createRequiredInterface(rootNode.path("requiredInterface").get(8));
-    }
+	@Test
+	public void test6() throws IOException {
+		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(5));
+		assertEquals(2, reqInterface.getMin());
+		assertEquals(6, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
+	}
 
-    @Test(expected = IOException.class)
-    public void test10() throws IOException {
-        createRequiredInterface(rootNode.path("requiredInterface").get(9));
-    }
+	@Test
+	public void test7() throws IOException {
+		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(6));
+		assertEquals(2, reqInterface.getMin());
+		assertEquals(2, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
+	}
 
-    private JsonNode getRootNodeFromJson(final File jsonFile) throws IOException {
-        String jsonDescription;
-        ObjectMapper objectMapper = new ObjectMapper();
-        if (jsonFile instanceof ResourceFile) {
-            jsonDescription = ResourceUtil.readResourceFileToString(((ResourceFile) jsonFile).getPathName());
-        } else {
-            jsonDescription = FileUtil.readFileAsString(jsonFile);
-        }
-        jsonDescription = jsonDescription.replaceAll("/\\*(.*)\\*/", "");
+	@Test
+	public void test8() throws IOException {
+		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(7));
+		assertEquals(1, reqInterface.getMin());
+		assertEquals(2, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
+	}
 
-        return objectMapper.readTree(jsonDescription);
-    }
+	@Test
+	public void test9() throws IOException {
+		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(8));
+		assertTrue(reqInterface.isOptional());
+		assertEquals(1, reqInterface.getMin());
+		assertEquals(2, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
+	}
 
-    private Interface createRequiredInterface(JsonNode requiredInterface) throws IOException {
-        if (!requiredInterface.has("id")) {
-            throw new IOException("No id has been specified");
-        }
-        if (!requiredInterface.has("name")) {
-            throw new IOException("No name has been specified");
-        }
-        if (requiredInterface.has("optional")) {
-            if (!requiredInterface.has("min") && !requiredInterface.has("max")) {
-                if (requiredInterface.get("optional").asBoolean()) {
-                    return new Interface(requiredInterface.get("id").asText(),
-                            requiredInterface.get("name").asText(),
-                            0,
-                            1);
-                } else {
-                    return new Interface(requiredInterface.get("id").asText(),
-                            requiredInterface.get("name").asText(),
-                            1,
-                            1);
-                }
-            } else {
-                throw new IOException("When specifying \"optional\" for a required interface, both \"min\" and \"max\" must be omitted");
-            }
-        } else { // optional is missing
-            if (!requiredInterface.has("min") && !requiredInterface.has("max")) {
-                return new Interface(requiredInterface.get("id").asText(),
-                        requiredInterface.get("name").asText(),
-                        1,
-                        1);// optional is missing
-            } else if (requiredInterface.has("min") && requiredInterface.has("max")) {
-                int min = requiredInterface.get("min").asInt();
-                int max = requiredInterface.get("max").asInt();
-                if (min <= max) {
-                    return new Interface(requiredInterface.get("id").asText(),
-                            requiredInterface.get("name").asText(),
-                            requiredInterface.get("min").asInt(),
-                            requiredInterface.get("max").asInt());
-                } else {
-                    throw new IOException("When declaring a required interface, \"min\" should be lesser than \"max\"");
-                }
-            } else {
-                throw new IOException("If not specifying \"optional\" for a required interface, either both \"min\" and \"max\" must be specified or none at all");
-            }
-        }
-    }
+	@Test
+	public void test10() throws IOException {
+		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(9));
+		assertTrue(reqInterface.isOptional());
+		assertEquals(2, reqInterface.getMin());
+		assertEquals(2, reqInterface.getMax());
+		assertTrue(reqInterface.isOrdered());
+		assertFalse(reqInterface.isUniqueComponents());
+	}
+
+	@Test
+	public void test11() throws IOException {
+		IRequiredInterfaceDefinition reqInterface = this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(10));
+		assertFalse(reqInterface.isOptional());
+		assertEquals(2, reqInterface.getMin());
+		assertEquals(2, reqInterface.getMax());
+		assertFalse(reqInterface.isOrdered());
+		assertTrue(reqInterface.isUniqueComponents());
+	}
 }

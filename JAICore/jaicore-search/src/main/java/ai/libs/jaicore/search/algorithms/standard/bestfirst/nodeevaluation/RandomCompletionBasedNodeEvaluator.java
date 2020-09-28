@@ -59,7 +59,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 import ai.libs.jaicore.timing.TimedComputation;
 
 public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, A, V>
-		implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V>, ICancelablePathEvaluator, IPotentiallyUncertaintyAnnotatingPathEvaluator<T, A, V>, ILoggingCustomizable {
+implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V>, ICancelablePathEvaluator, IPotentiallyUncertaintyAnnotatingPathEvaluator<T, A, V>, ILoggingCustomizable {
 
 	private static final IAlgorithm<?, ?> ALGORITHM = null;
 	private static final boolean LOG_FAILURES_AS_ERRORS = false;
@@ -95,6 +95,7 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 	protected final IObjectEvaluator<ILabeledPath<T, A>, V> solutionEvaluator;
 	protected IUncertaintySource<T, A, V> uncertaintySource;
 	protected SolutionEventBus<T> eventBus = new SolutionEventBus<>();
+	private final List<Object> solutionListeners = new ArrayList<>();
 	private final Map<List<T>, V> bestKnownScoreUnderNodeInCompleterGraph = new HashMap<>();
 	private boolean visualizeSubSearch;
 
@@ -438,7 +439,7 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 				throw new PathEvaluationException("Error in evaluating node!", e);
 			}
 			long duration = System.currentTimeMillis() - start;
-			if (duration >= this.timeoutForSingleCompletionEvaluationInMS) {
+			if (this.timeoutForSingleCompletionEvaluationInMS > 0 && duration >= this.timeoutForSingleCompletionEvaluationInMS) {
 				this.logger.warn("Evaluation took {}ms, but timeout is {}", duration, this.timeoutForSingleCompletionEvaluationInMS);
 				assert duration < this.timeoutForSingleCompletionEvaluationInMS + 10000 : "Evaluation took " + duration + "ms, but timeout is " + this.timeoutForSingleCompletionEvaluationInMS;
 			}
@@ -468,8 +469,8 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 			}
 		}
 		V score = this.scoresOfSolutionPaths.get(path.getNodes());
-		assert score != null : "Stored scores must never be null";
 		this.logger.debug("Determined value {} for path of length {}.", score, path.getNumberOfNodes());
+		assert score != null : "Stored scores must never be null";
 		this.logger.trace("Full path is {}", path);
 		return score;
 	}
@@ -491,8 +492,9 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 			solutionObject.setAnnotation("fTime", this.timesToComputeEvaluations.get(solution.getNodes()));
 			solutionObject.setAnnotation("timeToSolution", (int) (System.currentTimeMillis() - this.timestampOfFirstEvaluation));
 			solutionObject.setAnnotation("nodesEvaluatedToSolution", numberOfComputedFValues);
-			this.logger.debug("Posting solution {}", solutionObject);
+			this.logger.debug("Posting solution {} to {} listeners: {}", solutionObject, this.solutionListeners.size(), this.solutionListeners);
 			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(ALGORITHM, solutionObject));
+			this.logger.debug("Posted solution {} to event bus.", solutionObject);
 		} catch (Exception e) {
 			List<Pair<String, Object>> explanations = new ArrayList<>();
 			if (this.logger.isDebugEnabled()) {
@@ -533,6 +535,7 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 	@Override
 	public void registerSolutionListener(final Object listener) {
 		this.eventBus.register(listener);
+		this.solutionListeners.add(listener);
 	}
 
 	@Override
@@ -587,7 +590,7 @@ public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> e
 	public String toString() {
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("solutionEvaluator", this.solutionEvaluator);
-		fields.put("visualizeSubSearch", this.visualizeSubSearch);
+		fields.put("priorizing predicate", this.priorityPredicateForRDFS);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
 

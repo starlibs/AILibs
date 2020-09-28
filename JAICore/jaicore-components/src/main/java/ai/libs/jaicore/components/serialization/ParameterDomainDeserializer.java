@@ -10,9 +10,9 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.model.Dependency;
-import ai.libs.jaicore.components.model.IParameterDomain;
-import ai.libs.jaicore.components.model.Parameter;
 
 public class ParameterDomainDeserializer extends StdDeserializer<Dependency> {
 
@@ -31,8 +31,8 @@ public class ParameterDomainDeserializer extends StdDeserializer<Dependency> {
 
 	@Override
 	public Dependency deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
-		List<Pair<Parameter, IParameterDomain>> collection1 = new LinkedList<>();
-		LinkedList<Collection<Pair<Parameter, IParameterDomain>>> collection2 = new LinkedList<>();
+		List<Pair<IParameter, IParameterDomain>> collection1 = new LinkedList<>();
+		LinkedList<Collection<Pair<IParameter, IParameterDomain>>> collection2 = new LinkedList<>();
 		return new Dependency(collection2, collection1);
 	}
 

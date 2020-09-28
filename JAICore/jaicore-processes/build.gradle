@@ -3,6 +3,8 @@ dependencies{
 	
 	compile("$apacheCommonsLang")
 	compile("$jna")
+	compile("net.java.dev.jna:jna-platform:5.6.0")
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }
 
 uploadArchives {

@@ -1,0 +1,11 @@
+{
+  "repository" : "weka.classifiers.rules.ZeroR",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.rules.ZeroR",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "PipelineClassifier" ],
+    "parameters" : [ ],
+    "dependencies" : [ ]
+  } ]
+}

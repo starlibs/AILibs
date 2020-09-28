@@ -1,0 +1,26 @@
+{
+	"repository": "weka.attributeSelection.InfoGainAttributeEval",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.attributeSelection.InfoGainAttributeEval",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rankBasedEvaluator"
+			],
+			"parameters": [
+				{
+					"name": "M",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "B",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

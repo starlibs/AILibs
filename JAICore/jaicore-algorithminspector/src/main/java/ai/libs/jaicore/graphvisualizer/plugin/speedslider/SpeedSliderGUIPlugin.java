@@ -9,7 +9,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPlugin;
 public class SpeedSliderGUIPlugin extends ASimpleMVCPlugin<SpeedSliderGUIPluginModel, SpeedSliderGUIPluginView, SpeedSliderGUIPluginController> {
 
 	public SpeedSliderGUIPlugin() {
-		super();
+		super("Speed Slider");
 	}
 
 	@Override

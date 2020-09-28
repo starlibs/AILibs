@@ -237,9 +237,9 @@ public class ArrayUtil {
 			throw new IllegalArgumentException("The array must be of the same length.");
 		}
 		IntStream.range(0, sum.length).forEach(x -> sum[x] += summand[x]);
-  }
-	
-  public static <T> T[] mergeArrays(final T[] array0, final T[] array1) {
+	}
+
+	public static <T> T[] mergeArrays(final T[] array0, final T[] array1) {
 		@SuppressWarnings("unchecked")
 		T[] merged = (T[]) Array.newInstance(array0.getClass(), array0.length + array1.length);
 		System.arraycopy(array0, 0, merged, 0, array0.length);

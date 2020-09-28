@@ -69,4 +69,13 @@ public class MathExt {
 	public static double round(final double d, final int precision) {
 		return (Math.round(d * Math.pow(10, precision)) / Math.pow(10, precision));
 	}
+
+	/**
+	 * Takes the logarithm with respect to some given base.
+	 * @param v The value to take the logarithm of.
+	 * @param base The base of the logarithm.
+	 */
+	public static double logBase(final double v, final double base) {
+		return Math.log(v) / Math.log(base);
+	}
 }

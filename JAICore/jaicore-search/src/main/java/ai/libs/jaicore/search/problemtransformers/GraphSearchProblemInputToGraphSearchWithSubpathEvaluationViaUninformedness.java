@@ -2,31 +2,28 @@ package ai.libs.jaicore.search.problemtransformers;
 
 import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
-import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 
-import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
-import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
-import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
-public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness<N, A> implements AlgorithmicProblemReduction<IPathSearchInput<N, A>, SearchGraphPath<N, A>, GraphSearchWithSubpathEvaluationsInput<N, A, Double>, EvaluatedSearchGraphPath<N, A, Double>> {
+/**
+ *
+ * @author Felix Mohr
+ *
+ * @param <N> Node Type
+ * @param <A> Arc Type
+ *
+ * This reduction will create a problem in which each inner node is evaluated with 0.0, and each leaf node with the value given by the path evaluator.
+ * The given path evaluator is, by contract, just applicable to leaf nodes, so it is just used there, and everywhere else we use just a constant 0.0.
+ */
+public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness<N, A> extends GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<N, A, Double> {
 
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<N, A, Double> encodeProblem(final IPathSearchInput<N, A> problem) {
-		IPathEvaluator<N, A, Double> pe;
-		if (problem instanceof IPathSearchWithPathEvaluationsInput) {
-			IPathSearchWithPathEvaluationsInput<N, A, Double> cProblem = (IPathSearchWithPathEvaluationsInput<N, A, Double>)problem;
-			pe = n -> problem.getGoalTester().isGoal(n) ? cProblem.getPathEvaluator().evaluate(n) : 0.0;
+		if (!(problem instanceof IPathSearchWithPathEvaluationsInput)) {
+			throw new IllegalArgumentException("Given problem must be of type " + IPathSearchWithPathEvaluationsInput.class + " but is of " + problem.getClass());
 		}
-		else {
-			pe = n -> 0.0;
-		}
-		return new GraphSearchWithSubpathEvaluationsInput<>(problem, pe);
+		final IPathSearchWithPathEvaluationsInput<N, A, Double> cProblem = (IPathSearchWithPathEvaluationsInput<N, A, Double>) problem;
+		this.setNodeEvaluator(p -> cProblem.getGoalTester().isGoal(p) ? cProblem.getPathEvaluator().evaluate(p) : 0.0);
+		return super.encodeProblem(problem);
 	}
-
-	@Override
-	public SearchGraphPath<N, A> decodeSolution(final EvaluatedSearchGraphPath<N, A, Double> solution) {
-		return solution;
-	}
-
 }

@@ -1,0 +1,8 @@
+@relation tiny
+@attribute 'id' numeric
+@attribute 'a' numeric
+@attribute 'b' numeric
+@attribute 'target' {'yes', 'no'}
+@data
+1,5,10,'yes'
+2,3,62,'no'

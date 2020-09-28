@@ -4,7 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.api4.java.common.metric.IDistanceMetric;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.transform.vector.HilbertTransform;
 import ai.libs.jaicore.basic.transform.vector.IVectorTransform;
@@ -61,38 +62,46 @@ public class TransformDistanceTest {
 	 * Robustness test: When initializing with <code>null</code> for the distance
 	 * measure, the constructor is supposed to throw an IllegalArgumentExpection.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessForNullDistanceMeasure() {
-		new TransformDistance(0.5, null);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			new TransformDistance(0.5, null);
+		});
 	}
 
 	/**
 	 * Robustness test: When initializing with <code>null</code> for the transform
 	 * the constructor is supposed to throw an IllegalArgumentExpection.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessForNullTransform() {
-		new TransformDistance(0.5, null, new EuclideanDistance(), new EuclideanDistance());
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			new TransformDistance(0.5, null, new EuclideanDistance(), new EuclideanDistance());
+		});
 	}
 
 	/**
 	 * Robustness test: When initializing with <code>alpha > pi/2</code> the
 	 * constuctor is supposed to thrown an IllegalArgumentException.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessForAlphaGreaterPiHalf() {
-		double alpha = (Math.PI / 2) + 1e4;
-		new TransformDistance(alpha, new EuclideanDistance());
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			double alpha = (Math.PI / 2) + 1e4;
+			new TransformDistance(alpha, new EuclideanDistance());
+		});
 	}
 
 	/**
 	 * Robustness test: When initializing with <code>alpha < 0</code> the constuctor
 	 * is supposed to thrown an IllegalArgumentException.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessForAlphaLessThanZero() {
-		double alpha = 0 - Double.MIN_VALUE;
-		new TransformDistance(alpha, new EuclideanDistance());
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			double alpha = 0 - Double.MIN_VALUE;
+			new TransformDistance(alpha, new EuclideanDistance());
+		});
 	}
 
 	/**

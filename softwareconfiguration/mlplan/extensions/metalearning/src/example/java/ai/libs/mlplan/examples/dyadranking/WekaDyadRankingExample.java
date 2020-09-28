@@ -15,11 +15,11 @@ import ai.libs.jaicore.ml.core.evaluation.MLEvaluationUtil;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.DyadRankedBestFirstFactory;
-import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer;
+import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness;
 import ai.libs.mlplan.metamining.dyadranking.WEKADyadRankedNodeQueueConfig;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
+import ai.libs.mlplan.weka.MLPlanWekaBuilder;
+import ai.libs.mlplan.weka.MLPlanWekaClassifier;
+import ai.libs.mlplan.weka.weka.WekaMLPlanWekaClassifier;
 
 /**
  * Demonstrated the usage of ML-Plan with a dyad ranked OPEN list
@@ -38,9 +38,8 @@ public class WekaDyadRankingExample {
 
 		WEKADyadRankedNodeQueueConfig openConfig = new WEKADyadRankedNodeQueueConfig();
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
-		builder.withSearchSpaceConfigFile(new File("resources/automl/searchmodels/weka/weka-approach-5-autoweka.json"))
-		.withAlgorithmConfigFile(new File("conf/mlplan.properties"))
-		.withSearchFactory(new DyadRankedBestFirstFactory<>(openConfig), new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<>(n -> 1.0)).withPreferredNodeEvaluator(n -> 1.0);
+		builder.withSearchSpaceConfigFile(new File("resources/automl/searchmodels/weka/weka-reduced5.json")).withAlgorithmConfigFile(new File("conf/mlplan.properties"))
+				.withSearchFactory(new DyadRankedBestFirstFactory<>(openConfig), new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness<>()).withPreferredNodeEvaluator(n -> 1.0);
 
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
 		openConfig.setComponents(mlplan.getComponents());

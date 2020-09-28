@@ -6,9 +6,7 @@
     <param name="Target" value="System.out" />
     <param name="Threshold" value="trace" />
     <layout class="org.apache.log4j.PatternLayout">
-      <!-- <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] 
-        - %m%n" /> -->
-      <param name="ConversionPattern" value="%-5p [%t] [%c.%M (%C:%L)] - %m%n" />
+      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
     </layout>
   </appender>
 
@@ -46,7 +44,7 @@
     </layout>
   </appender>
  
-  <logger name="testers">
+  <logger name="tester">
     <level value="debug" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -165,9 +163,13 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
+  <logger name="example.optimizingfactory">
+    <level value="warn" />
+  </logger>
+  
   <!-- configuration for ML-Plan Test logging -->
   <logger name="testedalgorithm">
-    <level value="warn" />
+    <level value="debug" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -181,30 +183,38 @@
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory">
-    <level value="warn" />
+    <level value="debug" />
   </logger>
   
-  <logger name="testedalgorithm.optimizingfactory.optAlgo">
-    <level value="warn" />
+  <logger name="testedalgorithm.optimizingfactory.optimizer">
+    <level value="debug" />
   </logger>
   
-  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco">
-    <level value="warn" />
-  </logger>
-  
-  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search">
-    <level value="warn" />
-  </logger>
-  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco">
     <level value="info" />
   </logger>
   
-  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.randomsearch">
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco.search">
+    <level value="warn" />
+  </logger>
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator.randomsearch">
   	<level value="warn" />
   </logger>
   
-  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary">
-  	<level value="info" />
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator.primary">
+  	<level value="warn" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator.secondary">
+  	<level value="warn" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator.secondary.randomsearch">
+  	<level value="warn" />
   </logger>
   
   <logger name="ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator">

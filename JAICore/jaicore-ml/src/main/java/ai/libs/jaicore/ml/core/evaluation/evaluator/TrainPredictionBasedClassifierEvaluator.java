@@ -82,22 +82,6 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 					this.eventBus.post(new TrainTestSplitEvaluationCompletedEvent<>(learner, report));
 				}
 				reports.add(report);
-				if (this.logger.isDebugEnabled()) {
-					List<?> gt = report.getPredictionDiffList().getGroundTruthAsList();
-					List<?> pr = report.getPredictionDiffList().getPredictionsAsList();
-					int m = gt.size();
-					int mistakes = 0;
-					for (int j = 0; j < m; j++) {
-						if (!pr.get(j).equals(gt.get(j))) {
-							mistakes++;
-						}
-					}
-					if (m - mistakes == 0) {
-						this.logger.warn("0 correct predictions seems suspicious. Here are the vectors: \n\tGround truth: {}\n\tPredictions: {}", report.getPredictionDiffList().getGroundTruthAsList(),
-								report.getPredictionDiffList().getPredictionsAsList());
-					}
-					this.logger.debug("Execution completed. Classifier predicted {}/{} test instances correctly.", (m - mistakes), m);
-				}
 			}
 			this.logger.debug("Compute metric ({}) for the diff of predictions and ground truth.", this.metric.getClass().getName());
 			double score = this.metric.loss(reports.stream().map(ILearnerRunReport::getPredictionDiffList).collect(Collectors.toList()));
@@ -135,5 +119,9 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 	public void registerListener(final Object listener) {
 		this.eventBus.register(listener);
 		this.hasListeners = true;
+	}
+
+	public IAggregatedPredictionPerformanceMeasure getMetric() {
+		return this.metric;
 	}
 }

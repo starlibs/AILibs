@@ -1,7 +1,7 @@
 ---
 layout: project
 title: jaicore-experiments
-version: 0.2.0
+version: 0.2.3
 navigation_mode: anchor
 navigation:
     - { id: "overview", link: "overview", title: "Overview" }
@@ -363,4 +363,4 @@ This means one can run a large set of experiments and retrieve intermediate resu
 
 
 # Contribute
-jaicore-experiments is currently developed in the [JAICore/jaicore-experiments folder of AILibs on github.com](https://github.com/fmohr/AILibs/tree/master/JAICore/jaicore-experiments).
+jaicore-experiments is currently developed in the [JAICore/jaicore-experiments folder of AILibs on github.com](https://github.com/starlibs/AILibs/tree/master/JAICore/jaicore-experiments).

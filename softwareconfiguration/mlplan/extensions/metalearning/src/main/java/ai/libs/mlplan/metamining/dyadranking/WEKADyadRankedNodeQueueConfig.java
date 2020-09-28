@@ -1,6 +1,7 @@
 package ai.libs.mlplan.metamining.dyadranking;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -10,7 +11,7 @@ import org.openml.webapplication.fantail.dc.LandmarkerCharacterizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.ranking.dyad.learner.search.ADyadRankedNodeQueueConfig;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -52,7 +53,7 @@ public class WEKADyadRankedNodeQueueConfig extends ADyadRankedNodeQueueConfig<TF
 	 * components used during the search necessary so that the pipeline
 	 * characterizer can translate nodes to components instances
 	 */
-	private Collection<Component> components;
+	private Collection<IComponent> components;
 
 	/**
 	 * Create a new configuration for a WEAK dyad ranked node queue.
@@ -99,8 +100,8 @@ public class WEKADyadRankedNodeQueueConfig extends ADyadRankedNodeQueueConfig<TF
 	 * @param components
 	 *            the components to use for the pipeline characterizer
 	 */
-	public void setComponents(final Collection<Component> components) {
-		this.components = components;
+	public void setComponents(final Collection<? extends IComponent> components) {
+		this.components = new ArrayList<>(components);
 
 		if (this.pipelineCharacterizer == null) {
 			this.pipelineCharacterizer = new ComponentInstanceVectorFeatureGenerator(components);

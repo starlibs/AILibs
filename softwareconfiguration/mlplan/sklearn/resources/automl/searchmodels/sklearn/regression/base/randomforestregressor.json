@@ -1,0 +1,80 @@
+{
+  "repository" : "sklearn.ensemble.RandomForestRegressor",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.ensemble.RandomForestRegressor",
+    "providedInterface" : [ "BasicRegressor", "BaseLearner", "FeatureImportanceEstimator", "AbstractRegressor" ],
+    "requiredInterface" : [ ],
+    "parameters" : [ {
+      "name" : "n_estimators",
+      "type" : "int",
+      "min" : 1,
+      "max" : 500,
+      "default" : 10,
+      "minInterval" : 1,
+      "refineSplits" : 8
+    }, {
+      "name" : "criterion",
+      "type" : "cat",
+      "default" : "mse",
+      "values" : [ "mse", "mae" ]
+    }, {
+      "name" : "max_features",
+      "type" : "cat",
+      "values" : [ "None", "auto", "sqrt", "log2", "0.05", "0.1", "0.15", "0.2", "0.25", "0.3", "0.35", "0.4", "0.45", "0.5", "0.55", "0.6", "0.65", "0.7", "0.75", "0.8", "0.85", "0.9", "0.95", "1.0" ],
+      "default" : "auto"
+    }, {
+      "name" : "max_depth",
+      "type" : "cat",
+      "values" : [ "None", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21" ],
+      "default" : "None"
+    }, {
+      "name" : "min_samples_split",
+      "type" : "int",
+      "default" : 2,
+      "min" : 2,
+      "max" : 21,
+      "minInterval" : 1,
+      "refineSplits" : 8
+    }, {
+      "name" : "min_samples_leaf",
+      "type" : "int",
+      "default" : 1,
+      "min" : 1,
+      "max" : 10,
+      "minInterval" : 1,
+      "refineSplits" : 8
+    }, {
+      "name" : "min_weight_fraction_leaf",
+      "type" : "double",
+      "default" : 0.0,
+      "min" : 0.0,
+      "max" : 0.5,
+      "minInterval" : 0.1,
+      "refineSplits" : 8
+    }, {
+      "name" : "max_leaf_nodes",
+      "type" : "cat",
+      "values" : [ "None", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21" ],
+      "default" : "None"
+    }, {
+      "name" : "min_impurity_decrease",
+      "type" : "double",
+      "default" : 0.0,
+      "min" : 0.0,
+      "max" : 1.0,
+      "minInterval" : 0.1,
+      "refineSplits" : 8
+    }, {
+      "name" : "bootstrap",
+      "type" : "cat",
+      "values" : [ "True", "False" ],
+      "default" : "True"
+    }, {
+      "name" : "n_jobs",
+      "type" : "cat",
+      "values" : [ "1" ],
+      "default" : "1"
+    } ]
+  } ]
+}

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -34,6 +35,7 @@ import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
+import ai.libs.jaicore.search.algorithms.standard.random.exception.IllegalArgumentForPathExtensionException;
 import ai.libs.jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
@@ -64,6 +66,8 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 	private final Random random;
 	private final Map<N, Iterator<INewNodeDescription<N, A>>> successorGenerators = new HashMap<>();
 
+	private int iterations = 0;
+
 	public RandomSearch(final IPathSearchInput<N, A> problem) {
 		this(problem, 0);
 	}
@@ -92,7 +96,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 	}
 
 	/**
-	 * This expansion either generates all successors of a node (if the successor generator function is not able to provide single successor) or only one new successor. The node is put on CLOSED once all successors have been generated.
+	 * This expansion either generates all successors of a node (if the successor generator function is not able to provide single successor) or only one new successor.
+	 *
+	 * The node is put on CLOSED once all successors have been generated.
 	 *
 	 * Note that the fact that a new successor is generated does not mean that the algorithm will choose the newly generated successor to be appended to the paths.
 	 *
@@ -117,13 +123,12 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 				/* generate the next successor */
 				Iterator<INewNodeDescription<N, A>> iterator = this.successorGenerators.computeIfAbsent(node, ((ILazySuccessorGenerator<N, A>) this.gen)::getIterativeGenerator);
 				if (!iterator.hasNext()) {
-					throw new IllegalStateException();
+					throw new IllegalArgumentForPathExtensionException(
+							"The path cannot be expanded since the head has no successors. However, it is also not marked as a goal node. Output of goal check is: " + this.goalTester.isGoal(path) + ".", path);
 				}
 				INewNodeDescription<N, A> successor = iterator.next();
 				assert this.exploredGraph.isGraphSane();
-				if (successor == null) {
-					throw new IllegalStateException();
-				}
+				Objects.requireNonNull(successor, "Received null object as a successor");
 				assert this.exploredGraph.hasItem(node) : "Parent node of successor is not part of the explored graph.";
 				if (this.exploredGraph.getSuccessors(node).contains(successor.getTo())) {
 					throw new IllegalStateException("Single node generator has generated a known successor. Generating another candidate.");
@@ -161,8 +166,11 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 				this.logger.debug("{} nodes have been added to the local model. Now checking prioritization.", addedSuccessors);
 
 				/* if the node has successors but none of them is prioritized, remove the node from the priority list */
-				if (!this.exploredGraph.getSuccessors(node).isEmpty() && this.prioritizedNodes.contains(node)) {
+				if (this.prioritizedNodes.contains(node) && SetUtil.intersection(this.exploredGraph.getSuccessors(node), this.prioritizedNodes).isEmpty()) {
 					this.prioritizedNodes.remove(node);
+					if (this.logger.isDebugEnabled()) {
+						this.logger.debug("Removed node with code {} from set of prioritized nodes.", node.hashCode());
+					}
 					this.updateExhaustedAndPrioritizedState(node);
 				}
 				closeNodeAfterwards = true;
@@ -226,6 +234,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 			case ACTIVE:
 
 				/* if the root is exhausted, cancel */
+				this.iterations++;
 				SearchGraphPath<N, A> drawnPath = null;
 				drawnPath = this.nextSolutionUnderSubPath(this.root);
 				if (drawnPath == null) {
@@ -346,10 +355,13 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 				assert SetUtil.intersection(this.exhausted, this.prioritizedNodes).isEmpty() : "There are nodes that are both exhausted and prioritized, which must not be the case:"
 				+ SetUtil.intersection(this.exhausted, this.prioritizedNodes).stream().map(n -> "\n\t" + n).collect(Collectors.joining());
 				Collection<N> prioritizedSuccessors = SetUtil.intersection(successors, this.prioritizedNodes);
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("Number of prioritized successors of node {} is {}", head.hashCode(), prioritizedSuccessors.size());
+				}
 				N lastHead = head;
 				if (!prioritizedSuccessors.isEmpty()) {
 					head = prioritizedSuccessors.iterator().next();
-					this.logger.debug("Following prioritized node {}", head);
+					this.logger.debug("Following arc {} to prioritized node {}", this.exploredGraph.getEdgeLabel(lastHead, head), head);
 
 					/* we now know that there exist prioritizes paths. That means that we also want to chase them as long as possible */
 					if (!hasCheckedWhetherPrioritizedPathExists) {
@@ -451,6 +463,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 				}
 				if (currentIsPrioritized && allPrioritizedChildrenExhausted) {
 					int sizeBefore = this.prioritizedNodes.size();
+					if (this.logger.isDebugEnabled()) {
+						this.logger.debug("Removing node {} from set of prioritized nodes.", current.hashCode());
+					}
 					this.prioritizedNodes.remove(current);
 					this.post(new NodeTypeSwitchEvent<N>(this, current, "or_closed"));
 					int sizeAfter = this.prioritizedNodes.size();
@@ -483,5 +498,17 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 	@Override
 	public String getLoggerName() {
 		return this.loggerName;
+	}
+
+	public Random getRandom() {
+		return this.random;
+	}
+
+	public int getIterations() {
+		return this.iterations;
+	}
+
+	public void setIterations(final int iterations) {
+		this.iterations = iterations;
 	}
 }

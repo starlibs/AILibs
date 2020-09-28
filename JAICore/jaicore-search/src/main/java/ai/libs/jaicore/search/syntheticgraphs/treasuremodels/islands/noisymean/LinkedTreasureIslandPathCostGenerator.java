@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.api4.java.datastructure.graph.ILabeledPath;
+
+import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
 
 public class LinkedTreasureIslandPathCostGenerator extends NoisyMeanTreasureModel {
@@ -23,6 +26,11 @@ public class LinkedTreasureIslandPathCostGenerator extends NoisyMeanTreasureMode
 
 	@Override
 	public double getMinimumAchievable() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean isPathToTreasureIsland(final ILabeledPath<ITransparentTreeNode, Integer> path) {
 		throw new UnsupportedOperationException();
 	}
 

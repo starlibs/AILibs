@@ -20,7 +20,7 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IObjectAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.kvstore.KVStore;
 import ai.libs.jaicore.basic.sets.SetUtil;
@@ -173,12 +173,12 @@ public class ArffDatasetAdapterTest {
 	}
 
 	@Test
-	public void testReadingDenseDatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
-		this.testReadingDatasetFromFile(new File("testrsc/dataset/arff/classifier-rank.arff"));
+	public void testReadingSingleLabelDenseDatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
+		this.testReadingDatasetFromFile(new File("testrsc/dataset/arff/krvskp.arff"));
 	}
 
 	@Test
-	public void testReadingSparseDatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
+	public void testReadingSingleLabelSparseDatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
 		this.testReadingDatasetFromFile(new File("testrsc/dataset/arff/dexter.arff"));
 	}
 
@@ -188,10 +188,10 @@ public class ArffDatasetAdapterTest {
 	}
 
 	@Test
-	public void testWritingADatasetToFile() throws DatasetDeserializationFailedException, IOException {
-		File datasetFile = new File("testrsc/dataset/arff/classifier-rank.arff");
+	public void testWritingASingleLabelDatasetToFile() throws DatasetDeserializationFailedException, IOException {
+		File datasetFile = new File("testrsc/dataset/arff/krvskp.arff");
 		ILabeledDataset<?> ds = ArffDatasetAdapter.readDataset(datasetFile);
-		File datasetCopyFile = new File("testrsc/dataset/arff/classifier-rank.arff.copy");
+		File datasetCopyFile = new File("testrsc/dataset/arff/krvskp.arff.copy");
 		ArffDatasetAdapter.serializeDataset(datasetCopyFile, ds);
 		assertEquals(ds, ArffDatasetAdapter.readDataset(datasetCopyFile));
 		Files.delete(datasetCopyFile.toPath());

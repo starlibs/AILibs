@@ -22,7 +22,7 @@ public class DatasetTestUtil {
 			for (int j = 0; j < numAttributes; j++) {
 				IAttribute attribute = ds.getAttribute(j);
 				assertNotNull("Attribute " + j + " when retrieved via getAttribute(j) from dataset is NULL for dataset of type " + ds.getClass().getName(), attribute);
-				assertTrue(attribute.isValidValue(i.getAttributeValue(j)));
+				assertTrue(i.getAttributeValue(j) + " is not a valid value of attirbute " + attribute.getStringDescriptionOfDomain(), attribute.isValidValue(i.getAttributeValue(j)));
 			}
 
 			/* check validity of instance values by array access */
@@ -30,7 +30,8 @@ public class DatasetTestUtil {
 			for (int j = 0; j < numAttributes; j++) {
 				IAttribute attribute = ds.getAttribute(j);
 				assertNotNull("Attribute " + j + " when retrieved via getAttribute(j) from dataset is NULL for dataset of type " + ds.getClass().getName(), attribute);
-				assertTrue(point[j] + " is not a valid value for attribute " + attribute.getName() + " with domain " + attribute.getStringDescriptionOfDomain() + " (" + attribute.getClass().getName() + ")", attribute.isValidValue(point[j]));
+				assertTrue(point[j] + " is not a valid value for attribute " + attribute.getName() + " with domain " + attribute.getStringDescriptionOfDomain() + " (" + attribute.getClass().getName() + ")",
+						attribute.isValidValue(point[j]));
 			}
 
 			/* check equalness of values obtained via getAttributes()[j] and getAttribute(j)  */

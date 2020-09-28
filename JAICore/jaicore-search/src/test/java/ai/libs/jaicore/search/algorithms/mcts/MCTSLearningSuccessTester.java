@@ -10,20 +10,18 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.ActionPredictionFailedException;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.EBehaviorForNotFullyExploredStates;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.uct.UCBPolicy;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.uct.UCT;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 import ai.libs.jaicore.search.probleminputs.MDPUtils;
+import ai.libs.jaicore.test.MediumTest;
 
-public abstract class MCTSLearningSuccessTester<N, A> {
-
-	protected Logger logger = LoggerFactory.getLogger("testers");
+public abstract class MCTSLearningSuccessTester<N, A> extends Tester {
 
 	private static final int DEFAULT_NUMITERATIONS = 10000;
 	private static final double DEFAULT_GAMMA = 1.0;
@@ -52,6 +50,7 @@ public abstract class MCTSLearningSuccessTester<N, A> {
 	}
 
 	@Test
+	@MediumTest
 	public void testLearningSuccess() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ObjectEvaluationFailedException, ActionPredictionFailedException {
 		IMDP<N, A, Double> mdp = this.getMDP();
 		Objects.requireNonNull(mdp);

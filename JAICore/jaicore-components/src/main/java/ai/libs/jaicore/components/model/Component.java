@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -20,6 +20,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.jaicore.basic.sets.PartialOrderedSet;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDependency;
+import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 /**
@@ -30,7 +34,7 @@ import ai.libs.jaicore.logging.ToJSONStringUtil;
  * @author fmohr, wever
  */
 @JsonPropertyOrder({ "name", "parameters", "dependencies", "providedInterfaces", "requiredInterfaces" })
-public class Component implements Serializable {
+public class Component implements IComponent, Serializable {
 
 	private static final long serialVersionUID = -5382777749445815025L;
 
@@ -40,9 +44,9 @@ public class Component implements Serializable {
 	/* Description of the component. */
 	private final String name;
 	private Collection<String> providedInterfaces = new ArrayList<>();
-	private final List<Interface> requiredInterfaces = new ArrayList<>();
-	private PartialOrderedSet<Parameter> parameters = new PartialOrderedSet<>();
-	private Collection<Dependency> dependencies = new ArrayList<>();
+	private final List<IRequiredInterfaceDefinition> requiredInterfaces = new ArrayList<>();
+	private PartialOrderedSet<IParameter> parameters = new PartialOrderedSet<>();
+	private Collection<IParameterDependency> dependencies = new ArrayList<>();
 
 	/**
 	 * Constructor creating an empty <code>Component</code> with a specific name.
@@ -72,7 +76,7 @@ public class Component implements Serializable {
 	 */
 	@JsonCreator
 	public Component(@JsonProperty("name") final String name, @JsonProperty("providedInterfaces") final Collection<String> providedInterfaces, @JsonProperty("requiredInterfaces") final List<Interface> requiredInterfaces,
-			@JsonProperty("parameters") final PartialOrderedSet<Parameter> parameters, @JsonProperty("dependencies") final Collection<Dependency> dependencies) {
+			@JsonProperty("parameters") final PartialOrderedSet<IParameter> parameters, @JsonProperty("dependencies") final Collection<IParameterDependency> dependencies) {
 		this(name);
 		this.providedInterfaces = providedInterfaces;
 		this.requiredInterfaces.addAll(requiredInterfaces);
@@ -94,7 +98,7 @@ public class Component implements Serializable {
 	 * @param dependencies
 	 *            A list of dependencies to constrain the values of parameters (may be empty).
 	 */
-	public Component(final String name, final Collection<String> providedInterfaces, final List<Interface> requiredInterfaces, final PartialOrderedSet<Parameter> parameters, final List<Dependency> dependencies) {
+	public Component(final String name, final Collection<String> providedInterfaces, final List<IRequiredInterfaceDefinition> requiredInterfaces, final PartialOrderedSet<IParameter> parameters, final List<IParameterDependency> dependencies) {
 		this(name);
 		this.providedInterfaces = providedInterfaces;
 		this.requiredInterfaces.addAll(requiredInterfaces);
@@ -105,6 +109,7 @@ public class Component implements Serializable {
 	/**
 	 * @return The name of the Component.
 	 */
+	@Override
 	public String getName() {
 		return this.name;
 	}
@@ -112,7 +117,8 @@ public class Component implements Serializable {
 	/**
 	 * @return The list of required interfaces.
 	 */
-	public List<Interface> getRequiredInterfaces() {
+	@Override
+	public List<IRequiredInterfaceDefinition> getRequiredInterfaces() {
 		return this.requiredInterfaces;
 	}
 
@@ -120,19 +126,20 @@ public class Component implements Serializable {
 	 * @return The list of names of required interfaces.
 	 */
 	public List<String> getRequiredInterfaceNames() {
-		return this.requiredInterfaces.stream().map(Interface::getName).collect(Collectors.toList());
+		return this.requiredInterfaces.stream().map(IRequiredInterfaceDefinition::getName).collect(Collectors.toList());
 	}
 
 	/**
 	 * @return The list of ids of required interfaces.
 	 */
 	public List<String> getRequiredInterfaceIds() {
-		return this.requiredInterfaces.stream().map(Interface::getId).collect(Collectors.toList());
+		return this.requiredInterfaces.stream().map(IRequiredInterfaceDefinition::getId).collect(Collectors.toList());
 	}
 
 	/**
 	 * @return The collection of provided interfaces.
 	 */
+	@Override
 	public Collection<String> getProvidedInterfaces() {
 		return this.providedInterfaces;
 	}
@@ -140,7 +147,8 @@ public class Component implements Serializable {
 	/**
 	 * @return The set of parameters of this Component.
 	 */
-	public PartialOrderedSet<Parameter> getParameters() {
+	@Override
+	public PartialOrderedSet<IParameter> getParameters() {
 		return this.parameters;
 	}
 
@@ -151,18 +159,15 @@ public class Component implements Serializable {
 	 *            The name of the parameter to be returned.
 	 * @return The parameter for the given name.
 	 */
-	public Parameter getParameterWithName(final String paramName) {
-		Optional<Parameter> param = this.parameters.stream().filter(p -> p.getName().equals(paramName)).findFirst();
-		if (!param.isPresent()) {
-			throw new IllegalArgumentException("Component " + this.name + " has no parameter with name \"" + paramName + "\". Available parameters: " + this.parameters);
-		}
-		return param.get();
+	public IParameter getParameterWithName(final String paramName) {
+		return this.getParameter(paramName);
 	}
 
 	/**
 	 * @return The collection of dependencies on the parameters of this <code>Component</code>.
 	 */
-	public Collection<Dependency> getDependencies() {
+	@Override
+	public Collection<IParameterDependency> getParameterDependencies() {
 		return this.dependencies;
 	}
 
@@ -181,23 +186,34 @@ public class Component implements Serializable {
 	}
 
 	/**
+	 * Adds a new required interface to the component
+	 *
+	 * @param ri The required interface definition
+	 */
+	public void addRequiredInterface(final IRequiredInterfaceDefinition ri) {
+		this.requiredInterfaces.add(ri);
+	}
+
+	/**
 	 * Adds an additional required interface with an ID (local identifier) and an interface name (provided interface of another Component) to the required interfaces of this Component.
 	 *
 	 * @param interfaceID
 	 *            The local identifier to reference the specific required interface.
 	 * @param interfaceName
 	 *            The provided interface of another component.
+	 * @param uniqueComponents
+	 * 			  Whether or not this is a set interface (every component must be attached at most once)
 	 * @param min
 	 *            Minimun times the interface is required?
 	 * @param max
 	 *            Maximum times the interface is required?
 	 */
-	public void addRequiredInterface(final String interfaceID, final String interfaceName, final Integer min, final Integer max) {
-		this.requiredInterfaces.add(new Interface(interfaceID, interfaceName, min, max));
+	public void addRequiredInterface(final String interfaceID, final String interfaceName, final boolean optional, final boolean uniqueComponents, final boolean ordered, final Integer min, final Integer max) {
+		this.addRequiredInterface(new Interface(interfaceID, interfaceName, optional, uniqueComponents, ordered, min, max));
 	}
 
 	public void addRequiredInterface(final String interfaceID, final String interfaceName) {
-		this.addRequiredInterface(interfaceID, interfaceName, 1, 1);
+		this.addRequiredInterface(interfaceID, interfaceName, false, false, false, 1, 1);
 	}
 
 	/**
@@ -206,7 +222,7 @@ public class Component implements Serializable {
 	 * @param param
 	 *            The parameter to be added.
 	 */
-	public void addParameter(final Parameter param) {
+	public void addParameter(final IParameter param) {
 		if (this.parameters.stream().anyMatch(p -> p.getName().equals(param.getName()))) {
 			throw new IllegalArgumentException("Component " + this.name + " already has a parameter with name " + param.getName());
 		}
@@ -219,17 +235,17 @@ public class Component implements Serializable {
 	 * @param dependency
 	 *            The dependency to be added.
 	 */
-	public void addDependency(final Dependency dependency) {
+	public void addDependency(final IParameterDependency dependency) {
 		/*
 		 * check whether this dependency is coherent with the current partial order on
 		 * the parameters
 		 */
-		Collection<Parameter> paramsInPremise = new HashSet<>();
+		Collection<IParameter> paramsInPremise = new HashSet<>();
 		dependency.getPremise().forEach(c -> c.forEach(i -> paramsInPremise.add(i.getX())));
-		Collection<Parameter> paramsInConclusion = new HashSet<>();
+		Collection<IParameter> paramsInConclusion = new HashSet<>();
 		dependency.getConclusion().forEach(i -> paramsInConclusion.add(i.getX()));
-		for (Parameter before : paramsInPremise) {
-			for (Parameter after : paramsInConclusion) {
+		for (IParameter before : paramsInPremise) {
+			for (IParameter after : paramsInConclusion) {
 				this.parameters.requireABeforeB(before, after);
 			}
 		}
@@ -307,6 +323,33 @@ public class Component implements Serializable {
 		fields.put("requiredInterfaces", this.requiredInterfaces);
 		fields.put("parameters", this.parameters);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
+	}
+
+
+	@Override
+	public IRequiredInterfaceDefinition getRequiredInterfaceDescriptionById(final String id) {
+		for (IRequiredInterfaceDefinition ri : this.requiredInterfaces) {
+			if (ri.getName().equals(id)) {
+				return ri;
+			}
+		}
+		throw new NoSuchElementException("There is no required interface with id " + id);
+	}
+
+
+	@Override
+	public IParameter getParameter(final String name) {
+		for (IParameter p : this.parameters) {
+			if (p.getName().equals(name)) {
+				return p;
+			}
+		}
+		throw new NoSuchElementException("There is no parameter with id " + name);
+	}
+
+	@Override
+	public boolean hasRequiredInterfaceWithId(final String id) {
+		return this.requiredInterfaces.stream().anyMatch(ri -> ri.getId().equals(id));
 	}
 
 }

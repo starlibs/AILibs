@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.api4.java.ai.ml.core.evaluation.IPredictionAndGroundTruthTable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.APredictionPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.TypelessPredictionDiff;

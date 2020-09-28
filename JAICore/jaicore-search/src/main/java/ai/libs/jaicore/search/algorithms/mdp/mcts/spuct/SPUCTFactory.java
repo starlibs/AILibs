@@ -5,7 +5,7 @@ import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.UniformRandomPolicy;
 import ai.libs.jaicore.search.probleminputs.IMDP;
 
-public class SPUCTFactory<N, A> extends MCTSFactory<N, A> {
+public class SPUCTFactory<N, A> extends MCTSFactory<N, A, SPUCTFactory<N, A>> {
 
 	private double bigD = 1000;
 

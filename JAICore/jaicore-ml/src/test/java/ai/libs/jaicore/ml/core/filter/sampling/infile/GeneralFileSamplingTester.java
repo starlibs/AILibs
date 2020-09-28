@@ -7,16 +7,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.junit.AfterClass;
-import org.junit.Test;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.Arguments;
 import org.openml.apiconnector.io.OpenmlConnector;
 
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
@@ -35,19 +34,10 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 	protected static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 	protected static final String OUTPUT_FILE_NAME = System.getProperty("user.home") + File.separator + UUID.randomUUID().toString() + ".arff";
 
-	@Parameters(name = "problemset = {0}")
-	public static Collection<Object[]> data() {
-		List<Object> problemSets = new ArrayList<>();
-
-		problemSets.add(new FileBasedSamplingAlgorithmTestProblemSet());
-		List<Collection<Object>> input = new ArrayList<>();
-		input.add(problemSets);
-
-		Object[][] data = new Object[problemSets.size()][1];
-		for (int i = 0; i < data.length; i++) {
-			data[i][0] = problemSets.get(i);
-		}
-		return Arrays.asList(data);
+	public static Stream<Arguments> getProblemSets() {
+		List<Arguments> problemSets = new ArrayList<>();
+		problemSets.add(Arguments.of(new FileBasedSamplingAlgorithmTestProblemSet()));
+		return problemSets.stream();
 	}
 
 	/**

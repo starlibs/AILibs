@@ -1,0 +1,31 @@
+{
+	"repository": "weka.attributeSelection.CfsSubsetEval",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.attributeSelection.CfsSubsetEval",
+			"requiredInterface": [],
+			"providedInterface": [
+				"nonRankBasedEvaluator"
+			],
+			"parameters": [
+				{
+					"name": "M",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "L",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "Z",
+					"type": "boolean",
+					"default": "false"
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

@@ -1,0 +1,41 @@
+{
+  "repository" : "weka.classifiers.rules.JRip",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.rules.JRip",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "PipelineClassifier" ],
+    "parameters" : [ {
+      "name" : "N",
+      "type" : "double",
+      "default" : 2.0,
+      "min" : 1.0,
+      "max" : 5.0,
+      "refineSplits" : 5,
+      "minInterval" : 0.5
+    }, {
+      "name" : "E",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "P",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "O",
+      "type" : "int",
+      "default" : 2.0,
+      "min" : 1.0,
+      "max" : 5.0,
+      "refineSplits" : 5,
+      "minInterval" : 1
+    }, {
+    	"name": "F",
+    	"type": "cat",
+    	"default": "3",
+    	"values": ["1", "2", "3", "4", "5"]
+    
+    } ],
+    "dependencies" : [ ]
+  } ]
+}

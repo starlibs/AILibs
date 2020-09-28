@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.function.DoubleFunction;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class LinearlyScaledFunctionTest {
 

@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class MultiLabelClassificationTest {
 
@@ -24,7 +24,7 @@ public class MultiLabelClassificationTest {
 
 	private static MultiLabelClassification classification;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() {
 		classification = new MultiLabelClassification(GT_VECTOR);
 	}

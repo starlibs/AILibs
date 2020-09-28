@@ -1,0 +1,1 @@
+weka.classifiers.rules.ZeroR

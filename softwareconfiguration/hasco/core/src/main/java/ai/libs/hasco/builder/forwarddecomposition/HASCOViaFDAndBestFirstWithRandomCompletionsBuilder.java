@@ -1,0 +1,87 @@
+package ai.libs.hasco.builder.forwarddecomposition;
+
+import java.util.Random;
+import java.util.function.Predicate;
+
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.algorithm.Timeout;
+
+import ai.libs.hasco.builder.HASCOBuilder;
+import ai.libs.hasco.core.IHascoAware;
+import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
+
+public class HASCOViaFDAndBestFirstWithRandomCompletionsBuilder extends HASCOViaFDAndBestFirstBuilder<Double, HASCOViaFDAndBestFirstWithRandomCompletionsBuilder> {
+
+	private IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator = null;
+	private Predicate<TFDNode> priorizingPredicate;
+	private Random random = new Random();
+	private int numSamples = 10;
+	private int timeoutForSingleCompletionEvaluationInMS = -1;
+	private int timeoutForNodeEvaluationInMS = -1;
+
+	public HASCOViaFDAndBestFirstWithRandomCompletionsBuilder(final HASCOBuilder<TFDNode, String, Double, ?> builder) {
+		super(builder);
+	}
+
+	public Predicate<TFDNode> getPriorizingPredicate() {
+		return this.priorizingPredicate;
+	}
+
+	public HASCOViaFDAndBestFirstWithRandomCompletionsBuilder withPriorizingPredicate(final Predicate<TFDNode> priorizingPredicate) {
+		this.priorizingPredicate = priorizingPredicate;
+		return this.getSelf();
+	}
+
+	public HASCOViaFDAndBestFirstWithRandomCompletionsBuilder withRandom(final Random random) {
+		this.random = random;
+		return this.getSelf();
+	}
+
+	public HASCOViaFDAndBestFirstWithRandomCompletionsBuilder withSeed(final long seed) {
+		return this.withRandom(new Random(seed));
+	}
+
+	public HASCOViaFDAndBestFirstWithRandomCompletionsBuilder withNumSamples(final int samples) {
+		this.numSamples = samples;
+		return this.getSelf();
+	}
+
+	public HASCOViaFDAndBestFirstWithRandomCompletionsBuilder withTimeoutForNode(final Timeout to) {
+		this.timeoutForNodeEvaluationInMS = (int)to.milliseconds();
+		return this.getSelf();
+	}
+
+	public HASCOViaFDAndBestFirstWithRandomCompletionsBuilder withTimeoutForSingleEvaluation(final Timeout to) {
+		this.timeoutForSingleCompletionEvaluationInMS = (int)to.milliseconds();
+		return this.getSelf();
+	}
+
+	public IPathEvaluator<TFDNode, String,Double> getPreferredNodeEvaluator() {
+		return this.preferredNodeEvaluator;
+	}
+
+	public HASCOViaFDAndBestFirstWithRandomCompletionsBuilder withPreferredNodeEvaluator(final IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator) {
+		this.preferredNodeEvaluator = preferredNodeEvaluator;
+		return this.getSelf();
+	}
+
+	public HASCOViaFDAndBestFirstWithRandomCompletionsBuilder withDefaultParametrizationsFirst() {
+		return this.withPriorizingPredicate(new DefaultPathPriorizingPredicate<>());
+	}
+
+	@Override
+	public HASCOViaFD<Double> getAlgorithm(){
+
+		/* create node evaluator */
+		this.requireThatProblemHasBeenDefined();
+		this.withReduction(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(this.preferredNodeEvaluator, this.priorizingPredicate, this.random, this.numSamples, this.timeoutForSingleCompletionEvaluationInMS, this.timeoutForNodeEvaluationInMS));
+
+		/* now get algorithm and tell some of its components about it */
+		HASCOViaFD<Double> hasco = super.getAlgorithm();
+		if (this.priorizingPredicate instanceof IHascoAware) {
+			((IHascoAware)this.priorizingPredicate).setHascoReference(hasco);
+		}
+		return hasco;
+	}
+}

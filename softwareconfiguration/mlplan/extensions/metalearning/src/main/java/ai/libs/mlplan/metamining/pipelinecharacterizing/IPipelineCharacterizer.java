@@ -2,6 +2,7 @@ package ai.libs.mlplan.metamining.pipelinecharacterizing;
 
 import java.util.List;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
 
@@ -23,7 +24,7 @@ public interface IPipelineCharacterizer {
 	 *            The pipelines to go through for patterns
 	 * @throws InterruptedException
 	 */
-	public void build(List<ComponentInstance> pipelines) throws InterruptedException;
+	public void build(List<? extends IComponentInstance> pipelines) throws InterruptedException;
 
 	/**
 	 * Checks which of the found patterns (found during the training phase in
@@ -36,7 +37,7 @@ public interface IPipelineCharacterizer {
 	 *            The pipeline for which pattern occurrence is checked
 	 * @return A list representing pattern occurrences in the pipeline
 	 */
-	public double[] characterize(ComponentInstance pipeline);
+	public double[] characterize(IComponentInstance pipeline);
 
 	/**
 	 * For each {@link MLPipeline} that was used in the training (given by its

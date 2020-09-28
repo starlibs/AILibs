@@ -1,0 +1,21 @@
+{
+	"repository": "subrepo",
+	"components": [
+		{
+			"name": "{$nameOfB}",
+			"requiredInterface": [],
+			"providedInterface": [
+				"IFace"
+			],
+			"parameters": [
+				{
+					"name": "{$nameOfParamb}",
+					"type": "cat",
+					"values": {$domainOfb},
+					"default": "{$defaultOfb}"
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

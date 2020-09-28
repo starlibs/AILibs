@@ -4,45 +4,48 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.planning.core.Action;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;
+import ai.libs.jaicore.timing.TimeRecordingObjectEvaluator;
 
 public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements IObjectEvaluator<IPlan, V>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(HASCOReductionSolutionEvaluator.class);
 	private final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem;
 	private final HASCOReduction<V> reduction;
-	private final IObjectEvaluator<ComponentInstance, V> evaluator;
+	private final IObjectEvaluator<IComponentInstance, V> evaluator;
+	private final TimeRecordingObjectEvaluator<IComponentInstance, V> timedEvaluator;
 
 	public HASCOReductionSolutionEvaluator(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final HASCOReduction<V> reduction) {
 		super();
 		this.configurationProblem = configurationProblem;
 		this.reduction = reduction;
 		this.evaluator = this.configurationProblem.getCompositionEvaluator();
+		this.timedEvaluator = new TimeRecordingObjectEvaluator<>(this.evaluator);
 	}
 
-	@SuppressWarnings("unchecked")
+	public HASCOReduction<V> getReduction() {
+		return this.reduction;
+	}
+
 	@Override
 	public V evaluate(final IPlan plan) throws InterruptedException, ObjectEvaluationFailedException {
 		ComponentInstance solution = this.reduction.decodeSolution(plan);
 		if (solution == null) {
 			throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(Action::getEncoding).collect(Collectors.joining("\n\t")));
 		}
-		if (this.evaluator instanceof IInformedObjectEvaluatorExtension && this.reduction.getBestSolutionSupplier().get() != null) {
-			((IInformedObjectEvaluatorExtension<V>) this.evaluator).informAboutBestScore(this.reduction.getBestSolutionSupplier().get().getScore());
-		}
-		this.logger.info("Forwarding evaluation request to evaluator {}", this.evaluator.getClass().getName());
-		return this.evaluator.evaluate(solution);
+		this.logger.info("Forwarding evaluation request for CI {} to evaluator {}", solution, this.evaluator.getClass().getName());
+		return this.timedEvaluator.evaluate(solution);
 	}
 
 	@Override
@@ -63,9 +66,16 @@ public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements
 		if (this.evaluator instanceof ILoggingCustomizable) {
 			this.logger.info("Setting logger of evaluator {} to {}.be", this.evaluator.getClass().getName(), name);
 			((ILoggingCustomizable) this.evaluator).setLoggerName(name + ".be");
-		}
-		else {
+		} else {
 			this.logger.info("Evaluator {} cannot be customized for logging, so not configuring its logger.", this.evaluator.getClass().getName());
 		}
+	}
+
+	public IObjectEvaluator<IComponentInstance, V> getEvaluator() {
+		return this.evaluator;
+	}
+
+	public TimeRecordingObjectEvaluator<IComponentInstance, V> getTimedEvaluator() {
+		return this.timedEvaluator;
 	}
 }

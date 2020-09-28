@@ -8,7 +8,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
 
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.StratifiedSamplingFactory;
-import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.AttributeBasedStratifier;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.DiscretizationHelper.DiscretizationStrategy;
 
 public class AttributeBasedStratifiedSamplingTester extends GeneralSamplingTester<Object> {
@@ -24,9 +24,9 @@ public class AttributeBasedStratifiedSamplingTester extends GeneralSamplingTeste
 		// We assume that the target is the last attribute
 		attributeIndices.add(dataset.getNumAttributes());
 
-		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(attributeIndices,
+		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(attributeIndices,
 				DiscretizationStrategy.EQUAL_SIZE, 10);
-		StratifiedSamplingFactory<ILabeledDataset<?>> factory = new StratifiedSamplingFactory<>(selectorAndAssigner, selectorAndAssigner);
+		StratifiedSamplingFactory<ILabeledDataset<?>> factory = new StratifiedSamplingFactory<>(selectorAndAssigner);
 		int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * dataset.size());
 		return factory.getAlgorithm(sampleSize, dataset, new Random(RANDOM_SEED));
 

@@ -1,6 +1,6 @@
 package ai.libs.automl.mlplan.bigdata;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.File;
 import java.io.FileReader;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.api4.java.algorithm.Timeout;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.mlplan.bigdata.MLPlan4BigFileInput;

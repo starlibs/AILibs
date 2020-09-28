@@ -4,13 +4,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.interrupt.InterruptionTimerTask;
+import ai.libs.jaicore.test.MediumTest;
 
 public class TrackableTimerTester extends Tester {
 
@@ -36,6 +37,7 @@ public class TrackableTimerTester extends Tester {
 		};
 	}
 
+	@MediumTest
 	@Test
 	public void testIndividualTrackableTask() throws InterruptedException {
 		TrackableTimer tt = new TrackableTimer();
@@ -66,6 +68,7 @@ public class TrackableTimerTester extends Tester {
 		assertFalse(tt.hasOpenTasks());
 	}
 
+	@MediumTest
 	@Test
 	public void testReocurringTrackableTask() throws InterruptedException {
 		TrackableTimer tt = new TrackableTimer();
@@ -87,7 +90,7 @@ public class TrackableTimerTester extends Tester {
 		assertFalse(tt.hasOpenTasks());
 	}
 
-	@Test
+	@MediumTest
 	public void testIndividualUntrackableTask() throws InterruptedException {
 		TrackableTimer tt = new TrackableTimer();
 
@@ -118,7 +121,7 @@ public class TrackableTimerTester extends Tester {
 		assertFalse(tt.hasOpenTasks());
 	}
 
-	@Test
+	@MediumTest
 	public void testReocurringUntrackableTask() throws InterruptedException {
 		TrackableTimer tt = new TrackableTimer();
 		TrackableTimerTask t = TrackableTimerTask.get(this.getEmptyTask());
@@ -139,14 +142,14 @@ public class TrackableTimerTester extends Tester {
 		assertFalse(tt.hasOpenTasks());
 	}
 
-	@Test
+	@MediumTest
 	public void testInterruptTask() throws InterruptedException {
 		TrackableTimer tt = new TrackableTimer();
 		Thread t = new Thread() {
 			@Override
 			public void run() {
 				while (!Thread.interrupted()) {
-					Awaitility.await().atLeast(Duration.ONE_HUNDRED_MILLISECONDS);
+					Awaitility.await().atLeast(100, TimeUnit.MILLISECONDS);
 				}
 			}
 		};

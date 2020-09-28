@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.db.sql.SQLAdapter;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
+import ai.libs.mlplan.weka.weka.MLPipelineComponentInstanceFactory;
 import dataHandling.mySQL.MetaDataDataBaseConnection;
 import weka.core.Instances;
 

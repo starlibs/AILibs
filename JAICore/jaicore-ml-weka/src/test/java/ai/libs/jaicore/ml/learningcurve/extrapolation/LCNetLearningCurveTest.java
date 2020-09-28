@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.FixMethodOrder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runners.MethodSorters;
 
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.InvalidAnchorPointsException;

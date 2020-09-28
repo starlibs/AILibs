@@ -1,0 +1,5 @@
+{
+  "repository" : "base-index",
+  "include" : [ "./bernoullinb.json", "./decisiontreeclassifier.json", "./dummyclassifier.json", "./extratreesclassifier.json", "./gaussiannb.json", "./gradientboostingclassifier.json", "./kneighborsclassifier.json", "./linearsvc.json", "./logisticregression.json", "./mlpclassifier.json", "./multinomialnb.json", "./randomforestclassifier.json", "./sgdclassifier.json", "./stackingestimator.json", "./xgbclassifier.json", "./xgbrfclassifier.json" ],
+  "components" : [ ]
+}

@@ -16,5 +16,4 @@ public class NodeInfoAlteredEvent<T> extends AAlgorithmEvent implements GraphEve
 	public T getNode() {
 		return this.node;
 	}
-
 }

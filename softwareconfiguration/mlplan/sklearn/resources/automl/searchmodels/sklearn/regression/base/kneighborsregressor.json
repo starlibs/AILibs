@@ -1,0 +1,54 @@
+{
+  "repository" : "sklearn.neighbors.KNeighborsRegressor",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.neighbors.KNeighborsRegressor",
+    "providedInterface" : [ "BasicRegressor", "BaseLearner", "AbstractRegressor" ],
+    "requiredInterface" : [ ],
+    "parameters" : [ {
+      "name" : "n_neighbors",
+      "type" : "int",
+      "default" : 5,
+      "min" : 1,
+      "max" : 15,
+      "minInterval" : 1,
+      "refineSplits" : 8
+    }, {
+      "name" : "weights",
+      "type" : "cat",
+      "values" : [ "uniform", "distance" ],
+      "default" : "uniform"
+    }, {
+      "name" : "algorithm",
+      "type" : "cat",
+      "values" : [ "auto", "ball_tree", "kd_tree", "brute" ],
+      "default" : "auto"
+    }, {
+      "name" : "leaf_size",
+      "type" : "int",
+      "default" : 30,
+      "min" : 1,
+      "max" : 100,
+      "minInterval" : 1,
+      "refineSplits" : 8
+    }, {
+      "name" : "p",
+      "type" : "int",
+      "default" : 2,
+      "min" : 1,
+      "max" : 5,
+      "minInterval" : 1,
+      "refineSplits" : 8
+    }, {
+      "name" : "metric",
+      "type" : "cat",
+      "values" : [ "minkowski", "euclidean", "manhattan" ],
+      "default" : "minkowski"
+    }, {
+      "name" : "n_jobs",
+      "type" : "cat",
+      "values" : [ "1" ],
+      "default" : "1"
+    } ]
+  } ]
+}

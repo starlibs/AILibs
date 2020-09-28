@@ -2,11 +2,9 @@ package ai.libs.hasco.core.predicate;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-import ai.libs.jaicore.components.model.Component;
-import ai.libs.jaicore.components.model.Parameter;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.logic.fol.theories.EvaluablePredicate;
@@ -15,7 +13,7 @@ public class IsNotRefinablePredicate implements EvaluablePredicate {
 
 	private final IsValidParameterRangeRefinementPredicate p;
 
-	public IsNotRefinablePredicate(final Collection<Component> components, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration) {
+	public IsNotRefinablePredicate(final Collection<? extends IComponent> components, final INumericParameterRefinementConfigurationMap refinementConfiguration) {
 		super();
 		this.p = new IsValidParameterRangeRefinementPredicate(components, refinementConfiguration);
 	}

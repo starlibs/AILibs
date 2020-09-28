@@ -8,7 +8,7 @@ import java.util.HashMap;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.common.math.IVector;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;

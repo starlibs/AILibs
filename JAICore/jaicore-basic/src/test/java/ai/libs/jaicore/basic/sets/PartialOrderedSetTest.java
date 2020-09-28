@@ -7,8 +7,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -30,7 +31,7 @@ public class PartialOrderedSetTest {
 	 * Sets up set with a newly created {@link PartialOrderedSet} with the order
 	 * a < b, a < c; b < c; c < d.
 	 */
-	@Before
+	@BeforeEach
 	public void prepareSet() {
 		this.set = new PartialOrderedSet<>();
 		this.set.addABeforeB(A, B);
@@ -84,18 +85,20 @@ public class PartialOrderedSetTest {
 	 * {@link de.upb.crc901.configurationsetting.util.PartialOrderedSet#addABeforeB(java.lang.Object, java.lang.Object)}
 	 * .
 	 */
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testAddABeforeB() {
-		String e = "e";
-		this.set.addABeforeB(A, e);
-		this.set.addABeforeB(e, B);
-		assertTrue("Since a before e was added, this should also be allowed.", this.set.allowsABeforeB(A, e));
-		assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, B));
-		assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, C));
-		assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, D));
+		Assertions.assertThrows(IllegalStateException.class, () -> {
+			String e = "e";
+			this.set.addABeforeB(A, e);
+			this.set.addABeforeB(e, B);
+			assertTrue("Since a before e was added, this should also be allowed.", this.set.allowsABeforeB(A, e));
+			assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, B));
+			assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, C));
+			assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, D));
 
-		// negative test, because by transitivity this shouldn't be allowed.
-		this.set.addABeforeB(C, e);
+			// negative test, because by transitivity this shouldn't be allowed.
+			this.set.addABeforeB(C, e);
+		});
 	}
 
 	/**

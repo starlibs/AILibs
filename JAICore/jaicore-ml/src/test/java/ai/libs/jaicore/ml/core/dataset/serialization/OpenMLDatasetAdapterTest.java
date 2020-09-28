@@ -1,16 +1,16 @@
 package ai.libs.jaicore.ml.core.dataset.serialization;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
@@ -19,115 +19,231 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.common.reconstruction.IReconstructible;
 import org.api4.java.common.reconstruction.IReconstructionPlan;
 import org.api4.java.common.reconstruction.ReconstructionException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.openml.apiconnector.io.OpenmlConnector;
+import org.openml.apiconnector.xml.DataQuality;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.dataset.DatasetTestUtil;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
+import ai.libs.jaicore.test.MediumTest;
 
-@RunWith(Parameterized.class)
 public class OpenMLDatasetAdapterTest {
+	protected Logger logger = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER);
+
+	private static OpenmlConnector con = new OpenmlConnector();
 
 	private static Map<Integer, Integer> numInstances = new HashMap<>();
 	private static Map<Integer, Integer> numFeatures = new HashMap<>();
 	private static Map<Integer, Integer> numClasses = new HashMap<>();
-	private static Collection<Integer> splitTests = new HashSet<>(); // the set of datasets for which splitting and reproducibility in splitting is tested
 
-	private static OpenMLProblemSet register(final int id, final int pNumInstances, final int pNumFeatures, final int pNumClasses, final boolean conductSplitTest) throws Exception {
-		numInstances.put(id, pNumInstances);
-		numFeatures.put(id, pNumFeatures);
-		numClasses.put(id, pNumClasses);
-		if (conductSplitTest) {
-			splitTests.add(id);
-		}
+	private static OpenMLProblemSet register(final int id) throws Exception {
+		DataQuality quality = con.dataQualities(id, 1);
+		numClasses.put(id, quality.getQualitiesMap().get("NumberOfClasses").intValue());
+		numInstances.put(id, quality.getQualitiesMap().get("NumberOfInstances").intValue());
+		numFeatures.put(id, quality.getQualitiesMap().get("NumberOfFeatures").intValue() - 1);
 		return new OpenMLProblemSet(id);
 	}
 
 	// creates the test data
-	@Parameters(name = "{0}")
-	public static Collection<OpenMLProblemSet[]> data() throws IOException, Exception {
-		List<OpenMLProblemSet> problemSets = new ArrayList<>();
-		problemSets.add(register(3, 3196, 36, 2, true)); // kr-vs-kp
-		problemSets.add(register(23512, 98050, 28, 2, true)); // higgs
-		problemSets.add(register(1457, 1500, 10000, 50, true)); // amazon
-		problemSets.add(register(42123, 3615, 6, 3169, true)); // articleinfluence
-		problemSets.add(register(554, 70000, 784, 10, true)); // MNIST
-		problemSets.add(register(4136, 600, 20000, 2, true)); // dexter
-		problemSets.add(register(4137, 1150, 100000, 2, true)); // dorothea
-		problemSets.add(register(41026, 7000, 5000, 2, false)); // gisette
-		problemSets.add(register(40927, 60000, 3072, 10, false)); // CIFAR-10
-		problemSets.add(register(183, 4177, 8, 28, true)); // abalone
-		problemSets.add(register(181, 1484, 8, 10, true)); // yeast
-		problemSets.add(register(1501, 1593, 256, 10, true)); // semeion
-		problemSets.add(register(41064, 58000, 784, 2, true)); // convex
-		problemSets.add(register(41066, 1567, 590, 2, true)); // secom
-		problemSets.add(register(41065, 62000, 784, 10, true)); // mnist rotate
-		problemSets.add(register(273, 120919, 1001, 2, true)); // IMDB drama
-		problemSets.add(register(1156, 275, 10936, 2, true)); // AP_Omentum_Ovary
-//		problemSets.add(register(40594, 2000, 250, 12, true)); // Reuters (multi-label classification dataset; not yet supported)
 
-		OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
-		for (int i = 0; i < data.length; i++) {
-			data[i][0] = problemSets.get(i);
-		}
-		return Arrays.asList(data);
+	public static Stream<Arguments> readDatasets(final List<Integer> ids) {
+		return ids.stream().map(t -> {
+			try {
+				return Arguments.of(OpenMLDatasetAdapterTest.register(t));
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new IllegalStateException(e);
+			}
+		});
 	}
 
-	@Parameter(0)
-	public OpenMLProblemSet problemSet;
+	public static Stream<Arguments> getSmallDatasets() throws IOException, Exception {
+		return readDatasets(Arrays.asList(
+				3, // kr-vs-kp
+				6 // letter
+				));
 
-	@Test
-	public void testReadAndReconstructibility() throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
-		System.gc();
-		int id = this.problemSet.getId();
-		int expectedInstances = numInstances.get(id);
-		int expectedAttributes = numFeatures.get(id);
-		int expectedClasses = numClasses.get(id);
-		this.testReconstructibility(this.read(id, expectedInstances, expectedAttributes, expectedClasses));
+	}
+
+	public static Stream<Arguments> getBigDatasets() throws IOException, Exception {
+		return readDatasets(Arrays.asList(
+				9, // autos
+				12, // mfeat-factors
+				14, // mfeat-fourier
+				16, // mfeat-karhunen
+				18, // mfeat-morph
+				21, // car
+				22, // mfeat-zernike
+				23, //cmc
+				24, // mushroom
+				26, // nursey
+				28, // optdigits
+				30, // page-blocks
+				31, // credit-g
+				32, // pendigits
+				36, // segment
+				38, // sick
+				39, // ecoli
+				44, // spambase
+				46, // splice
+				57, // hypothyroid
+				60, // waveform-5000
+				61, // iris
+				149, // CovPokElec
+				155, // pokerhand
+				179, // adult
+				180, // covertype
+				181, // yeast
+				182, // satimage
+				183, // abalone
+				184, // kropt
+				185, // baseball
+				273, // IMDB Drama
+				293, // covertype
+				300, // isolet
+				351, // codrna
+				354, // poker
+				554, // MNIST
+				1039, // hiva_agnostic
+				1101, // lymphoma_2classes
+				1104, // leukemia
+				1150, // AP_Breast_Lung
+				1152, // AP_Prostate_Ovary
+				1156, // AP_Omentum_Ovary
+				1240, // AirlinesCodmaAdult
+				1457, // amazon
+				1501, // semeion
+				1515, // micro-mass
+				1590, // adult
+				4136, // dexter
+				4137, // dorothea
+				23512, // higgs
+				//				40594, // Reuters => Multi target
+				40668, // connect-4
+				40691, // wine-quality-red
+				40927, // CIFAR-10
+				41026, // gisette
+				41064, // convex
+				41065, // mnist rotation
+				41066 // secom
+				//				42123 // articleinfluence => string attribute
+				));
+
+	}
+
+	private static int lastCachedId; // this is to detect whether the current dataset hold in dataset fits the current problem set
+	private static ILabeledDataset<?> dataset;
+
+	private void assureThatCorrectDatasetIsLoaded(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException {
+		int id = problemSet.getId();
+		if (lastCachedId != id) {
+			dataset = this.read(id, numInstances.get(id), numFeatures.get(id), numClasses.get(id));
+			lastCachedId = id;
+		}
 	}
 
 	public ILabeledDataset<ILabeledInstance> read(final int id, final int expectedInstances, final int expectedAttributes, final int expectedClasses) throws DatasetDeserializationFailedException, InterruptedException {
+		this.logger.debug("Reading in dataset with id {}", id);
 		ILabeledDataset<ILabeledInstance> data = OpenMLDatasetReader.deserializeDataset(id);
+		this.logger.debug("Dataset read, now checking general properties.");
 		assertEquals("Incorrect number of instances.", expectedInstances, data.size());
 		assertEquals("Incorrect number of attributes.", expectedAttributes, data.getNumAttributes());
 		DatasetTestUtil.checkDatasetCoherence(data);
 		return data;
 	}
 
-	@Test
-	public void testReconstructibilityOfStratifiedSplit() throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException, SplitFailedException {
-		if (!splitTests.contains(this.problemSet.getId())) {
-			return;
-		}
-		System.gc();
-		ILabeledDataset<?> dataset = this.problemSet.getDataset();
+	@ParameterizedTest
+	@MethodSource("getSmallDatasets")
+	public void testReconstructibilityOfStratifiedSplitOnSmallDataset(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException, SplitFailedException {
+		this.testReconstructibilityOfStratifiedSplit(problemSet);
+	}
+
+	@ParameterizedTest
+	@MethodSource("getBigDatasets")
+	@MediumTest
+	public void testReconstructibilityOfStratifiedSplitOnBigDataset(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException, SplitFailedException {
+		this.testReconstructibilityOfStratifiedSplit(problemSet);
+	}
+
+	@ParameterizedTest
+	@MethodSource("getSmallDatasets")
+	public void testWriteOnSmallDataset(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException {
+		this.testWrite(problemSet);
+	}
+
+	@ParameterizedTest
+	@MethodSource("getBigDatasets")
+	@MediumTest
+	public void testWriteOnBigDataset(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException {
+		this.testWrite(problemSet);
+	}
+
+	@ParameterizedTest
+	@MethodSource("getSmallDatasets")
+	public void testWriteOnSmallDatasetOnSmallDataset(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
+		this.testReconstructibility(problemSet);
+	}
+
+	@ParameterizedTest
+	@MethodSource("getBigDatasets")
+	@MediumTest
+	public void testReconstructibilityOnBigDataset(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
+		this.testReconstructibility(problemSet);
+	}
+
+	private void testReconstructibilityOfStratifiedSplit(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException, SplitFailedException {
+		this.assureThatCorrectDatasetIsLoaded(problemSet);
 
 		/* create stratified split and test that folds are reproducible */
-		System.out.println("Creating a stratified split.");
+		this.logger.info("Creating a stratified split.");
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(dataset, 0, .7);
 		ILabeledDataset<?> reproducedFirstFold = (ILabeledDataset<?>) ((IReconstructible) split.get(0)).getConstructionPlan().reconstructObject();
 		ILabeledDataset<?> reproducedSecondFold = (ILabeledDataset<?>) ((IReconstructible) split.get(1)).getConstructionPlan().reconstructObject();
-		System.out.println("Testing that folds are reconstructible.");
+		this.logger.info("Testing that folds are reconstructible.");
 		this.testReproduction(split.get(0), reproducedFirstFold);
 		this.testReproduction(split.get(1), reproducedSecondFold);
 	}
 
-	public void testReconstructibility(final ILabeledDataset<?> dataset) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
+	private void testWrite(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException {
+		this.assureThatCorrectDatasetIsLoaded(problemSet);
+		File outFile = new File("tmp/test.arff");
+		outFile.getParentFile().mkdirs();
+		this.logger.debug("Reading in dataset.", outFile);
+		ILabeledDataset<?> ds = dataset;
+		this.logger.debug("Serializing dataset.");
+		ArffDatasetAdapter.serializeDataset(outFile, ds);
+		this.logger.debug("Re-reading dataset from tmp file {}", outFile);
+		ILabeledDataset<?> reread = ArffDatasetAdapter.readDataset(outFile);
+		assertNotNull("Could not read in dataset again after writing", reread);
+		assertEquals("Datasets have different sizes!", ds.size(), reread.size());
+		int n = reread.size();
+		for (int i = 0; i < n; i++) {
+			ILabeledInstance expected = ds.get(i);
+			ILabeledInstance actual = reread.get(i);
+			assertEquals("Mismatch in " + i + "-th instance of dataset.", expected, actual);
+		}
+		assertEquals("Datasets are not the same.", ds, reread);
+	}
+
+	private void testReconstructibility(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
+		this.assureThatCorrectDatasetIsLoaded(problemSet);
 		if (!(dataset instanceof IReconstructible)) {
 			fail("Dataset not reconstructible");
 		}
 
 		/* test reproducibility of the dataset itself */
 		IReconstructible rDataset = (IReconstructible) dataset;
-		System.out.println("Creating reconstruction plan.");
+		this.logger.info("Creating reconstruction plan.");
 		IReconstructionPlan plan = rDataset.getConstructionPlan();
-		System.out.println("Recovering object from reconstruction plan.");
+		this.logger.info("Recovering object from reconstruction plan.");
 		ILabeledDataset<?> reproducedDataset = (ILabeledDataset<?>) plan.reconstructObject();
-		System.out.println("Testing equalness of the reproduced object");
+		this.logger.info("Testing equalness of the reproduced object");
 		this.testReproduction(dataset, reproducedDataset);
 	}
 

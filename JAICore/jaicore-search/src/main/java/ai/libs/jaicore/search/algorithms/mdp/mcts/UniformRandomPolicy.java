@@ -11,7 +11,15 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.IRandomizable;
 
-public class UniformRandomPolicy<T, A, V extends Comparable<V>> implements IPolicy<T, A>, IRandomizable, ILoggingCustomizable {
+/**
+ *
+ * @author Felix Mohr
+ *
+ * @param <N> Type of states (nodes)
+ * @param <A> Type of actions
+ * @param <V> Type of scores
+ */
+public class UniformRandomPolicy<N, A, V extends Comparable<V>> implements IPolicy<N, A>, IRandomizable, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(UniformRandomPolicy.class);
 	private final Random r;
@@ -26,7 +34,7 @@ public class UniformRandomPolicy<T, A, V extends Comparable<V>> implements IPoli
 	}
 
 	@Override
-	public A getAction(final T node, final Collection<A> actions) {
+	public A getAction(final N node, final Collection<A> actions) {
 		this.logger.debug("Deriving action for node {}. Options are: {}", node, actions);
 
 		if (actions.isEmpty()) {
@@ -51,7 +59,7 @@ public class UniformRandomPolicy<T, A, V extends Comparable<V>> implements IPoli
 		return choice;
 	}
 
-	public void updatePath(final List<T> path, final V score) {
+	public void updatePath(final List<N> path, final V score) {
 		this.logger.debug("Updating path {} with score {}", path, score);
 	}
 

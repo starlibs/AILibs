@@ -26,7 +26,7 @@ public class JobSchedulingProblemBuilder {
 
 	public JobSchedulingProblemBuilder withWorkcenter(final String workcenterID, final int[][] setupMatrix) {
 		if (this.workcenters.containsKey(workcenterID)) {
-			throw new IllegalArgumentException("Workcenter with id " + workcenterID + " already exists.");
+			throw new IllegalArgumentException(String.format("Workcenter with id %s already exists", workcenterID));
 		}
 		this.workcenters.put(workcenterID, new Workcenter(workcenterID, setupMatrix));
 		return this;
@@ -34,6 +34,11 @@ public class JobSchedulingProblemBuilder {
 
 	public JobSchedulingProblemBuilder singleStaged() {
 		return this.withWorkcenter("W", null);
+	}
+
+	public JobSchedulingProblemBuilder singleOperationAndSingleMachine() {
+		this.singleStaged();
+		return this.withMachineForWorkcenter("M", "W", 0, 0);
 	}
 
 	public JobSchedulingProblemBuilder withParallelMachines(final int k) {
@@ -49,9 +54,27 @@ public class JobSchedulingProblemBuilder {
 
 	public JobSchedulingProblemBuilder withJob(final String jobID, final int releaseDate, final int dueDate, final int weight) {
 		if (this.jobs.containsKey(jobID)) {
-			throw new IllegalArgumentException("A job with ID " + jobID + " has already been defined.");
+			throw new IllegalArgumentException(String.format("A job with ID %s has already been defined.", jobID));
 		}
 		this.jobs.put(jobID, new Job(jobID, releaseDate, dueDate, weight));
+		return this;
+	}
+
+	public JobSchedulingProblemBuilder withSingleOpJob(final int processingTime, final int weight) {
+		int id = 1;
+		String jobId = "J" + id;
+		while (this.jobs.containsKey(jobId)) {
+			id++;
+			jobId = "J" + id;
+		}
+		this.withJob(jobId, 0, 0, weight);
+		id = 1;
+		String opId = "O" + id;
+		while (this.operations.containsKey(opId)) {
+			id++;
+			opId = "O" + id;
+		}
+		this.withOperationForJob(opId, jobId, processingTime, 0, "W");
 		return this;
 	}
 
@@ -59,13 +82,13 @@ public class JobSchedulingProblemBuilder {
 		Workcenter wc = this.workcenters.get(wcId);
 		Job job = this.jobs.get(jobId);
 		if (wc == null) {
-			throw new IllegalArgumentException("No workcenter with id " + wcId + " has been defined!");
+			throw new IllegalArgumentException(String.format("No workcenter with id %s has been defined!", wcId));
 		}
 		if (job == null) {
-			throw new IllegalArgumentException("No job with id " + jobId + " has been defined!");
+			throw new IllegalArgumentException(String.format("No job with id %s has been defined", jobId));
 		}
 		if (this.operations.containsKey(operationId)) {
-			throw new IllegalArgumentException("There is already an operation with name \"" + operationId + "\" defined (in job " + this.operations.get(operationId).getJob().getJobID() + ")");
+			throw new IllegalArgumentException(String.format("There is already an operation with name \"%s\" defined (in job %s)", operationId, this.operations.get(operationId).getJob().getJobID()));
 		}
 		this.operations.put(operationId, new Operation(operationId, processTime, status, job, wc)); // the constructor automatically adds the operation to the job
 		return this;
@@ -74,10 +97,10 @@ public class JobSchedulingProblemBuilder {
 	public JobSchedulingProblemBuilder withMachineForWorkcenter(final String machineId, final String wcId, final int availability, final int initialState) {
 		Workcenter wc = this.workcenters.get(wcId);
 		if (wc == null) {
-			throw new IllegalArgumentException("No workcenter with id " + wcId + " has been defined!");
+			throw new IllegalArgumentException(String.format("No workcenter with id %s has been defined!", wcId));
 		}
 		if (this.machines.containsKey(machineId)) {
-			throw new IllegalArgumentException("Machine with id " + machineId + " has already been defined (for work center " + this.machines.get(machineId).getWorkcenter().getWorkcenterID() + ")");
+			throw new IllegalArgumentException(String.format("Machine with id %s has already been defined (for work center %s)", machineId, this.machines.get(machineId).getWorkcenter().getWorkcenterID()));
 		}
 		this.machines.put(machineId, new Machine(machineId, availability, initialState, wc)); // the constructor automatically adds the machine to the work center
 		return this;

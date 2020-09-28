@@ -11,7 +11,7 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
@@ -35,7 +35,7 @@ public class HOMERNodeTest {
 
 	@Test
 	public void testToString() {
-		assertEquals("toString is not giving the correct result.", "((1),(2)),(5),(7)", node.toString());
+		assertEquals("toString is not giving the correct result.", "J48(J48(1,2),5,7)", node.toString());
 	}
 
 	@Test

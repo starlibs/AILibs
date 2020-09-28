@@ -1,0 +1,38 @@
+{
+	"repository": "weka.classifiers.meta.Vote",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.meta.Vote",
+			"requiredInterface": [],
+			"providedInterface": [
+				"AbstractClassifier",
+				"MetaClassifier",
+				"PipelineClassifier"
+			],
+			"parameters": [
+				{
+					"name": "R",
+					"type": "cat",
+					"default": "AVG",
+					"values": [
+						"AVG",
+						"PROD",
+						"MAJ",
+						"MIN",
+						"MAX"
+					]
+				},
+				{
+					"name": "S",
+					"type": "cat",
+					"default": "1",
+					"values": [
+						"1"
+					]
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

@@ -42,7 +42,7 @@ allprojects {
 
 	//Project properties
 	project.group = 'ai.libs'
-	project.version = '0.2.0'
+	project.version = '0.2.3'
 	
 	ext {
 	    ossrhUsername = project.hasProperty('ossrhUsername') ? ossrhUsername : System.getenv("ossrhUsername")
@@ -84,10 +84,10 @@ allprojects {
 	    // Specific Utils
 	    fastUtil = 'it.unimi.dsi:fastutil:8.2.1' // JAICore-Basic
 	    mtj = 'io.github.andreas-solti.matrix-toolkits-java:mtj:1.0.8'
-	    jna = 'net.java.dev.jna:jna:4.5.2' // JAICore-Processes
+	    jna = 'net.java.dev.jna:jna:5.6.0' // JAICore-Processes
 	    weka = 'ai.libs.thirdparty:interruptible-weka:0.1.5'
 	    wekaRotationForest = 'nz.ac.waikato.cms.weka:rotationForest:1.0.3'
-	    meka = 'ai.libs.thirdparty:interruptible-meka:0.1.1'
+	    meka = 'ai.libs.thirdparty:interruptible-meka:0.1.2'
 	    mysql = 'mysql:mysql-connector-java:5.1.45'
 	    moea = 'org.moeaframework:moeaframework:2.12'
 	    cli = 'commons-cli:commons-cli:1.4'
@@ -133,13 +133,17 @@ allprojects {
 		runtimeOnly group: 'org.slf4j', name:'slf4j-log4j12', version:'1.7.25'
 
 		//Testing
-		testCompile group: 'junit', name: 'junit', version: '4.12'
-		testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.6.2")
-		//testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.4.0-M1'
+		//testCompile group: 'junit', name: 'junit', version: '4.12'
+	    testImplementation 'org.junit.platform:junit-platform-runner:1.7.0'
+	    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+	    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.3.1'
+	    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+	    
 		testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
 		testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+		testImplementation 'org.awaitility:awaitility:4.0.3'
 	}
-
+	
 	//Always check for updates in SNAPSHOT versions, do not cache
 	configurations.all {
 		// check for updates every build
@@ -204,36 +208,52 @@ allprojects {
 	    project.natures "org.eclipse.buildship.core.gradleprojectnature"
 	}
 
-
+	
+	task testQuick(type: Test) {
+		useJUnitPlatform{
+			excludeTags 'medium-test'
+			excludeTags 'long-test'
+		}
+		minHeapSize = "1g"
+	     	maxHeapSize = "4g"
+	}
+	
+	task testMedium(type: Test) {
+		useJUnitPlatform{
+			excludeTags 'long-test'
+		}
+	}
 
 	test {
 		useJUnitPlatform()
-     	reports {
-        	junitXml.enabled = false
-        	html.enabled = true
-		}
+	     	reports {
+			junitXml.enabled = false
+			html.enabled = true
+			}
 
 		minHeapSize = "1g"
-     	maxHeapSize = "2g"
-     	ignoreFailures = false
+	     	maxHeapSize = "4g"
+	     	ignoreFailures = true
 		forkEvery = 1		
 		maxParallelForks = 1
-     	testLogging {
-			events "failed"
-			exceptionFormat "full"
-     	}
-     	ext.testFailures = 0
-     	afterSuite { desc, result ->
-            if (desc.getParent() == null) {
-                ext.testFailures += result.getFailedTestCount() //count failures
-            }
-        }
+	     	testLogging {
+		     	testLogging {
+				events "failed"
+				exceptionFormat "full"
+		     	}
+	     	}
+	     	ext.testFailures = 0
+	     	afterSuite { desc, result ->
+		    if (desc.getParent() == null) {
+		        ext.testFailures += result.getFailedTestCount() //count failures
+		    }
+		}
          
-        gradle.buildFinished { //when it finishes check if there are any failures and blow up
-    		if (ext.testFailures > 0) {
-        		ant.fail("The build finished but ${ext.testFailures} tests failed - blowing up the build ! ")
-    		}
-    	}
+		gradle.buildFinished { //when it finishes check if there are any failures and blow up
+	    		if (ext.testFailures > 0) {
+				ant.fail("The build finished but ${ext.testFailures} tests failed - blowing up the build ! ")
+	    		}
+	    	}
 	}
 }
 
@@ -243,7 +263,6 @@ task showDirs {
         logger.quiet(rootDir.toPath().relativize(project.testResultsDir.toPath()).toString())
     }
 }
-
 
 dependencies{
 	compile project(":hasco-core")

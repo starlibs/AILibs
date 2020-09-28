@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import junit.framework.Assert;
 import weka.core.Attribute;

@@ -33,6 +33,10 @@ public class GenericLandscapeAnalyzer<N, A> {
 		this.goalTester = problem.getGoalTester();
 	}
 
+	public double[] getValues(final Number probeSize) throws InterruptedException, PathEvaluationException {
+		return this.getValues(probeSize, LandscapeAnalysisCompletionTechnique.RANDOM);
+	}
+
 	public double[] getValues(final Number probeSize, final LandscapeAnalysisCompletionTechnique technique) throws InterruptedException, PathEvaluationException {
 		return this.getValues(new SearchGraphPath<>(this.root), probeSize, technique);
 	}

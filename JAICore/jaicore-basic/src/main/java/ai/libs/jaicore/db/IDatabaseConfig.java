@@ -40,5 +40,6 @@ public interface IDatabaseConfig extends IOwnerBasedConfig, Reloadable {
 	public String getDBTableName();
 
 	@Key(DB_SSL)
+	@DefaultValue("true")
 	public Boolean getDBSSL();
 }

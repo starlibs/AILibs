@@ -2,7 +2,7 @@ package ai.libs.mlplan.safeguard;
 
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 
 public class EvaluationSafeGuardException extends ObjectEvaluationFailedException {
 
@@ -11,14 +11,14 @@ public class EvaluationSafeGuardException extends ObjectEvaluationFailedExceptio
 	 */
 	private static final long serialVersionUID = 2170317514693997168L;
 
-	private final ComponentInstance ci;
+	private final IComponentInstance ci;
 
-	public EvaluationSafeGuardException(final String message, final ComponentInstance ci) {
+	public EvaluationSafeGuardException(final String message, final IComponentInstance ci) {
 		super(message);
 		this.ci = ci;
 	}
 
-	public ComponentInstance getCausingComponentInstance() {
+	public IComponentInstance getCausingComponentInstance() {
 		return this.ci;
 	}
 

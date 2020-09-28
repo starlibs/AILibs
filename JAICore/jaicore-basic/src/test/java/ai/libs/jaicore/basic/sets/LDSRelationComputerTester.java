@@ -10,38 +10,44 @@ import java.util.stream.Collectors;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.sets.algorithms.RelationComputerTester;
+import ai.libs.jaicore.basic.sets.problems.RelationalProblemSet;
 
 public class LDSRelationComputerTester extends RelationComputerTester {
 
-	@Test
-	public void testOutputSizeForCartesianProducts() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
-		RelationComputationProblem<Object> problem = this.getCartesianProductProblem();
+	@ParameterizedTest
+	@MethodSource("getProblemSets")
+	public void testOutputSizeForCartesianProducts(final RelationalProblemSet problemSet) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
+		RelationComputationProblem<Object> problem = this.getCartesianProductProblem(problemSet);
 		int expected = problem.getSets().get(0).size() * problem.getSets().get(1).size() * problem.getSets().get(2).size();
 		this.testRelation(problem, expected);
 	}
 
-	@Test
-	public void testOutputSizeForNonEmptyRelation() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
-		RelationComputationProblem<Object> problem = this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes();
-		LDSRelationComputer<Object> ldsComputer = new LDSRelationComputer<>(this.getCartesianProductProblem());
+	@ParameterizedTest
+	@MethodSource("getProblemSets")
+	public void testOutputSizeForNonEmptyRelation(final RelationalProblemSet problemSet) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
+		RelationComputationProblem<Object> problem = problemSet.getSimpleProblemInputForGeneralTestPurposes();
+		LDSRelationComputer<Object> ldsComputer = new LDSRelationComputer<>(this.getCartesianProductProblem(problemSet));
 		ldsComputer.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		List<List<Object>> cartesianProduct = ldsComputer.call();
 		List<List<?>> groundTruth = cartesianProduct.stream().filter(problem.getPrefixFilter()).collect(Collectors.toList());
 		this.testRelation(problem, groundTruth.size());
 	}
 
-	@Test
-	public void testOutputSizeForEmptyRelation() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
-		this.testRelation(this.getInfeasibleRelationProblem(), 0);
+	@ParameterizedTest
+	@MethodSource("getProblemSets")
+	public void testOutputSizeForEmptyRelation(final RelationalProblemSet problemSet) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
+		this.testRelation(this.getInfeasibleRelationProblem(problemSet), 0);
 	}
 
-	@Test
-	public void testOutputSizeForPrunedRelation() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
-		this.testRelation(this.getInfeasibleCompletelyPrunedRelationProblem(), 0);
+	@ParameterizedTest
+	@MethodSource("getProblemSets")
+	public void testOutputSizeForPrunedRelation(final RelationalProblemSet problemSet) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
+		this.testRelation(this.getInfeasibleCompletelyPrunedRelationProblem(problemSet), 0);
 	}
 
 	private void testRelation(final RelationComputationProblem<Object> problem, final int expected) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
@@ -68,16 +74,16 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 		return defficiency;
 	}
 
-	public RelationComputationProblem<Object> getCartesianProductProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException {
-		return new RelationComputationProblem<>(this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes().getSets()); // remove the filter condition
+	public RelationComputationProblem<Object> getCartesianProductProblem(final RelationalProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException {
+		return new RelationComputationProblem<>(problemSet.getSimpleProblemInputForGeneralTestPurposes().getSets()); // remove the filter condition
 	}
 
-	public RelationComputationProblem<Object> getInfeasibleRelationProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException {
-		return new RelationComputationProblem<>(this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes().getSets(), t -> t.size() < 3); // all full tuples are forbidden
+	public RelationComputationProblem<Object> getInfeasibleRelationProblem(final RelationalProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException {
+		return new RelationComputationProblem<>(problemSet.getSimpleProblemInputForGeneralTestPurposes().getSets(), t -> t.size() < 3); // all full tuples are forbidden
 	}
 
-	public RelationComputationProblem<Object> getInfeasibleCompletelyPrunedRelationProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException {
-		return new RelationComputationProblem<>(this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes().getSets(), t -> false); // all tuples are forbidden
+	public RelationComputationProblem<Object> getInfeasibleCompletelyPrunedRelationProblem(final RelationalProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException {
+		return new RelationComputationProblem<>(problemSet.getSimpleProblemInputForGeneralTestPurposes().getSets(), t -> false); // all tuples are forbidden
 	}
 
 	@Override

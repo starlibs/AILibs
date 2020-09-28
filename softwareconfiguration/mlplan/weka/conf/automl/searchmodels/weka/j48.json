@@ -11,7 +11,7 @@
 				"BaseClassifier",
 				"Test"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "O",
 					"type": "boolean",

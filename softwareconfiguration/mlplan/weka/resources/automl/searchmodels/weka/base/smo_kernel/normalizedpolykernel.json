@@ -1,0 +1,22 @@
+{
+  "repository" : "weka.classifiers.functions.supportVector.NormalizedPolyKernel",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.functions.supportVector.NormalizedPolyKernel",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "K" ],
+    "parameters" : [ {
+      "name" : "E",
+      "type" : "double",
+      "min" : 0.2,
+      "max" : 5.0,
+      "default" : 1.0,
+      "minInterval" : 0.1,
+      "refineSplits" : 8
+    }, {
+      "name" : "L",
+      "type" : "boolean",
+      "default" : "false"
+    } ]
+  } ]
+}

@@ -53,6 +53,14 @@
       "name": "10",
       "optional": "true",
       "min": 2
+    },
+    {
+      "id": "11",
+      "name": "11",
+      "optional": "false",
+      "ordered": "false",
+      "unique": "true",
+      "min": 2
     }
   ]
 }

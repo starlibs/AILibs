@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test to verify the correct behavior of {@link FilteredIterable}.

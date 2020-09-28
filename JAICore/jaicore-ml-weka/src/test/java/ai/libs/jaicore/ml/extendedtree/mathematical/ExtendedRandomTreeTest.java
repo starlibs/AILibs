@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;

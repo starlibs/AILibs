@@ -1,0 +1,33 @@
+{
+	"repository": "weka.attributeSelection.Ranker",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.attributeSelection.Ranker",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rankBasedSearcher"
+			],
+			"parameters": [
+				{
+					"name": "N",
+					"type": "cat",
+					"default": "20",
+					"values": [
+						"1",
+						"2",
+						"3",
+						"4",
+						"8",
+						"10",
+						"20",
+						"50",
+						"100",
+						"1000"
+					]
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

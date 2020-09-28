@@ -9,6 +9,7 @@ dependencies {
 	compile("$apacheCommonsLang")
 	compile("$mysql")
 	
+  	testCompile 'org.awaitility:awaitility:3.1.6'
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }
 			

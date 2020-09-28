@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.ExtendedRandomTree;
 import weka.core.DenseInstance;

@@ -1,20 +1,23 @@
 package ai.libs.hasco.test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.hasco.knowledgebase.PerformanceKnowledgeBase;
+import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.Component;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
 
-public class PerformanceKnowledgeBaseTest {
+public class PerformanceKnowledgeBaseTest extends Tester {
 
 	@Test
 	public void test() {
@@ -49,25 +52,19 @@ public class PerformanceKnowledgeBaseTest {
 		paramValues3.put("Param2", "Val2");
 		paramValues3.put("Param3", "13");
 
-		HashMap<String, ComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<String, ComponentInstance>();
+		HashMap<String, List<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
 
 		ComponentInstance ci1 = new ComponentInstance(comp, paramValues1, satisfactionOfRequiredInterfaces);
 		ComponentInstance ci2 = new ComponentInstance(comp, paramValues2, satisfactionOfRequiredInterfaces);
 		ComponentInstance ci3 = new ComponentInstance(comp, paramValues3, satisfactionOfRequiredInterfaces);
 
-		System.out.println(ci1.getParameterValues());
-
 		pKB.addPerformanceSample("test", ci1, 0.7754, false);
 		pKB.addPerformanceSample("test", ci2, 0.1154, false);
 		pKB.addPerformanceSample("test", ci3, 0.3333, false);
 
-		// System.out.println(pKB.createInstancesForPerformanceSamples("test", ci1));
-		// String identifier = Util.getComponentNamesOfComposition(ci1);
-		// System.out.println("Number completely distinct samples: " + pKB.getNumCompletelyDistinctSamples("test", identifier));
-
-		System.out.println("PKB has k completely distinct distinct samples: " + pKB.kCompletelyDistinctSamplesAvailable("test", ci1, 2));
-		System.out.println("PKB has k distinct values: " + pKB.kDistinctAttributeValuesAvailable("test", ci1, 4));
-		System.out.println(pKB.getPerformanceSamplesForIndividualComponent("test", comp));
+		LOGGER.info("PKB has k completely distinct distinct samples: {}", pKB.kCompletelyDistinctSamplesAvailable("test", ci1, 2));
+		LOGGER.info("PKB has k distinct values: {}", pKB.kDistinctAttributeValuesAvailable("test", ci1, 4));
+		LOGGER.info("{}", pKB.getPerformanceSamplesForIndividualComponent("test", comp));
 
 		assertTrue(true);
 	}

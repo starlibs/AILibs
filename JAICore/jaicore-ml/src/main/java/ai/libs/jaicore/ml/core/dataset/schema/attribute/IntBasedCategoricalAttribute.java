@@ -12,8 +12,6 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 	 */
 	private static final long serialVersionUID = 3727153881173459843L;
 
-	private static final String MISSING_VALUE = "?";
-
 	private final List<String> domain;
 	private final int numCategories;
 
@@ -41,13 +39,15 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 	@Override
 	public boolean isValidValue(final Object attributeValue) {
 		if (attributeValue == null) {
-			return false;
+			return true;
 		}
 		Integer value = null;
 		if (attributeValue instanceof ICategoricalAttributeValue) {
 			value = ((ICategoricalAttributeValue) attributeValue).getValue();
 		} else if (attributeValue instanceof Integer) {
 			value = (Integer) attributeValue;
+		} else if (attributeValue instanceof Double) {
+			value = (int) (double) attributeValue;
 		} else if (this.domain.contains(attributeValue)) {
 			value = this.domain.indexOf(attributeValue);
 		}
@@ -64,12 +64,12 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		if (!this.isValidValue(attributeValue)) {
 			throw new IllegalArgumentException("No valid attribute value.");
 		}
-		return this.domain.indexOf(this.getLabelOfAttributeValue(attributeValue)) + 1.0;
+		return this.domain.indexOf(this.getLabelOfAttributeValue(attributeValue));
 	}
 
 	@Override
 	public String decodeValue(final double encodedAttributeValue) {
-		return this.domain.get((int) encodedAttributeValue - 1);
+		return this.domain.get((int) encodedAttributeValue);
 	}
 
 	private String getLabelOfAttributeValue(final Object object) {
@@ -90,15 +90,12 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		if (this.isValidValue(object)) {
 			int cObject;
 			if (object instanceof Integer) {
-				cObject = (int)object;
-			}
-			else if (this.domain.contains(object)) {
+				cObject = (int) object;
+			} else if (this.domain.contains(object)) {
 				cObject = this.domain.indexOf(object);
-			}
-			else if (object instanceof ICategoricalAttributeValue) {
+			} else if (object instanceof ICategoricalAttributeValue) {
 				cObject = ((ICategoricalAttributeValue) object).getValue();
-			}
-			else {
+			} else {
 				throw new IllegalStateException("Object should be parseable after the test.");
 			}
 			return new IntBasedCategoricalAttributeValue(this, cObject);
@@ -131,10 +128,16 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 	@Override
 	public String serializeAttributeValue(final Object value) {
 		if (value == null) {
-			return MISSING_VALUE;
+			return null;
 		}
 		if (!(value instanceof Integer)) {
-			throw new IllegalArgumentException("Can only serialize the integer representation of a category.");
+			if (!this.domain.contains(value)) {
+				throw new IllegalArgumentException("The given value \"" + value + "\" is not part of the domain and cannot be serialized. The domain is: " + this.domain);
+			}
+			return (String)value; // here we know that this must be a String; otherwise it could not be in the domain!
+		}
+		if (((Integer) value) < 0) {
+			return null;
 		}
 		return this.domain.get((Integer) value);
 	}
@@ -142,13 +145,11 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 	@Override
 	public Integer deserializeAttributeValue(final String string) {
 		String trimmedString = string.trim();
-		if (string.equals(MISSING_VALUE)) {
-			return null;
-		}
 		if ((string.startsWith("'") && string.endsWith("'")) || (string.startsWith("\"") && string.endsWith("\""))) {
 			trimmedString = trimmedString.substring(1, trimmedString.length() - 1);
 		}
-		return this.domain.indexOf(trimmedString);
+		int indexOf = this.domain.indexOf(trimmedString);
+		return (indexOf < 0) ? null : indexOf;
 	}
 
 	@Override

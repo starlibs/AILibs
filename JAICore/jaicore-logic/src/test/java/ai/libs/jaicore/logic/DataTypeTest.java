@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.logic.fol.structure.Type;
 import ai.libs.jaicore.logic.fol.structure.TypeModule;
@@ -19,86 +19,86 @@ public class DataTypeTest {
 
 	private TypeModule typeMod;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.typeMod = new TypeModule();
 
-		rootType = typeMod.getType("Root");
+		this.rootType = this.typeMod.getType("Root");
 
-		nonRootType = typeMod.getType("NonRoot");
-		nonRootType.addSuperType(rootType);
+		this.nonRootType = this.typeMod.getType("NonRoot");
+		this.nonRootType.addSuperType(this.rootType);
 
 	}
 
 	@Test
 	public void getNameTest() {
-		assertEquals("getName()", "Root", rootType.getName());
+		assertEquals("getName()", "Root", this.rootType.getName());
 	}
 
 	@Test
 	public void toStringTest() {
-		assertEquals("Root;", rootType.toString());
-		assertEquals("NonRoot;Root", nonRootType.toString());
+		assertEquals("Root;", this.rootType.toString());
+		assertEquals("NonRoot;Root", this.nonRootType.toString());
 	}
 
 	@Test
 	public void isRootTypeTest() {
-		assertTrue(rootType.isRootType());
-		assertFalse(nonRootType.isRootType());
+		assertTrue(this.rootType.isRootType());
+		assertFalse(this.nonRootType.isRootType());
 	}
 
 	@Test
 	public void getParentTypesTest() {
-		assertTrue(nonRootType.getDirectSuperTypes().indexOf(rootType) != -1);
-		assertTrue(rootType.getDirectSuperTypes().indexOf(nonRootType) == -1);
+		assertTrue(this.nonRootType.getDirectSuperTypes().indexOf(this.rootType) != -1);
+		assertTrue(this.rootType.getDirectSuperTypes().indexOf(this.nonRootType) == -1);
 	}
 
 	@Test
 	public void removeParentTypeTest() {
-		nonRootType.removeSuperType(rootType);
-		assertTrue(nonRootType.getDirectSuperTypes().indexOf(rootType) == -1);
-		assertTrue(rootType.getDirectSubTypes().isEmpty());
+		this.nonRootType.removeSuperType(this.rootType);
+		assertTrue(this.nonRootType.getDirectSuperTypes().indexOf(this.rootType) == -1);
+		assertTrue(this.rootType.getDirectSubTypes().isEmpty());
 	}
 
 	@Test
 	public void removeSubTypeTest() {
-		rootType.removeSubType(nonRootType);
-		assertTrue(rootType.getDirectSubTypes().isEmpty());
+		this.rootType.removeSubType(this.nonRootType);
+		assertTrue(this.rootType.getDirectSubTypes().isEmpty());
 	}
 
 	@Test
 	public void isSubTypeOfTest() {
-		assertFalse(rootType.isSubTypeOf(nonRootType));
-		assertTrue(rootType.isSubTypeOf(rootType));
-		assertTrue(nonRootType.isSubTypeOf(rootType));
+		assertFalse(this.rootType.isSubTypeOf(this.nonRootType));
+		assertTrue(this.rootType.isSubTypeOf(this.rootType));
+		assertTrue(this.nonRootType.isSubTypeOf(this.rootType));
 	}
 
 	@Test
 	public void isSuperTypeOfTest() {
-		assertFalse(nonRootType.isSuperTypeOf(rootType));
-		assertTrue(nonRootType.isSuperTypeOf(nonRootType));
-		assertTrue(rootType.isSuperTypeOf(nonRootType));
+		assertFalse(this.nonRootType.isSuperTypeOf(this.rootType));
+		assertTrue(this.nonRootType.isSuperTypeOf(this.nonRootType));
+		assertTrue(this.rootType.isSuperTypeOf(this.nonRootType));
 	}
 
 	@Test
 	public void getGreatestSubTypeHierarchyTest() {
-		Type betweenType = typeMod.getType("IntermediateType1");
-		betweenType.addSuperType(nonRootType);
+		Type betweenType = this.typeMod.getType("IntermediateType1");
+		betweenType.addSuperType(this.nonRootType);
 
-		parallelNonRootType = typeMod.getType("ParallelNonRootType");
-		parallelNonRootType.addSuperType(rootType);
+		this.parallelNonRootType = this.typeMod.getType("ParallelNonRootType");
+		this.parallelNonRootType.addSuperType(this.rootType);
 
-		greatestSubType = typeMod.getType("GreatestSubType");
-		greatestSubType.addSuperType(parallelNonRootType);
-		greatestSubType.addSuperType(betweenType);
+		this.greatestSubType = this.typeMod.getType("GreatestSubType");
+		this.greatestSubType.addSuperType(this.parallelNonRootType);
+		this.greatestSubType.addSuperType(betweenType);
 
-		betweenType = typeMod.getType("IntermediateType2");
-		betweenType.addSuperType(nonRootType);
+		betweenType = this.typeMod.getType("IntermediateType2");
+		betweenType.addSuperType(this.nonRootType);
 
 	}
 
 	@Test
 	public void getGreatestSubTypeSimpleTest() {
-		assertEquals(nonRootType, Type.getGreatestSubType(rootType, nonRootType));
+		assertEquals(this.nonRootType, Type.getGreatestSubType(this.rootType, this.nonRootType));
 	}
 }

@@ -7,8 +7,8 @@ import java.util.List;
 
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassificationPredictionBatch;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class MultiLabelClassificationPredictionBatchTest {
 
@@ -27,7 +27,7 @@ public class MultiLabelClassificationPredictionBatchTest {
 
 	private static IMultiLabelClassificationPredictionBatch classification;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() {
 		List<IMultiLabelClassification> preds = new ArrayList<>(GT_MATRIX.length);
 		for (int i = 0; i < GT_MATRIX.length; i++) {

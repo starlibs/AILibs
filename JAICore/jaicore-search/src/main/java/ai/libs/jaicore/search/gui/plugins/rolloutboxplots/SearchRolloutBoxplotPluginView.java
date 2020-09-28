@@ -9,7 +9,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.NodeClickedEvent;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
@@ -20,7 +20,7 @@ import javafx.scene.web.WebView;
  * @param <BalancedTreeNode>
  *            The node class
  */
-public class SearchRolloutBoxplotPluginView extends ASimpleMVCPluginView<SearchRolloutBoxplotPluginModel, SearchRolloutBoxplotPluginController, FlowPane> {
+public class SearchRolloutBoxplotPluginView extends ASimpleMVCPluginView<SearchRolloutBoxplotPluginModel, SearchRolloutBoxplotPluginController, StackPane> {
 
 	private final Button left = new Button("left");
 	private final Button right = new Button("right");
@@ -29,10 +29,10 @@ public class SearchRolloutBoxplotPluginView extends ASimpleMVCPluginView<SearchR
 	private WebEngine engine;
 
 	public SearchRolloutBoxplotPluginView(final SearchRolloutBoxplotPluginModel model) {
-		super(model, new FlowPane());
+		super(model, new StackPane());
 		Platform.runLater(() -> {
 			WebView view = new WebView();
-			FlowPane node = this.getNode();
+			StackPane node = this.getNode();
 			node.getChildren().add(view);
 			this.engine = view.getEngine();
 			this.engine.loadContent("Nothing there yet.");
@@ -95,11 +95,6 @@ public class SearchRolloutBoxplotPluginView extends ASimpleMVCPluginView<SearchR
 	public synchronized void clear() {
 
 		/* nothing to do */
-	}
-
-	@Override
-	public String getTitle() {
-		return "Search Rollout Statistics";
 	}
 
 }

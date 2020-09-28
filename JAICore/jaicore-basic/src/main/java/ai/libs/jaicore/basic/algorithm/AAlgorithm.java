@@ -1,7 +1,10 @@
 package ai.libs.jaicore.basic.algorithm;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -17,6 +20,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.algorithm.exceptions.ExceptionInAlgorithmIterationException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.common.event.IRelaxedEventEmitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,10 +30,10 @@ import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.timing.TimedComputation;
 
-public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable {
+public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable, IRelaxedEventEmitter {
 
 	/* Logger variables */
-	protected Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
+	private Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
 	private String loggerName;
 
 	/* Parameters of the algorithm. */
@@ -49,6 +53,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private final Set<Thread> activeThreads = new HashSet<>();
 	private EAlgorithmState state = EAlgorithmState.CREATED;
 	private final EventBus eventBus = new EventBus();
+	private final List<Object> listeners = new ArrayList<>();
 
 	private int timeoutPrecautionOffset = 100; // this offset is substracted from the true remaining time whenever a timer is scheduled to ensure that the timeout is respected
 	private static final int MIN_RUNTIME_FOR_OBSERVED_TASK = 50;
@@ -109,6 +114,11 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	@Override
 	public void registerListener(final Object listener) {
 		this.eventBus.register(listener);
+		this.listeners.add(listener);
+	}
+
+	public List<Object> getListeners() {
+		return Collections.unmodifiableList(this.listeners);
 	}
 
 	@Override
@@ -138,6 +148,10 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		this.getConfig().setProperty(IOwnerBasedAlgorithmConfig.K_TIMEOUT, timeout.milliseconds() + "");
 	}
 
+	public boolean isTimeoutDefined() {
+		return this.getTimeout().milliseconds() > 0;
+	}
+
 	public int getTimeoutPrecautionOffset() {
 		return this.timeoutPrecautionOffset;
 	}
@@ -160,6 +174,10 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			return true;
 		}
 		return false;
+	}
+
+	protected long getDeadline() {
+		return this.deadline;
 	}
 
 	protected Timeout getRemainingTimeToDeadline() {
@@ -396,7 +414,9 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		}
 		if (this.getTimeout().milliseconds() > 0) {
 			this.deadline = System.currentTimeMillis() + this.getTimeout().milliseconds() - this.timeoutPrecautionOffset;
-			this.logger.info("Timeout is {}. Setting deadline to timestamp {}. Remaining time: {}", this.getTimeout(), this.deadline, this.getRemainingTimeToDeadline());
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info("Timeout is {}, and precaution offset is {}. Setting deadline to timestamp {}. Remaining time: {}", this.getTimeout(), this.timeoutPrecautionOffset, this.deadline, this.getRemainingTimeToDeadline());
+			}
 		} else {
 			this.deadline = System.currentTimeMillis() + 86400 * 1000 * 365;
 			this.logger.info("No timeout defined. Setting deadline to timestamp {}. Remaining time: {}", this.deadline, this.getRemainingTimeToDeadline());

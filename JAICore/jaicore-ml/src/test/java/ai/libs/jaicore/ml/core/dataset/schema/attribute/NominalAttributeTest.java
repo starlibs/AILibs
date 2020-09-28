@@ -7,8 +7,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class NominalAttributeTest extends AAttributeTest {
 
@@ -18,7 +18,7 @@ public class NominalAttributeTest extends AAttributeTest {
 
 	private static IntBasedCategoricalAttribute attributeToTest;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() {
 		attributeToTest = new IntBasedCategoricalAttribute(ATTRIBUTE_NAME, VALUES);
 	}

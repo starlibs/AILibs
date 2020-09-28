@@ -8,7 +8,7 @@ import java.util.Random;
 
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 

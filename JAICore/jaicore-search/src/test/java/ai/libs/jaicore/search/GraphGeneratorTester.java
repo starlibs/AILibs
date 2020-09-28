@@ -1,6 +1,6 @@
 package ai.libs.jaicore.search;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -11,18 +11,19 @@ import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.graph.LabeledGraph;
 
 public abstract class GraphGeneratorTester<N, A> {
 
-	public abstract List<Pair<IGraphGenerator<N, A>,Integer>> getGraphGenerators() throws Exception;
+	public abstract List<Pair<IGraphGenerator<N, A>, Integer>> getGraphGenerators() throws Exception;
 
 	private class Node {
 		N point;
 		int depth;
+
 		public Node(final N point, final int depth) {
 			super();
 			this.point = point;
@@ -51,7 +52,7 @@ public abstract class GraphGeneratorTester<N, A> {
 			g1.addItem(root1);
 			maxDepth = Integer.MAX_VALUE;
 			while (!open.isEmpty()) {
-				n1 ++;
+				n1++;
 				Node expandedNode = open.poll();
 				if (expandedNode.depth > maxDepth) {
 					break;
@@ -74,7 +75,7 @@ public abstract class GraphGeneratorTester<N, A> {
 			g2.addItem(root2);
 			maxDepth = Integer.MAX_VALUE;
 			while (!open.isEmpty()) {
-				n2 ++;
+				n2++;
 				Node expandedNode = open.poll();
 				if (expandedNode.depth > maxDepth) {
 					break;

@@ -2,7 +2,9 @@ package ai.libs.jaicore.experiments;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,8 +91,10 @@ public abstract class AExperimentBuilder<B extends AExperimentBuilder<B>> implem
 
 	@Override
 	public Experiment build() {
-		if (!this.keyMap.keySet().containsAll(this.config.getKeyFields())) {
-			throw new IllegalStateException("Cannot build experiment. Required fields have not been defined: " + SetUtil.difference(this.config.getKeyFields(), this.keyMap.keySet()));
+		ExperimentSetAnalyzer ea = new ExperimentSetAnalyzer(this.config);
+		List<String> keyFieldNames = this.config.getKeyFields().stream().map(f -> ea.getNameTypeSplitForAttribute(f).getX()).collect(Collectors.toList());
+		if (!this.keyMap.keySet().containsAll(keyFieldNames)) {
+			throw new IllegalStateException("Cannot build experiment. Required fields have not been defined: " + SetUtil.difference(keyFieldNames, this.keyMap.keySet()));
 		}
 		this.preBuildHook();
 		return new Experiment(this.memory, this.numCPUs, this.keyMap);

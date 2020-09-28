@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.aeonbits.owner.ConfigFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import autofe.db.configuration.DatabaseAutoFeConfiguration;
 import autofe.db.model.database.AbstractFeature;
