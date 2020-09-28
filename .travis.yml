@@ -51,7 +51,7 @@ addons:
 
 script:
   - echo $TEST_PROJECT
-  - ./gradlew $TEST_PROJECT:test
+  - ./gradlew $TEST_PROJECT:testQuick
 
 jobs:
   include:
