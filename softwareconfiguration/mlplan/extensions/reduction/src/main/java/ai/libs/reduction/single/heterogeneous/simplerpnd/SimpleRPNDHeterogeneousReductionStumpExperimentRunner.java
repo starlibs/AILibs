@@ -12,7 +12,9 @@ import java.util.Optional;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.api4.java.datastructure.kvstore.IKVStore;
 
-import ai.libs.jaicore.db.sql.SQLAdapter;
+import ai.libs.jaicore.db.IDatabaseAdapter;
+import ai.libs.jaicore.db.IDatabaseConfig;
+import ai.libs.jaicore.db.sql.DatabaseAdapterFactory;
 import ai.libs.reduction.Util;
 import ai.libs.reduction.single.MySQLReductionExperiment;
 import ai.libs.reduction.single.ReductionExperiment;
@@ -29,11 +31,11 @@ public class SimpleRPNDHeterogeneousReductionStumpExperimentRunner {
 	private static final String RUNTIME_STD = "runtime_std";
 
 	private static final String TABLE_NAME = "reductionstumps";
-	private final SQLAdapter adapter;
+	private final IDatabaseAdapter adapter;
 	private final Collection<MySQLReductionExperiment> knownExperiments = new HashSet<>();
 
-	public SimpleRPNDHeterogeneousReductionStumpExperimentRunner(final String host, final String user, final String password, final String database) throws SQLException {
-		this.adapter = new SQLAdapter(host, user, password, database);
+	public SimpleRPNDHeterogeneousReductionStumpExperimentRunner(final IDatabaseConfig config) throws SQLException {
+		this.adapter = DatabaseAdapterFactory.get(config);
 		this.knownExperiments.addAll(this.getConductedExperiments());
 	}
 

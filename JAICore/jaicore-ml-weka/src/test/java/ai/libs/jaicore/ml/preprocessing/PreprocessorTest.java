@@ -2,16 +2,16 @@ package ai.libs.jaicore.ml.preprocessing;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.algorithm.IAlgorithm;
-import org.junit.jupiter.api.Test;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
@@ -26,21 +26,15 @@ import weka.attributeSelection.AttributeSelection;
 
 public class PreprocessorTest extends GeneralAlgorithmTester {
 
-	// creates the test data
-	@Parameters(name = "{0}")
-	public static Collection<Object[]> data() {
+	public static Stream<Arguments> getProblemSets() {
 		Collection<List<String>> validCombos = WekaUtil.getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection();
-		List<Object> problemSets = validCombos.stream().map(c -> new WekaPreprocessorProblemSet(c.get(0), c.get(1))).collect(Collectors.toList());
-		Object[][] data = new Object[problemSets.size()][1];
-		for (int i = 0; i < data.length; i++) {
-			data[i][0] = problemSets.get(i);
-		}
-		return Arrays.asList(data);
+		return validCombos.stream().map(c -> Arguments.of(new WekaPreprocessorProblemSet(c.get(0), c.get(1))));
 	}
 
-	@Test
-	public void testFit() throws Exception {
-		Pair<String, ILabeledDataset<ILabeledInstance>> ps = (Pair<String, ILabeledDataset<ILabeledInstance>>)this.problemSet.getSimpleProblemInputForGeneralTestPurposes();
+	@ParameterizedTest
+	@MethodSource("getProblemSets")
+	public void testFit(final WekaPreprocessorProblemSet problemSet) throws Exception {
+		Pair<String, ILabeledDataset<ILabeledInstance>> ps = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		String[] parts = ps.getX().split("/");
 		ASSearch search = ASSearch.forName(parts[0], null);
 		ASEvaluation eval = ASEvaluation.forName(parts[1], null);

@@ -9,24 +9,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.db.sql.SQLAdapter;
+import ai.libs.jaicore.db.IDatabaseAdapter;
+import ai.libs.jaicore.db.IDatabaseConfig;
+import ai.libs.jaicore.db.sql.DatabaseAdapterFactory;
 import ai.libs.reduction.Util;
 
 public class MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner {
 
 	private static final String KEY_ERROR_RATE = "errorRate";
 	private static final String TABLE_NAME = "homogeneousensemblesofreductionstumps";
-	private final SQLAdapter adapter;
+	private final IDatabaseAdapter adapter;
 	private final Collection<MySQLEnsembleOfSimpleOneStepReductionsExperiment> knownExperiments = new HashSet<>();
 	private final Logger logger = LoggerFactory.getLogger(MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner.class);
 
 	public MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner(final String host, final String user, final String password, final String database) throws SQLException {
-		this.adapter = new SQLAdapter(host, user, password, database);
+		IDatabaseConfig config = ConfigFactory.create(IDatabaseConfig.class);
+		config.setProperty(IDatabaseConfig.DB_HOST, host);
+		config.setProperty(IDatabaseConfig.DB_USER, user);
+		config.setProperty(IDatabaseConfig.DB_PASS, password);
+		config.setProperty(IDatabaseConfig.DB_NAME, database);
+		this.adapter = DatabaseAdapterFactory.get(config);
 		this.knownExperiments.addAll(this.getConductedExperiments());
 	}
 
