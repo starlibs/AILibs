@@ -1,4 +1,4 @@
-package ai.libs.automl.mlplan.test;
+package ai.libs.mlplan.wekamlplan;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

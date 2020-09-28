@@ -1,16 +1,16 @@
 {
 	"repository": "preprocessing-index",
 	"include": [
+		"./asnoranker.json",
+		"./asranker.json",
 		"./bestfirst.json",
 		"./cfssubseteval.json",
 		"./correlationattributeeval.json",
 		"./gainratioattributeeval.json",
 		"./greedystepwise.json",
 		"./infogainattributeeval.json",
-		"./noranker.json",
 		"./onerattributeeval.json",
 		"./principalcomponents.json",
-		"./ranker.json",
 		"./ranker.json",
 		"./relieffattributeeval.json",
 		"./symmetricaluncertattributeeval.json"

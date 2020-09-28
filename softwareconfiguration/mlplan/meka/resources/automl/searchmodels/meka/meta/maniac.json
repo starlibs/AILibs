@@ -8,7 +8,7 @@
       "id" : "W",
       "name" : "BasicMLClassifier"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "compression",
       "comment" : "Compression factor of the autoencoders, each level of autoencoders will compress the labels to factor times previous layer size. (default: 0.85)",
       "type" : "double",

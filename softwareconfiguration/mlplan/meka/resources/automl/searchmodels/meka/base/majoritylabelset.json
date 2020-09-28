@@ -5,6 +5,6 @@
     "name" : "meka.classifiers.multilabel.MajorityLabelset",
     "providedInterface" : [ "MLClassifier", "BasicMLClassifier" ],
     "requiredInterface" : [ ],
-    "parameter" : [ ]
+    "parameters" : [ ]
   } ]
 }

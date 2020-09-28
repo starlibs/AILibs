@@ -8,7 +8,7 @@
 			"providedInterface": [
 				"rankBasedSearcher"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "N",
 					"type": "cat",

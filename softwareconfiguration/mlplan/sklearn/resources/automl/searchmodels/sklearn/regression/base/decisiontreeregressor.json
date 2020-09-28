@@ -5,7 +5,7 @@
     "name" : "sklearn.tree.DecisionTreeRegressor",
     "providedInterface" : [ "BasicRegressor", "BaseLearner", "FeatureImportanceEstimator", "AbstractRegressor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "criterion",
       "default" : "mse",
       "type" : "cat",

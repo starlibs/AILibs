@@ -5,7 +5,7 @@
     "name" : "sklearn.cluster.FeatureAgglomeration",
     "providedInterface" : [ "sklearn.cluster.FeatureAgglomeration", "AgglomerationPreprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "linkage",
       "default" : "ward",
       "type" : "cat",

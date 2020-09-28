@@ -8,7 +8,7 @@
       "id" : "W",
       "name" : "AbstractClassifier"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "X",
       "comment" : "The way to measure dependencies. default: lbf (frequencies only) | TODO: No label dependence still missing as an option",
       "type" : "cat",

@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.meta.MultiClassClassifier",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "PipelineClassifier" ],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   } ]
 }

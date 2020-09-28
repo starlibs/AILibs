@@ -10,7 +10,7 @@
 				"MetaClassifier",
 				"PipelineClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "R",
 					"type": "cat",

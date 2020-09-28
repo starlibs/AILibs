@@ -12,7 +12,7 @@
 				"BaseClassifier",
 				"PipelineClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "E",
 					"type": "boolean",

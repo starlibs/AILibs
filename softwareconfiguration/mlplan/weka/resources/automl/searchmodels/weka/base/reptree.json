@@ -13,7 +13,7 @@
 				"RandomizableBaseClassifier",
 				"PipelineClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "M",
 					"type": "int",

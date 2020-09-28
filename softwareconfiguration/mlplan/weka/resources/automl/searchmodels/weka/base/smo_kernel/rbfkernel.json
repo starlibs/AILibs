@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.functions.supportVector.RBFKernel",
     "requiredInterface" : [ ],
     "providedInterface" : [ "K" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "G",
       "type" : "double",
       "min" : 1.0E-4,

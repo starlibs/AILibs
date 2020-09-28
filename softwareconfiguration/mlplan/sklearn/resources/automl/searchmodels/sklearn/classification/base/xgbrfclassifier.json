@@ -5,7 +5,7 @@
     "name" : "xgboost.XGBRFClassifier",
     "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "n_estimators",
       "type" : "int",
       "default" : 100,

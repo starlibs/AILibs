@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.functions.Logistic",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "R",
       "type" : "double",
       "default" : 1.0E-7,

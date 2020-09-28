@@ -5,7 +5,7 @@
     "name" : "sklearn.linear_model.PassiveAggressiveRegressor",
     "providedInterface" : [ "BasicRegressor", "BaseLearner", "AbstractRegressor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "C",
       "type" : "double",
       "default" : 1.0,

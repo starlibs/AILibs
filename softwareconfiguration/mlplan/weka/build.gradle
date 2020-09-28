@@ -15,6 +15,7 @@ dependencies {
 	/* dependencies to the test sources of other projects */
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-components', configuration: 'testArtifacts')
 	testCompile project(path: ':JAICore:jaicore-ml', configuration: 'testArtifacts')
 	testCompile project(path: ':mlplan-core', configuration: 'testArtifacts')
 }

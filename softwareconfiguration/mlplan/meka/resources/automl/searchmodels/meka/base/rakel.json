@@ -9,7 +9,7 @@
       "name" : "AbstractClassifier"
     } ],
     "comment" : "LEFT OUT: _k  The number of labels in each partition __ should be 1 <= k < (L/2) where L is the total number of labels\nLEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m).",
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "M",
       "comment" : "Sets M (default 10): the number of subsets",
       "type" : "int",

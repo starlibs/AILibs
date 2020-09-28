@@ -5,7 +5,7 @@
     "name" : "sklearn.decomposition.FastICA",
     "providedInterface" : [ "sklearn.decomposition.FastICA", "DecompositionPreprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "tol",
       "type" : "double",
       "default" : 0.505,

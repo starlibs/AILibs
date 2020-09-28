@@ -8,7 +8,7 @@
       "id" : "W",
       "name" : "AbstractClassifier"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "I",
       "comment" : "The total number of iterations. default: 1000 ",
       "type" : "int",

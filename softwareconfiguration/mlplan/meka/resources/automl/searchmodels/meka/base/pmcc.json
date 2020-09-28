@@ -8,7 +8,7 @@
       "id" : "W",
       "name" : "AbstractClassifier"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "M",
       "comment" : "The population size (of chains) __ should be smaller than the total number of chains evaluated (Is) default: 10",
       "type" : "int",

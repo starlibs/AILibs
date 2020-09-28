@@ -5,7 +5,7 @@
     "name" : "xgboost.XGBClassifier",
     "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "max_depth",
       "type" : "int",
       "default" : 6,

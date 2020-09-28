@@ -8,7 +8,7 @@
       "id" : "W",
       "name" : "AbstractClassifier"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "Is",
       "comment" : "The number of iterations to search the chain space at train time. default: 0",
       "type" : "int",

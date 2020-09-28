@@ -4,7 +4,7 @@
     "name" : "weka.classifiers.trees.REPTree",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "M",
       "type" : "int",
       "default" : 2.0,

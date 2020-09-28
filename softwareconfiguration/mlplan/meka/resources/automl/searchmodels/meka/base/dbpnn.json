@@ -8,7 +8,7 @@
       "id" : "W",
       "name" : "meka.classifiers.multilabel.BPNN"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "H",
       "comment" : "Sets the number of hidden units default: 10",
       "type" : "int",

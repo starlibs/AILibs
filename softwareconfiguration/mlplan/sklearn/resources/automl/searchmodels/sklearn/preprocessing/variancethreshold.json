@@ -5,7 +5,7 @@
     "name" : "sklearn.feature_selection.VarianceThreshold",
     "providedInterface" : [ "sklearn.feature_selection.VarianceThreshold", "FeatureSelection", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "threshold",
       "default" : 1.0E-4,
       "type" : "cat",

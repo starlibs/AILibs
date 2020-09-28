@@ -5,6 +5,6 @@
     "name" : "sklearn.preprocessing.RobustScaler",
     "providedInterface" : [ "sklearn.preprocessing.RobustScaler", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ ]
+    "parameters" : [ ]
   } ]
 }

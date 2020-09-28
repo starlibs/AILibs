@@ -5,7 +5,7 @@
     "name" : "tpot.builtins.OneHotEncoder",
     "providedInterface" : [ "tpot.builtins.OneHotEncoder", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "minimum_fraction",
       "default" : 0.05,
       "type" : "cat",

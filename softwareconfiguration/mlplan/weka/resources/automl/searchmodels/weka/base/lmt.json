@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.trees.LMT",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "BoostableBaseClassifier", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "B",
       "type" : "boolean",
       "default" : "false"

@@ -5,7 +5,7 @@
     "name" : "sklearn.decomposition.PCA",
     "providedInterface" : [ "sklearn.decomposition.PCA", "DecompositionPreprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "svd_solver",
       "default" : "randomized",
       "type" : "cat",

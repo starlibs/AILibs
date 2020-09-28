@@ -8,7 +8,7 @@
       "id" : "score_func",
       "name" : "sklearn.feature_selection.f_classif"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "percentile",
       "type" : "int",
       "default" : 50,

@@ -5,6 +5,6 @@
     "name" : "tpot.builtins.ZeroCount",
     "providedInterface" : [ "tpot.builtins.ZeroCount", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ ]
+    "parameters" : [ ]
   } ]
 }

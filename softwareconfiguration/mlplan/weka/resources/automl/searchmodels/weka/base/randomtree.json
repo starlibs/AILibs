@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.trees.RandomTree",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "RandomizableBaseClassifier", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "M",
       "type" : "int",
       "default" : 1.0,

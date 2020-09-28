@@ -10,7 +10,7 @@
 	  	    		"name": "AbstractFilter"
 	  	    	}
 			],
-	    	"parameter" : [ ]
+	    	"parameters" : [ ]
 	    },{
 	  	    "name" : "autofe.MakeUnion",
 	  	    "providedInterface" : [ "AbstractFilter", "MakeUnion"],
@@ -24,7 +24,7 @@
 	  	    		"name": "AbstractFilter"
 	  	    	}
 			],
-	    	"parameter" : [ ]
+	    	"parameters" : [ ]
 	    }, {
 	  	    "name" : "autofe.MakeForward",
 	  	    "providedInterface" : [ "AbstractFilter", "MakeForward", "AbstractPipeline"],
@@ -38,7 +38,7 @@
 	  	    		"name": "AbstractPipeline"
 	  	    	}
 			],
-	    	"parameter" : [ ]
+	    	"parameters" : [ ]
 	    }
 	    ]
 }

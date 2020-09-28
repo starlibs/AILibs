@@ -5,7 +5,7 @@
     "name" : "meka.classifiers.multilabel.BPNN",
     "providedInterface" : [ "MLClassifier", "BasicMLClassifier", "ProblemTransformationMethod" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "H",
       "comment" : "Sets the number of hidden units default: 10",
       "type" : "int",

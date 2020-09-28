@@ -8,7 +8,7 @@
       "id" : "W",
       "name" : "BasicMLClassifier"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "I",
       "comment" : "Sets the number of models (default 10)",
       "type" : "int",

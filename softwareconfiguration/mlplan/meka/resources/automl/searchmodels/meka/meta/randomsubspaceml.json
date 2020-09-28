@@ -8,7 +8,7 @@
       "id" : "W",
       "name" : "ProblemTransformationMethod"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "P",
       "comment" : "Size of each bag, as a percentage of total training size (default 67)",
       "type" : "int",

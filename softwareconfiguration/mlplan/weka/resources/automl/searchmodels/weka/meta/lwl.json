@@ -8,7 +8,7 @@
       "name" : "WeightedInstancesHandler"
     } ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "K",
       "type" : "cat",
       "default" : "-1",

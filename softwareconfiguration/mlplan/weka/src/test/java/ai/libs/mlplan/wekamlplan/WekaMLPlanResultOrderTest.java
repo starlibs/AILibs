@@ -1,4 +1,4 @@
-package ai.libs.automl.mlplan.test;
+package ai.libs.mlplan.wekamlplan;
 
 import ai.libs.automl.MLPlanResultOrderTest;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;

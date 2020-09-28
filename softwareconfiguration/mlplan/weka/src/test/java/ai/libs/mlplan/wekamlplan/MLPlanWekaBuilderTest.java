@@ -1,4 +1,4 @@
-package ai.libs.automl.mlplan.test;
+package ai.libs.mlplan.wekamlplan;
 
 import java.io.IOException;
 import java.util.Arrays;
