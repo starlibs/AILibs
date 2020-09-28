@@ -6,7 +6,7 @@ import org.junit.jupiter.params.provider.Arguments;
 
 import ai.libs.softwareconfiguration.serialization.RepositoryDeserializationTest;
 
-public class SearchSpaceDeserializationTest extends RepositoryDeserializationTest {
+public class WekaSearchSpaceDeserializationTest extends RepositoryDeserializationTest {
 
 	private static final String BASE_PATH = "automl/searchmodels/weka/";
 

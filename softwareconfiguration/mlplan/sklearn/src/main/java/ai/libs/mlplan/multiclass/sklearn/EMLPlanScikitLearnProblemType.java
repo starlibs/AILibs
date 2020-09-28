@@ -21,16 +21,16 @@ import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
 
 public enum EMLPlanScikitLearnProblemType implements IProblemType<ScikitLearnWrapper<IPrediction, IPredictionBatch>> {
 
-	CLASSIFICATION_MULTICLASS(EScikitLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/sklearn-mlplan.json", "conf/mlplan-sklearn.json", "automl/searchmodels/sklearn/sklearn-preferenceList.txt",
+	CLASSIFICATION_MULTICLASS(EScikitLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/sklearn-classification.json", "conf/mlplan-sklearn.json", "automl/searchmodels/sklearn/sklearn-preferenceList.txt",
 			"conf/sklearn-preferenceList.txt", "AbstractClassifier", "BasicClassifier", EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new ScikitLearnClassifierFactory(),
 			new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>()), new ScikitLearnPipelineValidityCheckingNodeEvaluator()), //
 
-	CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES(EScikitLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/ml-plan-ul.json", EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
+	CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES(EScikitLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/sklearn-classification-ul.json", EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
 			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(),
 			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getRequestedInterface(), EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getRequestedBasicProblemInterface(), EClassificationPerformanceMeasure.ERRORRATE,
 			EClassificationPerformanceMeasure.ERRORRATE, CLASSIFICATION_MULTICLASS.getLearnerFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter(), CLASSIFICATION_MULTICLASS.getValidityCheckingNodeEvaluator()), //
 
-	REGRESSION(EScikitLearnProblemType.REGRESSION, "automl/searchmodels/sklearn/mlplan-regression.json", EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
+	REGRESSION(EScikitLearnProblemType.REGRESSION, "automl/searchmodels/sklearn/sklearn-regression.json", EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
 			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), "AbstractRegressor",
 			"BasicRegressor", ERegressionPerformanceMeasure.RMSE, ERegressionPerformanceMeasure.RMSE, new ScikitLearnRegressorFactory(), new RandomHoldoutSplitter<>(new Random(0), 0.7), null), //
 

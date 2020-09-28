@@ -1,0 +1,11 @@
+{
+	"repository": "Tiny repository",
+	"include": [
+		"./base/zeror.json",
+		"./base/oner.json",
+		"./base/randomforest.json",
+		"./base/randomtree.json",
+		"./base/reptree.json"
+	],
+	"components": []
+}

@@ -1,4 +1,4 @@
-package ai.libs.automl.mlplan.multiclass.wekamlplan.sklearn;
+package ai.libs.mlplan.sklearnmlplan;
 
 import java.io.IOException;
 import java.util.Arrays;

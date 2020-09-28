@@ -1,4 +1,4 @@
-package ai.libs.automl.mlplan.multiclass.wekamlplan.sklearn;
+package ai.libs.mlplan.sklearnmlplan;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -41,7 +41,7 @@ public class ScikitLearnClassifierFactoryTest {
 	private static final long SEED = 0;
 
 	/* Components for testing the factory */
-	private static final File COMPONENT_REPO = new File("resources/automl/searchmodels/sklearn/ml-plan-ul.json");
+	private static final File COMPONENT_REPO = new File("resources/automl/searchmodels/sklearn/sklearn-classification-ul.json");
 	private static ComponentSerialization serializer = new ComponentSerialization();
 	private static IComponentRepository repository;
 
