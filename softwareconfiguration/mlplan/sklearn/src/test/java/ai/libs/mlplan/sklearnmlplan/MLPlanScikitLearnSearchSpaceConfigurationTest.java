@@ -31,8 +31,8 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValid
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedComputation;
-import ai.libs.mlplan.multiclass.sklearn.AScikitLearnLearnerFactory;
-import ai.libs.mlplan.multiclass.sklearn.EMLPlanScikitLearnProblemType;
+import ai.libs.mlplan.sklearn.AScikitLearnLearnerFactory;
+import ai.libs.mlplan.sklearn.EMLPlanScikitLearnProblemType;
 
 @RunWith(Parameterized.class)
 public class MLPlanScikitLearnSearchSpaceConfigurationTest extends AbstractSearchSpaceConfigurationTest {

@@ -8,8 +8,8 @@ import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFail
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.automl.AbstractMLPlanBuilderTest;
-import ai.libs.mlplan.multiclass.sklearn.EMLPlanScikitLearnProblemType;
-import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
+import ai.libs.mlplan.sklearn.EMLPlanScikitLearnProblemType;
+import ai.libs.mlplan.sklearn.builder.MLPlanScikitLearnBuilder;
 
 public class MLPlanScikitLearnBuilderTest extends AbstractMLPlanBuilderTest {
 

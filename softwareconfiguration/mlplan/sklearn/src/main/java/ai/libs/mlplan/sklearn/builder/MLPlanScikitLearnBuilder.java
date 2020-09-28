@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multiclass.sklearn.builder;
+package ai.libs.mlplan.sklearn.builder;
 
 import java.io.IOException;
 
@@ -15,8 +15,8 @@ import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.core.IProblemType;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.sklearn.AScikitLearnLearnerFactory;
-import ai.libs.mlplan.multiclass.sklearn.EMLPlanScikitLearnProblemType;
+import ai.libs.mlplan.sklearn.AScikitLearnLearnerFactory;
+import ai.libs.mlplan.sklearn.EMLPlanScikitLearnProblemType;
 import ai.libs.python.IPythonConfig;
 import ai.libs.python.PythonRequirementDefinition;
 

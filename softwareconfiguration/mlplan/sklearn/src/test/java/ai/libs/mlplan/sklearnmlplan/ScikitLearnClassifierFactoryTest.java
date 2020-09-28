@@ -22,8 +22,8 @@ import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.mlplan.multiclass.sklearn.AScikitLearnLearnerFactory;
-import ai.libs.mlplan.multiclass.sklearn.ScikitLearnClassifierFactory;
+import ai.libs.mlplan.sklearn.AScikitLearnLearnerFactory;
+import ai.libs.mlplan.sklearn.ScikitLearnClassifierFactory;
 import weka.core.Instances;
 
 /**
