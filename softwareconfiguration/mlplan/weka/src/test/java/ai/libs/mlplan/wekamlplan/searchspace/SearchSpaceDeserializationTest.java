@@ -18,12 +18,10 @@ public class SearchSpaceDeserializationTest extends RepositoryDeserializationTes
 				Arguments.of(BASE_PATH + "ext/twosteppipeline.json", 1), //
 				Arguments.of(BASE_PATH + "meta/index.json", 12), //
 				Arguments.of(BASE_PATH + "preprocessing/index.json", 13), //
-				/* Test Repositories for WEKA */
-				Arguments.of(BASE_PATH + "minimaltest.json", 1), //
-				Arguments.of(BASE_PATH + "weka-tiny.json", 4), //
-				Arguments.of(BASE_PATH + "mlplan-components.json", 2), //
-				Arguments.of(BASE_PATH + "minitest.json", 6), //
 				/* Full Repositories for ML-Plan with WEKA backend */
+				Arguments.of(BASE_PATH + "weka-tiny.json", 4), //
+				Arguments.of(BASE_PATH + "weka-reduced5.json", 23), //
+				Arguments.of(BASE_PATH + "weka-reduced.json", 32), //
 				Arguments.of(BASE_PATH + "weka-full.json", 54) //
 		);
 	}

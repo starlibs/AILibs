@@ -38,7 +38,7 @@ public class WekaDyadRankingExample {
 
 		WEKADyadRankedNodeQueueConfig openConfig = new WEKADyadRankedNodeQueueConfig();
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
-		builder.withSearchSpaceConfigFile(new File("resources/automl/searchmodels/weka/weka-approach-5-autoweka.json")).withAlgorithmConfigFile(new File("conf/mlplan.properties"))
+		builder.withSearchSpaceConfigFile(new File("resources/automl/searchmodels/weka/weka-reduced5.json")).withAlgorithmConfigFile(new File("conf/mlplan.properties"))
 				.withSearchFactory(new DyadRankedBestFirstFactory<>(openConfig), new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness<>()).withPreferredNodeEvaluator(n -> 1.0);
 
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
