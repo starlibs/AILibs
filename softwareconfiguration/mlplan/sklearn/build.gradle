@@ -12,6 +12,7 @@ dependencies {
 	compile project(':mlplan-core')
 	testCompile project(path: ':mlplan-core', configuration: 'testArtifacts')
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-components', configuration: 'testArtifacts')
 }
 
 uploadArchives {

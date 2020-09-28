@@ -20,6 +20,7 @@ import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaLearningAlgorithm;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
+import ai.libs.jaicore.test.MediumTest;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 
@@ -31,6 +32,7 @@ public class WekaClassifierTest extends GeneralAlgorithmTester {
 
 	@ParameterizedTest
 	@MethodSource("getProblemSets")
+	@MediumTest
 	public void testFit(final WekaClassifierProblemSet problemSet) throws Exception {
 		Pair<String, ILabeledDataset<ILabeledInstance>> ps = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		WekaClassifier classifier = new WekaClassifier(ps.getX(), new String[] {});

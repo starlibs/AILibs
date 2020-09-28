@@ -21,6 +21,7 @@ import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
+import ai.libs.jaicore.test.MediumTest;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.trees.RandomForest;
@@ -49,6 +50,7 @@ public class WekaUtilTester extends Tester {
 	};
 
 	@Test
+	@MediumTest
 	public void checkSplit() throws Exception {
 
 		Instances inst = new Instances(new BufferedReader(new FileReader(VOWEL_ARFF)));
@@ -85,6 +87,7 @@ public class WekaUtilTester extends Tester {
 	}
 
 	@Test
+	@MediumTest
 	public void checkDeterminismOfStratifiedSplits() throws Exception {
 
 		Instances data = new Instances(new BufferedReader(new FileReader(VOWEL_ARFF)));
