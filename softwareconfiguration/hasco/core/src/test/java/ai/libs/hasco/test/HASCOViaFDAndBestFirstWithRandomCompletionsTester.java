@@ -12,8 +12,8 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +29,7 @@ import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.jaicore.test.MediumTest;
 
 public class HASCOViaFDAndBestFirstWithRandomCompletionsTester extends HASCOTester<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String> {
 
@@ -43,16 +44,17 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsTester extends HASCOTest
 		return getBuilder().withProblem(problem).getAlgorithm();
 	}
 
-	@Tag("long-test")
-	@Test
-	public void testThatDefaultParametrizationsAreEvaluatedFirst() throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	@ParameterizedTest
+	@MethodSource("getProblemSets")
+	@MediumTest
+	public void testThatDefaultParametrizationsAreEvaluatedFirst(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 
 		/* setup problems for which we want to check this */
 		List<RefinementConfiguredSoftwareConfigurationProblem<Double>> problems = new ArrayList<>();
-		problems.add(this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes());
-		problems.add(this.getProblemSet().getSimpleProblemInputWithTwoComponents());
-		problems.add(this.getProblemSet().getSimpleRecursiveProblemInput());
-		problems.add(this.getProblemSet().getDifficultProblemInputForGeneralTestPurposes());
+		problems.add(problemSet.getSimpleProblemInputForGeneralTestPurposes());
+		problems.add(problemSet.getSimpleProblemInputWithTwoComponents());
+		problems.add(problemSet.getSimpleRecursiveProblemInput());
+		problems.add(problemSet.getDifficultProblemInputForGeneralTestPurposes());
 
 		/* now run checks */
 		for (RefinementConfiguredSoftwareConfigurationProblem<Double> problem : problems) {

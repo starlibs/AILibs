@@ -32,7 +32,7 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 	private final String clazzName;
 	private final String methodName;
 	private final Class<?>[] argumentTypes;
-	private final transient Object[] arguments;
+	private final Object[] arguments;
 
 	public static boolean isArrayOfPrimitives(final Class<?> clazz) {
 		return clazz.isArray() && (boolean[].class.isAssignableFrom(clazz) || byte[].class.isAssignableFrom(clazz) || short[].class.isAssignableFrom(clazz) || int[].class.isAssignableFrom(clazz) || long[].class.isAssignableFrom(clazz)
@@ -187,9 +187,11 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 				}
 			}
 			int k = replacedArguments.length;
-			this.logger.debug("{}.{}", this.getMethod().getDeclaringClass().getName(), this.getMethod().getName());
-			for (int i = 0; i < k; i++) {
-				this.logger.debug("{}: {}: {}", i, replacedArguments[i].getClass().getName(), replacedArguments[i]);
+			if (this.logger != null && this.logger.isDebugEnabled()) {
+				this.logger.debug("{}.{}", this.getMethod().getDeclaringClass().getName(), this.getMethod().getName());
+				for (int i = 0; i < k; i++) {
+					this.logger.debug("{}: {}: {}", i, replacedArguments[i].getClass().getName(), replacedArguments[i]);
+				}
 			}
 			return method.invoke(null, replacedArguments);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ClassNotFoundException | IOException e) {
@@ -208,15 +210,21 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 			} catch (NoSuchMethodException | SecurityException | ClassNotFoundException e1) {
 				throw new ReconstructionException(e1);
 			}
-			this.logger.info("Creating new object via {}.{}", method.getDeclaringClass().getName(), method.getName());
-			for (int i = 0; i < m; i++) {
-				this.logger.debug("{}:  {}: {}", i, this.arguments[i] != null ? this.arguments[i].getClass().getName() : null, this.arguments[i]);
+			if (this.logger != null) {
+				this.logger.info("Creating new object via {}.{}", method.getDeclaringClass().getName(), method.getName());
+				if (this.logger.isDebugEnabled()) {
+					for (int i = 0; i < m; i++) {
+						this.logger.debug("{}:  {}: {}", i, this.arguments[i] != null ? this.arguments[i].getClass().getName() : null, this.arguments[i]);
+					}
+				}
 			}
 			try {
 				return method.invoke(null, this.arguments);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException e) {
-				this.logger.error("Error in invoking {}.{} with arguments: {} with class types {}.", this.clazzName, this.methodName, this.arguments,
-						Arrays.stream(this.arguments).map(a -> a.getClass().getName()).collect(Collectors.toList()));
+				if (this.logger != null) {
+					this.logger.error("Error in invoking {}.{} with arguments: {} with class types {}.", this.clazzName, this.methodName, this.arguments,
+							Arrays.stream(this.arguments).map(a -> a.getClass().getName()).collect(Collectors.toList()));
+				}
 				throw new ReconstructionException(e);
 			}
 		} else {
@@ -243,5 +251,56 @@ public class ReconstructionInstruction implements IReconstructionInstruction {
 
 	public Object[] getArguments() {
 		return this.arguments;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(this.argumentTypes);
+		result = prime * result + Arrays.deepHashCode(this.arguments);
+		result = prime * result + ((this.clazzName == null) ? 0 : this.clazzName.hashCode());
+		result = prime * result + ((this.methodName == null) ? 0 : this.methodName.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		ReconstructionInstruction other = (ReconstructionInstruction) obj;
+		if (!Arrays.equals(this.argumentTypes, other.argumentTypes)) {
+			return false;
+		}
+		if (!Arrays.deepEquals(this.arguments, other.arguments)) {
+			return false;
+		}
+		if (this.clazzName == null) {
+			if (other.clazzName != null) {
+				return false;
+			}
+		} else if (!this.clazzName.equals(other.clazzName)) {
+			return false;
+		}
+		if (this.methodName == null) {
+			if (other.methodName != null) {
+				return false;
+			}
+		} else if (!this.methodName.equals(other.methodName)) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "ReconstructionInstruction [clazzName=" + this.clazzName + ", methodName=" + this.methodName + ", argumentTypes=" + Arrays.toString(this.argumentTypes) + ", arguments=" + Arrays.toString(this.arguments) + "]";
 	}
 }

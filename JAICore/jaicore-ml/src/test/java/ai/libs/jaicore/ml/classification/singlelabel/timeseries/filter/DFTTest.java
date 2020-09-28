@@ -5,12 +5,10 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.junit.Before;
 import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
 
@@ -19,14 +17,13 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeri
  * DFT JUnit test
  *
  */
-@RunWith(JUnit4.class)
 public class DFTTest {
 	double[] timeseries1;
 	double[] timeseries2;
 
 	TimeSeriesDataset2 dataset;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.timeseries1 = new double [] {1,1,1,1,1,1,1,1};
 		this.timeseries2 = new double[] {1,2,4,3,5,2,4,3};

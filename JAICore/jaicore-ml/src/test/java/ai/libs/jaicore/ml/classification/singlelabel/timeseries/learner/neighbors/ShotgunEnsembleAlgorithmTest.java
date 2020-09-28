@@ -7,8 +7,8 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 
 import org.api4.java.algorithm.exceptions.AlgorithmException;
-import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
@@ -33,17 +33,17 @@ public class ShotgunEnsembleAlgorithmTest {
 	 * }
 	 * </code> after set up.
 	 */
-	TimeSeriesDataset2 dataset;
+	private TimeSeriesDataset2 dataset;
 
-	ShotgunEnsembleClassifier model;
+	private ShotgunEnsembleClassifier model;
 
-	ShotgunEnsembleLearnerAlgorithm algorithm;
+	private ShotgunEnsembleLearnerAlgorithm algorithm;
 
 	private int minWindowLength = 4;
 	private int maxWindowLength = 6;
 	private boolean meanNormalization = true;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		// Set up dataset.
 		double[][] data = { { 0.1, 0.1, 0.8, 0.1 }, { 0.25, 0.2, 0.25, 0.2 }, { 0.1, 0.2, 0.3, 0.5 }, { 0.15, 0.14, 0.1, 0.1 } };

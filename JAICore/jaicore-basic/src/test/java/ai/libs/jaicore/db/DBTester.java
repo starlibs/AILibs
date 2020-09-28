@@ -2,7 +2,6 @@ package ai.libs.jaicore.db;
 
 import static org.junit.Assert.assertNotNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -12,21 +11,20 @@ import org.junit.Rule;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.rules.Timeout;
 
-import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.db.sql.DatabaseAdapterFactory;
 import ai.libs.jaicore.db.sql.IRestDatabaseConfig;
 
 public abstract class DBTester extends Tester {
 
-	public static final String VAR_DB_REST_HOST = "AILIBS_JAICORE_DB_REST_DB_HOST";
-	public static final String VAR_DB_REST_TOKEN = "AILIBS_JAICORE_DB_REST_DB_TOKEN"; // this is for rest-based access
 	public static final String VAR_DB_HOST = "AILIBS_JAICORE_DB_DEFAULT_HOST";
 	public static final String VAR_DB_USER = "AILIBS_JAICORE_DB_DEFAULT_USER";
 	public static final String VAR_DB_PASS = "AILIBS_JAICORE_DB_DEFAULT_PASS";
 	public static final String VAR_DB_DATABASE = "AILIBS_JAICORE_DB_DEFAULT_DATABASE";
 
-	public static File REST_CONFIG_FILE = new File("testrsc/test.restSqlAdapter.properties");
+
+	public static final String VAR_DB_REST_HOST = "AILIBS_JAICORE_DB_REST_DB_HOST";
+	public static final String VAR_DB_REST_TOKEN = "AILIBS_JAICORE_DB_REST_DB_TOKEN"; // this is for rest-based access
 
 	@Rule
 	public Timeout globalTimeout = Timeout.seconds(10); // database tests should not take longer than 10 seconds
@@ -47,7 +45,7 @@ public abstract class DBTester extends Tester {
 		Objects.requireNonNull(configDefault.getDBDatabaseName(), "The database name read from environment variable " + VAR_DB_DATABASE + " is NULL!");
 
 		/* configure REST DB adapter */
-		IRestDatabaseConfig configRest = ConfigFactory.create(IRestDatabaseConfig.class, FileUtil.readPropertiesFile(REST_CONFIG_FILE));
+		IRestDatabaseConfig configRest = ConfigFactory.create(IRestDatabaseConfig.class);
 		configRest.setProperty(IRestDatabaseConfig.K_REST_DB_HOST, System.getenv(VAR_DB_REST_HOST));
 		configRest.setProperty(IRestDatabaseConfig.K_REST_DB_TOKEN, System.getenv(VAR_DB_REST_TOKEN));
 		if (configRest.getHost() == null || configRest.getToken() == null) {

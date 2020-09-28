@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 
 public class NumericAttributeTest extends AAttributeTest {
 
@@ -12,7 +12,7 @@ public class NumericAttributeTest extends AAttributeTest {
 
 	private static NumericAttribute attributeToTest;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() {
 		attributeToTest = new NumericAttribute(ATTRIBUTE_NAME);
 	}

@@ -173,12 +173,12 @@ public class ArffDatasetAdapterTest {
 	}
 
 	@Test
-	public void testReadingDenseDatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
-		this.testReadingDatasetFromFile(new File("testrsc/dataset/arff/classifier-rank.arff"));
+	public void testReadingSingleLabelDenseDatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
+		this.testReadingDatasetFromFile(new File("testrsc/dataset/arff/krvskp.arff"));
 	}
 
 	@Test
-	public void testReadingSparseDatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
+	public void testReadingSingleLabelSparseDatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
 		this.testReadingDatasetFromFile(new File("testrsc/dataset/arff/dexter.arff"));
 	}
 
@@ -188,10 +188,10 @@ public class ArffDatasetAdapterTest {
 	}
 
 	@Test
-	public void testWritingADatasetToFile() throws DatasetDeserializationFailedException, IOException {
-		File datasetFile = new File("testrsc/dataset/arff/classifier-rank.arff");
+	public void testWritingASingleLabelDatasetToFile() throws DatasetDeserializationFailedException, IOException {
+		File datasetFile = new File("testrsc/dataset/arff/krvskp.arff");
 		ILabeledDataset<?> ds = ArffDatasetAdapter.readDataset(datasetFile);
-		File datasetCopyFile = new File("testrsc/dataset/arff/classifier-rank.arff.copy");
+		File datasetCopyFile = new File("testrsc/dataset/arff/krvskp.arff.copy");
 		ArffDatasetAdapter.serializeDataset(datasetCopyFile, ds);
 		assertEquals(ds, ArffDatasetAdapter.readDataset(datasetCopyFile));
 		Files.delete(datasetCopyFile.toPath());

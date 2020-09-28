@@ -149,8 +149,9 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			String[] relationNameAndOptions = line.substring(line.indexOf('\'') + 1, line.lastIndexOf('\'')).split(SEPARATOR_RELATIONNAME);
 			metaData.put(K_RELATION_NAME, relationNameAndOptions[0].trim());
 			if (relationNameAndOptions.length > 1) {
-				OptionsParser optParser = new OptionsParser(relationNameAndOptions[1]);
-				metaData.put(K_CLASS_INDEX, optParser.get(F_CLASS_INDEX));
+				OptionsParser optParser = new OptionsParser(relationNameAndOptions[1].trim());
+				int classIndex = Integer.parseInt(optParser.get(F_CLASS_INDEX).toString());
+				metaData.put(K_CLASS_INDEX, classIndex);
 			}
 		} else {
 			metaData.put(K_RELATION_NAME, relationDescription);

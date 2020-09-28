@@ -12,7 +12,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.components.api.IComponent;
@@ -30,7 +30,7 @@ public class HyperBandTest {
 
 	private static MultiFidelitySoftwareConfigurationProblem<Double> input;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() {
 		Collection<IComponent> components = new ArrayList<>();
 		Component a = new Component("A");

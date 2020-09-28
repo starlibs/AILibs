@@ -214,6 +214,8 @@ allprojects {
 			excludeTags 'medium-test'
 			excludeTags 'long-test'
 		}
+		minHeapSize = "1g"
+	     	maxHeapSize = "4g"
 	}
 	
 	task testMedium(type: Test) {
@@ -231,14 +233,14 @@ allprojects {
 		}
 
 		minHeapSize = "1g"
-     	maxHeapSize = "4g"
-     	ignoreFailures = true
+	     	maxHeapSize = "4g"
+	     	ignoreFailures = true
 		forkEvery = 1		
 		maxParallelForks = 1
-     	testLogging {
+	     	testLogging {
 			events "failed"
 			exceptionFormat "full"
-     	} 
+	     	} 
 	}
 }
 

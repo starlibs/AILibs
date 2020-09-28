@@ -10,7 +10,7 @@ import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import org.api4.java.common.math.IVector;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
@@ -62,7 +62,7 @@ public class DyadScalerTest {
 		this.testingSet = new DyadRankingDataset(allRankings);
 	}
 
-	@Before
+	@BeforeEach
 	public void setupExpectedResults() {
 		// standardization
 		// derived by wolfram alpha

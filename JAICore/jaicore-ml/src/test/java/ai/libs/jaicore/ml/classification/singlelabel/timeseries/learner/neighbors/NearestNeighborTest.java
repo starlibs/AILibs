@@ -7,8 +7,8 @@ import java.util.PriorityQueue;
 
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
-import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.metric.EuclideanDistance;
@@ -35,7 +35,7 @@ public class NearestNeighborTest {
 	 * }
 	 * </code> after set up.
 	 */
-	TimeSeriesDataset2 dataset;
+	private TimeSeriesDataset2 dataset;
 
 	/**
 	 * Priority queue containing the (targetClass, distance)-pairs <code>
@@ -48,9 +48,9 @@ public class NearestNeighborTest {
 	 *  (3, 1.6)
 	 * }</code>.
 	 */
-	PriorityQueue<Pair<Integer, Double>> nearestNeighbors;
+	private PriorityQueue<Pair<Integer, Double>> nearestNeighbors;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		// Set up dataset.
 		double data[][] = { { 0.4, 0.5 }, { 0.4, 0.6 }, { 0.4, 0.4 }, { 0.7, 0.6 }, { 0.7, 0.3 } };

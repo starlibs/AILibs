@@ -388,25 +388,22 @@ class SQLAdapter implements IDatabaseAdapter {
 		int n = datarows.size();
 		this.checkConnection();
 		List<Integer> ids = new ArrayList<>(n);
-		try (Statement stmt = this.connect.createStatement()) {
-			for (int i = 0; i < Math.ceil(n * 1.0 / chunkSize); i++) {
-				int startIndex = i * chunkSize;
-				int endIndex = Math.min((i + 1) * chunkSize, n);
-				String sql = this.queryBuilder.buildMultiInsertSQLCommand(table, keys, datarows.subList(startIndex, endIndex));
+		for (int i = 0; i < Math.ceil(n * 1.0 / chunkSize); i++) {
+			int startIndex = i * chunkSize;
+			int endIndex = Math.min((i + 1) * chunkSize, n);
+			String sql = this.queryBuilder.buildMultiInsertSQLCommand(table, keys, datarows.subList(startIndex, endIndex));
+			try (PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 				this.logger.debug("Created SQL for {} entries", endIndex - startIndex);
-				this.logger.trace("Adding sql statement {} to batch", sql);
-				stmt.addBatch(sql);
-			}
-			this.logger.debug("Start batch execution.");
-			stmt.executeBatch();
-			this.logger.debug("Finished batch execution.");
-			try (ResultSet rs = stmt.getGeneratedKeys()) {
-				while (rs.next()) {
-					ids.add(rs.getInt(1));
+				stmt.executeUpdate();
+				this.logger.debug("Finished batch execution.");
+				try (ResultSet rs = stmt.getGeneratedKeys()) {
+					while (rs.next()) {
+						ids.add(rs.getInt(1));
+					}
 				}
 			}
-			return ids.stream().mapToInt(x -> x).toArray();
 		}
+		return ids.stream().mapToInt(x -> x).toArray();
 	}
 
 	/**

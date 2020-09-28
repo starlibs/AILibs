@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -22,16 +22,16 @@ import org.junit.jupiter.api.Test;
  */
 public class ShotgunEnsembleClassifierTest {
 
-	ShotgunEnsembleLearnerAlgorithm algorithm;
+	private ShotgunEnsembleLearnerAlgorithm algorithm;
 
-	ShotgunEnsembleClassifier shotgunEnsembleClassifier;
+	private ShotgunEnsembleClassifier shotgunEnsembleClassifier;
 
 	// Set up model and algorithm.
 	private int minWindowLength = 3;
 	private int maxWindowLength = 6;
 	private boolean meanNormalization = true;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		double factor = 0.95;

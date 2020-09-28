@@ -60,6 +60,7 @@ public class GMeansStratifier extends ClusterStratiAssigner implements IStratifi
 	@Override
 	public int createStrati(final IDataset<?> dataset) {
 		// Perform g-means to get a fitting k and the corresponding clusters.
+		this.setDataset(dataset);
 		List<Clusterable> cDataset = new ListView<>(dataset);
 		GMeans<Clusterable> clusterer = new GMeans<>(cDataset, this.distanceMeasure, this.randomSeed);
 		this.setClusters(clusterer.cluster());

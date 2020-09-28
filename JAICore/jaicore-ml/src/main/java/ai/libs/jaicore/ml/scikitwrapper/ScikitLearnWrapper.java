@@ -77,7 +77,7 @@ import ai.libs.python.IPythonConfig;
  * @author scheiblm
  */
 public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B>
-		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
+implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 
 	private static final Logger L = LoggerFactory.getLogger(ScikitLearnWrapper.class);
 	private static final IScikitLearnWrapperConfig CONF = ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class);
@@ -273,6 +273,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	@Override
 	public B predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
 		ILabeledDataset<ILabeledInstance> data;
+		Objects.requireNonNull(this.dataset, "No dataset has been set. Either train the learner or load it from a model.");
 		try {
 			data = this.dataset.createEmptyCopy();
 		} catch (DatasetCreationException e1) {
@@ -397,7 +398,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		result.append("\n");
 		result.append("sys.path.append(r'" + absoluteFolderPath + "')\n");
 		for (File module : importsFolder.listFiles()) {
-			if (!module.getName().startsWith("__")) {
+			if (!module.getName().startsWith("__") && module.getName().endsWith(".py")) {
 				/* Either import the module by its name. Then the classes of it have to be referenced by the fully qualified name. */
 				if (keepNamespace) {
 					result.append("import " + module.getName().substring(0, module.getName().length() - 3) + "\n");

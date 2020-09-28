@@ -39,7 +39,7 @@ public abstract class ClusterStratiAssigner implements IStratifier {
 	@Override
 	public int getStratum(final IInstance datapoint) {
 		if (this.dataset == null) {
-			throw new IllegalStateException("ClusterStratiAssigner has not been initialized!");
+			throw new IllegalStateException("No dataset has been set, so no strati have been built!");
 		}
 		if (!this.dataset.contains(datapoint)) {
 			throw new IllegalArgumentException("Given datapoint " + datapoint + " is not in the original dataset with " + this.dataset.size() + " entries.");

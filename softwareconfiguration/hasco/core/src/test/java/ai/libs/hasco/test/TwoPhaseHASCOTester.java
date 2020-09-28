@@ -16,8 +16,8 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.awaitility.Awaitility;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +35,7 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import ai.libs.jaicore.test.MediumTest;
 
 public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 
@@ -54,10 +55,11 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 		return twoPhaseHASCO;
 	}
 
-	@Tag("long-test")
-	@Test
-	public void testThatEnsembleConsideredBySelectionProcedureIsOrderedByScores() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTestProblemSetCreationException {
-		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(((SoftwareConfigurationProblemSet) this.getProblemSet()).getSimpleRecursiveProblemInput());
+	@ParameterizedTest
+	@MethodSource("getProblemSets")
+	@MediumTest
+	public void testThatEnsembleConsideredBySelectionProcedureIsOrderedByScores(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTestProblemSetCreationException {
+		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(problemSet.getSimpleRecursiveProblemInput());
 		twoPhaseHASCO.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		twoPhaseHASCO.call();
 		List<HASCOSolutionCandidate<Double>> list = twoPhaseHASCO.getEnsembleToSelectFromInPhase2();
@@ -67,10 +69,10 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 		}
 	}
 
-	@Tag("medium-test")
-	@Test
-	public void testThatBestSolutionFoundByHASCOIsSuccessfullyEvaluatedInPhase2() throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(((SoftwareConfigurationProblemSet) this.getProblemSet()).getSimpleProblemInputForGeneralTestPurposes());
+	@ParameterizedTest
+	@MethodSource("getProblemSets")
+	public void testThatBestSolutionFoundByHASCOIsSuccessfullyEvaluatedInPhase2(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(problemSet.getSimpleProblemInputForGeneralTestPurposes());
 		twoPhaseHASCO.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		twoPhaseHASCO.call();
 		HASCOSolutionCandidate<Double> bestCandidateOfPhase1 = twoPhaseHASCO.getBestSeenSolution();
@@ -78,10 +80,11 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 				twoPhaseHASCO.getSelectionPhaseEvaluationRunners().containsKey(bestCandidateOfPhase1) && twoPhaseHASCO.getSelectionPhaseEvaluationRunners().get(bestCandidateOfPhase1) != null);
 	}
 
-	@Tag("long-test")
-	@Test
-	public void testThatHalfOfSelectionPoolIsSuccessfullyEvaluated() throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(((SoftwareConfigurationProblemSet) this.getProblemSet()).getSimpleRecursiveProblemInput());
+	@ParameterizedTest
+	@MethodSource("getProblemSets")
+	@MediumTest
+	public void testThatHalfOfSelectionPoolIsSuccessfullyEvaluated(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(problemSet.getSimpleRecursiveProblemInput());
 		twoPhaseHASCO.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		twoPhaseHASCO.call();
 		List<HASCOSolutionCandidate<Double>> selectionPoolForPhase2 = twoPhaseHASCO.getEnsembleToSelectFromInPhase2();
@@ -93,13 +96,14 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 		this.logger.info("The first {}/{} solutions have been evaluated successfully.", n, selectionPoolForPhase2.size());
 	}
 
-	@Tag("long-test")
-	@Test
-	public void testThatTimeoutsUsedForComputationsInPhase2CorrespondToThoseObservedInPhase1()
+	@ParameterizedTest
+	@MethodSource("getProblemSets")
+	@MediumTest
+	public void testThatTimeoutsUsedForComputationsInPhase2CorrespondToThoseObservedInPhase1(final SoftwareConfigurationProblemSet problemSet)
 			throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 
 		/* define the problem with simulated runtimes */
-		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = ((SoftwareConfigurationProblemSet) this.getProblemSet()).getSimpleRecursiveProblemInput();
+		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = problemSet.getSimpleRecursiveProblemInput();
 		final Map<String, Integer> runtimes = new HashMap<>();
 		problem.getComponents().forEach(c -> runtimes.put(c.getName(), Integer.valueOf(("" + Math.abs(c.hashCode())).substring(0, 1))));
 		final Random random = new Random(0);
@@ -131,12 +135,13 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 		}
 	}
 
-	@Tag("long-test")
-	@Test
-	public void testCorrectTimeoutsAndAdherenceOfWorkers() throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	@ParameterizedTest
+	@MediumTest
+	@MethodSource("getProblemSets")
+	public void testCorrectTimeoutsAndAdherenceOfWorkers(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 
 		/* define the problem with simulated runtimes */
-		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = ((SoftwareConfigurationProblemSet) this.getProblemSet()).getSimpleRecursiveProblemInput();
+		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = problemSet.getSimpleRecursiveProblemInput();
 		final Map<String, Integer> runtimes = new HashMap<>();
 		problem.getComponents().forEach(c -> runtimes.put(c.getName(), 100 * Integer.valueOf(("" + Math.abs(c.hashCode())).substring(0, 1))));
 		final Random random = new Random(0);
