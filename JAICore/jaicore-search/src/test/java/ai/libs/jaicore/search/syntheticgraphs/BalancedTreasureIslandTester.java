@@ -1,21 +1,17 @@
 package ai.libs.jaicore.search.syntheticgraphs;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.datastructure.graph.ILabeledPath;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.provider.Arguments;
 
-import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.balanced.BalancedGraphGeneratorGenerator;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.balanced.BalancedGraphSearchWithPathEvaluationsProblem;
@@ -23,111 +19,70 @@ import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.equalsized.EqualSizedIslandsModel;
 import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.noisymean.ChaoticMeansTreasureModel;
 
-@RunWith(Parameterized.class)
 public class BalancedTreasureIslandTester extends SyntheticGraphTester {
 
-	private final int branchingFactor;
-	private final int depth;
-	private final int distanceToIslands;
-	private final int numberOfIslandsWithTreasure;
-	private final int numberOfIslands;
+	//	private int numberOfIslandsWithTreasure;
+	//	private int numberOfIslands;
+	//	private int exactIslandSize;
+	//	private IIslandModel islandModel;
+	//	private ChaoticMeansTreasureModel treasureGenerator;
+	//	private BalancedGraphSearchWithPathEvaluationsProblem searchProblem;
 
-	private int exactIslandSize;
-	private IIslandModel islandModel;
-	private ChaoticMeansTreasureModel treasureGenerator;
-	private BalancedGraphSearchWithPathEvaluationsProblem searchProblem;
-
-	public BalancedTreasureIslandTester(final int branchingFactor, final int depth, final int distanceToIslands, final int numberOfIslandsWithTreasure) {
-		super();
-		this.branchingFactor = branchingFactor;
-		this.depth = depth;
-		this.distanceToIslands = distanceToIslands;
-		this.numberOfIslandsWithTreasure = numberOfIslandsWithTreasure;
-		this.numberOfIslands = (int) Math.pow(branchingFactor, distanceToIslands);
-	}
-
-	// creates the test data
-	@Parameters(name = "branchingFactor = {0}, depth = {1}, distanceToIslands = {2}, numberOfIslandsWithTreasure = {3}")
-	public static Collection<Object[]> data() {
-
+	public static Stream<Arguments> getTreeSetups() {
 		final int MAX_BF = 4;
 		final int MAX_DEPTH = 4;
-		int combos = MAX_BF * MAX_DEPTH;
-
-		Object[][] data = new Object[combos][4];
-		int i = 0;
+		List<Arguments> data = new ArrayList<>();
 		for (int bf = 1; bf <= MAX_BF; bf++) {
 			for (int depth = 1; depth <= MAX_DEPTH; depth++) {
-				data[i][0] = bf;
-				data[i][1] = depth;
-				data[i][2] = Math.min(3, depth);
-				data[i][3] = Math.min(2, (int) Math.pow(bf, (int) data[i][2] - 1));
-				i++;
+				int x = Math.min(3, depth);
+				data.add(Arguments.of(bf, depth, x, Math.min(2, (int) Math.pow(bf, x - 1))));
 			}
 		}
-		return Arrays.asList(data);
+		return data.stream();
 	}
 
-	@BeforeEach
-	public void setupTest() throws PathEvaluationException, InterruptedException {
-
-		this.islandModel = new EqualSizedIslandsModel(BigInteger.valueOf((long) Math.pow(this.branchingFactor, this.depth - this.distanceToIslands)));
-		this.treasureGenerator = new ChaoticMeansTreasureModel(this.numberOfIslandsWithTreasure, this.islandModel, 0);
-		this.treasureGenerator.setLoggerName(this.getLoggerName() + ".treasuregen");
-		this.searchProblem = new BalancedGraphSearchWithPathEvaluationsProblem(this.branchingFactor, this.depth, this.treasureGenerator);
-
-		/* now tell the treasure generator about the graph */
-		this.treasureGenerator.setGraphSearchInput(this.searchProblem);
-		ITransparentTreeNode root = this.searchProblem.getGraphGenerator().getRootGenerator().getRoots().iterator().next();
-		this.searchProblem.getPathEvaluator().evaluate(new SearchGraphPath<>(root)); // this triggers the generation of treasures
-
-		/* now compute exact size of islands */
-		this.exactIslandSize = BalancedGraphGeneratorGenerator.getNumberOfLeafsUnderANonTerminalNodeInDepth(this.distanceToIslands, this.branchingFactor, this.depth);
-		this.logger.info("Now considering graph with bf {}, depth {}, (exact) island size {} (configured distance to islands was {}), and {} islands with treasure.", this.branchingFactor, this.depth, this.exactIslandSize,
-				this.distanceToIslands, this.numberOfIslandsWithTreasure);
-		assertEquals((int) Math.pow(this.branchingFactor, this.depth - this.distanceToIslands), this.exactIslandSize, "Island size is not computed correctly.");
-
-		/* check that the island model is correct*/
-		assertEquals(this.numberOfIslands, root.getNumberOfSubtreesWithMaxNumberOfNodes(BigInteger.valueOf(this.exactIslandSize)).intValueExact());
-		assertEquals(this.numberOfIslands, this.islandModel.getNumberOfIslands().intValueExact(), "Island model has a wrong imagination of the number of islands.");
+	@Override
+	public IPathSearchInput<ITransparentTreeNode, Integer> getSearchProblem(final int branchingFactor, final int depth, final int distanceToIslands, final int numberOfIslandsWithTreasure) {
+		ChaoticMeansTreasureModel treasureGenerator = new ChaoticMeansTreasureModel(numberOfIslandsWithTreasure, this.getIslandModel(branchingFactor, depth, distanceToIslands, numberOfIslandsWithTreasure), 0);
+		treasureGenerator.setLoggerName(this.getLoggerName() + ".treasuregen");
 
 		/* check that treasures have been distributed and that their number is correct */
-		assertTrue(this.treasureGenerator.isTreasuresDistributed(), "Treasures have not been distribued.");
-		assertEquals(this.numberOfIslandsWithTreasure, this.treasureGenerator.getTreasureIslands().size(), "The treasure model is not correct.");
+		//		assertTrue(treasureGenerator.isTreasuresDistributed(), "Treasures have not been distribued.");
+		//		assertEquals(numberOfIslandsWithTreasure, treasureGenerator.getTreasureIslands().size(), "The treasure model is not correct.");
+
+		return new BalancedGraphSearchWithPathEvaluationsProblem(branchingFactor, depth, treasureGenerator);
 	}
 
 	@Override
-	public IPathSearchInput<ITransparentTreeNode, Integer> getSearchProblem() {
-		return this.searchProblem;
+	public IIslandModel getIslandModel(final int branchingFactor, final int depth, final int distanceToIslands, final int numberOfIslandsWithTreasure) {
+		return new EqualSizedIslandsModel(BigInteger.valueOf((long) Math.pow(branchingFactor, depth - distanceToIslands)));
 	}
 
 	@Override
-	public IIslandModel getIslandModel() {
-		return this.islandModel;
+	public int getExpectedNumberOfIslands(final int branchingFactor, final int depth, final int distanceToIslands, final int numberOfIslandsWithTreasure) {
+		return (int) Math.pow(branchingFactor, distanceToIslands);
 	}
 
 	@Override
-	public int getExpectedNumberOfIslands() {
-		return this.numberOfIslands;
+	public int getMaximumIslandSizes(final int branchingFactor, final int depth, final int distanceToIslands, final int numberOfIslandsWithTreasure) {
+		return this.getMinimumIslandSizes(branchingFactor, depth, distanceToIslands, numberOfIslandsWithTreasure);
 	}
 
 	@Override
-	public int getMaximumIslandSizes() {
-		return this.exactIslandSize;
+	public int getMinimumIslandSizes(final int branchingFactor, final int depth, final int distanceToIslands, final int numberOfIslandsWithTreasure) {
+		int exactIslandSize = BalancedGraphGeneratorGenerator.getNumberOfLeafsUnderANonTerminalNodeInDepth(distanceToIslands, branchingFactor, depth);
+		assertEquals((int) Math.pow(branchingFactor, depth - distanceToIslands), exactIslandSize, "Island size is not computed correctly.");
+		return exactIslandSize;
 	}
 
 	@Override
-	public int getMinimumIslandSizes() {
-		return this.exactIslandSize;
+	public int getNumberOfTreasureIslands(final int branchingFactor, final int depth, final int distanceToIslands, final int numberOfIslandsWithTreasure) {
+		return numberOfIslandsWithTreasure;
 	}
 
 	@Override
-	public int getNumberOfTreasureIslands() {
-		return this.numberOfIslandsWithTreasure;
-	}
-
-	@Override
-	public boolean isPathATreasure(final ILabeledPath<ITransparentTreeNode, Integer> path) throws PathEvaluationException, InterruptedException {
-		return this.treasureGenerator.isPathToTreasureIsland(path);
+	public boolean isPathATreasure(final int branchingFactor, final int depth, final int distanceToIslands, final int numberOfIslandsWithTreasure, final ILabeledPath<ITransparentTreeNode, Integer> path) throws PathEvaluationException, InterruptedException {
+		ChaoticMeansTreasureModel treasureGenerator = new ChaoticMeansTreasureModel(numberOfIslandsWithTreasure, this.getIslandModel(branchingFactor, depth, distanceToIslands, numberOfIslandsWithTreasure), 0);
+		return treasureGenerator.isPathToTreasureIsland(path);
 	}
 }

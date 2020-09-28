@@ -11,11 +11,11 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.db.sql.SQLAdapter;
+import ai.libs.jaicore.db.IDatabaseAdapter;
 
 /**
  * Class that creates additional tables before an experiment is started.
- * 
+ *
  * @author Helena Graf
  *
  */
@@ -34,7 +34,7 @@ public class ExperimentAdditionalTableLoader {
 	 * statements, changing of the mode, setting of the time etc. Tests for the
 	 * INSERT VALUES statement by String occurrence, so including the String "INSERT
 	 * INTO" in the CREATE TABLE statement in any way will lead to bad behavior.
-	 * 
+	 *
 	 * @param folder
 	 *            the directory from which the files containing sql statements are loaded
 	 * @param adapter
@@ -43,7 +43,7 @@ public class ExperimentAdditionalTableLoader {
 	 *             if the given folder cannot be read (does not exist, no rights,
 	 *             not a directory, ...)
 	 */
-	public static void executeStatementsFromDirectory(final String folder, final SQLAdapter adapter) throws IOException {
+	public static void executeStatementsFromDirectory(final String folder, final IDatabaseAdapter adapter) throws IOException {
 		try (Stream<Path> paths = Files.walk(Paths.get(folder))) {
 			paths.filter(f -> f.toFile().isFile()).forEach(file -> {
 				try {
@@ -58,7 +58,7 @@ public class ExperimentAdditionalTableLoader {
 		}
 	}
 
-	private static void executeStatementInFile(final Path file, final SQLAdapter adapter) throws IOException, SQLException {
+	private static void executeStatementInFile(final Path file, final IDatabaseAdapter adapter) throws IOException, SQLException {
 		String createTableStatement = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
 		String insertValuesStatement = null;
 

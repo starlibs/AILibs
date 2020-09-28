@@ -3,20 +3,17 @@ package ai.libs.jaicore.search.syntheticgraphs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.datastructure.graph.ILabeledPath;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
@@ -29,51 +26,30 @@ import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.noisymean.C
 @RunWith(Parameterized.class)
 public class DegeneratedGraphTreasureIslandTester extends SyntheticGraphTester {
 
-	private final int branchingFactor;
-	private final int depth;
-	private final BigInteger maxIslandSize;
-	private int exactIslandSize;
-	private final BigInteger numberOfIslandsWithTreasure;
-	private IIslandModel islandModel;
-	private ChaoticMeansTreasureModel treasureGenerator;
-	private DegeneratedGraphSearchWithPathEvaluationsProblem searchProblem;
 
-	public DegeneratedGraphTreasureIslandTester(final int branchingFactor, final int depth, final int maxIslandSize, final int numberOfIslandsWithTreasure) {
-		super();
-		this.branchingFactor = branchingFactor;
-		this.depth = depth;
-		this.maxIslandSize = BigInteger.valueOf(maxIslandSize);
-		this.numberOfIslandsWithTreasure = BigInteger.valueOf(numberOfIslandsWithTreasure);
-	}
 
-	// creates the test data
-	@Parameters(name = "branchingFactor = {0}, depth = {1}, maxIslandSize = {2}, numberOfIslandsWithTreasure = {3}")
-	public static Collection<Object[]> data() {
+	public static Stream<Arguments> getTreeSetups() {
 
 		final int MAX_BF = 8;
 		final int MAX_DEPTH = 4;
 		final int MAX_ISLANDSIZE = 10;
-		int combos = (MAX_BF / 2) * MAX_DEPTH * MAX_ISLANDSIZE;
 
-		Object[][] data = new Object[combos][4];
-		int i = 0;
+		List<Arguments> data = new ArrayList<>();
 		for (int bf = 2; bf <= MAX_BF; bf += 2) {
 			for (int depth = 1; depth <= MAX_DEPTH; depth++) {
 				for (int islandSize = 1; islandSize <= MAX_ISLANDSIZE; islandSize++) {
-					data[i][0] = bf;
-					data[i][1] = depth;
-					data[i][2] = (int) Math.min(Math.pow(bf / 2, depth), islandSize);
-					data[i][3] = 1;
-					i++;
+					data.add(Arguments.of(bf, depth, (int) Math.min(Math.pow(bf / 2, depth), islandSize),  1));
 				}
 			}
 		}
-		List<Object[]> dataAsList = Arrays.asList(data);
-		assertEquals(new HashSet<>(dataAsList).size(), dataAsList.size());
-		return dataAsList;
+		return data.stream();
 	}
 
-	@BeforeEach
+	private int exactIslandSize;
+	private IIslandModel islandModel;
+	private ChaoticMeansTreasureModel treasureGenerator;
+	private DegeneratedGraphSearchWithPathEvaluationsProblem searchProblem;
+
 	public void setupTest() throws PathEvaluationException, InterruptedException {
 		this.islandModel = new EqualSizedIslandsModel(this.maxIslandSize);
 		this.treasureGenerator = new ChaoticMeansTreasureModel(this.numberOfIslandsWithTreasure.intValue(), this.islandModel, 0);
