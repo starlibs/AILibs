@@ -41,10 +41,10 @@ public class RandomSearchTester extends GraphSearchSolutionIteratorTester {
 
 	@ParameterizedTest
 	@MethodSource("getProblemSets")
-	public void testDifferentSequencesForDifferentSeeds(final IAlgorithmTestProblemSet<?> problem) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTestProblemSetCreationException {
+	public void testDifferentSequencesForDifferentSeeds(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTestProblemSetCreationException {
 		int seed1 = 0;
 		int seed2 = 4711;
-		assertNotEquals(this.getTourOfSequences(problem, seed1), this.getTourOfSequences(problem, seed2));
+		assertNotEquals(this.getTourOfSequences(problemSet, seed1), this.getTourOfSequences(problemSet, seed2));
 	}
 
 	@ParameterizedTest
