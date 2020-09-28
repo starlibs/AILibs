@@ -8,7 +8,7 @@
       "id" : "base_estimator",
       "name" : "BaseLearner"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "n_estimators",
       "type" : "int",
       "min" : 1,

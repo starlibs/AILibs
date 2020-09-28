@@ -8,6 +8,6 @@
       "id" : "estimator",
       "name" : "BaseLearner"
     } ],
-    "parameter" : [ ]
+    "parameters" : [ ]
   } ]
 }

@@ -8,7 +8,7 @@
 			"providedInterface": [
 				"nonRankBasedSearcher"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "D",
 					"type": "cat",

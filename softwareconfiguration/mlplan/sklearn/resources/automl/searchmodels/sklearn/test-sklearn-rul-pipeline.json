@@ -15,7 +15,7 @@
                     "name": "tsfreshFeatureSet"
                 }
             ],
-            "parameter": [
+            "parameters": [
                 {
                     "name": "disable_progressbar",
                     "default": "True",
@@ -72,7 +72,7 @@
                 "tsfreshFeatureSet"
             ],
             "requiredInterface": [],
-            "parameter": [
+            "parameters": [
                 {
                     "name": "has_duplicate_max",
                     "default": "True",
@@ -577,7 +577,7 @@
                 "DataCleaner"
             ],
             "requiredInterface": [],
-            "parameter": []
+            "parameters": []
         },
         {
             "name": "NoPreprocessor",
@@ -585,7 +585,7 @@
                 "BasicPreprocessor"
             ],
             "requiredInterface": [],
-            "parameter": []
+            "parameters": []
         },
         {
             "name": "sklearn.tree.DecisionTreeRegressor",
@@ -595,7 +595,7 @@
                 "FeatureImportanceEstimator"
             ],
             "requiredInterface": [],
-            "parameter": [
+            "parameters": [
                 {
                     "name": "criterion",
                     "default": "mse",

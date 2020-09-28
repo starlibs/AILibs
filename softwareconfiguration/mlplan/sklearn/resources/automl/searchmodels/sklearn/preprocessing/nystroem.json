@@ -5,7 +5,7 @@
     "name" : "sklearn.kernel_approximation.Nystroem",
     "providedInterface" : [ "sklearn.kernel_approximation.Nystroem", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "kernel",
       "default" : "rbf",
       "type" : "cat",

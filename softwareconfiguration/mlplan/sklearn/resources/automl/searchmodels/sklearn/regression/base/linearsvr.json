@@ -5,7 +5,7 @@
     "name" : "sklearn.svm.LinearSVR",
     "providedInterface" : [ "BasicRegressor", "BaseLearner", "AbstractRegressor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "epsilon",
       "type" : "double",
       "default" : 0.0,

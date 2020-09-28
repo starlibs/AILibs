@@ -5,7 +5,7 @@
     "name" : "sklearn.ensemble.RandomForestClassifier",
     "providedInterface" : [ "EnsembleClassifier", "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "n_estimators",
       "default" : 100,
       "type" : "int",

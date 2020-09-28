@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.rules.OneR",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "BoostableBaseClassifier", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "B",
       "type" : "int",
       "default" : 6.0,

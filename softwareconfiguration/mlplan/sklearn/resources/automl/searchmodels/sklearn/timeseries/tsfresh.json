@@ -5,7 +5,7 @@
     "name" : "Tsfresh",
     "providedInterface" : [ "tsfreshFeatureSet" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "has_duplicate_max",
       "default" : "True",
       "type" : "cat",

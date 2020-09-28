@@ -8,7 +8,7 @@
       "id" : "default_fc_parameters",
       "name" : "tsfreshFeatureSet"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "disable_progressbar",
       "default" : "True",
       "type" : "cat",

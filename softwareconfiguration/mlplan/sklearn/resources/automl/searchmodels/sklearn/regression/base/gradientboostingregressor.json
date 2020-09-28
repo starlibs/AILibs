@@ -5,7 +5,7 @@
     "name" : "sklearn.ensemble.GradientBoostingRegressor",
     "providedInterface" : [ "BasicRegressor", "BaseLearner", "FeatureImportanceEstimator", "AbstractRegressor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "loss",
       "type" : "cat",
       "values" : [ "ls", "lad", "huber", "quantile" ],

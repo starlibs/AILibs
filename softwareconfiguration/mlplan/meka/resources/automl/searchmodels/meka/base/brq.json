@@ -8,7 +8,7 @@
       "id" : "W",
       "name" : "AbstractClassifier"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "P",
       "type" : "double",
       "min" : 0.2,

@@ -8,7 +8,7 @@
       "id" : "estimator",
       "name" : "sklearn.ensemble.ExtraTreesClassifier"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "step",
       "type" : "double",
       "default" : 0.53,

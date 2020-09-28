@@ -8,7 +8,7 @@
       "id" : "W",
       "name" : "BasicMLClassifier"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "F",
       "comment" : "The number of iterations of EM to carry out (default: 10). REMARK: Here we could also use a subcomponent for filters!",
       "type" : "cat",

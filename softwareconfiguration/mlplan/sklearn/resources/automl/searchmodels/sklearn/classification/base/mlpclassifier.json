@@ -5,7 +5,7 @@
     "name" : "sklearn.neural_network.MLPClassifier",
     "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "alpha",
       "default" : 1.0E-4,
       "type" : "cat",

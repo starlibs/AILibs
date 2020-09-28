@@ -5,7 +5,7 @@
     "name" : "sklearn.linear_model.LogisticRegression",
     "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "penalty",
       "type" : "cat",
       "default" : "l2",

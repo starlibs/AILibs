@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.functions.VotedPerceptron",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "I",
       "type" : "int",
       "default" : 1.0,

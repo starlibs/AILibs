@@ -5,6 +5,6 @@
     "name" : "InvalidNumberReplacementTransformer",
     "providedInterface" : [ "DataCleaner" ],
     "requiredInterface" : [ ],
-    "parameter" : [ ]
+    "parameters" : [ ]
   } ]
 }

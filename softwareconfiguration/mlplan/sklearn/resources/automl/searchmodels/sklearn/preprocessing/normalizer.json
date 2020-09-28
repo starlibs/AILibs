@@ -5,7 +5,7 @@
     "name" : "sklearn.preprocessing.Normalizer",
     "providedInterface" : [ "sklearn.preprocessing.Normalizer", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "norm",
       "default" : "l1",
       "type" : "cat",

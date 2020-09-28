@@ -8,6 +8,6 @@
       "id" : "W",
       "name" : "meka.classifiers.multilabel.BR"
     } ],
-    "parameter" : [ ]
+    "parameters" : [ ]
   } ]
 }

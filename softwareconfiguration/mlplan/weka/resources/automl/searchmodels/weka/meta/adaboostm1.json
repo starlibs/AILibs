@@ -16,7 +16,7 @@
 				"WeightedInstancesHandler",
 				"PipelineClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "pActivator",
 					"type": "cat",

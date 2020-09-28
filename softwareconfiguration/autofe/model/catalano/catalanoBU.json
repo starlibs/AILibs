@@ -10,7 +10,7 @@
 	  	    		"name": "AbstractFilter"
 	  	    	}
 			],
-	    	"parameter" : [ ]
+	    	"parameters" : [ ]
 	    },{
 	  	    "name" : "autofe.MakeUnion",
 	  	    "providedInterface" : [ "AbstractFilter", "MakeUnion"],
@@ -24,7 +24,7 @@
 	  	    		"name": "AbstractFilter"
 	  	    	}
 			],
-	    	"parameter" : [ ]
+	    	"parameters" : [ ]
 	    }, {
 	  	    "name" : "AbstractPipe",
 	  	    "providedInterface" : [ "AbstractFilter", "AbstractPipeline"],
@@ -38,7 +38,7 @@
 	  	    		"name": "Preprocessor"
 	  	    	}
 			],
-	    	"parameter" : [ ]
+	    	"parameters" : [ ]
 	    }, {
 	  	    "name" : "PrepPipe",
 	  	    "providedInterface" : [ "PrepPipe", "Preprocessor"],
@@ -52,7 +52,7 @@
 	  	    		"name": "Preprocessor"
 	  	    	}
 			],
-	    	"parameter" : [ ]
+	    	"parameters" : [ ]
 	    }, {
 	    	"name": "NNPipe",
 	    	"providedInterface" : [ "AbstractFilter", "AbstractPipeline"],
@@ -66,6 +66,6 @@
 	  	    		"name": "Preprocessor"
 	  	    	}
 			],
-			"parameter" : [ ]
+			"parameters" : [ ]
 	    }]
 }

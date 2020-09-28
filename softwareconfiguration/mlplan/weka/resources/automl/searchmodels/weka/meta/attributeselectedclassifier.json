@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.meta.AttributeSelectedClassifier",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "E",
       "type" : "cat",
       "default" : "weka.attributeSelection.CfsSubsetEval",

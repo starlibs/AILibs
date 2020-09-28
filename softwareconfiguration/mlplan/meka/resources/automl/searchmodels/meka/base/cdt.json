@@ -8,7 +8,7 @@
       "id" : "W",
       "name" : "AbstractClassifier"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "H",
       "comment" : "Determines the width of the trellis (use 0 for chain; use _1 for a square trellis, i.e., width of sqrt(number of labels)). ",
       "type" : "cat",

@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.functions.SimpleLogistic",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "S",
       "type" : "boolean",
       "default" : "false"

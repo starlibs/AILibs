@@ -5,7 +5,7 @@
     "name" : "sklearn.svm.LinearSVC",
     "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "penalty",
       "default" : "l1",
       "type" : "cat",

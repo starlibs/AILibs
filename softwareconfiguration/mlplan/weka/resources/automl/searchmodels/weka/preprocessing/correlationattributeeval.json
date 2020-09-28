@@ -8,7 +8,7 @@
 			"providedInterface": [
 				"rankBasedEvaluator"
 			],
-			"parameter": [],
+			"parameters": [],
 			"dependencies": []
 		}
 	]

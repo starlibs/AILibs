@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.rules.M5Rules",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "N",
       "type" : "boolean",
       "default" : "false"

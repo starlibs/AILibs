@@ -5,6 +5,6 @@
     "name" : "sklearn.feature_selection.f_classif",
     "providedInterface" : [ "sklearn.feature_selection.f_classif" ],
     "requiredInterface" : [ ],
-    "parameter" : [ ]
+    "parameters" : [ ]
   } ]
 }

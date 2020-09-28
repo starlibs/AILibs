@@ -5,7 +5,7 @@
     "name" : "sklearn.preprocessing.PolynomialFeatures",
     "providedInterface" : [ "sklearn.preprocessing.PolynomialFeatures", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "degree",
       "default" : 2,
       "type" : "cat",

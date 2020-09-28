@@ -5,6 +5,6 @@
     "name" : "sklearn.naive_bayes.GaussianNB",
     "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
-    "parameter" : [ ]
+    "parameters" : [ ]
   } ]
 }

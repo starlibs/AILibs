@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.trees.M5P",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "Regressor", "BaseClassifier", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "N",
       "type" : "boolean",
       "default" : "false"

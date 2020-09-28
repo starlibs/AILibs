@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.functions.supportVector.Puk",
     "requiredInterface" : [ ],
     "providedInterface" : [ "K" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "O",
       "type" : "double",
       "min" : 0.1,

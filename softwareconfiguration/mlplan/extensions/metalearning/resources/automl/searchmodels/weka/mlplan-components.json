@@ -5,7 +5,7 @@
 			"name": "weka.classifiers.trees.RandomTree",
 			"providedInterface": ["AbstractClassifier"],
 			"requiredInterface": [],
-			"parameter": [
+			"parameters": [
 			]
 		},
 		
@@ -13,7 +13,7 @@
 			"name": "weka.classifiers.trees.RandomForest",
 			"providedInterface": ["AbstractClassifier"],
 			"requiredInterface": [],
-			"parameter": [ {
+			"parameters": [ {
 			      "name" : "I",
 			      "type" : "int",
 			      "default" : 10.0,
