@@ -19,7 +19,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.infiles.stratified.sampling.Class
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.stratified.sampling.StratifiedFileSampling;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
+import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 
 public class MLPlanSubsamplingExample {
 

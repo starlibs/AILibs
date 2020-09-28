@@ -8,8 +8,8 @@ import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFail
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.automl.AbstractMLPlanBuilderTest;
-import ai.libs.mlplan.multiclass.wekamlplan.EMLPlanWekaProblemType;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
+import ai.libs.mlplan.weka.EMLPlanWekaProblemType;
+import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 
 public class MLPlanWekaBuilderTest extends AbstractMLPlanBuilderTest {
 

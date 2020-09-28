@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multilabel.mekamlplan;
+package ai.libs.mlplan.meka;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 

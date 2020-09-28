@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multiclass.wekamlplan;
+package ai.libs.mlplan.weka;
 
 import java.util.Random;
 
@@ -15,9 +15,9 @@ import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.core.IProblemType;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaRegressorFactory;
+import ai.libs.mlplan.weka.weka.WekaPipelineFactory;
+import ai.libs.mlplan.weka.weka.WekaPipelineValidityCheckingNodeEvaluator;
+import ai.libs.mlplan.weka.weka.WekaRegressorFactory;
 
 public enum EMLPlanWekaProblemType implements IProblemType<IWekaClassifier> {
 

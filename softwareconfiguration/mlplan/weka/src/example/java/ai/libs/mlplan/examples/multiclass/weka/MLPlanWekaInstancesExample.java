@@ -3,7 +3,7 @@ package ai.libs.mlplan.examples.multiclass.weka;
 import java.io.FileReader;
 
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
+import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 

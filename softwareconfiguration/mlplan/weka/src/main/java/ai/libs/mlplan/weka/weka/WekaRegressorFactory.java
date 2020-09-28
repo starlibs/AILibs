@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multiclass.wekamlplan.weka;
+package ai.libs.mlplan.weka.weka;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

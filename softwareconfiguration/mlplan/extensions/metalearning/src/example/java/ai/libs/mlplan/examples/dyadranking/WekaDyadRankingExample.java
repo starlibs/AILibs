@@ -17,9 +17,9 @@ import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.DyadRankedBestFirstFactory;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness;
 import ai.libs.mlplan.metamining.dyadranking.WEKADyadRankedNodeQueueConfig;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
+import ai.libs.mlplan.weka.MLPlanWekaBuilder;
+import ai.libs.mlplan.weka.MLPlanWekaClassifier;
+import ai.libs.mlplan.weka.weka.WekaMLPlanWekaClassifier;
 
 /**
  * Demonstrated the usage of ML-Plan with a dyad ranked OPEN list

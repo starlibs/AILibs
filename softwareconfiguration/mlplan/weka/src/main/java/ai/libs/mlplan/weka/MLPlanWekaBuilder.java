@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multiclass.wekamlplan;
+package ai.libs.mlplan.weka;
 
 import java.io.IOException;
 

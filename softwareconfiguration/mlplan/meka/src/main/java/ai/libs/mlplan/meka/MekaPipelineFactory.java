@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multilabel.mekamlplan;
+package ai.libs.mlplan.meka;
 
 import java.util.LinkedList;
 import java.util.List;

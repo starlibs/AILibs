@@ -30,7 +30,7 @@ import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.timing.TimedComputation;
 import ai.libs.mlplan.core.ILearnerFactory;
-import ai.libs.mlplan.multiclass.wekamlplan.EMLPlanWekaProblemType;
+import ai.libs.mlplan.weka.EMLPlanWekaProblemType;
 
 @RunWith(Parameterized.class)
 public class MLPlanWekaSearchSpaceConfigurationTest extends AbstractSearchSpaceConfigurationTest {
