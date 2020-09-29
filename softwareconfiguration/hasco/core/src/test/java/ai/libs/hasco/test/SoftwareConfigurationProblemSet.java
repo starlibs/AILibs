@@ -51,6 +51,14 @@ public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<Re
 		}
 	}
 
+	public RefinementConfiguredSoftwareConfigurationProblem<Double> getMediumRecursiveProblemInput() throws AlgorithmTestProblemSetCreationException {
+		try {
+			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/mediumrecursiveproblem.json"), "IFace", n -> this.random.nextDouble() * 0.1);
+		} catch (UnresolvableRequiredInterfaceException | IOException e) {
+			throw new AlgorithmTestProblemSetCreationException(e);
+		}
+	}
+
 	@Override
 	public RefinementConfiguredSoftwareConfigurationProblem<Double> getDifficultProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
 		try {

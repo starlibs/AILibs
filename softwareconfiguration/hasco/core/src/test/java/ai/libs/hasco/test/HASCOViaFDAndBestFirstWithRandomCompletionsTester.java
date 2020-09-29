@@ -47,13 +47,15 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsTester extends HASCOTest
 	@ParameterizedTest
 	@MethodSource("getProblemSets")
 	@MediumTest
-	public void testThatDefaultParametrizationsAreEvaluatedFirst(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public void testThatDefaultParametrizationsAreEvaluatedFirst(final SoftwareConfigurationProblemSet problemSet)
+			throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 
 		/* setup problems for which we want to check this */
 		List<RefinementConfiguredSoftwareConfigurationProblem<Double>> problems = new ArrayList<>();
 		problems.add(problemSet.getSimpleProblemInputForGeneralTestPurposes());
 		problems.add(problemSet.getSimpleProblemInputWithTwoComponents());
 		problems.add(problemSet.getSimpleRecursiveProblemInput());
+		problems.add(problemSet.getMediumRecursiveProblemInput());
 		problems.add(problemSet.getDifficultProblemInputForGeneralTestPurposes());
 
 		/* now run checks */

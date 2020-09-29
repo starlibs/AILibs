@@ -1,7 +1,5 @@
 package ai.libs.hasco.test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.api4.java.algorithm.IAlgorithm;
@@ -13,15 +11,13 @@ import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfiguratio
 public abstract class SoftwareConfigurationAlgorithmTester extends GeneralAlgorithmTester {
 
 	public static Stream<Arguments> getProblemSets() {
-		List<Arguments> problemSets = new ArrayList<>();
-		problemSets.add(Arguments.of(new SoftwareConfigurationProblemSet()));
-		return problemSets.stream();
+		return Stream.of(Arguments.of(new SoftwareConfigurationProblemSet()));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public final IAlgorithm<?, ?> getAlgorithm(final Object problem) {
-		return this.getAlgorithmForSoftwareConfigurationProblem((RefinementConfiguredSoftwareConfigurationProblem<Double>)problem);
+		return this.getAlgorithmForSoftwareConfigurationProblem((RefinementConfiguredSoftwareConfigurationProblem<Double>) problem);
 	}
 
 	public abstract IAlgorithm<?, ?> getAlgorithmForSoftwareConfigurationProblem(final RefinementConfiguredSoftwareConfigurationProblem<Double> problem);
