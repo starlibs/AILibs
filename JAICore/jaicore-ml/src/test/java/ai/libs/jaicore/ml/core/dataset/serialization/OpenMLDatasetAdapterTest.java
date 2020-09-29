@@ -33,7 +33,7 @@ import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 import ai.libs.jaicore.test.MediumTest;
 
-class OpenMLDatasetAdapterTest {
+public class OpenMLDatasetAdapterTest {
 	protected Logger logger = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER);
 
 	private static OpenmlConnector con = new OpenmlConnector();

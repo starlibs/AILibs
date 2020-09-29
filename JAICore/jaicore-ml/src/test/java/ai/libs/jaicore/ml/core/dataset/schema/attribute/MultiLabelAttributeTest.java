@@ -10,7 +10,7 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IMultiLabelAttribute;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class MultiLabelAttributeTest {
+public class MultiLabelAttributeTest {
 
 	private static final String NAME = "myAtt";
 	private static final List<String> VALUES = Arrays.asList("A", "B", "C");
