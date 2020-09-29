@@ -46,7 +46,7 @@ import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffAttributeType;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffItem;
 import ai.libs.jaicore.ml.pdm.dataset.SensorTimeSeriesAttribute;
 
-class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<ILabeledInstance>> {
+public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<ILabeledInstance>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ArffDatasetAdapter.class);
 
