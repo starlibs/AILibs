@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.sets.algorithms.RelationComputerTester;
 import ai.libs.jaicore.basic.sets.problems.RelationalProblemSet;
+import ai.libs.jaicore.logging.LoggerUtil;
 
 public class LDSRelationComputerTester extends RelationComputerTester {
 
@@ -32,7 +33,7 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 	public void testOutputSizeForNonEmptyRelation(final RelationalProblemSet problemSet) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
 		RelationComputationProblem<Object> problem = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		LDSRelationComputer<Object> ldsComputer = new LDSRelationComputer<>(this.getCartesianProductProblem(problemSet));
-		ldsComputer.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		ldsComputer.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		List<List<Object>> cartesianProduct = ldsComputer.call();
 		List<List<?>> groundTruth = cartesianProduct.stream().filter(problem.getPrefixFilter()).collect(Collectors.toList());
 		this.testRelation(problem, groundTruth.size());

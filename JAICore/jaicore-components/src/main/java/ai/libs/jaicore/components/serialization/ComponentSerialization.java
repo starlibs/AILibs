@@ -171,7 +171,12 @@ public class ComponentSerialization implements ILoggingCustomizable {
 	}
 
 	public IComponentRepository deserializeRepository(final File jsonFile, final Map<String, String> templateVars) throws IOException {
-		return this.deserializeRepository(this.readRepositoryFile(jsonFile, templateVars));
+		try {
+			return this.deserializeRepository(this.readRepositoryFile(jsonFile, templateVars));
+		}
+		catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Found a problem when parsing repository file " + jsonFile, e);
+		}
 	}
 
 	public IComponentRepository deserializeRepository(final String repository) throws IOException {
@@ -268,7 +273,7 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		}
 		boolean initWithExtremal = false;
 		int refineSplits = parameter.get("refineSplits").asInt();
-		int minInterval = parameter.get("minInterval").asInt();
+		double minInterval = parameter.get("minInterval").asDouble();
 		if (type.endsWith("-log")) {
 			return new NumericParameterRefinementConfiguration(parameter.get("focus").asDouble(), parameter.get("basis").asDouble(), initWithExtremal, refineSplits, minInterval);
 		} else {
@@ -410,11 +415,18 @@ public class ComponentSerialization implements ILoggingCustomizable {
 	public INumericParameterRefinementConfigurationMap deserializeParamRefinementConfiguration(final JsonNode component) {
 		NumericParameterRefinementConfigurationMap paramConfigs = new NumericParameterRefinementConfigurationMap();
 		Map<String, NumericParameterRefinementConfiguration> map = new HashMap<>();
-		paramConfigs.put(component.get("name").asText(), map);
+		String componentName =component.get("name").asText();
+		paramConfigs.put(componentName, map);
 		for (JsonNode parameter : component.get(FIELD_PARAMETERS)) {
+			String paramName = parameter.get("name").asText();
 			String type = parameter.get("type").asText();
 			if (type.startsWith(DTYPE_INT) || type.startsWith(DTYPE_DOUBLE)) {
-				map.put(parameter.get("name").asText(), this.deserializeParamRefinement(parameter));
+				try {
+					map.put(paramName, this.deserializeParamRefinement(parameter));
+				}
+				catch (RuntimeException e) {
+					throw new IllegalArgumentException("Observed problems when processing parameter " + paramName + " of component " + componentName);
+				}
 			}
 		}
 		return paramConfigs;

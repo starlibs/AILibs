@@ -19,6 +19,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.openml.apiconnector.io.OpenmlConnector;
 
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.AFileSamplingAlgorithm;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.ArffUtilities;
 
@@ -70,7 +71,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 
 	private void testSampleSize(final File input) throws Exception {
 		AFileSamplingAlgorithm samplingAlgorithm = (AFileSamplingAlgorithm) this.getAlgorithm(input);
-		samplingAlgorithm.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		samplingAlgorithm.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		this.logger.info("Testing {}.", samplingAlgorithm.getClass().getName());
 		int inputSize = ArffUtilities.countDatasetEntries(input, true);
 		int sampleSize = (int) (inputSize * DEFAULT_SAMPLE_FRACTION);

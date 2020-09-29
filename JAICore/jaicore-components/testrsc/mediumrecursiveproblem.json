@@ -51,7 +51,7 @@
 				{
 					"name": "b",
 					"type": "cat",
-					"default": "v2",
+					"default": "v3",
 					"values": [
 						"v3",
 						"v4"
@@ -93,7 +93,7 @@
 				{
 					"name": "d2",
 					"type": "cat",
-					"default": "v2",
+					"default": "v4",
 					"values": [
 						"v3",
 						"v4"

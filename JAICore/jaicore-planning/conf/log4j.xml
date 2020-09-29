@@ -53,8 +53,17 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
-  <logger name="ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester">
-   <level value="trace" />
+	<logger name="ai.libs.jaicore.interrupt">
+		<level value="info" />
+	</logger>
+	
+  <logger name="tester">
+		<level value="trace" />
+		<appender-ref ref="console" />
+		<appender-ref ref="infoFileAppender" />
+		<appender-ref ref="warnFileAppender" />
+		<appender-ref ref="errFileAppender" />
+		<appender-ref ref="traceFileAppender" />
   </logger>
   
   <logger name="testedalgorithm">
@@ -68,6 +77,14 @@
   </logger>
   
   <logger name="testedalgorithm.base">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="testedalgorithm.base.gg">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="testedalgorithm.base.gg.util">
     <level value="warn" />
   </logger>
   

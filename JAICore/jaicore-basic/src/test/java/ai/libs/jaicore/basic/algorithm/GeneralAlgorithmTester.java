@@ -36,6 +36,7 @@ import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.concurrent.ThreadGroupObserver;
 import ai.libs.jaicore.interrupt.Interrupter;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.test.MediumTest;
 
 /**
@@ -46,7 +47,6 @@ import ai.libs.jaicore.test.MediumTest;
  */
 public abstract class GeneralAlgorithmTester extends Tester {
 
-	public static final String TESTEDALGORITHM_LOGGERNAME = "testedalgorithm";
 	private static final int TIMEOUT_DELAY = 12000;
 	private static final int TOTAL_EXPERIMENT_TIMEOUT = 20000;
 	private static final int INTERRUPTION_DELAY = 5000;
@@ -69,7 +69,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(problemSet.getSimpleProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+			((ILoggingCustomizable) algorithm).setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		}
 		CheckingEventListener listener = new CheckingEventListener();
 		algorithm.registerListener(listener);
@@ -88,7 +88,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(problemSet.getSimpleProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+			((ILoggingCustomizable) algorithm).setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		}
 		algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
 		CheckingEventListener listener = new CheckingEventListener();
@@ -111,9 +111,10 @@ public abstract class GeneralAlgorithmTester extends Tester {
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(problemSet.getSimpleProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+			((ILoggingCustomizable) algorithm).setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		}
 		CheckingEventListener listener = new CheckingEventListener();
+		this.logger.info("Start testing that start and finish event are emitted during iteration.");
 		try {
 			for (IAlgorithmEvent e : algorithm) {
 				listener.receiveEvent(e);
@@ -126,6 +127,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 				throw e;
 			}
 		}
+		this.logger.info("Algorithm has no more events.");
 		listener.checkState();
 		this.checkPreconditionForTest(problemSet);
 	}
@@ -188,7 +190,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 			this.logger.info("Testing interruptibility of algorithm {} ({}) with problem input {}", algorithm.getId(), algorithm.getClass().getName(), StringUtil.toStringLimited(algorithm.getInput(), 100));
 		}
 		if (algorithm instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+			((ILoggingCustomizable) algorithm).setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		}
 		algorithm.setTimeout(1, TimeUnit.DAYS); // effectively deactivate timeout that has maybe been set during construction
 		if (parallelized) {
@@ -280,7 +282,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 			this.logger.info("Testing cancel of algorithm {} ({}) with problem input {}", algorithm.getId(), algorithm.getClass().getName(), StringUtil.toStringLimited(algorithm.getInput(), 100));
 		}
 		if (algorithm instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+			((ILoggingCustomizable) algorithm).setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		}
 		algorithm.setTimeout(1, TimeUnit.DAYS); // effectively deactivate timeout that has maybe been set during construction
 		int allowedCPUs = parallelized ? Runtime.getRuntime().availableProcessors() : 1;
@@ -389,7 +391,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 			this.logger.info("Testing timeout of algorithm {} ({}) with problem input {}", algorithm.getId(), algorithm.getClass().getName(), StringUtil.toStringLimited(algorithm.getInput(), 100));
 		}
 		if (algorithm instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+			((ILoggingCustomizable) algorithm).setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		}
 		if (algorithm instanceof AAlgorithm) {
 			this.logger.info("Setting timeout precaution offset to 5000");

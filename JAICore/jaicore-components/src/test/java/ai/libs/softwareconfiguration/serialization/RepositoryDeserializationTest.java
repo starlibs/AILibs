@@ -8,17 +8,18 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.basic.ResourceFile;
+import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.test.MediumTest;
 
-public class RepositoryDeserializationTest {
+public abstract class RepositoryDeserializationTest extends Tester {
 
 	@MediumTest
 	@ParameterizedTest
 	@MethodSource("provideRepositoriesToTest")
 	public void testDeserializationOfRepository(final String path, final int numExpectedComponents) throws IOException {
-		System.out.println("Check " + path + " with " + numExpectedComponents + " components.");
+		logger.info("Check {} with {} components.", path, numExpectedComponents);
 		ResourceFile file = new ResourceFile(path);
 		IComponentRepository repo = new ComponentSerialization().deserializeRepository(file);
 		assertEquals(numExpectedComponents, repo.size(), String.format("Number of components deserialized from path %s is %s instead of the expected number %s ", path, repo.size(), numExpectedComponents));

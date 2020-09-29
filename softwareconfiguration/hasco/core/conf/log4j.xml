@@ -103,6 +103,10 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
+  <logger name="testedalgorithm._swConfigAlgo">
+    <level value="warn" />
+  </logger>
+  
   <logger name="testedalgorithm.base._orgraphsearch._algorithm._algorithm">
   	<level value="warn" />
   </logger>

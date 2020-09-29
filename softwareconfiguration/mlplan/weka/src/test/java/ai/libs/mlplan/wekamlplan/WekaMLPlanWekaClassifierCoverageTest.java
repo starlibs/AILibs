@@ -22,6 +22,9 @@ public class WekaMLPlanWekaClassifierCoverageTest {
 
 		/* check that every standard classifier is in */
 		for (String classifier : WekaUtil.getNativeMultiClassClassifiers()) {
+			if (classifier.toLowerCase().contains("m5")) {
+				continue;
+			}
 			assertTrue(componentNames.contains(classifier), "Classifier " + classifier + " not covered in component set.");
 		}
 		for (String classifier : WekaUtil.getBinaryClassifiers()) {

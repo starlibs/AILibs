@@ -238,6 +238,10 @@ public class ComponentUtil {
 	}
 
 	public static int getNumberOfUnparametrizedCompositions(final Collection<? extends IComponent> components, final String requiredInterface) {
+		return getNumberOfUnparametrizedCompositions(components, requiredInterface, false);
+	}
+
+	public static int getNumberOfUnparametrizedCompositions(final Collection<? extends IComponent> components, final String requiredInterface, final boolean uniqueComponents) {
 		if (hasCycles(components, requiredInterface)) {
 			return -1;
 		}
@@ -251,7 +255,25 @@ public class ComponentUtil {
 			} else {
 				for (IRequiredInterfaceDefinition reqIFaceDef : candidate.getRequiredInterfaces()) {
 					String reqIFace = reqIFaceDef.getName();
-					int subSolutionsForThisInterface = getNumberOfUnparametrizedCompositions(components, reqIFace);
+					int numberOfSolutionPerSlotForThisInterface = getNumberOfUnparametrizedCompositions(components, reqIFace, reqIFaceDef.isUniqueComponents());
+					int subSolutionsForThisInterface = 0;
+					if (reqIFaceDef.isOptional() || reqIFaceDef.getMin() == 0) {
+						subSolutionsForThisInterface ++;
+					}
+
+					/* now consider all numbers i of positive realizations of this required interface */
+					for (int i = Math.max(1, reqIFaceDef.getMin()); i <= reqIFaceDef.getMax(); i++) {
+						int numberOfPossibleRealizationsForThisFixedNumberOfSlots = 1;
+						int numCandidatesForNextSlot = numberOfSolutionPerSlotForThisInterface;;
+						for (int j = 0; j < i; j++) {
+							numberOfPossibleRealizationsForThisFixedNumberOfSlots *= numCandidatesForNextSlot;
+							if (reqIFaceDef.isUniqueComponents()) {
+								numCandidatesForNextSlot --;
+							}
+						}
+						subSolutionsForThisInterface += numberOfPossibleRealizationsForThisFixedNumberOfSlots;
+					}
+
 					if (waysToResolveComponent > 0) {
 						waysToResolveComponent *= subSolutionsForThisInterface;
 					} else {

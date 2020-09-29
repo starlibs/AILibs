@@ -9,6 +9,7 @@ import org.api4.java.algorithm.Timeout;
 
 import ai.libs.automl.AutoMLAlgorithmCoreFunctionalityTester;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.weka.EMLPlanWekaProblemType;
@@ -29,7 +30,7 @@ public class MLPlanCoreFunctionalityTester extends AutoMLAlgorithmCoreFunctional
 			MLPlan<IWekaClassifier> mlplan = builder.withDataset(data).build();
 			mlplan.setRandomSeed(1);
 			mlplan.setPortionOfDataForPhase2(0f);
-			mlplan.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+			mlplan.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 			return mlplan;
 		} catch (IOException e) {
 			throw new AlgorithmCreationException(e);

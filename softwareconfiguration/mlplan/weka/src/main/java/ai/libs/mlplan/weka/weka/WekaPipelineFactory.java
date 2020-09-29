@@ -125,11 +125,10 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 			if (!parameterValues.getValue().equals("false")) {
 				parameters.add("-" + parameterValues.getKey());
 			}
-
 			IParameterDomain domain = ci.getComponent().getParameter(parameterValues.getKey()).getDefaultDomain();
 			if (parameterValues.getValue() != null && !parameterValues.getValue().equals("") && !parameterValues.getValue().equals("true") && !parameterValues.getValue().equals("false")) {
 				if (domain instanceof NumericParameterDomain && ((NumericParameterDomain) domain).isInteger()) {
-					parameters.add((int) Double.parseDouble(parameterValues.getValue()) + "");
+					parameters.add(((int) Double.parseDouble(parameterValues.getValue())) + "");
 				} else {
 					parameters.add(parameterValues.getValue());
 				}

@@ -39,6 +39,7 @@ import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.PreTrainedPredictionBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
+import ai.libs.jaicore.test.LongTest;
 
 /**
  * This test tests whether or not the algorithm delivers a solution on each given dataset within 30 seconds.
@@ -62,6 +63,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 
 	@ParameterizedTest
 	@MethodSource("getDatasets")
+	@LongTest
 	public void testThatModelIsTrained(final OpenMLProblemSet problemSet)
 			throws DatasetDeserializationFailedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ObjectEvaluationFailedException, SplitFailedException, AlgorithmCreationException, IOException {
 		try {

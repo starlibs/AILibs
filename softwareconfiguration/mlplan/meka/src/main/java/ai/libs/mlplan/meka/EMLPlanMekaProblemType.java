@@ -18,7 +18,6 @@ public enum EMLPlanMekaProblemType implements IProblemType<IMekaClassifier> {
 
 	private final String searchSpaceConfigFileFromResource;
 	private final String systemSearchSpaceConfigFromFileSystem;
-
 	private final String preferedComponentsListFromResource;
 	private final String preferedComponentsListFromFileSystem;
 

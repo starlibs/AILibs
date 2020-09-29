@@ -13,7 +13,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.Tester;
-import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
@@ -30,7 +30,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 0, 1, 2 };
 		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices));
-		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
+		selectorAndAssigner.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		selectorAndAssigner.setNumCPUs(1);
 		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(6, computedNumber);
@@ -41,7 +41,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 0, 1, 2 };
 		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices));
-		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
+		selectorAndAssigner.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		selectorAndAssigner.setNumCPUs(4);
 		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(6, computedNumber);
@@ -52,7 +52,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
 		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices));
-		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
+		selectorAndAssigner.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		selectorAndAssigner.setNumCPUs(1);
 		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(3, computedNumber);
@@ -63,7 +63,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
 		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices));
-		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
+		selectorAndAssigner.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		selectorAndAssigner.setNumCPUs(4);
 		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(3, computedNumber);
@@ -74,7 +74,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
 		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices));
-		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
+		selectorAndAssigner.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		selectorAndAssigner.setNumCPUs(1);
 		selectorAndAssigner.createStrati(dataset);
 		IntList stratiAssignment = new IntArrayList();
@@ -96,7 +96,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		ILabeledDataset<ILabeledInstance> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
 		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices));
-		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
+		selectorAndAssigner.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		selectorAndAssigner.setNumCPUs(4);
 		selectorAndAssigner.createStrati(dataset);
 		IntList stratiAssignment = new IntArrayList();
@@ -119,7 +119,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		Integer[] attributeIndices = { 0, 1, 2 };
 		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_LENGTH, 2);
-		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
+		selectorAndAssigner.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		selectorAndAssigner.setNumCPUs(1);
 		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(8, computedNumber);
@@ -131,7 +131,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		Integer[] attributeIndices = { 0, 1, 2 };
 		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_LENGTH, 2);
-		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
+		selectorAndAssigner.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		selectorAndAssigner.setNumCPUs(4);
 		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(8, computedNumber);
@@ -143,7 +143,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		Integer[] attributeIndices = { 0, 1, 2 };
 		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_SIZE, 2);
-		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
+		selectorAndAssigner.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		selectorAndAssigner.setNumCPUs(1);
 		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(8, computedNumber);
@@ -155,7 +155,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		Integer[] attributeIndices = { 0, 1, 2 };
 		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_SIZE, 2);
-		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
+		selectorAndAssigner.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		selectorAndAssigner.setNumCPUs(4);
 		int computedNumber = selectorAndAssigner.createStrati(dataset);
 		assertEquals(8, computedNumber);
@@ -167,7 +167,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		Integer[] attributeIndices = { 2 };
 		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_SIZE, 2);
-		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
+		selectorAndAssigner.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		selectorAndAssigner.setNumCPUs(1);
 		selectorAndAssigner.createStrati(dataset);
 		IntList stratiAssignment = new IntArrayList();
@@ -189,7 +189,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester 
 		Integer[] attributeIndices = { 2 };
 		AttributeBasedStratifier selectorAndAssigner = new AttributeBasedStratifier(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_SIZE, 2);
-		selectorAndAssigner.setLoggerName(GeneralAlgorithmTester.TESTEDALGORITHM_LOGGERNAME);
+		selectorAndAssigner.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		selectorAndAssigner.setNumCPUs(4);
 		selectorAndAssigner.createStrati(dataset);
 		IntList stratiAssignment = new IntArrayList();

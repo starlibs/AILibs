@@ -22,6 +22,7 @@ import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IParameterDependency;
 import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 
 /**
  * The ComponentInstanceUtil provides some utilities to deal with component instances.
@@ -71,7 +72,7 @@ public class ComponentInstanceUtil {
 
 		for (IParameterDependency dependency : ci.getComponent().getParameterDependencies()) {
 			if (CompositionProblemUtil.isDependencyPremiseSatisfied(dependency, refinedDomainMap) && !CompositionProblemUtil.isDependencyConditionSatisfied(dependency.getConclusion(), refinedDomainMap)) {
-				throw new IllegalStateException("Problem with dependency " + dependency);
+				throw new IllegalStateException("The dependency " + dependency + " of component " + ci.getComponent().getName() + " in the following component instance is violated: " + new ComponentSerialization().serialize(ci));
 			}
 		}
 	}
@@ -85,10 +86,10 @@ public class ComponentInstanceUtil {
 		return sb.toString();
 	}
 
-	public static ComponentInstance getDefaultParametrization(final ComponentInstance ci) {
+	public static ComponentInstance getDefaultParametrization(final IComponentInstance ci) {
 		Map<String, List<IComponentInstance>> defaultRequiredInterfaces = new HashMap<>();
 		ci.getSatisfactionOfRequiredInterfaces().forEach((name, ciReqList) -> {
-			List<IComponentInstance> l = new ArrayList<>(ciReqList);
+			List<IComponentInstance> l = ciReqList.stream().map(ComponentInstanceUtil::getDefaultParametrization).collect(Collectors.toList());
 			defaultRequiredInterfaces.put(name, l);
 		});
 		return new ComponentInstance(ci.getComponent(), new HashMap<>(), defaultRequiredInterfaces);

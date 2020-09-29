@@ -147,7 +147,7 @@ abstract class MLPlanUtil {
 		} catch (IOException e) {
 			throw new IllegalArgumentException("Invalid configuration file " + searchSpaceFile, e);
 		}
-		HASCOViaFDAndBestFirstWithRandomCompletionsBuilder hascoBuilder = HASCOBuilder.get(problem).withBestFirst().viaRandomCompletions();
+		HASCOViaFDAndBestFirstWithRandomCompletionsBuilder hascoBuilder = HASCOBuilder.get(problem).withBestFirst().withRandomCompletions();
 
 		/* now configure the chain of preferred node evaluators (taking in account that the ones about checking validity and preferred components are the most important one) */
 		List<IPathEvaluator<TFDNode, String, Double>> neChain = new ArrayList<>();

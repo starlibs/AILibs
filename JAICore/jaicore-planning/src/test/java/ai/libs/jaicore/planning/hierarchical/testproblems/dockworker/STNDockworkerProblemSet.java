@@ -106,6 +106,6 @@ public class STNDockworkerProblemSet extends AAlgorithmTestProblemSet<STNPlannin
 
 	@Override
 	public STNPlanningProblem getDifficultProblemInputForGeneralTestPurposes() {
-		return getDockworkerProblemForNumberOfContainers(10000, 10000, 10000);
+		return getDockworkerProblemForNumberOfContainers(100000, 100000, 100000);
 	}
 }

@@ -2,16 +2,15 @@ package ai.libs.automl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
-import org.junit.runners.Parameterized.Parameters;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.Study;
 
@@ -40,8 +39,7 @@ public abstract class AutoMLAlgorithmForRegressionResultProductionTester extends
 	}
 
 	// creates the test data
-	@Parameters(name = "{0}")
-	public static Collection<OpenMLProblemSet[]> data() throws DatasetDeserializationFailedException {
+	public static Stream<OpenMLProblemSet> getDatasets() throws DatasetDeserializationFailedException {
 		try {
 			List<Integer> ignoreDatasets = Arrays.asList(565);
 			List<OpenMLProblemSet> problemSets = new ArrayList<>();
@@ -56,12 +54,7 @@ public abstract class AutoMLAlgorithmForRegressionResultProductionTester extends
 					return null;
 				}
 			}).filter(x -> x != null).forEach(problemSets::add);
-
-			OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
-			for (int i = 0; i < data.length; i++) {
-				data[i][0] = problemSets.get(i);
-			}
-			return Arrays.asList(data);
+			return problemSets.stream();
 		} catch (Exception e) {
 			throw new DatasetDeserializationFailedException(e);
 		}

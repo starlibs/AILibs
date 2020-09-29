@@ -385,7 +385,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 								if (newNode.getScore() == null) {
 									throw new IllegalArgumentException("Cannot insert nodes with value NULL into OPEN!");
 								}
-								BestFirst.this.bfLogger.debug("Inserting successor {} of {} to OPEN. F-Value is {}", newNode.hashCode(), this.expandedNodeInternal, newNode.getScore());
+								BestFirst.this.bfLogger.debug("Inserting successor {} of {} to OPEN. F-Value is {}", newNode.hashCode(), this.expandedNodeInternal.hashCode(), newNode.getScore());
 								BestFirst.this.open.add(newNode);
 							} finally {
 								BestFirst.this.openLock.unlock();
@@ -415,9 +415,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 				BestFirst.this.bfLogger.error("An unexpected exception occurred while building nodes", e);
 			} finally {
 
-				/*
-				 * free resources if this is computed by helper threads and notify the listeners
-				 */
+				/* free resources if this is computed by helper threads and notify the listeners */
 				assert !Thread.holdsLock(BestFirst.this.openLock) : "Node Builder must not hold a lock on OPEN when locking the active jobs counter";
 				BestFirst.this.bfLogger.debug("Trying to decrement active jobs by one.");
 				BestFirst.this.bfLogger.trace("Waiting for activeJobsCounterlock to become free.");
@@ -532,6 +530,11 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 					this.bfLogger.error("An unexpected exception occurred while labeling node {}", node, e2);
 				}
 			} else {
+
+				/* maybe, this interrupt occurred during the shutdown/cancellation process. In that case, the InterruptedException needs to be "converted" into another one */
+				this.checkAndConductTermination();
+
+				/* if we came here, this was really a particular interruption */
 				this.bfLogger.info("Received external interrupt. Forwarding this interrupt.");
 				throw e;
 			}

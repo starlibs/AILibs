@@ -4,31 +4,37 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.events.HASCOSolutionEvent;
+import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.util.CycleDetectedResult;
 import ai.libs.jaicore.search.util.DeadEndDetectedResult;
@@ -38,8 +44,25 @@ import ai.libs.jaicore.test.MediumTest;
 
 public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends SoftwareConfigurationAlgorithmTester {
 
-	private Logger logger = LoggerFactory.getLogger(HASCOTester.class);
 	private ComponentSerialization serializer = new ComponentSerialization(this.getLoggerName() + ".serialization");
+
+	public static Stream<Arguments> getAllCompositionProblems() {
+		Stream<File> relevantFiles = FileUtil.getFilesOfFolder(new File("../../../JAICore/jaicore-components/testrsc")).stream();
+		ComponentSerialization serializer = new ComponentSerialization(LoggerUtil.LOGGER_NAME_TESTER);
+		return relevantFiles.filter(f -> f.isFile() && f.getName().endsWith(".json")).map(f -> {
+			try {
+				IComponentRepository repository = serializer.deserializeRepository(f);
+				if (repository.isEmpty()) {
+					return null;
+				}
+				IComponent firstComponent = repository.iterator().next();
+				return Arguments.of(f.getName(), new RefinementConfiguredSoftwareConfigurationProblem<>(f, firstComponent.getProvidedInterfaces().iterator().next(), x -> 0.0));
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+		}).filter(Objects::nonNull);
+	}
 
 	@Override
 	public abstract HASCO<N, A, Double> getAlgorithmForSoftwareConfigurationProblem(RefinementConfiguredSoftwareConfigurationProblem<Double> problem);
@@ -47,19 +70,19 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 
 	private HASCO<N, A, Double> getHASCOForSimpleProblem(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTestProblemSetCreationException {
 		HASCO<N, A, Double> hasco = this.getAlgorithmForSoftwareConfigurationProblem(problemSet.getSimpleProblemInputForGeneralTestPurposes());
-		hasco.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		hasco.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		return hasco;
 	}
 
 	private HASCO<N, A, Double> getHASCOForDifficultProblem(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTestProblemSetCreationException {
 		HASCO<N, A, Double> hasco = this.getAlgorithmForSoftwareConfigurationProblem(problemSet.getDifficultProblemInputForGeneralTestPurposes());
-		hasco.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		hasco.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		return hasco;
 	}
 
 	private HASCO<N, A, Double> getHASCOForProblemWithDependencies(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTestProblemSetCreationException {
 		HASCO<N, A, Double> hasco = this.getAlgorithmForSoftwareConfigurationProblem(problemSet.getDependencyProblemInput());
-		hasco.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		hasco.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		return hasco;
 	}
 

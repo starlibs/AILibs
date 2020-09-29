@@ -2,32 +2,28 @@ package ai.libs.mlplan.wekamlplan;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.provider.Arguments;
 
 import ai.libs.automl.AbstractMLPlanBuilderTest;
+import ai.libs.mlplan.core.IProblemType;
 import ai.libs.mlplan.weka.EMLPlanWekaProblemType;
 import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 
 public class MLPlanWekaBuilderTest extends AbstractMLPlanBuilderTest {
 
-	@Parameters(name = "{0}")
-	public static Collection<EMLPlanWekaProblemType[]> data() throws DatasetDeserializationFailedException {
+	public static Stream<Arguments> getProblemTypes() throws DatasetDeserializationFailedException {
 		try {
-			EMLPlanWekaProblemType[][] data = new EMLPlanWekaProblemType[EMLPlanWekaProblemType.values().length][1];
-			for (int i = 0; i < data.length; i++) {
-				data[i][0] = EMLPlanWekaProblemType.values()[i];
-			}
-			return Arrays.asList(data);
+			return Arrays.stream(EMLPlanWekaProblemType.values()).map(Arguments::of);
 		} catch (Exception e) {
 			throw new DatasetDeserializationFailedException(e);
 		}
 	}
 
 	@Override
-	public MLPlanWekaBuilder getBuilder() throws IOException {
-		return new MLPlanWekaBuilder((EMLPlanWekaProblemType)this.problemType);
+	public MLPlanWekaBuilder getBuilder(final IProblemType<?> problemType) throws IOException {
+		return new MLPlanWekaBuilder((EMLPlanWekaProblemType) problemType);
 	}
 }

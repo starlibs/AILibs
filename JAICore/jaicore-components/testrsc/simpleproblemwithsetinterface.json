@@ -7,7 +7,6 @@
 				{
 					"id": "rif1",
 					"name": "rif1",
-					"type": "set",
 					"min": 0,
 					"max": 2
 				}

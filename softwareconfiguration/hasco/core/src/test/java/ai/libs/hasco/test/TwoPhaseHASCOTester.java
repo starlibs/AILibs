@@ -34,6 +34,7 @@ import ai.libs.hasco.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.test.MediumTest;
 
@@ -45,7 +46,7 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 	public TwoPhaseHASCO<TFDNode, String> getAlgorithmForSoftwareConfigurationProblem(final RefinementConfiguredSoftwareConfigurationProblem<Double> problem) {
 
 		/* produce an HASCO instance */
-		HASCOViaFD<Double> hasco = HASCOBuilder.get(problem).withBestFirst().viaRandomCompletions().withNumSamples(3).getAlgorithm();
+		HASCOViaFD<Double> hasco = HASCOBuilder.get(problem).withBestFirst().withRandomCompletions().withNumSamples(3).getAlgorithm();
 
 		/* produce two-phase HASCO */
 		TwoPhaseSoftwareConfigurationProblem prob = new TwoPhaseSoftwareConfigurationProblem(problem, problem.getParamRefinementConfig(), problem.getCompositionEvaluator());
@@ -60,7 +61,7 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 	@MediumTest
 	public void testThatEnsembleConsideredBySelectionProcedureIsOrderedByScores(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTestProblemSetCreationException {
 		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(problemSet.getSimpleRecursiveProblemInput());
-		twoPhaseHASCO.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		twoPhaseHASCO.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		twoPhaseHASCO.call();
 		List<HASCOSolutionCandidate<Double>> list = twoPhaseHASCO.getEnsembleToSelectFromInPhase2();
 		int n = list.size();
@@ -73,7 +74,7 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 	@MethodSource("getProblemSets")
 	public void testThatBestSolutionFoundByHASCOIsSuccessfullyEvaluatedInPhase2(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(problemSet.getSimpleProblemInputForGeneralTestPurposes());
-		twoPhaseHASCO.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		twoPhaseHASCO.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		twoPhaseHASCO.call();
 		HASCOSolutionCandidate<Double> bestCandidateOfPhase1 = twoPhaseHASCO.getBestSeenSolution();
 		assertTrue("Best solution of phase 1 has not been successfully evaluated in phase 2!",
@@ -85,7 +86,7 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 	@MediumTest
 	public void testThatHalfOfSelectionPoolIsSuccessfullyEvaluated(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(problemSet.getSimpleRecursiveProblemInput());
-		twoPhaseHASCO.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		twoPhaseHASCO.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		twoPhaseHASCO.call();
 		List<HASCOSolutionCandidate<Double>> selectionPoolForPhase2 = twoPhaseHASCO.getEnsembleToSelectFromInPhase2();
 		int n = selectionPoolForPhase2.size();
@@ -118,7 +119,7 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 		/* get two-phase HASCO with solution listener */
 		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(timeSimulatingProblem);
 		twoPhaseHASCO.setTimeout(new Timeout(30, TimeUnit.SECONDS));
-		twoPhaseHASCO.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		twoPhaseHASCO.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		Map<ComponentInstance, Integer> trueTimes = new HashMap<>();
 		twoPhaseHASCO.registerListener(new Object() {
 			@Subscribe
@@ -157,7 +158,7 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(timeSimulatingProblem);
 		TwoPhaseHASCOConfig config = twoPhaseHASCO.getConfig();
 		twoPhaseHASCO.setTimeout(new Timeout(20, TimeUnit.SECONDS));
-		twoPhaseHASCO.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		twoPhaseHASCO.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		twoPhaseHASCO.call();
 
 		/* check that phase 2 was conducted properly */

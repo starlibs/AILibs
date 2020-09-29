@@ -243,17 +243,17 @@
 
 	<logger
 		name="testedalgorithm.optimizingfactory.optimizer.hasco.search">
-		<level value="info" />
+		<level value="warn" />
 	</logger>
 
 	<logger
 		name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator">
-		<level value="info" />
+		<level value="warn" />
 	</logger>
 	
 	<logger
 		name="testedalgorithm.optimizingfactory.optimizer.hasco.search.nodeevaluator.secondary.evaluator.fw">
-		<level value="info" />
+		<level value="warn" />
 	</logger>
 
 	<logger

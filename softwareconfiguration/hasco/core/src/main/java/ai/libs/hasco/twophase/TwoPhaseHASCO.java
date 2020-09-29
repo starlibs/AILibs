@@ -16,6 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -126,6 +127,19 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		}); // this is to register solutions during runtime
 	}
 
+	private void awaitTerminationOfHASCO() throws InterruptedException {
+
+		/* wait HASCO to complete the cancel */
+		AtomicBoolean cancelCompleted = this.hasco.getCancelCompleted();
+		synchronized (cancelCompleted) {
+			this.logger.info("Waiting for HACSO to complete cancel.");
+			while (!cancelCompleted.get()) {
+				cancelCompleted.wait();
+			}
+		}
+		this.logger.info("HASCO completed cancel. Now throwing a cancelation exception.");
+	}
+
 	@Override
 	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		this.logger.info("Stepping 2phase HASCO. Current state: {}", this.getState());
@@ -169,7 +183,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 								TwoPhaseHASCO.this.logger.info("Canceling HASCO (first phase). {}ms remaining.", timeRemaining);
 								TwoPhaseHASCO.this.hasco.cancel();
 								TwoPhaseHASCO.this.logger.info("HASCO canceled successfully after {}ms", (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart) - timeElapsed);
-								this.cancel();
+								this.cancel(); // cancels the TIMER, not 2PHASE-HASCO!!
 							}
 						} catch (Exception e) {
 							TwoPhaseHASCO.this.logger.error("Observed {} while checking termination of phase 1. Stack trace is: {}", e.getClass().getName(),
@@ -184,8 +198,9 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 			try {
 				this.hasco.call();
 			} catch (AlgorithmExecutionCanceledException e) {
-				this.logger.info("HASCO has terminated due to a cancel.");
+				this.logger.info("HASCO has terminated due to a cancel. My own cancel state is: {}", this.isCanceled());
 				if (this.isCanceled()) {
+					this.awaitTerminationOfHASCO();
 					throw new AlgorithmExecutionCanceledException(e.getDelay());
 				}
 			} catch (AlgorithmTimeoutedException e) {
@@ -201,6 +216,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 			this.logger.info("HASCO has finished. {} solutions were found.", this.phase1ResultQueue.size());
 			if (this.phase1ResultQueue.isEmpty() && this.getRemainingTimeToDeadline().seconds() < 10) {
 				this.logger.info("No solution found within phase 1. Throwing an AlgorithmTimeoutedException (This is conventional behavior for when an algorithm has not identified its solution when the timeout bound is hit.)");
+				this.awaitTerminationOfHASCO();
 				this.terminate(); // this sends the AlgorithmFinishedEvent
 				throw new AlgorithmTimeoutedException(this.getRemainingTimeToDeadline().milliseconds() * -1);
 			}
@@ -236,6 +252,12 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 			}
 			this.setBestSeenSolution(this.selectedHASCOSolution);
 			assert this.getBestSeenSolution().equals(this.selectedHASCOSolution);
+
+			this.logger.info("TwoPhaseHASCO has finished. Possibly awaiting HASCO termination. State of HASCO cancellation: {}", this.hasco.getCancelCompleted().get());
+			if (this.hasco.isCanceled()) {
+				this.awaitTerminationOfHASCO();
+				this.logger.info("TwoPhaseHASCO has finished and HASCO canceallation is {}/{} (canceled/cancel completed)", this.hasco.isCanceled(), this.hasco.getCancelCompleted().get());
+			}
 			return this.terminate();
 
 		default:
@@ -482,7 +504,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 	public void cancel() {
 		this.logger.info("Received cancel signal.");
 		super.cancel();
-		this.logger.debug("Cancelling HASCO");
+		this.logger.debug("Cancelling HASCO. My own cancel flag is {}", this.isCanceled());
 		if (this.hasco != null) {
 			this.hasco.cancel();
 		}

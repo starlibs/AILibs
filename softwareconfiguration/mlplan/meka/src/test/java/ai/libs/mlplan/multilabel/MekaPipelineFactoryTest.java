@@ -11,7 +11,6 @@ import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +26,7 @@ import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.classification.multilabel.dataset.IMekaInstances;
 import ai.libs.jaicore.ml.classification.multilabel.dataset.MekaInstances;
 import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
+import ai.libs.jaicore.test.LongTest;
 import ai.libs.mlplan.meka.EMLPlanMekaProblemType;
 import ai.libs.mlplan.meka.MekaPipelineFactory;
 import meka.core.MLUtils;
@@ -49,10 +49,6 @@ public class MekaPipelineFactoryTest {
 		dTrain = new MekaInstances(data);
 	}
 
-	@BeforeEach
-	public void init() {
-	}
-
 	@Disabled
 	@Test
 	public void testValidDefaultConfigInstantiation() throws ComponentInstantiationFailedException, TrainingException, InterruptedException {
@@ -72,6 +68,7 @@ public class MekaPipelineFactoryTest {
 	}
 
 	@Test
+	@LongTest
 	public void testValidRandomConfigInstantiation() throws ComponentInstantiationFailedException, TrainingException, InterruptedException {
 		Collection<ComponentInstance> algorithmSelections = ComponentUtil.getAllAlgorithmSelectionInstances("MLClassifier", repository);
 		List<ComponentInstance> list = new ArrayList<>(algorithmSelections);
