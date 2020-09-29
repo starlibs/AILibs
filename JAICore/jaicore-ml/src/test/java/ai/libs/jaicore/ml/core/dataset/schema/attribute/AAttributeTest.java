@@ -8,7 +8,7 @@ import java.util.Collection;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.junit.jupiter.api.Test;
 
-public abstract class AAttributeTest {
+abstract class AAttributeTest {
 
 	public abstract String getExpectedAttributeName();
 

@@ -33,7 +33,7 @@ import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 import ai.libs.jaicore.test.MediumTest;
 
-public class OpenMLDatasetAdapterTest {
+class OpenMLDatasetAdapterTest {
 	protected Logger logger = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER);
 
 	private static OpenmlConnector con = new OpenmlConnector();
@@ -64,23 +64,21 @@ public class OpenMLDatasetAdapterTest {
 	}
 
 	public static Stream<Arguments> getSmallDatasets() throws IOException, Exception {
-		return readDatasets(Arrays.asList(
-				3, // kr-vs-kp
+		return readDatasets(Arrays.asList(3, // kr-vs-kp
 				6 // letter
-				));
+		));
 
 	}
 
 	public static Stream<Arguments> getBigDatasets() throws IOException, Exception {
-		return readDatasets(Arrays.asList(
-				9, // autos
+		return readDatasets(Arrays.asList(9, // autos
 				12, // mfeat-factors
 				14, // mfeat-fourier
 				16, // mfeat-karhunen
 				18, // mfeat-morph
 				21, // car
 				22, // mfeat-zernike
-				23, //cmc
+				23, // cmc
 				24, // mushroom
 				26, // nursey
 				28, // optdigits
@@ -124,7 +122,7 @@ public class OpenMLDatasetAdapterTest {
 				4136, // dexter
 				4137, // dorothea
 				23512, // higgs
-				//				40594, // Reuters => Multi target
+				// 40594, // Reuters => Multi target
 				40668, // connect-4
 				40691, // wine-quality-red
 				40927, // CIFAR-10
@@ -132,8 +130,8 @@ public class OpenMLDatasetAdapterTest {
 				41064, // convex
 				41065, // mnist rotation
 				41066 // secom
-				//				42123 // articleinfluence => string attribute
-				));
+		// 42123 // articleinfluence => string attribute
+		));
 
 	}
 

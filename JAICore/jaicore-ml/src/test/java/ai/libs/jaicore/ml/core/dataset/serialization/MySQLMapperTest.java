@@ -23,7 +23,7 @@ import ai.libs.jaicore.db.DBTester;
 import ai.libs.jaicore.db.IDatabaseAdapter;
 
 @TestMethodOrder(OrderAnnotation.class)
-public class MySQLMapperTest extends DBTester {
+class MySQLMapperTest extends DBTester {
 
 	private static final String TABLE = "test_relation";
 	private static final String TARGET_ATTRIBUTE_NAME = "target";
