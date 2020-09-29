@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.ExtendedRandomForest;
@@ -33,7 +33,7 @@ public class ExtendedRandomForestTest {
 	private static final double[][][] l1Lower = new double[dataset_count][noise_count][seedNum];
 	private static final double[][][] l1Upper = new double[dataset_count][noise_count][seedNum];
 
-	@Before
+	@BeforeEach
 	public void testTrain() throws Exception {
 		for (int dataset_index = 0; dataset_index < dataset_count; dataset_index++) {
 			for (int noise_index = 0; noise_index < noise_count; noise_index++) {

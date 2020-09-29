@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,7 +34,7 @@ public class WekaUtilTester extends Tester {
 	private static final File VOWEL_ARFF = new File(BASE_FOLDER, "vowel.arff");
 	private static final int OPENML_KRVSKP = 3;
 
-	Classifier[] portfolio = {
+	private final Classifier[] portfolio = {
 			// new BayesNet(), new NaiveBayes(),
 			// new SimpleLogistic(),
 			// new IBk(), new KStar(),
@@ -67,7 +68,7 @@ public class WekaUtilTester extends Tester {
 
 			c.buildClassifier(train);
 			eval.evaluateModel(c, test);
-			System.out.println(eval.pctCorrect());
+			assertNotNull(eval.pctCorrect());
 		}
 	}
 
@@ -119,7 +120,7 @@ public class WekaUtilTester extends Tester {
 	@Test
 	public void checkValidAttributeSelections() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		Collection<List<String>> preprocessors = WekaUtil.getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection();
-		assertEquals(-1, preprocessors.size()); // one would need to count them; I didn't do this now. Do this when the test fails and you are annoyed by it
+		assertEquals(9, preprocessors.size());
 
 		/* maybe check here the executability of those combinations */
 	}

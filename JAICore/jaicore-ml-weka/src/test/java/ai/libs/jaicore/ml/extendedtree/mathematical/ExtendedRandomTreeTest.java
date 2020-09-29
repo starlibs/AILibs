@@ -1,20 +1,19 @@
 package ai.libs.jaicore.ml.extendedtree.mathematical;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
-import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.ExtendedRandomForest;
 import weka.core.Attribute;
@@ -29,32 +28,22 @@ import weka.core.Instances;
  * @author mirkoj
  *
  */
-@RunWith(Parameterized.class)
 public class ExtendedRandomTreeTest {
 
-	private RandomTreeParams params;
-
-	public ExtendedRandomTreeTest(final RandomTreeParams params) {
-		this.params = params;
+	public static Stream<Arguments> getParameters() {
+		return Stream.of(Arguments.of(new RandomTreeParams((x) -> Math.pow(x, 2), (x) -> 2 * x)), Arguments.of(new RandomTreeParams((x) -> Math.sin(x), (x) -> Math.cos(x))), Arguments.of(new RandomTreeParams((x) -> Math.pow(x, 10), (x) -> 10 * Math.pow(x, 9))));
 	}
 
-	@Test
-	public void testTree() throws Exception {
-		Instances trainingData = this.params.getTrainingData();
+	@ParameterizedTest
+	@MethodSource("getParameters")
+	public void testTree(final RandomTreeParams params) throws Exception {
+		Instances trainingData = params.getTrainingData();
 		ExtendedRandomForest tree = new ExtendedRandomForest();
 		tree.buildClassifier(trainingData);
 
-		Entry<Instance, Interval> e = this.params.getTestData();
+		Entry<Instance, Interval> e = params.getTestData();
 		Interval predicted = tree.predictInterval(e.getKey());
-		System.out.println("Range-Query: " + e.getKey());
-		System.out.println("Predicted: " + predicted + ", Actual " + e.getValue());
-		assertTrue(true);
-	}
-
-	@Parameters
-	public static Collection<RandomTreeParams[]> getParameters() {
-		return Arrays.asList(new RandomTreeParams[][] { { new RandomTreeParams((x) -> Math.pow(x, 2), (x) -> 2 * x) }, { new RandomTreeParams((x) -> Math.sin(x), (x) -> Math.cos(x)) },
-			{ new RandomTreeParams((x) -> Math.pow(x, 10), (x) -> 10 * Math.pow(x, 9)) } });
+		assertNotNull(predicted);
 	}
 
 	static class RandomTreeParams {

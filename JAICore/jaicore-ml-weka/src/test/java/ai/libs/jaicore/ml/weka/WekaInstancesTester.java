@@ -11,18 +11,15 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
-import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
@@ -30,29 +27,20 @@ import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.core.Instances;
 
-@RunWith(Parameterized.class)
 public class WekaInstancesTester {
 
-	// creates the test data
-	@Parameters(name = "{0}")
-	public static Collection<File[]> data() throws IOException, Exception {
+	public static Stream<Arguments> getDatasets() throws IOException, Exception {
 		List<File> datasets = new ArrayList<>();
 		datasets.add(new File("testrsc/ml/orig/amazon-subseteval.arff"));
 		datasets.add(new File("testrsc/ml/orig/vowel.arff"));
 		datasets.add(new File("testrsc/ml/orig/letter.arff"));
-		File[][] data = new File[datasets.size()][1];
-		for (int i = 0; i < data.length; i++) {
-			data[i][0] = datasets.get(i);
-		}
-		return Arrays.asList(data);
+		return datasets.stream().map(Arguments::of);
 	}
 
-	@Parameter(0)
-	public File dataset;
-
-	@Test
-	public void testConversionToWekaInstances() throws Exception {
-		Instances data = new Instances(new FileReader(this.dataset));
+	@ParameterizedTest
+	@MethodSource("getDatasets")
+	public void testConversionToWekaInstances(final File dataset) throws Exception {
+		Instances data = new Instances(new FileReader(dataset));
 		data.setClassIndex(data.numAttributes() - 1);
 		WekaInstances wrapped = new WekaInstances(data);
 		int n = data.size();
@@ -103,7 +91,7 @@ public class WekaInstancesTester {
 						assertEquals("Class has value " + inst.getLabel() + " but should have" + data.get(i).classValue(), data.get(i).classValue(), (Double) inst.getLabel(), 0.0);
 					} else {
 						String expectedValue = data.attribute(j).value((int) data.get(i).value(j)); // get true label
-						String wrappedValue = inst.getLabel().toString(); // get wrapped label attribute
+						String wrappedValue = ((ICategoricalAttribute)wrapped.getLabelAttribute()).getLabelOfCategory((int)inst.getLabel()).toString(); // get wrapped label attribute
 						assertEquals("Class has value " + wrappedValue + " but should have " + WekaUtil.getClassName(data.get(i)), expectedValue, wrappedValue);
 					}
 				}
@@ -112,9 +100,10 @@ public class WekaInstancesTester {
 		}
 	}
 
-	@Test
-	public void testCreateEmpty() throws Exception {
-		Instances data = new Instances(new FileReader(this.dataset));
+	@ParameterizedTest
+	@MethodSource("getDatasets")
+	public void testCreateEmpty(final File dataset) throws Exception {
+		Instances data = new Instances(new FileReader(dataset));
 		data.setClassIndex(data.numAttributes() - 1);
 		IWekaInstances wrapped = new WekaInstances(data);
 		int size = wrapped.size();
@@ -138,9 +127,10 @@ public class WekaInstancesTester {
 	}
 
 
-	@Test
-	public void testCopy() throws Exception {
-		Instances data = new Instances(new FileReader(this.dataset));
+	@ParameterizedTest
+	@MethodSource("getDatasets")
+	public void testCopy(final File dataset) throws Exception {
+		Instances data = new Instances(new FileReader(dataset));
 		data.setClassIndex(data.numAttributes() - 1);
 		IWekaInstances wrapped = new WekaInstances(data);
 		IWekaInstances copy = (IWekaInstances)wrapped.createCopy();
@@ -153,9 +143,10 @@ public class WekaInstancesTester {
 		assertNotEquals(wrapped, copy);
 	}
 
-	@Test
-	public void testIterability() throws Exception {
-		Instances data = new Instances(new FileReader(this.dataset));
+	@ParameterizedTest
+	@MethodSource("getDatasets")
+	public void testIterability(final File dataset) throws Exception {
+		Instances data = new Instances(new FileReader(dataset));
 		data.setClassIndex(data.numAttributes() - 1);
 		WekaInstances wrapped = new WekaInstances(data);
 		for (IWekaInstance wi : wrapped) {
@@ -163,13 +154,14 @@ public class WekaInstancesTester {
 		}
 	}
 
-	@Test
-	public void testEqualnessOfTwoCopiesOfSameDataset() throws Exception {
-		Instances ds1 = new Instances(new FileReader(this.dataset));
+	@ParameterizedTest
+	@MethodSource("getDatasets")
+	public void testEqualnessOfTwoCopiesOfSameDataset(final File dataset) throws Exception {
+		Instances ds1 = new Instances(new FileReader(dataset));
 		ds1.setClassIndex(ds1.numAttributes() - 1);
 		WekaInstances wrapped1 = new WekaInstances(ds1);
 
-		Instances ds2 = new Instances(new FileReader(this.dataset));
+		Instances ds2 = new Instances(new FileReader(dataset));
 		ds2.setClassIndex(ds2.numAttributes() - 1);
 		WekaInstances wrapped2 = new WekaInstances(ds2);
 
@@ -190,9 +182,10 @@ public class WekaInstancesTester {
 		assertEquals("Comparing the datasets with equals yields false.", wrapped1, wrapped2);
 	}
 
-	@Test
-	public void testContainsPredicate() throws Exception {
-		Instances data = new Instances(new FileReader(this.dataset));
+	@ParameterizedTest
+	@MethodSource("getDatasets")
+	public void testContainsPredicate(final File dataset) throws Exception {
+		Instances data = new Instances(new FileReader(dataset));
 		data.setClassIndex(data.numAttributes() - 1);
 		WekaInstances wrapped = new WekaInstances(data);
 
@@ -201,9 +194,10 @@ public class WekaInstancesTester {
 		}
 	}
 
-	@Test
-	public void testSelfEqualness() throws Exception {
-		Instances data = new Instances(new FileReader(this.dataset));
+	@ParameterizedTest
+	@MethodSource("getDatasets")
+	public void testSelfEqualness(final File dataset) throws Exception {
+		Instances data = new Instances(new FileReader(dataset));
 		data.setClassIndex(data.numAttributes() - 1);
 		WekaInstances wrapped = new WekaInstances(data);
 
@@ -213,9 +207,10 @@ public class WekaInstancesTester {
 		assertEquals(wrapped, wrapped);
 	}
 
-	@Test
-	public void testArraysCorrespondToListViaEquals() throws Exception {
-		Instances data = new Instances(new FileReader(this.dataset));
+	@ParameterizedTest
+	@MethodSource("getDatasets")
+	public void testArraysCorrespondToListViaEquals(final File dataset) throws Exception {
+		Instances data = new Instances(new FileReader(dataset));
 		data.setClassIndex(data.numAttributes() - 1);
 		WekaInstances wrapped = new WekaInstances(data);
 
@@ -236,9 +231,10 @@ public class WekaInstancesTester {
 		}
 	}
 
-	@Test
-	public void testThatEachElementIsFoundWithContains() throws FileNotFoundException, IOException {
-		Instances data = new Instances(new FileReader(this.dataset));
+	@ParameterizedTest
+	@MethodSource("getDatasets")
+	public void testThatEachElementIsFoundWithContains(final File dataset) throws FileNotFoundException, IOException {
+		Instances data = new Instances(new FileReader(dataset));
 		data.setClassIndex(data.numAttributes() - 1);
 		WekaInstances wrapped = new WekaInstances(data);
 		for (IWekaInstance wi : wrapped) {

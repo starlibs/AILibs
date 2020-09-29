@@ -5,16 +5,15 @@ import static org.junit.Assert.assertTrue;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
-import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.ExtendedM5Tree;
 import weka.core.Attribute;
@@ -29,18 +28,16 @@ import weka.core.Instances;
  * @author mirkoj
  *
  */
-@RunWith(Parameterized.class)
 public class ExtendedM5TreeTest {
 
-	private M5TreeParams params;
-
-	public ExtendedM5TreeTest(final M5TreeParams params) {
-		this.params = params;
+	public static Stream<Arguments> getParameters() {
+		return Stream.of(Arguments.of(new M5TreeParams((x) -> Math.sin(x) * x + x + 0, null)));
 	}
 
-	@Test
-	public void giveData() throws Exception {
-		Instances trainingData = this.params.getTrainingData();
+	@ParameterizedTest
+	@MethodSource("getParameters")
+	public void giveData(final M5TreeParams params) throws Exception {
+		Instances trainingData = params.getTrainingData();
 		ExtendedM5Tree tree = new ExtendedM5Tree();
 		tree.buildClassifier(trainingData);
 
@@ -67,23 +64,7 @@ public class ExtendedM5TreeTest {
 		assertTrue(true);
 	}
 
-	// @Test
-	public void testTree() throws Exception {
-		Instances trainingData = this.params.getTrainingData();
-		ExtendedM5Tree tree = new ExtendedM5Tree();
-		tree.buildClassifier(trainingData);
 
-
-		Entry<Instance, Interval> e = this.params.getTestData();
-		Interval predicted = tree.predictInterval(e.getKey());
-		System.out.println("Range-Query: " + e.getKey());
-		System.out.println("Predicted: " + predicted + ", Actual " + e.getValue());
-	}
-
-	@Parameters
-	public static Collection<M5TreeParams[]> getParameters() {
-		return Arrays.asList(new M5TreeParams[][] { { new M5TreeParams((x) -> Math.sin(x) * x + x + 0, null) } });
-	}
 
 	static class M5TreeParams {
 		private static final double lowerBound = -5;

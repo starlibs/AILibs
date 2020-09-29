@@ -38,7 +38,7 @@ public abstract class DBTester extends Tester {
 		configDefault.setProperty(IDatabaseConfig.DB_USER, System.getenv(VAR_DB_USER));
 		configDefault.setProperty(IDatabaseConfig.DB_PASS, System.getenv(VAR_DB_PASS));
 		configDefault.setProperty(IDatabaseConfig.DB_NAME, System.getenv(VAR_DB_DATABASE));
-		configDefault.setProperty(IDatabaseConfig.DB_SSL, "false");
+		configDefault.setProperty(IDatabaseConfig.DB_SSL, "true");
 		Objects.requireNonNull(configDefault.getDBHost(), "The host information read from environment variable " + VAR_DB_HOST + " is NULL!");
 		Objects.requireNonNull(configDefault.getDBUsername(), "The user information read from environment variable " + VAR_DB_USER + " is NULL!");
 		Objects.requireNonNull(configDefault.getDBPassword(), "The password read from environment variable " + VAR_DB_PASS + " is NULL!");

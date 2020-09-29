@@ -208,40 +208,41 @@ allprojects {
 	    project.natures "org.eclipse.buildship.core.gradleprojectnature"
 	}
 
+	// configure logging behavior for all test tasks
+	tasks.withType(Test) {
 	
-	task testQuick(type: Test) {
-		useJUnitPlatform{
-			excludeTags 'medium-test'
-			excludeTags 'long-test'
-		}
-		minHeapSize = "1g"
-	     	maxHeapSize = "4g"
-	}
-	
-	task testMedium(type: Test) {
-		useJUnitPlatform{
-			excludeTags 'long-test'
-		}
-	}
-
-	test {
 		useJUnitPlatform()
-	     	reports {
-			junitXml.enabled = false
-			html.enabled = true
-			}
-
+		
 		minHeapSize = "1g"
 	     	maxHeapSize = "4g"
-	     	ignoreFailures = true
-		forkEvery = 1		
-		maxParallelForks = 1
-	     	testLogging {
-		     	testLogging {
-				events "failed"
-				exceptionFormat "full"
-		     	}
-	     	}
+		
+		testLogging {
+			events "failed", "passed", "skipped"
+			exceptionFormat "full"
+			showExceptions true
+			showCauses true
+			showStackTraces true
+
+			// set options for log level DEBUG and INFO
+			debug {
+			    events "started", "failed", "passed", "skipped", "standard_error", "standard_out"
+			    exceptionFormat "full"
+			}
+			info.events = debug.events
+			info.exceptionFormat = debug.exceptionFormat
+			
+
+			afterSuite { desc, result ->
+			    if (!desc.parent) { // will match the outermost suite
+				def output = "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} passed, ${result.failedTestCount} failed, ${result.skippedTestCount} skipped)"
+				def startItem = '|  ', endItem = '  |'
+				def repeatLength = startItem.length() + output.length() + endItem.length()
+				println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
+			    }
+			}
+		}
+		
+	     	
 	     	ext.testFailures = 0
 	     	afterSuite { desc, result ->
 		    if (desc.getParent() == null) {
@@ -254,6 +255,32 @@ allprojects {
 				ant.fail("The build finished but ${ext.testFailures} tests failed - blowing up the build ! ")
 	    		}
 	    	}
+	}
+	
+	task testQuick(type: Test) {
+		useJUnitPlatform{
+			excludeTags 'medium-test'
+			excludeTags 'long-test'
+		}
+	     	
+	       
+	}
+	
+	task testMedium(type: Test) {
+		useJUnitPlatform{
+			excludeTags 'long-test'
+		}
+	}
+
+	test {
+	     	reports {
+			junitXml.enabled = false
+			html.enabled = true
+			}
+
+	     	ignoreFailures = true
+		forkEvery = 1		
+		maxParallelForks = 1
 	}
 }
 
