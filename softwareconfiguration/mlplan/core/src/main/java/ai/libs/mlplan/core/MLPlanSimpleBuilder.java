@@ -27,7 +27,7 @@ public class MLPlanSimpleBuilder extends AMLPlanBuilder<IClassifier, MLPlanSimpl
 
 			@Override
 			public String getSearchSpaceConfigFileFromResource() {
-				return "automl/searchmodels/weka-tiny.json";
+				return "automl/searchmodels/weka/weka-tiny.json";
 			}
 
 			@Override
