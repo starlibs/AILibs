@@ -19,7 +19,7 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 public abstract class PipelineValidityCheckingNodeEvaluator implements IPathEvaluator<TFDNode, String, Double> {
 
 	private ILabeledDataset<?> data;
-	private List<IComponent> components = new ArrayList<>();
+	private List<IComponent> components;
 
 	/* the predicates of the dataset */
 	protected boolean propertiesDetermined;
@@ -29,14 +29,15 @@ public abstract class PipelineValidityCheckingNodeEvaluator implements IPathEval
 	protected boolean multiValuedNominalAttributes;
 	protected boolean containsNegativeValues;
 
+
+	public PipelineValidityCheckingNodeEvaluator() {
+
+	}
+
 	public PipelineValidityCheckingNodeEvaluator(final Collection<? extends IComponent> components, final ILabeledDataset<?> data) {
 		this.setComponents(components);
 		this.setData(data);
 		this.extractDatasetProperties();
-	}
-
-	public PipelineValidityCheckingNodeEvaluator() {
-
 	}
 
 	protected synchronized void extractDatasetProperties() {
@@ -79,8 +80,7 @@ public abstract class PipelineValidityCheckingNodeEvaluator implements IPathEval
 
 	public void setComponents(final Collection<? extends IComponent> components) {
 		Objects.requireNonNull(components);
-		components.clear();
-		this.components.addAll(components);
+		this.components = new ArrayList<>(components);
 	}
 
 	public ILabeledDataset<?> getData() {

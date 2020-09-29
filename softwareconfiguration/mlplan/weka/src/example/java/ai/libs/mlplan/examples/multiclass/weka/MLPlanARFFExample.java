@@ -37,7 +37,7 @@ public class MLPlanARFFExample {
 		LOGGER.info("Data read. Time to create dataset object was {}ms", System.currentTimeMillis() - start);
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
-		MLPlan<IWekaClassifier> mlplan = new MLPlanWekaBuilder().withNumCpus(4).withTimeOut(new Timeout(300, TimeUnit.SECONDS)).withDataset(split.get(0)).build();
+		MLPlan<IWekaClassifier> mlplan = new MLPlanWekaBuilder().withNumCpus(4).withTimeOut(new Timeout(60, TimeUnit.SECONDS)).withDataset(split.get(0)).build();
 		mlplan.setLoggerName("testedalgorithm");
 
 		try {

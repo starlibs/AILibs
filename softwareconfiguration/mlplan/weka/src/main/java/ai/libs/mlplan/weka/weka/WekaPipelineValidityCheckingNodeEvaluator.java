@@ -40,12 +40,14 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 		if (instance != null) {
 
 			/* check invalid preprocessor combinations */
-			IComponentInstance pp = instance.getSatisfactionOfRequiredInterface("preprocessor").iterator().next();
-			if (pp != null && pp.getComponent().getName().contains("AttributeSelection")) {
-				IComponentInstance search = pp.getSatisfactionOfRequiredInterface("search").iterator().next();
-				IComponentInstance eval = pp.getSatisfactionOfRequiredInterface("eval").iterator().next();
-				if (search != null && eval != null && !WekaUtil.isValidPreprocessorCombination(search.getComponent().getName(), eval.getComponent().getName())) {
-					throw new ControlledNodeEvaluationException("The given combination of searcher and evaluator cannot be benchmarked since they are incompatible.");
+			if (instance.getSatisfactionOfRequiredInterfaces().containsKey("preprocessor")) {
+				IComponentInstance pp = instance.getSatisfactionOfRequiredInterface("preprocessor").iterator().next();
+				if (pp != null && pp.getComponent().getName().contains("AttributeSelection")) {
+					IComponentInstance search = pp.getSatisfactionOfRequiredInterface("search").iterator().next();
+					IComponentInstance eval = pp.getSatisfactionOfRequiredInterface("eval").iterator().next();
+					if (search != null && eval != null && !WekaUtil.isValidPreprocessorCombination(search.getComponent().getName(), eval.getComponent().getName())) {
+						throw new ControlledNodeEvaluationException("The given combination of searcher and evaluator cannot be benchmarked since they are incompatible.");
+					}
 				}
 			}
 
