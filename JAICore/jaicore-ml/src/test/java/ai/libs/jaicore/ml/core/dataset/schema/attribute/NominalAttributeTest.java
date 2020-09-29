@@ -10,7 +10,7 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class NominalAttributeTest extends AAttributeTest {
+public class NominalAttributeTest extends AAttributeTest {
 
 	private static final String ATTRIBUTE_NAME = "myNominalAttribute";
 	private static final List<Integer> KEYS = Arrays.asList(0, 1, 2, 3, 4);

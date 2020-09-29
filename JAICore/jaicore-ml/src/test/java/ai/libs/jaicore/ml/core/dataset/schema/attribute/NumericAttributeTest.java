@@ -6,7 +6,7 @@ import java.util.Collection;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.junit.jupiter.api.BeforeAll;
 
-class NumericAttributeTest extends AAttributeTest {
+public class NumericAttributeTest extends AAttributeTest {
 
 	private static final String ATTRIBUTE_NAME = "myNumericAttribute";
 
