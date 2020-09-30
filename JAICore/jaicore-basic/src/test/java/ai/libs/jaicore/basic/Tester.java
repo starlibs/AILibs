@@ -3,6 +3,7 @@ package ai.libs.jaicore.basic;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.concurrent.GlobalTimer;
+import ai.libs.jaicore.concurrent.TrackableTimerTask;
 import ai.libs.jaicore.logging.LoggerUtil;
 
 public abstract class Tester implements ILoggingCustomizable {
@@ -54,15 +56,15 @@ public abstract class Tester implements ILoggingCustomizable {
 	public void checkThreadStatus(final String situation) throws InterruptedException {
 		this.logger.info("Checking thread status: {}", situation);
 		assert !Thread.currentThread().isInterrupted() : "Execution thread must not be interrupted " + situation + " test!";
-		boolean allTasksResolved = GlobalTimer.getInstance().getNumberOfActiveTasks() == 0;
-		if (!allTasksResolved) {
-			String msg = "Global Timer has " + GlobalTimer.getInstance().getNumberOfActiveTasks() + " active jobs " + situation + " test: " + GlobalTimer.getInstance().getActiveTasks().stream().map(t -> "\n\t" + t.toString()).collect(Collectors.joining());
+		Collection<TrackableTimerTask> unresolvedTasks = GlobalTimer.getInstance().getActiveTasks();
+		if (!unresolvedTasks.isEmpty()) {
+			String msg = "Global Timer has " + unresolvedTasks.size() + " active jobs " + situation + " test: " + unresolvedTasks.stream().map(t -> "\n\t- " + t.toString()).collect(Collectors.joining());
 			while (GlobalTimer.getInstance().getNumberOfActiveTasks() > 0) {
 				this.logger.info("Waiting for timer to shutdown ...");
 				Thread.sleep(100);
 			}
 			fail(msg);
 		}
-		assertTrue(allTasksResolved);
+		assertTrue(unresolvedTasks.isEmpty());
 	}
 }
