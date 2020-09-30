@@ -69,7 +69,7 @@
 	</logger>
 	
 	<logger name="tester">
-	  <level value="debug" />
+	  <level value="info" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
@@ -94,7 +94,7 @@
   </logger>
 	
 	<logger name="testedalgorithm">
-    <level value="debug" />
+    <level value="warn" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />

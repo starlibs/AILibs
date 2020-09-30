@@ -65,12 +65,16 @@
 	</logger>
 	
 	<logger name="testedalgorithm">
-		<level value="debug" />
+		<level value="info" />
 		<appender-ref ref="console" />
 		<appender-ref ref="infoFileAppender" />
 		<appender-ref ref="warnFileAppender" />
 		<appender-ref ref="errFileAppender" />
 		<appender-ref ref="traceFileAppender" />
+	</logger>
+	
+	<logger name="testedalgorithm._orgraphsearch">
+		<level value="warn" />
 	</logger>
 	
 	<logger name="example">
