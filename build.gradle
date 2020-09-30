@@ -217,7 +217,7 @@ allprojects {
 	     	maxHeapSize = "4g"
 		
 		testLogging {
-			events "failed", "passed", "skipped", "standard_out", "standard_error"
+			events "failed", "passed", "skipped"
 			exceptionFormat "full"
 			showExceptions true
 			showCauses true

@@ -183,7 +183,6 @@ class SQLAdapter implements IDatabaseAdapter {
 			}
 		} while (tries < 3);
 		this.logger.error("Quitting execution as no database connection could be established");
-		System.exit(1);
 	}
 
 	/**

@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.api4.java.datastructure.kvstore.IKVStore;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -36,6 +37,7 @@ public class SqlAdapterTest extends DBTester {
 	@ParameterizedTest(name="create table")
 	@Order(1)
 	@MethodSource("getDatabaseAdapters")
+	@org.junit.jupiter.api.Timeout(value = 5, unit = TimeUnit.SECONDS)
 	public void testCreateTable(final Object config) throws SQLException, IOException {
 		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
 		String table = this.getTablename(adapter);
