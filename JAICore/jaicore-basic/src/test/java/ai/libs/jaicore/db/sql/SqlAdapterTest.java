@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.api4.java.datastructure.kvstore.IKVStore;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -36,8 +35,7 @@ public class SqlAdapterTest extends DBTester {
 
 	@ParameterizedTest(name="create table")
 	@Order(1)
-	@MethodSource("getDatabaseAdapters")
-	@org.junit.jupiter.api.Timeout(value = 5, unit = TimeUnit.SECONDS)
+	@MethodSource("getDatabaseConfigs")
 	public void testCreateTable(final Object config) throws SQLException, IOException {
 		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
 		String table = this.getTablename(adapter);
@@ -52,7 +50,7 @@ public class SqlAdapterTest extends DBTester {
 
 	@ParameterizedTest(name="insert rows")
 	@Order(2)
-	@MethodSource("getDatabaseAdapters")
+	@MethodSource("getDatabaseConfigs")
 	public void testInsertQuery(final Object config) throws SQLException {
 		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
 		String table = this.getTablename(adapter);
@@ -70,7 +68,7 @@ public class SqlAdapterTest extends DBTester {
 
 	@ParameterizedTest(name="select rows")
 	@Order(3)
-	@MethodSource("getDatabaseAdapters")
+	@MethodSource("getDatabaseConfigs")
 	public void testSelectQuery(final Object config) throws SQLException {
 		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
 		String table = this.getTablename(adapter);
@@ -88,7 +86,7 @@ public class SqlAdapterTest extends DBTester {
 
 	@ParameterizedTest(name="delete rows")
 	@Order(4)
-	@MethodSource("getDatabaseAdapters")
+	@MethodSource("getDatabaseConfigs")
 	public void testRemoveEntryQuery(final Object config) throws SQLException {
 		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
 		String table = this.getTablename(adapter);
@@ -101,7 +99,7 @@ public class SqlAdapterTest extends DBTester {
 
 	@ParameterizedTest(name="drop table")
 	@Order(5)
-	@MethodSource("getDatabaseAdapters")
+	@MethodSource("getDatabaseConfigs")
 	public void testDropTable(final Object config) throws SQLException {
 		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
 		String table = this.getTablename(adapter);

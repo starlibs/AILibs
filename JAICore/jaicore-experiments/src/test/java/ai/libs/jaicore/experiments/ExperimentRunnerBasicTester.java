@@ -1,11 +1,11 @@
 package ai.libs.jaicore.experiments;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,11 +20,12 @@ import java.util.stream.Stream;
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.FixMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.runners.MethodSorters;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,14 +34,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.db.DBTester;
 import ai.libs.jaicore.db.IDatabaseAdapter;
-import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
 import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class ExperimentRunnerTester extends DBTester implements IExperimentSetEvaluator {
+@TestMethodOrder(OrderAnnotation.class)
+public class ExperimentRunnerBasicTester extends AExperimentTester implements IExperimentSetEvaluator {
 
 	public static Stream<Arguments> getSetups() throws IOException {
 
@@ -72,17 +72,16 @@ public class ExperimentRunnerTester extends DBTester implements IExperimentSetEv
 
 		/* build cartesian product with the database parameters */
 		List<Arguments> combos = new ArrayList<>();
-		for (List<Arguments> tuple : SetUtil.cartesianProduct(Arrays.asList(DBTester.getDatabaseAdapters().collect(Collectors.toList()), args))) {
+		for (List<Arguments> tuple : SetUtil.cartesianProduct(Arrays.asList(DBTester.getDatabaseConfigs().collect(Collectors.toList()), args))) {
 			Object[] arr = new Object[3];
 			arr[0] = tuple.get(0).get()[0];
-			arr[1] = ConfigFactory.create(IExperimentSetConfig.class).loadPropertiesFromFile((File)tuple.get(1).get()[0]);
+			arr[1] = ConfigFactory.create(IExperimentSetConfig.class).loadPropertiesFromFile((File) tuple.get(1).get()[0]);
 			arr[2] = tuple.get(1).get()[1];
 			combos.add(Arguments.of(arr));
 		}
 		return combos.stream();
 	}
 
-	private static final String TABLE = "exptable";
 
 	public static class Generator implements IExperimentJSONKeyGenerator {
 
@@ -140,44 +139,47 @@ public class ExperimentRunnerTester extends DBTester implements IExperimentSetEv
 		}
 	}
 
-	private String getTablename(final IDatabaseAdapter adapter) {
-		String table = TABLE + "_" + adapter.getClass().getName().replace(".", "_");
-		this.logger.info("Using table {}" , table);
-		return table;
-	}
-
-
-
-	public IExperimentDatabaseHandle getHandle(final Object config) {
-		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
-		return new ExperimenterMySQLHandle(adapter, this.getTablename(adapter));
-	}
-
 	private int getNumberOfTotalExperiments(final IExperimentSetConfig config) {
 		return config.getConstraints() == null ? (3 * new Generator().getNumberOfValues()) : 4;
 	}
 
-	@ParameterizedTest(name="Experiment Creation")
-	@MethodSource("getSetups")
-	public void test1ThatAllExperimentsAreCreated(final Object dbConfig, final IExperimentSetConfig config, final Consumer<ExperimentRunner> experimentRunnerMethod)
-			throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	private void prepareDB(final IDatabaseAdapter adapter, final IExperimentSetConfig config)
+			throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, SQLException, IOException {
+
+		/* erase table if exists */
+		String tablename = this.getTablename(adapter);
+		if (adapter.doesTableExist(tablename)) {
+			this.logger.info("Dropping table {}", tablename);
+			adapter.update("DROP TABLE `" + tablename + "`");
+		}
 
 		/* check that running the experiments works */
-		IExperimentDatabaseHandle handle = this.getHandle(dbConfig);
+		IExperimentDatabaseHandle handle = this.getHandle(adapter);
 		ExperimentDatabasePreparer preparer = new ExperimentDatabasePreparer(config, handle);
+		this.logger.info("Installing experiments.");
 		Collection<ExperimentDBEntry> experimentDBEntries = preparer.synchronizeExperiments();
+		this.logger.info("Ready. Now checking that the number of installed experiments is correct.");
 		int expected = this.getNumberOfTotalExperiments(config);
 		assertEquals(expected, experimentDBEntries.size());
 		Collection<ExperimentDBEntry> experiments = handle.getAllExperiments();
 		assertEquals(expected, experiments.size());
 	}
 
-	@ParameterizedTest(name="Experiment Creation")
+	private void prepareDB(final Object dbConfig, final IExperimentSetConfig config)
+			throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, SQLException, IOException {
+		this.prepareDB(this.reportConfigAndGetAdapter(dbConfig), config);
+	}
+
+	@ParameterizedTest(name = "Experiment Execution")
 	@MethodSource("getSetups")
-	public void test2ThatAllExperimentsAreConductedExactlyOnceUsingParallelization(final Object dbConfig, final IExperimentSetConfig config, final Consumer<ExperimentRunner> experimentRunnerMethod) throws ExperimentDBInteractionFailedException, InterruptedException {
+	@Order(1)
+	public void testThatAllExperimentsAreConductedExactlyOnceUsingParallelization(final Object dbConfig, final IExperimentSetConfig config, final Consumer<ExperimentRunner> experimentRunnerMethod)
+			throws ExperimentDBInteractionFailedException, InterruptedException, AlgorithmTimeoutedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, AlgorithmExecutionCanceledException, SQLException, IOException {
 
 		/* check that running the experiments works */
-		IExperimentDatabaseHandle handle = this.getHandle(dbConfig);
+		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(dbConfig);
+		this.prepareDB(adapter, config);
+		IExperimentDatabaseHandle handle = this.getHandle(adapter);
 		ExperimentRunner runner = new ExperimentRunner(config, this, handle);
 		experimentRunnerMethod.accept(runner);
 		Collection<ExperimentDBEntry> conductedExperiments = handle.getConductedExperiments();
@@ -189,43 +191,40 @@ public class ExperimentRunnerTester extends DBTester implements IExperimentSetEv
 		}
 	}
 
-	@ParameterizedTest(name="Experiment Creation")
+	@ParameterizedTest(name = "Single Experiment Deletion")
 	@MethodSource("getSetups")
-	public void test3ThatErasureOfSingleExperimentsWorks(final Object dbConfig, final IExperimentSetConfig config, final Consumer<ExperimentRunner> experimentRunnerMethod) throws ExperimentDBInteractionFailedException {
+	@Order(2)
+	public void testThatErasureOfSingleExperimentsWorks(final Object dbConfig, final IExperimentSetConfig config, final Consumer<ExperimentRunner> experimentRunnerMethod) throws ExperimentDBInteractionFailedException, AlgorithmTimeoutedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, InterruptedException, AlgorithmExecutionCanceledException, SQLException, IOException {
 
 		/* erase all experiments */
+		this.prepareDB(dbConfig, config);
 		IExperimentDatabaseHandle handle = this.getHandle(dbConfig);
 		handle.setup(config);
-		int n = handle.getConductedExperiments().size();
+		int n = handle.getAllExperiments().size();
 		assertEquals(this.getNumberOfTotalExperiments(config), n); // check that all experiments are still there
-		for (ExperimentDBEntry entry : handle.getConductedExperiments()) {
+		for (ExperimentDBEntry entry : handle.getAllExperiments()) {
 			handle.deleteExperiment(entry);
-			assertEquals(n - (long) 1, handle.getConductedExperiments().size());
+			assertEquals(n - (long) 1, handle.getAllExperiments().size());
 			n--;
 		}
 	}
 
-	@ParameterizedTest(name="Experiment Creation")
+	@ParameterizedTest(name = "Experiment Table Erasure")
 	@MethodSource("getSetups")
-	public void test4Deletion(final Object dbConfig, final IExperimentSetConfig config, final Consumer<ExperimentRunner> experimentRunnerMethod) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException {
-
-		IExperimentDatabaseHandle handle = this.getHandle(dbConfig);
+	@Order(3)
+	public void testDeletion(final Object dbConfig, final IExperimentSetConfig config, final Consumer<ExperimentRunner> experimentRunnerMethod) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException, AlgorithmTimeoutedException, IllegalExperimentSetupException, InterruptedException, AlgorithmExecutionCanceledException, SQLException, IOException {
+		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(dbConfig);
+		this.prepareDB(adapter, config);
+		IExperimentDatabaseHandle handle = this.getHandle(adapter);
 		handle.setup(config);
 		handle.deleteDatabase();
-		boolean correctExceptionObserved = false;
-		try {
-			handle.createAndGetExperiment(new Experiment(0, 0, new HashMap<>()));
-			fail("The create statement should throw an exception.");
-		} catch (ExperimentDBInteractionFailedException e) {
-			//			correctExceptionObserved = (e.getCause() instanceof MySQLSyntaxErrorException)
-			//					&& ((MySQLSyntaxErrorException) e.getCause()).getMessage().equals("Table '" + dbConfig.getDBDatabaseName() + "." + dbConfig.getDBTableName() + "' doesn't exist");
-		}
-		assertTrue(correctExceptionObserved);
+		assertFalse(adapter.doesTableExist(this.getTablename(adapter)));
 	}
 
 	@Override
 	public void evaluate(final ExperimentDBEntry experimentEntry, final IExperimentIntermediateResultProcessor processor) throws ExperimentEvaluationFailedException {
 		Map<String, Object> results = new HashMap<>();
+		this.logger.info("Evaluating experiment with id {}", experimentEntry.getId());
 		results.put("C", this.computeExperimentValue(experimentEntry.getExperiment()));
 		processor.processResults(results);
 	}

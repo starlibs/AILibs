@@ -27,7 +27,7 @@ public abstract class DBTester extends Tester {
 	public static final String VAR_DB_REST_TOKEN = "AILIBS_JAICORE_DB_REST_DB_TOKEN"; // this is for rest-based access
 
 	@Rule
-	public Timeout globalTimeout = Timeout.seconds(10); // database tests should not take longer than 10 seconds
+	public Timeout globalTimeout = Timeout.seconds(30); // database tests should not take longer than 10 seconds
 
 	protected IDatabaseAdapter reportConfigAndGetAdapter(final Object config) {
 		if (config instanceof IDatabaseConfig) {
@@ -45,7 +45,7 @@ public abstract class DBTester extends Tester {
 		}
 	}
 
-	public static Stream<Arguments> getDatabaseAdapters() throws IOException {
+	public static Stream<Arguments> getDatabaseConfigs() throws IOException {
 
 		/* configure standard DB adapter */
 		IDatabaseConfig configDefault = ConfigFactory.create(IDatabaseConfig.class);
