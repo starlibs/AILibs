@@ -14,8 +14,11 @@ import org.junit.rules.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.concurrent.CancellationTimerTask;
 import ai.libs.jaicore.concurrent.GlobalTimer;
+import ai.libs.jaicore.concurrent.NamedTimerTask;
 import ai.libs.jaicore.concurrent.TrackableTimerTask;
+import ai.libs.jaicore.interrupt.InterruptionTimerTask;
 import ai.libs.jaicore.logging.LoggerUtil;
 
 public abstract class Tester implements ILoggingCustomizable {
@@ -58,7 +61,23 @@ public abstract class Tester implements ILoggingCustomizable {
 		assert !Thread.currentThread().isInterrupted() : "Execution thread must not be interrupted " + situation + " test!";
 		Collection<TrackableTimerTask> unresolvedTasks = GlobalTimer.getInstance().getActiveTasks();
 		if (!unresolvedTasks.isEmpty()) {
-			String msg = "Global Timer has " + unresolvedTasks.size() + " active jobs " + situation + " test: " + unresolvedTasks.stream().map(t -> "\n\t- " + t.toString()).collect(Collectors.joining());
+			String msg = "Global Timer has " + unresolvedTasks.size() + " active jobs " + situation + " test: " + unresolvedTasks.stream().map(t -> {
+				StringBuilder sb = new StringBuilder();
+				sb.append(t.getClass().getName());
+				sb.append(" (" + (t.hasBeenExecuted() ? "" : "not ")  + "executed, " + (t.isFinished() ? "" : "not ") + "finished)");
+				if (t instanceof NamedTimerTask) {
+					sb.append(": ");
+					sb.append(((NamedTimerTask) t).getDescriptor());
+					if (t instanceof CancellationTimerTask) {
+						sb.append(" - to cancel " + ((CancellationTimerTask)t).getCancelable());
+					}
+					if (t instanceof InterruptionTimerTask) {
+						InterruptionTimerTask it = (InterruptionTimerTask)t;
+						sb.append(" - to interrupt " + it.getThreadToBeInterrupted() + " with reason " + it.getReason() + " (" + (it.isTriggered() ? "" : "not ")  +"triggered)");
+					}
+				}
+				return "\n\t- " + sb.toString();
+			}).collect(Collectors.joining());
 			while (GlobalTimer.getInstance().getNumberOfActiveTasks() > 0) {
 				this.logger.info("Waiting for timer to shutdown ...");
 				Thread.sleep(100);
