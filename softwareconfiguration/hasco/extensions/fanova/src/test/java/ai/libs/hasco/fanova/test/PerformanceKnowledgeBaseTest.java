@@ -1,4 +1,4 @@
-package ai.libs.hasco.test;
+package ai.libs.hasco.fanova.test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
