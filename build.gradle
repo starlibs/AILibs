@@ -263,8 +263,8 @@ allprojects {
 			excludeTags 'medium-test'
 			excludeTags 'long-test'
 		}
-	     	
-	       
+		minHeapSize = "1g"
+	     	maxHeapSize = "4g"
 	}
 	
 	task testMedium(type: Test) {
