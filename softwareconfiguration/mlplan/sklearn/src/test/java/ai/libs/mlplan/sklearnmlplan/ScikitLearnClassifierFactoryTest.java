@@ -59,7 +59,7 @@ public class ScikitLearnClassifierFactoryTest {
 
 	private static final String MAKE_FORWARD_NAME = "mlplan.util.model.make_forward";
 
-	private static final String EXPECTED_CLASSIFIER = "RandomForestClassifier(max_features=0.53,criterion=\"gini\",min_samples_split=11,n_estimators=100,bootstrap=True,min_samples_leaf=11)";
+	private static final String EXPECTED_CLASSIFIER = "RandomForestClassifier(max_features=\"auto\",criterion=\"gini\",min_samples_split=11,bootstrap=True,n_estimators=100,min_samples_leaf=11)";
 	private static final String EXPECTED_PREPROCESSOR = "Nystroem(n_components=6,kernel=\"rbf\",gamma=0.505)";
 	private static final String EXPECTED_TWO_STEP_PIPE = "make_pipeline(" + EXPECTED_PREPROCESSOR + "," + EXPECTED_CLASSIFIER + ")";
 	private static final String EXPECTED_SIMPLE_MAKE_UNION_PIPE = "make_pipeline(make_union(" + EXPECTED_PREPROCESSOR + "," + EXPECTED_PREPROCESSOR + ")," + EXPECTED_CLASSIFIER + ")";
