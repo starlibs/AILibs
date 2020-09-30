@@ -14,6 +14,9 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.test.ShortTest;
+
+@ShortTest
 public class SetUtilTest {
 
 	@Test

@@ -43,9 +43,6 @@ public class AUCTest {
 			timeNeeded = System.currentTimeMillis() - timestamp;
 			timeNeededWEKA.add(timeNeeded);
 
-			System.out.println("WEKA AUC ROC: " + wekaAUC);
-			System.out.println("WEKA AUPRC: " + wekaAUPRC);
-
 			List<Integer> expected = new ArrayList<>();
 			List<ISingleLabelClassification> predicted = new ArrayList<>();
 
@@ -63,18 +60,9 @@ public class AUCTest {
 			timeNeeded = System.currentTimeMillis() - timestamp;
 			timeNeededJAICore.add(timeNeeded);
 
-			System.out.println("JAICore AUC ROC: " + jaicoreAUC);
-			System.out.println("JAICore AUPRC: " + jaicoreAUPRC);
-
 			assertEquals("AUC ROC is not equal", wekaAUC, jaicoreAUC, 1E-8);
 			assertEquals("AUPRC is not equal", wekaAUPRC, jaicoreAUPRC, 5E-2);
 		}
-
-		System.out.println("WEKA: " + timeNeededWEKA);
-		System.out.println("JAICore: " + timeNeededJAICore);
-
-		System.out.println(timeNeededWEKA.stream().mapToLong(x -> x).sum());
-		System.out.println(timeNeededJAICore.stream().mapToLong(x -> x).sum());
 	}
 
 }

@@ -7,12 +7,15 @@ import org.api4.java.common.metric.IScalarDistance;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.test.ShortTest;
+
 /**
  * Test suite for the {@link ai.libs.jaicore.basic.metric.TimeWarpEditDistance}
  * implementation.
  *
  * @author fischor
  */
+@ShortTest
 public class TimeWarpEditDistanceTest {
 
 	/**

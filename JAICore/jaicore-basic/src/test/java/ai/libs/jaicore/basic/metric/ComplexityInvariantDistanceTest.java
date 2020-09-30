@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.complexity.StretchingComplexity;
+import ai.libs.jaicore.test.ShortTest;
 
 /**
  * Test suite for the
@@ -13,6 +14,7 @@ import ai.libs.jaicore.basic.complexity.StretchingComplexity;
  *
  * @author fischor
  */
+@ShortTest
 public class ComplexityInvariantDistanceTest {
 
 	/** The distance measure used throughout the tests. */

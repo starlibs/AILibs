@@ -7,7 +7,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.graph.Graph;
+import ai.libs.jaicore.test.ShortTest;
 
+@ShortTest
 public class GraphConstructionTest {
 
 	@Test

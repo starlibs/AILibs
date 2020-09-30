@@ -7,12 +7,15 @@ import org.api4.java.common.metric.IDistanceMetric;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.test.ShortTest;
+
 /**
  * Test suite for the {@link ai.libs.jaicore.basic.metric.DerivateDistance}
  * implementation.
  *
  * @author fischor
  */
+@ShortTest
 public class DerivateDistanceTest {
 
 	/**

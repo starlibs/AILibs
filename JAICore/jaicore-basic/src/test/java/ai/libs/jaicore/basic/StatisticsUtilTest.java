@@ -6,14 +6,17 @@ import static org.junit.Assert.assertTrue;
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.random.Well1024a;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import ai.libs.jaicore.test.ShortTest;
 
 /**
  * Test-suite to test the StatisticsUtil.
  *
  * @author mwever
  */
+@ShortTest
 public class StatisticsUtilTest {
 
 	private static final int SAMPLE_SIZE = 30;

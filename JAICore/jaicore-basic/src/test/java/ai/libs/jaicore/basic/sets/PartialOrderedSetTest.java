@@ -11,10 +11,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.test.ShortTest;
+
 /**
  *
  * @author David Niehues - davnie@mail.upb.de
  */
+@ShortTest
 public class PartialOrderedSetTest {
 
 	private static final String A = "a";

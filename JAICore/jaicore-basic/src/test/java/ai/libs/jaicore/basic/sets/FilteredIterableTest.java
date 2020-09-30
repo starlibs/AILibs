@@ -11,11 +11,14 @@ import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.test.ShortTest;
+
 /**
  * Test to verify the correct behavior of {@link FilteredIterable}.
  *
  * @author mwever
  */
+@ShortTest
 public class FilteredIterableTest {
 
 	private static final List<String> ORIGINAL_LIST = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h");

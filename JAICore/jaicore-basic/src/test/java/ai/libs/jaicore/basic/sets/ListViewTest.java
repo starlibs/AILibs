@@ -7,6 +7,9 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.test.ShortTest;
+
+@ShortTest
 public class ListViewTest {
 
 	@Test
@@ -16,7 +19,7 @@ public class ListViewTest {
 		int index = 0;
 		for (int i : l2) {
 			assertEquals(i, l.get(index));
-			index ++;
+			index++;
 		}
 	}
 }

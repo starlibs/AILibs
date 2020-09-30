@@ -5,12 +5,15 @@ import static org.junit.Assert.assertEquals;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.test.ShortTest;
+
 /**
  * Test suite for the {@link ai.libs.jaicore.basic.metric.DynamicTimeWarping}
  * implementation.
  *
  * @author fischor
  */
+@ShortTest
 public class DynamicTimeWarpingTest {
 
 	/**

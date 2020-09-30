@@ -6,12 +6,15 @@ import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.test.ShortTest;
+
 /**
  * Test suite for the {@link aicore.ml.tsc.distances.ShotgunDistance}
  * implementation.
  *
  * @author fischor
  */
+@ShortTest
 public class ShotgunDistanceTest {
 
 	/**

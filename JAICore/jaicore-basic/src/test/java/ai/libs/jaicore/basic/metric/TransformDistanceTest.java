@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.transform.vector.HilbertTransform;
 import ai.libs.jaicore.basic.transform.vector.IVectorTransform;
+import ai.libs.jaicore.test.ShortTest;
 
 /**
  * Test suite for the {@link ai.libs.jaicore.basic.metric.TransformDistance}
@@ -16,6 +17,7 @@ import ai.libs.jaicore.basic.transform.vector.IVectorTransform;
  *
  * @author fischor
  */
+@ShortTest
 public class TransformDistanceTest {
 
 	/**
