@@ -213,6 +213,13 @@ allprojects {
 	
 		useJUnitPlatform()
 		
+	     	reports {
+			junitXml.enabled = false
+			html.enabled = true
+		}
+		forkEvery = 1		
+		maxParallelForks = 1
+		
 		minHeapSize = "1g"
 	     	maxHeapSize = "4g"
 		
@@ -271,16 +278,12 @@ allprojects {
 			excludeTags 'long-test'
 		}
 	}
-
+	
 	test {
 	     	reports {
 			junitXml.enabled = false
 			html.enabled = true
-			}
-
-	     	ignoreFailures = true
-		forkEvery = 1		
-		maxParallelForks = 1
+		}
 	}
 }
 
