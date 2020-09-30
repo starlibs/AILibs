@@ -255,7 +255,6 @@ allprojects {
 				ant.fail("The build finished but ${ext.testFailures} tests failed - blowing up the build ! ")
 	    		}
 	    	}
-	     	ignoreFailures = true
 	}
 	
 	task testQuick(type: Test) {
