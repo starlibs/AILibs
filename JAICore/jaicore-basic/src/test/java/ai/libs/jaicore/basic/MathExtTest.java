@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.test.ShortTest;
+
+@ShortTest
 public class MathExtTest {
 
 	@Test

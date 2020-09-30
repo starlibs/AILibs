@@ -11,11 +11,14 @@ import java.io.InputStreamReader;
 
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.test.ShortTest;
+
 /**
  * This test checks the basic functionalities provided by the ResourceUtil class which provides a convenient API for handling resource files.
  *
  * @author mwever
  */
+@ShortTest
 public class ResourceUtilTest {
 
 	private static final String RESOURCE_FILE_PATH = "ai/libs/jaicore/basic/testrsc/dummy.resource";

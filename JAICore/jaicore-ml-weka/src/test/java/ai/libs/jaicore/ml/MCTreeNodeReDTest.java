@@ -31,7 +31,7 @@ import weka.core.Instances;
 public class MCTreeNodeReDTest {
 
 	private static final String CLASSIFIER_NAME = RandomForest.class.getName();
-	private static final File DATASET = new File("testrsc/orig/vowel.arff");
+	private static final File DATASET = new File("testrsc/ml/orig/vowel.arff");
 
 	@Test
 	public void test() throws Exception {
@@ -92,8 +92,8 @@ public class MCTreeNodeReDTest {
 
 				double maxCorrectDec = pctCorrectDecomposition.stream().mapToDouble(x -> x).max().getAsDouble();
 				double maxCorrectCls = pctCorrectClassifier.stream().mapToDouble(x -> x).max().getAsDouble();
-				assertTrue (maxCorrectDec > 0);
-				assertTrue (maxCorrectCls > 0);
+				assertTrue(maxCorrectDec > 0);
+				assertTrue(maxCorrectCls > 0);
 			}
 
 		}

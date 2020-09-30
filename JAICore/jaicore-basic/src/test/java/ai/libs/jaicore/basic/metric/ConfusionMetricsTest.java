@@ -6,6 +6,9 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.test.ShortTest;
+
+@ShortTest
 public class ConfusionMetricsTest {
 
 	private static final int[][] a = { { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0 } };

@@ -7,6 +7,9 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.test.ShortTest;
+
+@ShortTest
 public class TempFileHandlingTest {
 
 	@Test

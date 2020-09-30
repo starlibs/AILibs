@@ -10,6 +10,7 @@ import ai.libs.jaicore.basic.transform.vector.HilbertTransform;
 import ai.libs.jaicore.basic.transform.vector.IVectorTransform;
 import ai.libs.jaicore.basic.transform.vector.derivate.ADerivateFilter;
 import ai.libs.jaicore.basic.transform.vector.derivate.BackwardDifferenceDerivate;
+import ai.libs.jaicore.test.ShortTest;
 
 /**
  * Test suite for the {@link ai.libs.jaicore.basic.metric.DerivateTransformDistance}
@@ -17,6 +18,7 @@ import ai.libs.jaicore.basic.transform.vector.derivate.BackwardDifferenceDerivat
  *
  * @author fischor
  */
+@ShortTest
 public class DerivateTransformDistanceTest {
 
 	/**

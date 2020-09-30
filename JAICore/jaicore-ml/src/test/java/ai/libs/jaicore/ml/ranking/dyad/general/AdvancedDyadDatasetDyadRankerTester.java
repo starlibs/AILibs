@@ -10,12 +10,13 @@ import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.ranking.IRanking;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IPLDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IPLNetDyadRankerConfiguration;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.PLNetDyadRanker;
 import ai.libs.jaicore.ml.ranking.loss.KendallsTauDyadRankingLoss;
 
@@ -29,22 +30,21 @@ public class AdvancedDyadDatasetDyadRankerTester {
 
 	public static Stream<Arguments> supplyDyadRankers() {
 		PLNetDyadRanker ranker1 = new PLNetDyadRanker();
-		//		ranker1.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "0");
-		//		ranker1.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8");
-		//		ranker1.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
+		ranker1.getConfig().put(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "0");
+		ranker1.getConfig().put(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8");
+		ranker1.getConfig().put(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
 		PLNetDyadRanker ranker2 = new PLNetDyadRanker();
-		//		ranker2.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
-		//		ranker2.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_TRAIN_RATIO, "1.0");
-		//		ranker2.getConfig().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8,4");
-
-		return Stream.of(Arguments.of(new PLNetDyadRanker[] { ranker1 }), Arguments.of(new PLNetDyadRanker[] { ranker2 }), Arguments.of(new PLNetDyadRanker[] { new PLNetDyadRanker() }));
+		ranker2.getConfig().put(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
+		ranker2.getConfig().put(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_TRAIN_RATIO, "1.0");
+		ranker2.getConfig().put(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8,4");
+		return Stream.of(Arguments.of(ranker1), Arguments.of(ranker2), Arguments.of(new PLNetDyadRanker()));
 	}
 
 	private static final int SEED = 7;
 
+	@Disabled
 	@ParameterizedTest
 	@MethodSource("supplyDyadRankers")
-	@Ignore
 	public void testSwapOrdering1(final IPLDyadRanker ranker) throws PredictionException, InterruptedException, TrainingException {
 
 		ranker.fit(DyadRankingInstanceSupplier.getDyadRankingDataset(55, 200));

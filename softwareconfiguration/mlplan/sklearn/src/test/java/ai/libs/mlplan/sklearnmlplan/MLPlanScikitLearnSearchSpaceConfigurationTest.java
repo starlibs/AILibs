@@ -52,7 +52,10 @@ public class MLPlanScikitLearnSearchSpaceConfigurationTest extends AbstractSearc
 		EMLPlanScikitLearnProblemType problemType = (EMLPlanScikitLearnProblemType) problemTypeOrig;
 		String dataPath = (problemType == EMLPlanScikitLearnProblemType.RUL) ? DATASET_RUL : DATASET_DEFAULT;
 		ILabeledDataset<ILabeledInstance> data = ArffDatasetAdapter.readDataset(new File(dataPath));
-		data = (ILabeledDataset<ILabeledInstance>) SplitterUtil.getSimpleTrainTestSplit(data, 0, 20.0 / data.size()).get(0); // work with only 20 instances for speedup
+
+		if (data.size() > 20) {// ensure that the dataset has at maximum 20 instances (for speedup)
+			data = (ILabeledDataset<ILabeledInstance>) SplitterUtil.getSimpleTrainTestSplit(data, 0, 20.0 / data.size()).get(0);
+		}
 
 		this.factory = problemType.getLearnerFactory();
 		this.evaluator = new MonteCarloCrossValidationEvaluatorFactory().withData(data).withNumMCIterations(1).withTrainFoldSize(0.7).withMeasure(problemType.getPerformanceMetricForSearchPhase()).withRandom(new Random(42))
