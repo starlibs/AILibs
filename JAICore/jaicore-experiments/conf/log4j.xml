@@ -58,4 +58,13 @@
 	<logger name="ai.libs.jaicore.experiments">
 	 <level value="trace" />
 	</logger>
+	
+	<logger name="example">
+		<level value="debug" />
+		<appender-ref ref="console" />
+		<appender-ref ref="infoFileAppender" />
+		<appender-ref ref="warnFileAppender" />
+		<appender-ref ref="errFileAppender" />
+		<appender-ref ref="traceFileAppender" />
+	</logger>
 </log4j:configuration>

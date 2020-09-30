@@ -29,6 +29,22 @@ public abstract class DBTester extends Tester {
 	@Rule
 	public Timeout globalTimeout = Timeout.seconds(10); // database tests should not take longer than 10 seconds
 
+	protected IDatabaseAdapter reportConfigAndGetAdapter(final Object config) {
+		if (config instanceof IDatabaseConfig) {
+			IDatabaseConfig c = (IDatabaseConfig )config;
+			this.logger.info("Carry out tests with direct MySQL connection to {} on database {} with user {}.", c.getDBHost(), c.getDBDatabaseName(), c.getDBUsername());
+			return DatabaseAdapterFactory.get(c);
+		}
+		else if (config instanceof IRestDatabaseConfig) {
+			IRestDatabaseConfig c = (IRestDatabaseConfig)config;
+			this.logger.info("Carry out tests with REST connection to {} using token {}.", c.getHost(), c.getToken());
+			return DatabaseAdapterFactory.get(c);
+		}
+		else {
+			throw new IllegalArgumentException("Cannot work with configs of type " + config.getClass());
+		}
+	}
+
 	public static Stream<Arguments> getDatabaseAdapters() throws IOException {
 
 		/* configure standard DB adapter */
@@ -53,8 +69,6 @@ public abstract class DBTester extends Tester {
 			throw new IllegalArgumentException("Could not load host and token information information");
 		}
 		assertNotNull(configRest.getHost());
-
-		LOGGER.info("Carry out tests with server backend at {} on database {} with user {}, and token {}.", configDefault.getDBHost(), configDefault.getDBDatabaseName(), configDefault.getDBUsername(), configRest.getToken());
-		return Stream.of(Arguments.of(DatabaseAdapterFactory.get(configDefault)), Arguments.of(DatabaseAdapterFactory.get(configRest)));
+		return Stream.of(Arguments.of(configDefault), Arguments.of(configRest));
 	}
 }

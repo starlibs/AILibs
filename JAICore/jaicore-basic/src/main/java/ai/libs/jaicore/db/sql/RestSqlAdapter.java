@@ -259,6 +259,6 @@ class RestSqlAdapter implements IDatabaseAdapter {
 
 	@Override
 	public boolean doesTableExist(final String tablename) throws SQLException, IOException {
-		throw new UnsupportedOperationException();
+		return this.getResultsOfQuery("SHOW TABLES").stream().anyMatch(r -> r.values().iterator().next().equals(tablename));
 	}
 }

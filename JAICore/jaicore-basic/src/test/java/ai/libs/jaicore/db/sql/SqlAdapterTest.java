@@ -27,40 +27,52 @@ public class SqlAdapterTest extends DBTester {
 
 	private static final String TABLE = "testtable";
 
-	@ParameterizedTest
+	private String getTablename(final IDatabaseAdapter adapter) {
+		String table = TABLE + "_" + adapter.getClass().getName().replace(".", "_");
+		this.logger.info("Using table {}" , table);
+		return table;
+	}
+
+	@ParameterizedTest(name="create table")
 	@Order(1)
 	@MethodSource("getDatabaseAdapters")
-	public void testCreateTable(final IDatabaseAdapter adapter) throws SQLException, IOException {
-		assertFalse(adapter.doesTableExist(TABLE), "The test table " + TABLE + " already exists. It should not exist. Please remove it mnaually and run the test again.");
+	public void testCreateTable(final Object config) throws SQLException, IOException {
+		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
+		String table = this.getTablename(adapter);
+		assertFalse(adapter.doesTableExist(table), "The test table " + table + " already exists. It should not exist. Please remove it mnaually and run the test again.");
 		this.logger.info("Create table...");
 		Map<String, String> types = new HashMap<>();
 		types.put("id", "INT(10)");
 		types.put("a", "VARCHAR(10)");
-		adapter.createTable(TABLE, "id", Arrays.asList("a"), types, Arrays.asList());
-		assertTrue(adapter.doesTableExist(TABLE), "The test table " + TABLE + " could not be created!");
+		adapter.createTable(table, "id", Arrays.asList("a"), types, Arrays.asList());
+		assertTrue(adapter.doesTableExist(table), "The test table " + table + " could not be created!");
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name="insert rows")
 	@Order(2)
 	@MethodSource("getDatabaseAdapters")
-	public void testInsertQuery(final IDatabaseAdapter adapter) throws SQLException {
-		int numEntriesBefore = this.numEntries(adapter, TABLE);
+	public void testInsertQuery(final Object config) throws SQLException {
+		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
+		String table = this.getTablename(adapter);
+		int numEntriesBefore = this.numEntries(adapter, table);
 		assertEquals(0, numEntriesBefore);
 		this.logger.info("Insert into table...");
-		adapter.insert("INSERT INTO " + TABLE + " (a) VALUES ('x')");
-		assertEquals(1, this.numEntries(adapter, TABLE));
+		adapter.insert("INSERT INTO " + table + " (a) VALUES ('x')");
+		assertEquals(1, this.numEntries(adapter, table));
 		Map<String, Object> vals = new HashMap<>();
 		vals.put("a", "y");
-		adapter.insert(TABLE, vals);
-		int numEntriesAfter = this.numEntries(adapter, TABLE);
+		adapter.insert(table, vals);
+		int numEntriesAfter = this.numEntries(adapter, table);
 		assertEquals(2, numEntriesAfter);
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name="select rows")
 	@Order(3)
 	@MethodSource("getDatabaseAdapters")
-	public void testSelectQuery(final IDatabaseAdapter adapter) throws SQLException {
-		List<IKVStore> res = adapter.getResultsOfQuery("SELECT * FROM " + TABLE);
+	public void testSelectQuery(final Object config) throws SQLException {
+		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
+		String table = this.getTablename(adapter);
+		List<IKVStore> res = adapter.getResultsOfQuery("SELECT * FROM " + table);
 		if (res.isEmpty() || res.size() > 2) {
 			fail("No result or too many results returned for select query.");
 		}
@@ -72,22 +84,26 @@ public class SqlAdapterTest extends DBTester {
 		assertEquals("Column 'a' not as expected.", "y", store.getAsString("a"));
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name="delete rows")
 	@Order(4)
 	@MethodSource("getDatabaseAdapters")
-	public void testRemoveEntryQuery(final IDatabaseAdapter adapter) throws SQLException {
-		int numEntriesBefore = this.numEntries(adapter, TABLE);
+	public void testRemoveEntryQuery(final Object config) throws SQLException {
+		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
+		String table = this.getTablename(adapter);
+		int numEntriesBefore = this.numEntries(adapter, table);
 		assertEquals(2, numEntriesBefore);
-		adapter.update("DELETE FROM " + TABLE + "");
-		int numEntriesAfter = this.numEntries(adapter, TABLE);
+		adapter.update("DELETE FROM " + table + "");
+		int numEntriesAfter = this.numEntries(adapter, table);
 		assertEquals("No entry added!", 0, numEntriesAfter);
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name="drop table")
 	@Order(5)
 	@MethodSource("getDatabaseAdapters")
-	public void testDropTable(final IDatabaseAdapter adapter) throws SQLException {
-		adapter.update("DROP TABLE " + TABLE);
+	public void testDropTable(final Object config) throws SQLException {
+		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
+		String table = this.getTablename(adapter);
+		adapter.update("DROP TABLE " + table);
 	}
 
 	public int numEntries(final IDatabaseAdapter adapter, final String table) throws SQLException {
