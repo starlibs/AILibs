@@ -217,7 +217,7 @@ allprojects {
 	     	maxHeapSize = "4g"
 		
 		testLogging {
-			events "failed", "passed", "skipped"
+			events "failed", "passed", "skipped", "standard_out", "standard_error"
 			exceptionFormat "full"
 			showExceptions true
 			showCauses true
@@ -255,6 +255,7 @@ allprojects {
 				ant.fail("The build finished but ${ext.testFailures} tests failed - blowing up the build ! ")
 	    		}
 	    	}
+	     	ignoreFailures = true
 	}
 	
 	task testQuick(type: Test) {

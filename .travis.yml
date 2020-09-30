@@ -23,6 +23,7 @@ env:
   - TEST_PROJECT=:hasco-fanova
   - TEST_PROJECT=:JAICore:jaicore-algorithminspector
   - TEST_PROJECT=:JAICore:jaicore-basic
+  - TEST_PROJECT=:JAICore:jaicore-components
   - TEST_PROJECT=:JAICore:jaicore-ea
   - TEST_PROJECT=:JAICore:jaicore-experiments
   - TEST_PROJECT=:JAICore:jaicore-logic
@@ -34,8 +35,6 @@ env:
   - TEST_PROJECT=:JAICore:jaicore-processes
   - TEST_PROJECT=:JAICore:jaicore-search
   - TEST_PROJECT=:mlplan-core
-  - TEST_PROJECT=:mlplan-ext-bigdata
-  - TEST_PROJECT=:mlplan-ext-metalearning
   - TEST_PROJECT=:mlplan-ext-reduction
 
   - TEST_PROJECT=:mlplan-full
