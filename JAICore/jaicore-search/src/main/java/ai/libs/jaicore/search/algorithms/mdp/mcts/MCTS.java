@@ -214,6 +214,12 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 									/* compute possible actions (this is done first since this may take long/timeout/interrupt, so that we check afterwards whether we are still active */
 									long startActionTime = System.currentTimeMillis();
 									final N currentNode = current;
+									if (this.getRemainingTimeToDeadline().milliseconds() < 2000) {
+										if (this.getRemainingTimeToDeadline().milliseconds() > 0) {
+											Thread.sleep(this.getRemainingTimeToDeadline().milliseconds());
+										}
+										this.checkAndConductTermination();
+									}
 									Collection<A> applicableActions = Collections.unmodifiableCollection(TimedComputation.compute(() -> this.mdp.getApplicableActions(currentNode), new Timeout(this.getRemainingTimeToDeadline().milliseconds() - 1000, TimeUnit.MILLISECONDS), "Timeout bound hit."));
 									untriedActions = new ArrayList<>(applicableActions);
 									timeSpentInActionApplicabilityComputationThisIteration += (System.currentTimeMillis() - startActionTime);

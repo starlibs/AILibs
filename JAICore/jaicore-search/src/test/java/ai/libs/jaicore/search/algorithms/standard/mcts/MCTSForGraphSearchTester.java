@@ -7,6 +7,7 @@ import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -18,6 +19,7 @@ import ai.libs.jaicore.search.model.other.AgnosticPathEvaluator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.test.MediumTest;
 
+@Tag("mcts")
 public abstract class MCTSForGraphSearchTester extends GraphSearchSolutionIteratorTester {
 
 	public abstract <N, A> MCTSFactory<N, A, ?> getFactory();

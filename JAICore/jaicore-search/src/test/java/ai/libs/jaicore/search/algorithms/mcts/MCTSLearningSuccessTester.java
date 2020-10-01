@@ -12,6 +12,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.junit.Rule;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
 
@@ -25,6 +26,7 @@ import ai.libs.jaicore.search.probleminputs.IMDP;
 import ai.libs.jaicore.search.probleminputs.MDPUtils;
 import ai.libs.jaicore.test.MediumTest;
 
+@Tag("mcts")
 public abstract class MCTSLearningSuccessTester<N, A> extends Tester {
 
 	private static final int DEFAULT_NUMITERATIONS = 10000;
