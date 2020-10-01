@@ -139,7 +139,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 					this.checkAndConductTermination();
 					long innerTimePoint = System.currentTimeMillis();
 					this.currentTuple.add(set.get(j));
-					assert (System.currentTimeMillis() - innerTimePoint) < 5 : "Copying the " + (next.indexOfSet) + "-tuple " + this.currentTuple + " took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!";
+					assert (System.currentTimeMillis() - innerTimePoint) <= 20 : "Copying the " + (next.indexOfSet) + "-tuple " + this.currentTuple + " took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!";
 					innerTimePoint = System.currentTimeMillis();
 					boolean adopt = this.prefixFilter.test(this.currentTuple);
 					this.logger.debug("Prefix filter outputs {} tuple {}", adopt, this.currentTuple);

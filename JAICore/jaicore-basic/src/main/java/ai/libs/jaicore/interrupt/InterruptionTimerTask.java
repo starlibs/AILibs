@@ -70,6 +70,10 @@ public class InterruptionTimerTask extends NamedTimerTask {
 		return this.triggered;
 	}
 
+	public Object getReason() {
+		return this.reason;
+	}
+
 	@Override
 	public boolean isFinished() {
 		return this.finished;

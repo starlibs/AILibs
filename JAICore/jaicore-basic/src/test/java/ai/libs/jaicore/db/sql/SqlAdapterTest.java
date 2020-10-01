@@ -2,7 +2,6 @@ package ai.libs.jaicore.db.sql;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -11,7 +10,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.api4.java.datastructure.kvstore.IKVStore;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -36,12 +34,15 @@ public class SqlAdapterTest extends DBTester {
 
 	@ParameterizedTest(name="create table")
 	@Order(1)
-	@MethodSource("getDatabaseAdapters")
-	@org.junit.jupiter.api.Timeout(value = 5, unit = TimeUnit.SECONDS)
+	@MethodSource("getDatabaseConfigs")
 	public void testCreateTable(final Object config) throws SQLException, IOException {
 		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
 		String table = this.getTablename(adapter);
-		assertFalse(adapter.doesTableExist(table), "The test table " + table + " already exists. It should not exist. Please remove it mnaually and run the test again.");
+		if (adapter.doesTableExist(table)) {
+			this.logger.warn("The test table " + table + " already exists. It should not exist and will be removed now prior to the test.");
+			adapter.update("DROP TABLE `" + table + "`");
+			this.logger.info("Table dropped, now continuing with the test.");
+		}
 		this.logger.info("Create table...");
 		Map<String, String> types = new HashMap<>();
 		types.put("id", "INT(10)");
@@ -52,7 +53,7 @@ public class SqlAdapterTest extends DBTester {
 
 	@ParameterizedTest(name="insert rows")
 	@Order(2)
-	@MethodSource("getDatabaseAdapters")
+	@MethodSource("getDatabaseConfigs")
 	public void testInsertQuery(final Object config) throws SQLException {
 		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
 		String table = this.getTablename(adapter);
@@ -70,7 +71,7 @@ public class SqlAdapterTest extends DBTester {
 
 	@ParameterizedTest(name="select rows")
 	@Order(3)
-	@MethodSource("getDatabaseAdapters")
+	@MethodSource("getDatabaseConfigs")
 	public void testSelectQuery(final Object config) throws SQLException {
 		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
 		String table = this.getTablename(adapter);
@@ -88,7 +89,7 @@ public class SqlAdapterTest extends DBTester {
 
 	@ParameterizedTest(name="delete rows")
 	@Order(4)
-	@MethodSource("getDatabaseAdapters")
+	@MethodSource("getDatabaseConfigs")
 	public void testRemoveEntryQuery(final Object config) throws SQLException {
 		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
 		String table = this.getTablename(adapter);
@@ -101,7 +102,7 @@ public class SqlAdapterTest extends DBTester {
 
 	@ParameterizedTest(name="drop table")
 	@Order(5)
-	@MethodSource("getDatabaseAdapters")
+	@MethodSource("getDatabaseConfigs")
 	public void testDropTable(final Object config) throws SQLException {
 		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
 		String table = this.getTablename(adapter);

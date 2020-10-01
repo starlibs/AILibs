@@ -13,6 +13,18 @@ dependencies {
   	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }
 
+task testAllButMCTS(type: Test) {
+	useJUnitPlatform{
+		excludeTags 'mcts'
+	}
+}
+
+task testMCTS(type: Test) {
+	useJUnitPlatform{
+		includeTags 'mcts'
+	}
+}
+
 uploadArchives {
 	repositories {
 		mavenDeployer {

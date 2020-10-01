@@ -33,7 +33,7 @@ public class MySQLMapperTest extends DBTester {
 	}
 
 	@ParameterizedTest
-	@MethodSource("getDatabaseAdapters")
+	@MethodSource("getDatabaseConfigs")
 	@Order(1)
 	public void testWriteMapping(final IDatabaseAdapter adapter) throws SQLException, IOException, DatasetDeserializationFailedException {
 		ILabeledDataset<?> ds = this.getDataset();
@@ -47,7 +47,7 @@ public class MySQLMapperTest extends DBTester {
 	}
 
 	@ParameterizedTest
-	@MethodSource("getDatabaseAdapters")
+	@MethodSource("getDatabaseConfigs")
 	@Order(2)
 	public void testReadMapping(final IDatabaseAdapter adapter) throws SQLException, IOException, DatasetDeserializationFailedException {
 		ILabeledDataset<?> ds = this.getDataset();

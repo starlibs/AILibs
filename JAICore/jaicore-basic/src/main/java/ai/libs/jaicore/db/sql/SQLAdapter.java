@@ -208,6 +208,7 @@ class SQLAdapter implements IDatabaseAdapter {
 			this.connect();
 		}
 		this.timestampOfLastAction = System.currentTimeMillis();
+		Objects.requireNonNull(this.connect, "Connection object is null!");
 	}
 
 	/**

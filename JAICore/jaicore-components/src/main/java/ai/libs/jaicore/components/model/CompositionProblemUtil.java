@@ -73,8 +73,10 @@ public class CompositionProblemUtil {
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			builder.append(curInstance.getComponent().getName());
-			for (Collection<IComponentInstance> instances : curInstance.getSatisfactionOfRequiredInterfaces().values()) {
-				instances.forEach(componentInstances::push);
+			if (curInstance.getSatisfactionOfRequiredInterfaces() != null) {
+				for (Collection<IComponentInstance> instances : curInstance.getSatisfactionOfRequiredInterfaces().values()) {
+					instances.forEach(componentInstances::push);
+				}
 			}
 		}
 		return builder.toString();

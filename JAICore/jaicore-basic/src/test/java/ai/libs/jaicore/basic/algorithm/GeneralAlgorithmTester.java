@@ -2,7 +2,6 @@ package ai.libs.jaicore.basic.algorithm;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -53,7 +52,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 10000; // this is the time the thread has to react upon an interrupt
 	private static final int THREAD_SHUTDOWN_TOLERANCE = 2000; // this is the time until which all threads must have been shutdown after the experiment
 	private static final int EARLY_TERMINATION_TOLERANCE = 50;
-	private static final int MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER = 200;
+	private static final int MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER = 2000;
 
 	public abstract IAlgorithm<?, ?> getAlgorithm(Object problem) throws AlgorithmCreationException;
 
@@ -64,7 +63,8 @@ public abstract class GeneralAlgorithmTester extends Tester {
 
 	@ParameterizedTest
 	@MethodSource("getProblemSets")
-	public void testStartAndFinishEventEmissionSequentially(final IAlgorithmTestProblemSet<?> problemSet) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException, AlgorithmTestProblemSetCreationException {
+	public void testStartAndFinishEventEmissionSequentially(final IAlgorithmTestProblemSet<?> problemSet)
+			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException, AlgorithmTestProblemSetCreationException {
 		this.checkPreconditionForTest(problemSet);
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(problemSet.getSimpleProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
@@ -83,7 +83,8 @@ public abstract class GeneralAlgorithmTester extends Tester {
 
 	@ParameterizedTest
 	@MethodSource("getProblemSets")
-	public void testStartAndFinishEventEmissionProtocolParallelly(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmCreationException, AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public void testStartAndFinishEventEmissionProtocolParallelly(final IAlgorithmTestProblemSet<?> problemSet)
+			throws AlgorithmCreationException, AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		this.checkPreconditionForTest(problemSet);
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(problemSet.getSimpleProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
@@ -451,10 +452,9 @@ public abstract class GeneralAlgorithmTester extends Tester {
 		int runtime = (int) (end - start);
 		assertFalse(Thread.currentThread().isInterrupted(), "Thread must not be interrupted after timeout!");
 		if (!parallelized) {
-			assertTrue(!threadCountObserverThread.isThreadConstraintViolated(),
-					"The number of threads used during execution reached " + threadCountObserverThread.getMaxObservedThreads() + " while allowed maximum is " + allowedCPUs + ". Observed threads: \n\t- "
-							+ Arrays.asList(threadCountObserverThread.getThreadsAtPointOfViolation() != null ? threadCountObserverThread.getThreadsAtPointOfViolation() : new Thread[0]).stream().map(Thread::getName)
-							.collect(Collectors.joining("\n\t- ")));
+			Thread[] threadsAtTimeOfViolation = threadCountObserverThread.getThreadsAtPointOfViolation();
+			assertTrue(!threadCountObserverThread.isThreadConstraintViolated(), "The number of threads used during execution reached " + threadCountObserverThread.getMaxObservedThreads() + " while allowed maximum is " + allowedCPUs
+					+ ". Observed threads: \n\t- " + Arrays.asList(threadsAtTimeOfViolation != null ? threadsAtTimeOfViolation : new Thread[0]).stream().map(Thread::getName).collect(Collectors.joining("\n\t- ")));
 		}
 		this.logger.info("Executing thread has returned control after {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime);
 		if (runtime < TIMEOUT_DELAY) {
@@ -470,18 +470,6 @@ public abstract class GeneralAlgorithmTester extends Tester {
 
 	protected void checkPreconditionForTest(final IAlgorithmTestProblemSet<?> problemSet) throws InterruptedException {
 		Objects.requireNonNull(problemSet);
-		assert !Thread.currentThread().isInterrupted() : "Execution thread must not be interrupted at start of test!";
-		boolean allTasksResolved = GlobalTimer.getInstance().getNumberOfActiveTasks() == 0;
-		if (!allTasksResolved) {
-			String msg = "Global Timer has still " + GlobalTimer.getInstance().getNumberOfActiveTasks() + " active jobs: " + GlobalTimer.getInstance().getActiveTasks().stream().map(t -> "\n\t" + t.toString()).collect(Collectors.joining());
-			while (GlobalTimer.getInstance().getNumberOfActiveTasks() > 0) {
-				this.logger.info("Waiting for timer to shutdown ...");
-				Thread.sleep(100);
-			}
-			fail(msg);
-		}
-
-		assert allTasksResolved;
 	}
 
 	private void waitForThreadGroupToBecomeEmpty(final ThreadGroup group) throws InterruptedException {

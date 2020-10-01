@@ -51,7 +51,7 @@ public class DefaultGUIEventBus implements GUIEventBus {
 		try {
 			listener.handleGUIEvent(guiEvent);
 		} catch (Exception exception) {
-			LOGGER.error("Error while passing GUIEvent {} to handler {}.", guiEvent, listener, exception);
+			LOGGER.error("Error while passing GUIEvent {} to handler {}.", guiEvent, listener, exception);
 		}
 	}
 
