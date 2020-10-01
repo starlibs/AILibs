@@ -59,7 +59,7 @@ public abstract class Tester implements ILoggingCustomizable {
 	public void checkThreadStatus(final String situation) throws InterruptedException {
 		this.logger.info("Checking thread status: {}", situation);
 		assert !Thread.currentThread().isInterrupted() : "Execution thread must not be interrupted " + situation + " test!";
-		Collection<TrackableTimerTask> unresolvedTasks = GlobalTimer.getInstance().getActiveTasks();
+		Collection<TrackableTimerTask> unresolvedTasks = GlobalTimer.getInstance().getActiveTasks().stream().filter(t -> t != GlobalTimer.INIT_TASK).collect(Collectors.toList());
 		if (!unresolvedTasks.isEmpty()) {
 			String msg = "Global Timer has " + unresolvedTasks.size() + " active jobs " + situation + " test: " + unresolvedTasks.stream().map(t -> {
 				StringBuilder sb = new StringBuilder();

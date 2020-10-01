@@ -2,7 +2,6 @@ package ai.libs.jaicore.db.sql;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -39,7 +38,11 @@ public class SqlAdapterTest extends DBTester {
 	public void testCreateTable(final Object config) throws SQLException, IOException {
 		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
 		String table = this.getTablename(adapter);
-		assertFalse(adapter.doesTableExist(table), "The test table " + table + " already exists. It should not exist. Please remove it mnaually and run the test again.");
+		if (adapter.doesTableExist(table)) {
+			this.logger.warn("The test table " + table + " already exists. It should not exist and will be removed now prior to the test.");
+			adapter.update("DROP TABLE `" + table + "`");
+			this.logger.info("Table dropped, now continuing with the test.");
+		}
 		this.logger.info("Create table...");
 		Map<String, String> types = new HashMap<>();
 		types.put("id", "INT(10)");
