@@ -8,6 +8,7 @@ import java.util.List;
 import org.aeonbits.owner.ConfigCache;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
@@ -34,6 +35,7 @@ public class BOSSAlgorithmTest {
 		this.dataset = new TimeSeriesDataset2(futureDataSet, null, null);
 	}
 
+	@Disabled
 	@Test
 	public void testFit() throws TrainingException {
 		IBossAlgorithmConfig config = ConfigCache.getOrCreate(IBossAlgorithmConfig.class);

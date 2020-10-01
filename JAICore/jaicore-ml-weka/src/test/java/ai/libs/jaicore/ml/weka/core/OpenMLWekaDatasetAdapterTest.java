@@ -16,6 +16,7 @@ import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetAdapterTest;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
+import ai.libs.jaicore.test.ShortParameterizedTest;
 import ai.libs.jaicore.test.ShortTest;
 
 public class OpenMLWekaDatasetAdapterTest extends Tester {
@@ -24,8 +25,7 @@ public class OpenMLWekaDatasetAdapterTest extends Tester {
 		return OpenMLDatasetAdapterTest.getSmallDatasets();
 	}
 
-	@ShortTest
-	@ParameterizedTest
+	@ShortParameterizedTest
 	@MethodSource("getDatasets")
 	public void testCastabilityToWekaInstances(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
 		System.gc();

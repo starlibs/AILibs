@@ -8,7 +8,6 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
@@ -17,7 +16,7 @@ import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
 import ai.libs.jaicore.search.model.other.AgnosticPathEvaluator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
-import ai.libs.jaicore.test.MediumTest;
+import ai.libs.jaicore.test.MediumParameterizedTest;
 
 @Tag("mcts")
 public abstract class MCTSForGraphSearchTester extends GraphSearchSolutionIteratorTester {
@@ -33,34 +32,34 @@ public abstract class MCTSForGraphSearchTester extends GraphSearchSolutionIterat
 	}
 
 	@Override
-	@ParameterizedTest
-	@MethodSource("getProblemSets")
-	@MediumTest // this is the important difference, because MCTS takes longer to produce all paths!
-	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall(final IAlgorithmTestProblemSet<Object> problemSet) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
+	@MediumParameterizedTest
+	@MethodSource("getProblemSets") // this is the important difference, because MCTS takes longer to produce all paths!
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall(final IAlgorithmTestProblemSet<Object> problemSet)
+			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
 		super.testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall(problemSet);
 	}
 
 	@Override
-	@ParameterizedTest
-	@MethodSource("getProblemSets")
-	@MediumTest // this is the important difference, because MCTS takes longer to produce all paths!
-	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall(final IAlgorithmTestProblemSet<Object> problemSet) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
+	@MediumParameterizedTest
+	@MethodSource("getProblemSets") // this is the important difference, because MCTS takes longer to produce all paths!
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall(final IAlgorithmTestProblemSet<Object> problemSet)
+			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
 		super.testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall(problemSet);
 	}
 
 	@Override
-	@ParameterizedTest
+	@MediumParameterizedTest
 	@MethodSource("getProblemSets")
-	@MediumTest
-	public void testThatIteratorReturnsEachPossibleSolution(final IAlgorithmTestProblemSet<Object> problemSet) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException {
+	public void testThatIteratorReturnsEachPossibleSolution(final IAlgorithmTestProblemSet<Object> problemSet)
+			throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException {
 		super.testThatIteratorReturnsEachPossibleSolution(problemSet);
 	}
 
 	@Override
-	@ParameterizedTest
+	@MediumParameterizedTest
 	@MethodSource("getProblemSets")
-	@MediumTest
-	public void testThatIteratorReturnsEachPossibleSolutionWithParallelization(final IAlgorithmTestProblemSet<Object> problemSet) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException {
+	public void testThatIteratorReturnsEachPossibleSolutionWithParallelization(final IAlgorithmTestProblemSet<Object> problemSet)
+			throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException {
 		super.testThatIteratorReturnsEachPossibleSolutionWithParallelization(problemSet);
 	}
 }

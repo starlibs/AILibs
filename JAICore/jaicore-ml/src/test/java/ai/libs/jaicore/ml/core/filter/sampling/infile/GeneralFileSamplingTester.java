@@ -6,9 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -19,6 +17,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.openml.apiconnector.io.OpenmlConnector;
 
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
+import ai.libs.jaicore.basic.algorithm.IAlgorithmTestProblemSet;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.AFileSamplingAlgorithm;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.ArffUtilities;
@@ -36,9 +35,8 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 	protected static final String OUTPUT_FILE_NAME = System.getProperty("user.home") + File.separator + UUID.randomUUID().toString() + ".arff";
 
 	public static Stream<Arguments> getProblemSets() {
-		List<Arguments> problemSets = new ArrayList<>();
-		problemSets.add(Arguments.of(new FileBasedSamplingAlgorithmTestProblemSet()));
-		return problemSets.stream();
+		IAlgorithmTestProblemSet<?> problemSet = new FileBasedSamplingAlgorithmTestProblemSet();
+		return Stream.of(Arguments.of(problemSet));
 	}
 
 	/**

@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.ExtendedM5Tree;
+import ai.libs.jaicore.test.ShortParameterizedTest;
 import ai.libs.jaicore.test.ShortTest;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -35,8 +36,7 @@ public class ExtendedM5TreeTest {
 		return Stream.of(Arguments.of(new M5TreeParams((x) -> Math.sin(x) * x + x + 0, null)));
 	}
 
-	@ParameterizedTest
-	@ShortTest
+	@ShortParameterizedTest
 	@MethodSource("getParameters")
 	public void giveData(final M5TreeParams params) throws Exception {
 		Instances trainingData = params.getTrainingData();

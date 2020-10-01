@@ -6,18 +6,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 
 /**
- * Annotation for JUnit tests that are faster than a second to execute.
+ * Annotation for *parameterized* JUnit tests that take longer than 5 seconds.
  *
  * @author mwever
- *
  */
-@Tag("short-test")
-@Test
+@Tag("long-test")
+@ParameterizedTest
 @Target({ ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ShortTest {
+public @interface LongParameterizedTest {
 
 }

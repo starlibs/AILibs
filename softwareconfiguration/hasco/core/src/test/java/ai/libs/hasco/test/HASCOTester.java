@@ -18,7 +18,6 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -40,7 +39,8 @@ import ai.libs.jaicore.search.util.CycleDetectedResult;
 import ai.libs.jaicore.search.util.DeadEndDetectedResult;
 import ai.libs.jaicore.search.util.GraphSanityChecker;
 import ai.libs.jaicore.search.util.SanityCheckResult;
-import ai.libs.jaicore.test.MediumTest;
+import ai.libs.jaicore.test.LongParameterizedTest;
+import ai.libs.jaicore.test.MediumParameterizedTest;
 
 public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends SoftwareConfigurationAlgorithmTester {
 
@@ -66,7 +66,6 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 
 	@Override
 	public abstract HASCO<N, A, Double> getAlgorithmForSoftwareConfigurationProblem(RefinementConfiguredSoftwareConfigurationProblem<Double> problem);
-
 
 	private HASCO<N, A, Double> getHASCOForSimpleProblem(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTestProblemSetCreationException {
 		HASCO<N, A, Double> hasco = this.getAlgorithmForSoftwareConfigurationProblem(problemSet.getSimpleProblemInputForGeneralTestPurposes());
@@ -94,10 +93,10 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 		return hascoObjects;
 	}
 
-	@ParameterizedTest
-	@MediumTest
+	@MediumParameterizedTest
 	@MethodSource("getProblemSets")
-	public void sanityCheckOfSearchGraph(final SoftwareConfigurationProblemSet problemSet) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmTestProblemSetCreationException {
+	public void sanityCheckOfSearchGraph(final SoftwareConfigurationProblemSet problemSet)
+			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmTestProblemSetCreationException {
 		for (Pair<HASCO<N, A, Double>, Integer> pairOfHASCOAndNumOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems(problemSet)) {
 			HASCO<N, A, Double> hasco = pairOfHASCOAndNumOfSolutions.getX();
 
@@ -111,18 +110,20 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 		}
 	}
 
-	@ParameterizedTest
+	@LongParameterizedTest
 	@MethodSource("getProblemSets")
-	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall(final SoftwareConfigurationProblemSet problemSet) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmTestProblemSetCreationException {
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall(final SoftwareConfigurationProblemSet problemSet)
+			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmTestProblemSetCreationException {
 		for (Pair<HASCO<N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems(problemSet)) {
 			HASCO<N, A, Double> hasco = pairOfHASCOAndExpectedNumberOfSolutions.getX();
 			this.checkNumberOfSolutionOnHASCO(hasco, pairOfHASCOAndExpectedNumberOfSolutions.getY());
 		}
 	}
 
-	@ParameterizedTest
+	@LongParameterizedTest
 	@MethodSource("getProblemSets")
-	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall(final SoftwareConfigurationProblemSet problemSet)
+			throws AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		for (Pair<HASCO<N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems(problemSet)) {
 			HASCO<N, A, Double> hasco = pairOfHASCOAndExpectedNumberOfSolutions.getX();
 			hasco.setNumCPUs(Runtime.getRuntime().availableProcessors());
@@ -149,7 +150,7 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 		assertEquals("All " + numberOfExpectedSolutions + " solutions were found, but " + solutions.size() + " solutions were returned in total, i.e. there are solutions returned twice", numberOfExpectedSolutions, solutions.size());
 	}
 
-	@ParameterizedTest
+	@LongParameterizedTest
 	@MethodSource("getProblemSets")
 	public void testThatIteratorReturnsEachPossibleSolution(final SoftwareConfigurationProblemSet problemSet) throws AlgorithmTestProblemSetCreationException {
 		for (Pair<HASCO<N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems(problemSet)) {

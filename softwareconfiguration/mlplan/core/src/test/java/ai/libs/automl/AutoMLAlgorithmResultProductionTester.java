@@ -25,7 +25,6 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.junit.FixMethodOrder;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runners.MethodSorters;
 
@@ -39,7 +38,7 @@ import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.PreTrainedPredictionBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
-import ai.libs.jaicore.test.LongTest;
+import ai.libs.jaicore.test.LongParameterizedTest;
 
 /**
  * This test tests whether or not the algorithm delivers a solution on each given dataset within 30 seconds.
@@ -49,7 +48,6 @@ import ai.libs.jaicore.test.LongTest;
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
-
 
 	public abstract IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(ILabeledDataset<?> data) throws AlgorithmCreationException, IOException;
 
@@ -61,9 +59,8 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 
 	}
 
-	@ParameterizedTest
+	@LongParameterizedTest
 	@MethodSource("getDatasets")
-	@LongTest
 	public void testThatModelIsTrained(final OpenMLProblemSet problemSet)
 			throws DatasetDeserializationFailedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ObjectEvaluationFailedException, SplitFailedException, AlgorithmCreationException, IOException {
 		try {

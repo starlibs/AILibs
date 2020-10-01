@@ -16,10 +16,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.graph.LabeledGraph;
-import ai.libs.jaicore.test.LongTest;
-import ai.libs.jaicore.test.MediumTest;
+import ai.libs.jaicore.test.LongParameterizedTest;
+import ai.libs.jaicore.test.MediumParameterizedTest;
 
-public abstract class GraphGeneratorTester<N, A>  extends Tester {
+public abstract class GraphGeneratorTester<N, A> extends Tester {
 
 	private class Node {
 		N point;
@@ -38,16 +38,14 @@ public abstract class GraphGeneratorTester<N, A>  extends Tester {
 		this.testIdempotency(g, 100);
 	}
 
-	@ParameterizedTest(name = "{0}")
+	@MediumParameterizedTest
 	@MethodSource("getGraphGenerators")
-	@MediumTest
 	public void testIdempotencyMedium(final String name, final IGraphGenerator<N, A> g) throws Exception {
 		this.testIdempotency(g, 1000);
 	}
 
-	@ParameterizedTest(name = "{0}")
+	@LongParameterizedTest
 	@MethodSource("getGraphGenerators")
-	@LongTest
 	public void testIdempotencyLarge(final String name, final IGraphGenerator<N, A> g) throws Exception {
 		this.testIdempotency(g, 10000);
 	}

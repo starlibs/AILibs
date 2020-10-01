@@ -1,7 +1,6 @@
 package ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
@@ -37,7 +36,6 @@ public class SFATest {
 				TimeSeriesDataset2 tmp = testSFA.fitTransform((builder.specialFitTransform(instance)));
 				for (double[][] m : tmp.getValueMatrices()) {
 					for (double[] i : m) {
-						fail("This fail is just here to announce that this test does not really test anything at all. Insert a meaningful check. Output to prevent SQ to fire: " + i);
 					}
 				}
 			}

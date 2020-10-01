@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.test.LongParameterizedTest;
 
 public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTester {
 
@@ -44,7 +45,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		IAlgorithmTestProblemSet<Object> current = problemSet;
 		while (current instanceof ReductionBasedAlgorithmTestProblemSet) {
 			@SuppressWarnings("unchecked")
-			ReductionBasedAlgorithmTestProblemSet<Object, Object, Object, Object> castCurrent = ((ReductionBasedAlgorithmTestProblemSet<Object, Object, Object, Object>)current);
+			ReductionBasedAlgorithmTestProblemSet<Object, Object, Object, Object> castCurrent = ((ReductionBasedAlgorithmTestProblemSet<Object, Object, Object, Object>) current);
 			if (this.reduction == null) {
 				this.reduction = castCurrent.getReduction();
 			} else {
@@ -71,7 +72,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 
 		/* retrieve the solutions from the original problem */
 		@SuppressWarnings("unchecked")
-		Map<I, Collection<O>> problemsWithSolutions = ((IAlgorithmTestProblemSetForSolutionIterators<I, O>)current).getProblemsWithSolutions();
+		Map<I, Collection<O>> problemsWithSolutions = ((IAlgorithmTestProblemSetForSolutionIterators<I, O>) current).getProblemsWithSolutions();
 		Map<Object, Collection<?>> reducedProblemsWithOriginalSolutions = new HashMap<>();
 		for (Entry<I, Collection<O>> originalProblemWithSolutions : problemsWithSolutions.entrySet()) {
 			Object problem = originalProblemWithSolutions.getKey();
@@ -83,7 +84,8 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		return reducedProblemsWithOriginalSolutions;
 	}
 
-	private void solveProblemViaCall(final Entry<Object, Collection<?>> problem, final ISolutionCandidateIterator<Object, Object> algorithm) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	private void solveProblemViaCall(final Entry<Object, Collection<?>> problem, final ISolutionCandidateIterator<Object, Object> algorithm)
+			throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		final Collection<?> stillMissingSolutions = new ArrayList<>(problem.getValue());
 		final Collection<Object> foundSolutions = new ArrayList<>();
 		assertNotNull(algorithm);
@@ -95,7 +97,8 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 			public void receiveSolution(final ISolutionCandidateFoundEvent<Object> solutionEvent) {
 				Object solution = solutionEvent.getSolutionCandidate();
 				Object solutionToOriginalProblem = SolutionCandidateIteratorTester.this.reduction != null ? SolutionCandidateIteratorTester.this.reduction.decodeSolution(solution) : solution;
-				assertTrue ("Returned solution " + solution + " converted to original solution " + solutionToOriginalProblem + " is not a solution in the original problem according to ground truth.", stillMissingSolutions.contains(solutionToOriginalProblem) || foundSolutions.contains(solutionToOriginalProblem));
+				assertTrue("Returned solution " + solution + " converted to original solution " + solutionToOriginalProblem + " is not a solution in the original problem according to ground truth.",
+						stillMissingSolutions.contains(solutionToOriginalProblem) || foundSolutions.contains(solutionToOriginalProblem));
 				if (foundSolutions.contains(solutionToOriginalProblem)) {
 					SolutionCandidateIteratorTester.this.logger.warn("Returned solution {} converted to original solution {} has already been found earlier, i.e. is returned twice.", solution, solutionToOriginalProblem);
 				} else {
@@ -107,10 +110,12 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		while (algorithm.hasNext()) {
 			algorithm.nextWithException();
 		}
-		assertTrue("Found " + foundSolutions.size() + "/" + problem.getValue().size() + " solutions.\n\t" + stillMissingSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")) + "\nFound solutions: \n\t" + foundSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")), stillMissingSolutions.isEmpty());
+		assertTrue("Found " + foundSolutions.size() + "/" + problem.getValue().size() + " solutions.\n\t" + stillMissingSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")) + "\nFound solutions: \n\t"
+				+ foundSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")), stillMissingSolutions.isEmpty());
 	}
 
-	private void solveProblemViaIterator(final Entry<Object, Collection<?>> problem, final ISolutionCandidateIterator<Object, Object> algorithm) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	private void solveProblemViaIterator(final Entry<Object, Collection<?>> problem, final ISolutionCandidateIterator<Object, Object> algorithm)
+			throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		assertNotNull(algorithm);
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
@@ -132,7 +137,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 			} else {
 				assertTrue(!terminated);
 				if (e instanceof ISolutionCandidateFoundEvent) {
-					Object solution = ((ISolutionCandidateFoundEvent<Object>)e).getSolutionCandidate();
+					Object solution = ((ISolutionCandidateFoundEvent<Object>) e).getSolutionCandidate();
 					Object solutionToOriginalProblem = solution;
 					if (SolutionCandidateIteratorTester.this.reduction != null) {
 						solutionToOriginalProblem = SolutionCandidateIteratorTester.this.reduction.decodeSolution(solution);
@@ -146,12 +151,14 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 				}
 			}
 		}
-		assertTrue("Found " + foundSolutions.size() + "/" + problem.getValue().size() + " solutions. Missing solutions:\n\t" + stillMissingSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")) + "\nFound solutions: \n\t" + foundSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")), stillMissingSolutions.isEmpty());
+		assertTrue("Found " + foundSolutions.size() + "/" + problem.getValue().size() + " solutions. Missing solutions:\n\t" + stillMissingSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t"))
+				+ "\nFound solutions: \n\t" + foundSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")), stillMissingSolutions.isEmpty());
 	}
 
 	@ParameterizedTest
 	@MethodSource("getProblemSets")
-	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall(final IAlgorithmTestProblemSet<Object> problemSet) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall(final IAlgorithmTestProblemSet<Object> problemSet)
+			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
 		Map<Object, Collection<?>> reducedProblemsWithOriginalSolutions = this.loadProblemsAndSolutions(problemSet);
 		for (Entry<Object, Collection<?>> problem : reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
@@ -161,9 +168,10 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		}
 	}
 
-	@ParameterizedTest
+	@LongParameterizedTest
 	@MethodSource("getProblemSets")
-	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall(final IAlgorithmTestProblemSet<Object> problemSet) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall(final IAlgorithmTestProblemSet<Object> problemSet)
+			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
 		Map<Object, Collection<?>> reducedProblemsWithOriginalSolutions = this.loadProblemsAndSolutions(problemSet);
 		for (Entry<Object, Collection<?>> problem : reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
@@ -173,9 +181,10 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		}
 	}
 
-	@ParameterizedTest
+	@LongParameterizedTest
 	@MethodSource("getProblemSets")
-	public void testThatIteratorReturnsEachPossibleSolution(final IAlgorithmTestProblemSet<Object> problemSet) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException {
+	public void testThatIteratorReturnsEachPossibleSolution(final IAlgorithmTestProblemSet<Object> problemSet)
+			throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException {
 		Map<Object, Collection<?>> reducedProblemsWithOriginalSolutions = this.loadProblemsAndSolutions(problemSet);
 		for (Entry<Object, Collection<?>> problem : reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
@@ -185,9 +194,10 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		}
 	}
 
-	@ParameterizedTest
+	@LongParameterizedTest
 	@MethodSource("getProblemSets")
-	public void testThatIteratorReturnsEachPossibleSolutionWithParallelization(final IAlgorithmTestProblemSet<Object> problemSet) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException {
+	public void testThatIteratorReturnsEachPossibleSolutionWithParallelization(final IAlgorithmTestProblemSet<Object> problemSet)
+			throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException {
 		Map<Object, Collection<?>> reducedProblemsWithOriginalSolutions = this.loadProblemsAndSolutions(problemSet);
 		for (Entry<Object, Collection<?>> problem : reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());

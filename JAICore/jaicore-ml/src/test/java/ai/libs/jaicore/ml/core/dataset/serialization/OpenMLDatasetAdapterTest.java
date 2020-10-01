@@ -31,6 +31,7 @@ import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.dataset.DatasetTestUtil;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
+import ai.libs.jaicore.test.MediumParameterizedTest;
 import ai.libs.jaicore.test.MediumTest;
 
 public class OpenMLDatasetAdapterTest {
@@ -162,9 +163,8 @@ public class OpenMLDatasetAdapterTest {
 		this.testReconstructibilityOfStratifiedSplit(problemSet);
 	}
 
-	@ParameterizedTest
+	@MediumParameterizedTest
 	@MethodSource("getBigDatasets")
-	@MediumTest
 	public void testReconstructibilityOfStratifiedSplitOnBigDataset(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException, SplitFailedException {
 		this.testReconstructibilityOfStratifiedSplit(problemSet);
 	}
@@ -175,9 +175,8 @@ public class OpenMLDatasetAdapterTest {
 		this.testWrite(problemSet);
 	}
 
-	@ParameterizedTest
+	@MediumParameterizedTest
 	@MethodSource("getBigDatasets")
-	@MediumTest
 	public void testWriteOnBigDataset(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException {
 		this.testWrite(problemSet);
 	}
@@ -188,9 +187,8 @@ public class OpenMLDatasetAdapterTest {
 		this.testReconstructibility(problemSet);
 	}
 
-	@ParameterizedTest
+	@MediumParameterizedTest
 	@MethodSource("getBigDatasets")
-	@MediumTest
 	public void testReconstructibilityOnBigDataset(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
 		this.testReconstructibility(problemSet);
 	}

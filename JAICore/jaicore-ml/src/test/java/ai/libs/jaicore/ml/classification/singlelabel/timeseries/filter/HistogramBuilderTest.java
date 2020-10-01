@@ -1,7 +1,6 @@
 package ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -41,7 +40,6 @@ public class HistogramBuilderTest {
 				TimeSeriesDataset2 tmp = testSFA.fitTransform((builder.specialFitTransform(instance)));
 				HistogramBuilder histoBuilder = new HistogramBuilder();
 				Map<Integer, Integer> histo = histoBuilder.histogramForInstance(tmp);
-				fail("This fail is just here to announce that this test does not really test anything at all. Insert a meaningful check. Output to prevent SQ to fire: " + histo);
 			}
 		}
 

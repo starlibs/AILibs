@@ -20,6 +20,7 @@ import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.ml.weka.preprocessing.WekaPreprocessorFitter;
+import ai.libs.jaicore.test.MediumParameterizedTest;
 import ai.libs.jaicore.test.MediumTest;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -32,9 +33,8 @@ public class PreprocessorTest extends GeneralAlgorithmTester {
 		return validCombos.stream().map(c -> Arguments.of(new WekaPreprocessorProblemSet(c.get(0), c.get(1))));
 	}
 
-	@ParameterizedTest
+	@MediumParameterizedTest
 	@MethodSource("getProblemSets")
-	@MediumTest
 	public void testFit(final WekaPreprocessorProblemSet problemSet) throws Exception {
 		Pair<String, ILabeledDataset<ILabeledInstance>> ps = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		String[] parts = ps.getX().split("/");

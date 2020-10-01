@@ -20,7 +20,6 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IObjectAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.kvstore.KVStore;
 import ai.libs.jaicore.basic.sets.SetUtil;
@@ -29,6 +28,8 @@ import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttri
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 import ai.libs.jaicore.ml.pdm.dataset.SensorTimeSeries;
 import ai.libs.jaicore.ml.pdm.dataset.SensorTimeSeriesAttribute;
+import ai.libs.jaicore.test.LongTest;
+import ai.libs.jaicore.test.ShortTest;
 
 public class ArffDatasetAdapterTest {
 
@@ -64,21 +65,21 @@ public class ArffDatasetAdapterTest {
 		return IntStream.range(0, instanceArray.length).mapToObj(x -> x + " " + attributes.get(x).serializeAttributeValue(instanceArray[x])).reduce((a, b) -> a + "," + b).get();
 	}
 
-	@Test
+	@ShortTest
 	public void testParseRelation() {
 		KVStore store = ArffDatasetAdapter.parseRelation(RELATION_STRING);
 		assertEquals("The class index could not be read correctly", CLASS_INDEX, (int) store.getAsInt(ArffDatasetAdapter.K_CLASS_INDEX));
 		assertEquals("The relation name could not be extracted correctly", RELATION_NAME, store.getAsString(ArffDatasetAdapter.K_RELATION_NAME));
 	}
 
-	@Test
+	@ShortTest
 	public void testParseNumericAttribute() throws UnsupportedAttributeTypeException {
 		IAttribute attribute = ArffDatasetAdapter.parseAttribute(NUMERIC_ATTRIBUTE_STRING);
 		assertTrue("Returned attribute is not of type INumericAttribtue", attribute instanceof INumericAttribute);
 		assertEquals("Name of attribute could not be extracted correctly", ATTRIBUTE_NAME, attribute.getName());
 	}
 
-	@Test
+	@ShortTest
 	public void testParseCategoricalAttribute() throws UnsupportedAttributeTypeException {
 		IAttribute attribute = ArffDatasetAdapter.parseAttribute(NOMINAL_ATTRIBUTE_STRING);
 		assertTrue("Returned attribute is not of type INumericAttribtue", attribute instanceof ICategoricalAttribute);
@@ -88,14 +89,14 @@ public class ArffDatasetAdapterTest {
 		assertTrue("Extracted list of categories does not contain all ground truth values", CATEGORICAL_VALUES.containsAll(catAtt.getLabels()));
 	}
 
-	@Test
+	@ShortTest
 	public void testParseSensorTimeSeriesAttribute() throws UnsupportedAttributeTypeException {
 		IAttribute attribute = ArffDatasetAdapter.parseAttribute(SENSOR_TIME_SERIES_ATTRIBUTE_STRING);
 		assertTrue("Returned attribute is not of type IObjectAttribute", attribute instanceof IObjectAttribute);
 		assertEquals("Name of attribute could not be extracted correctly", ATTRIBUTE_NAME, attribute.getName());
 	}
 
-	@Test
+	@ShortTest
 	public void testParseDenseInstance() {
 		String testInstanceLine = generateDenseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE);
 		Object parsedInstance = ArffDatasetAdapter.parseInstance(false, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
@@ -114,21 +115,26 @@ public class ArffDatasetAdapterTest {
 		assertNotNull("No instance label for dense instance " + parsedInstance, ((List<?>) parsedInstance).get(1));
 	}
 
-	@Test
+	@ShortTest
 	public void testParseSparseInstance() {
 		String testInstanceLine = generateSparseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE);
-		Object parsedInstance = ArffDatasetAdapter.parseInstance(true, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
-		assertTrue("The returned instance is not in the expected sparse instance format", parsedInstance instanceof Map);
+		List<Object> parsedInstance = ArffDatasetAdapter.parseInstance(true, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
+		assertTrue("The returned instance is not in the expected sparse instance format", parsedInstance.get(0) instanceof Map);
 		@SuppressWarnings("unchecked")
-		Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
+		Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance.get(0);
 		for (int i = 0; i < TEST_INSTANCE.length; i++) {
+			if (i == CLASS_INDEX) {
+				continue;
+			}
 			assertEquals("Attribute value at position " + i + " " + parsedSparseInstance.get(i) + " is not equal to the expected value " + TEST_INSTANCE[i], TEST_INSTANCE[i], parsedSparseInstance.get(i));
 		}
+		assertEquals("Target has not been parsed correctly.", TEST_INSTANCE[CLASS_INDEX], parsedInstance.get(1));
+
 		assertTrue("Numeric attribute is not a Number object but of type " + parsedSparseInstance.get(0).getClass().getName(), parsedSparseInstance.get(0) instanceof Number);
-		assertNotNull("No instance label for sparse instance " + parsedSparseInstance, parsedSparseInstance.get(CLASS_INDEX));
+		assertNotNull("No instance label for sparse instance " + parsedSparseInstance, parsedInstance.get(1));
 	}
 
-	@Test
+	@ShortTest
 	public void testThatMissingNumericValuesAreNullInDenseInstances() {
 		String testInstanceLine = generateDenseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE_WITH_MISSING_NUMERIC_VAL);
 		Object parsedInstance = ArffDatasetAdapter.parseInstance(false, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
@@ -139,7 +145,7 @@ public class ArffDatasetAdapterTest {
 		assertNotNull(label);
 	}
 
-	@Test
+	@ShortTest
 	public void testThatMissingCategoricalValuesAreNullInDenseInstances() {
 		String testInstanceLine = generateDenseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE_WITH_MISSING_CATEGORICAL_VAL);
 		Object parsedInstance = ArffDatasetAdapter.parseInstance(false, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
@@ -150,34 +156,34 @@ public class ArffDatasetAdapterTest {
 		assertNotNull(parsedDenseInstance[0]);
 	}
 
-	@Test
+	@ShortTest
 	public void testThatMissingNumericValuesAreNullInSparseInstances() {
 		String testInstanceLine = generateSparseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE_WITH_MISSING_NUMERIC_VAL);
-		Object parsedInstance = ArffDatasetAdapter.parseInstance(true, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
+		List<Object> parsedInstance = ArffDatasetAdapter.parseInstance(true, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
 		@SuppressWarnings("unchecked")
-		Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
+		Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance.get(0);
 		assertNull(parsedSparseInstance.get(0));
 		assertNotNull(parsedSparseInstance.get(1));
-		assertNotNull(parsedSparseInstance.get(2));
+		assertNotNull(parsedInstance.get(1));
 	}
 
-	@Test
+	@ShortTest
 	public void testThatMissingCategoricalValuesAreNullInSparseInstances() {
 		String testInstanceLine = generateSparseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE_WITH_MISSING_CATEGORICAL_VAL);
 		Object parsedInstance = ArffDatasetAdapter.parseInstance(true, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
 		@SuppressWarnings("unchecked")
-		Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
+		Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) ((List<Object>) parsedInstance).get(0);
 		assertNotNull(parsedSparseInstance.get(0));
 		assertNotNull(parsedSparseInstance.get(1));
 		assertNull(parsedSparseInstance.get(2));
 	}
 
-	@Test
+	@ShortTest
 	public void testReadingSingleLabelDenseDatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
 		this.testReadingDatasetFromFile(new File("testrsc/dataset/arff/krvskp.arff"));
 	}
 
-	@Test
+	@LongTest
 	public void testReadingSingleLabelSparseDatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
 		this.testReadingDatasetFromFile(new File("testrsc/dataset/arff/dexter.arff"));
 	}
@@ -187,7 +193,7 @@ public class ArffDatasetAdapterTest {
 		DatasetTestUtil.checkDatasetCoherence(ds);
 	}
 
-	@Test
+	@ShortTest
 	public void testWritingASingleLabelDatasetToFile() throws DatasetDeserializationFailedException, IOException {
 		File datasetFile = new File("testrsc/dataset/arff/krvskp.arff");
 		ILabeledDataset<?> ds = ArffDatasetAdapter.readDataset(datasetFile);

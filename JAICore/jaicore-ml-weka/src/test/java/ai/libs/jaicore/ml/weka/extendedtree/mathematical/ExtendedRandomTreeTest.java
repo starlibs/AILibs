@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.ExtendedRandomForest;
+import ai.libs.jaicore.test.MediumParameterizedTest;
 import ai.libs.jaicore.test.MediumTest;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -36,8 +37,7 @@ public class ExtendedRandomTreeTest {
 				Arguments.of(new RandomTreeParams((x) -> Math.pow(x, 10), (x) -> 10 * Math.pow(x, 9))));
 	}
 
-	@ParameterizedTest
-	@MediumTest
+	@MediumParameterizedTest
 	@MethodSource("getParameters")
 	public void testTree(final RandomTreeParams params) throws Exception {
 		Instances trainingData = params.getTrainingData();

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Annotation for JUnit Tests that take longer than 5 seconds.
+ * Annotation for JUnit tests that take longer than 5 seconds.
  *
  * @author mwever
  */

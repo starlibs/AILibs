@@ -27,6 +27,7 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
 import ai.libs.jaicore.ml.core.dataset.clusterable.ClusterableDataset;
 import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
+import ai.libs.jaicore.test.MediumParameterizedTest;
 import ai.libs.jaicore.test.MediumTest;
 
 /**
@@ -79,9 +80,8 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	 * @throws AlgorithmCreationException
 	 * @throws Exception
 	 */
-	@ParameterizedTest
+	@MediumParameterizedTest
 	@MethodSource("getProblemSets")
-	@MediumTest
 	public void testSampleSizeMediumProblem(final MemoryBasedSamplingAlgorithmTestProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		ILabeledDataset<?> dataset = problemSet.getMediumProblemInputForGeneralTestPurposes();
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
@@ -101,9 +101,8 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	 * @throws AlgorithmCreationException
 	 * @throws Exception
 	 */
-	@ParameterizedTest
+	@MediumParameterizedTest
 	@MethodSource("getProblemSets")
-	@MediumTest
 	public void testSampleSizeLargeProblem(final MemoryBasedSamplingAlgorithmTestProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		ILabeledDataset<?> dataset = problemSet.getDifficultProblemInputForGeneralTestPurposes();
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
@@ -180,9 +179,8 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	 * @throws Exception
 	 *
 	 */
-	@ParameterizedTest
+	@MediumParameterizedTest
 	@MethodSource("getProblemSets")
-	@MediumTest
 	public void testNoDuplicatesLargeProblem(final MemoryBasedSamplingAlgorithmTestProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, AlgorithmCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		ILabeledDataset<?> dataset = problemSet.getDifficultProblemInputForGeneralTestPurposes();
 		assertNotNull(dataset);

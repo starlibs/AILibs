@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
@@ -59,6 +60,7 @@ public class ShotgunEnsembleAlgorithmTest {
 		this.algorithm = this.model.getLearningAlgorithm(null);
 	}
 
+	@Disabled
 	@Test
 	public void testCorrectness() throws AlgorithmException {
 		// Create algorithm.
@@ -111,6 +113,7 @@ public class ShotgunEnsembleAlgorithmTest {
 		});
 	}
 
+	@Disabled
 	@Test
 	public void testRobustnessForCallingWithoutModelSet() throws AlgorithmException {
 		// Call algorithm without model set.

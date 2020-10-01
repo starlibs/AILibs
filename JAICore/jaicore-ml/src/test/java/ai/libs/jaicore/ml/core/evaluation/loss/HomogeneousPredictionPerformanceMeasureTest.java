@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
-import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
+import ai.libs.jaicore.test.ShortTest;
 
 public class HomogeneousPredictionPerformanceMeasureTest {
 
@@ -30,42 +30,42 @@ public class HomogeneousPredictionPerformanceMeasureTest {
 		return list;
 	}
 
-	@Test
+	@ShortTest
 	public void testTrueNegatives() {
 		assertEquals("Wrong number of true negatives", 1.0, EClassificationPerformanceMeasure.TRUE_NEGATIVES_WITH_1_POSITIVE.score(VEC_EXP, VEC_ACT), DELTA);
 	}
 
-	@Test
+	@ShortTest
 	public void testTruePositives() {
 		assertEquals("Wrong number of true positives", 3.0, EClassificationPerformanceMeasure.TRUE_POSITIVES_WITH_1_POSITIVE.score(VEC_EXP, VEC_ACT), DELTA);
 	}
 
-	@Test
+	@ShortTest
 	public void testFalseNegatives() {
 		assertEquals("Wrong number of false negatives", 2.0, EClassificationPerformanceMeasure.FALSE_NEGATIVES_WITH_1_POSITIVE.score(VEC_EXP, VEC_ACT), DELTA);
 	}
 
-	@Test
+	@ShortTest
 	public void testFalsePositives() {
 		assertEquals("Wrong number of false positives", 2.0, EClassificationPerformanceMeasure.FALSE_POSITIVES_WITH_1_POSITIVE.score(VEC_EXP, VEC_ACT), DELTA);
 	}
 
-	@Test
+	@ShortTest
 	public void testErrorRate() {
 		assertEquals("ErrorRate is not correct", 0.5, EClassificationPerformanceMeasure.ERRORRATE.loss(VEC_EXP, VEC_ACT), DELTA);
 	}
 
-	@Test
+	@ShortTest
 	public void testPrecision() {
 		assertEquals("Precision is not correct", 0.6, EClassificationPerformanceMeasure.PRECISION_WITH_1_POSITIVE.score(VEC_EXP, VEC_ACT), DELTA);
 	}
 
-	@Test
+	@ShortTest
 	public void testRecall() {
 		assertEquals("Recall is not correct", 0.6, EClassificationPerformanceMeasure.RECALL_WITH_1_POSITIVE.score(VEC_EXP, VEC_ACT), DELTA);
 	}
 
-	@Test
+	@ShortTest
 	public void testF1Measure() {
 		assertEquals("FMeasure is not correct", 0.6, EClassificationPerformanceMeasure.F1_WITH_1_POSITIVE.score(VEC_EXP, VEC_ACT), DELTA);
 	}

@@ -11,12 +11,12 @@ import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
+import ai.libs.jaicore.test.MediumParameterizedTest;
 import ai.libs.jaicore.test.MediumTest;
 
 public abstract class RepositoryDeserializationTest extends Tester {
 
-	@MediumTest
-	@ParameterizedTest
+	@MediumParameterizedTest
 	@MethodSource("provideRepositoriesToTest")
 	public void testDeserializationOfRepository(final String path, final int numExpectedComponents) throws IOException {
 		logger.info("Check {} with {} components.", path, numExpectedComponents);

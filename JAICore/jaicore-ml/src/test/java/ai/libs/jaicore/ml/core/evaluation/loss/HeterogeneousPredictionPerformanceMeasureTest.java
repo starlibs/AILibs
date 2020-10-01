@@ -6,10 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.api4.java.ai.ml.core.evaluation.IPredictionAndGroundTruthTable;
-import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.APredictionPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.TypelessPredictionDiff;
+import ai.libs.jaicore.test.ShortTest;
 
 /**
  * At the time of writing, we had no concrete heterogeneous prediction performance measure available.
@@ -29,12 +29,12 @@ public class HeterogeneousPredictionPerformanceMeasureTest {
 	private static final List<Integer> VEC_EXP = Arrays.asList(1, 0, 0, 1, 1, 1, 0, 1);
 	private static final List<String> VEC_ACT = Arrays.asList("1", "0", "1", "0", "1", "0", "1", "1");
 
-	@Test
+	@ShortTest
 	public void testArtificialHeterogeneousPredictionPerformanceMeasure() {
 		assertEquals("Prediction failed", .5, new ArtificialPredictionPerformanceMeasure().loss(VEC_EXP, VEC_ACT), DELTA);
 	}
 
-	@Test
+	@ShortTest
 	public void testArtificialHeterogeneousPredictionPerformanceMeasureTypelessViaPredictionDiff() {
 		IPredictionAndGroundTruthTable<?, ?> diff = new TypelessPredictionDiff(VEC_EXP, VEC_ACT); // create a prediction where type information is lost
 		assertEquals("Prediction failed", .5, new ArtificialPredictionPerformanceMeasure().loss(diff.getCastedView(Integer.class, String.class)), DELTA);
