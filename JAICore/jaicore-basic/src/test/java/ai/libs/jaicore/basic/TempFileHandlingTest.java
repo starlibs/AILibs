@@ -5,14 +5,11 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.jupiter.api.Test;
-
 import ai.libs.jaicore.test.ShortTest;
 
-@ShortTest
 public class TempFileHandlingTest {
 
-	@Test
+	@ShortTest
 	public void testFileCreationAndDeletion() throws IOException {
 		TempFileHandler h = new TempFileHandler();
 		String uuid = h.createTempFile();

@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.test.ShortTest;
 
@@ -17,7 +16,6 @@ import ai.libs.jaicore.test.ShortTest;
  *
  * @author David Niehues - davnie@mail.upb.de
  */
-@ShortTest
 public class PartialOrderedSetTest {
 
 	private static final String A = "a";
@@ -61,7 +59,7 @@ public class PartialOrderedSetTest {
 	 * {@link de.upb.crc901.configurationsetting.util.PartialOrderedSet#clear()}
 	 * .
 	 */
-	@Test
+	@ShortTest
 	public void testClear() {
 		this.set.clear();
 		assertTrue("Even after clear the set wasn't empty.", this.set.isEmpty());
@@ -88,7 +86,7 @@ public class PartialOrderedSetTest {
 	 * {@link de.upb.crc901.configurationsetting.util.PartialOrderedSet#addABeforeB(java.lang.Object, java.lang.Object)}
 	 * .
 	 */
-	@Test
+	@ShortTest
 	public void testAddABeforeB() {
 		Assertions.assertThrows(IllegalStateException.class, () -> {
 			String e = "e";
@@ -109,7 +107,7 @@ public class PartialOrderedSetTest {
 	 * {@link de.upb.crc901.configurationsetting.util.PartialOrderedSet#allowsABeforeB(java.lang.Object, java.lang.Object)}
 	 * .
 	 */
-	@Test
+	@ShortTest
 	public void testAllowsABeforeB() {
 		assertTrue(this.set.allowsABeforeB(A, B));
 		assertTrue(this.set.allowsABeforeB(A, C));
@@ -130,7 +128,7 @@ public class PartialOrderedSetTest {
 	 * {@link de.upb.crc901.configurationsetting.util.PartialOrderedSet#getTransitiveClosure(java.lang.Object)}
 	 * .
 	 */
-	@Test
+	@ShortTest
 	public void testGetTransitiveClosureE() {
 		assertTrue(this.set.getTransitiveClosure(A).equals(this.transitiveClosureOfA));
 		assertTrue(this.set.getTransitiveClosure(B).equals(this.transitiveClosureOfB));
@@ -143,7 +141,7 @@ public class PartialOrderedSetTest {
 	 * {@link de.upb.crc901.configurationsetting.util.PartialOrderedSet#getTransitiveClosure(java.util.Set)}
 	 * .
 	 */
-	@Test
+	@ShortTest
 	public void testGetTransitiveClosureSetOfE() throws InterruptedException {
 		Set<String> everything = new HashSet<>();
 		everything.add(A);
@@ -176,7 +174,7 @@ public class PartialOrderedSetTest {
 	 * {@link de.upb.crc901.configurationsetting.util.PartialOrderedSet#isReflexive()}
 	 * .
 	 */
-	@Test
+	@ShortTest
 	public void testIsReflexive() {
 		assertFalse("The given set isn't refelxive, but calculation says it is.", this.set.isReflexive());
 	}
@@ -186,7 +184,7 @@ public class PartialOrderedSetTest {
 	 * {@link de.upb.crc901.configurationsetting.util.PartialOrderedSet#removeAll(java.util.Collection)}
 	 * .
 	 */
-	@Test
+	@ShortTest
 	public void testRemoveAllCollectionOfQ() {
 		Set<String> remover = new HashSet<>();
 		remover.add(A);
@@ -207,7 +205,7 @@ public class PartialOrderedSetTest {
 	 * {@link de.upb.crc901.configurationsetting.util.PartialOrderedSet#retainAll(java.util.Collection)}
 	 * .
 	 */
-	@Test
+	@ShortTest
 	public void testRetainAllCollectionOfQ() {
 		Set<String> remainingCollection = new HashSet<>();
 
@@ -235,7 +233,7 @@ public class PartialOrderedSetTest {
 	 * {@link de.upb.crc901.configurationsetting.util.PartialOrderedSet#removeIf(java.util.function.Predicate)}
 	 * .
 	 */
-	@Test
+	@ShortTest
 	public void testRemoveIf() {
 		this.set.removeIf(s -> "c".equals(s));
 		assertFalse("c was removed but contains still says it's in.", this.set.contains("c"));
@@ -248,7 +246,7 @@ public class PartialOrderedSetTest {
 	 * {@link de.upb.crc901.configurationsetting.util.PartialOrderedSet#remove(java.lang.Object)}
 	 * .
 	 */
-	@Test
+	@ShortTest
 	public void testRemoveObject() {
 		this.set.remove(C);
 

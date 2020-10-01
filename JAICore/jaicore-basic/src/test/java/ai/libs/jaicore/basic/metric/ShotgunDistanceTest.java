@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.test.ShortTest;
 
@@ -14,14 +13,13 @@ import ai.libs.jaicore.test.ShortTest;
  *
  * @author fischor
  */
-@ShortTest
 public class ShotgunDistanceTest {
 
 	/**
 	 * Correctness test. Tests the calculation based on an defined input and
 	 * expected output.
 	 */
-	@Test
+	@ShortTest
 	public void testCorrectnessForDistanceCalculation() {
 		// Input.
 		double[] queryTimeSeries = { 1, 1, 2, 2, 3, 5, 3 };
@@ -41,7 +39,7 @@ public class ShotgunDistanceTest {
 	 * Correctness test. Tests the calculation based on an defined input and
 	 * expected output.
 	 */
-	@Test
+	@ShortTest
 	public void testCorrectnessForDistanceCalculation2() {
 		// Input.
 		double[] queryTimeSeries = { 1, 1, 2, 2, 3, 5, 3 };
@@ -63,7 +61,7 @@ public class ShotgunDistanceTest {
 	 * query time series. The result of the distance calculation however, is
 	 * irrelevant (undefined).
 	 */
-	@Test
+	@ShortTest
 	public void testRobustnessForTooLongWindowLength() {
 		// Input.
 		double[] queryTimeSeries = { 1, 2, 3 };
@@ -81,7 +79,7 @@ public class ShotgunDistanceTest {
 	 * sample time series. The result of the distance calculation however, is
 	 * irrelevant (undefined).
 	 */
-	@Test
+	@ShortTest
 	public void testRobustnessForTooLongWindowLength2() {
 		// Input.
 		double[] queryTimeSeries = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
@@ -99,7 +97,7 @@ public class ShotgunDistanceTest {
 	 * time series. The result of the distance calculation however, is irrelevant
 	 * (undefined).
 	 */
-	@Test
+	@ShortTest
 	public void testRobustnessForTooLongWindowLength3() {
 		// Input.
 		double[] queryTimeSeries = { 1, 2, 3 };
@@ -115,7 +113,7 @@ public class ShotgunDistanceTest {
 	 * Robustness test: When initializing with a negative window length, the
 	 * constructor is supposed to throw an IllegalArgumentExpection.
 	 */
-	@Test
+	@ShortTest
 	public void testRobustnessForNegativeWindowLength() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			int windowLength = -1;

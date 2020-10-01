@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.api4.java.common.metric.IDistanceMetric;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.transform.vector.HilbertTransform;
 import ai.libs.jaicore.basic.transform.vector.IVectorTransform;
@@ -17,14 +16,13 @@ import ai.libs.jaicore.test.ShortTest;
  *
  * @author fischor
  */
-@ShortTest
 public class TransformDistanceTest {
 
 	/**
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@Test
+	@ShortTest
 	public void testCorrectnessForDistanceCalculation() {
 		// Input.
 		double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 };
@@ -42,7 +40,7 @@ public class TransformDistanceTest {
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@Test
+	@ShortTest
 	public void testCorrectnessForDistanceCalculation2() {
 		// Input.
 		double[] timeSeries1 = { 1, 2, 3, 4, 5 }; // transform will give [-6.0833, -5.6666667, -4, -0.6666667, 6.41666667]
@@ -64,7 +62,7 @@ public class TransformDistanceTest {
 	 * Robustness test: When initializing with <code>null</code> for the distance
 	 * measure, the constructor is supposed to throw an IllegalArgumentExpection.
 	 */
-	@Test
+	@ShortTest
 	public void testRobustnessForNullDistanceMeasure() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			new TransformDistance(0.5, null);
@@ -75,7 +73,7 @@ public class TransformDistanceTest {
 	 * Robustness test: When initializing with <code>null</code> for the transform
 	 * the constructor is supposed to throw an IllegalArgumentExpection.
 	 */
-	@Test
+	@ShortTest
 	public void testRobustnessForNullTransform() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			new TransformDistance(0.5, null, new EuclideanDistance(), new EuclideanDistance());
@@ -86,7 +84,7 @@ public class TransformDistanceTest {
 	 * Robustness test: When initializing with <code>alpha > pi/2</code> the
 	 * constuctor is supposed to thrown an IllegalArgumentException.
 	 */
-	@Test
+	@ShortTest
 	public void testRobustnessForAlphaGreaterPiHalf() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double alpha = (Math.PI / 2) + 1e4;
@@ -98,7 +96,7 @@ public class TransformDistanceTest {
 	 * Robustness test: When initializing with <code>alpha < 0</code> the constuctor
 	 * is supposed to thrown an IllegalArgumentException.
 	 */
-	@Test
+	@ShortTest
 	public void testRobustnessForAlphaLessThanZero() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double alpha = 0 - Double.MIN_VALUE;
@@ -110,7 +108,7 @@ public class TransformDistanceTest {
 	 * Boundary test: When initializing with <code>alpha = 0</code> the constructor
 	 * is must not thrown an IllegalArgumentException.
 	 */
-	@Test
+	@ShortTest
 	public void testBoundaryForAlphaEqualToZero() {
 		double alpha = 0;
 		new TransformDistance(alpha, new EuclideanDistance());
@@ -121,7 +119,7 @@ public class TransformDistanceTest {
 	 * Boundary test: When initializing with <code>alpha = pi/2</code> the
 	 * constructor is must not thrown an IllegalArgumentException.
 	 */
-	@Test
+	@ShortTest
 	public void testBoundaryForAlphaEqualToPiHalf() {
 		double alpha = Math.PI / 2;
 		new TransformDistance(alpha, new EuclideanDistance());

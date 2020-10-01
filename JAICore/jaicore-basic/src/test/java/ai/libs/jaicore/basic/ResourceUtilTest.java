@@ -9,8 +9,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.junit.jupiter.api.Test;
-
 import ai.libs.jaicore.test.ShortTest;
 
 /**
@@ -18,7 +16,6 @@ import ai.libs.jaicore.test.ShortTest;
  *
  * @author mwever
  */
-@ShortTest
 public class ResourceUtilTest {
 
 	private static final String RESOURCE_FILE_PATH = "ai/libs/jaicore/basic/testrsc/dummy.resource";
@@ -29,7 +26,7 @@ public class ResourceUtilTest {
 	 * @throws FileNotFoundException Thrown if the resource file could not be found.
 	 * @throws IOException Thrown if the resource file could not be read.
 	 */
-	@Test
+	@ShortTest
 	public void testReadResourceToString() throws IOException {
 		String actualContent = ResourceUtil.readResourceFileToString(RESOURCE_FILE_PATH).trim();
 		assertEquals("The content of the read-in resource does not match the expected content", EXPECTED_CONTENT, actualContent);
@@ -38,14 +35,14 @@ public class ResourceUtilTest {
 	/**
 	 * Test to get a resource as a file object.
 	 */
-	@Test
+	@ShortTest
 	public void testGetResourceAsFile() {
 		File resourceFile = ResourceUtil.getResourceAsFile(RESOURCE_FILE_PATH);
 		assertTrue("The file returned for the resource path does not exist", resourceFile.exists());
 		assertTrue("The file returned is not a file but a directory.", !resourceFile.isDirectory());
 	}
 
-	@Test
+	@ShortTest
 	public void test() throws IOException {
 		ResourceFile resFile = ResourceUtil.getResourceAsFile(RESOURCE_FILE_PATH);
 		ResourceFile res2File = new ResourceFile(resFile.getParentFile(), "dummy2.resource");

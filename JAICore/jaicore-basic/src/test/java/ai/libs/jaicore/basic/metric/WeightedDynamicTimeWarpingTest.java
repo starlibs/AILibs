@@ -3,7 +3,6 @@ package ai.libs.jaicore.basic.metric;
 import static org.junit.Assert.assertEquals;
 
 import org.api4.java.common.metric.IScalarDistance;
-import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.test.ShortTest;
 
@@ -13,14 +12,13 @@ import ai.libs.jaicore.test.ShortTest;
  *
  * @author fischor
  */
-@ShortTest
 public class WeightedDynamicTimeWarpingTest {
 
 	/**
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@Test
+	@ShortTest
 	public void testCorrectnessForDistanceCalculation() {
 		// Input.
 		double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 };

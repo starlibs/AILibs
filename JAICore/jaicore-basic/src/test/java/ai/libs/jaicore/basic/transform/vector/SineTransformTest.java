@@ -2,7 +2,6 @@ package ai.libs.jaicore.basic.transform.vector;
 
 import static org.junit.Assert.assertArrayEquals;
 
-import org.junit.jupiter.api.Test;
 import ai.libs.jaicore.test.ShortTest;
 
 /**
@@ -10,10 +9,9 @@ import ai.libs.jaicore.test.ShortTest;
  *
  * @author fischor
  */
-@ShortTest
 public class SineTransformTest {
 
-	@Test
+	@ShortTest
 	public void testCorrectnessForTransformation() {
 		// Input.
 		double[] timeSeries = { 1, 2, 3, 4, 5 };

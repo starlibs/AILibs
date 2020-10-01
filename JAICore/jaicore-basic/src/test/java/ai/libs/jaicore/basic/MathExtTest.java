@@ -2,14 +2,11 @@ package ai.libs.jaicore.basic;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.jupiter.api.Test;
-
 import ai.libs.jaicore.test.ShortTest;
 
-@ShortTest
 public class MathExtTest {
 
-	@Test
+	@ShortTest
 	public void testLogBase() {
 		assertEquals(3.0, MathExt.logBase(8.0, 2.0), 1E-8);
 		assertEquals(3.0, MathExt.logBase(27.0, 3.0), 1E-8);

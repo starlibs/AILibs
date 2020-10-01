@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class HOMERLeafTest {
@@ -13,7 +13,7 @@ public class HOMERLeafTest {
 	private static final int LABEL_INDEX = 1;
 	private static HOMERLeaf leaf;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() {
 		leaf = new HOMERLeaf(LABEL_INDEX);
 	}

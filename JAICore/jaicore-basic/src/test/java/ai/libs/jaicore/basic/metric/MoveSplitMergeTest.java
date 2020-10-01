@@ -2,8 +2,6 @@ package ai.libs.jaicore.basic.metric;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.jupiter.api.Test;
-
 import ai.libs.jaicore.test.ShortTest;
 
 /**
@@ -12,14 +10,13 @@ import ai.libs.jaicore.test.ShortTest;
  *
  * @author fischor
  */
-@ShortTest
 public class MoveSplitMergeTest {
 
 	/**
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@Test
+	@ShortTest
 	public void testCorrectnessForDistanceCalculation() {
 		// Input.
 		double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 };
@@ -37,7 +34,7 @@ public class MoveSplitMergeTest {
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@Test
+	@ShortTest
 	public void testCorrectnessForDistanceCalculation2() {
 		// Input.
 		double[] timeSeries1 = { 7.0, 8.0, 12.0, 15.0, 9.0, 3.0, 5.0 };
