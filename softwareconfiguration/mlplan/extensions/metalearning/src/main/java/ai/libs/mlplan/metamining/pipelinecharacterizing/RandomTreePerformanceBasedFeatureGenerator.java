@@ -7,8 +7,8 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.common.math.IVector;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.AccessibleRandomTree;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.AccessibleRandomTree.AccessibleTree;
+import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.trees.AccessibleRandomTree;
+import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.trees.AccessibleRandomTree.AccessibleTree;
 import weka.classifiers.trees.RandomTree;
 import weka.core.Instances;
 

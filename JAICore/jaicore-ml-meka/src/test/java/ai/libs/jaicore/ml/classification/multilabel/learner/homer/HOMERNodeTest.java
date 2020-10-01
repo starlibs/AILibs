@@ -45,7 +45,7 @@ public class HOMERNodeTest {
 
 	@ShortTest
 	public void testFitting() throws Exception {
-		Instances data = new Instances(new FileReader(new File("../../../datasets/classification/multi-label/flags.arff")));
+		Instances data = new Instances(new FileReader(new File("testrsc/flags.arff")));
 		MLUtils.prepareData(data);
 
 		List<IWekaInstances> split = WekaUtil.realizeSplit(new WekaInstances(data), WekaUtil.getArbitrarySplit(new WekaInstances(data), new Random(42), .7));

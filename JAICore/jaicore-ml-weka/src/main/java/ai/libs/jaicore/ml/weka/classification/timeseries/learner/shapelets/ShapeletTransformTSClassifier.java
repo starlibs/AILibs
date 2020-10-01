@@ -15,7 +15,7 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.FStat;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.IQualityMeasure;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.Shapelet;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.search.AMinimumDistanceSearchStrategy;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaTimeseriesUtil;
+import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.util.WekaTimeseriesUtil;
 import ai.libs.jaicore.ml.weka.classification.timeseries.learner.shapelets.ShapeletTransformLearningAlgorithm.IShapeletTransformLearningAlgorithmConfig;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
