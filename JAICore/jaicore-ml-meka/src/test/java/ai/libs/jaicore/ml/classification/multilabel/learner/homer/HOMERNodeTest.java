@@ -11,11 +11,11 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
+import ai.libs.jaicore.test.ShortTest;
 import meka.core.MLUtils;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -33,17 +33,17 @@ public class HOMERNodeTest {
 		node = new HOMERNode(new HOMERNode(l1, l2), l5, l7);
 	}
 
-	@Test
+	@ShortTest
 	public void testToString() {
 		assertEquals("J48(J48(1,2),5,7)", node.toString(), "toString is not giving the correct result.");
 	}
 
-	@Test
+	@ShortTest
 	public void testGetLabels() {
 		assertTrue(node.getLabels().containsAll(Arrays.asList(1, 2, 5)), "Node does not contain all labels");
 	}
 
-	@Test
+	@ShortTest
 	public void testFitting() throws Exception {
 		Instances data = new Instances(new FileReader(new File("../../../datasets/classification/multi-label/flags.arff")));
 		MLUtils.prepareData(data);

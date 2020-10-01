@@ -9,12 +9,11 @@ import java.util.List;
 
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassificationPredictionBatch;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.multilabel.dataset.IMekaInstances;
 import ai.libs.jaicore.ml.classification.multilabel.dataset.MekaInstances;
 import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
-import ai.libs.jaicore.test.MediumTest;
+import ai.libs.jaicore.test.ShortTest;
 import meka.classifiers.multilabel.BR;
 import meka.classifiers.multilabel.Evaluation;
 import meka.core.MLUtils;
@@ -37,7 +36,7 @@ public class MekaClassifierTest {
 		splitterSplit = RandomHoldoutSplitter.createSplit(dataset, 42, .7);
 	}
 
-	@Test
+	@ShortTest
 	public void testFitAndPredictWithWekaInstnaces() throws Exception {
 		BR br = new BR();
 		br.buildClassifier(new Instances(wekaInstances));
@@ -53,8 +52,7 @@ public class MekaClassifierTest {
 		}
 	}
 
-	@MediumTest
-	@Test
+	@ShortTest
 	public void testFitAndPredictWithHoldoutSplitter() throws Exception {
 		BR br = new BR();
 		br.buildClassifier(splitterSplit.get(0).getInstances());

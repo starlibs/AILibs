@@ -6,7 +6,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+
+import ai.libs.jaicore.test.ShortTest;
 
 public class HOMERLeafTest {
 
@@ -18,7 +19,7 @@ public class HOMERLeafTest {
 		leaf = new HOMERLeaf(LABEL_INDEX);
 	}
 
-	@Test
+	@ShortTest
 	public void testGetLabels() {
 		Collection<Integer> col = leaf.getLabels();
 		assertEquals("Size must be 1", 1, col.size());
