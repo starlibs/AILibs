@@ -34,6 +34,7 @@ env:
   - TEST_PROJECT=:JAICore:jaicore-ml-weka
   - TEST_PROJECT=:JAICore:jaicore-planning
   - TEST_PROJECT=:JAICore:jaicore-processes
+  - TEST_PROJECT=:JAICore:jaicore-search
   - TEST_PROJECT=:mlplan-core
   - TEST_PROJECT=:mlplan-ext-reduction
 
@@ -56,10 +57,6 @@ script:
 # Assign jobs to stages. The test jobs defined above are implicitly assigned to the test stage: https://docs.travis-ci.com/user/build-stages/#naming-your-build-stages
 jobs:
   include:
-    - stage: test
-    	- env: TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testAllButMCTS
-	- env: TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testMCTS
-	  
     - stage: check_build
       env: 
         jobs:
