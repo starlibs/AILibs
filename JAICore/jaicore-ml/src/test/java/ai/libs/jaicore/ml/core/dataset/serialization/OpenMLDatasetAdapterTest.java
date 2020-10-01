@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
@@ -32,7 +33,6 @@ import ai.libs.jaicore.ml.core.dataset.DatasetTestUtil;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 import ai.libs.jaicore.test.MediumParameterizedTest;
-import ai.libs.jaicore.test.MediumTest;
 
 public class OpenMLDatasetAdapterTest {
 	protected Logger logger = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER);
@@ -90,7 +90,7 @@ public class OpenMLDatasetAdapterTest {
 				38, // sick
 				39, // ecoli
 				44, // spambase
-				46, // splice
+				// /* */ 46 // splice => contains ignore attribute which we cannot deal with yet.
 				57, // hypothyroid
 				60, // waveform-5000
 				61, // iris
@@ -123,7 +123,7 @@ public class OpenMLDatasetAdapterTest {
 				4136, // dexter
 				4137, // dorothea
 				23512, // higgs
-				// 40594, // Reuters => Multi target
+				// /**/ 40594, // Reuters => Multi target
 				40668, // connect-4
 				40691, // wine-quality-red
 				40927, // CIFAR-10
@@ -131,7 +131,7 @@ public class OpenMLDatasetAdapterTest {
 				41064, // convex
 				41065, // mnist rotation
 				41066 // secom
-		// 42123 // articleinfluence => string attribute
+		// /**/ 42123 // articleinfluence => string attribute
 		));
 
 	}
@@ -150,6 +150,8 @@ public class OpenMLDatasetAdapterTest {
 	public ILabeledDataset<ILabeledInstance> read(final int id, final int expectedInstances, final int expectedAttributes, final int expectedClasses) throws DatasetDeserializationFailedException, InterruptedException {
 		this.logger.debug("Reading in dataset with id {}", id);
 		ILabeledDataset<ILabeledInstance> data = OpenMLDatasetReader.deserializeDataset(id);
+		System.out.println(data.getInstanceSchema().getAttributeList().stream().map(x -> x.getName() + "\n").collect(Collectors.joining()));
+
 		this.logger.debug("Dataset read, now checking general properties.");
 		assertEquals("Incorrect number of instances.", expectedInstances, data.size());
 		assertEquals("Incorrect number of attributes.", expectedAttributes, data.getNumAttributes());

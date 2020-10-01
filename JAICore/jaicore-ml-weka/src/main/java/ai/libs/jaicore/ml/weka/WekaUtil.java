@@ -106,6 +106,32 @@ public class WekaUtil {
 		return classifiers;
 	}
 
+	public static Collection<String> getBasicClassifiers() {
+		Collection<String> classifiers = new ArrayList<>();
+
+		classifiers.add("weka.classifiers.bayes.BayesNet");
+		classifiers.add("weka.classifiers.bayes.NaiveBayes");
+		classifiers.add("weka.classifiers.bayes.NaiveBayesMultinomial");
+		classifiers.add("weka.classifiers.functions.Logistic");
+		classifiers.add("weka.classifiers.functions.MultilayerPerceptron");
+		classifiers.add("weka.classifiers.functions.SimpleLogistic");
+		classifiers.add("weka.classifiers.functions.SMO");
+		classifiers.add("weka.classifiers.lazy.IBk");
+		classifiers.add("weka.classifiers.lazy.KStar");
+		classifiers.add("weka.classifiers.rules.DecisionTable");
+		classifiers.add("weka.classifiers.rules.JRip");
+		classifiers.add("weka.classifiers.rules.OneR");
+		classifiers.add("weka.classifiers.rules.PART");
+		classifiers.add("weka.classifiers.rules.ZeroR");
+		classifiers.add("weka.classifiers.trees.DecisionStump");
+		classifiers.add("weka.classifiers.trees.J48");
+		classifiers.add("weka.classifiers.trees.LMT");
+		classifiers.add("weka.classifiers.trees.RandomForest");
+		classifiers.add("weka.classifiers.trees.RandomTree");
+		classifiers.add("weka.classifiers.trees.REPTree");
+		return classifiers;
+	}
+
 	public static Collection<String> getNativeMultiClassClassifiers() {
 		Collection<String> classifiers = new ArrayList<>();
 

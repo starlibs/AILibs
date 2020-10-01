@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Random;
 
 import org.api4.java.ai.ml.core.exception.TrainingException;
-import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.primitives.Pair;
@@ -16,7 +15,7 @@ import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IPLNetDyadRankerConfigu
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.PLNetDyadRanker;
 import ai.libs.jaicore.ml.ranking.dyad.learner.zeroshot.inputoptimization.NegIdentityInpOptLoss;
 import ai.libs.jaicore.ml.ranking.dyad.learner.zeroshot.inputoptimization.PLNetInputOptimizer;
-import ai.libs.jaicore.test.MediumTest;
+import ai.libs.jaicore.test.LongTest;
 
 /**
  * Tests input optimizer on a PLNet trained on synthetic data set
@@ -27,8 +26,7 @@ import ai.libs.jaicore.test.MediumTest;
  */
 public class InputOptimizerTest {
 
-	@Test
-	@MediumTest
+	@LongTest
 	public void testPLNetInputOptimizer() throws TrainingException, InterruptedException {
 
 		PLNetDyadRanker testnet = new PLNetDyadRanker();

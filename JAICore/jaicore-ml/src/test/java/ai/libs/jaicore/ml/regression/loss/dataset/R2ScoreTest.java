@@ -7,11 +7,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.jupiter.api.Test;
+import ai.libs.jaicore.test.ShortTest;
 
 public class R2ScoreTest extends ARegressionLossTest {
 
-	@Test
+	@ShortTest
 	public void testScore() {
 		List<Double> expected = Arrays.asList(2.0, 4.0, 5.0, 4.0, 5.0);
 		List<Double> predicted = Arrays.asList(2.8, 3.4, 4.0, 4.6, 5.2);
@@ -19,7 +19,7 @@ public class R2ScoreTest extends ARegressionLossTest {
 		assertEquals("R2Score does not return the expected value.", 0.6, score.score(expected, this.toPredictions(predicted)), 1E-8);
 	}
 
-	@Test
+	@ShortTest
 	public void testRandomNumbers() {
 		R2 score = new R2();
 		Random r = new Random();

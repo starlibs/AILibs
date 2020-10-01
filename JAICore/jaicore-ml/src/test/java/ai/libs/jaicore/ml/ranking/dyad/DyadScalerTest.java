@@ -11,7 +11,6 @@ import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import org.api4.java.common.math.IVector;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DenseDyadRankingInstance;
@@ -21,6 +20,7 @@ import ai.libs.jaicore.ml.ranking.dyad.learner.util.AbstractDyadScaler;
 import ai.libs.jaicore.ml.ranking.dyad.learner.util.DyadMinMaxScaler;
 import ai.libs.jaicore.ml.ranking.dyad.learner.util.DyadStandardScaler;
 import ai.libs.jaicore.ml.ranking.dyad.learner.util.DyadUnitIntervalScaler;
+import ai.libs.jaicore.test.ShortTest;
 
 /**
  * Tests our basic scalers.
@@ -101,7 +101,7 @@ public class DyadScalerTest {
 		this.expectedMinMaxResultY = new double[] { minmaxAlt, minmaxAlt, minmaxAlt, minmaxAlt };
 	}
 
-	@Test
+	@ShortTest
 	public void testStandardScaler() {
 		this.setupDataset();
 		System.out.println("Testing DyadStandardScaler...");
@@ -121,7 +121,7 @@ public class DyadScalerTest {
 		}
 	}
 
-	@Test
+	@ShortTest
 	public void testUnitIntervalScaler() {
 		this.setupDataset();
 		System.out.println("Testing UnitIntervalScaler...");
@@ -141,7 +141,7 @@ public class DyadScalerTest {
 		}
 	}
 
-	@Test
+	@ShortTest
 	public void testMinMaxScaler() {
 		this.setupDataset();
 		System.out.println("Testing MinMaxScaler...");

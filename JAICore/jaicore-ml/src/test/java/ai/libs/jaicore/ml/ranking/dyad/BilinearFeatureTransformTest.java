@@ -4,12 +4,12 @@ import static org.junit.Assert.assertEquals;
 
 import org.api4.java.common.math.IVector;
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.ranking.dyad.general.DyadSupplier;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.featuretransform.BiliniearFeatureTransform;
+import ai.libs.jaicore.test.ShortTest;
 
 /**
  * Class for testing the functionality of
@@ -23,7 +23,7 @@ public class BilinearFeatureTransformTest {
 	 * Tests if the bilinear feature transformation yields a vector of the correct
 	 * length.
 	 */
-	@Test
+	@ShortTest
 	public void testLengthOfVectorTransform() {
 		System.out.println("Testing the length of the result of the Bilinear Feature Transform");
 		Dyad dyad = DyadSupplier.getRandomDyad(4, 5);
@@ -37,7 +37,7 @@ public class BilinearFeatureTransformTest {
 	 * Tests if the transform method generates the correct values for a small
 	 * example.
 	 */
-	@Test
+	@ShortTest
 	public void testTransform() {
 		System.out.println("Testing the soundness of the Bilinear Feature Transform.");
 		/**

@@ -16,6 +16,7 @@ import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import org.api4.java.common.math.IVector;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -55,6 +56,7 @@ public class DyadRankerMetaminingTest {
 	// seed for shuffling the dataset
 	private static final long seed = 15;
 
+	@Disabled
 	@ParameterizedTest
 	@MethodSource("supplyDyadRankers")
 	public void test(final IPLDyadRanker ranker) throws InterruptedException, TrainingException, PredictionException, FileNotFoundException {
@@ -76,7 +78,6 @@ public class DyadRankerMetaminingTest {
 
 		// trainData = randomlyTrimSparseDyadRankingInstances(trainData, 2);
 		// testData = randomlyTrimSparseDyadRankingInstances(testData, 5);
-
 
 		// train the ranker
 		ranker.fit(trainData);

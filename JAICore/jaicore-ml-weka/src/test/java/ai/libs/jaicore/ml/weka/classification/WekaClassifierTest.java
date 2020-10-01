@@ -8,7 +8,6 @@ import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelCla
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.algorithm.IAlgorithm;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -21,14 +20,13 @@ import ai.libs.jaicore.ml.weka.classification.learner.WekaLearningAlgorithm;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.test.MediumParameterizedTest;
-import ai.libs.jaicore.test.MediumTest;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 
 public class WekaClassifierTest extends GeneralAlgorithmTester {
 
 	public static Stream<Arguments> getProblemSets() {
-		return WekaUtil.getBasicLearners().stream().map(l -> Arguments.of(new WekaClassifierProblemSet(l)));
+		return WekaUtil.getBasicClassifiers().stream().map(l -> Arguments.of(new WekaClassifierProblemSet(l)));
 	}
 
 	@MediumParameterizedTest
@@ -54,10 +52,10 @@ public class WekaClassifierTest extends GeneralAlgorithmTester {
 
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(final Object problem) throws AlgorithmCreationException {
-		Pair<String, ILabeledDataset<ILabeledInstance>> cProblem = (Pair<String, ILabeledDataset<ILabeledInstance>>)problem;
+		Pair<String, ILabeledDataset<ILabeledInstance>> cProblem = (Pair<String, ILabeledDataset<ILabeledInstance>>) problem;
 		try {
 			return new WekaLearningAlgorithm(Class.forName(cProblem.getX()), cProblem.getY());
-		} catch (ClassNotFoundException e)  {
+		} catch (ClassNotFoundException e) {
 			throw new AlgorithmCreationException(e);
 		}
 	}

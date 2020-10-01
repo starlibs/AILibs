@@ -10,6 +10,7 @@ import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.ranking.IRanking;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.common.math.IVector;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -55,6 +56,7 @@ public class SimpleDyadDatasetDyadRankerTester {
 		ranker.fit(this.supplySimpleDataset());
 	}
 
+	@Disabled
 	@ParameterizedTest
 	@MethodSource("supplyDyadRankers")
 	public void testSwapOrdering0(final IDyadRanker ranker) throws PredictionException, InterruptedException, TrainingException {
@@ -68,6 +70,7 @@ public class SimpleDyadDatasetDyadRankerTester {
 		assertEquals(new double[] { 0.0 }, predict.get(1).getAlternative().asArray());
 	}
 
+	@Disabled
 	@ParameterizedTest
 	@MethodSource("supplyDyadRankers")
 	public void testSwapOrdering1(final IDyadRanker ranker) throws PredictionException, InterruptedException, TrainingException {
