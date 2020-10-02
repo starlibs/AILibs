@@ -23,7 +23,7 @@ env:
 #  - TEST_PROJECT=:hasco-core
 #  - TEST_PROJECT=:hasco-fanova
 #  - TEST_PROJECT=:JAICore:jaicore-algorithminspector
-#  - TEST_PROJECT=:JAICore:jaicore-basic
+  - TEST_PROJECT=:JAICore:jaicore-basic
   - TEST_PROJECT=:JAICore:jaicore-components
 #  - TEST_PROJECT=:JAICore:jaicore-ea
 #  - TEST_PROJECT=:JAICore:jaicore-experiments
