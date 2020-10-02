@@ -73,7 +73,7 @@ jobs:
         - ./gradlew testClasses
         - git fetch --no-tags --unshallow https://github.com/fmohr/AILibs.git +master:refs/heads/master
         - git fetch --no-tags https://github.com/fmohr/AILibs.git +dev:refs/heads/dev
-        #- ./gradlew sonarqube -x test
+        - ./gradlew sonarqube -x test
 
 # configures the *order* of the stages. See https://docs.travis-ci.com/user/build-stages/
 stages:
