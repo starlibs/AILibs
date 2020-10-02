@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Conducting tests for branch $TRAVIS_BRANCH, project ${TEST_PROJECT}, and task $TEST_TASK"
+echo "Conducting tests for branch $TRAVIS_BRANCH, project $TEST_PROJECT, and task $TEST_TASK"
 
 if [[ -z "${TEST_TASK}" ]]; then
 	if [[ "$TRAVIS_BRANCH" == "master" ]]; then
@@ -17,6 +17,12 @@ if [[ -z "${TEST_TASK}" ]]; then
 	fi
 else
 	echo "A test task is already defined. We use this indepedent of the branch."
+	if [[ ${TEST_TASK} == "testInterruptibility" ||  ${TEST_TASK} == "testCancelability" ||  ${TEST_TASK} == "testTimeoutability" ||  ${TEST_TASK} == "testInterruptibilityMCTS" ||  ${TEST_TASK} == "testInterruptibilityDefault" ]]; then
+		if [[ ${TRAVIS_BRANCH} != "master" && ${TRAVIS_BRANCH} != "dev" ]]; then
+			echo "Skipping time intense tests for branch build."
+			exit 0
+		fi
+	fi
 fi
 
 echo "Test task is: ${TEST_TASK}"
