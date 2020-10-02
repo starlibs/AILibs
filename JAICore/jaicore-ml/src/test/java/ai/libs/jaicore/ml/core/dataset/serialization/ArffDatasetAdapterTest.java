@@ -20,6 +20,7 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IObjectAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.junit.Test;
 
 import ai.libs.jaicore.basic.kvstore.KVStore;
 import ai.libs.jaicore.basic.sets.SetUtil;
@@ -183,6 +184,7 @@ public class ArffDatasetAdapterTest {
 		this.testReadingDatasetFromFile(new File("testrsc/dataset/arff/krvskp.arff"));
 	}
 
+	@Test
 	@LongTest
 	public void testReadingSingleLabelSparseDatasetFromFile() throws DatasetDeserializationFailedException, InterruptedException {
 		this.testReadingDatasetFromFile(new File("testrsc/dataset/arff/dexter.arff"));

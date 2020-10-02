@@ -20,6 +20,7 @@ import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
 import org.api4.java.ai.ml.regression.evaluation.IRegressionPrediction;
 import org.api4.java.ai.ml.regression.evaluation.IRegressionResultBatch;
+import org.junit.Test;
 import org.junit.jupiter.api.Disabled;
 
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
@@ -48,6 +49,7 @@ public class ScikitLearnWrapperTest {
 	private static final String OWN_CLASSIFIER_DUMP = BASE_TESTRSC_PATH + "0532052678.arff";
 	private static final String IMPORT_FOLDER = BASE_TESTRSC_PATH + "importfolder_test";
 
+	@Test
 	@LongTest
 	public void fitRegression() throws Exception {
 		ScikitLearnWrapper<IRegressionPrediction, IRegressionResultBatch> slw = new ScikitLearnWrapper<>("LinearRegression()", "from sklearn.linear_model import LinearRegression", EScikitLearnProblemType.REGRESSION);
@@ -57,6 +59,7 @@ public class ScikitLearnWrapperTest {
 		assertTrue(slw.getModelPath().exists());
 	}
 
+	@Test
 	@LongTest
 	public void fitAndPredict() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.ensemble");
@@ -75,6 +78,7 @@ public class ScikitLearnWrapperTest {
 	}
 
 	@Disabled("Currently multi-target is not supported anymore.")
+	@Test
 	@LongTest
 	public void fitRegressionMultitarget() throws Exception {
 		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor(activation='logistic')", "from sklearn.neural_network import MLPRegressor",
@@ -89,6 +93,7 @@ public class ScikitLearnWrapperTest {
 	}
 
 	@Disabled("Currently multi-target is not supported anymore.")
+	@Test
 	@LongTest
 	public void trainAndTestClassifierRegressionMultitarget() throws Exception {
 		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EScikitLearnProblemType.CLASSIFICATION);
@@ -104,6 +109,7 @@ public class ScikitLearnWrapperTest {
 	}
 
 	@Disabled("Currently unsupported feature")
+	@Test
 	@LongTest
 	public void testClassifierRegression() throws Exception {
 		ScikitLearnWrapper<IRegressionPrediction, IRegressionResultBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EScikitLearnProblemType.REGRESSION);
@@ -113,6 +119,7 @@ public class ScikitLearnWrapperTest {
 		assertEquals("Unequal length of predictions and number of test ILabeledDataset<ILabeledInstance>", result.getNumPredictions(), datasetTest.size());
 	}
 
+	@Test
 	@LongTest
 	public void trainClassifierCategorical() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.pipeline", "sklearn.decomposition", "sklearn.ensemble");
@@ -124,6 +131,7 @@ public class ScikitLearnWrapperTest {
 		assertTrue(slw.getModelPath().exists());
 	}
 
+	@Test
 	@LongTest
 	public void trainAndTestClassifierCategorical() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.pipeline", "sklearn.decomposition", "sklearn.ensemble");
@@ -136,6 +144,7 @@ public class ScikitLearnWrapperTest {
 		assertEquals("Unequal length of predictions and number of test ILabeledDataset<ILabeledInstance>", result.getNumPredictions(), datasetTest.size());
 	}
 
+	@Test
 	@Disabled("Currently unsupported feature.")
 	@LongTest
 	public void testClassifierCategorical() throws Exception {
@@ -148,6 +157,7 @@ public class ScikitLearnWrapperTest {
 		assertEquals("Unequal length of predictions and number of test ILabeledDataset<ILabeledInstance>", result.getNumPredictions(), datasetTest.size());
 	}
 
+	@Test
 	@LongTest
 	public void getRawOutput() throws Exception {
 		ScikitLearnWrapper<IRegressionPrediction, IRegressionResultBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EScikitLearnProblemType.REGRESSION);
@@ -161,6 +171,7 @@ public class ScikitLearnWrapperTest {
 		assertTrue(slw.getModelPath().exists());
 	}
 
+	@Test
 	@Disabled("Currently unsupported feature")
 	@LongTest
 	public void loadOwnClassifierFromFileWithNamespace() throws Exception {
@@ -176,6 +187,7 @@ public class ScikitLearnWrapperTest {
 		assertTrue(slw.getModelPath().exists());
 	}
 
+	@Test
 	@Disabled("Currently multi-target is not supported anymore.")
 	@LongTest
 	public void loadOwnClassifierFromFileWithoutNamespace() throws Exception {
@@ -190,6 +202,7 @@ public class ScikitLearnWrapperTest {
 		assertTrue(slw.getModelPath().exists());
 	}
 
+	@Test
 	@LongTest
 	public void invalidConstructorNoConstructionCall() throws IOException {
 		assertThrows(AssertionError.class, () -> {
@@ -197,6 +210,7 @@ public class ScikitLearnWrapperTest {
 		});
 	}
 
+	@Test
 	@LongTest
 	public void invalidConstructorEmptyConstructionCall() throws IOException {
 		assertThrows(AssertionError.class, () -> {

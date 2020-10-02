@@ -98,6 +98,7 @@ public class InterruptTest {
 	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 */
+	@Test
 	@LongTest
 	public void testNestedInterruptDuringExecutionWithOuterSignifiantlyEarlier() throws ExecutionException, InterruptedException {
 
@@ -127,6 +128,7 @@ public class InterruptTest {
 	 * @throws InterruptedException
 	 * @throws AlgorithmTimeoutedException
 	 */
+	@Test
 	@LongTest
 	public void testNestedInterruptDuringExecutionWithOuterSignifiantlyLater() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();
@@ -161,6 +163,7 @@ public class InterruptTest {
 	 * @throws InterruptedException
 	 * @throws AlgorithmTimeoutedException
 	 */
+	@Test
 	@LongTest
 	public void testNestedInterruptDuringExecutionWithOuterAndInnerAtSameTime() throws ExecutionException {
 		this.checkPreconditions();
@@ -192,6 +195,7 @@ public class InterruptTest {
 		}
 	}
 
+	@Test
 	@LongTest
 	public void testTwistedInterruptDuringExecutionWithOuterSignifiantlyEarlier() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();
@@ -225,6 +229,7 @@ public class InterruptTest {
 		}
 	}
 
+	@Test
 	@LongTest
 	public void testTwistedInterruptDuringExecutionWithOuterSignifiantlyLater() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();
@@ -255,6 +260,7 @@ public class InterruptTest {
 		}
 	}
 
+	@Test
 	@LongTest
 	public void testTwistedTrackedInterruptDuringExecutionWithOuterAndInnerAtSameTime() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();

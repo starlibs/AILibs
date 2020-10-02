@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Random;
 
 import org.api4.java.ai.ml.core.exception.TrainingException;
+import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.primitives.Pair;
@@ -26,6 +27,7 @@ import ai.libs.jaicore.test.LongTest;
  */
 public class InputOptimizerTest {
 
+	@Test
 	@LongTest
 	public void testPLNetInputOptimizer() throws TrainingException, InterruptedException {
 

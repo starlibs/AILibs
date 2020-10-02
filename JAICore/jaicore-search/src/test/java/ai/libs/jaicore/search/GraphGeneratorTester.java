@@ -46,7 +46,7 @@ public abstract class GraphGeneratorTester<N, A> extends Tester {
 	}
 
 	@LongTest
-	@ParameterizedTest(name = "Test idempotency on {0} with 10000 iterations")
+	@ParameterizedTest(name = "Test idempotency on {0} with 1000 iterations")
 	@MethodSource("getGraphGenerators")
 	public void testIdempotencyLarge(final String name, final IGraphGenerator<N, A> g) throws Exception {
 		this.testIdempotency(g, 10000);
