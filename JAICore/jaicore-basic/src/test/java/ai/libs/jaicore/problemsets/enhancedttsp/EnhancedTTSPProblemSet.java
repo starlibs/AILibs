@@ -20,7 +20,7 @@ public class EnhancedTTSPProblemSet extends AAlgorithmTestProblemSet<EnhancedTTS
 	}
 
 	private static final int MIN_N = 3;
-	private static final int MAX_N = 6;
+	private static final int MAX_N = 5;
 
 	@Override
 	public EnhancedTTSP getSimpleProblemInputForGeneralTestPurposes() {

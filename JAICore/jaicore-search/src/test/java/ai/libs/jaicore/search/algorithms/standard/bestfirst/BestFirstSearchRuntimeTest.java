@@ -21,7 +21,6 @@ import ai.libs.jaicore.search.exampleproblems.nqueens.NQueensToGraphSearchReduce
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness;
-import ai.libs.jaicore.test.MediumParameterizedTest;
 import ai.libs.jaicore.test.MediumTest;
 
 public class BestFirstSearchRuntimeTest extends Tester{
@@ -36,7 +35,8 @@ public class BestFirstSearchRuntimeTest extends Tester{
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="Measure Runtime for BestFirst on {0}")
 	@MethodSource("getProblemSets")
 	public <N, A> void measureRuntime(final GraphSearchInput<?, ?> problem) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness transformer = new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness();
@@ -52,7 +52,8 @@ public class BestFirstSearchRuntimeTest extends Tester{
 		this.logger.info("Needed {}ms to identify {} solutions. Expanded {}/{} created nodes. This corresponds to {} expansions and {} creations per second.", runtime, bf.getSolutionQueue().size(), bf.getExpandedCounter(), bf.getCreatedCounter(), expansionsPerSecond, creationsPerSecond);
 	}
 
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="Measure Runtime for DFS on {0}")
 	@MethodSource("getProblemSets")
 	public void measureRuntimeForDFS(final GraphSearchInput<?, ?> problem) throws InterruptedException {
 		TinyDepthFirstSearch<?, ?> dfs = new TinyDepthFirstSearch<>(problem);

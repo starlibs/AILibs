@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.awaitility.Awaitility;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +61,7 @@ public class InterruptTest {
 		assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty(), "There are still active tasks of some previous test!!");
 	}
 
+	@Test
 	@MediumTest
 	public void testSimpleInterruptDuringExecution() throws ExecutionException, InterruptedException {
 		for (int i = 0; i < NUMBER_ITERATIONS_SIMPLE; i++) {
@@ -77,6 +79,7 @@ public class InterruptTest {
 		}
 	}
 
+	@Test
 	@MediumTest
 	public void testThatNoInterruptIsFiredIfExecutionFinishesInTime() throws AlgorithmTimeoutedException, ExecutionException, InterruptedException {
 		for (int i = 0; i < NUMBER_ITERATIONS_SIMPLE; i++) {

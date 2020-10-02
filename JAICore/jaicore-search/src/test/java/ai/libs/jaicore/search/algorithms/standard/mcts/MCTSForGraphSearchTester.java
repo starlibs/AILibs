@@ -8,6 +8,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
@@ -16,7 +17,7 @@ import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
 import ai.libs.jaicore.search.model.other.AgnosticPathEvaluator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
-import ai.libs.jaicore.test.MediumParameterizedTest;
+import ai.libs.jaicore.test.MediumTest;
 
 @Tag("mcts")
 public abstract class MCTSForGraphSearchTester extends GraphSearchSolutionIteratorTester {
@@ -32,7 +33,8 @@ public abstract class MCTSForGraphSearchTester extends GraphSearchSolutionIterat
 	}
 
 	@Override
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="Single-Thread test for completeness of event emitter on {0}")
 	@MethodSource("getProblemSets") // this is the important difference, because MCTS takes longer to produce all paths!
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall(final IAlgorithmTestProblemSet<Object> problemSet)
 			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
@@ -40,7 +42,8 @@ public abstract class MCTSForGraphSearchTester extends GraphSearchSolutionIterat
 	}
 
 	@Override
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="Multi-Thread test for completeness of event emitter on {0}")
 	@MethodSource("getProblemSets") // this is the important difference, because MCTS takes longer to produce all paths!
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall(final IAlgorithmTestProblemSet<Object> problemSet)
 			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
@@ -48,7 +51,8 @@ public abstract class MCTSForGraphSearchTester extends GraphSearchSolutionIterat
 	}
 
 	@Override
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="Single-Thread test for completeness of iterator on {0}")
 	@MethodSource("getProblemSets")
 	public void testThatIteratorReturnsEachPossibleSolution(final IAlgorithmTestProblemSet<Object> problemSet)
 			throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException {
@@ -56,7 +60,8 @@ public abstract class MCTSForGraphSearchTester extends GraphSearchSolutionIterat
 	}
 
 	@Override
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="Multi-Thread test for completeness of iterator on {0}")
 	@MethodSource("getProblemSets")
 	public void testThatIteratorReturnsEachPossibleSolutionWithParallelization(final IAlgorithmTestProblemSet<Object> problemSet)
 			throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException {

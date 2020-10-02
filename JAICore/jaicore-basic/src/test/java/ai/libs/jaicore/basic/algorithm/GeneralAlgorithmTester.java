@@ -25,6 +25,7 @@ import org.api4.java.algorithm.exceptions.ExceptionInAlgorithmIterationException
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.eventbus.Subscribe;
@@ -35,8 +36,7 @@ import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.concurrent.ThreadGroupObserver;
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.logging.LoggerUtil;
-import ai.libs.jaicore.test.LongParameterizedTest;
-import ai.libs.jaicore.test.MediumParameterizedTest;
+import ai.libs.jaicore.test.MediumTest;
 
 /**
  * A class to test any type of algorithm.
@@ -61,7 +61,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 		GlobalTimer.getInstance(); // this is to avoid that the timeout timer is spawned as a thread of a specific group
 	}
 
-	@LongParameterizedTest
+	@ParameterizedTest(name="Single-Threaded check on start and finish event via event bus on {0}")
 	@MethodSource("getProblemSets")
 	public void testStartAndFinishEventEmissionSequentially(final IAlgorithmTestProblemSet<?> problemSet)
 			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException, AlgorithmTestProblemSetCreationException {
@@ -81,7 +81,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 		this.checkPreconditionForTest(problemSet);
 	}
 
-	@LongParameterizedTest
+	@ParameterizedTest(name="Multi-Threaded check on start and finish event via event bus on {0}")
 	@MethodSource("getProblemSets")
 	public void testStartAndFinishEventEmissionProtocolParallelly(final IAlgorithmTestProblemSet<?> problemSet)
 			throws AlgorithmCreationException, AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
@@ -104,7 +104,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 		this.checkPreconditionForTest(problemSet);
 	}
 
-	@LongParameterizedTest
+	@ParameterizedTest(name="Check on start and finish event via iterator on {0}")
 	@MethodSource("getProblemSets")
 	public void testStartAndFinishEventEmissionByIteration(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmCreationException, AlgorithmTestProblemSetCreationException, InterruptedException {
 		this.checkPreconditionForTest(problemSet);
@@ -133,43 +133,48 @@ public abstract class GeneralAlgorithmTester extends Tester {
 		this.checkPreconditionForTest(problemSet);
 	}
 
-	@DisplayName("Test Interrupt")
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="Single-Thread Interrupt test on {0}")
 	@MethodSource("getProblemSets")
 	public void testInterrupt(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
 		this.runInterruptTest(problemSet, false);
 	}
 
 	@DisplayName("Test Interrupt Parallelized")
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="Multi-Thread Interrupt test on {0}")
 	@MethodSource("getProblemSets")
 	public void testInterruptWhenParallelized(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
 		this.runInterruptTest(problemSet, true);
 	}
 
 	@DisplayName("Test Cancel")
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="Single-Thread Cancellation test on {0}")
 	@MethodSource("getProblemSets")
 	public void testCancel(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
 		this.runCancelTest(problemSet, false);
 	}
 
 	@DisplayName("Test Cancel Parallelized")
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="Multi-Thread Cancellation test on {0}")
 	@MethodSource("getProblemSets")
 	public void testCancelWhenParallelized(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
 		this.runCancelTest(problemSet, true);
 	}
 
 	@DisplayName("Test Timeout")
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="Single-Thread Timeout Test on {0}")
 	@MethodSource("getProblemSets")
 	public void testTimeout(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
 		this.runTimeoutTest(problemSet, false);
 	}
 
 	@DisplayName("Test Timeout Parallelized")
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="Multi-Thread Timeout Test on {0}")
 	@MethodSource("getProblemSets")
 	public void testTimeoutWhenParallelized(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
 		this.runTimeoutTest(problemSet, true);
@@ -340,7 +345,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 					AlgorithmExecutionCanceledException ex = (AlgorithmExecutionCanceledException) e.getCause();
 					cancellationExceptionSeen = true;
 					assertTrue(ex.getDelay() <= INTERRUPTION_CLEANUP_TOLERANCE, "The algorithm has sent an AlgorithmExceutionCanceledException, which is correct, but the cancel was triggered with a delay of " + ex.getDelay()
-							+ "ms, which exceeds the allowed time of " + INTERRUPTION_CLEANUP_TOLERANCE + "ms.");
+					+ "ms, which exceeds the allowed time of " + INTERRUPTION_CLEANUP_TOLERANCE + "ms.");
 				} else {
 					throw e;
 				}
@@ -363,7 +368,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 			assertTrue(!threadCountObserverThread.isThreadConstraintViolated(),
 					"The number of threads used during execution reached " + threadCountObserverThread.getMaxObservedThreads() + " while allowed maximum is " + allowedCPUs + ". Observed threads: \n\t- "
 							+ Arrays.asList(threadCountObserverThread.getThreadsAtPointOfViolation() != null ? threadCountObserverThread.getThreadsAtPointOfViolation() : new Thread[0]).stream().map(Thread::getName)
-									.collect(Collectors.joining("\n\t- ")));
+							.collect(Collectors.joining("\n\t- ")));
 		}
 		if (runtime < INTERRUPTION_DELAY - EARLY_TERMINATION_TOLERANCE) {
 			this.logger.warn("Runtime was {}ms and hence less than {}ms, actually should be at least 10 seconds.", runtime, INTERRUPTION_DELAY - EARLY_TERMINATION_TOLERANCE);

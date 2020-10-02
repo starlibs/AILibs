@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
-import ai.libs.jaicore.test.LongParameterizedTest;
 
 public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTester {
 
@@ -155,7 +154,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 				+ "\nFound solutions: \n\t" + foundSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")), stillMissingSolutions.isEmpty());
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name="Single-Thread solution events via bus on {0}")
 	@MethodSource("getProblemSets")
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall(final IAlgorithmTestProblemSet<Object> problemSet)
 			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
@@ -168,7 +167,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		}
 	}
 
-	@LongParameterizedTest
+	@ParameterizedTest(name="Multi-Thread solution events via bus on {0}")
 	@MethodSource("getProblemSets")
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall(final IAlgorithmTestProblemSet<Object> problemSet)
 			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
@@ -181,7 +180,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		}
 	}
 
-	@LongParameterizedTest
+	@ParameterizedTest(name="Single-Thread solution events via iterator on {0}")
 	@MethodSource("getProblemSets")
 	public void testThatIteratorReturnsEachPossibleSolution(final IAlgorithmTestProblemSet<Object> problemSet)
 			throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException {
@@ -194,7 +193,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		}
 	}
 
-	@LongParameterizedTest
+	@ParameterizedTest(name="Single-Thread solution events via iterator on {0}")
 	@MethodSource("getProblemSets")
 	public void testThatIteratorReturnsEachPossibleSolutionWithParallelization(final IAlgorithmTestProblemSet<Object> problemSet)
 			throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException {
