@@ -7,7 +7,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Objects;
+import java.util.stream.Stream;
 
+import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.ml.core.dataset.schema.IInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
@@ -17,10 +20,13 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.db.DBTester;
 import ai.libs.jaicore.db.IDatabaseAdapter;
+import ai.libs.jaicore.db.IDatabaseConfig;
+import ai.libs.jaicore.db.sql.DatabaseAdapterFactory;
 
 @TestMethodOrder(OrderAnnotation.class)
 public class MySQLMapperTest extends DBTester {
@@ -72,5 +78,21 @@ public class MySQLMapperTest extends DBTester {
 
 		/* delete table */
 		adapter.update("DROP TABLE " + TABLE);
+	}
+
+	public static Stream<Arguments> getDatabaseConfigs() throws IOException {
+		/* configure standard DB adapter */
+		IDatabaseConfig configDefault = ConfigFactory.create(IDatabaseConfig.class);
+		configDefault.setProperty(IDatabaseConfig.DB_DRIVER, "mysql");
+		configDefault.setProperty(IDatabaseConfig.DB_HOST, System.getenv(VAR_DB_HOST));
+		configDefault.setProperty(IDatabaseConfig.DB_USER, System.getenv(VAR_DB_USER));
+		configDefault.setProperty(IDatabaseConfig.DB_PASS, System.getenv(VAR_DB_PASS));
+		configDefault.setProperty(IDatabaseConfig.DB_NAME, System.getenv(VAR_DB_DATABASE));
+		configDefault.setProperty(IDatabaseConfig.DB_SSL, "true");
+		Objects.requireNonNull(configDefault.getDBHost(), "The host information read from environment variable " + VAR_DB_HOST + " is NULL!");
+		Objects.requireNonNull(configDefault.getDBUsername(), "The user information read from environment variable " + VAR_DB_USER + " is NULL!");
+		Objects.requireNonNull(configDefault.getDBPassword(), "The password read from environment variable " + VAR_DB_PASS + " is NULL!");
+		Objects.requireNonNull(configDefault.getDBDatabaseName(), "The database name read from environment variable " + VAR_DB_DATABASE + " is NULL!");
+		return Stream.of(Arguments.of(DatabaseAdapterFactory.get(configDefault)));
 	}
 }
