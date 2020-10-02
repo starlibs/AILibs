@@ -66,13 +66,8 @@ public class OpenMLDatasetAdapterTest {
 
 	public static Stream<Arguments> getSmallDatasets() throws IOException, Exception {
 		return readDatasets(Arrays.asList(3, // kr-vs-kp
-				6 // letter
-		));
-
-	}
-
-	public static Stream<Arguments> getBigDatasets() throws IOException, Exception {
-		return readDatasets(Arrays.asList(9, // autos
+				6, // letter
+				9, // autos
 				12, // mfeat-factors
 				14, // mfeat-fourier
 				16, // mfeat-karhunen
@@ -92,17 +87,29 @@ public class OpenMLDatasetAdapterTest {
 				44, // spambase
 				// /* */ 46 // splice => contains ignore attribute which we cannot deal with yet.
 				57, // hypothyroid
-				60, // waveform-5000
+				//				60, // waveform-5000; this dataset has a -0.0 entry and can hence not be recovered appropriately
 				61, // iris
-				149, // CovPokElec
-				155, // pokerhand
 				179, // adult
-				180, // covertype
 				181, // yeast
 				182, // satimage
 				183, // abalone
 				184, // kropt
 				185, // baseball
+				1101, // lymphoma_2classes
+				1104, // leukemia
+				1501, // semeion
+				1515, // micro-mass
+				1590, // adult
+				40691, // wine-quality-red
+				41066 // secom
+				));
+	}
+
+	public static Stream<Arguments> getMediumDatasets() throws IOException, Exception {
+		return readDatasets(Arrays.asList(
+				149, // CovPokElec
+				155, // pokerhand
+				180, // covertype
 				273, // IMDB Drama
 				293, // covertype
 				300, // isolet
@@ -110,30 +117,27 @@ public class OpenMLDatasetAdapterTest {
 				354, // poker
 				554, // MNIST
 				1039, // hiva_agnostic
-				1101, // lymphoma_2classes
-				1104, // leukemia
 				1150, // AP_Breast_Lung
 				1152, // AP_Prostate_Ovary
 				1156, // AP_Omentum_Ovary
 				1240, // AirlinesCodmaAdult
 				1457, // amazon
-				1501, // semeion
-				1515, // micro-mass
-				1590, // adult
 				4136, // dexter
 				4137, // dorothea
 				23512, // higgs
 				// /**/ 40594, // Reuters => Multi target
 				40668, // connect-4
-				40691, // wine-quality-red
-				40927, // CIFAR-10
-				41026, // gisette
 				41064, // convex
-				41065, // mnist rotation
-				41066 // secom
-		// /**/ 42123 // articleinfluence => string attribute
-		));
+				41065 // mnist rotation
+				// /**/ 42123 // articleinfluence => string attribute
+				));
+	}
 
+	public static Stream<Arguments> getBigDatasets() throws IOException, Exception {
+		return readDatasets(Arrays.asList(
+				40927, // CIFAR-10 // this is even TOO big for a 4GB test
+				41026 // gisette // this is even TOO big for a 4GB test
+				));
 	}
 
 	private static int lastCachedId; // this is to detect whether the current dataset hold in dataset fits the current problem set
@@ -166,7 +170,7 @@ public class OpenMLDatasetAdapterTest {
 	}
 
 	@MediumParameterizedTest
-	@MethodSource("getBigDatasets")
+	@MethodSource("getMediumDatasets")
 	public void testReconstructibilityOfStratifiedSplitOnBigDataset(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException, SplitFailedException {
 		this.testReconstructibilityOfStratifiedSplit(problemSet);
 	}
@@ -178,7 +182,7 @@ public class OpenMLDatasetAdapterTest {
 	}
 
 	@MediumParameterizedTest
-	@MethodSource("getBigDatasets")
+	@MethodSource("getMediumDatasets")
 	public void testWriteOnBigDataset(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException {
 		this.testWrite(problemSet);
 	}
@@ -190,7 +194,7 @@ public class OpenMLDatasetAdapterTest {
 	}
 
 	@MediumParameterizedTest
-	@MethodSource("getBigDatasets")
+	@MethodSource("getMediumDatasets")
 	public void testReconstructibilityOnBigDataset(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
 		this.testReconstructibility(problemSet);
 	}

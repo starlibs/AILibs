@@ -110,21 +110,17 @@ public class TempFileHandler implements Closeable {
 	 * @param uuid
 	 *            UUID of the temporary file.
 	 * @return An existing or new file writer for the given temporary file.
+	 * @throws IOException
 	 */
-	public FileWriter getFileWriterForTempFile(final String uuid) {
+	public FileWriter getFileWriterForTempFile(final String uuid) throws IOException {
 		if (this.tempFileWriters.containsKey(uuid)) {
 			return this.tempFileWriters.get(uuid);
 		} else {
-			try {
-				FileWriter writer = new FileWriter(this.tempFiles.get(uuid));
-				this.tempFileWriters.put(uuid, writer);
-				return writer;
-			} catch (IOException e) {
-				this.logger.error(String.format("Cannot create FileWriter for file with UUID %s", uuid), e);
-			}
+			FileWriter writer = new FileWriter(this.tempFiles.get(uuid));
+			this.tempFileWriters.put(uuid, writer);
+			return writer;
 
 		}
-		return null;
 	}
 
 	/***
