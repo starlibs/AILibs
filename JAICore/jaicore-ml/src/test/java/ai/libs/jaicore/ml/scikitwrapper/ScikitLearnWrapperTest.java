@@ -21,7 +21,6 @@ import org.api4.java.ai.ml.core.evaluation.execution.IDatasetSplitSet;
 import org.api4.java.ai.ml.regression.evaluation.IRegressionPrediction;
 import org.api4.java.ai.ml.regression.evaluation.IRegressionResultBatch;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
@@ -29,7 +28,6 @@ import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
 import ai.libs.jaicore.test.LongTest;
-import ai.libs.jaicore.test.MediumTest;
 
 /**
  * REQUIREMENTS: python 3.6.4 + scikit-learn 0.20.0 need to be installed in order to run these tests.
@@ -50,7 +48,7 @@ public class ScikitLearnWrapperTest {
 	private static final String OWN_CLASSIFIER_DUMP = BASE_TESTRSC_PATH + "0532052678.arff";
 	private static final String IMPORT_FOLDER = BASE_TESTRSC_PATH + "importfolder_test";
 
-	@MediumTest
+	@LongTest
 	public void fitRegression() throws Exception {
 		ScikitLearnWrapper<IRegressionPrediction, IRegressionResultBatch> slw = new ScikitLearnWrapper<>("LinearRegression()", "from sklearn.linear_model import LinearRegression", EScikitLearnProblemType.REGRESSION);
 		ILabeledDataset<ILabeledInstance> dataset = this.loadARFF(REGRESSION_ARFF);
@@ -59,7 +57,7 @@ public class ScikitLearnWrapperTest {
 		assertTrue(slw.getModelPath().exists());
 	}
 
-	@MediumTest
+	@LongTest
 	public void fitAndPredict() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.ensemble");
 		String constructInstruction = "sklearn.ensemble.RandomForestClassifier(n_estimators=100)";
@@ -77,8 +75,7 @@ public class ScikitLearnWrapperTest {
 	}
 
 	@Disabled("Currently multi-target is not supported anymore.")
-	@Test
-	@MediumTest
+	@LongTest
 	public void fitRegressionMultitarget() throws Exception {
 		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor(activation='logistic')", "from sklearn.neural_network import MLPRegressor",
 				EScikitLearnProblemType.REGRESSION);
@@ -92,8 +89,7 @@ public class ScikitLearnWrapperTest {
 	}
 
 	@Disabled("Currently multi-target is not supported anymore.")
-	@Test
-	@MediumTest
+	@LongTest
 	public void trainAndTestClassifierRegressionMultitarget() throws Exception {
 		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EScikitLearnProblemType.CLASSIFICATION);
 		ILabeledDataset<ILabeledInstance> datasetTrain = this.loadARFF(BAYESNET_TRAIN_ARFF);
@@ -108,7 +104,7 @@ public class ScikitLearnWrapperTest {
 	}
 
 	@Disabled("Currently unsupported feature")
-	@MediumTest
+	@LongTest
 	public void testClassifierRegression() throws Exception {
 		ScikitLearnWrapper<IRegressionPrediction, IRegressionResultBatch> slw = new ScikitLearnWrapper<>("MLPRegressor()", "from sklearn.neural_network import MLPRegressor", EScikitLearnProblemType.REGRESSION);
 		ILabeledDataset<ILabeledInstance> datasetTest = this.loadARFF(BAYESNET_TRAIN_ARFF);
@@ -117,7 +113,7 @@ public class ScikitLearnWrapperTest {
 		assertEquals("Unequal length of predictions and number of test ILabeledDataset<ILabeledInstance>", result.getNumPredictions(), datasetTest.size());
 	}
 
-	@MediumTest
+	@LongTest
 	public void trainClassifierCategorical() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.pipeline", "sklearn.decomposition", "sklearn.ensemble");
 		String constructInstruction = "sklearn.pipeline.make_pipeline(sklearn.pipeline.make_union(sklearn.decomposition.PCA(),sklearn.decomposition.FastICA()),sklearn.ensemble.RandomForestClassifier(n_estimators=100))";
@@ -128,7 +124,7 @@ public class ScikitLearnWrapperTest {
 		assertTrue(slw.getModelPath().exists());
 	}
 
-	@MediumTest
+	@LongTest
 	public void trainAndTestClassifierCategorical() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.pipeline", "sklearn.decomposition", "sklearn.ensemble");
 		String constructInstruction = "sklearn.pipeline.make_pipeline(sklearn.pipeline.make_union(sklearn.decomposition.PCA(),sklearn.decomposition.FastICA()),sklearn.ensemble.RandomForestClassifier(n_estimators=100))";
@@ -141,7 +137,7 @@ public class ScikitLearnWrapperTest {
 	}
 
 	@Disabled("Currently unsupported feature.")
-	@Test
+	@LongTest
 	public void testClassifierCategorical() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.pipeline", "sklearn.decomposition", "sklearn.ensemble");
 		String constructInstruction = "sklearn.pipeline.make_pipeline(sklearn.pipeline.make_union(sklearn.decomposition.PCA(),sklearn.decomposition.FastICA()),sklearn.ensemble.RandomForestClassifier(n_estimators=100))";
@@ -201,7 +197,7 @@ public class ScikitLearnWrapperTest {
 		});
 	}
 
-	@Test
+	@LongTest
 	public void invalidConstructorEmptyConstructionCall() throws IOException {
 		assertThrows(AssertionError.class, () -> {
 			new ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch>("", "", EScikitLearnProblemType.CLASSIFICATION);
