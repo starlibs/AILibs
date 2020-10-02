@@ -88,8 +88,9 @@ public class TempFileHandler implements Closeable {
 	 * @param uuid
 	 *            UUID of the temporary file.
 	 * @return An existing or new file reader for the given temporary file.
+	 * @throws FileNotFoundException
 	 */
-	public BufferedReader getFileReaderForTempFile(final String uuid) {
+	public BufferedReader getFileReaderForTempFile(final String uuid) throws FileNotFoundException {
 		if (this.tempFileReaders.containsKey(uuid)) {
 			try {
 				this.tempFileReaders.get(uuid).close();
@@ -98,15 +99,9 @@ public class TempFileHandler implements Closeable {
 			}
 			this.tempFileReaders.remove(uuid);
 		}
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(this.tempFiles.get(uuid)));
-			this.tempFileReaders.put(uuid, reader);
-			return reader;
-		} catch (FileNotFoundException e) {
-			this.logger.error(String.format("File for UUID %s does not exist!", uuid), e);
-		}
-
-		return null;
+		BufferedReader reader = new BufferedReader(new FileReader(this.tempFiles.get(uuid)));
+		this.tempFileReaders.put(uuid, reader);
+		return reader;
 	}
 
 	/**

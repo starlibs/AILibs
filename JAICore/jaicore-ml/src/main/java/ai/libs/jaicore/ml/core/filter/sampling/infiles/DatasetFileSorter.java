@@ -127,70 +127,76 @@ public class DatasetFileSorter implements ICancelable {
 			// Split the existing file into two halfs
 			String leftUUID = this.tempFileHandler.createTempFile();
 			String rightUUID = this.tempFileHandler.createTempFile();
-			FileWriter leftWriter = this.tempFileHandler.getFileWriterForTempFile(leftUUID);
-			FileWriter rightWriter = this.tempFileHandler.getFileWriterForTempFile(rightUUID);
-			BufferedReader reader = this.tempFileHandler.getFileReaderForTempFile(fileUUID);
-			int i = 0;
-			String line;
-			while ((line = reader.readLine()) != null) {
-				if (i % 100 == 0 && Thread.interrupted()) {
-					throw new InterruptedException();
+			try (FileWriter leftWriter = this.tempFileHandler.getFileWriterForTempFile(leftUUID)) {
+				try (FileWriter rightWriter = this.tempFileHandler.getFileWriterForTempFile(rightUUID)) {
+					try (BufferedReader reader = this.tempFileHandler.getFileReaderForTempFile(fileUUID)) {
+						int i = 0;
+						String line;
+						while ((line = reader.readLine()) != null) {
+							if (i % 100 == 0 && Thread.interrupted()) {
+								throw new InterruptedException();
+							}
+							if (i < (length / 2)) {
+								leftWriter.write(line + "\n");
+							} else {
+								rightWriter.write(line + "\n");
+							}
+							i++;
+						}
+						if (Thread.interrupted()) {
+							throw new InterruptedException();
+						}
+						leftWriter.flush();
+						rightWriter.flush();
+						// Sort the two halfs
+						String sortedLeftUUID = this.mergesort(leftUUID);
+						String sortedRightUUID = this.mergesort(rightUUID);
+						// Merge the sorted halfs back together ande delete the left and right temp files
+						if (Thread.interrupted()) {
+							throw new InterruptedException();
+						}
+						if (this.canceled) {
+							throw new AlgorithmExecutionCanceledException(0);
+						}
+						String mergedFileUUID = this.merge(sortedLeftUUID, sortedRightUUID);
+						this.tempFileHandler.deleteTempFile(leftUUID);
+						this.tempFileHandler.deleteTempFile(rightUUID);
+						return mergedFileUUID;
+					}
 				}
-				if (i < (length / 2)) {
-					leftWriter.write(line + "\n");
-				} else {
-					rightWriter.write(line + "\n");
-				}
-				i++;
 			}
-			if (Thread.interrupted()) {
-				throw new InterruptedException();
-			}
-			leftWriter.flush();
-			rightWriter.flush();
-			// Sort the two halfs
-			String sortedLeftUUID = this.mergesort(leftUUID);
-			String sortedRightUUID = this.mergesort(rightUUID);
-			// Merge the sorted halfs back together ande delete the left and right temp files
-			if (Thread.interrupted()) {
-				throw new InterruptedException();
-			}
-			if (this.canceled) {
-				throw new AlgorithmExecutionCanceledException(0);
-			}
-			String mergedFileUUID = this.merge(sortedLeftUUID, sortedRightUUID);
-			this.tempFileHandler.deleteTempFile(leftUUID);
-			this.tempFileHandler.deleteTempFile(rightUUID);
-			return mergedFileUUID;
 		}
 	}
 
 	private String merge(final String leftUUID, final String rightUUID) throws IOException {
 		String uuid = this.tempFileHandler.createTempFile();
-		FileWriter writer = this.tempFileHandler.getFileWriterForTempFile(uuid);
-		BufferedReader leftReader = this.tempFileHandler.getFileReaderForTempFile(leftUUID);
-		BufferedReader rightReader = this.tempFileHandler.getFileReaderForTempFile(rightUUID);
-		String leftLine = leftReader.readLine();
-		String rightLine = rightReader.readLine();
-		while (leftLine != null || rightLine != null) {
-			if (leftLine == null) {
-				writer.write(rightLine + "\n");
-				rightLine = rightReader.readLine();
-			} else if (rightLine == null) {
-				writer.write(leftLine + "\n");
-				leftLine = leftReader.readLine();
-			} else {
-				int c = this.comparator.compare(leftLine, rightLine);
-				if (c > 0) {
-					writer.write(rightLine + "\n");
-					rightLine = rightReader.readLine();
-				} else {
-					writer.write(leftLine + "\n");
-					leftLine = leftReader.readLine();
+		try (FileWriter writer = this.tempFileHandler.getFileWriterForTempFile(uuid)) {
+			try (BufferedReader leftReader = this.tempFileHandler.getFileReaderForTempFile(leftUUID)) {
+				try (BufferedReader rightReader = this.tempFileHandler.getFileReaderForTempFile(rightUUID)) {
+					String leftLine = leftReader.readLine();
+					String rightLine = rightReader.readLine();
+					while (leftLine != null || rightLine != null) {
+						if (leftLine == null) {
+							writer.write(rightLine + "\n");
+							rightLine = rightReader.readLine();
+						} else if (rightLine == null) {
+							writer.write(leftLine + "\n");
+							leftLine = leftReader.readLine();
+						} else {
+							int c = this.comparator.compare(leftLine, rightLine);
+							if (c > 0) {
+								writer.write(rightLine + "\n");
+								rightLine = rightReader.readLine();
+							} else {
+								writer.write(leftLine + "\n");
+								leftLine = leftReader.readLine();
+							}
+						}
+					}
+					writer.flush();
 				}
 			}
 		}
-		writer.flush();
 		return uuid;
 	}
 
