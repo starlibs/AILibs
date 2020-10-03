@@ -33,6 +33,7 @@ import ai.libs.jaicore.ml.core.dataset.DatasetTestUtil;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 import ai.libs.jaicore.test.MediumParameterizedTest;
+import ai.libs.jaicore.test.MediumTest;
 
 public class OpenMLDatasetAdapterTest {
 	protected Logger logger = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER);
@@ -107,7 +108,7 @@ public class OpenMLDatasetAdapterTest {
 
 	public static Stream<Arguments> getMediumDatasets() throws IOException, Exception {
 		return readDatasets(Arrays.asList(
-				149, // CovPokElec
+				//				149, // CovPokElec
 				155, // pokerhand
 				180, // covertype
 				273, // IMDB Drama
@@ -163,25 +164,28 @@ public class OpenMLDatasetAdapterTest {
 		return data;
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name="test reconstructibility of stratified split on {0}")
 	@MethodSource("getSmallDatasets")
 	public void testReconstructibilityOfStratifiedSplitOnSmallDataset(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException, SplitFailedException {
 		this.testReconstructibilityOfStratifiedSplit(problemSet);
 	}
 
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="test reconstructibility of stratified split on {0}")
 	@MethodSource("getMediumDatasets")
 	public void testReconstructibilityOfStratifiedSplitOnBigDataset(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException, SplitFailedException {
 		this.testReconstructibilityOfStratifiedSplit(problemSet);
 	}
 
-	@ParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="test writing {0}")
 	@MethodSource("getSmallDatasets")
 	public void testWriteOnSmallDataset(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException {
 		this.testWrite(problemSet);
 	}
 
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="test writing {0}")
 	@MethodSource("getMediumDatasets")
 	public void testWriteOnBigDataset(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException {
 		this.testWrite(problemSet);
