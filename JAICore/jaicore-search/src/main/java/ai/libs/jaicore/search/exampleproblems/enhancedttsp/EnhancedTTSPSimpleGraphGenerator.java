@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.MappingIterator;
+import ai.libs.jaicore.interrupt.UndeclaredInterruptedException;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPState;
 import ai.libs.jaicore.search.model.NodeExpansionDescription;
@@ -62,14 +63,21 @@ public class EnhancedTTSPSimpleGraphGenerator implements IGraphGenerator<Enhance
 				return l;
 			}
 
-			public INewNodeDescription<EnhancedTTSPState, String> generateSuccessor(final EnhancedTTSPState n, final short destination) {
+			public INewNodeDescription<EnhancedTTSPState, String> generateSuccessor(final EnhancedTTSPState n, final short destination) throws InterruptedException {
 				return new NodeExpansionDescription<>(EnhancedTTSPSimpleGraphGenerator.this.problem.computeSuccessorState(n, destination), n.getCurLocation() + " -> " + destination);
 			}
 
 			@Override
 			public Iterator<INewNodeDescription<EnhancedTTSPState, String>> getIterativeGenerator(final EnhancedTTSPState node) {
 				ShortList availableDestinations = EnhancedTTSPSimpleGraphGenerator.this.problem.getPossibleRemainingDestinationsInState(node);
-				return new MappingIterator<>(availableDestinations.iterator(), s -> this.generateSuccessor(node, s));
+				return new MappingIterator<>(availableDestinations.iterator(), s -> {
+					try {
+						return this.generateSuccessor(node, s);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+						throw new UndeclaredInterruptedException(e);
+					}
+				});
 			}
 		};
 	}

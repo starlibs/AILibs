@@ -60,10 +60,22 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 		Collection<INewNodeDescription<N, A>> successors = this.succGen.generateSuccessors(state);
 		Collection<A> actions = new ArrayList<>();
 		Map<A, N> cache = new HashMap<>();
+		if (Thread.interrupted()) {
+			throw new InterruptedException("The computation of applicable actions has been interrupted.");
+		}
+		long lastInterruptCheck = System.currentTimeMillis();
 		for (INewNodeDescription<N, A> succ : successors) {
 			A action = succ.getArcLabel();
 			actions.add(action);
 			cache.put(action, succ.getTo());
+			long now = System.currentTimeMillis();
+			if (lastInterruptCheck < now - 10) {
+				lastInterruptCheck = now;
+				if (Thread.interrupted()) {
+					throw new InterruptedException("The computation of applicable actions has been interrupted.");
+				}
+			}
+
 			if (this.backPointers.containsKey(succ.getTo())) {
 				Pair<N, A> backpointer = this.backPointers.get(succ.getTo());
 				boolean sameParent = backpointer.getX().equals(state);
@@ -71,6 +83,13 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 				if (!sameParent || !sameAction) {
 					N otherNode = null;
 					for (N key : this.backPointers.keySet()) {
+						now = System.currentTimeMillis();
+						if (lastInterruptCheck < now - 10) {
+							lastInterruptCheck = now;
+							if (Thread.interrupted()) {
+								throw new InterruptedException("The computation of applicable actions has been interrupted.");
+							}
+						}
 						if (key.equals(succ.getTo())) {
 							otherNode = key;
 							break;
