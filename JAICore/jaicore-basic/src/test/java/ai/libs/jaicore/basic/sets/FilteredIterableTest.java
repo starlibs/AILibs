@@ -9,8 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.BeforeClass;
-
-import ai.libs.jaicore.test.ShortTest;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test to verify the correct behavior of {@link FilteredIterable}.
@@ -30,7 +29,7 @@ public class FilteredIterableTest {
 	/**
 	 * Test whether we can iterate over a filtered list of strings correctly.
 	 */
-	@ShortTest
+	@Test
 	public void testCorrectElementsIterated() {
 		for (int numElements = 1; numElements <= ORIGINAL_LIST.size(); numElements++) {
 			for (int shuffleSeed = 0; shuffleSeed < NUM_RESHUFFLES; shuffleSeed++) {

@@ -224,7 +224,13 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 
 								this.logger.debug("Ask tree policy to choose one action of: {}.", possibleActions);
 								long tpStart = System.currentTimeMillis();
-								action = this.treePolicy.getAction(current, possibleActions);
+								try {
+									action = this.treePolicy.getAction(current, possibleActions);
+								}
+								catch (InterruptedException e) {
+									this.checkAndConductTermination(); // if we have been canceled, throw the corresponding exception
+									throw e; // otherwise re-throw the InterruptedException
+								}
 								timeSpentInTreePolicyQueriesThisIteration += (System.currentTimeMillis() - tpStart);
 								invocationsOfTreePolicyInThisIteration++;
 								Objects.requireNonNull(action, "Actions in MCTS must never be null, but tree policy returned null!");
@@ -311,7 +317,13 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 										Collection<A> applicableActions = this.getApplicableActions(current);
 										timeSpentInActionApplicabilityComputationThisIteration += (System.currentTimeMillis() - startActionTime);
 										this.logger.debug("Ask default policy to choose one action of: {}.", applicableActions);
-										action = this.defaultPolicy.getAction(current, applicableActions);
+										try {
+											action = this.defaultPolicy.getAction(current, applicableActions);
+										}
+										catch (InterruptedException e) {
+											this.checkAndConductTermination(); // if we have been canceled, throw the corresponding exception
+											throw e; // otherwise re-throw the InterruptedException
+										}
 										assert applicableActions.contains(action);
 									}
 									timeSpentInDefaultPolicyThisIteration += (System.currentTimeMillis() - startDP);

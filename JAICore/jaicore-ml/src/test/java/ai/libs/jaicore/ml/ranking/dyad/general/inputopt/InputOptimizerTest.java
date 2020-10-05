@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Random;
 
 import org.api4.java.ai.ml.core.exception.TrainingException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.primitives.Pair;

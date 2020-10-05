@@ -9,7 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import ai.libs.jaicore.test.ShortTest;
+import org.junit.jupiter.api.Test;
 
 /**
  * This test checks the basic functionalities provided by the ResourceUtil class which provides a convenient API for handling resource files.
@@ -26,7 +26,7 @@ public class ResourceUtilTest {
 	 * @throws FileNotFoundException Thrown if the resource file could not be found.
 	 * @throws IOException Thrown if the resource file could not be read.
 	 */
-	@ShortTest
+	@Test
 	public void testReadResourceToString() throws IOException {
 		String actualContent = ResourceUtil.readResourceFileToString(RESOURCE_FILE_PATH).trim();
 		assertEquals("The content of the read-in resource does not match the expected content", EXPECTED_CONTENT, actualContent);
@@ -35,14 +35,14 @@ public class ResourceUtilTest {
 	/**
 	 * Test to get a resource as a file object.
 	 */
-	@ShortTest
+	@Test
 	public void testGetResourceAsFile() {
 		File resourceFile = ResourceUtil.getResourceAsFile(RESOURCE_FILE_PATH);
 		assertTrue("The file returned for the resource path does not exist", resourceFile.exists());
 		assertTrue("The file returned is not a file but a directory.", !resourceFile.isDirectory());
 	}
 
-	@ShortTest
+	@Test
 	public void test() throws IOException {
 		ResourceFile resFile = ResourceUtil.getResourceAsFile(RESOURCE_FILE_PATH);
 		ResourceFile res2File = new ResourceFile(resFile.getParentFile(), "dummy2.resource");

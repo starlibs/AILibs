@@ -6,13 +6,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.api4.java.ai.ml.regression.evaluation.IRegressionPrediction;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
-import ai.libs.jaicore.test.ShortTest;
 
 public class AsymmetricLossTest extends ARegressionLossTest {
 
-	@ShortTest
+	@Test
 	public void lossWithNoError() {
 		List<Double> expected = Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5);
 		List<IRegressionPrediction> predicted = this.toPredictions(expected);
@@ -21,7 +21,7 @@ public class AsymmetricLossTest extends ARegressionLossTest {
 		assertEquals("Loss must be 0.0", 0.0, asymmetricLoss.loss(expected, predicted), 1E-8);
 	}
 
-	@ShortTest
+	@Test
 	public void lossWithError() {
 		List<Double> expected = Arrays.asList(10.0, 5.0);
 		List<IRegressionPrediction> predicted = this.toPredictions(Arrays.asList(11.0, 4.0));

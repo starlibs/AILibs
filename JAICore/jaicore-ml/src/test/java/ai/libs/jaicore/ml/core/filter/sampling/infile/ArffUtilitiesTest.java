@@ -7,15 +7,16 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.junit.jupiter.api.Test;
+
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.ArffUtilities;
 import ai.libs.jaicore.test.MediumTest;
-import ai.libs.jaicore.test.ShortTest;
 
 public class ArffUtilitiesTest {
 
 	private static final File ARFF_DATASET = new File(new File(new File(new File("testrsc"), "ml"), "orig"), "letter.arff");
 
-	@ShortTest
+	@Test
 	public void testArffHeaderExtraction() throws IOException {
 		String extractedHeader = ArffUtilities.extractArffHeader(ARFF_DATASET);
 		String trueHeader = "@relation letter\n" + "@attribute 'x-box' integer\n" + "@attribute 'y-box' integer\n" + "@attribute 'width' integer\n" + "@attribute 'high' integer\n" + "@attribute 'onpix' integer\n"
@@ -25,6 +26,7 @@ public class ArffUtilitiesTest {
 		assertEquals(trueHeader, extractedHeader);
 	}
 
+	@Test
 	@MediumTest
 	public void testArffDataentryCount() throws IOException {
 		int countedEntries = ArffUtilities.countDatasetEntries(ARFF_DATASET, true);
@@ -32,7 +34,7 @@ public class ArffUtilitiesTest {
 		assertEquals(trueEntries, countedEntries);
 	}
 
-	@ShortTest
+	@Test
 	public void testSkippingToDataWithReader() throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(ARFF_DATASET));
 		ArffUtilities.skipWithReaderToDatapoints(reader);

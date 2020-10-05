@@ -7,8 +7,7 @@ import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.random.Well1024a;
 import org.junit.jupiter.api.BeforeAll;
-
-import ai.libs.jaicore.test.ShortTest;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test-suite to test the StatisticsUtil.
@@ -36,19 +35,19 @@ public class StatisticsUtilTest {
 		negSampleB = samples[1];
 	}
 
-	@ShortTest
+	@Test
 	public void testWilcoxonSignedRankSumTest() {
 		assertFalse("Wilcoxon Signed Rank Test detects different distributions which is not the case.", StatisticsUtil.wilcoxonSignedRankSumTestTwoSided(posSampleA, posSampleB));
 		assertTrue("Wilcoxon Signed Rank Test did not detect different distributions although they are.", StatisticsUtil.wilcoxonSignedRankSumTestTwoSided(negSampleA, negSampleB));
 	}
 
-	@ShortTest
+	@Test
 	public void testMannWhitneyUTest() {
 		assertFalse("MannWhitneyUTest detects different distributions which is not the case.", StatisticsUtil.mannWhitneyTwoSidedSignificance(posSampleA, posSampleB));
 		assertTrue("Wilcoxon Signed Rank Test did not detect different distributions although they are.", StatisticsUtil.wilcoxonSignedRankSumTestTwoSided(negSampleA, negSampleB));
 	}
 
-	@ShortTest
+	@Test
 	public void testTTest() {
 		assertFalse("TTest identifies different distributions which is not the case", StatisticsUtil.twoSampleTTestSignificance(posSampleA, posSampleB));
 		assertTrue("TTest did not detect different distributions although they are.", StatisticsUtil.twoSampleTTestSignificance(negSampleA, negSampleB));

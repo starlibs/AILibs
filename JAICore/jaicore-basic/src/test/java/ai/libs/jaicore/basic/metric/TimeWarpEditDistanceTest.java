@@ -5,8 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.api4.java.common.metric.IScalarDistance;
 import org.junit.jupiter.api.Assertions;
-
-import ai.libs.jaicore.test.ShortTest;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test suite for the {@link ai.libs.jaicore.basic.metric.TimeWarpEditDistance}
@@ -20,7 +19,7 @@ public class TimeWarpEditDistanceTest {
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@ShortTest
+	@Test
 	public void testCorrectnessForDistanceCalculation() {
 		// Input.
 		double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 };
@@ -40,7 +39,7 @@ public class TimeWarpEditDistanceTest {
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@ShortTest
+	@Test
 	public void testCorrectnessForDistanceCalculation2() {
 		// Input.
 		double[] timeSeries1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -61,7 +60,7 @@ public class TimeWarpEditDistanceTest {
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@ShortTest
+	@Test
 	public void testDistanceCalculation3() {
 		// Input.
 		double[] timeSeries1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -82,7 +81,7 @@ public class TimeWarpEditDistanceTest {
 	 * Robustness test: When initializing with <code>lambda < 0</code> the
 	 * constuctor is supposed to thrown an IllegalArgumentException.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForLambdaLessThanZero() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double lambda = 0 - Double.MIN_VALUE;
@@ -94,7 +93,7 @@ public class TimeWarpEditDistanceTest {
 	 * Robustness test: When initializing with <code>nu < 0</code> the constuctor is
 	 * supposed to thrown an IllegalArgumentException.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForNuLessThanZero() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double nu = 0 - Double.MIN_VALUE;
@@ -106,7 +105,7 @@ public class TimeWarpEditDistanceTest {
 	 * Boundary test: When initializing with <code>alpha = pi/2</code> the
 	 * constructor is must not thrown an IllegalArgumentException.
 	 */
-	@ShortTest
+	@Test
 	public void testBoundaryForLambdaEqualToZero() {
 		double lambda = 0;
 		new TimeWarpEditDistance(lambda, 1, ScalarDistanceUtil.getAbsoluteDistance());
@@ -117,7 +116,7 @@ public class TimeWarpEditDistanceTest {
 	 * Boundary test: When initializing with <code>nu = 0</code> the constructor is
 	 * must not thrown an IllegalArgumentException.
 	 */
-	@ShortTest
+	@Test
 	public void testBoundaryForNuEqualToZero() {
 		double nu = 0;
 		new TimeWarpEditDistance(1, nu, ScalarDistanceUtil.getAbsoluteDistance());

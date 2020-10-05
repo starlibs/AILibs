@@ -34,7 +34,6 @@ import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.dataset.DatasetTestUtil;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
-import ai.libs.jaicore.test.MediumParameterizedTest;
 import ai.libs.jaicore.test.MediumTest;
 
 public class OpenMLDatasetAdapterTest {
@@ -153,36 +152,37 @@ public class OpenMLDatasetAdapterTest {
 	private static int lastCachedId; // this is to detect whether the current dataset hold in dataset fits the current problem set
 	private static ILabeledDataset<?> dataset;
 
-	private void assureThatCorrectDatasetIsLoaded(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, ClassNotFoundException, IOException {
+	private void assureThatCorrectDatasetIsLoaded(final OpenMLProblemSet problemSet, final boolean checkProperties) throws DatasetDeserializationFailedException, InterruptedException, ClassNotFoundException, IOException {
 		int id = problemSet.getId();
 		if (lastCachedId != id) {
-			dataset = this.read(id, numInstances.get(id), numFeatures.get(id), numClasses.get(id));
+			dataset = this.read(id, numInstances.get(id), numFeatures.get(id), numClasses.get(id), checkProperties);
 			lastCachedId = id;
 		}
 	}
 
-	public ILabeledDataset<ILabeledInstance> read(final int id, final int expectedInstances, final int expectedAttributes, final int expectedClasses) throws DatasetDeserializationFailedException, InterruptedException, IOException, ClassNotFoundException {
+	public ILabeledDataset<ILabeledInstance> read(final int id, final int expectedInstances, final int expectedAttributes, final int expectedClasses, final boolean checkProperties) throws DatasetDeserializationFailedException, InterruptedException, IOException, ClassNotFoundException {
 		File file = new File(TMP_FOLDER + File.separator + "openmlid-" + id);
 		if (!file.exists()) {
 			this.logger.info("Reading in dataset with id {}", id);
 			ILabeledDataset<ILabeledInstance> data = OpenMLDatasetReader.deserializeDataset(id);
-			this.logger.info("Dataset read, now checking general properties.");
-			assertEquals("Incorrect number of instances.", expectedInstances, data.size());
-			this.logger.debug("Number of instance correct. Now checking number of attributes.");
-			assertEquals("Incorrect number of attributes.", expectedAttributes, data.getNumAttributes());
-			this.logger.debug("Number of attributes correct, now checking data coherence.");
-			DatasetTestUtil.checkDatasetCoherence(data);
-			this.logger.info("Dataset valid. Serializing it.");
+			if (checkProperties) {
+				this.logger.info("Dataset read, now checking general properties.");
+				assertEquals("Incorrect number of instances.", expectedInstances, data.size());
+				this.logger.debug("Number of instance correct. Now checking number of attributes.");
+				assertEquals("Incorrect number of attributes.", expectedAttributes, data.getNumAttributes());
+				this.logger.debug("Number of attributes correct, now checking data coherence.");
+				DatasetTestUtil.checkDatasetCoherence(data);
+				this.logger.info("Dataset valid. Serializing it.");
+			}
+			else {
+				this.logger.debug("Dataset read. Not checking properties.");
+			}
 			FileUtil.serializeObject(data, file.getAbsolutePath());
 			return data;
 		}
 		else {
 			this.logger.info("Re-using previously checked serialization of dataset {}.", id);
-			ILabeledDataset<ILabeledInstance> data = (ILabeledDataset<ILabeledInstance>)FileUtil.unserializeObject(file.getAbsolutePath());
-			assertEquals("Incorrect number of instances.", expectedInstances, data.size());
-			assertEquals("Incorrect number of attributes.", expectedAttributes, data.getNumAttributes());
-			DatasetTestUtil.checkDatasetCoherence(data);
-			return data;
+			return (ILabeledDataset<ILabeledInstance>)FileUtil.unserializeObject(file.getAbsolutePath());
 		}
 	}
 
@@ -213,25 +213,26 @@ public class OpenMLDatasetAdapterTest {
 		this.testWrite(problemSet);
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name="test reconstructibility of {0}")
 	@MethodSource("getSmallDatasets")
 	public void testWriteOnSmallDatasetOnSmallDataset(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException, ReconstructionException, ClassNotFoundException {
 		this.testReconstructibility(problemSet);
 	}
 
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="test reconstructibility of {0}")
 	@MethodSource("getMediumDatasets")
 	public void testReconstructibilityOnBigDataset(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException, ReconstructionException, ClassNotFoundException {
 		this.testReconstructibility(problemSet);
 	}
 
 	private void testReconstructibilityOfStratifiedSplit(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException, SplitFailedException, ClassNotFoundException, IOException {
-		this.assureThatCorrectDatasetIsLoaded(problemSet);
+		this.assureThatCorrectDatasetIsLoaded(problemSet, true);
 		Objects.requireNonNull(dataset);
 
 		/* create stratified split and test that folds are reproducible */
 		this.logger.info("Creating a stratified split.");
-		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(dataset, 0, .7, this.logger.getName());
+		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(dataset, 0, .7);
 		ILabeledDataset<?> reproducedFirstFold = (ILabeledDataset<?>) ((IReconstructible) split.get(0)).getConstructionPlan().reconstructObject();
 		ILabeledDataset<?> reproducedSecondFold = (ILabeledDataset<?>) ((IReconstructible) split.get(1)).getConstructionPlan().reconstructObject();
 		this.logger.info("Testing that folds are reconstructible.");
@@ -240,7 +241,7 @@ public class OpenMLDatasetAdapterTest {
 	}
 
 	private void testWrite(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException, ClassNotFoundException {
-		this.assureThatCorrectDatasetIsLoaded(problemSet);
+		this.assureThatCorrectDatasetIsLoaded(problemSet, true);
 		File outFile = new File("tmp/test.arff");
 		outFile.getParentFile().mkdirs();
 		this.logger.debug("Reading in dataset.", outFile);
@@ -261,7 +262,7 @@ public class OpenMLDatasetAdapterTest {
 	}
 
 	private void testReconstructibility(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException, ClassNotFoundException, IOException {
-		this.assureThatCorrectDatasetIsLoaded(problemSet);
+		this.assureThatCorrectDatasetIsLoaded(problemSet, true);
 		Objects.requireNonNull(dataset);
 		if (!(dataset instanceof IReconstructible)) {
 			fail("Dataset not reconstructible");

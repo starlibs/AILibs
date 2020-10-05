@@ -11,13 +11,11 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.ExtendedRandomForest;
 import ai.libs.jaicore.test.MediumParameterizedTest;
-import ai.libs.jaicore.test.MediumTest;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;

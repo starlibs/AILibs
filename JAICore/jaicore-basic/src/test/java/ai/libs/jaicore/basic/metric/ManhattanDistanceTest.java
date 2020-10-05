@@ -2,7 +2,7 @@ package ai.libs.jaicore.basic.metric;
 
 import static org.junit.Assert.assertEquals;
 
-import ai.libs.jaicore.test.ShortTest;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test suite for the {@link ai.libs.jaicore.basic.metric.ManhattanDistance}
@@ -16,7 +16,7 @@ public class ManhattanDistanceTest {
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@ShortTest
+	@Test
 	public void testCorrectnessForDistanceCalculation() {
 		// Input.
 		double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 };
@@ -34,7 +34,7 @@ public class ManhattanDistanceTest {
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@ShortTest
+	@Test
 	public void testCorrectnessForDistanceCalculation2() {
 		// Input.
 		double[] timeSeries1 = { 0.50, 0.87, 0.90, 0.82, 0.70 };

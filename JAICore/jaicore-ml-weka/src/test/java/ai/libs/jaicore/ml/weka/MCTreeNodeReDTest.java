@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.weka.classification.learner.reduction.MCTreeNodeReD;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;

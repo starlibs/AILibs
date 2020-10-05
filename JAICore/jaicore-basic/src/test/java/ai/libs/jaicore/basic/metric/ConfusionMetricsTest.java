@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.stream.IntStream;
 
-import ai.libs.jaicore.test.ShortTest;
+import org.junit.jupiter.api.Test;
 
 public class ConfusionMetricsTest {
 
@@ -20,49 +20,49 @@ public class ConfusionMetricsTest {
 	private static final double[] recall = { 0.0 };
 	private static final double[] f1score = { 0.0 };
 
-	@ShortTest
+	@Test
 	public void testPrecision() {
 		for (int i = 0; i < a.length; i++) {
 			assertEquals("Precision not correct", precision[i], ConfusionMetrics.getPrecision(tp(a[i], b[i]), fp(a[i], b[i])), 1E-8);
 		}
 	}
 
-	@ShortTest
+	@Test
 	public void testRecall() {
 		for (int i = 0; i < a.length; i++) {
 			assertEquals("Recall not correct", recall[i], ConfusionMetrics.getRecall(tp(a[i], b[i]), fn(a[i], b[i])), 1E-8);
 		}
 	}
 
-	@ShortTest
+	@Test
 	public void testF1Score() {
 		for (int i = 0; i < a.length; i++) {
 			assertEquals("F1Score not correct", f1score[i], ConfusionMetrics.getF1Score(tp(a[i], b[i]), fp(a[i], b[i]), fn(a[i], b[i])), 1E-8);
 		}
 	}
 
-	@ShortTest
+	@Test
 	public void testTP() {
 		for (int i = 0; i < a.length; i++) {
 			assertEquals("TP not correct", tp[i], tp(a[i], b[i]));
 		}
 	}
 
-	@ShortTest
+	@Test
 	public void testFP() {
 		for (int i = 0; i < a.length; i++) {
 			assertEquals("FP not correct", fp[i], fp(a[i], b[i]));
 		}
 	}
 
-	@ShortTest
+	@Test
 	public void testTN() {
 		for (int i = 0; i < a.length; i++) {
 			assertEquals("TN not correct", tn[i], tn(a[i], b[i]));
 		}
 	}
 
-	@ShortTest
+	@Test
 	public void testFN() {
 		for (int i = 0; i < a.length; i++) {
 			assertEquals("FN not correct", fn[i], fn(a[i], b[i]));

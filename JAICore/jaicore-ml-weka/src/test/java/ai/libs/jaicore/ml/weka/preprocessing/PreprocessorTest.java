@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.algorithm.IAlgorithm;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -19,9 +18,7 @@ import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-import ai.libs.jaicore.ml.weka.preprocessing.WekaPreprocessorFitter;
 import ai.libs.jaicore.test.MediumParameterizedTest;
-import ai.libs.jaicore.test.MediumTest;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;

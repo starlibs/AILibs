@@ -2,7 +2,7 @@ package ai.libs.jaicore.basic.transform.vector;
 
 import static org.junit.Assert.assertArrayEquals;
 
-import ai.libs.jaicore.test.ShortTest;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test suite for the {@link HilbertTransform} implementation.
@@ -11,7 +11,7 @@ import ai.libs.jaicore.test.ShortTest;
  */
 public class HilbertTransformTest {
 
-	@ShortTest
+	@Test
 	public void testCorrectnessForTransformation() {
 		// Input.
 		double[] timeSeries = { 1, 2, 3, 4, 5 };
@@ -24,7 +24,7 @@ public class HilbertTransformTest {
 		assertArrayEquals(expectation, transformed, 0.0001);
 	}
 
-	@ShortTest
+	@Test
 	public void testCorrectnessForTransformation2() {
 		// Input.
 		double[] timeSeries = { 2, 2, 2, 2, 2 };

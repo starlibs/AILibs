@@ -15,6 +15,9 @@ public class EnhancedTTSPGenerator {
 	}
 
 	public EnhancedTTSP generate(final int n, final int maxDistance, final int seed) {
+		if (n > Short.MAX_VALUE) {
+			throw new IllegalArgumentException("Number of locations must not exceed " + Short.MAX_VALUE);
+		}
 
 		/* create TTSP problem */
 		List<Boolean> blockedHours = Arrays.asList(true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true);

@@ -29,7 +29,7 @@ public class EnhancedTTSPProblemSet extends AAlgorithmTestProblemSet<EnhancedTTS
 
 	@Override
 	public EnhancedTTSP getDifficultProblemInputForGeneralTestPurposes() {
-		return new EnhancedTTSPGenerator(new RandomLocationGenerator(new Random(0))).generate(20000, 100, 0);
+		return new EnhancedTTSPGenerator(new RandomLocationGenerator(new Random(0))).generate(32000, 100, 0);
 	}
 
 	@Override

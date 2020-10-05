@@ -13,6 +13,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
@@ -24,7 +25,6 @@ import ai.libs.jaicore.ml.hpo.multifidelity.MultiFidelitySoftwareConfigurationPr
 import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.Hyperband;
 import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.Hyperband.HyperbandSolutionCandidate;
 import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.IHyperbandConfig;
-import ai.libs.jaicore.test.ShortTest;
 
 public class HyperBandTest {
 
@@ -58,12 +58,12 @@ public class HyperBandTest {
 		input = new MultiFidelitySoftwareConfigurationProblem<>(components, requiredInterface, evaluator);
 	}
 
-	@ShortTest
+	@Test
 	public void testHyperBandRunSingleThreaded() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		this.runHyperbandTest(ConfigFactory.create(IHyperbandConfig.class));
 	}
 
-	@ShortTest
+	@Test
 	public void testHyperBandRunMultiThreaded() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		IHyperbandConfig config = ConfigFactory.create(IHyperbandConfig.class);
 		config.setProperty(IHyperbandConfig.K_CPUS, "4");

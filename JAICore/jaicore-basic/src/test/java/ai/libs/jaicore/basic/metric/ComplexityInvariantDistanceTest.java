@@ -3,9 +3,9 @@ package ai.libs.jaicore.basic.metric;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.complexity.StretchingComplexity;
-import ai.libs.jaicore.test.ShortTest;
 
 /**
  * Test suite for the
@@ -25,7 +25,7 @@ public class ComplexityInvariantDistanceTest {
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@ShortTest
+	@Test
 	public void testCorrectnessForDistanceCalculation() {
 		// Input.
 		double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 }; // complexity 5
@@ -43,7 +43,7 @@ public class ComplexityInvariantDistanceTest {
 	 * Robustness test: When initializing with <code>null</code> for the distance
 	 * measure, the constructor is supposed to throw an IllegalArgumentExpection.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForNullDistanceMeasure() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			new ComplexityInvariantDistance(null, STRECHING_COMPLEXITY);
@@ -54,7 +54,7 @@ public class ComplexityInvariantDistanceTest {
 	 * Robustness test: When initializing with <code>null</code> for the complexity
 	 * measure, the constructor is supposed to throw an IllegalArgumentExpection.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForNullComplexityMeasure() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			new ComplexityInvariantDistance(EUCLIDEAN_DISTANCE, null);

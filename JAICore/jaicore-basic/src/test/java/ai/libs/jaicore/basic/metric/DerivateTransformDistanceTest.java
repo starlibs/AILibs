@@ -4,12 +4,12 @@ import static org.junit.Assert.assertEquals;
 
 import org.api4.java.common.metric.IDistanceMetric;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.transform.vector.HilbertTransform;
 import ai.libs.jaicore.basic.transform.vector.IVectorTransform;
 import ai.libs.jaicore.basic.transform.vector.derivate.ADerivateFilter;
 import ai.libs.jaicore.basic.transform.vector.derivate.BackwardDifferenceDerivate;
-import ai.libs.jaicore.test.ShortTest;
 
 /**
  * Test suite for the {@link ai.libs.jaicore.basic.metric.DerivateTransformDistance}
@@ -23,7 +23,7 @@ public class DerivateTransformDistanceTest {
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@ShortTest
+	@Test
 	public void testCorrectnessForDistanceCalculation() {
 		// Input.
 		double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 };
@@ -41,13 +41,13 @@ public class DerivateTransformDistanceTest {
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@ShortTest
+	@Test
 	public void testCorrectnessForDistanceCalculation2() {
 		// Input.
 		double[] timeSeries1 = { 1, 2, 3, 4, 5 }; // transform { -6.0833, -5.6666667, -4, -0.6666667, 6.41666667 },
-													// derivate { 1, 1, 1, 1}
+		// derivate { 1, 1, 1, 1}
 		double[] timeSeries2 = { 2, 2, 2, 2, 2 }; // transform { -4.166667, -1.666667, 0, 1.666667, 4.166667 }, derivate
-													// { 0, 0, 0, 0}
+		// { 0, 0, 0, 0}
 		double a = 0.5;
 		double b = 0.25;
 		double c = 0.25;
@@ -68,7 +68,7 @@ public class DerivateTransformDistanceTest {
 	 * Robustness test: When initializing with <code>null</code> for the distance
 	 * measure, the constructor is supposed to throw an IllegalArgumentExpection.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForNullDistanceMeasure() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			new DerivateTransformDistance(0.5, 0.25, 0.25, null);
@@ -80,7 +80,7 @@ public class DerivateTransformDistanceTest {
 	 * distance measure, the constructor is supposed to throw an
 	 * IllegalArgumentExpection.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForNullDistanceMeasure2() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			new DerivateTransformDistance(0.5, 0.25, 0.25, null, new EuclideanDistance(), new EuclideanDistance());
@@ -92,7 +92,7 @@ public class DerivateTransformDistanceTest {
 	 * distance measure, the constructor is supposed to throw an
 	 * IllegalArgumentExpection.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForNullDistanceMeasure3() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			new DerivateTransformDistance(0.5, 0.25, 0.25, new EuclideanDistance(), null, new EuclideanDistance());
@@ -104,7 +104,7 @@ public class DerivateTransformDistanceTest {
 	 * distance measure, the constructor is supposed to throw an
 	 * IllegalArgumentExpection.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForNullDistanceMeasure4() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			new DerivateTransformDistance(0.5, 0.25, 0.25, new EuclideanDistance(), new EuclideanDistance(), null);
@@ -115,7 +115,7 @@ public class DerivateTransformDistanceTest {
 	 * Robustness test: When initializing with <code>null</code> for the transform
 	 * the constructor is supposed to throw an IllegalArgumentExpection.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForNullDerivate() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			new DerivateTransformDistance(0.5, 0.25, 0.25, null, new HilbertTransform(), new EuclideanDistance());
@@ -126,7 +126,7 @@ public class DerivateTransformDistanceTest {
 	 * Robustness test: When initializing with <code>null</code> for the derivation
 	 * the constructor is supposed to throw an IllegalArgumentExpection.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForNullTransform() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			new DerivateTransformDistance(0.5, 0.25, 0.25, new BackwardDifferenceDerivate(), null, new EuclideanDistance());
@@ -137,7 +137,7 @@ public class DerivateTransformDistanceTest {
 	 * Robustness test: When initializing with <code>a > 1</code> the constuctor is
 	 * supposed to thrown an IllegalArgumentException.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForAGreaterOne() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double a = 1.1;
@@ -151,7 +151,7 @@ public class DerivateTransformDistanceTest {
 	 * Robustness test: When initializing with <code>b > 1</code> the constuctor is
 	 * supposed to thrown an IllegalArgumentException.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForBGreaterOne() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double a = 0.5;
@@ -165,7 +165,7 @@ public class DerivateTransformDistanceTest {
 	 * Robustness test: When initializing with <code>c > 1</code> the constuctor is
 	 * supposed to thrown an IllegalArgumentException.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForCGreaterOne() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double a = 0.5;
@@ -179,7 +179,7 @@ public class DerivateTransformDistanceTest {
 	 * Robustness test: When initializing with <code>a < 0</code> the constuctor is
 	 * supposed to thrown an IllegalArgumentException.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForALessThanZero() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double a = 0 - Double.MIN_VALUE;
@@ -193,7 +193,7 @@ public class DerivateTransformDistanceTest {
 	 * Robustness test: When initializing with <code>b < 0</code> the constuctor is
 	 * supposed to thrown an IllegalArgumentException.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForBLessThanZero() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double a = 0.5;
@@ -207,7 +207,7 @@ public class DerivateTransformDistanceTest {
 	 * Robustness test: When initializing with <code>c < 0</code> the constuctor is
 	 * supposed to thrown an IllegalArgumentException.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForCLessThanZero() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double a = 0.5;

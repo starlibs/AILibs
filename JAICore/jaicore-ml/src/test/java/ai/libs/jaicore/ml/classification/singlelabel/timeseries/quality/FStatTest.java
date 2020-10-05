@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Arrays;
 import java.util.List;
 
-import ai.libs.jaicore.test.ShortTest;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link FStat}.
@@ -22,7 +22,7 @@ public class FStatTest {
 	/**
 	 * See {@link FStat#assessQuality(List, int[])}.
 	 */
-	@ShortTest
+	@Test
 	public void assessQualityTest() {
 		FStat fStat = new FStat();
 

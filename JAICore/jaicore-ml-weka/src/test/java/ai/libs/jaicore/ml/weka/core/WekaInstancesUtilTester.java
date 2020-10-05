@@ -15,6 +15,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -29,7 +30,6 @@ import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstancesUtil;
-import ai.libs.jaicore.test.ShortParameterizedTest;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Instances;
 
@@ -45,7 +45,7 @@ public class WekaInstancesUtilTester extends Tester {
 		return new WekaInstances(problemSet.getDataset());
 	}
 
-	@ShortParameterizedTest
+	@ParameterizedTest(name="Test util converstion on {0}")
 	@MethodSource("getDatasets")
 	public void testUtilConversion(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, UnsupportedAttributeTypeException {
 		WekaInstances dataset = this.getWekaDataset(problemSet);
@@ -54,7 +54,7 @@ public class WekaInstancesUtilTester extends Tester {
 		assertEquals(dataset.getNumAttributes(), wekaInstances.numAttributes() - (long) 1);
 	}
 
-	@ShortParameterizedTest
+	@ParameterizedTest(name="Test instances constructor on {0}")
 	@MethodSource("getDatasets")
 	public void testWekaInstancesConstructor(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException {
 		WekaInstances dataset = this.getWekaDataset(problemSet);
@@ -68,7 +68,7 @@ public class WekaInstancesUtilTester extends Tester {
 		}
 	}
 
-	@ShortParameterizedTest
+	@ParameterizedTest(name="Test instances constructor on {0}")
 	@MethodSource("getDatasets")
 	public void testWekaInstanceConstructor(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, UnsupportedAttributeTypeException {
 		WekaInstances dataset = this.getWekaDataset(problemSet);
@@ -83,7 +83,7 @@ public class WekaInstancesUtilTester extends Tester {
 		assertTrue("The average instance construction time was " + runtimeStats.getMean() + " but at most 10ms is allowed.", runtimeStats.getMean() <= 10);
 	}
 
-	@ShortParameterizedTest
+	@ParameterizedTest(name="Test sparse2sparse and dense2dense on {0}")
 	@MethodSource("getDatasets")
 	public void testSparse2SparseAndDense2Dense(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException {
 		WekaInstances dataset = this.getWekaDataset(problemSet);
@@ -92,7 +92,7 @@ public class WekaInstancesUtilTester extends Tester {
 		}
 	}
 
-	@ShortParameterizedTest
+	@ParameterizedTest(name="Test training and prediction with ZeroR on {0}")
 	@MethodSource("getDatasets")
 	public void testTrainingAndPrediction(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, TrainingException, SplitFailedException, PredictionException {
 		WekaInstances dataset = this.getWekaDataset(problemSet);
