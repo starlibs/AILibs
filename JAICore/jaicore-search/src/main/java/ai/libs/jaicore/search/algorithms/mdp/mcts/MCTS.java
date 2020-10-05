@@ -324,19 +324,18 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 							}
 
 							/* we now have the action chosen for this node. Now draw a successor state */
-							long startSuccessorComputation = System.currentTimeMillis();
-							N nextState = this.utils.drawSuccessorState(this.mdp, current, action);
-							timeSpentInSuccessorGenerationThisIteration += System.currentTimeMillis() - startSuccessorComputation;
-
 							try {
+								long startSuccessorComputation = System.currentTimeMillis();
+								N nextState = this.utils.drawSuccessorState(this.mdp, current, action);
+								timeSpentInSuccessorGenerationThisIteration += System.currentTimeMillis() - startSuccessorComputation;
 								scores.add(this.mdp.getScore(current, action, nextState));
+								current = nextState;
+								path.extend(current, action);
 							}
 							catch (InterruptedException e) {
 								this.checkAndConductTermination(); // if we have been canceled, throw the corresponding exception
 								throw e; // otherwise re-throw the InterruptedException
 							}
-							current = nextState;
-							path.extend(current, action);
 						}
 
 						/* if we touched the ground with the tree policy, add the last action to the taboo list */
@@ -505,5 +504,9 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 
 	public int getMsSpentInTreePolicyUpdates() {
 		return this.msSpentInTreePolicyUpdates;
+	}
+
+	public boolean isTabooExhaustedNodes() {
+		return this.tabooExhaustedNodes;
 	}
 }

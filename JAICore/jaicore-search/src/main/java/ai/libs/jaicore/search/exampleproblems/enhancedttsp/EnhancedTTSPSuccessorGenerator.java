@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.MappingIterator;
+import ai.libs.jaicore.basic.sets.EmptyIterator;
 import ai.libs.jaicore.interrupt.UndeclaredInterruptedException;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPState;
@@ -82,6 +83,9 @@ public class EnhancedTTSPSuccessorGenerator implements ILazySuccessorGenerator<E
 	@Override
 	public Iterator<INewNodeDescription<EnhancedTTSPState, String>> getIterativeGenerator(final EnhancedTTSPState node) {
 		this.logger.info("Creating iterative generator.");
+		if (node.getCurTour().size() == this.problem.getLocations().size()) {
+			return new EmptyIterator<>();
+		}
 		ShortList availableDestinations = this.getPossibleDestinationsThatHaveNotBeenGeneratedYet(node);
 		return new MappingIterator<>(availableDestinations.iterator(), s -> {
 			try {

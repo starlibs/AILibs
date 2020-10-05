@@ -60,26 +60,38 @@ public class TempFileHandler implements Closeable {
 	 *
 	 * @return UUID associated with the new temporary file.
 	 */
-	public String createTempFile() {
-		String uuid = UUID.randomUUID().toString();
-		String path = this.tempFileDirectory.getAbsolutePath() + File.separator + uuid;
+	public File createTempFile() {
+		return this.createTempFile(UUID.randomUUID().toString());
+	}
 
+	public File createTempFile(final String name) {
+		String path = this.tempFileDirectory.getAbsolutePath() + File.separator + name;
 		FileUtil.touch(path);
 		File file = new File(path);
 		file.deleteOnExit();
-		this.tempFiles.put(uuid, file);
-		return uuid;
+		this.tempFiles.put(name, file);
+		return file;
+	}
+
+	public boolean doesTempFileExist(final String name) {
+		return new File(this.tempFileDirectory + File.separator + name).exists();
 	}
 
 	/**
-	 * Get the temporary file with the UUID.
+	 * Get the temporary file with some name.
 	 *
-	 * @param uuid
-	 *            UUID of the file.
-	 * @return File object associated with the UUID.
+	 * @param name
+	 *            name of the temporary file.
+	 * @return File object associated with the name.
 	 */
-	public File getTempFile(final String uuid) {
-		return this.tempFiles.get(uuid);
+	public File getTempFile(final String name) {
+		if (!this.tempFiles.containsKey(name)) {
+			if (!this.doesTempFileExist(name)) {
+				throw new IllegalArgumentException("The temporary file " + name + " does not exist!");
+			}
+			this.tempFiles.put(name, new File(this.tempFileDirectory.getAbsolutePath() + File.separator + name));
+		}
+		return this.tempFiles.get(name);
 	}
 
 	/**

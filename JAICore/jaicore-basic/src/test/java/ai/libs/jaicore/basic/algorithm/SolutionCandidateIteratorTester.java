@@ -1,7 +1,8 @@
 package ai.libs.jaicore.basic.algorithm;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -94,23 +95,20 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		algorithm.registerListener(new Object() {
 			@Subscribe
 			public void receiveSolution(final ISolutionCandidateFoundEvent<Object> solutionEvent) {
+				assertFalse(Thread.currentThread().isInterrupted(), "The worker thread " + Thread.currentThread() + " has been interrupted while transmitting a solution.");
 				Object solution = solutionEvent.getSolutionCandidate();
 				Object solutionToOriginalProblem = SolutionCandidateIteratorTester.this.reduction != null ? SolutionCandidateIteratorTester.this.reduction.decodeSolution(solution) : solution;
-				assertTrue("Returned solution " + solution + " converted to original solution " + solutionToOriginalProblem + " is not a solution in the original problem according to ground truth.",
-						stillMissingSolutions.contains(solutionToOriginalProblem) || foundSolutions.contains(solutionToOriginalProblem));
-				if (foundSolutions.contains(solutionToOriginalProblem)) {
-					SolutionCandidateIteratorTester.this.logger.warn("Returned solution {} converted to original solution {} has already been found earlier, i.e. is returned twice.", solution, solutionToOriginalProblem);
-				} else {
-					foundSolutions.add(solutionToOriginalProblem);
-					stillMissingSolutions.remove(solutionToOriginalProblem);
-				}
+				assertTrue(problem.getValue().contains(solutionToOriginalProblem), algorithm.getClass() + " has returned solution " + solutionToOriginalProblem + ", which is no solution to the original problem.");
+				assertFalse(foundSolutions.contains(solutionToOriginalProblem), algorithm.getClass() + " has returned solution " + solutionToOriginalProblem + " for the second time!");
+				foundSolutions.add(solutionToOriginalProblem);
+				stillMissingSolutions.remove(solutionToOriginalProblem);
 			}
 		});
 		while (algorithm.hasNext()) {
 			algorithm.nextWithException();
 		}
-		assertTrue("Found " + foundSolutions.size() + "/" + problem.getValue().size() + " solutions.\n\t" + stillMissingSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")) + "\nFound solutions: \n\t"
-				+ foundSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")), stillMissingSolutions.isEmpty());
+		assertTrue(stillMissingSolutions.isEmpty(), "Found " + foundSolutions.size() + "/" + problem.getValue().size() + " solutions.\n\t" + stillMissingSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")) + "\nFound solutions: \n\t"
+				+ foundSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")));
 	}
 
 	private void solveProblemViaIterator(final Entry<Object, Collection<?>> problem, final ISolutionCandidateIterator<Object, Object> algorithm)
@@ -134,24 +132,22 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 			} else if (e instanceof AlgorithmFinishedEvent) {
 				terminated = true;
 			} else {
-				assertTrue(!terminated);
+				assertFalse(terminated);
 				if (e instanceof ISolutionCandidateFoundEvent) {
 					Object solution = ((ISolutionCandidateFoundEvent<Object>) e).getSolutionCandidate();
 					Object solutionToOriginalProblem = solution;
 					if (SolutionCandidateIteratorTester.this.reduction != null) {
 						solutionToOriginalProblem = SolutionCandidateIteratorTester.this.reduction.decodeSolution(solution);
 					}
-					if (!stillMissingSolutions.contains(solutionToOriginalProblem)) {
-						SolutionCandidateIteratorTester.this.logger.warn("Returned solution {} converted to original solution {} is not a solution in the original problem according to ground truth.", solution, solutionToOriginalProblem);
-					} else {
-						foundSolutions.add(solutionToOriginalProblem);
-						stillMissingSolutions.remove(solutionToOriginalProblem);
-					}
+					assertTrue(problem.getValue().contains(solutionToOriginalProblem), algorithm.getClass() + " has returned solution " + solutionToOriginalProblem + ", which is no solution to the original problem.");
+					assertFalse(foundSolutions.contains(solutionToOriginalProblem), algorithm.getClass() + " has returned solution " + solutionToOriginalProblem + " for the second time!");
+					foundSolutions.add(solutionToOriginalProblem);
+					stillMissingSolutions.remove(solutionToOriginalProblem);
 				}
 			}
 		}
-		assertTrue("Found " + foundSolutions.size() + "/" + problem.getValue().size() + " solutions. Missing solutions:\n\t" + stillMissingSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t"))
-				+ "\nFound solutions: \n\t" + foundSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")), stillMissingSolutions.isEmpty());
+		assertTrue(stillMissingSolutions.isEmpty(), "Found " + foundSolutions.size() + "/" + problem.getValue().size() + " solutions. Missing solutions:\n\t" + stillMissingSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t"))
+				+ "\nFound solutions: \n\t" + foundSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")));
 	}
 
 	@ParameterizedTest(name="Single-Thread solution events via bus on {0}")

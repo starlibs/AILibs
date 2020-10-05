@@ -78,7 +78,7 @@ public class DatasetFileSorter implements ICancelable {
 			fileWriter.write(arffHeader);
 
 			// Create a temp file with all datapoints
-			String tempFileUUID = this.tempFileHandler.createTempFile();
+			String tempFileUUID = this.tempFileHandler.createTempFile().getName();
 			FileWriter tempFileWriter = this.tempFileHandler.getFileWriterForTempFile(tempFileUUID);
 			String dataPointLine;
 			boolean datastarted = false;
@@ -125,8 +125,8 @@ public class DatasetFileSorter implements ICancelable {
 			return fileUUID;
 		} else {
 			// Split the existing file into two halfs
-			String leftUUID = this.tempFileHandler.createTempFile();
-			String rightUUID = this.tempFileHandler.createTempFile();
+			String leftUUID = this.tempFileHandler.createTempFile().getName();
+			String rightUUID = this.tempFileHandler.createTempFile().getName();
 			try (FileWriter leftWriter = this.tempFileHandler.getFileWriterForTempFile(leftUUID)) {
 				try (FileWriter rightWriter = this.tempFileHandler.getFileWriterForTempFile(rightUUID)) {
 					try (BufferedReader reader = this.tempFileHandler.getFileReaderForTempFile(fileUUID)) {
@@ -169,7 +169,7 @@ public class DatasetFileSorter implements ICancelable {
 	}
 
 	private String merge(final String leftUUID, final String rightUUID) throws IOException {
-		String uuid = this.tempFileHandler.createTempFile();
+		String uuid = this.tempFileHandler.createTempFile().getName();
 		try (FileWriter writer = this.tempFileHandler.getFileWriterForTempFile(uuid)) {
 			try (BufferedReader leftReader = this.tempFileHandler.getFileReaderForTempFile(leftUUID)) {
 				try (BufferedReader rightReader = this.tempFileHandler.getFileReaderForTempFile(rightUUID)) {
