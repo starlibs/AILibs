@@ -29,7 +29,9 @@ env:
   - TEST_PROJECT=:JAICore:jaicore-experiments
   - TEST_PROJECT=:JAICore:jaicore-logic
   - TEST_PROJECT=:JAICore:jaicore-math
-  - TEST_PROJECT=:JAICore:jaicore-ml
+  - TEST_PROJECT=:JAICore:jaicore-ml TEST_TASK=testOpenMLAdapter
+  - TEST_PROJECT=:JAICore:jaicore-ml TEST_TASK=testSampling
+  - TEST_PROJECT=:JAICore:jaicore-ml TEST_TASK=testOthers
   - TEST_PROJECT=:JAICore:jaicore-ml-meka 
   - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testInterruptibility
   - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testCancelability
