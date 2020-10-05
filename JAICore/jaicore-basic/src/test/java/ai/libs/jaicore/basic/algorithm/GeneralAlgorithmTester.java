@@ -137,6 +137,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 	@ParameterizedTest(name="Single-Thread Interrupt test on {0}")
 	@MethodSource("getProblemSets")
 	public void testInterrupt(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
+		this.logger.info("Testing interruptibility without parallelization for problem set {}", problemSet);
 		this.runInterruptTest(problemSet, false);
 	}
 
@@ -145,6 +146,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 	@ParameterizedTest(name="Multi-Thread Interrupt test on {0}")
 	@MethodSource("getProblemSets")
 	public void testInterruptWhenParallelized(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
+		this.logger.info("Testing interruptibility under parallelization for problem set {}", problemSet);
 		this.runInterruptTest(problemSet, true);
 	}
 
@@ -153,6 +155,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 	@ParameterizedTest(name="Single-Thread Cancellation test on {0}")
 	@MethodSource("getProblemSets")
 	public void testCancel(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
+		this.logger.info("Testing cancelability without parallelization for problem set {}", problemSet);
 		this.runCancelTest(problemSet, false);
 	}
 
@@ -161,6 +164,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 	@ParameterizedTest(name="Multi-Thread Cancellation test on {0}")
 	@MethodSource("getProblemSets")
 	public void testCancelWhenParallelized(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
+		this.logger.info("Testing cancelability under parallelization for problem set {}", problemSet);
 		this.runCancelTest(problemSet, true);
 	}
 
@@ -169,6 +173,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 	@ParameterizedTest(name="Single-Thread Timeout Test on {0}")
 	@MethodSource("getProblemSets")
 	public void testTimeout(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
+		this.logger.info("Testing timeout adherence without parallelization for problem set {}", problemSet);
 		this.runTimeoutTest(problemSet, false);
 	}
 
@@ -177,6 +182,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 	@ParameterizedTest(name="Multi-Thread Timeout Test on {0}")
 	@MethodSource("getProblemSets")
 	public void testTimeoutWhenParallelized(final IAlgorithmTestProblemSet<?> problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
+		this.logger.info("Testing timeout adherence under parallelization for problem set {}", problemSet);
 		this.runTimeoutTest(problemSet, true);
 	}
 

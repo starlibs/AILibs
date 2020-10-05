@@ -65,6 +65,10 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
+	<logger name="ai.libs.jaicore.interrupt">
+	 <level value="info" />
+	</logger>
+	
 	<logger name="ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester">
 	 <level value="warn" />
 	</logger>
