@@ -136,8 +136,7 @@ public class OpenMLDatasetAdapterTest {
 				23512, // higgs
 				// /**/ 40594, // Reuters => Multi target
 				40668, // connect-4
-				41064, // convex
-				41065 // mnist rotation
+				41064 // convex
 				// /**/ 42123 // articleinfluence => string attribute
 				));
 	}
@@ -145,7 +144,8 @@ public class OpenMLDatasetAdapterTest {
 	public static Stream<Arguments> getBigDatasets() throws IOException, Exception {
 		return readDatasets(Arrays.asList(
 				40927, // CIFAR-10 // this is even TOO big for a 4GB test
-				41026 // gisette // this is even TOO big for a 4GB test
+				41026, // gisette // this is even TOO big for a 4GB test
+				41065 // mnist rotation // this in fact just fits into a 4GB test but sometime can cause problems; its a borderline case
 				));
 	}
 

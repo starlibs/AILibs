@@ -228,7 +228,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 
 				if (!listener.getErrorOutput().isEmpty()) {
 					L.error("Raise error message: {}", listener.getErrorOutput());
-					throw new TrainingException(listener.getErrorOutput().split("\\n")[0]);
+					throw new TrainingException(listener.getErrorOutput());
 				}
 			}
 		} catch (TrainingException e) {
