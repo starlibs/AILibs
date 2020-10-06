@@ -13,7 +13,10 @@ cache:
   
 # overriding the install step is important to avoid that ./gradlew assemble is run (which is the default in travis)
 install:
-  - pyenv global 3.6.12
+  - pyenv versions
+  - pyenv install 3.7.0
+  - pyenv versions
+  - pyenv global 3.7.0
   - python --version
   - pip3 install liac-arff numpy scipy scikit-learn tpot pandas xgboost
 
