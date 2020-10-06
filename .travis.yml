@@ -16,6 +16,7 @@ install:
   - pyenv versions
   - pyenv global 3.6.7
   - python --version
+  - pip3 install --upgrade pip
   - pip3 install liac-arff numpy scipy scikit-learn tpot pandas xgboost
 
 # defines a matrix of jobs for testing.
