@@ -10,10 +10,6 @@ cache:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
   - "$HOME/.sonar/cache"
-
-# setup python version
-python:
-  - 3.6
   
 # overriding the install step is important to avoid that ./gradlew assemble is run (which is the default in travis)
 install:
@@ -59,6 +55,11 @@ env:
 
 
 addons:
+  apt:
+    sources:
+      - deadsnakes # source required so it finds the package definition below
+    packages:
+      - python3.6
   sonarcloud:
     organization: "starlibs"
 
