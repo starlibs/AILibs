@@ -14,9 +14,7 @@ cache:
 # overriding the install step is important to avoid that ./gradlew assemble is run (which is the default in travis)
 install:
   - pyenv versions
-  - pyenv install 3.7.0
-  - pyenv versions
-  - pyenv global 3.7.0
+  - pyenv global 3.6.7
   - python --version
   - pip3 install liac-arff numpy scipy scikit-learn tpot pandas xgboost
 
@@ -60,11 +58,6 @@ env:
 
 
 addons:
-  apt:
-    sources:
-      - deadsnakes # source required so it finds the package definition below
-    packages:
-      - python3.6
   sonarcloud:
     organization: "starlibs"
 
