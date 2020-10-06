@@ -13,7 +13,7 @@ cache:
 
 # overriding the install step is important to avoid that ./gradlew assemble is run (which is the default in travis)
 install:
-  - true
+  - pip install liac-arff numpy scipy scikit-learn tpot pandas xgboost
 
 # defines a matrix of jobs for testing.
 env:
