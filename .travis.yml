@@ -13,13 +13,13 @@ cache:
   
 # overriding the install step is important to avoid that ./gradlew assemble is run (which is the default in travis)
 install:
-  - pyenv global 3.6
   - python --version
   - pip3 install liac-arff numpy scipy scikit-learn tpot pandas xgboost
 
 # defines a matrix of jobs for testing.
 env:
   global:
+  - PYTHON=3.6
   - secure: yUfjJ5ZSdOWWYLye5Oc6LnkN8fRFHOvRM/NlH15NXN5ZloRqfsfcQ80TFUBOCkEBwGPwUqhqZn2x7yc6XzVlpZ0lNc8voDvDNvGk2V0R42QOHUPFce0HicAtslM6we05kWA3wmcKvB3nBhRC1rPcrZC3a0G2Vby8yfvO2BEEog7Cb8zhaX5RcOFedSw3pgDrnu/aglZ2mtOjhyt36aYXx7UGY9ueEO24EcF0R8XKNn8h7qSnr7GJtPLioTME4gCOhV57YBBgDbM72I33Rmmr1fvb264/QTozYh5E0e+0uv5BuQO8q4XZU5VjdG+eTISbtkXc3bFSAOeVYUrXJBv7t7C/IhuiaHFRSC8O9dME8MXfaa/0E199CgmI7M23LIjKF7r3gPz6VvBx9BBs3m7zgCnwBhomw8ggk1U21GDYR5AwoaGhYpBCFfdMNPnPiS8vpoXYk9L1dl8vyGRyVLBNpAq7wXthWrUz3X3HEEMVWDyRqnugDzS+lE/hB+Mh7TA+lqVJegRcNOyjHw/JdynEbbvatRXOZQftcgQ4FZ81dUjI+Svin79WCdCSGM8fcTTIB5+/avoggAyLwQpsX5BXewEhADdwl5OcsFiYBPZLbX0gUBtbIKCsEOxUMX55VbzdiLoWOFMjjqUeyXJteGdqVKcFIyEazJ/Eh07lc78SxqE=
   jobs:
   - TEST_PROJECT=:hasco-core
