@@ -72,9 +72,7 @@ script:
 # Assign jobs to stages. The test jobs defined above are implicitly assigned to the test stage: https://docs.travis-ci.com/user/build-stages/#naming-your-build-stages
 jobs:
   exclude:
-#    - if: true #branch != master
-#        env: TEST_CAT=long
-      
+    - if: (branch != master) AND (env(TEST_CAT) = long)
     - if: NOT (branch IN (master, dev))
  #       env: TEST_CAT=medium
       
