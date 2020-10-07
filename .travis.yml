@@ -73,8 +73,7 @@ script:
 jobs:
   exclude:
     - if: (branch != master) AND (env(TEST_CAT) = long)
-    - if: NOT (branch IN (master, dev))
- #       env: TEST_CAT=medium
+    - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = medium)
       
   include:
     - stage: check_build
