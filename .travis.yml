@@ -75,7 +75,7 @@ jobs:
     - if: true #branch != master
 #        env: TEST_CAT=long
       
-    - if: true #NOT (branch IN (master, dev))
+    - if: NOT (branch IN (master, dev))
  #       env: TEST_CAT=medium
       
   include:
