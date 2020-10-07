@@ -20,7 +20,7 @@
       "min" : 1.0E-12,
       "max" : 10.0,
       "refineSplits" : 8,
-      "minInterval" : 1
+      "minInterval" : 0.1
     }, {
       "name" : "a4",
       "type" : "double",
@@ -28,7 +28,7 @@
       "min" : 1.0E-12,
       "max" : 10.0,
       "refineSplits" : 8,
-      "minInterval" : 1
+      "minInterval" : 0.1
     }, {
       "name" : "a5",
       "type" : "double",
@@ -36,7 +36,7 @@
       "min" : 1.0E-12,
       "max" : 10.0,
       "refineSplits" : 8,
-      "minInterval" : 1
+      "minInterval" : 0.1
     } ],
     "dependencies" : [ ]
   }, {
@@ -58,7 +58,7 @@
       "min" : 1.0E-12,
       "max" : 10.0,
       "refineSplits" : 8,
-      "minInterval" : 10
+      "minInterval" : 0.1
     }, {
       "name" : "a4",
       "type" : "double",
@@ -66,7 +66,7 @@
       "min" : 1.0E-12,
       "max" : 10.0,
       "refineSplits" : 8,
-      "minInterval" : 10
+      "minInterval" : 0.1
     }, {
       "name" : "a5",
       "type" : "double",
@@ -74,7 +74,7 @@
       "min" : 1.0E-12,
       "max" : 10.0,
       "refineSplits" : 8,
-      "minInterval" : 10
+      "minInterval" : 0.1
     } ],
     "dependencies" : [ {
       "pre" : "c in {true}",
