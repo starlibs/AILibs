@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.awaitility.Awaitility;
 import org.junit.FixMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -83,6 +85,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends ATest {
 			/* get algorithm */
 			this.logger.info("Loading the algorithm");
 			IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> algorithm = this.getAutoMLAlgorithm(train); // AutoML-tools should deliver a classifier
+			algorithm.setNumCPUs(1);
 
 			assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 			if (algorithm instanceof ILoggingCustomizable) {
@@ -114,7 +117,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends ATest {
 			assertTrue(test.size() >= 10, "At least 10 instances must be classified!");
 			IClassifierEvaluator evaluator = new PreTrainedPredictionBasedClassifierEvaluator(test, this.getTestMeasure());
 			double score = evaluator.evaluate(c);
-			Thread.sleep(algorithm.getTimeout().seconds() / 20);
+			Awaitility.await().atLeast(Duration.ofSeconds(algorithm.getTimeout().seconds() / 20));
 			assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty(), "There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks());
 			this.logger.info("Error rate of solution {} ({}) on {} is: {}", c.getClass().getName(), c, datasetname, score);
 		} catch (AlgorithmTimeoutedException e) {

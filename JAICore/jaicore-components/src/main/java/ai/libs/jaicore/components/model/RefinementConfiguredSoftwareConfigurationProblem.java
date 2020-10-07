@@ -8,6 +8,7 @@ import org.api4.java.common.attributedobjects.IObjectEvaluator;
 
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfiguration;
 import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
@@ -47,8 +48,16 @@ public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparab
 		/* check that parameter refinements are defined for all components */
 		for (IComponent c : this.getComponents()) {
 			for (IParameter p : c.getParameters()) {
-				if (p.isNumeric() && this.paramRefinementConfig.getRefinement(c, p) == null) {
-					throw new IllegalArgumentException("Error in parsing config file " + configurationFile.getAbsolutePath() + ". No refinement config was delivered for numeric parameter " + p.getName() + " of component " + c.getName());
+				if (p.isNumeric()) {
+					if (this.paramRefinementConfig.getRefinement(c, p) == null) {
+						throw new IllegalArgumentException("Error in parsing config file " + configurationFile.getAbsolutePath() + ". No refinement config was delivered for numeric parameter " + p.getName() + " of component " + c.getName());
+					}
+					NumericParameterDomain domain = (NumericParameterDomain)p.getDefaultDomain();
+					INumericParameterRefinementConfiguration refinementConfig = this.paramRefinementConfig.getRefinement(c, p);
+					double range = domain.getMax() - domain.getMin();
+					if (range > 0 && refinementConfig.getIntervalLength() >= range) {
+						throw new IllegalArgumentException("Error in parsing config file " + configurationFile.getAbsolutePath() + ". The defined interval length " + refinementConfig.getIntervalLength() + " for parameter " + p.getName() + " of component " + c.getName() + " is not strictly smaller than the parameter range " + (domain.getMax() - domain.getMin() + " of interval [" + domain.getMin() + ", " + domain.getMax() + "]. No refinement is possible hence."));
+					}
 				}
 			}
 		}

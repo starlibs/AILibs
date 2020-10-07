@@ -46,8 +46,6 @@ public class ScikitLearnWrapperTest {
 	private static final String BAYESNET_TRAIN_ARFF = BASE_TESTRSC_PATH + "Bayesnet_Train.arff";
 	private static final String MLP_REGRESSOR_DUMP = BASE_TESTRSC_PATH + "01673183575_MLPRegressor.pcl";
 	private static final String CLASSIFIER_DUMP = BASE_TESTRSC_PATH + "0800955787_Pipeline.pcl";
-	private static final String OWN_CLASSIFIER_DUMP = BASE_TESTRSC_PATH + "0532052678.arff";
-	private static final String IMPORT_FOLDER = BASE_TESTRSC_PATH + "importfolder_test";
 
 	@Test
 	@LongTest
@@ -167,37 +165,6 @@ public class ScikitLearnWrapperTest {
 		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.fit(datasetTrain);
 		slw.predict(datasetTest);
-		assertNotNull(MSG_MODELPATH_NOT_NULL, slw.getModelPath());
-		assertTrue(slw.getModelPath().exists());
-	}
-
-	@Test
-	@Disabled("Currently unsupported feature")
-	@LongTest
-	public void loadOwnClassifierFromFileWithNamespace() throws Exception {
-		File importfolder = new File(IMPORT_FOLDER);
-		String importStatement = ScikitLearnWrapper.createImportStatementFromImportFolder(importfolder, true);
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("test_module_1.My_MLPRegressor()", importStatement, EScikitLearnProblemType.CLASSIFICATION);
-		ILabeledDataset<ILabeledInstance> dataset = this.loadARFF(REGRESSION_ARFF);
-		slw.setProblemType(EScikitLearnProblemType.REGRESSION);
-		int s = dataset.getNumAttributes();
-		slw.setTargets(s - 1, s - 2, s - 3);
-		slw.fit(dataset);
-		assertNotNull(MSG_MODELPATH_NOT_NULL, slw.getModelPath());
-		assertTrue(slw.getModelPath().exists());
-	}
-
-	@Test
-	@Disabled("Currently multi-target is not supported anymore.")
-	@LongTest
-	public void loadOwnClassifierFromFileWithoutNamespace() throws Exception {
-		File importfolder = new File(IMPORT_FOLDER);
-		String importStatement = ScikitLearnWrapper.createImportStatementFromImportFolder(importfolder, false);
-		ScikitLearnWrapper<SingleLabelClassification, SingleLabelClassificationPredictionBatch> slw = new ScikitLearnWrapper<>("My_MLPRegressor()", importStatement, EScikitLearnProblemType.REGRESSION);
-		ILabeledDataset<ILabeledInstance> dataset = this.loadARFF(OWN_CLASSIFIER_DUMP);
-		int s = dataset.getNumAttributes();
-		slw.setTargets(s - 1, s - 2, s - 3);
-		slw.fit(dataset);
 		assertNotNull(MSG_MODELPATH_NOT_NULL, slw.getModelPath());
 		assertTrue(slw.getModelPath().exists());
 	}
