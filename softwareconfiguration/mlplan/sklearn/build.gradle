@@ -19,6 +19,31 @@ dependencies {
 	testCompile project(path: ':mlplan-core', configuration: 'testArtifacts')
 }
 
+task testCoreFunctionality(type: Test) {
+	useJUnitPlatform{
+		filter {
+			excludeTestsMatching "ai.libs.mlplan.sklearnmlplan.MLPlanScikitLearnClassificationResultDeliveryTester"
+			excludeTestsMatching "ai.libs.mlplan.sklearnmlplan.MLPlanScikitLearnRegressionResultDeliveryTester"
+		}
+	}
+}
+
+task testClassification(type: Test) {
+	useJUnitPlatform{
+		filter {
+			includeTestsMatching "ai.libs.mlplan.sklearnmlplan.MLPlanScikitLearnClassificationResultDeliveryTester"
+		}
+	}
+}
+
+task testRegression(type: Test) {
+	useJUnitPlatform{
+		filter {
+			includeTestsMatching "ai.libs.mlplan.sklearnmlplan.MLPlanScikitLearnRegressionResultDeliveryTester"
+		}
+	}
+}
+
 uploadArchives {
 	repositories {
 		mavenDeployer {

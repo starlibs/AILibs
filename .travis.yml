@@ -54,7 +54,9 @@ env:
   - TEST_PROJECT=:mlplan-full
   - TEST_PROJECT=:mlplan-gui
   - TEST_PROJECT=:mlplan-meka
-  - TEST_PROJECT=:mlplan-sklearn
+  - TEST_PROJECT=:mlplan-sklearn TEST_TASK=testCoreFunctionality
+  - TEST_PROJECT=:mlplan-sklearn TEST_TASK=testClassification TEST_CAT=long
+  - TEST_PROJECT=:mlplan-sklearn TEST_TASK=testRegression TEST_CAT=long
   - TEST_PROJECT=:mlplan-weka TEST_TASK=testCoreFunctionality
   - TEST_PROJECT=:mlplan-weka TEST_TASK=testClassification TEST_CAT=long
   - TEST_PROJECT=:mlplan-weka TEST_TASK=testRegression TEST_CAT=long
@@ -72,7 +74,7 @@ script:
 # Assign jobs to stages. The test jobs defined above are implicitly assigned to the test stage: https://docs.travis-ci.com/user/build-stages/#naming-your-build-stages
 jobs:
   exclude:
-    - if: (branch != master) AND (env(TEST_CAT) = long)
+    - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = long) ## typically we will want to remove dev here, because long is only for master. This is just initially to make sure that also the long tests are built
     - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = medium)
       
   include:
