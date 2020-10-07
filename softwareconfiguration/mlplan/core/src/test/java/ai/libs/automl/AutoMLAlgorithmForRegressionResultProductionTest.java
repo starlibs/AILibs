@@ -19,7 +19,7 @@ import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 import ai.libs.jaicore.ml.regression.loss.ERegressionPerformanceMeasure;
 
-public abstract class AutoMLAlgorithmForRegressionResultProductionTester extends AutoMLAlgorithmResultProductionTester {
+public abstract class AutoMLAlgorithmForRegressionResultProductionTest extends AutoMLAlgorithmResultProductionTester {
 
 	private static OpenmlConnector con = new OpenmlConnector();
 

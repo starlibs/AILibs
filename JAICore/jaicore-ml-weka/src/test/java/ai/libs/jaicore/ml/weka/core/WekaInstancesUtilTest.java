@@ -19,7 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.ml.core.dataset.SparseInstance;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetAdapterTest;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
@@ -33,7 +33,7 @@ import ai.libs.jaicore.ml.weka.dataset.WekaInstancesUtil;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Instances;
 
-public class WekaInstancesUtilTester extends Tester {
+public class WekaInstancesUtilTest extends ATest {
 
 	public static Stream<Arguments> getDatasets() throws Exception {
 		return OpenMLDatasetAdapterTest.getSmallDatasets();
@@ -88,7 +88,7 @@ public class WekaInstancesUtilTester extends Tester {
 	public void testSparse2SparseAndDense2Dense(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException {
 		WekaInstances dataset = this.getWekaDataset(problemSet);
 		for (ILabeledInstance i : dataset) {
-			assertTrue((i instanceof SparseInstance) == (((WekaInstance) i).getElement() instanceof weka.core.SparseInstance));
+			assertEquals((i instanceof SparseInstance), (((WekaInstance) i).getElement() instanceof weka.core.SparseInstance));
 		}
 	}
 

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author mwever
  */
-public class StatisticsUtilTest {
+class StatisticsUtilTest {
 
 	private static final int SAMPLE_SIZE = 30;
 
@@ -25,7 +25,7 @@ public class StatisticsUtilTest {
 	private static double[] negSampleB;
 
 	@BeforeAll
-	public static void setup() {
+	static void setup() {
 		double[][] samples = generateDistributionSamples(new NormalDistribution(new Well1024a(0), 0.0, 1.0), new NormalDistribution(new Well1024a(2), 0.0, 1.0));
 		posSampleA = samples[0];
 		posSampleB = samples[1];
@@ -36,19 +36,19 @@ public class StatisticsUtilTest {
 	}
 
 	@Test
-	public void testWilcoxonSignedRankSumTest() {
+	void testWilcoxonSignedRankSumTest() {
 		assertFalse("Wilcoxon Signed Rank Test detects different distributions which is not the case.", StatisticsUtil.wilcoxonSignedRankSumTestTwoSided(posSampleA, posSampleB));
 		assertTrue("Wilcoxon Signed Rank Test did not detect different distributions although they are.", StatisticsUtil.wilcoxonSignedRankSumTestTwoSided(negSampleA, negSampleB));
 	}
 
 	@Test
-	public void testMannWhitneyUTest() {
+	void testMannWhitneyUTest() {
 		assertFalse("MannWhitneyUTest detects different distributions which is not the case.", StatisticsUtil.mannWhitneyTwoSidedSignificance(posSampleA, posSampleB));
 		assertTrue("Wilcoxon Signed Rank Test did not detect different distributions although they are.", StatisticsUtil.wilcoxonSignedRankSumTestTwoSided(negSampleA, negSampleB));
 	}
 
 	@Test
-	public void testTTest() {
+	void testTTest() {
 		assertFalse("TTest identifies different distributions which is not the case", StatisticsUtil.twoSampleTTestSignificance(posSampleA, posSampleB));
 		assertTrue("TTest did not detect different distributions although they are.", StatisticsUtil.twoSampleTTestSignificance(negSampleA, negSampleB));
 	}

@@ -7,6 +7,10 @@ import ai.libs.jaicore.db.IDatabaseConfig;
 
 public class DatabaseAdapterFactory {
 
+	private DatabaseAdapterFactory() {
+		/* avoid instantiation */
+	}
+
 	public static IDatabaseAdapter get(final IDatabaseConfig config) {
 		Objects.requireNonNull(config);
 		return new SQLAdapter(config);

@@ -14,12 +14,12 @@ import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.graph.LabeledGraph;
 import ai.libs.jaicore.test.LongTest;
 import ai.libs.jaicore.test.MediumTest;
 
-public abstract class GraphGeneratorTester<N, A> extends Tester {
+public abstract class GraphGeneratorTester<N, A> extends ATest {
 
 	private class Node {
 		N point;

@@ -30,7 +30,7 @@ import org.junit.runners.MethodSorters;
 
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.concurrent.GlobalTimer;
@@ -47,7 +47,7 @@ import ai.libs.jaicore.test.LongParameterizedTest;
  *
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
+public abstract class AutoMLAlgorithmResultProductionTester extends ATest {
 
 	public abstract IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(ILabeledDataset<?> data) throws AlgorithmCreationException, IOException;
 
@@ -73,6 +73,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 			List<ILabeledDataset<?>> trainTestSplit = this.getTrainTestSplit(problemSet.getDataset());
 			ILabeledDataset<?> train = trainTestSplit.get(0);
 			ILabeledDataset<?> test = trainTestSplit.get(1);
+			test.removeIf(i -> i.getLabel() == null);
 			if (train.getNumAttributes() != test.getNumAttributes()) {
 				throw new IllegalStateException();
 			}

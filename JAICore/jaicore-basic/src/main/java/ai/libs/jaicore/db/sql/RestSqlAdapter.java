@@ -149,8 +149,8 @@ class RestSqlAdapter implements IDatabaseAdapter {
 		queryStringBuilder.append("UPDATE " + tablename + " SET ");
 		queryStringBuilder.append(valuesToWrite.entrySet().stream().map(e -> e.getKey() + "='" + e.getValue() + "'").collect(Collectors.joining(",")));
 		if (!where.isEmpty()) {
-			queryStringBuilder.append(" WHERE ");
-			queryStringBuilder.append(where.entrySet().stream().map(e -> RestSqlAdapter.whereClauseElement(e.getKey(), e.getValue() != null ? e.getValue().toString() : null)).collect(Collectors.joining(" AND ")));
+			queryStringBuilder.append(STR_SPACE_WHERE);
+			queryStringBuilder.append(where.entrySet().stream().map(e -> RestSqlAdapter.whereClauseElement(e.getKey(), e.getValue() != null ? e.getValue().toString() : null)).collect(Collectors.joining(STR_SPACE_AND)));
 		}
 		return this.update(queryStringBuilder.toString());
 	}

@@ -11,11 +11,11 @@ import org.junit.Rule;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.rules.Timeout;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.db.sql.DatabaseAdapterFactory;
 import ai.libs.jaicore.db.sql.IRestDatabaseConfig;
 
-public abstract class DBTester extends Tester {
+public abstract class DBTest extends ATest {
 
 	public static final String VAR_DB_HOST = "AILIBS_JAICORE_DB_DEFAULT_HOST";
 	public static final String VAR_DB_USER = "AILIBS_JAICORE_DB_DEFAULT_USER";

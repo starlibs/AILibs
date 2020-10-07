@@ -26,12 +26,12 @@ import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
-public class ExtrapolatedSaturationPointEvaluationTester {
+public class ExtrapolatedSaturationPointEvaluationTest {
 
 	private IWekaInstances train;
 	private IWekaInstances test;
 
-	@Disabled
+	@Disabled("We currently do not support learning curve based stuff")
 	@Test
 	public void testClassifierEvaluationAtSaturationPoint() throws Exception {
 		// Load dataset from OpenML and create stratified split

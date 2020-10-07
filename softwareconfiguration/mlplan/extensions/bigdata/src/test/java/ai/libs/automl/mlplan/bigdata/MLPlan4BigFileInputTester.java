@@ -12,7 +12,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.Timeout;
 import org.junit.jupiter.api.Test;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
@@ -22,7 +22,7 @@ import weka.classifiers.evaluation.Evaluation;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 
-public class MLPlan4BigFileInputTester extends Tester {
+public class MLPlan4BigFileInputTester extends ATest {
 
 	@Test
 	public void test() throws Exception {

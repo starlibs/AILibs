@@ -20,7 +20,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.db.DBTester;
+import ai.libs.jaicore.db.DBTest;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
 import ai.libs.jaicore.experiments.ExperimentDatabasePreparer;
 import ai.libs.jaicore.experiments.ExperimentRunner;
@@ -46,10 +46,10 @@ import weka.core.Instances;
  *
  * @author fmohr, mwever
  */
-public class MLExperimentTester extends DBTester implements IExperimentSetEvaluator {
+public class MLExperimentTest extends DBTest implements IExperimentSetEvaluator {
 
 	private static final ISpecificMLExperimentConfig config = ConfigCache.getOrCreate(ISpecificMLExperimentConfig.class);
-	private static final Logger logger = LoggerFactory.getLogger(MLExperimentTester.class);
+	private static final Logger logger = LoggerFactory.getLogger(MLExperimentTest.class);
 	private boolean conductedExperiment = false;
 
 	@Override
@@ -79,7 +79,7 @@ public class MLExperimentTester extends DBTester implements IExperimentSetEvalua
 		}
 	}
 
-	@Disabled
+	@Disabled("Currently no ML experiment file exists, and conducting this experiment makes no sense.")
 	@LongTest
 	@ParameterizedTest(name="test ML experiment")
 	@MethodSource("getDatabaseConfigs")
@@ -88,7 +88,7 @@ public class MLExperimentTester extends DBTester implements IExperimentSetEvalua
 		handle.setup(config);
 		ExperimentDatabasePreparer preparer = new ExperimentDatabasePreparer(config, handle);
 		preparer.synchronizeExperiments();
-		ExperimentRunner runner = new ExperimentRunner(config, new MLExperimentTester(), handle);
+		ExperimentRunner runner = new ExperimentRunner(config, new MLExperimentTest(), handle);
 		runner.randomlyConductExperiments();
 		assertTrue(this.conductedExperiment);
 	}

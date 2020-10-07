@@ -9,7 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.hasco.knowledgebase.PerformanceKnowledgeBase;
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.Component;
@@ -17,7 +17,7 @@ import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
 
-public class PerformanceKnowledgeBaseTest extends Tester {
+public class PerformanceKnowledgeBaseTest extends ATest {
 
 	@Test
 	public void test() {

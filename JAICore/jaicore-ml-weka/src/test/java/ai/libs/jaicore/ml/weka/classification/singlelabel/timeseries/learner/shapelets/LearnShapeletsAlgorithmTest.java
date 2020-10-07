@@ -144,9 +144,11 @@ public class LearnShapeletsAlgorithmTest {
 		List<Integer> result = this.algorithm.shuffleAccordingToAlternatingClassScheme(indices, targets, random);
 		assertEquals(indices.size(), result.size(), "The result indices size does not match the expected size.");
 		assertTrue(result.stream().allMatch(i -> indices.contains(i)), "The calculated indices does not contain each original index.");
-		assertTrue(targets[result.get(0)] == 0, "The first element is not member of the first class.");
+		assertEquals(0, targets[result.get(0)], "The first element is not member of the first class.");
 
 		// Check thrown exception
-		assertThrows(IllegalArgumentException.class, () -> this.algorithm.shuffleAccordingToAlternatingClassScheme(Arrays.asList(1, 2, 3), new int[] { 0, 1 }, random));
+		List<Integer> l1 = Arrays.asList(1, 2, 3);
+		int[] a1 = new int[] { 0, 1 };
+		assertThrows(IllegalArgumentException.class, () -> this.algorithm.shuffleAccordingToAlternatingClassScheme(l1, a1, random));
 	}
 }

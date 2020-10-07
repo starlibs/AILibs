@@ -65,8 +65,8 @@ public class EnhancedTTSPSuccessorGenerator implements ILazySuccessorGenerator<E
 		if (possibleUntriedDestinations.contains(node.getCurLocation())) {
 			throw new IllegalStateException("The list of possible destinations must not contain the current position " + node.getCurLocation() + ".");
 		}
-		int N = possibleUntriedDestinations.size();
-		for (int i = 0; i < N; i++) {
+		int n = possibleUntriedDestinations.size();
+		for (int i = 0; i < n; i++) {
 			if (Thread.interrupted()) {
 				throw new InterruptedException("Successor generation has been interrupted.");
 			}
@@ -91,6 +91,7 @@ public class EnhancedTTSPSuccessorGenerator implements ILazySuccessorGenerator<E
 			try {
 				return this.generateSuccessor(node, s);
 			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 				throw new UndeclaredInterruptedException(e);
 			}
 		});

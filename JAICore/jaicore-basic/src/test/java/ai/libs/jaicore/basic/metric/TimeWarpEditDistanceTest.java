@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
  */
 public class TimeWarpEditDistanceTest {
 
+	public static final IScalarDistance ABS_DISTANCE = ScalarDistanceUtil.getAbsoluteDistance();
+
 	/**
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
@@ -85,7 +87,7 @@ public class TimeWarpEditDistanceTest {
 	public void testRobustnessForLambdaLessThanZero() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double lambda = 0 - Double.MIN_VALUE;
-			new TimeWarpEditDistance(lambda, 1, ScalarDistanceUtil.getAbsoluteDistance());
+			new TimeWarpEditDistance(lambda, 1, ABS_DISTANCE);
 		});
 	}
 
@@ -97,7 +99,7 @@ public class TimeWarpEditDistanceTest {
 	public void testRobustnessForNuLessThanZero() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double nu = 0 - Double.MIN_VALUE;
-			new TimeWarpEditDistance(1, nu, ScalarDistanceUtil.getAbsoluteDistance());
+			new TimeWarpEditDistance(1, nu, ABS_DISTANCE);
 		});
 	}
 
@@ -108,7 +110,7 @@ public class TimeWarpEditDistanceTest {
 	@Test
 	public void testBoundaryForLambdaEqualToZero() {
 		double lambda = 0;
-		new TimeWarpEditDistance(lambda, 1, ScalarDistanceUtil.getAbsoluteDistance());
+		new TimeWarpEditDistance(lambda, 1, ABS_DISTANCE);
 		assertTrue(true); // this part must be reached
 	}
 
@@ -119,7 +121,7 @@ public class TimeWarpEditDistanceTest {
 	@Test
 	public void testBoundaryForNuEqualToZero() {
 		double nu = 0;
-		new TimeWarpEditDistance(1, nu, ScalarDistanceUtil.getAbsoluteDistance());
+		new TimeWarpEditDistance(1, nu, ABS_DISTANCE);
 		assertTrue(true); // this part must be reached
 	}
 

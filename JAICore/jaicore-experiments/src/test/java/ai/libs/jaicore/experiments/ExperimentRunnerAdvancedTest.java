@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.awaitility.Awaitility;
 import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +37,7 @@ import ai.libs.jaicore.db.IDatabaseAdapter;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.logging.LoggerUtil;
 
-public class ExperimentRunnerAdvancedTester extends AExperimentTester {
+public class ExperimentRunnerAdvancedTest extends AExperimentTester {
 
 	private final static String EXECUTOR_INFO = "Testexecutor"; // for the executor field in the database
 
@@ -219,11 +221,7 @@ public class ExperimentRunnerAdvancedTester extends AExperimentTester {
 					this.logger.error("Error trying to get a random experiment.", e);
 					throw new RuntimeException(e);
 				}
-				try {
-					Thread.sleep(new Random().nextInt(10));
-				} catch (InterruptedException e) {
-					throw new RuntimeException();
-				}
+				Awaitility.await().atLeast(Duration.ofMillis(new Random().nextInt(10)));
 			});
 			allJobs.add(submit);
 		}

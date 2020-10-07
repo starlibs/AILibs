@@ -11,13 +11,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetAdapterTest;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 
-public class OpenMLWekaDatasetAdapterTest extends Tester {
+public class OpenMLWekaDatasetAdapterTest extends ATest {
 
 	public static Stream<Arguments> getDatasets() throws Exception {
 		return OpenMLDatasetAdapterTest.getSmallDatasets();

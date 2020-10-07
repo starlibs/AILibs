@@ -20,12 +20,12 @@ public class BalancedGraphSearchWithPathEvaluationsProblem extends GraphSearchWi
 	private final int exactIslandSize;
 	private final ChaoticMeansTreasureModel treasureModel;
 
-	public static IIslandModel getIslandModel(final int branchingFactor, final int depth, final int distanceToIslands, final int numberOfIslandsWithTreasure) {
-		return new EqualSizedIslandsModel(BigInteger.valueOf((long) Math.pow(branchingFactor, depth - distanceToIslands)));
+	public static IIslandModel getIslandModel(final int branchingFactor, final int depth, final int distanceToIslands) {
+		return new EqualSizedIslandsModel(BigInteger.valueOf((long) Math.pow(branchingFactor, depth - (double)distanceToIslands)));
 	}
 
 	public static ChaoticMeansTreasureModel getTreasureModel(final int branchingFactor, final int depth, final int distanceToIslands, final int numberOfIslandsWithTreasure) {
-		return new ChaoticMeansTreasureModel(numberOfIslandsWithTreasure, getIslandModel(branchingFactor, depth, distanceToIslands, numberOfIslandsWithTreasure), 0);
+		return new ChaoticMeansTreasureModel(numberOfIslandsWithTreasure, getIslandModel(branchingFactor, depth, distanceToIslands), 0);
 	}
 
 	public BalancedGraphSearchWithPathEvaluationsProblem(final int branchingFactor, final int depth, final int distanceToIslands, final int numberOfIslandsWithTreasure) {
@@ -36,7 +36,7 @@ public class BalancedGraphSearchWithPathEvaluationsProblem extends GraphSearchWi
 		this.islandModel = this.treasureModel.getIslandModel();
 		this.expectedNumberOfIslands = (int) Math.pow(branchingFactor, distanceToIslands);
 		this.exactIslandSize = BalancedGraphGeneratorGenerator.getNumberOfLeafsUnderANonTerminalNodeInDepth(distanceToIslands, branchingFactor, depth);
-		if ((int) Math.pow(branchingFactor, depth - distanceToIslands)!= this.exactIslandSize) {
+		if ((int) Math.pow(branchingFactor, depth - (double)distanceToIslands)!= this.exactIslandSize) {
 			throw new IllegalStateException("Island size is not computed correctly.");
 		}
 	}

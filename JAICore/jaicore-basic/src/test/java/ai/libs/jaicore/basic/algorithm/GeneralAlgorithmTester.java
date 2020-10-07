@@ -1,8 +1,10 @@
 package ai.libs.jaicore.basic.algorithm;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Timer;
@@ -23,6 +25,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.algorithm.exceptions.ExceptionInAlgorithmIterationException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,7 +34,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.basic.StringUtil;
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.concurrent.ThreadGroupObserver;
 import ai.libs.jaicore.interrupt.Interrupter;
@@ -44,7 +47,7 @@ import ai.libs.jaicore.test.MediumTest;
  * Note that it is on purpose that this class is not generic in the input/output classes of the tested algorithm. The reason is that the algorithm is tested for different input instances, and these may also have different types. Of course,
  * the main type of the different inputs is usually the same, but since the type itself may be generic, the concrete type may depend on the input itself.
  */
-public abstract class GeneralAlgorithmTester extends Tester {
+public abstract class GeneralAlgorithmTester extends ATest {
 
 	private static final int TIMEOUT_DELAY = 12000;
 	private static final int TOTAL_EXPERIMENT_TIMEOUT = 20000;
@@ -334,7 +337,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 		algorithmThread.start();
 		boolean finishedEarly = false;
 		try {
-			Object output = task.get(TOTAL_EXPERIMENT_TIMEOUT, TimeUnit.MILLISECONDS);
+			task.get(TOTAL_EXPERIMENT_TIMEOUT, TimeUnit.MILLISECONDS);
 			finishedEarly = true;
 			this.logger.info("Gained back control from test task.");
 			this.logger.warn("Algorithm terminated without exception but with regular output. Maybe the benchmark is too easy.");
@@ -484,7 +487,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 		int numberOfThreadsAfter = group.activeCount();
 		for (int i = 0; i < n && numberOfThreadsAfter > 0; i++) {
 			this.logger.info("Thread wait {}/{}: There are still {} threads active. Waiting {}ms for another check.", i + 1, n, numberOfThreadsAfter, sleepTime);
-			Thread.sleep(sleepTime);
+			Awaitility.await().atLeast(Duration.ofMillis(sleepTime));
 			numberOfThreadsAfter = group.activeCount();
 		}
 
@@ -493,7 +496,7 @@ public abstract class GeneralAlgorithmTester extends Tester {
 		if (numberOfThreadsAfter > 0) {
 			group.enumerate(threads, true);
 		}
-		assertTrue(numberOfThreadsAfter == 0, "Number of threads has increased with execution. New threads: " + Arrays.toString(threads));
+		assertEquals(0, numberOfThreadsAfter, "Number of threads has increased with execution. New threads: " + Arrays.toString(threads));
 	}
 
 	private class CheckingEventListener {

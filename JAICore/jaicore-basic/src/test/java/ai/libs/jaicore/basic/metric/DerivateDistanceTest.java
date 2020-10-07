@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
  */
 public class DerivateDistanceTest {
 
+	public static final EuclideanDistance EUCLIDEAN_DISTANCE = new EuclideanDistance();
+
 	/**
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
@@ -44,7 +46,7 @@ public class DerivateDistanceTest {
 		double[] timeSeries2 = { 1, 2, 3, 5, 5, 6 };
 		double alpha = 0.5;
 		IDistanceMetric timeSeriesDistance = new DynamicTimeWarping();
-		IDistanceMetric derivateDistance = new EuclideanDistance();
+		IDistanceMetric derivateDistance = EUCLIDEAN_DISTANCE;
 
 		// Expectation.
 		double expectation = Math.cos(alpha) * 1 + Math.sin(alpha) * Math.sqrt(7);
@@ -73,7 +75,7 @@ public class DerivateDistanceTest {
 	@Test
 	public void testRobustnessForNullDerivationMeasure() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			new DerivateDistance(0.5, null, new EuclideanDistance(), new EuclideanDistance());
+			new DerivateDistance(0.5, null, EUCLIDEAN_DISTANCE, EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -85,7 +87,7 @@ public class DerivateDistanceTest {
 	public void testRobustnessForAlphaGreaterPiHalf() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double alpha = (Math.PI / 2) + 1e4;
-			new DerivateDistance(alpha, new EuclideanDistance());
+			new DerivateDistance(alpha, EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -97,7 +99,7 @@ public class DerivateDistanceTest {
 	public void testRobustnessForAlphaLessThanZero() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double alpha = 0 - Double.MIN_VALUE;
-			new DerivateDistance(alpha, new EuclideanDistance());
+			new DerivateDistance(alpha, EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -107,7 +109,7 @@ public class DerivateDistanceTest {
 	 */
 	@Test
 	public void testBoundaryForAlphaEqualToZero() {
-		new DerivateDistance(0, new EuclideanDistance());
+		new DerivateDistance(0, EUCLIDEAN_DISTANCE);
 		assertTrue(true); // this part must be reached
 	}
 
@@ -118,7 +120,7 @@ public class DerivateDistanceTest {
 	@Test
 	public void testBoundaryForAlphaEqualToPiHalf() {
 		double alpha = Math.PI / 2;
-		new DerivateDistance(alpha, new EuclideanDistance());
+		new DerivateDistance(alpha, EUCLIDEAN_DISTANCE);
 		assertTrue(true); // this part must be reached
 	}
 

@@ -7,10 +7,10 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
-public class TempFileHandlingTest {
+class TempFileHandlingTest {
 
 	@Test
-	public void testFileCreationAndDeletion() throws IOException {
+	void testFileCreationAndDeletion() throws IOException {
 		TempFileHandler h = new TempFileHandler();
 		String uuid = h.createTempFile().getName();
 		File f = new File(System.getProperty("user.home") + File.separator + ".ailibs" + File.separator + uuid);

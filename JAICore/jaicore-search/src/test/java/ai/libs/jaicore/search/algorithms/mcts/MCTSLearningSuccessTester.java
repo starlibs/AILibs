@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.ActionPredictionFailedException;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.EBehaviorForNotFullyExploredStates;
@@ -27,7 +27,7 @@ import ai.libs.jaicore.search.probleminputs.MDPUtils;
 import ai.libs.jaicore.test.MediumTest;
 
 @Tag("mcts")
-public abstract class MCTSLearningSuccessTester<N, A> extends Tester {
+public abstract class MCTSLearningSuccessTester<N, A> extends ATest {
 
 	private static final int DEFAULT_NUMITERATIONS = 10000;
 	private static final double DEFAULT_GAMMA = 1.0;

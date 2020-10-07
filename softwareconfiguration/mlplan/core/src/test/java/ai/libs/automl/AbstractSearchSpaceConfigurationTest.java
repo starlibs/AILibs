@@ -20,7 +20,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import ai.libs.hasco.builder.HASCOBuilder;
 import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFD;
 import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.ComponentInstance;
@@ -31,7 +31,7 @@ import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.test.LongParameterizedTest;
 import ai.libs.mlplan.core.IProblemType;
 
-public abstract class AbstractSearchSpaceConfigurationTest extends Tester {
+public abstract class AbstractSearchSpaceConfigurationTest extends ATest {
 
 	private static final boolean FAIL_IMMEDIATELY = true;
 	protected StringBuilder stringBuilder;

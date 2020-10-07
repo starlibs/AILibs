@@ -16,7 +16,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
@@ -27,7 +27,7 @@ import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 
-public class WekaUtilTester extends Tester {
+public class WekaUtilTest extends ATest {
 
 	private static final File BASE_FOLDER = new File("testrsc/ml/orig/");
 	private static final File VOWEL_ARFF = new File(BASE_FOLDER, "vowel.arff");

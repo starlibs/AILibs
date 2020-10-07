@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
@@ -42,7 +42,7 @@ import ai.libs.mlplan.core.events.ClassifierFoundEvent;
  * @author Felix Mohr
  *
  */
-public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> extends Tester {
+public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> extends ATest {
 
 	public abstract AMLPlanBuilder<L, ?> getMLPlanBuilder() throws Exception;
 

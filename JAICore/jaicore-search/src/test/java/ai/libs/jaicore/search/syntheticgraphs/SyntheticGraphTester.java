@@ -16,13 +16,13 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
 
-public abstract class SyntheticGraphTester extends Tester {
+public abstract class SyntheticGraphTester extends ATest {
 
 	public void testIslandModel(final ISyntheticTreasureIslandProblem searchProblem) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
 		int expectedNumberOfIslands = searchProblem.getExpectedNumberOfIslands();

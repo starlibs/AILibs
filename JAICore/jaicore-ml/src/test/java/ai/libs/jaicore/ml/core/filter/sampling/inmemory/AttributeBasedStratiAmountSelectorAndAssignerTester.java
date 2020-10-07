@@ -12,7 +12,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.junit.jupiter.api.Test;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
@@ -23,7 +23,7 @@ import ai.libs.jaicore.ml.core.util.TestDatasetGenerator;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
-public class AttributeBasedStratiAmountSelectorAndAssignerTester extends Tester {
+public class AttributeBasedStratiAmountSelectorAndAssignerTester extends ATest {
 
 	@Test
 	public void testNumberAllAttributesCategoricalSerial() {

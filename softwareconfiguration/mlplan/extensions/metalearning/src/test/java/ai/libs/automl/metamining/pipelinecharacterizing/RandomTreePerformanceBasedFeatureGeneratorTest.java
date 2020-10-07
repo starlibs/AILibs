@@ -10,7 +10,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.common.math.IVector;
 import org.junit.jupiter.api.Test;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.RandomTreePerformanceBasedFeatureGenerator;
 import weka.core.Attribute;
@@ -26,7 +26,7 @@ import weka.core.Instances;
  * @author Helena Graf
  *
  */
-public class RandomTreePerformanceBasedFeatureGeneratorTest extends Tester {
+public class RandomTreePerformanceBasedFeatureGeneratorTest extends ATest {
 
 	private static final String MSG_TRANSFORM = "{} --> {}";
 	private static final String MSG_BUILD = "Build Tree on Data:\n {}";

@@ -264,7 +264,6 @@ public class EnhancedTTSP {
 		this.logger.info("\t\tMin travel time for rest: {}", minTravelTimeForRest);
 		double doableMinTravelTimeForRest = minTravelTimeForRest;
 		double estimatedTravelingTimeForThatPortion = 0;
-		long start = System.currentTimeMillis();
 		while ((estimatedTravelingTimeForThatPortion = this.getActualDrivingTimeWithoutBreak(doableMinTravelTimeForRest, departureOfCurrentPoint, shareOfTripDone)) > drivingTime) {
 			doableMinTravelTimeForRest -= 0.01;
 		}

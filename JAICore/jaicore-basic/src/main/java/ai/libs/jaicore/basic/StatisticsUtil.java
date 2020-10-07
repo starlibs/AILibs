@@ -2,7 +2,6 @@ package ai.libs.jaicore.basic;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
@@ -61,12 +60,7 @@ public class StatisticsUtil {
 	 */
 	public static double median(final Collection<? extends Number> values) {
 		List<? extends Number> list = new ArrayList<>(values);
-		list.sort(new Comparator<Number>() {
-			@Override
-			public int compare(final Number o1, final Number o2) {
-				return Double.compare(o1.doubleValue(), o2.doubleValue());
-			}
-		});
+		list.sort((o1, o2) -> Double.compare(o1.doubleValue(), o2.doubleValue()));
 		int upperIndex = (int) Math.ceil(((double) values.size() + 1) / 2);
 		int lowerIndex = (int) Math.floor(((double) values.size() + 1) / 2);
 

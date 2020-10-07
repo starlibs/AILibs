@@ -19,6 +19,9 @@ import ai.libs.jaicore.basic.transform.vector.derivate.BackwardDifferenceDerivat
  */
 public class DerivateTransformDistanceTest {
 
+	public static final EuclideanDistance EUCLIDEAN_DISTANCE = new EuclideanDistance();
+	public static final BackwardDifferenceDerivate BACKWARD_DERIVATE = new BackwardDifferenceDerivate();
+
 	/**
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
@@ -53,7 +56,7 @@ public class DerivateTransformDistanceTest {
 		double c = 0.25;
 		ADerivateFilter derivate = new BackwardDifferenceDerivate();
 		IVectorTransform transform = new HilbertTransform();
-		IDistanceMetric euclideanDistance = new EuclideanDistance();
+		IDistanceMetric euclideanDistance = EUCLIDEAN_DISTANCE;
 
 		// Expectation.
 		double expectation = a * Math.sqrt(15) + b * Math.sqrt(4) + c * 6.79562;
@@ -83,7 +86,7 @@ public class DerivateTransformDistanceTest {
 	@Test
 	public void testRobustnessForNullDistanceMeasure2() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			new DerivateTransformDistance(0.5, 0.25, 0.25, null, new EuclideanDistance(), new EuclideanDistance());
+			new DerivateTransformDistance(0.5, 0.25, 0.25, null, EUCLIDEAN_DISTANCE, EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -95,7 +98,7 @@ public class DerivateTransformDistanceTest {
 	@Test
 	public void testRobustnessForNullDistanceMeasure3() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			new DerivateTransformDistance(0.5, 0.25, 0.25, new EuclideanDistance(), null, new EuclideanDistance());
+			new DerivateTransformDistance(0.5, 0.25, 0.25, EUCLIDEAN_DISTANCE, null, EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -107,7 +110,7 @@ public class DerivateTransformDistanceTest {
 	@Test
 	public void testRobustnessForNullDistanceMeasure4() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			new DerivateTransformDistance(0.5, 0.25, 0.25, new EuclideanDistance(), new EuclideanDistance(), null);
+			new DerivateTransformDistance(0.5, 0.25, 0.25, EUCLIDEAN_DISTANCE, EUCLIDEAN_DISTANCE, null);
 		});
 	}
 
@@ -118,7 +121,7 @@ public class DerivateTransformDistanceTest {
 	@Test
 	public void testRobustnessForNullDerivate() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			new DerivateTransformDistance(0.5, 0.25, 0.25, null, new HilbertTransform(), new EuclideanDistance());
+			new DerivateTransformDistance(0.5, 0.25, 0.25, null, new HilbertTransform(), EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -129,7 +132,7 @@ public class DerivateTransformDistanceTest {
 	@Test
 	public void testRobustnessForNullTransform() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			new DerivateTransformDistance(0.5, 0.25, 0.25, new BackwardDifferenceDerivate(), null, new EuclideanDistance());
+			new DerivateTransformDistance(0.5, 0.25, 0.25, BACKWARD_DERIVATE, null, EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -143,7 +146,7 @@ public class DerivateTransformDistanceTest {
 			double a = 1.1;
 			double b = 0.5;
 			double c = 0.5;
-			new DerivateTransformDistance(a, b, c, new EuclideanDistance());
+			new DerivateTransformDistance(a, b, c, EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -157,7 +160,7 @@ public class DerivateTransformDistanceTest {
 			double a = 0.5;
 			double b = 1.1;
 			double c = 0.5;
-			new DerivateTransformDistance(a, b, c, new EuclideanDistance());
+			new DerivateTransformDistance(a, b, c, EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -171,7 +174,7 @@ public class DerivateTransformDistanceTest {
 			double a = 0.5;
 			double b = 0.5;
 			double c = 1.1;
-			new DerivateTransformDistance(a, b, c, new EuclideanDistance());
+			new DerivateTransformDistance(a, b, c, EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -185,7 +188,7 @@ public class DerivateTransformDistanceTest {
 			double a = 0 - Double.MIN_VALUE;
 			double b = 0.5;
 			double c = 0.5;
-			new DerivateTransformDistance(a, b, c, new EuclideanDistance());
+			new DerivateTransformDistance(a, b, c, EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -199,7 +202,7 @@ public class DerivateTransformDistanceTest {
 			double a = 0.5;
 			double b = 0 - Double.MIN_VALUE;
 			double c = 0.5;
-			new DerivateTransformDistance(a, b, c, new EuclideanDistance());
+			new DerivateTransformDistance(a, b, c, EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -213,7 +216,7 @@ public class DerivateTransformDistanceTest {
 			double a = 0.5;
 			double b = 0.5;
 			double c = 0 - Double.MIN_VALUE;
-			new DerivateTransformDistance(a, b, c, new EuclideanDistance());
+			new DerivateTransformDistance(a, b, c, EUCLIDEAN_DISTANCE);
 		});
 	}
 

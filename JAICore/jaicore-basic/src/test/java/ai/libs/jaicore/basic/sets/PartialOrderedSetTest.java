@@ -87,16 +87,16 @@ public class PartialOrderedSetTest {
 	 */
 	@Test
 	public void testAddABeforeB() {
-		Assertions.assertThrows(IllegalStateException.class, () -> {
-			String e = "e";
-			this.set.addABeforeB(A, e);
-			this.set.addABeforeB(e, B);
-			assertTrue("Since a before e was added, this should also be allowed.", this.set.allowsABeforeB(A, e));
-			assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, B));
-			assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, C));
-			assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, D));
+		String e = "e";
+		this.set.addABeforeB(A, e);
+		this.set.addABeforeB(e, B);
+		assertTrue("Since a before e was added, this should also be allowed.", this.set.allowsABeforeB(A, e));
+		assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, B));
+		assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, C));
+		assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, D));
 
-			// negative test, because by transitivity this shouldn't be allowed.
+		// negative test, because by transitivity this shouldn't be allowed.
+		Assertions.assertThrows(IllegalStateException.class, () -> {
 			this.set.addABeforeB(C, e);
 		});
 	}

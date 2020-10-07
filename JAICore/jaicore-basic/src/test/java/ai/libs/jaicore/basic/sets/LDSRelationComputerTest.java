@@ -14,11 +14,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
-import ai.libs.jaicore.basic.sets.algorithms.RelationComputerTester;
+import ai.libs.jaicore.basic.sets.algorithms.RelationComputerTest;
 import ai.libs.jaicore.basic.sets.problems.RelationalProblemSet;
 import ai.libs.jaicore.logging.LoggerUtil;
 
-public class LDSRelationComputerTester extends RelationComputerTester {
+public class LDSRelationComputerTest extends RelationComputerTest {
 
 	@ParameterizedTest
 	@MethodSource("getProblemSets")

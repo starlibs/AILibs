@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.basic.MathExt;
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.problems.nqueens.NQueensProblem;
 import ai.libs.jaicore.search.algorithms.standard.dfs.TinyDepthFirstSearch;
 import ai.libs.jaicore.search.exampleproblems.nqueens.NQueensToGraphSearchReducer;
@@ -23,7 +23,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness;
 import ai.libs.jaicore.test.MediumTest;
 
-public class BestFirstSearchRuntimeTest extends Tester{
+public class BestFirstSearchRuntimeTest extends ATest{
 
 	public static Stream<Arguments> getProblemSets() {
 		List<Arguments> problemSets = new ArrayList<>();

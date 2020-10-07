@@ -18,6 +18,8 @@ import ai.libs.jaicore.basic.transform.vector.IVectorTransform;
  */
 public class TransformDistanceTest {
 
+	public static final EuclideanDistance EUCLIDEAN_DISTANCE = new EuclideanDistance();
+
 	/**
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
@@ -47,7 +49,7 @@ public class TransformDistanceTest {
 		double[] timeSeries2 = { 2, 2, 2, 2, 2 }; // transform will give [ -4.166667, -1.666667, 0, 1.666667, 4.166667 ]
 		double alpha = 0.5;
 		IVectorTransform transform = new HilbertTransform();
-		IDistanceMetric euclideanDistance = new EuclideanDistance();
+		IDistanceMetric euclideanDistance = EUCLIDEAN_DISTANCE;
 
 		// Expectation.
 		double expectation = Math.cos(alpha) * Math.sqrt(15) + Math.sin(alpha) * 6.79562;
@@ -76,7 +78,7 @@ public class TransformDistanceTest {
 	@Test
 	public void testRobustnessForNullTransform() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			new TransformDistance(0.5, null, new EuclideanDistance(), new EuclideanDistance());
+			new TransformDistance(0.5, null, EUCLIDEAN_DISTANCE, EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -88,7 +90,7 @@ public class TransformDistanceTest {
 	public void testRobustnessForAlphaGreaterPiHalf() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double alpha = (Math.PI / 2) + 1e4;
-			new TransformDistance(alpha, new EuclideanDistance());
+			new TransformDistance(alpha, EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -100,7 +102,7 @@ public class TransformDistanceTest {
 	public void testRobustnessForAlphaLessThanZero() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			double alpha = 0 - Double.MIN_VALUE;
-			new TransformDistance(alpha, new EuclideanDistance());
+			new TransformDistance(alpha, EUCLIDEAN_DISTANCE);
 		});
 	}
 
@@ -111,7 +113,7 @@ public class TransformDistanceTest {
 	@Test
 	public void testBoundaryForAlphaEqualToZero() {
 		double alpha = 0;
-		new TransformDistance(alpha, new EuclideanDistance());
+		new TransformDistance(alpha, EUCLIDEAN_DISTANCE);
 		assertTrue(true); // this part must be reached
 	}
 
@@ -122,7 +124,7 @@ public class TransformDistanceTest {
 	@Test
 	public void testBoundaryForAlphaEqualToPiHalf() {
 		double alpha = Math.PI / 2;
-		new TransformDistance(alpha, new EuclideanDistance());
+		new TransformDistance(alpha, EUCLIDEAN_DISTANCE);
 		assertTrue(true); // this part must be reached
 	}
 

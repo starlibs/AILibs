@@ -9,11 +9,11 @@ import java.util.concurrent.TimeUnit;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.interrupt.InterruptionTimerTask;
 import ai.libs.jaicore.test.MediumTest;
 
-public class TrackableTimerTester extends Tester {
+public class TrackableTimerTest extends ATest {
 
 	public TrackableTimerTask getEmptyTrackableTask() {
 		return new TrackableTimerTask() {
