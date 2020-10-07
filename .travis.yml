@@ -33,20 +33,20 @@ env:
   - TEST_PROJECT=:JAICore:jaicore-experiments
   - TEST_PROJECT=:JAICore:jaicore-logic
   - TEST_PROJECT=:JAICore:jaicore-math
-  - TEST_PROJECT=:JAICore:jaicore-ml TEST_TASK=testOpenMLAdapter
-  - TEST_PROJECT=:JAICore:jaicore-ml TEST_TASK=testSampling
+  - TEST_PROJECT=:JAICore:jaicore-ml TEST_TASK=testOpenMLAdapter TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-ml TEST_TASK=testSampling TEST_CAT=medium
   - TEST_PROJECT=:JAICore:jaicore-ml TEST_TASK=testOthers
   - TEST_PROJECT=:JAICore:jaicore-ml-meka 
-  - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testInterruptibility
-  - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testCancelability
-  - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testTimeoutability
+  - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testInterruptibility TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testCancelability TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testTimeoutability TEST_CAT=medium
   - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testWithoutICT
   - TEST_PROJECT=:JAICore:jaicore-planning
   - TEST_PROJECT=:JAICore:jaicore-processes
-  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testInterruptibilityDefault
-  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testInterruptibilityMCTS
-  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testCancelability
-  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testTimeoutability
+  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testInterruptibilityDefault TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testInterruptibilityMCTS TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testCancelability TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testTimeoutability TEST_CAT=medium
   - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testWithoutICT
   - TEST_PROJECT=:mlplan-core
   - TEST_PROJECT=:mlplan-ext-reduction
@@ -55,7 +55,9 @@ env:
   - TEST_PROJECT=:mlplan-gui
   - TEST_PROJECT=:mlplan-meka
   - TEST_PROJECT=:mlplan-sklearn
-  - TEST_PROJECT=:mlplan-weka
+  - TEST_PROJECT=:mlplan-weka TEST_TASK=testCoreFunctionality
+  - TEST_PROJECT=:mlplan-weka TEST_TASK=testClassification TEST_CAT=long
+  - TEST_PROJECT=:mlplan-weka TEST_TASK=testRegression TEST_CAT=long
 
 
 addons:
@@ -69,7 +71,14 @@ script:
 
 # Assign jobs to stages. The test jobs defined above are implicitly assigned to the test stage: https://docs.travis-ci.com/user/build-stages/#naming-your-build-stages
 jobs:
-  include:      
+  exclude:
+    - if: branch != master
+      env: TEST_CAT=long
+      
+    - if: NOT (branch IN (master, dev))
+      env: TEST_CAT=medium
+      
+  include:
     - stage: check_build
       env: 
         jobs:
