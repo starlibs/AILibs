@@ -8,6 +8,7 @@ import java.util.HashMap;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.common.math.IVector;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.ATest;
@@ -26,6 +27,7 @@ import weka.core.Instances;
  * @author Helena Graf
  *
  */
+@Disabled("This project is currently not maintained")
 public class RandomTreePerformanceBasedFeatureGeneratorTest extends ATest {
 
 	private static final String MSG_TRANSFORM = "{} --> {}";

@@ -3,7 +3,6 @@ package ai.libs.mlplan.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -34,7 +33,7 @@ import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
@@ -210,7 +209,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 		throw new UnsupportedOperationException("Currently only support for BestFirst search. Will be extended in the upcoming release.");
 	}
 
-	public Collection<IComponent> getComponents() throws IOException {
+	public IComponentRepository getComponents() throws IOException {
 		return this.serializer.deserializeRepository(this.searchSpaceFile);
 	}
 
