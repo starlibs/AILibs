@@ -28,7 +28,7 @@ public class FANOVAParameterImportanceEstimatorTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FANOVAParameterImportanceEstimatorTest.class);
 
 	@Test
-	public void testImportanceEstimation() throws IOException, ExtractionOfImportantParametersFailedException {
+	public void testImportanceEstimation() throws IOException, ExtractionOfImportantParametersFailedException, InterruptedException {
 		PerformanceKnowledgeBase pkb = new PerformanceKnowledgeBase();
 		try (BufferedReader reader = Files.newBufferedReader(Paths.get(testFile), StandardCharsets.UTF_8)) {
 			ArffReader arffReader = new ArffReader(reader);

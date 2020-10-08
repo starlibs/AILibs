@@ -78,7 +78,6 @@ public class WekaUtil {
 
 	public static Collection<String> getBasicLearners() {
 		Collection<String> classifiers = new ArrayList<>();
-
 		classifiers.add("weka.classifiers.bayes.BayesNet");
 		classifiers.add("weka.classifiers.bayes.NaiveBayes");
 		classifiers.add("weka.classifiers.bayes.NaiveBayesMultinomial");
@@ -108,7 +107,6 @@ public class WekaUtil {
 
 	public static Collection<String> getBasicClassifiers() {
 		Collection<String> classifiers = new ArrayList<>();
-
 		classifiers.add("weka.classifiers.bayes.BayesNet");
 		classifiers.add("weka.classifiers.bayes.NaiveBayes");
 		classifiers.add("weka.classifiers.bayes.NaiveBayesMultinomial");

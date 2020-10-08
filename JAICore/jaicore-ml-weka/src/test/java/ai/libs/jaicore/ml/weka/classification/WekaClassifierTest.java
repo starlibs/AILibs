@@ -14,7 +14,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaLearningAlgorithm;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
@@ -26,7 +25,8 @@ import weka.classifiers.Classifier;
 public class WekaClassifierTest extends GeneralAlgorithmTester {
 
 	public static Stream<Arguments> getProblemSets() {
-		return WekaUtil.getBasicClassifiers().stream().map(l -> Arguments.of(new WekaClassifierProblemSet(l)));
+		return Stream.of(Arguments.of(new WekaClassifierProblemSet("weka.classifiers.functions.Logistic")));
+		// return WekaUtil.getBasicClassifiers().stream().map(l -> Arguments.of(new WekaClassifierProblemSet(l)));
 	}
 
 	@MediumParameterizedTest

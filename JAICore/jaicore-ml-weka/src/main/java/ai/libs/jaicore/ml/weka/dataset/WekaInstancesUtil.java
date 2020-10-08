@@ -42,10 +42,14 @@ public class WekaInstancesUtil {
 		return new LabeledInstanceSchema(dataset.relationName(), attributes, labelAttribute);
 	}
 
-	public static Instances datasetToWekaInstances(final ILabeledDataset<? extends ILabeledInstance> dataset) throws UnsupportedAttributeTypeException {
+	public static Instances datasetToWekaInstances(final ILabeledDataset<? extends ILabeledInstance> dataset) throws UnsupportedAttributeTypeException, InterruptedException {
 		Instances wekaInstances = createDatasetFromSchema(dataset.getInstanceSchema());
 		int expectedAttributes = dataset.getInstanceSchema().getNumAttributes();
 		for (ILabeledInstance inst : dataset) {
+			if (Thread.interrupted()) {
+				throw new InterruptedException("Received interrupt.");
+			}
+
 			if (inst.getNumAttributes() != expectedAttributes) {
 				throw new IllegalStateException("Dataset scheme defines a number of " + expectedAttributes + " attributes, but instance has " + inst.getNumAttributes() + ".");
 			}

@@ -17,9 +17,10 @@ public interface IParameterImportanceEstimator {
 	 * @param sizeOfLargestSubsetsToConsider
 	 * @param recompute
 	 * @return
+	 * @throws InterruptedException
 	 * @throws Exception
 	 */
-	public Set<String> extractImportantParameters(ComponentInstance composition, boolean recompute) throws ExtractionOfImportantParametersFailedException;
+	public Set<String> extractImportantParameters(ComponentInstance composition, boolean recompute) throws ExtractionOfImportantParametersFailedException, InterruptedException;
 
 	/**
 	 * Computes importance values for an individual component
@@ -35,8 +36,9 @@ public interface IParameterImportanceEstimator {
 	 *
 	 * @param composition
 	 * @return true if the estimator is ready, false otherwise
+	 * @throws InterruptedException
 	 */
-	public boolean readyToEstimateImportance(ComponentInstance composition);
+	public boolean readyToEstimateImportance(ComponentInstance composition) throws InterruptedException;
 
 	/**
 	 * Set the performance knowledge base used for parameter importance estimation

@@ -417,8 +417,9 @@ public class PerformanceKnowledgeBase {
 	 *
 	 * @param k
 	 * @return
+	 * @throws InterruptedException
 	 */
-	public boolean kDistinctAttributeValuesAvailable(final String benchmarkName, final ComponentInstance composition, final int minNum) {
+	public boolean kDistinctAttributeValuesAvailable(final String benchmarkName, final ComponentInstance composition, final int minNum) throws InterruptedException {
 		if (!this.performanceInstancesByIdentifier.containsKey(benchmarkName)) {
 			return false;
 		}

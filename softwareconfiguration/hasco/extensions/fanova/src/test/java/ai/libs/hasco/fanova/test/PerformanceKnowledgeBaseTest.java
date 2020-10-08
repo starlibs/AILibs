@@ -20,7 +20,7 @@ import ai.libs.jaicore.components.model.Parameter;
 public class PerformanceKnowledgeBaseTest extends Tester {
 
 	@Test
-	public void test() {
+	public void test() throws InterruptedException {
 		PerformanceKnowledgeBase pKB = new PerformanceKnowledgeBase();
 		Component comp = new Component("TestComponent");
 		NumericParameterDomain domain1 = new NumericParameterDomain(false, 0.0, 5.0);

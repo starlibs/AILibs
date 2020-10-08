@@ -18,6 +18,9 @@ public class WekaClassifierProblemSet implements IAlgorithmTestProblemSet<Pair<S
 
 	private final String classifierClass;
 
+	private static ILabeledDataset<ILabeledInstance> simpleDataset = null;
+	private static ILabeledDataset<ILabeledInstance> difficultDataset = null;
+
 	public WekaClassifierProblemSet(final String classifierClass) {
 		super();
 		this.classifierClass = classifierClass;
@@ -31,7 +34,10 @@ public class WekaClassifierProblemSet implements IAlgorithmTestProblemSet<Pair<S
 	@Override
 	public Pair<String, ILabeledDataset<ILabeledInstance>> getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		try {
-			return new Pair<>(this.classifierClass, OpenMLDatasetReader.deserializeDataset(30)); // page-blocks
+			if (simpleDataset == null) {
+				simpleDataset = OpenMLDatasetReader.deserializeDataset(30);
+			}
+			return new Pair<>(this.classifierClass, simpleDataset); // page-blocks
 		} catch (DatasetDeserializationFailedException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
@@ -40,14 +46,21 @@ public class WekaClassifierProblemSet implements IAlgorithmTestProblemSet<Pair<S
 	@Override
 	public Pair<String, ILabeledDataset<ILabeledInstance>> getDifficultProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		int blowUpFactor = 400;
-		ILabeledDataset<ILabeledInstance> ds = this.getSimpleProblemInputForGeneralTestPurposes().getY();
-		DatasetDeriver<ILabeledDataset<ILabeledInstance>> deriver = new DatasetDeriver<>(ds);
-		deriver.addIndices(IntStream.range(0, ds.size()).boxed().collect(Collectors.toList()),  blowUpFactor);
-		try {
-			return new Pair<>(this.classifierClass, deriver.build());
-		} catch (DatasetCreationException e) {
-			throw new AlgorithmTestProblemSetCreationException(e);
+
+		if (difficultDataset == null) {
+			ILabeledDataset<ILabeledInstance> ds = simpleDataset;
+			if (ds == null) {
+				ds = this.getSimpleProblemInputForGeneralTestPurposes().getY();
+			}
+			DatasetDeriver<ILabeledDataset<ILabeledInstance>> deriver = new DatasetDeriver<>(ds);
+			deriver.addIndices(IntStream.range(0, ds.size()).boxed().collect(Collectors.toList()), blowUpFactor);
+			try {
+				difficultDataset = deriver.build();
+			} catch (DatasetCreationException e) {
+				throw new AlgorithmTestProblemSetCreationException(e);
+			}
 		}
+		return new Pair<>(this.classifierClass, difficultDataset);
 	}
 
 	@Override
