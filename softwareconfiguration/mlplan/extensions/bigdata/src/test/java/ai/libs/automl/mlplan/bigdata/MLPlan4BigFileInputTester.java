@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.Timeout;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.ATest;
@@ -22,6 +23,7 @@ import weka.classifiers.evaluation.Evaluation;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 
+@Disabled("This project is currently not maintained")
 public class MLPlan4BigFileInputTester extends ATest {
 
 	@Test
