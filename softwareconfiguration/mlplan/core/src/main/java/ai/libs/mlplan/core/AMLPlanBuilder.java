@@ -257,6 +257,11 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 			this.logger.warn("The dataset claims to be reconstructible, but it does not carry any instructions.");
 		}
 		this.dataset = dataset;
+		if (dataset.stream().anyMatch(i -> i.getLabel() == null)) {
+			this.logger.warn("Dataset has instances without label. Dropping those lines!! Number of instances now: {}", this.dataset.size());
+			this.dataset.removeIf(i -> i.getLabel() == null);
+			this.logger.warn("Dataset is now reduced. Number of instances now: {}", this.dataset.size());
+		}
 		return this.getSelf();
 	}
 

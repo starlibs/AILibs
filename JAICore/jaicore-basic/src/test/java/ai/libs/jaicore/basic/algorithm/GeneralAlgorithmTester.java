@@ -33,8 +33,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.jaicore.basic.StringUtil;
 import ai.libs.jaicore.basic.ATest;
+import ai.libs.jaicore.basic.StringUtil;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.concurrent.ThreadGroupObserver;
 import ai.libs.jaicore.interrupt.Interrupter;
@@ -276,6 +276,9 @@ public abstract class GeneralAlgorithmTester extends ATest {
 		 * is returned but not that the algorithm is shutdown
 		 */
 		algorithm.cancel();
+		this.logger.info("Waiting for algorithm thread to die.");
+		algorithmThread.join();
+		this.logger.info("Ready.");
 		this.waitForThreadGroupToBecomeEmpty(algorithmThreadGroup);
 		this.checkPreconditionForTest(problemSet);
 		this.logger.info("Interrupt-Test finished.");
@@ -386,6 +389,9 @@ public abstract class GeneralAlgorithmTester extends ATest {
 		if (!finishedEarly) {
 			assertTrue(cancellationExceptionSeen, "The algorithm has not emitted an AlgorithmExecutionCanceledException.");
 		}
+		this.logger.info("Waiting for algorithm thread to die.");
+		algorithmThread.join();
+		this.logger.info("Ready.");
 		this.waitForThreadGroupToBecomeEmpty(algorithmThreadGroup);
 		this.logger.info("Cancel-Test finished.");
 	}
@@ -471,6 +477,11 @@ public abstract class GeneralAlgorithmTester extends ATest {
 					runtime, TIMEOUT_DELAY);
 		}
 		assertFalse(timeoutTriggered, "The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + " ms after the specified timeout.");
+
+		/* check thread status */
+		this.logger.info("Waiting for algorithm thread to die.");
+		algorithmThread.join();
+		this.logger.info("Ready.");
 		this.waitForThreadGroupToBecomeEmpty(tg);
 		this.checkPreconditionForTest(problemSet);
 		this.logger.info("Timeout-Test finished.");
