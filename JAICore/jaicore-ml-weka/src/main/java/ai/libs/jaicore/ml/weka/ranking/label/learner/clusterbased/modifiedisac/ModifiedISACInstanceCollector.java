@@ -75,7 +75,7 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 			atributesofTrainingsdata.add(data.attribute(i).toString());
 		}
 		for (Instance i : data) {
-			this.collectedInstances.add(new ProblemInstance<Instance>(i));
+			this.collectedInstances.add(new ProblemInstance<>(i));
 		}
 	}
 

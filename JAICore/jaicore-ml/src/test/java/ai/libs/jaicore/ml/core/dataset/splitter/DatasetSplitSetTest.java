@@ -17,12 +17,12 @@ import org.api4.java.common.reconstruction.IReconstructionPlan;
 import org.api4.java.common.reconstruction.ReconstructionException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.test.MediumTest;
-import ai.libs.jaicore.test.ShortTest;
 
 public class DatasetSplitSetTest {
 	private static ILabeledDataset<ILabeledInstance> d;
@@ -41,7 +41,7 @@ public class DatasetSplitSetTest {
 		this.splitSet = new DatasetSplitSet<>(this.testSplits);
 	}
 
-	@ShortTest
+	@Test
 	public void testAddSplit() {
 		List<ILabeledDataset<ILabeledInstance>> newSplit = Arrays.asList(d, d, d, d);
 		this.splitSet.addSplit(newSplit);
@@ -49,18 +49,19 @@ public class DatasetSplitSetTest {
 		assertEquals("Last split does not match the shape of the added split", this.splitSet.getNumberOfFoldsForSplit(this.splitSet.getNumberOfSplits() - 1), newSplit.size());
 	}
 
-	@ShortTest
+	@Test
 	public void testGetNumberofFoldsPerSplit() {
 		assertEquals("The number of folds does not match for the first split.", this.testSplits.get(0).size(), this.splitSet.getNumberOfFoldsPerSplit());
 	}
 
-	@ShortTest
+	@Test
 	public void testGetFolds() {
 		for (int i = 0; i < this.splitSet.getNumberOfSplits(); i++) {
 			assertEquals("The folds of split " + i + " do not match.", this.testSplits.get(i), this.splitSet.getFolds(i));
 		}
 	}
 
+	@Test
 	@MediumTest
 	public void testReproducibilityOfStratifiedSplit() throws SplitFailedException, InterruptedException, IOException, ClassNotFoundException, ReconstructionException {
 		ReproducibleSplit<ILabeledDataset<ILabeledInstance>> folds = (ReproducibleSplit<ILabeledDataset<ILabeledInstance>>) SplitterUtil.getLabelStratifiedTrainTestSplit(d, 0, .7);

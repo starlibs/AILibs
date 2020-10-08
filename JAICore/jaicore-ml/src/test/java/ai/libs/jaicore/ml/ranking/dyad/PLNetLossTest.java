@@ -2,12 +2,12 @@ package ai.libs.jaicore.ml.ranking.dyad;
 
 import static org.junit.Assert.assertTrue;
 
+import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.PLNetLoss;
 import ai.libs.jaicore.test.MediumTest;
-import ai.libs.jaicore.test.ShortTest;
 
 public class PLNetLossTest {
 
@@ -22,7 +22,7 @@ public class PLNetLossTest {
 		assertTrue(Math.abs(trueLoss - computedLoss) < this.tolerance);
 	}
 
-	@ShortTest
+	@Test
 	public void computeLossTest2() {
 		INDArray plNetOutputs = Nd4j.create(new double[] { -2.0, 42.123, -0.01, 0 });
 		double trueLoss = 44.8212; // manually computed value
@@ -31,7 +31,7 @@ public class PLNetLossTest {
 		assertTrue(Math.abs(trueLoss - computedLoss) < this.tolerance);
 	}
 
-	@ShortTest
+	@Test
 	public void computeLossTest3() {
 		INDArray plNetOutputs = Nd4j.create(new double[] { 12.345, 6.789 });
 		double trueLoss = 0.00385676; // manually computed value
@@ -39,7 +39,7 @@ public class PLNetLossTest {
 		assertTrue(Math.abs(trueLoss - computedLoss) < this.tolerance);
 	}
 
-	@ShortTest
+	@Test
 	public void computeGradientTest1() {
 		INDArray plNetOutputs = Nd4j.create(new double[] { 10.0, 5.0, 2.0, 1 });
 		int k = 0;
@@ -48,7 +48,7 @@ public class PLNetLossTest {
 		assertTrue(Math.abs(trueGradient - computedGradient) < this.tolerance);
 	}
 
-	@ShortTest
+	@Test
 	public void computeGradientTest2() {
 		INDArray plNetOutputs = Nd4j.create(new double[] { 10.0, 5.0, 2.0, 1 });
 		int k = 1;
@@ -57,7 +57,7 @@ public class PLNetLossTest {
 		assertTrue(Math.abs(trueGradient - computedGradient) < this.tolerance);
 	}
 
-	@ShortTest
+	@Test
 	public void computeGradientTest3() {
 		INDArray plNetOutputs = Nd4j.create(new double[] { 10.0, 5.0, 2.0, 1 });
 		int k = 3;
@@ -66,7 +66,7 @@ public class PLNetLossTest {
 		assertTrue(Math.abs(trueGradient - computedGradient) < this.tolerance);
 	}
 
-	@ShortTest
+	@Test
 	public void computeGradientTest4() {
 		INDArray plNetOutputs = Nd4j.create(new double[] { -2.0, 4.2, 0 });
 		int k = 0;
@@ -75,7 +75,7 @@ public class PLNetLossTest {
 		assertTrue(Math.abs(trueGradient - computedGradient) < this.tolerance);
 	}
 
-	@ShortTest
+	@Test
 	public void computeGradientTest5() {
 		INDArray plNetOutputs = Nd4j.create(new double[] { -2.0, 4.2, 0 });
 		int k = 1;
@@ -84,7 +84,7 @@ public class PLNetLossTest {
 		assertTrue(Math.abs(trueGradient - computedGradient) < this.tolerance);
 	}
 
-	@ShortTest
+	@Test
 	public void computeGradientTest6() {
 		INDArray plNetOutputs = Nd4j.create(new double[] { -2.0, 4.2, 0 });
 		int k = 2;
@@ -93,7 +93,7 @@ public class PLNetLossTest {
 		assertTrue(Math.abs(trueGradient - computedGradient) < this.tolerance);
 	}
 
-	@ShortTest
+	@Test
 	public void computeGradientTest7() {
 		INDArray plNetOutputs = Nd4j.create(new double[] { 12.345, 6.789 });
 		int k = 0;
@@ -102,7 +102,7 @@ public class PLNetLossTest {
 		assertTrue(Math.abs(trueGradient - computedGradient) < this.tolerance);
 	}
 
-	@ShortTest
+	@Test
 	public void computeGradientTest8() {
 		INDArray plNetOutputs = Nd4j.create(new double[] { 12.345, 6.789 });
 		int k = 1;

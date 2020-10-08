@@ -14,17 +14,16 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.basic.MathExt;
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.problems.nqueens.NQueensProblem;
 import ai.libs.jaicore.search.algorithms.standard.dfs.TinyDepthFirstSearch;
 import ai.libs.jaicore.search.exampleproblems.nqueens.NQueensToGraphSearchReducer;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness;
-import ai.libs.jaicore.test.MediumParameterizedTest;
 import ai.libs.jaicore.test.MediumTest;
 
-public class BestFirstSearchRuntimeTest extends Tester{
+public class BestFirstSearchRuntimeTest extends ATest{
 
 	public static Stream<Arguments> getProblemSets() {
 		List<Arguments> problemSets = new ArrayList<>();
@@ -36,7 +35,8 @@ public class BestFirstSearchRuntimeTest extends Tester{
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="Measure Runtime for BestFirst on {0}")
 	@MethodSource("getProblemSets")
 	public <N, A> void measureRuntime(final GraphSearchInput<?, ?> problem) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness transformer = new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness();
@@ -47,12 +47,13 @@ public class BestFirstSearchRuntimeTest extends Tester{
 		int runtime = (int) (System.currentTimeMillis() - start);
 		double expansionsPerSecond = MathExt.round(bf.getExpandedCounter() / (runtime / 1000f), 2);
 		double creationsPerSecond = MathExt.round(bf.getCreatedCounter() / (runtime / 1000f), 2);
-		assertTrue("Only achieved " + expansionsPerSecond + " but 1000 were required. Total runtime was " + runtime + " for " + bf.getExpandedCounter() + " expansions.", runtime < 1000 || (expansionsPerSecond > 1000));
+		assertTrue("Only achieved " + expansionsPerSecond + " but 900 were required. Total runtime was " + runtime + " for " + bf.getExpandedCounter() + " expansions.", runtime < 1000 || (expansionsPerSecond > 900));
 		assertTrue(runtime < 1000 || creationsPerSecond > 1000);
 		this.logger.info("Needed {}ms to identify {} solutions. Expanded {}/{} created nodes. This corresponds to {} expansions and {} creations per second.", runtime, bf.getSolutionQueue().size(), bf.getExpandedCounter(), bf.getCreatedCounter(), expansionsPerSecond, creationsPerSecond);
 	}
 
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name="Measure Runtime for DFS on {0}")
 	@MethodSource("getProblemSets")
 	public void measureRuntimeForDFS(final GraphSearchInput<?, ?> problem) throws InterruptedException {
 		TinyDepthFirstSearch<?, ?> dfs = new TinyDepthFirstSearch<>(problem);

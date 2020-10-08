@@ -9,11 +9,8 @@ import java.util.Arrays;
 import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.trees.AccessibleRandomTree;
-import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.trees.LearnPatternSimilarityClassifier;
-import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.trees.LearnPatternSimilarityLearningAlgorithm;
-import ai.libs.jaicore.test.ShortTest;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -88,7 +85,7 @@ public class LearnPatternSimilarityAlgorithmTest {
 	 * See
 	 * {@link LearnPatternSimilarityLearningAlgorithm#generateSubseriesFeatureInstance(double[], int, int[], int[], int)}.
 	 */
-	@ShortTest
+	@Test
 	public void generateSubseriesFeatureInstanceTest() {
 
 		final int lenIdx = 2;
@@ -106,7 +103,7 @@ public class LearnPatternSimilarityAlgorithmTest {
 	 * See
 	 * {@link LearnPatternSimilarityLearningAlgorithm#generateSubseriesFeaturesInstances(java.util.ArrayList, int, int[], int[], double[][])}.
 	 */
-	@ShortTest
+	@Test
 	public void generateSubseriesFeaturesInstancesTest() {
 		final int lenIdx = 2;
 
@@ -122,7 +119,7 @@ public class LearnPatternSimilarityAlgorithmTest {
 	/**
 	 * See {@link LearnPatternSimilarityLearningAlgorithm#initializeRegressionTree(int)}.
 	 */
-	@ShortTest
+	@Test
 	public void initializeRegressionTreeTest() {
 		final AccessibleRandomTree regTree = this.algorithm.initializeRegressionTree(100);
 
@@ -136,7 +133,7 @@ public class LearnPatternSimilarityAlgorithmTest {
 	 * See
 	 * {@link LearnPatternSimilarityLearningAlgorithm#generateSegmentsAndDifferencesForTree(int[], int[], int, int, java.util.Random)}.
 	 */
-	@ShortTest
+	@Test
 	public void generateSegmentsAndDifferencesForTreeTest() {
 		final int[] segments = new int[NUM_SEGMENTS];
 		final int[] segmentsDifference = new int[NUM_SEGMENTS];

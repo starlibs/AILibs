@@ -12,12 +12,10 @@ import java.util.stream.IntStream;
 
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.MathUtil;
-import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.shapelets.LearnShapeletsClassifier;
-import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.shapelets.LearnShapeletsLearningAlgorithm;
-import ai.libs.jaicore.test.ShortTest;
 
 /**
  * Unit tests for {@link LearnShapeletsLearningAlgorithm}.
@@ -71,7 +69,7 @@ public class LearnShapeletsAlgorithmTest {
 	/**
 	 * See {@link MathUtil#sigmoid(double)}.
 	 */
-	@ShortTest
+	@Test
 	public void sigmoidTest() {
 		final double z = 0.5;
 		final double expected = 0.6224593312018545646389;
@@ -81,7 +79,7 @@ public class LearnShapeletsAlgorithmTest {
 	/**
 	 * See {@link LearnShapeletsLearningAlgorithm#getNumberOfSegments(int, int, int)}.
 	 */
-	@ShortTest
+	@Test
 	public void getNumberOfSegmentsTest() {
 		final int Q = 30;
 		final int r = 5;
@@ -95,7 +93,7 @@ public class LearnShapeletsAlgorithmTest {
 	 * See
 	 * {@link LearnShapeletsLearningAlgorithm#calculateD(double[][][], int, int, double[], int, int)}.
 	 */
-	@ShortTest
+	@Test
 	public void calculateDTest() {
 		final int minShapeLength = 3; // Length of 2 combined with r = 0
 		final int r = 0; // Take first S array
@@ -115,7 +113,7 @@ public class LearnShapeletsAlgorithmTest {
 	 * See
 	 * {@link LearnShapeletsLearningAlgorithm#calculateMHat(double[][][], int, int, double[], int, int, double)}.
 	 */
-	@ShortTest
+	@Test
 	public void calculateM_hatTest() {
 		final int minShapeLength = 3; // Length of 2 combined with r = 0
 		final int r = 0; // Take first S array
@@ -134,7 +132,7 @@ public class LearnShapeletsAlgorithmTest {
 	 * See
 	 * {@link LearnShapeletsLearningAlgorithm#shuffleAccordingToAlternatingClassScheme(List, int[], Random)}.
 	 */
-	@ShortTest
+	@Test
 	public void shuffleAccordingToSchemeTest() {
 		int[] targets = new int[] { 2, 2, 0, 1, 1, 2, 0, 1 };
 
@@ -146,9 +144,11 @@ public class LearnShapeletsAlgorithmTest {
 		List<Integer> result = this.algorithm.shuffleAccordingToAlternatingClassScheme(indices, targets, random);
 		assertEquals(indices.size(), result.size(), "The result indices size does not match the expected size.");
 		assertTrue(result.stream().allMatch(i -> indices.contains(i)), "The calculated indices does not contain each original index.");
-		assertTrue(targets[result.get(0)] == 0, "The first element is not member of the first class.");
+		assertEquals(0, targets[result.get(0)], "The first element is not member of the first class.");
 
 		// Check thrown exception
-		assertThrows(IllegalArgumentException.class, () -> this.algorithm.shuffleAccordingToAlternatingClassScheme(Arrays.asList(1, 2, 3), new int[] { 0, 1 }, random));
+		List<Integer> l1 = Arrays.asList(1, 2, 3);
+		int[] a1 = new int[] { 0, 1 };
+		assertThrows(IllegalArgumentException.class, () -> this.algorithm.shuffleAccordingToAlternatingClassScheme(l1, a1, random));
 	}
 }

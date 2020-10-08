@@ -1,12 +1,19 @@
 package ai.libs.jaicore.ml.core.dataset;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class DenseInstance extends AInstance {
+public class DenseInstance extends AInstance implements Serializable {
 
+	private static final long serialVersionUID = -4214595761791391816L;
 	private List<Object> attributes;
+
+	/* this is just for serialization issues */
+	public DenseInstance() {
+		super();
+	}
 
 	public DenseInstance(final Object[] attributes, final Object label) {
 		this(new ArrayList<>(Arrays.asList(attributes)), label);

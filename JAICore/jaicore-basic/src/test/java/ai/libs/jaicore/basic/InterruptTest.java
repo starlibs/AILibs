@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.awaitility.Awaitility;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,7 @@ import ai.libs.jaicore.test.LongTest;
 import ai.libs.jaicore.test.MediumTest;
 import ai.libs.jaicore.timing.TimedComputation;
 
-public class InterruptTest {
+class InterruptTest {
 
 	private static final int NUMBER_ITERATIONS_SIMPLE = 5;
 	private static final int NUMBER_ITERATIONS_SHIFTED = 15;
@@ -60,8 +61,9 @@ public class InterruptTest {
 		assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty(), "There are still active tasks of some previous test!!");
 	}
 
+	@Test
 	@MediumTest
-	public void testSimpleInterruptDuringExecution() throws ExecutionException, InterruptedException {
+	void testSimpleInterruptDuringExecution() throws ExecutionException, InterruptedException {
 		for (int i = 0; i < NUMBER_ITERATIONS_SIMPLE; i++) {
 
 			/* test that InterruptException is thrown  */
@@ -77,8 +79,9 @@ public class InterruptTest {
 		}
 	}
 
+	@Test
 	@MediumTest
-	public void testThatNoInterruptIsFiredIfExecutionFinishesInTime() throws AlgorithmTimeoutedException, ExecutionException, InterruptedException {
+	void testThatNoInterruptIsFiredIfExecutionFinishesInTime() throws AlgorithmTimeoutedException, ExecutionException, InterruptedException {
 		for (int i = 0; i < NUMBER_ITERATIONS_SIMPLE; i++) {
 
 			/* test that InterruptException is thrown  */
@@ -95,8 +98,9 @@ public class InterruptTest {
 	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 */
+	@Test
 	@LongTest
-	public void testNestedInterruptDuringExecutionWithOuterSignifiantlyEarlier() throws ExecutionException, InterruptedException {
+	void testNestedInterruptDuringExecutionWithOuterSignifiantlyEarlier() throws ExecutionException, InterruptedException {
 
 		for (int i = 0; i < NUMBER_ITERATIONS_SHIFTED; i++) {
 
@@ -124,8 +128,9 @@ public class InterruptTest {
 	 * @throws InterruptedException
 	 * @throws AlgorithmTimeoutedException
 	 */
+	@Test
 	@LongTest
-	public void testNestedInterruptDuringExecutionWithOuterSignifiantlyLater() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
+	void testNestedInterruptDuringExecutionWithOuterSignifiantlyLater() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();
 		for (int i = 0; i < NUMBER_ITERATIONS_SHIFTED; i++) {
 
@@ -158,8 +163,9 @@ public class InterruptTest {
 	 * @throws InterruptedException
 	 * @throws AlgorithmTimeoutedException
 	 */
+	@Test
 	@LongTest
-	public void testNestedInterruptDuringExecutionWithOuterAndInnerAtSameTime() throws ExecutionException {
+	void testNestedInterruptDuringExecutionWithOuterAndInnerAtSameTime() throws ExecutionException {
 		this.checkPreconditions();
 		for (int i = 0; i < NUMBER_ITERATIONS_OVERLAPPING; i++) {
 			logger.info("Starting iteration {}/{} of testNestedInterruptDuringExecutionWithOuterAndInnerAtSameTime", i + 1, NUMBER_ITERATIONS_OVERLAPPING);
@@ -189,8 +195,9 @@ public class InterruptTest {
 		}
 	}
 
+	@Test
 	@LongTest
-	public void testTwistedInterruptDuringExecutionWithOuterSignifiantlyEarlier() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
+	void testTwistedInterruptDuringExecutionWithOuterSignifiantlyEarlier() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();
 		for (int i = 0; i < NUMBER_ITERATIONS_SHIFTED; i++) {
 
@@ -222,8 +229,9 @@ public class InterruptTest {
 		}
 	}
 
+	@Test
 	@LongTest
-	public void testTwistedInterruptDuringExecutionWithOuterSignifiantlyLater() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
+	void testTwistedInterruptDuringExecutionWithOuterSignifiantlyLater() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();
 		for (int i = 0; i < NUMBER_ITERATIONS_SHIFTED; i++) {
 
@@ -252,8 +260,9 @@ public class InterruptTest {
 		}
 	}
 
+	@Test
 	@LongTest
-	public void testTwistedTrackedInterruptDuringExecutionWithOuterAndInnerAtSameTime() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
+	void testTwistedTrackedInterruptDuringExecutionWithOuterAndInnerAtSameTime() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
 		this.checkPreconditions();
 		int innerEarlier = 0;
 		int outerEarlier = 0;

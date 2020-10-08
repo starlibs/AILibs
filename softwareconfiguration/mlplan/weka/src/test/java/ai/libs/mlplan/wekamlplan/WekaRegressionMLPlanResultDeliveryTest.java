@@ -16,17 +16,18 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.Timeout;
 
-import ai.libs.automl.AutoMLAlgorithmForRegressionResultProductionTester;
+import ai.libs.automl.AutoMLAlgorithmForRegressionResultProductionTest;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
-import ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
+import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 import ai.libs.mlplan.weka.weka.WekaPipelineValidityCheckingNodeEvaluator;
+import weka.classifiers.rules.ZeroR;
 
-public class WekaRegressionMLPlanResultDeliveryTester extends AutoMLAlgorithmForRegressionResultProductionTester {
+public class WekaRegressionMLPlanResultDeliveryTest extends AutoMLAlgorithmForRegressionResultProductionTest {
 
 	@Override
 	public IAlgorithm<ILabeledDataset<?>, IWekaClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws AlgorithmCreationException {
@@ -69,7 +70,7 @@ public class WekaRegressionMLPlanResultDeliveryTester extends AutoMLAlgorithmFor
 
 	public int getTrainTimeOfMajorityClassifier(final ILabeledDataset<?> data) throws TrainingException, InterruptedException, DatasetDeserializationFailedException {
 		long start = System.currentTimeMillis();
-		new MajorityClassifier().fit(data);
+		new WekaClassifier(new ZeroR()).fit(data);
 		return (int) (System.currentTimeMillis() - start);
 	}
 }

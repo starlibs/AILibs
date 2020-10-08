@@ -14,20 +14,20 @@ import java.util.Random;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.test.MediumTest;
-import ai.libs.jaicore.test.ShortTest;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 
-public class WekaUtilTester extends Tester {
+public class WekaUtilTest extends ATest {
 
 	private static final File BASE_FOLDER = new File("testrsc/ml/orig/");
 	private static final File VOWEL_ARFF = new File(BASE_FOLDER, "vowel.arff");
@@ -70,7 +70,7 @@ public class WekaUtilTester extends Tester {
 		}
 	}
 
-	@ShortTest
+	@Test
 	public void checkEqualsMethod() throws Exception {
 
 		Instances ds1 = new Instances(new BufferedReader(new FileReader(VOWEL_ARFF)));
@@ -85,6 +85,7 @@ public class WekaUtilTester extends Tester {
 		}
 	}
 
+	@Test
 	@MediumTest
 	public void checkDeterminismOfStratifiedSplits() throws Exception {
 
@@ -114,7 +115,7 @@ public class WekaUtilTester extends Tester {
 		}
 	}
 
-	@ShortTest
+	@Test
 	public void checkValidAttributeSelections() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		Collection<List<String>> preprocessors = WekaUtil.getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection();
 		assertEquals(9, preprocessors.size());

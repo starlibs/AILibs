@@ -19,6 +19,9 @@ public class RandomLocationGenerator implements ITSPLocationGenerator {
 
 	@Override
 	public List<Location> getLocations(final int n, final double centerX, final double centerY, final double radius, final double minDistance) {
+		if (n > Short.MAX_VALUE) {
+			throw new IllegalArgumentException("Number of locations must not exceed " + Short.MAX_VALUE);
+		}
 		List<Location> locations = new LinkedList<>();
 		for (short i = 0; i < n; i++) {
 			Location nl;

@@ -1,5 +1,7 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
@@ -41,6 +43,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 	private Logger logger = LoggerFactory.getLogger(MCTSPathSearch.class);
 	private final GraphBasedMDP<N, A> mdp;
 	private final MCTS<N, A> mcts;
+	private final Set<Integer> hashCodesOfReturnedPaths = new HashSet<>();
 
 	public MCTSPathSearch(final I problem, final MCTSFactory<N, A, ?> mctsFactory) {
 		super(problem);
@@ -94,6 +97,12 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 				/* only if the roll-out is a goal path, emit a success event */
 				if (this.getGoalTester().isGoal(path)) {
 					this.updateBestSeenSolution(path);
+					int hashCode = path.hashCode();
+					if (this.hashCodesOfReturnedPaths.contains(hashCode)) {
+						this.logger.info("Skipping (and supressing) previously found solution with hash code {}", hashCode);
+						continue;
+					}
+					this.hashCodesOfReturnedPaths.add(hashCode);
 					ISolutionCandidateFoundEvent<EvaluatedSearchGraphPath<N, A, Double>> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this, path);
 					this.post(event);
 					return event;

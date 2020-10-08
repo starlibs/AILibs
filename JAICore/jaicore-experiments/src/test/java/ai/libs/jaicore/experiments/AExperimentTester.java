@@ -1,10 +1,10 @@
 package ai.libs.jaicore.experiments;
 
-import ai.libs.jaicore.db.DBTester;
+import ai.libs.jaicore.db.DBTest;
 import ai.libs.jaicore.db.IDatabaseAdapter;
 import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 
-public class AExperimentTester extends DBTester {
+public class AExperimentTester extends DBTest {
 
 	public static final String TABLE = "exptable";
 

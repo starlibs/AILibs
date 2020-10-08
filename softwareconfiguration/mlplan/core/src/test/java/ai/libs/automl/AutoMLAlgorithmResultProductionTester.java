@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,13 +25,15 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.awaitility.Awaitility;
 import org.junit.FixMethodOrder;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runners.MethodSorters;
 
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.concurrent.GlobalTimer;
@@ -38,7 +41,7 @@ import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.PreTrainedPredictionBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
-import ai.libs.jaicore.test.LongParameterizedTest;
+import ai.libs.jaicore.test.LongTest;
 
 /**
  * This test tests whether or not the algorithm delivers a solution on each given dataset within 30 seconds.
@@ -47,7 +50,7 @@ import ai.libs.jaicore.test.LongParameterizedTest;
  *
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
+public abstract class AutoMLAlgorithmResultProductionTester extends ATest {
 
 	public abstract IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(ILabeledDataset<?> data) throws AlgorithmCreationException, IOException;
 
@@ -59,7 +62,8 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 
 	}
 
-	@LongParameterizedTest
+	@LongTest
+	@ParameterizedTest(name="Test that ML-Plan delivers a model on {0}")
 	@MethodSource("getDatasets")
 	public void testThatModelIsTrained(final OpenMLProblemSet problemSet)
 			throws DatasetDeserializationFailedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ObjectEvaluationFailedException, SplitFailedException, AlgorithmCreationException, IOException {
@@ -73,6 +77,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 			List<ILabeledDataset<?>> trainTestSplit = this.getTrainTestSplit(problemSet.getDataset());
 			ILabeledDataset<?> train = trainTestSplit.get(0);
 			ILabeledDataset<?> test = trainTestSplit.get(1);
+			test.removeIf(i -> i.getLabel() == null);
 			if (train.getNumAttributes() != test.getNumAttributes()) {
 				throw new IllegalStateException();
 			}
@@ -80,6 +85,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 			/* get algorithm */
 			this.logger.info("Loading the algorithm");
 			IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> algorithm = this.getAutoMLAlgorithm(train); // AutoML-tools should deliver a classifier
+			algorithm.setNumCPUs(1);
 
 			assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 			if (algorithm instanceof ILoggingCustomizable) {
@@ -111,7 +117,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends Tester {
 			assertTrue(test.size() >= 10, "At least 10 instances must be classified!");
 			IClassifierEvaluator evaluator = new PreTrainedPredictionBasedClassifierEvaluator(test, this.getTestMeasure());
 			double score = evaluator.evaluate(c);
-			Thread.sleep(algorithm.getTimeout().seconds() / 20);
+			Awaitility.await().atLeast(Duration.ofSeconds(algorithm.getTimeout().seconds() / 20));
 			assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty(), "There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks());
 			this.logger.info("Error rate of solution {} ({}) on {} is: {}", c.getClass().getName(), c, datasetname, score);
 		} catch (AlgorithmTimeoutedException e) {

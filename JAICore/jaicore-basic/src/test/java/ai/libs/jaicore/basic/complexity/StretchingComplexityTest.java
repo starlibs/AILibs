@@ -2,7 +2,7 @@ package ai.libs.jaicore.basic.complexity;
 
 import static org.junit.Assert.assertEquals;
 
-import ai.libs.jaicore.test.ShortTest;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test suite for the {@link StretchingComplexity} implementation.
@@ -14,7 +14,7 @@ public class StretchingComplexityTest {
 	double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 };
 	double[] timeSeries2 = { .0, Math.sqrt(8), .0, Math.sqrt(8), .0, Math.sqrt(8) };
 
-	@ShortTest
+	@Test
 	public void testComplexityCalculation() throws IllegalArgumentException {
 		StretchingComplexity sc = new StretchingComplexity();
 		double complexity = sc.complexity(this.timeSeries1);
@@ -23,7 +23,7 @@ public class StretchingComplexityTest {
 		assertEquals(String.format(message, complexity, expectation), expectation, complexity, 0.001);
 	}
 
-	@ShortTest
+	@Test
 	public void testComplexityCalculation2() throws IllegalArgumentException {
 		StretchingComplexity sc = new StretchingComplexity();
 		double complexity = sc.complexity(this.timeSeries2);

@@ -94,6 +94,15 @@ public class MLPlanScikitLearnSearchSpaceConfigurationTest extends AbstractSearc
 	}
 
 	@Override
+	public void testExecutabilityOfDefaultConfigs(final IProblemType<?> problemType) throws Exception {
+		if (problemType == EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES) {
+			this.logger.warn(MSG_DISABLED); // unlimited length pipelines cannot be tested this way!
+			return;
+		}
+		super.testExecutabilityOfDefaultConfigs(problemType);
+	}
+
+	@Override
 	public void testExecutabilityOfMinConfigs(final IProblemType<?> problemType) throws Exception {
 		this.logger.warn(MSG_DISABLED);
 		assertTrue(true);

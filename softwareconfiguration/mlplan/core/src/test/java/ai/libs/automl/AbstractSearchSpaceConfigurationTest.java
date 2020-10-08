@@ -15,12 +15,13 @@ import java.util.stream.Collectors;
 
 import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.hasco.builder.HASCOBuilder;
 import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFD;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.basic.Tester;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.ComponentInstance;
@@ -28,10 +29,10 @@ import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logging.LoggerUtil;
-import ai.libs.jaicore.test.LongParameterizedTest;
+import ai.libs.jaicore.test.LongTest;
 import ai.libs.mlplan.core.IProblemType;
 
-public abstract class AbstractSearchSpaceConfigurationTest extends Tester {
+public abstract class AbstractSearchSpaceConfigurationTest extends ATest {
 
 	private static final boolean FAIL_IMMEDIATELY = true;
 	protected StringBuilder stringBuilder;
@@ -47,7 +48,8 @@ public abstract class AbstractSearchSpaceConfigurationTest extends Tester {
 
 	public abstract void prepare(IProblemType<?> problemType) throws Exception;
 
-	@LongParameterizedTest
+	@LongTest
+	@ParameterizedTest(name="Test no exceptions in generation of graph for {0}")
 	@MethodSource("getProblemTypes")
 	public void testNoExceptionsInGraphGeneration(final IProblemType<?> problemType) throws Exception {
 		this.prepare(problemType);
@@ -73,7 +75,8 @@ public abstract class AbstractSearchSpaceConfigurationTest extends Tester {
 		assertTrue(true);
 	}
 
-	@LongParameterizedTest
+	@LongTest
+	@ParameterizedTest(name="Test executability of default configs for {0}")
 	@MethodSource("getProblemTypes")
 	public void testExecutabilityOfDefaultConfigs(final IProblemType<?> problemType) throws Exception {
 		this.logger.info("Testing default configurations for {}", problemType.getName());
@@ -124,7 +127,8 @@ public abstract class AbstractSearchSpaceConfigurationTest extends Tester {
 		assertEquals(0, numberOfErrorsFound, 0.0001, this.stringBuilder.toString());
 	}
 
-	@LongParameterizedTest
+	@LongTest
+	@ParameterizedTest(name="Test executability of min configs for {0}")
 	@MethodSource("getProblemTypes")
 	public void testExecutabilityOfMinConfigs(final IProblemType<?> problemType) throws Exception {
 		this.logger.info("Testing minimum configurations for {}", problemType.getName());
@@ -175,7 +179,8 @@ public abstract class AbstractSearchSpaceConfigurationTest extends Tester {
 		assertEquals(0, numberOfErrorsFound, 0.0001, this.stringBuilder.toString());
 	}
 
-	@LongParameterizedTest
+	@LongTest
+	@ParameterizedTest(name="Test executability of max configs for {0}")
 	@MethodSource("getProblemTypes")
 	public void testExecutabilityOfMaxConfigs(final IProblemType<?> problemType) throws Exception {
 		this.logger.info("Testing maximum configurations for {}", problemType.getName());
@@ -229,7 +234,8 @@ public abstract class AbstractSearchSpaceConfigurationTest extends Tester {
 		assertEquals(0, numberOfErrorsFound, 0.0001, this.stringBuilder.toString());
 	}
 
-	@LongParameterizedTest
+
+	@ParameterizedTest(name="Test executability of cat configs for {0}")
 	@MethodSource("getProblemTypes")
 	public void testExecutabilityOfCatConfigs(final IProblemType<?> problemType) throws Exception {
 		this.logger.info("Testing categorical configurations for {}", problemType.getName());

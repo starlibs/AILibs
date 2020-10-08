@@ -1,14 +1,20 @@
 package ai.libs.jaicore.ml.core.dataset.schema;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 
-public class LabeledInstanceSchema extends InstanceSchema implements ILabeledInstanceSchema {
+public class LabeledInstanceSchema extends InstanceSchema implements ILabeledInstanceSchema, Serializable {
 
 	private IAttribute labelAttribute;
+
+	/* just for serialization purposes */
+	public LabeledInstanceSchema() {
+		super();
+	}
 
 	public LabeledInstanceSchema(final String relationName, final List<IAttribute> attributeList, final IAttribute labelAttribute) {
 		super(relationName, attributeList);

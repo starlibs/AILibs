@@ -14,12 +14,12 @@ import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.graph.LabeledGraph;
-import ai.libs.jaicore.test.LongParameterizedTest;
-import ai.libs.jaicore.test.MediumParameterizedTest;
+import ai.libs.jaicore.test.LongTest;
+import ai.libs.jaicore.test.MediumTest;
 
-public abstract class GraphGeneratorTester<N, A> extends Tester {
+public abstract class GraphGeneratorTester<N, A> extends ATest {
 
 	private class Node {
 		N point;
@@ -32,19 +32,21 @@ public abstract class GraphGeneratorTester<N, A> extends Tester {
 		}
 	}
 
-	@ParameterizedTest(name = "{0}")
+	@ParameterizedTest(name = "Test idempotency on {0} with 100 iterations")
 	@MethodSource("getGraphGenerators")
 	public void testIdempotencyQuick(final String name, final IGraphGenerator<N, A> g) throws Exception {
 		this.testIdempotency(g, 100);
 	}
 
-	@MediumParameterizedTest
+	@MediumTest
+	@ParameterizedTest(name = "Test idempotency on {0} with 1000 iterations")
 	@MethodSource("getGraphGenerators")
 	public void testIdempotencyMedium(final String name, final IGraphGenerator<N, A> g) throws Exception {
 		this.testIdempotency(g, 1000);
 	}
 
-	@LongParameterizedTest
+	@LongTest
+	@ParameterizedTest(name = "Test idempotency on {0} with 1000 iterations")
 	@MethodSource("getGraphGenerators")
 	public void testIdempotencyLarge(final String name, final IGraphGenerator<N, A> g) throws Exception {
 		this.testIdempotency(g, 10000);

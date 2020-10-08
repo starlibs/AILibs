@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.Timeout;
+import org.junit.jupiter.api.Disabled;
 
 import ai.libs.automl.AutoMLAlgorithmForClassificationResultProductionTester;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
@@ -15,6 +16,7 @@ import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 
+@Disabled("Learning curves are currently not enabled.")
 public class MLPlanWithLearningCurvePredictionResultDeliveryTester extends AutoMLAlgorithmForClassificationResultProductionTester {
 
 	@Override

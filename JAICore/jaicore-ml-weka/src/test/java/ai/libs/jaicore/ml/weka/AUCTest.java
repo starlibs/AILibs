@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Random;
 
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.AreaUnderPrecisionRecallCurve;
 import ai.libs.jaicore.ml.classification.loss.dataset.AreaUnderROCCurve;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
-import ai.libs.jaicore.test.ShortTest;
 import weka.classifiers.Evaluation;
 import weka.classifiers.evaluation.NominalPrediction;
 import weka.classifiers.evaluation.Prediction;
@@ -22,7 +22,7 @@ import weka.core.Instances;
 
 public class AUCTest {
 
-	@ShortTest
+	@Test
 	public void testAUROCPerformanceMeasure() throws Exception {
 		Instances data = new Instances(new FileReader(new File("testrsc/dataset/arff/breast.cancer.arff")));
 		data.setClassIndex(data.numAttributes() - 1);

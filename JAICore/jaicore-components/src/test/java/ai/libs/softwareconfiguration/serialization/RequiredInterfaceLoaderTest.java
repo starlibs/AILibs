@@ -13,12 +13,12 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logging.LoggerUtil;
 
-public class RequiredInterfaceLoaderTest extends Tester {
+public class RequiredInterfaceLoaderTest extends ATest {
 
 	private final JsonNode rootNode;
 	private final ComponentSerialization serializer = new ComponentSerialization(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
@@ -66,8 +66,9 @@ public class RequiredInterfaceLoaderTest extends Tester {
 
 	@Test
 	public void test5() throws IOException {
+		JsonNode node = this.rootNode.path("requiredInterface").get(4);
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			this.serializer.deserializeRequiredInterface(this.rootNode.path("requiredInterface").get(4));
+			this.serializer.deserializeRequiredInterface(node);
 		});
 	}
 

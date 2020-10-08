@@ -18,9 +18,9 @@ import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
-public class LearningCurveExtrapolationEvaluationTester {
+public class LearningCurveExtrapolationEvaluationTest {
 
-	@Disabled
+	@Disabled("We currently do not support learning curve based stuff")
 	@Test
 	public void testClassifierEvaluationWithLearningCurveExtrapolation() throws Exception {
 		// Load dataset from OpenML

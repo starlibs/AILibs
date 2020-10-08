@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -26,7 +27,7 @@ import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.test.LongParameterizedTest;
-import ai.libs.jaicore.test.ShortParameterizedTest;
+import ai.libs.jaicore.test.LongTest;
 import weka.core.Instances;
 
 public class WekaInstancesTester {
@@ -39,7 +40,7 @@ public class WekaInstancesTester {
 		return datasets.stream().map(Arguments::of);
 	}
 
-	@ShortParameterizedTest
+	@ParameterizedTest(name="test conversion to WekaInstances on {0}")
 	@MethodSource("getDatasets")
 	public void testConversionToWekaInstances(final File dataset) throws Exception {
 		Instances data = new Instances(new FileReader(dataset));
@@ -102,7 +103,7 @@ public class WekaInstancesTester {
 		}
 	}
 
-	@ShortParameterizedTest
+	@ParameterizedTest(name="test create empty for {0}")
 	@MethodSource("getDatasets")
 	public void testCreateEmpty(final File dataset) throws Exception {
 		Instances data = new Instances(new FileReader(dataset));
@@ -128,7 +129,7 @@ public class WekaInstancesTester {
 		assertEquals(wrapped.getLabelAttribute().getClass(), emptyCopy.getLabelAttribute().getClass());
 	}
 
-	@ShortParameterizedTest
+	@ParameterizedTest(name="test copy creation on {0}")
 	@MethodSource("getDatasets")
 	public void testCopy(final File dataset) throws Exception {
 		Instances data = new Instances(new FileReader(dataset));
@@ -144,7 +145,7 @@ public class WekaInstancesTester {
 		assertNotEquals(wrapped, copy);
 	}
 
-	@ShortParameterizedTest
+	@ParameterizedTest(name="test iterability on {0}")
 	@MethodSource("getDatasets")
 	public void testIterability(final File dataset) throws Exception {
 		Instances data = new Instances(new FileReader(dataset));
@@ -155,7 +156,8 @@ public class WekaInstancesTester {
 		}
 	}
 
-	@LongParameterizedTest
+	@ParameterizedTest(name="test equalness of two copies of {0}")
+	@LongTest
 	@MethodSource("getDatasets")
 	public void testEqualnessOfTwoCopiesOfSameDataset(final File dataset) throws Exception {
 		Instances ds1 = new Instances(new FileReader(dataset));
@@ -195,7 +197,7 @@ public class WekaInstancesTester {
 		}
 	}
 
-	@ShortParameterizedTest
+	@ParameterizedTest(name="test self-equalness of {0}")
 	@MethodSource("getDatasets")
 	public void testSelfEqualness(final File dataset) throws Exception {
 		Instances data = new Instances(new FileReader(dataset));
@@ -208,7 +210,7 @@ public class WekaInstancesTester {
 		assertEquals(wrapped, wrapped);
 	}
 
-	@ShortParameterizedTest
+	@ParameterizedTest(name="test array correspondence on {0}")
 	@MethodSource("getDatasets")
 	public void testArraysCorrespondToListViaEquals(final File dataset) throws Exception {
 		Instances data = new Instances(new FileReader(dataset));
@@ -232,7 +234,8 @@ public class WekaInstancesTester {
 		}
 	}
 
-	@LongParameterizedTest
+	@LongTest
+	@ParameterizedTest(name="test contains on {0}")
 	@MethodSource("getDatasets")
 	public void testThatEachElementIsFoundWithContains(final File dataset) throws FileNotFoundException, IOException {
 		Instances data = new Instances(new FileReader(dataset));

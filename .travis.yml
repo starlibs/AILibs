@@ -10,10 +10,14 @@ cache:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
   - "$HOME/.sonar/cache"
-
+  
 # overriding the install step is important to avoid that ./gradlew assemble is run (which is the default in travis)
 install:
-  - true
+  - pyenv versions
+  - pyenv global 3.6.7
+  - python --version
+  - pip3 install --upgrade pip
+  - pip3 install liac-arff numpy scipy scikit-learn tpot pandas xgboost
 
 # defines a matrix of jobs for testing.
 env:
@@ -29,20 +33,33 @@ env:
   - TEST_PROJECT=:JAICore:jaicore-experiments
   - TEST_PROJECT=:JAICore:jaicore-logic
   - TEST_PROJECT=:JAICore:jaicore-math
-  - TEST_PROJECT=:JAICore:jaicore-ml
-  - TEST_PROJECT=:JAICore:jaicore-ml-meka
-  - TEST_PROJECT=:JAICore:jaicore-ml-weka
+  - TEST_PROJECT=:JAICore:jaicore-ml TEST_TASK=testOpenMLAdapter TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-ml TEST_TASK=testSampling TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-ml TEST_TASK=testOthers
+  - TEST_PROJECT=:JAICore:jaicore-ml-meka 
+  - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testInterruptibility TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testCancelability TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testTimeoutability TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testWithoutICT
   - TEST_PROJECT=:JAICore:jaicore-planning
   - TEST_PROJECT=:JAICore:jaicore-processes
-  - TEST_PROJECT=:JAICore:jaicore-search
+  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testInterruptibilityDefault TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testInterruptibilityMCTS TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testCancelability TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testTimeoutability TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testWithoutICT
   - TEST_PROJECT=:mlplan-core
   - TEST_PROJECT=:mlplan-ext-reduction
 
   - TEST_PROJECT=:mlplan-full
   - TEST_PROJECT=:mlplan-gui
   - TEST_PROJECT=:mlplan-meka
-  - TEST_PROJECT=:mlplan-sklearn
-  - TEST_PROJECT=:mlplan-weka
+  - TEST_PROJECT=:mlplan-sklearn TEST_TASK=testCoreFunctionality
+  - TEST_PROJECT=:mlplan-sklearn TEST_TASK=testClassification TEST_CAT=long
+  - TEST_PROJECT=:mlplan-sklearn TEST_TASK=testRegression TEST_CAT=long
+  - TEST_PROJECT=:mlplan-weka TEST_TASK=testCoreFunctionality
+  - TEST_PROJECT=:mlplan-weka TEST_TASK=testClassification TEST_CAT=long
+  - TEST_PROJECT=:mlplan-weka TEST_TASK=testRegression TEST_CAT=long
 
 
 addons:
@@ -56,6 +73,10 @@ script:
 
 # Assign jobs to stages. The test jobs defined above are implicitly assigned to the test stage: https://docs.travis-ci.com/user/build-stages/#naming-your-build-stages
 jobs:
+  exclude:
+    - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = long) ## typically we will want to remove dev here, because long is only for master. This is just initially to make sure that also the long tests are built
+    - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = medium)
+      
   include:
     - stage: check_build
       env: 

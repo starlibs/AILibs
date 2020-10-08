@@ -30,10 +30,10 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeDisplayInfoAlgorithmE
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
 
-public class AlgorithmEventHistorySerializerTest {
+class AlgorithmEventHistorySerializerTest {
 
 	@Test
-	public void testAlgorithmEventSerializationAndDeserializationWithEasyEvents() throws IOException, InterruptedException {
+	void testAlgorithmEventSerializationAndDeserializationWithEasyEvents() throws IOException, InterruptedException {
 
 		NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer = new NodeInfoAlgorithmEventPropertyComputer();
 		List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers = Arrays.asList(nodeInfoAlgorithmEventPropertyComputer, new NodeDisplayInfoAlgorithmEventPropertyComputer<>(n -> n.toString()),
@@ -55,29 +55,17 @@ public class AlgorithmEventHistorySerializerTest {
 		};
 
 		recorder.handleAlgorithmEvent(new AlgorithmCanceledEvent(dummyAlg));
-		Thread.sleep(20);
 		recorder.handleAlgorithmEvent(new AlgorithmFinishedEvent(dummyAlg));
-		Thread.sleep(10);
 		recorder.handleAlgorithmEvent(new AlgorithmInitializedEvent(dummyAlg));
-		Thread.sleep(20);
 		recorder.handleAlgorithmEvent(new AlgorithmFinishedEvent(dummyAlg));
-		Thread.sleep(10);
 		recorder.handleAlgorithmEvent(new AlgorithmInterruptedEvent(dummyAlg));
-		Thread.sleep(10);
 		recorder.handleAlgorithmEvent(new GraphInitializedEvent<>(dummyAlg, "root"));
-		Thread.sleep(10);
 		recorder.handleAlgorithmEvent(new NodeAddedEvent<>(dummyAlg, "root", "n1", "cool"));
-		Thread.sleep(10);
 		recorder.handleAlgorithmEvent(new NodeAddedEvent<>(dummyAlg, "root", "n2", "very_cool"));
-		Thread.sleep(10);
 		recorder.handleAlgorithmEvent(new NodeParentSwitchEvent<>(dummyAlg, "n1", "root", "n2"));
-		Thread.sleep(10);
 		recorder.handleAlgorithmEvent(new NodeRemovedEvent<>(dummyAlg, "n1"));
-		Thread.sleep(10);
 		recorder.handleAlgorithmEvent(new NodeTypeSwitchEvent<>(dummyAlg, "n2", "cool"));
-		Thread.sleep(10);
 		recorder.handleAlgorithmEvent(new TupleFoundEvent<>(dummyAlg, Arrays.asList("a", "b")));
-		Thread.sleep(10);
 		recorder.handleAlgorithmEvent(new TupleOfCartesianProductFoundEvent<>(dummyAlg, Arrays.asList("a", "b")));
 
 		AlgorithmEventHistorySerializer serializer = new AlgorithmEventHistorySerializer();

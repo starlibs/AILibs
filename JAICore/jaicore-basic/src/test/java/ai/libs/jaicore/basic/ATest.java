@@ -3,10 +3,12 @@ package ai.libs.jaicore.basic;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.awaitility.Awaitility;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +23,7 @@ import ai.libs.jaicore.concurrent.TrackableTimerTask;
 import ai.libs.jaicore.interrupt.InterruptionTimerTask;
 import ai.libs.jaicore.logging.LoggerUtil;
 
-public abstract class Tester implements ILoggingCustomizable {
+public abstract class ATest implements ILoggingCustomizable {
 
 	protected final static Logger LOGGER = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER);
 
@@ -80,7 +82,7 @@ public abstract class Tester implements ILoggingCustomizable {
 			}).collect(Collectors.joining());
 			while (GlobalTimer.getInstance().getNumberOfActiveTasks() > 0) {
 				this.logger.info("Waiting for timer to shutdown ...");
-				Thread.sleep(100);
+				Awaitility.await().atLeast(Duration.ofMillis(100));
 			}
 			fail(msg);
 		}

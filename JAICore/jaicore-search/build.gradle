@@ -13,15 +13,20 @@ dependencies {
   	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }
 
-task testAllButMCTS(type: Test) {
+task testInterruptibilityMCTS(type: Test) {
 	useJUnitPlatform{
-		excludeTags 'mcts'
+		filter {
+			includeTestsMatching "ai.libs.jaicore.search.algorithms.standard.mcts.*.testInterrupt"
+		}
 	}
 }
 
-task testMCTS(type: Test) {
+task testInterruptibilityDefault(type: Test) {
 	useJUnitPlatform{
-		includeTags 'mcts'
+		filter {
+			includeTestsMatching "*testInterrupt"
+			excludeTestsMatching "*mcts*"
+		}
 	}
 }
 

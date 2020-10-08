@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Test;
+
 import ai.libs.jaicore.ml.weka.classification.learner.reduction.MCTreeNodeReD;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
@@ -31,6 +33,7 @@ public class MCTreeNodeReDTest {
 	private static final String CLASSIFIER_NAME = RandomForest.class.getName();
 	private static final File DATASET = new File("testrsc/ml/orig/vowel.arff");
 
+	@Test
 	@LongTest
 	public void test() throws Exception {
 

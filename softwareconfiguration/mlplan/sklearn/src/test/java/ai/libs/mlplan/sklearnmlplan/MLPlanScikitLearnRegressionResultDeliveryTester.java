@@ -16,14 +16,14 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.Timeout;
 
-import ai.libs.automl.AutoMLAlgorithmForRegressionResultProductionTester;
+import ai.libs.automl.AutoMLAlgorithmForRegressionResultProductionTest;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.regression.learner.ConstantRegressor;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.sklearn.builder.MLPlanScikitLearnBuilder;
 
-public class MLPlanScikitLearnRegressionResultDeliveryTester extends AutoMLAlgorithmForRegressionResultProductionTester {
+public class MLPlanScikitLearnRegressionResultDeliveryTester extends AutoMLAlgorithmForRegressionResultProductionTest {
 
 	@Override
 	public IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws AlgorithmCreationException, IOException {

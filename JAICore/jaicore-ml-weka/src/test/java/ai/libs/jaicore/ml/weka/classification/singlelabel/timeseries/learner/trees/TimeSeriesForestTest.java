@@ -4,12 +4,11 @@ import java.util.ArrayList;
 
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
-import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.trees.TimeSeriesForestClassifier;
-import ai.libs.jaicore.test.ShortTest;
 
 /**
  * Unit tests of the time series forest classifier.
@@ -36,7 +35,7 @@ public class TimeSeriesForestTest {
 	 * @throws TrainingException
 	 *             thrown if the training could not be performed.
 	 */
-	@ShortTest
+	@Test
 	public void voidTrainingTest() throws TrainingException {
 		int numTrees = 10;
 		int maxDepth = 10;

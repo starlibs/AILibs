@@ -80,7 +80,7 @@ public class ClassStratiFileAssigner implements IStratiFileAssigner {
 	}
 
 	private String createNewStratumFile(final String c) throws IOException {
-		String uuid = this.tempFileHandler.createTempFile();
+		String uuid = this.tempFileHandler.createTempFile().getName();
 		this.tempFileHandler.getFileWriterForTempFile(uuid).write(this.arffHeader);
 		this.tempFileHandler.getFileWriterForTempFile(uuid).flush();
 		this.classToStratumMapping.put(c, uuid);

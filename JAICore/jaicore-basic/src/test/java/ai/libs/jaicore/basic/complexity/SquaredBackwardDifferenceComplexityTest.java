@@ -2,11 +2,10 @@ package ai.libs.jaicore.basic.complexity;
 
 import static org.junit.Assert.assertEquals;
 
-import ai.libs.jaicore.test.ShortTest;
+import org.junit.jupiter.api.Test;
 
 /**
- * Test suite for the {@link SquaredBackwardDifferenceComplexity}
- * implementation.
+ * Test suite for the {@link SquaredBackwardDifferenceComplexity} implementation.
  *
  * @author fischor
  */
@@ -15,7 +14,7 @@ public class SquaredBackwardDifferenceComplexityTest {
 	double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 };
 	double[] timeSeries2 = { .0, Math.sqrt(8), .0, Math.sqrt(8), .0, Math.sqrt(8) };
 
-	@ShortTest
+	@Test
 	public void testComplexityCalculation() throws IllegalArgumentException {
 		SquaredBackwardDifferenceComplexity sc = new SquaredBackwardDifferenceComplexity();
 		double complexity = sc.complexity(this.timeSeries1);
@@ -24,7 +23,7 @@ public class SquaredBackwardDifferenceComplexityTest {
 		assertEquals(String.format(message, complexity, expectation), expectation, complexity, 0.001);
 	}
 
-	@ShortTest
+	@Test
 	public void testComplexityCalculation2() throws IllegalArgumentException {
 		SquaredBackwardDifferenceComplexity sc = new SquaredBackwardDifferenceComplexity();
 		double complexity = sc.complexity(this.timeSeries2);

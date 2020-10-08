@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
-public class MySQLQueryBuilderTester {
+public class MySQLQueryBuilderTest {
 
 	@Test
 	public void test() {

@@ -2,11 +2,9 @@ package ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.tr
 
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.trees.TimeSeriesBagOfFeaturesClassifier;
-import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.trees.TimeSeriesBagOfFeaturesLearningAlgorithm;
-import ai.libs.jaicore.test.ShortTest;
 
 /**
  * Unit tests of the TSBF algorithm class.
@@ -48,7 +46,7 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 	 * See
 	 * {@link TimeSeriesBagOfFeaturesLearningAlgorithm#discretizeProbs(int, double[][])}.
 	 */
-	@ShortTest
+	@Test
 	public void discretizeProbsTest() {
 		double[][] probs = new double[][] { { 0.19, 0.21, 0.25 } };
 
@@ -59,7 +57,7 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 	 * See
 	 * {@link TimeSeriesBagOfFeaturesLearningAlgorithm#formHistogramsAndRelativeFreqs(int[][], int[], int, int, int)}.
 	 */
-	@ShortTest
+	@Test
 	public void formHistogramsAndRelativeFreqsTest() {
 		int[][] discretizedProbs = new int[][] { { 1, 2, 3 } };
 		int numBins = 5;
@@ -82,7 +80,7 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 	 * See
 	 * {@link TimeSeriesBagOfFeaturesLearningAlgorithm#generateHistogramInstances(int[][][], int[][])}.
 	 */
-	@ShortTest
+	@Test
 	public void generateHistogramInstancesTest() {
 		int[][][] histograms = new int[][][] { { { 1, 0, 1 }, { 0, 1, 1 } } };
 		int[][] relativeFreqsOfClasses = new int[][] { { 0, 2 } };
@@ -95,7 +93,7 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 	 * See
 	 * {@link TimeSeriesBagOfFeaturesLearningAlgorithm#generateFeatures(double[][], int, int, int[][], int[][][])}.
 	 */
-	@ShortTest
+	@Test
 	public void generateFeaturesTest() {
 		final double[][] data = new double[][] { { 1, 2, 3, 4 }, { 0, 0, 0, 0 } };
 		final int[][] subsequences = new int[][] { { 0, 3 } };
@@ -120,7 +118,7 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 	 * See
 	 * {@link TimeSeriesBagOfFeaturesLearningAlgorithm#generateSubsequencesAndIntervals(int, int, int, int)}.
 	 */
-	@ShortTest
+	@Test
 	public void generateSubsequencesAndIntervalsTest() {
 
 		final int r = 2;

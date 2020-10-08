@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.FStat;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.IQualityMeasure;
@@ -18,7 +19,6 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.MathUtil;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.TimeSeriesUtil;
 import ai.libs.jaicore.ml.weka.classification.timeseries.learner.shapelets.ShapeletTransformLearningAlgorithm;
 import ai.libs.jaicore.ml.weka.classification.timeseries.learner.shapelets.ShapeletTransformTSClassifier;
-import ai.libs.jaicore.test.ShortTest;
 
 /**
  * Unit tests for {@link ShapeletTransformLearningAlgorithm}.
@@ -62,7 +62,7 @@ public class ShapeletTransformAlgorithmTest {
 	 * See
 	 * {@link ShapeletTransformLearningAlgorithm#generateCandidates(double[], int, int)}.
 	 */
-	@ShortTest
+	@Test
 	public void generateCandidatesTest() {
 		double[] data = new double[] { 1, 2, 3, 4, 5, 6 };
 		int l = 3;
@@ -78,7 +78,7 @@ public class ShapeletTransformAlgorithmTest {
 	/**
 	 * See {@link ShapeletTransformLearningAlgorithm#findDistances(Shapelet, double[][])}.
 	 */
-	@ShortTest
+	@Test
 	public void findDistancesTest() {
 		Shapelet shapelet = new Shapelet(TimeSeriesUtil.zNormalize(new double[] { 1, 2, 3 }, true), 0, 3, 0);
 		double[][] dataMatrix = new double[][] { { 4, 2, 4, 6, 5 }, { 2, 2, 2, 2, 2 } };
@@ -104,7 +104,7 @@ public class ShapeletTransformAlgorithmTest {
 	/**
 	 * See {@link ShapeletTransformLearningAlgorithm#removeSelfSimilar(List)}.
 	 */
-	@ShortTest
+	@Test
 	public void removeSelfSimilarTest() {
 		List<Map.Entry<Shapelet, Double>> shapelets = new ArrayList<>();
 		shapelets.add(new AbstractMap.SimpleEntry<Shapelet, Double>(new Shapelet(null, 0, 10, 0), 0d));
@@ -119,7 +119,7 @@ public class ShapeletTransformAlgorithmTest {
 	/**
 	 * See {@link ShapeletTransformLearningAlgorithm#merge(int, List, List)}.
 	 */
-	@ShortTest
+	@Test
 	public void mergeTest() {
 		Map.Entry<Shapelet, Double> testEntry1;
 		Map.Entry<Shapelet, Double> testEntry2;
@@ -150,7 +150,7 @@ public class ShapeletTransformAlgorithmTest {
 	/**
 	 * See {@link ShapeletTransformLearningAlgorithm#zNormalize(double[], boolean)}.
 	 */
-	@ShortTest
+	@Test
 	public void zNormalizeTest() {
 		double[] expectedResult = new double[] { -1, 0, +1 };
 
@@ -164,7 +164,7 @@ public class ShapeletTransformAlgorithmTest {
 	 * and
 	 * {@link ShapeletTransformLearningAlgorithm#getMinimumDistanceAmongAllSubsequencesOptimized(Shapelet, double[])
 	 */
-	@ShortTest
+	@Test
 	public void getMinimumDistanceAmongAllSequencesOptimizedTest() {
 		double[] matrix = new double[] { 4, 1, 2, 4, 6, 5 };
 
@@ -186,7 +186,7 @@ public class ShapeletTransformAlgorithmTest {
 	/**
 	 * See {@link MathUtil#singleSquaredEuclideanDistance(double[], double[])}.
 	 */
-	@ShortTest
+	@Test
 	public void squareEuclideanDistanceTest() {
 		double[] vector = new double[] { 4, 2, 6 };
 		double[] vector2 = new double[] { 2, 4, 6 };
@@ -201,7 +201,7 @@ public class ShapeletTransformAlgorithmTest {
 	 * ShapeletTransformLearningAlgorithm#getMinimumDistanceAmongAllSubsequencesOptimized(Shapelet,
 	 * double[])
 	 */
-	@ShortTest
+	@Test
 	public void getMinimumDistanceAmongAllSequencesOptimizedTest2() {
 		double[] matrix = new double[] { 4, 3, 6, 9, 23, 1 };
 

@@ -6,7 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 
 /**
  * Annotation for JUnit tests that take longer than 5 seconds.
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.Test;
  * @author mwever
  */
 @Tag("long-test")
-@Test
 @Target({ ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LongTest {

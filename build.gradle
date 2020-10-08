@@ -273,6 +273,46 @@ allprojects {
 	     	maxHeapSize = "4g"
 	}
 	
+	task testInterruptibility(type: Test) {
+		useJUnitPlatform{
+			filter {
+				includeTestsMatching "*testInterrupt"
+				includeTestsMatching "*testInterruptWhenParallelized"
+			}
+		}
+	}
+	
+	task testCancelability(type: Test) {
+		useJUnitPlatform{
+			filter {
+				includeTestsMatching "*testCancel"
+				includeTestsMatching "*testCancelWhenParallelized"
+			}
+		}
+	}
+	
+	task testTimeoutability(type: Test) {
+		useJUnitPlatform{
+			filter {
+				includeTestsMatching "*testTimeout"
+				includeTestsMatching "*testTimeoutWhenParallelized"
+			}
+		}
+	}
+	
+	task testWithoutICT(type: Test) {
+		useJUnitPlatform{
+			filter {
+				excludeTestsMatching "*testInterrupt"
+				excludeTestsMatching "*testInterruptWhenParallelized"
+				excludeTestsMatching "*testCancel"
+				excludeTestsMatching "*testCancelWhenParallelized"
+				excludeTestsMatching "*testTimeout"
+				excludeTestsMatching "*testTimeoutWhenParallelized"
+			}
+		}
+	}
+	
 	task testMedium(type: Test) {
 		useJUnitPlatform{
 			excludeTags 'long-test'

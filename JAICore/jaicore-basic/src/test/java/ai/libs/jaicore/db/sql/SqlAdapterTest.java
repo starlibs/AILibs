@@ -2,6 +2,7 @@ package ai.libs.jaicore.db.sql;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -18,11 +19,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import ai.libs.jaicore.db.DBTester;
+import ai.libs.jaicore.db.DBTest;
 import ai.libs.jaicore.db.IDatabaseAdapter;
 
 @TestMethodOrder(OrderAnnotation.class)
-public class SqlAdapterTest extends DBTester {
+public class SqlAdapterTest extends DBTest {
 
 	private static final String TABLE = "testtable";
 
@@ -103,10 +104,11 @@ public class SqlAdapterTest extends DBTester {
 	@ParameterizedTest(name="drop table")
 	@Order(5)
 	@MethodSource("getDatabaseConfigs")
-	public void testDropTable(final Object config) throws SQLException {
+	public void testDropTable(final Object config) throws SQLException, IOException {
 		IDatabaseAdapter adapter = this.reportConfigAndGetAdapter(config);
 		String table = this.getTablename(adapter);
 		adapter.update("DROP TABLE " + table);
+		assertFalse(adapter.doesTableExist(table));
 	}
 
 	public int numEntries(final IDatabaseAdapter adapter, final String table) throws SQLException {

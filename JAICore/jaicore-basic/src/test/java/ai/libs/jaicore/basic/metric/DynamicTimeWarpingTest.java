@@ -3,8 +3,7 @@ package ai.libs.jaicore.basic.metric;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.jupiter.api.Assertions;
-
-import ai.libs.jaicore.test.ShortTest;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test suite for the {@link ai.libs.jaicore.basic.metric.DynamicTimeWarping}
@@ -18,7 +17,7 @@ public class DynamicTimeWarpingTest {
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@ShortTest
+	@Test
 	public void testCorrectnessForDistanceCalculation() {
 		// Input.
 		double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 };
@@ -36,7 +35,7 @@ public class DynamicTimeWarpingTest {
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@ShortTest
+	@Test
 	public void testCorrectnessForDistanceCalculation2() {
 		// Input.
 		double[] timeSeries1 = { 0.50, 0.87, 0.90, 0.82, 0.70 };
@@ -54,7 +53,7 @@ public class DynamicTimeWarpingTest {
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@ShortTest
+	@Test
 	public void testCorrectnessForDistanceCalculation3() {
 		// Input.
 		double[] timeSeries5 = { 1, 1, 2, 2, 3, 5 }; // distance with d(x,y) = |x-y| is 1
@@ -72,7 +71,7 @@ public class DynamicTimeWarpingTest {
 	 * Correctness test. Tests the distance calculation based on an defined input
 	 * and expected output.
 	 */
-	@ShortTest
+	@Test
 	public void testDistanceCalculationWithWindow() {
 		// Input.
 		double[] timeSeries3 = { 0.50, 0.87, 0.90, 0.82, 0.70 };
@@ -91,7 +90,7 @@ public class DynamicTimeWarpingTest {
 	 * distance measure, the constructor is supposed to throw an
 	 * IllegalArgumentExpection.
 	 */
-	@ShortTest
+	@Test
 	public void testRobustnessForNullDistanceMeasure() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			new DynamicTimeWarping(null);

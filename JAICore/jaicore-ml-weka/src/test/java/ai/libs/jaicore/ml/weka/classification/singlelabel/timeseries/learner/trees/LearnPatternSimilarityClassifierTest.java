@@ -3,9 +3,7 @@ package ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.tr
 import static org.junit.Assert.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
-
-import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.trees.LearnPatternSimilarityClassifier;
-import ai.libs.jaicore.test.ShortTest;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link LearnPatternSimilarityClassifier}.
@@ -47,7 +45,7 @@ public class LearnPatternSimilarityClassifierTest {
 	 * See
 	 * {@link LearnPatternSimilarityClassifier#findNearestInstanceIndex(int[][])}.
 	 */
-	@ShortTest
+	@Test
 	public void findNearestInstanceIndexTest() {
 		// Prepare test data with 2 instances, NUM_TREES trees with NUM_SEGMENTS segments
 		final int[][][] trainLeafNodes = new int[][][] { { { 5 }, { 3 } }, { { 4 }, { 5 } } };

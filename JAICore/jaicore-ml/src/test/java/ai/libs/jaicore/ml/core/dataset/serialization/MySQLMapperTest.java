@@ -23,13 +23,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import ai.libs.jaicore.db.DBTester;
+import ai.libs.jaicore.db.DBTest;
 import ai.libs.jaicore.db.IDatabaseAdapter;
 import ai.libs.jaicore.db.IDatabaseConfig;
 import ai.libs.jaicore.db.sql.DatabaseAdapterFactory;
 
 @TestMethodOrder(OrderAnnotation.class)
-public class MySQLMapperTest extends DBTester {
+public class MySQLMapperTest extends DBTest {
 
 	private static final String TABLE = "test_relation";
 	private static final String TARGET_ATTRIBUTE_NAME = "target";

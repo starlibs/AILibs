@@ -11,6 +11,7 @@ import java.util.stream.IntStream;
 import org.aeonbits.owner.ConfigCache;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,11 +20,8 @@ import ai.libs.jaicore.graph.TreeNode;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesFeature;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesFeature.FeatureType;
-import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.trees.TimeSeriesTreeClassifier;
-import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.trees.TimeSeriesTreeLearningAlgorithm;
 import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.trees.TimeSeriesTreeClassifier.TimeSeriesTreeNodeDecisionFunction;
 import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.trees.TimeSeriesTreeLearningAlgorithm.ITimeSeriesTreeConfig;
-import ai.libs.jaicore.test.ShortTest;
 
 /**
  * Unit tests for the time series tree classifier.
@@ -71,7 +69,7 @@ public class TimeSeriesTreeTest {
 	 * See
 	 * {@link TimeSeriesTreeLearningAlgorithm#calculateFeature(FeatureType, double[], int, int, boolean)}.
 	 */
-	@ShortTest
+	@Test
 	public void calculateFeatureTest() {
 		double[] instance = new double[] { 1, 2, 3 };
 		// Mean
@@ -92,7 +90,7 @@ public class TimeSeriesTreeTest {
 	 * See
 	 * {@link TimeSeriesTreeLearningAlgorithm#randomlySampleNoReplacement(List, int, int)}.
 	 */
-	@ShortTest
+	@Test
 	public void randomlySampleNoReplacementTest() {
 		int m = 40;
 		List<Integer> sampleBase = IntStream.range(0, 100).boxed().collect(Collectors.toList());
@@ -104,7 +102,7 @@ public class TimeSeriesTreeTest {
 	/**
 	 * See {@link TimeSeriesTreeLearningAlgorithm#sampleIntervals(int, int)}.
 	 */
-	@ShortTest
+	@Test
 	public void sampleIntervalsTest() {
 		int m = 40;
 
@@ -117,7 +115,7 @@ public class TimeSeriesTreeTest {
 	 * See
 	 * {@link TimeSeriesTreeLearningAlgorithm#generateThresholdCandidates(Pair, int, double[][][])}.
 	 */
-	@ShortTest
+	@Test
 	public void generateThresholdCandidatesTest() {
 		List<Integer> T1 = Arrays.asList(0, 1);
 		List<Integer> T2 = Arrays.asList(2, 3);
@@ -140,7 +138,7 @@ public class TimeSeriesTreeTest {
 	/**
 	 * See {@link TimeSeriesTreeLearningAlgorithm#transformInstances(double[][], Pair)}.
 	 */
-	@ShortTest
+	@Test
 	public void transformInstancesTest() {
 		double[][] data = new double[][] { { 0, 1, 2, 3, 4, 5, 6 }, { 2, 4, 6, 8, 10, 12, 14 } };
 		List<Integer> T1 = Arrays.asList(0, 0);
@@ -175,7 +173,7 @@ public class TimeSeriesTreeTest {
 	/**
 	 * See {@link TimeSeriesTreeLearningAlgorithm#calculateMargin(double[], double)}.
 	 */
-	@ShortTest
+	@Test
 	public void calculateMarginTest() {
 		double[] dataValues = new double[] { 0, 1, 2, 3, 4, 5 };
 		double thresholdCandidate = 1.5d;
@@ -189,7 +187,7 @@ public class TimeSeriesTreeTest {
 	/**
 	 * See {@link TimeSeriesTreeLearningAlgorithm#calculateEntrance(double, double)}.
 	 */
-	@ShortTest
+	@Test
 	public void calculateEntranceTest() {
 		double[] dataValues = new double[] { 0, 0, 1, 1, 2, 2, 3, 3 };
 		int[] targets = new int[] { 0, 0, 0, 0, 0, 0, 1, 1 };
@@ -207,7 +205,7 @@ public class TimeSeriesTreeTest {
 	 * See
 	 * {@link TimeSeriesTreeLearningAlgorithm#calculateDeltaEntropy(double[], int[], double, List, double)}.
 	 */
-	@ShortTest
+	@Test
 	public void calculateDeltaEntropyTest() {
 		double[] dataValues = new double[] { 0, 0, 1, 1, 2, 2, 3, 3 };
 		int[] targets = new int[] { 0, 0, 0, 0, 0, 0, 1, 1 };
@@ -223,7 +221,7 @@ public class TimeSeriesTreeTest {
 	/**
 	 * See {@link TimeSeriesTreeLearningAlgorithm#getBestSplitIndex(double[])}.
 	 */
-	@ShortTest
+	@Test
 	public void getBestSplitIndexTest() {
 
 		double[] deltaEntropyStarPerFeatureType = new double[] { 1, 6, 7 };
@@ -237,7 +235,7 @@ public class TimeSeriesTreeTest {
 	 * See
 	 * {@link TimeSeriesTreeLearningAlgorithm#getChildDataIndices(double[][][], int, int, int, double)}.
 	 */
-	@ShortTest
+	@Test
 	public void getChildDataIndicesTest() {
 		double[][][] transformedFeatures = new double[][][] { { { 0, 1.2d }, { 1, 6d } }, { { 3, 1.1d }, { 2, 0.5d } }, { { 1, 1.34d }, { 0, 3.2d } } };
 		int n = 2;
@@ -272,7 +270,7 @@ public class TimeSeriesTreeTest {
 	 * See
 	 * {@link TimeSeriesTreeLearningAlgorithm#tree(double[][], int[], double, TreeNode, int)}.
 	 */
-	@ShortTest
+	@Test
 	public void treeTest() throws TrainingException {
 		TimeSeriesTreeClassifier tst = new TimeSeriesTreeClassifier(this.config);
 

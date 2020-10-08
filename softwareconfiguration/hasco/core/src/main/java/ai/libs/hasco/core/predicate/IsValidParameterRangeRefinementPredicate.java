@@ -29,6 +29,7 @@ import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.logic.fol.theories.EvaluablePredicate;
+import ai.libs.jaicore.logic.fol.util.LogicUtil;
 
 public class IsValidParameterRangeRefinementPredicate implements EvaluablePredicate {
 
@@ -105,8 +106,8 @@ public class IsValidParameterRangeRefinementPredicate implements EvaluablePredic
 				/* if the interval is under the distinction threshold, return an empty list of possible refinements (predicate will always be false here) */
 				double relativeLength = (currentInterval.getSup() / currentInterval.getInf() - 1);
 				double absoluteLength = currentInterval.getSup() - currentInterval.getInf();
-				boolean isAtomicInterval = refinementConfig.isInitRefinementOnLogScale() && relativeLength < refinementConfig.getIntervalLength()
-						|| !refinementConfig.isInitRefinementOnLogScale() && absoluteLength < refinementConfig.getIntervalLength();
+				boolean isAtomicInterval = refinementConfig.isInitRefinementOnLogScale() && relativeLength <= refinementConfig.getIntervalLength()
+						|| !refinementConfig.isInitRefinementOnLogScale() && absoluteLength <= refinementConfig.getIntervalLength();
 				if (isAtomicInterval) {
 					this.logger.info("Returning an empty list as this is a numeric parameter that has been narrowed sufficiently. Required interval length is {}, and actual interval length is {}", refinementConfig.getIntervalLength(),
 							currentInterval.getSup() - currentInterval.getInf());
@@ -137,7 +138,7 @@ public class IsValidParameterRangeRefinementPredicate implements EvaluablePredic
 					for (Interval proposedRefinement : proposedRefinements) {
 						assert proposedRefinement.getInf() >= currentInterval.getInf() && proposedRefinement.getSup() <= currentInterval.getSup() : "The proposed refinement [" + proposedRefinement.getInf() + ", "
 								+ proposedRefinement.getSup() + "] is not a sub-interval of " + currentParamValue + "].";
-						assert !hasBeenSetBefore || !proposedRefinement.equals(currentInterval) : "No real refinement of parameter " + parameterName + " of component " + componentName + " with min interval size " + refinementConfig.getIntervalLength() + "! Intervals [" + currentInterval.getInf() + ", " + currentInterval.getSup() + "] and [" + proposedRefinement.getInf() + ", " + proposedRefinement.getSup() + "] are identical.";
+						assert !hasBeenSetBefore || !proposedRefinement.equals(currentInterval) : "No real refinement of parameter " + parameterName + " of component " + componentName + " with min interval size " + refinementConfig.getIntervalLength() + "! Intervals [" + currentInterval.getInf() + ", " + currentInterval.getSup() + "] and [" + proposedRefinement.getInf() + ", " + proposedRefinement.getSup() + "] are identical. State description: " + LogicUtil.getSortedLiteralSetDescription(state);
 					}
 					this.logger.info("Returning linear refinements: {}.", proposedRefinements.stream().map(i -> "[" + i.getInf() + ", " + i.getSup() + "]").collect(Collectors.toList()));
 					return this.getGroundingsForIntervals(proposedRefinements, partialGroundingAsList);
@@ -247,7 +248,7 @@ public class IsValidParameterRangeRefinementPredicate implements EvaluablePredic
 		this.logger.trace("Splitting interval of length {} and log-length {} into {} sub-intervals.", length, logLength, numberOfIntervals);
 		double stepSize = length / numberOfIntervals;
 		for (int i = 0; i < numberOfIntervals; i++) {
-			intervals.add(new Interval(min + i * stepSize, min + ((i + 1) * stepSize)));
+			intervals.add(new Interval(Math.max(min, min + i * stepSize), Math.min(max, min + ((i + 1) * stepSize))));
 		}
 		if (createPointIntervalsForExtremalValues) {
 			intervals.add(0, new Interval(min, min));

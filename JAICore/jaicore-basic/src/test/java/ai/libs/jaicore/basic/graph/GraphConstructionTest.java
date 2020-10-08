@@ -4,12 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.jupiter.api.Test;
+
 import ai.libs.jaicore.graph.Graph;
-import ai.libs.jaicore.test.ShortTest;
 
 public class GraphConstructionTest {
 
-	@ShortTest
+	@Test
 	public void testThatNewNodesOccurInNodeSet() {
 		String node = "a";
 		Graph<String> g = new Graph<>();
@@ -18,7 +19,7 @@ public class GraphConstructionTest {
 		assertTrue(g.getItems().contains(node));
 	}
 
-	@ShortTest
+	@Test
 	public void testThatRemovedNodesAreNotInNodeSet() {
 		String node = "a";
 		Graph<String> g = new Graph<>();
@@ -28,7 +29,7 @@ public class GraphConstructionTest {
 		assertFalse(g.getItems().contains(node));
 	}
 
-	@ShortTest
+	@Test
 	public void testThatAddingEdgesImpliesAddingNodes() {
 		String node1 = "a";
 		String node2 = "b";
@@ -44,7 +45,7 @@ public class GraphConstructionTest {
 		assertTrue(g.getPredecessors(node2).contains(node1));
 	}
 
-	@ShortTest
+	@Test
 	public void testThatNodeRemovalImpliesEdgeRemoval() {
 		String node1 = "a";
 		String node2 = "b";
@@ -55,7 +56,7 @@ public class GraphConstructionTest {
 		assertEquals(0, g.getPredecessors(node2).size());
 	}
 
-	@ShortTest
+	@Test
 	public void testThatNewNodesAreSources() {
 		String node1 = "a";
 		Graph<String> g = new Graph<>();
@@ -63,7 +64,7 @@ public class GraphConstructionTest {
 		assertTrue(g.getSources().contains(node1));
 	}
 
-	@ShortTest
+	@Test
 	public void testThatNewNodesAreSinks() {
 		String node1 = "a";
 		Graph<String> g = new Graph<>();

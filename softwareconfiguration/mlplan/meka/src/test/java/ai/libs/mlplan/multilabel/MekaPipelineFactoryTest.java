@@ -1,5 +1,7 @@
 package ai.libs.mlplan.multilabel;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
@@ -32,7 +35,7 @@ import ai.libs.mlplan.meka.MekaPipelineFactory;
 import meka.core.MLUtils;
 import weka.core.Instances;
 
-public class MekaPipelineFactoryTest {
+public class MekaPipelineFactoryTest extends ATest {
 	private static final File SSC = FileUtil.getExistingFileWithHighestPriority(EMLPlanMekaProblemType.CLASSIFICATION_MULTILABEL.getSearchSpaceConfigFileFromResource(),
 			EMLPlanMekaProblemType.CLASSIFICATION_MULTILABEL.getSearchSpaceConfigFromFileSystem());
 
@@ -70,25 +73,28 @@ public class MekaPipelineFactoryTest {
 	@Test
 	@LongTest
 	public void testValidRandomConfigInstantiation() throws ComponentInstantiationFailedException, TrainingException, InterruptedException {
-		Collection<ComponentInstance> algorithmSelections = ComponentUtil.getAllAlgorithmSelectionInstances("MLClassifier", repository);
-		List<ComponentInstance> list = new ArrayList<>(algorithmSelections);
+		List<ComponentInstance> list = new ArrayList<>(ComponentUtil.getAllAlgorithmSelectionInstances("MLClassifier", repository));
+		this.logger.info("Testing {} configurations.", list.size());
 
 		AtomicInteger count = new AtomicInteger(0);
 		AtomicDouble currentPercentage = new AtomicDouble(0.0);
-		double step = 0.05;
+		double step = 0.01;
 		IntStream.range(0, list.size()).parallel().forEach(i -> {
-			System.out.println(ComponentInstanceUtil.getComponentInstanceAsComponentNames(list.get(i)));
+			this.logger.trace("Checking {}", ComponentInstanceUtil.getComponentInstanceAsComponentNames(list.get(i)));
 			int currentI = i;
-			IntStream.range(0, 5).forEach(s -> {
+			boolean success = false;
+			for (int j = 0; j < 5 && !success; j++) {
 				try {
-					mpf.getComponentInstantiation(ComponentUtil.getRandomParametrization(list.get(currentI), new Random(s)));
+					mpf.getComponentInstantiation(ComponentUtil.getRandomParametrization(list.get(currentI), new Random(j)));
+					success = true;
 				} catch (ComponentInstantiationFailedException e) {
-					e.printStackTrace();
+					this.logger.warn("Failed to instantiate. Error was: {}", e.getMessage());
 				}
-			});
+			};
+			assertTrue(success, "Could not find a realization of component " + list.get(currentI));
 
 			if ((double) count.incrementAndGet() / list.size() >= currentPercentage.get()) {
-				System.out.println("Current state: " + (currentPercentage.get() * 100) + "%");
+				this.logger.debug("Current state: {}%", currentPercentage.get() * 100);
 				currentPercentage.addAndGet(step);
 			}
 		});

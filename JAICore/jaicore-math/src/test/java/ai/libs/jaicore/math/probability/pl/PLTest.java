@@ -13,7 +13,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.junit.jupiter.api.Test;
 
-public class PLTester {
+public class PLTest {
 
 	@Test
 	public void test() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {

@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import ai.libs.jaicore.test.ShortTest;
+import org.junit.jupiter.api.Test;
 
 public class SetUtilTest {
 
-	@ShortTest
+	@Test
 	public void testMappingCreation() throws InterruptedException {
 		Collection<String> a = new ArrayList<>();
 		a.add("D1");
@@ -51,7 +51,7 @@ public class SetUtilTest {
 		}
 	}
 
-	@ShortTest
+	@Test
 	public void testLocallyFilteredTotalMappings() throws InterruptedException {
 
 		/* create a = b with values 1,2,3,4,5 */
@@ -89,7 +89,7 @@ public class SetUtilTest {
 		assertEquals(out2, maps);
 	}
 
-	@ShortTest
+	@Test
 	public void testDifferenceEmptyPositiveCase() {
 		Collection<String> a = new ArrayList<>();
 		a.add("i1");
@@ -102,7 +102,7 @@ public class SetUtilTest {
 		assertTrue("Difference IS empty, but SetUtil.differenceEmpty returns false", SetUtil.differenceEmpty(a, b));
 	}
 
-	@ShortTest
+	@Test
 	public void testDifferenceEmptyNegativeCase() {
 		Collection<String> a = new ArrayList<>();
 		a.add("i1");
@@ -116,7 +116,7 @@ public class SetUtilTest {
 		assertTrue(!SetUtil.differenceEmpty(a, b));
 	}
 
-	@ShortTest
+	@Test
 	public void testDifferenceNotEmptyPositiveCase() {
 		Collection<String> a = new ArrayList<>();
 		a.add("i1");
@@ -130,7 +130,7 @@ public class SetUtilTest {
 		assertTrue(SetUtil.differenceNotEmpty(a, b));
 	}
 
-	@ShortTest
+	@Test
 	public void testDifferenceNotEmptyNegativeCase() {
 		Collection<String> a = new ArrayList<>();
 		a.add("i1");
@@ -143,7 +143,7 @@ public class SetUtilTest {
 		assertTrue("Difference IS empty, but SetUtil.differenceNotEmpty returns true", !SetUtil.differenceNotEmpty(a, b));
 	}
 
-	@ShortTest
+	@Test
 	public void testThatConstraintsAreAddedInPartialSet() throws InterruptedException {
 		String a = "a";
 		String b = "b";
@@ -155,7 +155,7 @@ public class SetUtilTest {
 		assertTrue(set.getOrder().get(a).contains(b));
 	}
 
-	@ShortTest
+	@Test
 	public void testThatObjectRemovalImpliesConstraintRemovalInPartialSet() throws InterruptedException {
 		String a = "a";
 		String b = "b";
@@ -184,7 +184,7 @@ public class SetUtilTest {
 		assertFalse(set.getOrder().containsKey(a));
 	}
 
-	@ShortTest
+	@Test
 	public void testcalculateNumberOfTotalOrderings() throws InterruptedException {
 		final String a, b, c, d;
 		a = "a";

@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.jaicore.db.DBTester;
+import ai.libs.jaicore.db.DBTest;
 import ai.libs.jaicore.db.IDatabaseAdapter;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
@@ -40,7 +40,7 @@ import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedExceptio
 import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
 
 @TestMethodOrder(OrderAnnotation.class)
-public class ExperimentRunnerBasicTester extends AExperimentTester implements IExperimentSetEvaluator {
+public class ExperimentRunnerBasicTest extends AExperimentTester implements IExperimentSetEvaluator {
 
 	public static Stream<Arguments> getSetups() throws IOException {
 
@@ -72,7 +72,7 @@ public class ExperimentRunnerBasicTester extends AExperimentTester implements IE
 
 		/* build cartesian product with the database parameters */
 		List<Arguments> combos = new ArrayList<>();
-		for (List<Arguments> tuple : SetUtil.cartesianProduct(Arrays.asList(DBTester.getDatabaseConfigs().collect(Collectors.toList()), args))) {
+		for (List<Arguments> tuple : SetUtil.cartesianProduct(Arrays.asList(DBTest.getDatabaseConfigs().collect(Collectors.toList()), args))) {
 			Object[] arr = new Object[3];
 			arr[0] = tuple.get(0).get()[0];
 			arr[1] = ConfigFactory.create(IExperimentSetConfig.class).loadPropertiesFromFile((File) tuple.get(1).get()[0]);

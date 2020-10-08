@@ -24,6 +24,9 @@ public class MajorityClassifier extends ASupervisedLearner<ILabeledInstance, ILa
 
 	@Override
 	public void fit(final ILabeledDataset<? extends ILabeledInstance> dTrain) throws TrainingException, InterruptedException {
+		if (!(dTrain.getLabelAttribute() instanceof ICategoricalAttribute)) {
+			throw new IllegalArgumentException("The label attribute of the given data is of type " + dTrain.getLabelAttribute().getClass() + ", but the " + MajorityClassifier.class.getName() + " can only work with categorical labels.");
+		}
 		Map<Object, Integer> labelCounter = new HashMap<>();
 		Objects.requireNonNull(dTrain);
 		if (dTrain.isEmpty()) {
@@ -33,7 +36,6 @@ public class MajorityClassifier extends ASupervisedLearner<ILabeledInstance, ILa
 			labelCounter.put(i.getLabel(), labelCounter.computeIfAbsent(i.getLabel(), t -> 0) + 1);
 		}
 		this.majorityLabel = labelCounter.keySet().stream().max((l1, l2) -> Integer.compare(labelCounter.get(l1), labelCounter.get(l2))).get();
-
 		ICategoricalAttribute labelAtt = ((ICategoricalAttribute) dTrain.getLabelAttribute());
 		this.prediction = new double[labelAtt.getLabels().size()];
 		this.prediction[labelAtt.getAsAttributeValue(this.majorityLabel).getValue()] = 1.0;

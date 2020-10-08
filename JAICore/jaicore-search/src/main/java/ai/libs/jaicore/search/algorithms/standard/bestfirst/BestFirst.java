@@ -119,6 +119,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 	private final List<INewNodeDescription<N, A>> lastExpansion = new ArrayList<>();
 	protected final Queue<EvaluatedSearchGraphPath<N, A, V>> solutions = new LinkedBlockingQueue<>();
 	protected final Queue<EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>> pendingSolutionFoundEvents = new LinkedBlockingQueue<>();
+	private boolean shutdownComplete = false;
 
 	/* communication */
 	protected final Map<N, BackPointerPath<N, A, V>> ext2int = new ConcurrentHashMap<>();
@@ -563,7 +564,8 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 
 		/* check whether an uncertainty-value is present if the node evaluator is an uncertainty-measuring evaluator */
 		assert !(this.nodeEvaluator instanceof IPotentiallyUncertaintyAnnotatingPathEvaluator) || !((IPotentiallyUncertaintyAnnotatingPathEvaluator<?, ?, ?>) this.nodeEvaluator).annotatesUncertainty()
-		|| node.getAnnotation(ENodeAnnotation.F_UNCERTAINTY.name()) != null : "Uncertainty-based node evaluator (" + this.nodeEvaluator.getClass().getName() + ") claims to annotate uncertainty but has not assigned any uncertainty to " + node.getHead() + " with label " + label;
+		|| node.getAnnotation(ENodeAnnotation.F_UNCERTAINTY.name()) != null : "Uncertainty-based node evaluator (" + this.nodeEvaluator.getClass().getName()
+		+ ") claims to annotate uncertainty but has not assigned any uncertainty to " + node.getHead() + " with label " + label;
 
 		/* eventually set the label */
 		node.setScore(label);
@@ -837,8 +839,16 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 	 */
 	private void checkTerminationAndUnregisterFromExpand(final BackPointerPath<N, A, V> node) throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException {
 		if (this.isStopCriterionSatisfied()) {
-			this.unregisterFromExpand(node);
-			assert !this.expanding.containsKey(node.getHead()) : "Expanded node " + this.nodeSelectedForExpansion + " was not removed from EXPANDING!";
+			assert this.shutdownComplete || this.expanding.containsKey(node.getHead()) : "Expanded node " + this.nodeSelectedForExpansion + " is not contained EXPANDING currently! That cannot be the case. The " + this.expanding.size()
+			+ " nodes currently in EXPANDING are: " + this.expanding.keySet().stream().map(n -> "\n\t" + n).collect(Collectors.joining());
+			synchronized (this.expanding) {
+				if (this.expanding.containsKey(node.getHead())) {
+					this.unregisterFromExpand(node);
+					assert !this.expanding.containsKey(node.getHead()) : "Expanded node " + this.nodeSelectedForExpansion + " was not removed from EXPANDING!";
+				} else {
+					this.bfLogger.debug("Node {} is already unregistered from expansion.", node.getHead().hashCode());
+				}
+			}
 		}
 		super.checkAndConductTermination();
 	}
@@ -867,7 +877,7 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 			int interruptedThreads = 0;
 			for (Entry<N, Thread> entry : this.expanding.entrySet()) {
 				Thread t = entry.getValue();
-				if (t.equals(Thread.currentThread())) {
+				if (!t.equals(Thread.currentThread())) {
 					this.expanding.remove(entry.getKey());
 					this.bfLogger.debug("Removing node {} with thread {} from expansion map, since this thread is realizing the shutdown.", entry.getKey(), t);
 				} else {
@@ -929,6 +939,8 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 			this.bfLogger.info("Canceling node evaluator.");
 			((ICancelablePathEvaluator) this.nodeEvaluator).cancelActiveTasks();
 		}
+		assert this.pool == null || this.pool.isShutdown() : "The pool has not been shutdown correctly at the end of the routine.";
+		this.shutdownComplete = true;
 		this.bfLogger.info("Shutdown completed");
 	}
 
@@ -1054,7 +1066,10 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 			switch (this.getState()) {
 			case CREATED:
 				AlgorithmInitializedEvent initEvent = this.activate();
-				this.bfLogger.info("Initializing BestFirst search {} with the following configuration:\n\tCPUs: {}\n\tTimeout: {}ms\n\tGraph Generator: {}\n\tNode Evaluator: {}\n\tConsidering node evaluator optimistic: {}\n\tListening to solutions delivered by node evaluator: {}\n\tInitial score upper bound: {}", this, this.getConfig().cpus(), this.getConfig().timeout(), this.graphGenerator.getClass(), this.nodeEvaluator, this.considerNodeEvaluationOptimistic, this.solutionReportingNodeEvaluator, this.getBestScoreKnownToExist());
+				this.bfLogger.info(
+						"Initializing BestFirst search {} with the following configuration:\n\tCPUs: {}\n\tTimeout: {}ms\n\tGraph Generator: {}\n\tNode Evaluator: {}\n\tConsidering node evaluator optimistic: {}\n\tListening to solutions delivered by node evaluator: {}\n\tInitial score upper bound: {}",
+						this, this.getConfig().cpus(), this.getConfig().timeout(), this.graphGenerator.getClass(), this.nodeEvaluator, this.considerNodeEvaluationOptimistic, this.solutionReportingNodeEvaluator,
+						this.getBestScoreKnownToExist());
 				int additionalCPUs = this.getConfig().cpus() - 1;
 				if (additionalCPUs > 0) {
 					this.parallelizeNodeExpansion(additionalCPUs);
@@ -1305,6 +1320,10 @@ public class BestFirst<I extends IPathSearchWithPathEvaluationsInput<N, A, V>, N
 
 	public Queue<EvaluatedSearchGraphPath<N, A, V>> getSolutionQueue() {
 		return this.solutions;
+	}
+
+	public boolean isShutdownComplete() {
+		return this.shutdownComplete;
 	}
 
 	/**

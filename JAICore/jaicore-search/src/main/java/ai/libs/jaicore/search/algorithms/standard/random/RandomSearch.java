@@ -9,19 +9,20 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.graphsearch.problem.IPathSearchInput;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTester;
+import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.common.control.IRandomConfigurable;
 import org.api4.java.datastructure.graph.ILabeledPath;
-import org.api4.java.datastructure.graph.implicit.ILazySuccessorGenerator;
 import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
@@ -37,7 +38,9 @@ import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.random.exception.IllegalArgumentForPathExtensionException;
 import ai.libs.jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
+import ai.libs.jaicore.search.model.ILazyRandomizableSuccessorGenerator;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.timing.TimedComputation;
 
 /**
  * This search randomly draws paths from the root. At every node, each successor is chosen with the same probability except if a priority predicate is defined. A priority predicate says whether or not a node lies on a path that has
@@ -84,15 +87,12 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		super(problem);
 		N rootNode = ((ISingleRootGenerator<N>) problem.getGraphGenerator().getRootGenerator()).getRoot();
 		this.gen = problem.getGraphGenerator().getSuccessorGenerator();
-		this.isRandomizableSingleNodeSuccessorGenerator = this.gen instanceof ILazySuccessorGenerator && this.gen instanceof IRandomConfigurable;
+		this.isRandomizableSingleNodeSuccessorGenerator = this.gen instanceof ILazyRandomizableSuccessorGenerator;
 		this.goalTester = problem.getGoalTester();
 		this.exploredGraph.addItem(rootNode);
 		this.root = new SearchGraphPath<>(rootNode);
 		this.random = random;
 		this.priorityPredicate = priorityPredicate;
-		if (this.isRandomizableSingleNodeSuccessorGenerator) {
-			((IRandomConfigurable) this.gen).setRandom(random);
-		}
 	}
 
 	/**
@@ -121,7 +121,8 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 			if (this.isRandomizableSingleNodeSuccessorGenerator) {
 
 				/* generate the next successor */
-				Iterator<INewNodeDescription<N, A>> iterator = this.successorGenerators.computeIfAbsent(node, ((ILazySuccessorGenerator<N, A>) this.gen)::getIterativeGenerator);
+				this.logger.debug("Graph generator is lazy. Get iterator for node.");
+				Iterator<INewNodeDescription<N, A>> iterator = this.successorGenerators.computeIfAbsent(node, n -> ((ILazyRandomizableSuccessorGenerator<N, A>) this.gen).getIterativeGenerator(n, this.random));
 				if (!iterator.hasNext()) {
 					throw new IllegalArgumentForPathExtensionException(
 							"The path cannot be expanded since the head has no successors. However, it is also not marked as a goal node. Output of goal check is: " + this.goalTester.isGoal(path) + ".", path);
@@ -145,8 +146,15 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 
 			/* if the successor generator cannot produce random sequences of successors, generate all successors and draw randomly from them */
 			else {
+				Timeout toForSuccessorComputation = new Timeout(this.getRemainingTimeToDeadline().milliseconds() - this.getTimeoutPrecautionOffset(), TimeUnit.MILLISECONDS);
+				this.logger.debug("Graph generator is not lazy or cannot cope with randomness. Computing all successors of node. Timeout is {}ms", toForSuccessorComputation.milliseconds());
 				long start = System.currentTimeMillis();
-				List<INewNodeDescription<N, A>> successors = this.gen.generateSuccessors(node); // could have been interrupted here
+				List<INewNodeDescription<N, A>> successors;
+				try {
+					successors = TimedComputation.compute(() -> this.gen.generateSuccessors(node), toForSuccessorComputation, "Successor computation in RandomSearch");
+				} catch (ExecutionException e) {
+					throw new RuntimeException(e);
+				} // could have been interrupted here
 				this.logger.debug("Identified {} successor(s) in {}ms, which are now appended.", successors.size(), System.currentTimeMillis() - start);
 				Collection<N> knownSuccessors = this.exploredGraph.getSuccessors(node);
 				long lastTerminationCheck = 0;

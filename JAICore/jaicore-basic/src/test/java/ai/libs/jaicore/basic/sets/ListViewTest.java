@@ -5,11 +5,11 @@ import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.List;
 
-import ai.libs.jaicore.test.ShortTest;
+import org.junit.jupiter.api.Test;
 
 public class ListViewTest {
 
-	@ShortTest
+	@Test
 	public void testNumberList() {
 		List<Number> l = Arrays.asList(2, 4, 6, 8, 10);
 		List<Integer> l2 = new ListView<>(l);

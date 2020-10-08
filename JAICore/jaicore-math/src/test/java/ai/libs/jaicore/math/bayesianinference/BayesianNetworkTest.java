@@ -12,9 +12,9 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.junit.jupiter.api.Test;
 
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 
-public class BayesianNetworkTester extends Tester {
+public class BayesianNetworkTest extends ATest {
 
 	/* define the variable names */
 	private static final String V_ASTHMA = "Asthma";

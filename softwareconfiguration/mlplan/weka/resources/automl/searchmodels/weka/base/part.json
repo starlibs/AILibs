@@ -12,7 +12,7 @@
       "min" : 2.0,
       "max" : 5.0,
       "refineSplits" : 8,
-      "minInterval" : 10
+      "minInterval" : 1.0
     }, {
       "name" : "M",
       "type" : "int",

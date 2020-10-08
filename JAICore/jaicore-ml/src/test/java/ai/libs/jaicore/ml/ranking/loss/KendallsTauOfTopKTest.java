@@ -7,12 +7,12 @@ import java.util.List;
 
 import org.api4.java.ai.ml.ranking.IRanking;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.ranking.dyad.DyadRankingLossUtil;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes.Ranking;
-import ai.libs.jaicore.test.ShortTest;
 
 public class KendallsTauOfTopKTest {
 
@@ -35,7 +35,7 @@ public class KendallsTauOfTopKTest {
 	private static final List<Dyad> GT_DYAD_LIST = Arrays.asList(DYAD_1, DYAD_2, DYAD_3, DYAD_4);
 	private static final List<IRanking<?>> GT_RANKINGS = Arrays.asList(new Ranking<>(GT_DYAD_LIST));
 
-	@ShortTest
+	@Test
 	public void testTop2Isolation() {
 		// Case 1: i and j appear in both top k lists
 		List<IDyad> dyadList = Arrays.asList(DYAD_1, DYAD_2, DYAD_4, DYAD_3);
@@ -50,7 +50,7 @@ public class KendallsTauOfTopKTest {
 		assertEquals(distance, distance2, 0.0);
 	}
 
-	@ShortTest
+	@Test
 	public void testTop2CorrectOrder() {
 		// Case 1: i and j appear in both top k lists
 		List<Dyad> dyadList2 = Arrays.asList(DYAD_1, DYAD_2, DYAD_4, DYAD_3);
@@ -60,7 +60,7 @@ public class KendallsTauOfTopKTest {
 		assertEquals(0.0d, distance, 0.0);
 	}
 
-	@ShortTest
+	@Test
 	public void testTop2WrongOrder() {
 		// Case 1: i and j appear in both top k lists
 		List<Dyad> dyadList2 = Arrays.asList(DYAD_2, DYAD_1, DYAD_3, DYAD_4);
@@ -73,7 +73,7 @@ public class KendallsTauOfTopKTest {
 	/**
 	 * Case 2 i,j in one ranking but just one in the other
 	 */
-	@ShortTest
+	@Test
 	public void testOnlyOneTop2ElementFirst() {
 		List<Dyad> dyadList2 = Arrays.asList(DYAD_1, DYAD_3, DYAD_2, DYAD_4);
 		List<IRanking<?>> predBatch = Arrays.asList(new Ranking<>(dyadList2));
@@ -86,7 +86,7 @@ public class KendallsTauOfTopKTest {
 	/**
 	 * Case 2 i,j in one ranking but just one in the other
 	 */
-	@ShortTest
+	@Test
 	public void testOnlyOneTop2ElementSecond() {
 		List<Dyad> dyadList2 = Arrays.asList(DYAD_2, DYAD_3, DYAD_1, DYAD_4);
 		List<IRanking<?>> predBatch = Arrays.asList(new Ranking<>(dyadList2));
@@ -102,7 +102,7 @@ public class KendallsTauOfTopKTest {
 	 * opposing top k lists (case 3) and 2 pairs for which both elements are in one top k list and none in the other (case 4).
 	 * With a penalty parameter of p = 0.5 we expect the overall distance to be 5.
 	 */
-	@ShortTest
+	@Test
 	public void testWrongRanking() {
 		List<Dyad> dyadList2 = Arrays.asList(DYAD_4, DYAD_3, DYAD_1, DYAD_2);
 		List<IRanking<?>> predBatch = Arrays.asList(new Ranking<>(dyadList2));

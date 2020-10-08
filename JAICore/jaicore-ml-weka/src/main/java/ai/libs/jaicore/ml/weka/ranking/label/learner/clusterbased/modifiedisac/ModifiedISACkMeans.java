@@ -54,7 +54,7 @@ public class ModifiedISACkMeans extends Kmeans<double[], Double> {
 			firstCenter[i] = firstCenter[i] / totalvalue;
 		}
 		this.center.add(firstCenter);
-		this.pointsInCenter.put(firstCenter, new ArrayList<double[]>());
+		this.pointsInCenter.put(firstCenter, new ArrayList<>());
 	}
 
 	private void locateFirstPoints() {
@@ -153,7 +153,7 @@ public class ModifiedISACkMeans extends Kmeans<double[], Double> {
 			this.initpoints.remove(indexofnewCenterinInit);
 			this.center.add(this.points.get(indexOfnewCenter));
 
-			this.pointsInCenter.put(this.points.get(indexOfnewCenter), new ArrayList<double[]>());
+			this.pointsInCenter.put(this.points.get(indexOfnewCenter), new ArrayList<>());
 		}
 	}
 
