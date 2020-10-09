@@ -4,6 +4,13 @@
 echo "Testing whether this build may be declared as a comment build or whether there are non-documentation changes in the code base."
 echo "Commit range is $TRAVIS_COMMIT_RANGE" 
 
+if [[ ${TRAVIS_BRANCH} == "master" ||  ${TRAVIS_BRANCH} == "dev" ]]; then
+	if [[ ${TRAVIS_EVENT_TYPE} == "push" ]]; then
+		echo "This is a push event on master or dev. This is always allowed."
+		exit 0
+	fi
+fi
+
 if ! git diff --name-only $TRAVIS_COMMIT_RANGE | grep -qvE '(.md$)'
 then
   echo "Only docs were updated, not running the CI."
