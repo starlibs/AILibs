@@ -27,7 +27,6 @@ fi
 
 echo "Test task is: ${TEST_TASK}"
 ./gradlew $TEST_PROJECT:$TEST_TASK
-echo "Test finished. This is the report folder:"
-ls -lh JAICore/*/build/reports/tests
-ls -lh softwareconfiguration/*/*/build/reports/tests
+echo "Test finished. This is the report folder(s):"
+find ./ -maxdepth 10 -iname 'tests' -exec ls -lh {} \;
 exit $?
