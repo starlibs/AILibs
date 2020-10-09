@@ -74,17 +74,12 @@ script:
 # Assign jobs to stages. The test jobs defined above are implicitly assigned to the test stage: https://docs.travis-ci.com/user/build-stages/#naming-your-build-stages
 jobs:
   exclude:
-    - if: (commit_message=~ /--documentation--/) AND (env(DUMMY) != true) # do not build anything if the commit is only for documentation!
-    - if: (NOT (commit_message=~ /--documentation--/)) AND (env(DUMMY) = true) # exclude the dummy build if this is not a documentation push
-    - if: (type=push) AND (branch IN (master, dev)) AND (env(DUMMY) != true) # do never build master and dev in push mode; this is double work, because the branches are protected and always built upon PR
+    - if: (type=push) AND (branch IN (master, dev)) # do never build master and dev in push mode; this is double work, because the branches are protected and always built upon PR
     - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = long) ## typically we will want to remove dev here, because long is only for master. This is just initially to make sure that also the long tests are built
     - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = medium)
       
   include:
     - stage: dummy # this stage does nothing but span an immediately succeeding build to not break the github hook (this would happen with [skip ci]
-      env: 
-        jobs:
-          - DUMMY=true
       script:
         - echo "Dummy build finished"
         
@@ -101,8 +96,11 @@ jobs:
 
 # configures the *order* of the stages. See https://docs.travis-ci.com/user/build-stages/
 stages:
-  - dummy
-  - check_build
-  - test
+  - name: dummy
+    if: (commit_message=~ /--documentation--/)
+  - name: check_build
+    if: NOT (commit_message=~ /--documentation--/) # do not build anything if the commit is only for documentation!
+  - name: test
+    if: NOT (commit_message=~ /--documentation--/) # do not build anything if the commit is only for documentation!
 
 
