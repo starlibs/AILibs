@@ -15,8 +15,34 @@ dependencies {
 	/* dependencies to the test sources of other projects */
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-components', configuration: 'testArtifacts')
 	testCompile project(path: ':JAICore:jaicore-ml', configuration: 'testArtifacts')
 	testCompile project(path: ':mlplan-core', configuration: 'testArtifacts')
+}
+
+task testCoreFunctionality(type: Test) {
+	useJUnitPlatform{
+		filter {
+			excludeTestsMatching "ai.libs.mlplan.wekamlplan.WekaClassificationMLPlanResultDeliveryTester"
+			excludeTestsMatching "ai.libs.mlplan.wekamlplan.WekaRegressionMLPlanResultDeliveryTest"
+		}
+	}
+}
+
+task testClassification(type: Test) {
+	useJUnitPlatform{
+		filter {
+			includeTestsMatching "ai.libs.mlplan.wekamlplan.WekaClassificationMLPlanResultDeliveryTester"
+		}
+	}
+}
+
+task testRegression(type: Test) {
+	useJUnitPlatform{
+		filter {
+			includeTestsMatching "ai.libs.mlplan.wekamlplan.WekaRegressionMLPlanResultDeliveryTest"
+		}
+	}
 }
 
 uploadArchives {

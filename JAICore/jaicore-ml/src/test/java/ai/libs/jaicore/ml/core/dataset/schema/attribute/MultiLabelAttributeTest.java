@@ -7,10 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IMultiLabelAttribute;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiLabelAttribute;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class MultiLabelAttributeTest {
 
@@ -18,7 +16,7 @@ public class MultiLabelAttributeTest {
 	private static final List<String> VALUES = Arrays.asList("A", "B", "C");
 	private static IMultiLabelAttribute att;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() {
 		att = new MultiLabelAttribute(NAME, VALUES);
 	}

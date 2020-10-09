@@ -3,8 +3,8 @@
 	"include": [
 		"./meka-full-base.json",
 		"./meka-reduced-meta.json",
-		"../weka/weka-full-base.json",
-		"../weka/weka-full-meta.json"
+		"../weka/base/index.json",
+		"../weka/meta/index.json"
 	],
 	"parameters": [],
 	"components": []

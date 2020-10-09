@@ -2,8 +2,8 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.npuzzle.test;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.problems.npuzzle.NPuzzleState;
 
@@ -13,7 +13,7 @@ public class NPuzzleNodeTester {
 	private NPuzzleState n1;
 	private NPuzzleState n2;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		int[][] board = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 0 } };
 		this.n = new NPuzzleState(board, 2, 2);

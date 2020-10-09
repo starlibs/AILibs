@@ -72,7 +72,7 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	private double avgBranchingFactor = -1;
 	private int numUpdates;
 
-	private Function<Integer, Integer> rolloutsForGammaEquals1AsFunctionOfHeight;
+	private Function<Integer, Integer> rolloutsForGammaEquals1AsFunctionOfHeight = d -> 1000;
 
 	/* configuration of gamma-shape. this depends on the branching factor.
 	 * Note that "per child" does not mean that each child needs so many visits but for k children, the parent needs k * p observations. */
@@ -136,11 +136,15 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	public A getAction(final N node, final Collection<A> actions) throws ActionPredictionFailedException {
 		long start = System.currentTimeMillis();
 		Map<String, Object> nodeInfoMap = new HashMap<>();
+		if (!this.depths.containsKey(node)) {
+			throw new IllegalArgumentException("No depth information for node " + node + ". The node has apparently not occured in any back-propagation!");
+		}
 		int depth = this.depths.get(node);
 		this.logger.info("Determining action for node in depth {}. {} actions available. Node info: {}", depth, actions.size(), node);
 		if (!this.nodesForWhichAnActionHasBeenRequested.contains(node)) {
 
 			/* memorize that this node has been relevant for decision */
+			this.logger.debug("Mark node {} as one for which an action has been requested!", node);
 			this.nodesForWhichAnActionHasBeenRequested.add(node);
 
 			/* inform kernel about this new node  */
@@ -417,8 +421,12 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 			if (!this.deepestRelativeNodeDepthsOfNodes.containsKey(node) || this.deepestRelativeNodeDepthsOfNodes.get(node) < relativeDepth) {
 				this.deepestRelativeNodeDepthsOfNodes.put(node, relativeDepth);
 			}
+			this.logger.debug("Setting depth of node {} to {}", node, depth);
 			this.depths.put(node, depth);
 			isNextNodeRelevantForDecisions = this.nodesForWhichAnActionHasBeenRequested.contains(node);
+			if (!isNextNodeRelevantForDecisions) {
+				this.logger.debug("Node {} has never been requested for an action, so disregarding upcoming observations.", node);
+			}
 			lastNode = node;
 			lastAction = arc;
 			depth++;
@@ -459,8 +467,6 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 			final double x0 = sumTmp == 0 ? 0 : (pNumRollouts / sumTmp);
 			final double a = x0 / hmax;
 			this.rolloutsForGammaEquals1AsFunctionOfHeight = d -> Math.max((int) (x0 - a * (d - this.fixedDecisions.size())), GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT + 1);
-		} else {
-			this.rolloutsForGammaEquals1AsFunctionOfHeight = d -> 1000;
 		}
 	}
 

@@ -22,7 +22,7 @@ public class FeatureSpace implements Serializable {
 		this.featureDomains = new ArrayList<>();
 	}
 
-	public FeatureSpace(final Instances data) {
+	public FeatureSpace(final Instances data) throws InterruptedException {
 		this();
 		for (int i = 0; i < data.numAttributes(); i++) {
 			Attribute attr = data.attribute(i);

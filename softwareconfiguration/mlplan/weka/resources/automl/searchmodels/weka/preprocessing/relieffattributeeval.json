@@ -8,7 +8,7 @@
 			"providedInterface": [
 				"rankBasedEvaluator"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "K",
 					"type": "int",
@@ -30,7 +30,7 @@
 					"min": 1.0,
 					"max": 8.0,
 					"refineSplits": 8,
-					"minInterval": 10
+					"minInterval": 1.0
 				}
 			],
 			"dependencies": [

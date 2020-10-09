@@ -3,7 +3,8 @@ package ai.libs.jaicore.basic.metric;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test suite for the {@link aicore.ml.tsc.distances.ShotgunDistance}
@@ -111,9 +112,11 @@ public class ShotgunDistanceTest {
 	 * Robustness test: When initializing with a negative window length, the
 	 * constructor is supposed to throw an IllegalArgumentExpection.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessForNegativeWindowLength() {
-		int windowLength = -1;
-		new ShotgunDistance(windowLength, false);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			int windowLength = -1;
+			new ShotgunDistance(windowLength, false);
+		});
 	}
 }

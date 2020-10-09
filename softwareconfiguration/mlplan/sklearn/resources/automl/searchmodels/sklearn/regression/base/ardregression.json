@@ -5,7 +5,7 @@
     "name" : "sklearn.linear_model.ARDRegression",
     "providedInterface" : [ "BasicRegressor", "BaseLearner", "AbstractRegressor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "n_iter",
       "type" : "int",
       "default" : 300,

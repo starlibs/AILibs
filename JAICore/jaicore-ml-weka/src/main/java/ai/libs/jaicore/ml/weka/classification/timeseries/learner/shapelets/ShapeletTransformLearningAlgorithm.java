@@ -23,13 +23,13 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.ASimplifiedTSCLearningAlgorithm;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.ensemble.MajorityConfidenceVote;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.IQualityMeasure;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.Shapelet;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.search.AMinimumDistanceSearchStrategy;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.search.EarlyAbandonMinimumDistanceSearchStrategy;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.TimeSeriesUtil;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaTimeseriesUtil;
+import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.ensemble.MajorityConfidenceVote;
+import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.util.WekaTimeseriesUtil;
 import ai.libs.jaicore.ml.weka.classification.timeseries.learner.ensemble.EnsembleProvider;
 import weka.classifiers.Classifier;
 

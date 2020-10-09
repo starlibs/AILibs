@@ -5,7 +5,7 @@
     "name" : "sklearn.neighbors.KNeighborsClassifier",
     "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "n_neighbors",
       "type" : "int",
       "default" : 51,

@@ -8,7 +8,7 @@
       "id" : "W",
       "name" : "BasicMLClassifier"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "comment" : "Sets the number of RBMs default: 2",
       "name" : "N",
       "type" : "int",

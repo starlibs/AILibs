@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.components.api.IComponent;

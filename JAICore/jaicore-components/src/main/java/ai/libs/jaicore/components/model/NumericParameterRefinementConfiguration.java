@@ -16,6 +16,9 @@ public class NumericParameterRefinementConfiguration implements INumericParamete
 
 	public NumericParameterRefinementConfiguration(final double focusPoint, final double logBasis, final boolean initWithExtremalPoints, final int refinementsPerStep, final double intervalLength) {
 		super();
+		if (intervalLength <= 0) {
+			throw new IllegalArgumentException("Interval length must be strictly positive but is " + intervalLength);
+		}
 		this.focusPoint = focusPoint;
 		this.logBasis = logBasis;
 		this.initRefinementOnLogScale = !Double.isNaN(focusPoint);

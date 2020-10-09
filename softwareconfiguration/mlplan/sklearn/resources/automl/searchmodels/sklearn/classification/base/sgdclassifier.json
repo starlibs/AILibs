@@ -5,7 +5,7 @@
     "name" : "sklearn.linear_model.SGDClassifier",
     "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "loss",
       "default" : "hinge",
       "type" : "cat",

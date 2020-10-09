@@ -7,13 +7,11 @@ import java.util.List;
 
 import org.aeonbits.owner.ConfigCache;
 import org.api4.java.ai.ml.core.exception.TrainingException;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.BOSSClassifier;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.BOSSLearningAlgorithm.IBossAlgorithmConfig;
 
 /**
@@ -24,7 +22,7 @@ public class BOSSAlgorithmTest {
 
 	private TimeSeriesDataset2 dataset;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		double[] timeseries1 = new double[] { 1, 1, 1, 1, 1, 1, 1, 1 };
 		double[] timeseries2 = new double[] { 1, 2, 4, 3, 5, 2, 4, 3 };
@@ -37,9 +35,7 @@ public class BOSSAlgorithmTest {
 		this.dataset = new TimeSeriesDataset2(futureDataSet, null, null);
 	}
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
+	@Disabled
 	@Test
 	public void testFit() throws TrainingException {
 		IBossAlgorithmConfig config = ConfigCache.getOrCreate(IBossAlgorithmConfig.class);

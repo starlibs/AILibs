@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.meta.AdditiveRegression",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "Regressor", "WeightedInstancesHandler", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "sActivator",
       "type" : "cat",
       "default" : "0",

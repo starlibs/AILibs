@@ -5,6 +5,6 @@
     "name" : "sklearn.preprocessing.MinMaxScaler",
     "providedInterface" : [ "sklearn.preprocessing.MinMaxScaler", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ ]
+    "parameters" : [ ]
   } ]
 }

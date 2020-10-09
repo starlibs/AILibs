@@ -5,7 +5,7 @@
     "name" : "sklearn.kernel_approximation.RBFSampler",
     "providedInterface" : [ "sklearn.kernel_approximation.RBFSampler", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "gamma",
       "type" : "double",
       "default" : 0.505,

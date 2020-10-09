@@ -4,10 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.api4.java.common.metric.IScalarDistance;
-import org.junit.Test;
-
-import ai.libs.jaicore.basic.metric.ScalarDistanceUtil;
-import ai.libs.jaicore.basic.metric.TimeWarpEditDistance;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test suite for the {@link ai.libs.jaicore.basic.metric.TimeWarpEditDistance}
@@ -16,6 +14,8 @@ import ai.libs.jaicore.basic.metric.TimeWarpEditDistance;
  * @author fischor
  */
 public class TimeWarpEditDistanceTest {
+
+	public static final IScalarDistance ABS_DISTANCE = ScalarDistanceUtil.getAbsoluteDistance();
 
 	/**
 	 * Correctness test. Tests the distance calculation based on an defined input
@@ -83,20 +83,24 @@ public class TimeWarpEditDistanceTest {
 	 * Robustness test: When initializing with <code>lambda < 0</code> the
 	 * constuctor is supposed to thrown an IllegalArgumentException.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessForLambdaLessThanZero() {
-		double lambda = 0 - Double.MIN_VALUE;
-		new TimeWarpEditDistance(lambda, 1, ScalarDistanceUtil.getAbsoluteDistance());
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			double lambda = 0 - Double.MIN_VALUE;
+			new TimeWarpEditDistance(lambda, 1, ABS_DISTANCE);
+		});
 	}
 
 	/**
 	 * Robustness test: When initializing with <code>nu < 0</code> the constuctor is
 	 * supposed to thrown an IllegalArgumentException.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessForNuLessThanZero() {
-		double nu = 0 - Double.MIN_VALUE;
-		new TimeWarpEditDistance(1, nu, ScalarDistanceUtil.getAbsoluteDistance());
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			double nu = 0 - Double.MIN_VALUE;
+			new TimeWarpEditDistance(1, nu, ABS_DISTANCE);
+		});
 	}
 
 	/**
@@ -106,7 +110,7 @@ public class TimeWarpEditDistanceTest {
 	@Test
 	public void testBoundaryForLambdaEqualToZero() {
 		double lambda = 0;
-		new TimeWarpEditDistance(lambda, 1, ScalarDistanceUtil.getAbsoluteDistance());
+		new TimeWarpEditDistance(lambda, 1, ABS_DISTANCE);
 		assertTrue(true); // this part must be reached
 	}
 
@@ -117,7 +121,7 @@ public class TimeWarpEditDistanceTest {
 	@Test
 	public void testBoundaryForNuEqualToZero() {
 		double nu = 0;
-		new TimeWarpEditDistance(1, nu, ScalarDistanceUtil.getAbsoluteDistance());
+		new TimeWarpEditDistance(1, nu, ABS_DISTANCE);
 		assertTrue(true); // this part must be reached
 	}
 

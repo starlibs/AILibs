@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import ai.libs.jaicore.search.model.NodeExpansionDescription;

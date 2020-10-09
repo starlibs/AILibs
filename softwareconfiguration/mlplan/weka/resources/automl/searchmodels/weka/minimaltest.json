@@ -1,6 +1,0 @@
-{
-	"repository": "Tiny repository",
-	"include": [
-		"./base/reptree.json"
-	]
-}

@@ -1,116 +1,99 @@
 package ai.libs.jaicore.search.syntheticgraphs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.degenerated.DegeneratedGraphSearchProblem;
 
-@RunWith(Parameterized.class)
 public class DegeneratedGraphGeneratorGeneratorTester {
 
-	private final int branchingFactor;
-	private final int depth;
-	private DegeneratedGraphSearchProblem input;
-
-	public DegeneratedGraphGeneratorGeneratorTester(final int branchingFactor, final int depth) {
-		super();
-		this.branchingFactor = branchingFactor;
-		this.depth = depth;
-	}
-
-	// creates the test data
-	@Parameters(name = "branchingFactor = {0}, depth = {1}")
-	public static Collection<Object[]> data() {
+	public static Stream<Arguments> getTreeSetups() {
 
 		final int MAX_BF = 8;
 		final int MAX_DEPTH = 4;
-		int combos = MAX_BF * MAX_DEPTH / 2;
 
-		Object[][] data = new Object[combos][2];
-		int i = 0;
-		for (int bf = 2; bf <= MAX_BF; bf+=2) {
-			for (int depth = 1; depth <= MAX_DEPTH; depth ++) {
-				data[i][0] = bf;
-				data[i][1] = depth;
-				i++;
+		List<Arguments> data = new ArrayList<>();
+		for (int bf = 2; bf <= MAX_BF; bf += 2) {
+			for (int depth = 1; depth <= MAX_DEPTH; depth++) {
+				data.add(Arguments.of(bf, depth));
 			}
 		}
-		return Arrays.asList(data);
+		return data.stream();
 	}
 
-	@Before
-	public void setupTest() {
-		int numDeadEnds = this.branchingFactor / 2;
-		this.input = new DegeneratedGraphSearchProblem(new Random(0), numDeadEnds, this.branchingFactor, this.depth);
+	public DegeneratedGraphSearchProblem getProblem(final int branchingFactor, final int depth) {
+		int numDeadEnds = branchingFactor / 2;
+		return new DegeneratedGraphSearchProblem(new Random(0), numDeadEnds, branchingFactor, depth);
 	}
 
-	private int getNumOfNodesInDepth(final int depth) {
+	private int getNumOfNodesInDepth(final int branchingFactor, final int depth) {
 		if (depth == 0) {
 			return 1;
 		}
-		int deadEnds = this.branchingFactor / 2;
-		return (int)(Math.pow(this.branchingFactor - deadEnds, depth - 1) * this.branchingFactor);
+		int deadEnds = branchingFactor / 2;
+		return (int) (Math.pow(branchingFactor - deadEnds, depth - 1) * branchingFactor);
 	}
 
-	private int getNumOfSolutionsInDepth(final int depth) {
+	private int getNumOfSolutionsInDepth(final int branchingFactor, final int depth) {
 		int innerNodes = 0;
-		int deadEnds = this.branchingFactor / 2;
+		int deadEnds = branchingFactor / 2;
 		for (int k = 0; k < depth; k++) {
-			innerNodes += (int)Math.pow(this.branchingFactor  - deadEnds, k);
+			innerNodes += (int) Math.pow(branchingFactor - deadEnds, k);
 		}
 		int deadEndSolutions = innerNodes * deadEnds;
-		return (int)(Math.pow(this.branchingFactor - deadEnds, depth) + deadEndSolutions);
+		return (int) (Math.pow(branchingFactor - deadEnds, depth) + deadEndSolutions);
 	}
 
-	@Test
-	public void testMetrics() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		int leafsPerInnerLevel = this.branchingFactor / 2;
-		int offspringsPerInnerLevel = this.branchingFactor - leafsPerInnerLevel;
-		int leafsOnLastLevel = this.branchingFactor;
 
-		for (int islandSize = 1; islandSize <= 3; islandSize ++) {
+	@ParameterizedTest(name = "branchingFactor = {0}, depth = {1}")
+	@MethodSource("getTreeSetups")
+	public void testMetrics(final int branchingFactor, final int depth) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+		int leafsPerInnerLevel = branchingFactor / 2;
+		int offspringsPerInnerLevel = branchingFactor - leafsPerInnerLevel;
+		int leafsOnLastLevel = branchingFactor;
+
+		for (int islandSize = 1; islandSize <= 3; islandSize++) {
 			int expectedMaxLeafs = -1;
 			if (islandSize < leafsOnLastLevel) {
 				expectedMaxLeafs = 1;
-			}
-			else if (islandSize < leafsOnLastLevel * offspringsPerInnerLevel + leafsPerInnerLevel) { // try to unify the nodes under the last inner node
+			} else if (islandSize < leafsOnLastLevel * offspringsPerInnerLevel + leafsPerInnerLevel) { // try to unify the nodes under the last inner node
 				expectedMaxLeafs = leafsOnLastLevel;
-			}
-			else {
+			} else {
 				return;
 			}
-			assertEquals("Degenerated tree with bf " + this.branchingFactor + " and depth " + this.depth + " and max island size " + islandSize + " should have a maximum of " + expectedMaxLeafs + " leafs per island.", expectedMaxLeafs, this.input.getGraphGenerator().getMaxNumberOfLeafsInEverySubtreeOfMaxLength(BigInteger.valueOf(islandSize)).intValueExact());
+			assertEquals(expectedMaxLeafs, this.getProblem(branchingFactor, depth).getGraphGenerator().getMaxNumberOfLeafsInEverySubtreeOfMaxLength(BigInteger.valueOf(islandSize)).intValueExact(),
+					"Degenerated tree with bf " + branchingFactor + " and depth " + depth + " and max island size " + islandSize + " should have a maximum of " + expectedMaxLeafs + " leafs per island.");
 		}
 	}
 
-	@Test
-	public void testNumberOfSolutionPaths() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		DepthFirstSearch<ITransparentTreeNode, Integer> dfs = new DepthFirstSearch<>(this.input);
+	@ParameterizedTest(name = "branchingFactor = {0}, depth = {1}")
+	@MethodSource("getTreeSetups")
+	public void testNumberOfSolutionPaths(final int branchingFactor, final int depth) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+		DepthFirstSearch<ITransparentTreeNode, Integer> dfs = new DepthFirstSearch<>(this.getProblem(branchingFactor, depth));
 
 		/* compute number of totally expected solutions */
-		int totalSolutionsExpected = this.getNumOfSolutionsInDepth(this.depth);
+		int totalSolutionsExpected = this.getNumOfSolutionsInDepth(branchingFactor, depth);
 		int solutions = 0;
 		Map<Integer, Set<BigInteger>> idsPerLayer = new HashMap<>();
 		while (dfs.hasNext()) {
@@ -127,11 +110,11 @@ public class DegeneratedGraphGeneratorGeneratorTester {
 		}
 
 		/* check that all ids per layer have been enumerated */
-		for (int d = 0; d < this.depth; d++) {
-			long expectedNodesInThisLayer = this.getNumOfNodesInDepth(d);
+		for (int d = 0; d < depth; d++) {
+			long expectedNodesInThisLayer = this.getNumOfNodesInDepth(branchingFactor, d);
 			Set<BigInteger> idsInLayer = idsPerLayer.get(d);
 			for (long i = 0; i < expectedNodesInThisLayer; i++) {
-				assertTrue("Id " + i + " is missing in layer of depth " + d + ". Total expected number of nodes: " + expectedNodesInThisLayer + ". Ids: " + idsInLayer, idsInLayer.contains(BigInteger.valueOf(i)));
+				assertTrue(idsInLayer.contains(BigInteger.valueOf(i)), "Id " + i + " is missing in layer of depth " + d + ". Total expected number of nodes: " + expectedNodesInThisLayer + ". Ids: " + idsInLayer);
 			}
 		}
 		assertEquals(totalSolutionsExpected, solutions);

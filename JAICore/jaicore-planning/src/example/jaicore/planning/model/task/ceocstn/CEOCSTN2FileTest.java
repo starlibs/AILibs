@@ -9,7 +9,7 @@ import java.util.Collection;
 
 import javax.swing.JFileChooser;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CEOCSTN2FileTest {
 

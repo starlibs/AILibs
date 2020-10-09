@@ -1,7 +1,0 @@
-{
-	"repository": "WEKA Full Meta Models",
-	"comment": "All meta models from WEKA",
-	"include": [
-		"./meta/index.json"
-	]
-}

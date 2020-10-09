@@ -1,5 +1,7 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.graphsearch.problem.IPathSearchWithPathEvaluationsInput;
@@ -18,6 +20,7 @@ import com.google.common.eventbus.Subscribe;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
+import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.GraphBasedMDP;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTS;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.MCTSFactory;
@@ -40,6 +43,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 	private Logger logger = LoggerFactory.getLogger(MCTSPathSearch.class);
 	private final GraphBasedMDP<N, A> mdp;
 	private final MCTS<N, A> mcts;
+	private final Set<Integer> hashCodesOfReturnedPaths = new HashSet<>();
 
 	public MCTSPathSearch(final I problem, final MCTSFactory<N, A, ?> mctsFactory) {
 		super(problem);
@@ -49,7 +53,9 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 
 			@Subscribe
 			public void receiveMCTSEvent(final IAlgorithmEvent e) {
-				MCTSPathSearch.this.post(e); // forward everything
+				if (!(e instanceof AlgorithmInitializedEvent) && !(e instanceof AlgorithmFinishedEvent)){
+					MCTSPathSearch.this.post(e); // forward everything
+				}
 			}
 		});
 	}
@@ -84,13 +90,19 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 
 				/* form a path object and return a respective event */
 				MCTSIterationCompletedEvent<N, A, Double> ce = (MCTSIterationCompletedEvent<N, A, Double>) e;
-				double overallScore = ce.getScores().stream().reduce((a, b) -> a + b).get();
+				double overallScore = SetUtil.sum(ce.getScores());
 				this.logger.info("Registered rollout with score {}. Updating best seen solution correspondingly.", overallScore);
 				EvaluatedSearchGraphPath<N, A, Double> path = new EvaluatedSearchGraphPath<>(ce.getRollout(), overallScore);
 
 				/* only if the roll-out is a goal path, emit a success event */
 				if (this.getGoalTester().isGoal(path)) {
 					this.updateBestSeenSolution(path);
+					int hashCode = path.hashCode();
+					if (this.hashCodesOfReturnedPaths.contains(hashCode)) {
+						this.logger.info("Skipping (and supressing) previously found solution with hash code {}", hashCode);
+						continue;
+					}
+					this.hashCodesOfReturnedPaths.add(hashCode);
 					ISolutionCandidateFoundEvent<EvaluatedSearchGraphPath<N, A, Double>> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this, path);
 					this.post(event);
 					return event;

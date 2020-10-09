@@ -12,9 +12,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ai.libs.jaicore.basic.kvstore.KVStore;
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
@@ -28,8 +25,6 @@ import ai.libs.jaicore.components.exceptions.ComponentNotFoundException;
  * @author wever
  */
 public class ComponentUtil {
-
-	private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
 
 	private ComponentUtil() {
 		/* Intentionally left blank to prevent instantiation of this class. */
@@ -251,7 +246,25 @@ public class ComponentUtil {
 			} else {
 				for (IRequiredInterfaceDefinition reqIFaceDef : candidate.getRequiredInterfaces()) {
 					String reqIFace = reqIFaceDef.getName();
-					int subSolutionsForThisInterface = getNumberOfUnparametrizedCompositions(components, reqIFace);
+					int numberOfSolutionPerSlotForThisInterface = getNumberOfUnparametrizedCompositions(components, reqIFace);
+					int subSolutionsForThisInterface = 0;
+					if (reqIFaceDef.isOptional() || reqIFaceDef.getMin() == 0) {
+						subSolutionsForThisInterface ++;
+					}
+
+					/* now consider all numbers i of positive realizations of this required interface */
+					for (int i = Math.max(1, reqIFaceDef.getMin()); i <= reqIFaceDef.getMax(); i++) {
+						int numberOfPossibleRealizationsForThisFixedNumberOfSlots = 1;
+						int numCandidatesForNextSlot = numberOfSolutionPerSlotForThisInterface;
+						for (int j = 0; j < i; j++) {
+							numberOfPossibleRealizationsForThisFixedNumberOfSlots *= numCandidatesForNextSlot;
+							if (reqIFaceDef.isUniqueComponents()) {
+								numCandidatesForNextSlot --;
+							}
+						}
+						subSolutionsForThisInterface += numberOfPossibleRealizationsForThisFixedNumberOfSlots;
+					}
+
 					if (waysToResolveComponent > 0) {
 						waysToResolveComponent *= subSolutionsForThisInterface;
 					} else {

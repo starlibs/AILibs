@@ -5,7 +5,7 @@
     "name" : "sklearn.ensemble.ExtraTreesRegressor",
     "providedInterface" : [ "BasicRegressor", "BaseLearner", "FeatureImportanceEstimator", "AbstractRegressor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "n_estimators",
       "type" : "int",
       "min" : 1,

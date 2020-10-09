@@ -5,6 +5,6 @@
     "name" : "sklearn.preprocessing.StandardScaler",
     "providedInterface" : [ "sklearn.preprocessing.StandardScaler", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ ]
+    "parameters" : [ ]
   } ]
 }

@@ -5,11 +5,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -18,8 +17,9 @@ import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Test;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
@@ -27,6 +27,8 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
 import ai.libs.jaicore.ml.core.dataset.clusterable.ClusterableDataset;
 import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
+import ai.libs.jaicore.test.MediumParameterizedTest;
+import ai.libs.jaicore.test.MediumTest;
 
 /**
  * This class provides some tests that verify basic properties of a sampling
@@ -41,24 +43,10 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 	private static final String SAMPLER_LOGGER_NAME = "testedalgorithm";
 
-	@Parameters(name = "problemset = {0}")
-	public static Collection<Object[]> data() {
-		List<Object> problemSets = new ArrayList<>();
-
-		problemSets.add(new MemoryBasedSamplingAlgorithmTestProblemSet());
-		List<Collection<Object>> input = new ArrayList<>();
-		input.add(problemSets);
-
-		Object[][] data = new Object[problemSets.size()][1];
-		for (int i = 0; i < data.length; i++) {
-			data[i][0] = problemSets.get(i);
-		}
-		return Arrays.asList(data);
-	}
-
-	@Override
-	public MemoryBasedSamplingAlgorithmTestProblemSet getProblemSet() {
-		return (MemoryBasedSamplingAlgorithmTestProblemSet) super.getProblemSet();
+	public static Stream<Arguments> getProblemSets() {
+		List<Arguments> problemSets = new ArrayList<>();
+		problemSets.add(Arguments.of(new MemoryBasedSamplingAlgorithmTestProblemSet()));
+		return problemSets.stream();
 	}
 
 	@Override
@@ -70,9 +58,9 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 
 	public abstract IAlgorithm<?, ?> getAlgorithm(ILabeledDataset<?> dataset);
 
-	@Test
-	public void testSampleSizeSimpleProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
-		MemoryBasedSamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
+	@ParameterizedTest
+	@MethodSource("getProblemSets")
+	public void testSampleSizeSimpleProblem(final MemoryBasedSamplingAlgorithmTestProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		ILabeledDataset<?> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		this.logger.info("Testing sample on dataset with {} data points.", dataset.size());
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
@@ -92,9 +80,9 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	 * @throws AlgorithmCreationException
 	 * @throws Exception
 	 */
-	@Test
-	public void testSampleSizeMediumProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
-		MemoryBasedSamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
+	@MediumParameterizedTest
+	@MethodSource("getProblemSets")
+	public void testSampleSizeMediumProblem(final MemoryBasedSamplingAlgorithmTestProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		ILabeledDataset<?> dataset = problemSet.getMediumProblemInputForGeneralTestPurposes();
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
@@ -113,9 +101,9 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	 * @throws AlgorithmCreationException
 	 * @throws Exception
 	 */
-	@Test
-	public void testSampleSizeLargeProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
-		MemoryBasedSamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
+	@MediumParameterizedTest
+	@MethodSource("getProblemSets")
+	public void testSampleSizeLargeProblem(final MemoryBasedSamplingAlgorithmTestProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		ILabeledDataset<?> dataset = problemSet.getDifficultProblemInputForGeneralTestPurposes();
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
@@ -149,9 +137,9 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	 * @throws Exception
 	 *
 	 */
-	@Test
-	public void testNoDuplicatesTinyProblem() throws AlgorithmTestProblemSetCreationException, AlgorithmCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
-		MemoryBasedSamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
+	@ParameterizedTest
+	@MethodSource("getProblemSets")
+	public void testNoDuplicatesTinyProblem(final MemoryBasedSamplingAlgorithmTestProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, AlgorithmCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		ILabeledDataset<?> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		this.testNoDuplicates(dataset);
 	}
@@ -170,9 +158,9 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	 * @throws Exception
 	 *
 	 */
-	@Test
-	public void testNoDuplicatesSmallProblem() throws AlgorithmTestProblemSetCreationException, AlgorithmCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
-		MemoryBasedSamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
+	@ParameterizedTest
+	@MethodSource("getProblemSets")
+	public void testNoDuplicatesSmallProblem(final MemoryBasedSamplingAlgorithmTestProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, AlgorithmCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		ILabeledDataset<?> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		this.testNoDuplicates(dataset);
 	}
@@ -191,9 +179,9 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	 * @throws Exception
 	 *
 	 */
-	@Test
-	public void testNoDuplicatesLargeProblem() throws AlgorithmTestProblemSetCreationException, AlgorithmCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
-		MemoryBasedSamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
+	@MediumParameterizedTest
+	@MethodSource("getProblemSets")
+	public void testNoDuplicatesLargeProblem(final MemoryBasedSamplingAlgorithmTestProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, AlgorithmCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		ILabeledDataset<?> dataset = problemSet.getDifficultProblemInputForGeneralTestPurposes();
 		assertNotNull(dataset);
 		this.logger.info("Loaded dataset with {} instances and {} attributes.", dataset.size(), dataset.getNumAttributes());
@@ -234,9 +222,9 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	 *
 	 * @throws Exception
 	 */
-	@Test
-	public <I extends ILabeledInstance> void checkOriginalDataSetNotModified() throws AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
-		MemoryBasedSamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
+	@ParameterizedTest
+	@MethodSource("getProblemSets")
+	public <I extends ILabeledInstance> void checkOriginalDataSetNotModified(final MemoryBasedSamplingAlgorithmTestProblemSet problemSet) throws AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		ILabeledDataset<? extends ILabeledInstance> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		int hashCode = dataset.hashCode();
 		@SuppressWarnings("unchecked")

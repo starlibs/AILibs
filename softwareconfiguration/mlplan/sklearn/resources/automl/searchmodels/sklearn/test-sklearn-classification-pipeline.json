@@ -1,8 +1,0 @@
-{
-	"repository": "Test Classification",
-	"include": [
-		"./classification/ext/twosteppipeline.json",
-		"./preprocessing/maxabsscaler.json",
-		"./classification/base/gaussiannb.json"
-	]
-}

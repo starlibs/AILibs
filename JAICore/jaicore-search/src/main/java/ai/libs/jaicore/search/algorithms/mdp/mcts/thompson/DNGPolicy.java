@@ -223,7 +223,7 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 		for (int i = l - 2; i >= 0; i --) {
 			N node = nodes.get(i);
 			A action = actions.get(i);
-			double rewardOfThisAction = scores.get(i);
+			double rewardOfThisAction = scores.get(i) != null ? scores.get(i) : Double.NaN;
 			this.rewardsMDP.computeIfAbsent(node, n -> new HashMap<>()).putIfAbsent(action, rewardOfThisAction);
 			accumulatedScores = rewardOfThisAction + this.gammaMDP * accumulatedScores;
 			this.logger.debug("Updating statistics for {}-th node with accumulated score {}. State here is: {}", i, accumulatedScores, node);

@@ -10,15 +10,16 @@ import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 
-public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, IPrediction, IPredictionBatch> implements ITimeTrackingLearner {
+public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, IPrediction, IPredictionBatch> implements ITimeTrackingLearner, ILoggingCustomizable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TimeTrackingLearnerWrapper.class);
+	private Logger logger = LoggerFactory.getLogger(TimeTrackingLearnerWrapper.class);
 
 	private final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> wrappedSLClassifier;
 	private IComponentInstance ci;
@@ -103,7 +104,7 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 		try {
 			this.predictedInductionTime = Double.parseDouble(inductionTime);
 		} catch (Exception e) {
-			LOGGER.warn("Could not parse double from provided induction time {}.", inductionTime, e);
+			this.logger.warn("Could not parse double from provided induction time {}.", inductionTime, e);
 		}
 	}
 
@@ -112,7 +113,7 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 		try {
 			this.predictedInferenceTime = Double.parseDouble(inferenceTime);
 		} catch (Exception e) {
-			LOGGER.warn("Could not parse double from provided inference time {}.", inferenceTime, e);
+			this.logger.warn("Could not parse double from provided inference time {}.", inferenceTime, e);
 		}
 	}
 
@@ -147,6 +148,22 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 	@Override
 	public String toString() {
 		return this.getClass().getName() + " -> " + this.wrappedSLClassifier.toString();
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
+		if (this.wrappedSLClassifier instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.wrappedSLClassifier).setLoggerName(name + ".bl");
+		}
+		else {
+			this.logger.info("Underlying learner {} is not {}, so not customizing its logger.", this.wrappedSLClassifier.getClass(), ILoggingCustomizable.class);
+		}
 	}
 
 }

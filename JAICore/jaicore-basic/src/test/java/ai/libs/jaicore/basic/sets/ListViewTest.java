@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ListViewTest {
 
@@ -16,7 +16,7 @@ public class ListViewTest {
 		int index = 0;
 		for (int i : l2) {
 			assertEquals(i, l.get(index));
-			index ++;
+			index++;
 		}
 	}
 }

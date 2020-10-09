@@ -462,7 +462,7 @@ public class TaskPlannerUtil implements ILoggingCustomizable {
 				}
 			}
 		}
-		this.logger.info("Admissible groundings for {} with precondition {} on {} in state {} are: {}", methodOrPrimitiveTask, preconditionOfMethodOrPrimitive, target, state, groundings);
+		this.logger.info("Admissible groundings for {} with precondition {} on {} are: {}", methodOrPrimitiveTask, preconditionOfMethodOrPrimitive, target, groundings);
 		return groundings;
 	}
 

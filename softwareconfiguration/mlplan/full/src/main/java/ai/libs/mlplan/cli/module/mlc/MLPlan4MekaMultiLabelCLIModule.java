@@ -18,7 +18,7 @@ import ai.libs.mlplan.cli.MLPlanCLI;
 import ai.libs.mlplan.cli.module.AMLPlanCLIModule;
 import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
 import ai.libs.mlplan.cli.module.UnsupportedModuleConfigurationException;
-import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
+import ai.libs.mlplan.meka.ML2PlanMekaBuilder;
 
 // Multi-Label: EXACT_MATCH, INSTANCE_F1, LABEL_F1, MICRO_F1, HAMMING, JACCARD, RANK
 

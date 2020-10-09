@@ -8,7 +8,7 @@
       "id" : "W",
       "name" : "BasicMLClassifier"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "size",
       "comment" : "Size of the compressed matrix. Should be less than the number of labels and more than 1. (default: 20)",
       "type" : "int",

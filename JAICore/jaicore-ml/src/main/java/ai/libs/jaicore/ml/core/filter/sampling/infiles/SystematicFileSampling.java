@@ -139,6 +139,11 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 				}
 			} else {
 				// Delete sorted dataset file and terminate
+				try {
+					this.sortedDatasetFileReader.close();
+				} catch (IOException e) {
+					throw new AlgorithmException("Could not closed dataset file reader", e);
+				}
 				this.cleanUp();
 				return this.terminate();
 			}

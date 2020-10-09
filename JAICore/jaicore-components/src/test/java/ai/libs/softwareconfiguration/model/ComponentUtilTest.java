@@ -7,8 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ public class ComponentUtilTest {
 	/* Collection of components that may be used in the single unit tests. */
 	private static IComponentRepository components;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws IOException {
 		components = new ComponentSerialization().deserializeRepository(COMPONENT_REPOSITORY);
 	}

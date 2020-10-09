@@ -7,6 +7,7 @@ import java.util.Random;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
 
+import ai.libs.jaicore.basic.algorithm.IAlgorithmTestProblemSet;
 import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.GmeansSamplingFactory;
 
@@ -15,33 +16,32 @@ public class GMeansSamplingTester extends GeneralSamplingTester<Number> {
 	private static final long SEED = 1;
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
-
 	@Override
-	public void testSampleSizeSimpleProblem() {
+	public void testSampleSizeSimpleProblem(final MemoryBasedSamplingAlgorithmTestProblemSet set) {
 		// Sample Size is not supported for GMeansSampling
 		assertTrue(true);
 	}
 
 	@Override
-	public void testSampleSizeMediumProblem() {
+	public void testSampleSizeMediumProblem(final MemoryBasedSamplingAlgorithmTestProblemSet set) {
 		// Sample Size is not supported for GMeansSampling
 		assertTrue(true);
 	}
 
 	@Override
-	public void testSampleSizeLargeProblem() {
+	public void testSampleSizeLargeProblem(final MemoryBasedSamplingAlgorithmTestProblemSet set) {
 		// Sample Size is not supported for GMeansSampling
 		assertTrue(true);
 	}
 
 	@Override
-	public void testNoDuplicatesSmallProblem() {
+	public void testNoDuplicatesSmallProblem(final MemoryBasedSamplingAlgorithmTestProblemSet set) {
 		// GMeansSampling cannot be used for too large problems, because it is too slow
 		assertTrue(true);
 	}
 
 	@Override
-	public void testNoDuplicatesLargeProblem() {
+	public void testNoDuplicatesLargeProblem(final MemoryBasedSamplingAlgorithmTestProblemSet set) {
 		// GMeansSampling cannot be used for too large problems, because it is too slow
 		assertTrue(true);
 	}
@@ -58,37 +58,37 @@ public class GMeansSamplingTester extends GeneralSamplingTester<Number> {
 	}
 
 	@Override
-	public void testTimeout() {
+	public void testTimeout(final IAlgorithmTestProblemSet<?> problemSet) {
 		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
 		assertTrue(true);
 	}
 
 	@Override
-	public void testTimeoutWhenParallelized() {
+	public void testTimeoutWhenParallelized(final IAlgorithmTestProblemSet<?> problemSet) {
 		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
 		assertTrue(true);
 	}
 
 	@Override
-	public void testInterrupt() {
+	public void testInterrupt(final IAlgorithmTestProblemSet<?> problemSet) {
 		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
 		assertTrue(true);
 	}
 
 	@Override
-	public void testInterruptWhenParallelized() {
+	public void testInterruptWhenParallelized(final IAlgorithmTestProblemSet<?> problemSet) {
 		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
 		assertTrue(true);
 	}
 
 	@Override
-	public void testCancel() {
+	public void testCancel(final IAlgorithmTestProblemSet<?> problemSet) {
 		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
 		assertTrue(true);
 	}
 
 	@Override
-	public void testCancelWhenParallelized() {
+	public void testCancelWhenParallelized(final IAlgorithmTestProblemSet<?> problemSet) {
 		/* skip this test, because the used G-Means implementation is not interruptible (and hence not timeoutable and not cancelable) */
 		assertTrue(true);
 	}

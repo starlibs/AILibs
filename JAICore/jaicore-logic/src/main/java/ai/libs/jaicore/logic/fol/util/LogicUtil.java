@@ -3,6 +3,7 @@ package ai.libs.jaicore.logic.fol.util;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -172,5 +173,9 @@ public class LogicUtil {
 			}
 		}
 		return newFormula;
+	}
+
+	public static String getSortedLiteralSetDescription(final Collection<? extends Literal> collection) {
+		return collection.stream().sorted((l1, l2) -> l1.toString().compareTo(l2.toString()	)).map(l -> "\n\t- " + l).collect(Collectors.joining());
 	}
 }

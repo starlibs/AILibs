@@ -1,6 +1,5 @@
 package ai.libs.jaicore.search.model.travesaltree;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,33 +43,17 @@ public class JaicoreNodeInfoGenerator<N, V extends Comparable<V>> implements Nod
 		if (annotations.containsKey(ENodeAnnotation.F_ERROR.toString()) && (annotations.get(ENodeAnnotation.F_ERROR.toString()) instanceof Throwable)) {
 			sb.append("<h2>Error Details:</h2><pre style=\"color: red;\">");
 			Throwable e = (Throwable) annotations.get(ENodeAnnotation.F_ERROR.toString());
-			sb.append("Error Type " + e.getClass().getName() + "\nMessage: " + e.getMessage() + "\nStack Trace:\n");
-			for (StackTraceElement ste : e.getStackTrace()) {
-				sb.append("  " + ste.toString() + "\n");
-			}
-			if (e instanceof RuntimeException) {
-				Throwable e2 = ((RuntimeException) e).getCause();
-				if (e2 != null) {
-					sb.append("Sub-Error Type " + e2.getClass().getName() + "\nMessage: " + e2.getMessage() + "\nStack Trace:\n");
-					for (StackTraceElement ste : e2.getStackTrace()) {
-						sb.append("  " + ste.toString() + "\n");
-					}
-				} else {
-					sb.append("No cause was attached.\n");
+			do {
+				sb.append("Error Type " + e.getClass().getName() + "\nMessage: " + e.getMessage() + "\nStack Trace:\n");
+				for (StackTraceElement ste : e.getStackTrace()) {
+					sb.append("  " + ste.toString() + "\n");
 				}
-
-			} else if (e instanceof InvocationTargetException) {
-				Throwable e2 = ((InvocationTargetException) e).getCause();
-				if (e2 != null) {
-					sb.append("Sub-Error Type " + e2.getClass().getName() + "\nMessage: " + e2.getMessage() + "\nStack Trace:\n");
-					for (StackTraceElement ste : e2.getStackTrace()) {
-						sb.append("  " + ste.toString() + "\n");
-					}
-				} else {
-					sb.append("No cause was attached.\n");
+				e = e.getCause();
+				if (e != null) {
+					sb.append("Caused By: ");
 				}
-
 			}
+			while (e != null);
 			sb.append("</pre>");
 		}
 		if (this.nodeInfoGeneratorForPoints != null) {

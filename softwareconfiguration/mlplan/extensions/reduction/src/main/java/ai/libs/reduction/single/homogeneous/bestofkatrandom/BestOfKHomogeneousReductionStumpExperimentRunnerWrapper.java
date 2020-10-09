@@ -11,7 +11,8 @@ import java.util.Optional;
 
 import org.api4.java.datastructure.kvstore.IKVStore;
 
-import ai.libs.jaicore.db.sql.SQLAdapter;
+import ai.libs.jaicore.db.IDatabaseConfig;
+import ai.libs.jaicore.db.sql.DatabaseAdapterFactory;
 import ai.libs.reduction.single.ABestOfKReductionStumpExperimentRunnerWrapper;
 import ai.libs.reduction.single.BestOfKAtRandomExperiment;
 import ai.libs.reduction.single.MySQLReductionExperiment;
@@ -24,8 +25,8 @@ public class BestOfKHomogeneousReductionStumpExperimentRunnerWrapper extends ABe
 
 	private final Collection<MySQLReductionExperiment> knownExperiments = new HashSet<>();
 
-	public BestOfKHomogeneousReductionStumpExperimentRunnerWrapper(final String host, final String user, final String password, final String database, final int k, final int mccvRepeats) throws SQLException {
-		super(new SQLAdapter(host, user, password, database), TABLE_NAME, k, mccvRepeats);
+	public BestOfKHomogeneousReductionStumpExperimentRunnerWrapper(final IDatabaseConfig config, final int k, final int mccvRepeats) throws SQLException {
+		super(DatabaseAdapterFactory.get(config), TABLE_NAME, k, mccvRepeats);
 		this.knownExperiments.addAll(this.getConductedExperiments());
 	}
 

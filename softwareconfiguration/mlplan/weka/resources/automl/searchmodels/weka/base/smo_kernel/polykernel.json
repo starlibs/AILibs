@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.functions.supportVector.PolyKernel",
     "requiredInterface" : [ ],
     "providedInterface" : [ "K" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "E",
       "type" : "double",
       "min" : 0.2,

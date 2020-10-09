@@ -35,7 +35,7 @@ import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.components.serialization.ParameterDeserializer;
 import ai.libs.jaicore.components.serialization.ParameterDomainDeserializer;
-import ai.libs.jaicore.db.sql.SQLAdapter;
+import ai.libs.jaicore.db.IDatabaseAdapter;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -55,7 +55,7 @@ public class PerformanceKnowledgeBase {
 
 	private static final String LABEL_PERFORMANCE_SAMPLES = "performance_samples";
 
-	private SQLAdapter sqlAdapter;
+	private IDatabaseAdapter sqlAdapter;
 	private Map<String, HashMap<ComponentInstance, Double>> performanceSamples;
 	/** This is map contains a String */
 	private Map<String, HashMap<String, List<Pair<ParameterConfiguration, Double>>>> performanceSamplesByIdentifier;
@@ -108,7 +108,7 @@ public class PerformanceKnowledgeBase {
 		}
 	}
 
-	public PerformanceKnowledgeBase(final SQLAdapter sqlAdapter) {
+	public PerformanceKnowledgeBase(final IDatabaseAdapter sqlAdapter) {
 		super();
 		this.sqlAdapter = sqlAdapter;
 		this.performanceInstancesByIdentifier = new HashMap<>();
@@ -417,8 +417,9 @@ public class PerformanceKnowledgeBase {
 	 *
 	 * @param k
 	 * @return
+	 * @throws InterruptedException
 	 */
-	public boolean kDistinctAttributeValuesAvailable(final String benchmarkName, final ComponentInstance composition, final int minNum) {
+	public boolean kDistinctAttributeValuesAvailable(final String benchmarkName, final ComponentInstance composition, final int minNum) throws InterruptedException {
 		if (!this.performanceInstancesByIdentifier.containsKey(benchmarkName)) {
 			return false;
 		}

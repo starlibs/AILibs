@@ -19,11 +19,11 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 	private final V view;
 	private final C controller;
 
-	@SuppressWarnings("unchecked")
 	public ASimpleMVCPlugin() {
 		this(null);
 	}
 
+	@SuppressWarnings("unchecked")
 	public ASimpleMVCPlugin(final String title) {
 		super();
 		if (title == null) {

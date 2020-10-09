@@ -5,7 +5,7 @@
     "name" : "sklearn.linear_model.LassoLars",
     "providedInterface" : [ "BasicRegressor", "BaseLearner", "AbstractRegressor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "alpha",
       "type" : "double",
       "default" : 1,

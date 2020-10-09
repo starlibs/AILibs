@@ -5,7 +5,7 @@
     "name" : "sklearn.tree.ExtraTreeRegressor",
     "providedInterface" : [ "BasicRegressor", "BaseLearner", "FeatureImportanceEstimator", "AbstractRegressor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "criterion",
       "type" : "cat",
       "values" : [ "mse", "friedman_mse", "mae" ],

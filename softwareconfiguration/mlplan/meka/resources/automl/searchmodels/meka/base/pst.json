@@ -8,7 +8,7 @@
       "id" : "W",
       "name" : "AbstractClassifier"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "P",
       "comment" : "Sets the pruning value, defining an infrequent labelset as one which occurs <= P times in the data (P = 0 defaults to LC). default: 0 (LC)",
       "type" : "int",

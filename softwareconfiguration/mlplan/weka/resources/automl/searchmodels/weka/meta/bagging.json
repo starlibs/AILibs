@@ -11,7 +11,7 @@
 				"WeightedInstancesHandler",
 				"PipelineClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "P",
 					"type": "int",

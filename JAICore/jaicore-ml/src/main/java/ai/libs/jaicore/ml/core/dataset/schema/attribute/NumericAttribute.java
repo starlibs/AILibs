@@ -89,6 +89,6 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 
 	@Override
 	public Double deserializeAttributeValue(final String string) {
-		return Double.parseDouble(string);
+		return string.equals("null") ? null : Double.parseDouble(string);
 	}
 }

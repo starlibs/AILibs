@@ -56,7 +56,8 @@ implements IOptimalPathInORGraphSearch<I, EvaluatedSearchGraphPath<N, A, V>, N, 
 		this.updateBestSeenSolution(path);
 		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this, path);
 		this.logger.info("Identified solution with score {}. Now posting the solution event {} to {} listeners. Enable DEBUG to see the concrete nodes, actions and listeners.", path.getScore(), event, this.getListeners().size());
-		this.logger.debug("Nodes: {}. Actions: {}. Listeners: {}", path.getNodes(), path.getArcs(), this.getListeners());
+		this.logger.debug("{} nodes (enable TRACE to see exact definitions). Actions: {}. Listeners: {}", path.getNumberOfNodes(), path.getArcs(), this.getListeners());
+		this.logger.trace("Nodes: {}", path.getNodes());
 		this.post(event);
 		this.logger.debug("Event transmitted successfully.");
 		return event;

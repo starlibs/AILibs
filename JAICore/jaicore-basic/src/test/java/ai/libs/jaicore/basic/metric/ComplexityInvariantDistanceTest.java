@@ -2,67 +2,63 @@ package ai.libs.jaicore.basic.metric;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.complexity.StretchingComplexity;
-import ai.libs.jaicore.basic.metric.ComplexityInvariantDistance;
-import ai.libs.jaicore.basic.metric.EuclideanDistance;
 
 /**
  * Test suite for the
  * {@link ai.libs.jaicore.basic.metric.ComplexityInvariantDistance} implementation.
- * 
+ *
  * @author fischor
  */
 public class ComplexityInvariantDistanceTest {
 
-    /** The distance measure used throughout the tests. */
-    EuclideanDistance euclideanDistance;
+	/** The distance measure used throughout the tests. */
+	private static final EuclideanDistance EUCLIDEAN_DISTANCE = new EuclideanDistance();
 
-    /** The complexity measure used throughout the tests. */
-    StretchingComplexity stretchingComplexity;
+	/** The complexity measure used throughout the tests. */
+	private static final StretchingComplexity STRECHING_COMPLEXITY = new StretchingComplexity();
 
-    @Before
-    public void setUp() {
-        euclideanDistance = new EuclideanDistance();
-        stretchingComplexity = new StretchingComplexity();
-    }
+	/**
+	 * Correctness test. Tests the distance calculation based on an defined input
+	 * and expected output.
+	 */
+	@Test
+	public void testCorrectnessForDistanceCalculation() {
+		// Input.
+		double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 }; // complexity 5
+		double[] timeSeries2 = { .0, Math.sqrt(8), .0, Math.sqrt(8), .0, Math.sqrt(8) }; // complexity 15
+		// Expectation.
+		double expectation = EUCLIDEAN_DISTANCE.distance(timeSeries1, timeSeries2) * (15 / 5);
 
-    /**
-     * Correctness test. Tests the distance calculation based on an defined input
-     * and expected output.
-     */
-    @Test
-    public void testCorrectnessForDistanceCalculation() {
-        // Input.
-        double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 }; // complexity 5
-        double[] timeSeries2 = { .0, Math.sqrt(8), .0, Math.sqrt(8), .0, Math.sqrt(8) }; // complexity 15
-        // Expectation.
-        double expectation = euclideanDistance.distance(timeSeries1, timeSeries2) * (15 / 5);
+		ComplexityInvariantDistance cid = new ComplexityInvariantDistance(EUCLIDEAN_DISTANCE, STRECHING_COMPLEXITY);
+		double distance = cid.distance(timeSeries1, timeSeries2);
 
-        ComplexityInvariantDistance cid = new ComplexityInvariantDistance(euclideanDistance, stretchingComplexity);
-        double distance = cid.distance(timeSeries1, timeSeries2);
+		assertEquals(expectation, distance, 0.001);
+	}
 
-        assertEquals(expectation, distance, 0.001);
-    }
+	/**
+	 * Robustness test: When initializing with <code>null</code> for the distance
+	 * measure, the constructor is supposed to throw an IllegalArgumentExpection.
+	 */
+	@Test
+	public void testRobustnessForNullDistanceMeasure() {
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			new ComplexityInvariantDistance(null, STRECHING_COMPLEXITY);
+		});
+	}
 
-    /**
-     * Robustness test: When initializing with <code>null</code> for the distance
-     * measure, the constructor is supposed to throw an IllegalArgumentExpection.
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testRobustnessForNullDistanceMeasure() {
-           new ComplexityInvariantDistance(null, stretchingComplexity);
-    }
-
-    /**
-     * Robustness test: When initializing with <code>null</code> for the complexity
-     * measure, the constructor is supposed to throw an IllegalArgumentExpection.
-     */
-    @Test (expected = IllegalArgumentException.class)
-    public void testRobustnessForNullComplexityMeasure() {
-           new ComplexityInvariantDistance(euclideanDistance, null);
-    }
+	/**
+	 * Robustness test: When initializing with <code>null</code> for the complexity
+	 * measure, the constructor is supposed to throw an IllegalArgumentExpection.
+	 */
+	@Test
+	public void testRobustnessForNullComplexityMeasure() {
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			new ComplexityInvariantDistance(EUCLIDEAN_DISTANCE, null);
+		});
+	}
 
 }

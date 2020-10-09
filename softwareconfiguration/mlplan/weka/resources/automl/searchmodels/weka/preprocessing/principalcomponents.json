@@ -8,7 +8,7 @@
 			"providedInterface": [
 				"rankBasedEvaluator"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "numActivator",
 					"type": "cat",
@@ -42,7 +42,7 @@
 					"min": 0.5,
 					"max": 1.0,
 					"refineSplits": 8,
-					"minInterval": 10
+					"minInterval": 0.05
 				},
 				{
 					"name": "O",

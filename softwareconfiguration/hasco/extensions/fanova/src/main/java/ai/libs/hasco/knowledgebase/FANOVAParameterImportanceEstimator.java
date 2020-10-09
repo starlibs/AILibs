@@ -62,10 +62,11 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	 * @param importanceThreshold
 	 * @param sizeOfLargestSubsetsToConsider
 	 * @return
+	 * @throws InterruptedException
 	 * @throws Exception
 	 */
 	@Override
-	public Set<String> extractImportantParameters(final ComponentInstance composition, final boolean recompute) throws ExtractionOfImportantParametersFailedException {
+	public Set<String> extractImportantParameters(final ComponentInstance composition, final boolean recompute) throws ExtractionOfImportantParametersFailedException, InterruptedException {
 		String pipelineIdentifier = CompositionProblemUtil.getComponentNamesOfComposition(composition);
 		if (this.importantParameterMap.containsKey(pipelineIdentifier)) {
 			return this.importantParameterMap.get(pipelineIdentifier);
@@ -161,7 +162,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	}
 
 	@Override
-	public boolean readyToEstimateImportance(final ComponentInstance composition) {
+	public boolean readyToEstimateImportance(final ComponentInstance composition) throws InterruptedException {
 		return this.performanceKnowledgeBase.kDistinctAttributeValuesAvailable(this.benchmarkName, composition, this.minNumSamples);
 	}
 

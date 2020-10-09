@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.meta.ClassificationViaRegression",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "PipelineClassifier" ],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   } ]
 }

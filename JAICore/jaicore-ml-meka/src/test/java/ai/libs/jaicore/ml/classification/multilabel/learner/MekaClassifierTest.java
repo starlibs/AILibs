@@ -8,8 +8,8 @@ import java.io.FileReader;
 import java.util.List;
 
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassificationPredictionBatch;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.multilabel.dataset.IMekaInstances;
 import ai.libs.jaicore.ml.classification.multilabel.dataset.MekaInstances;
@@ -28,7 +28,7 @@ public class MekaClassifierTest {
 	private static IMekaInstances dataset;
 	private static List<IMekaInstances> splitterSplit;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws Exception {
 		wekaInstances = new Instances(new FileReader(new File("testrsc/flags.arff")));
 		MLUtils.prepareData(wekaInstances);

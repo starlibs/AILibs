@@ -80,6 +80,17 @@ public class ChaoticMeansTreasureModel extends NoisyMeanTreasureModel {
 	}
 
 	public boolean isTreasureIsland(final BigInteger island) {
+		if (this.indicesOfIslands.isEmpty()) {
+			try {
+				this.distributeTreasures();
+			} catch (AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException e) {
+				return false;
+			}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				return false;
+			}
+		}
 		return this.indicesOfIslands.contains(island);
 	}
 

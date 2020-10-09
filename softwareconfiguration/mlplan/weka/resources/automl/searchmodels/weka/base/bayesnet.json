@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.bayes.BayesNet",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "D",
       "type" : "boolean",
       "default" : "false"

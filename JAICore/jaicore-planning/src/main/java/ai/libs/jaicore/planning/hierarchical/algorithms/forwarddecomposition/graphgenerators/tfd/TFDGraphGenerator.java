@@ -56,7 +56,9 @@ public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String>, ILog
 	protected Collection<TFDNode> getSuccessorsResultingFromResolvingComplexTask(final Monom state, final Literal taskToBeResolved, final List<Literal> remainingOtherTasks) throws InterruptedException {
 		Collection<TFDNode> successors = new ArrayList<>();
 		Collection<MethodInstance> applicableMethodInstances = this.util.getMethodInstancesForTaskThatAreApplicableInState(null, this.problem.getDomain().getMethods(), taskToBeResolved, state, remainingOtherTasks);
-		this.logger.debug("Identified {} applicable method instances." , applicableMethodInstances.size());
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug("Identified {} applicable method instances: {}" , applicableMethodInstances.size(), applicableMethodInstances.stream().map(mi -> mi.getMethod().getName() + "(" + mi.getGrounding() + ")").collect(Collectors.joining(", ")));
+		}
 		assert this.areLonelyMethodsContainedAtMostOnce(applicableMethodInstances);
 		for (MethodInstance instance : applicableMethodInstances) {
 
@@ -116,7 +118,7 @@ public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String>, ILog
 	@Override
 	public ISuccessorGenerator<TFDNode, String> getSuccessorGenerator() {
 		return l -> {
-			this.logger.debug("Starting node generation for node {}", l);
+			this.logger.debug("Starting node generation for node with tasks {}", l.getRemainingTasks());
 			Monom state = l.getState();
 			List<Literal> currentlyRemainingTasks = new ArrayList<>(l.getRemainingTasks());
 			if (currentlyRemainingTasks.isEmpty()) {

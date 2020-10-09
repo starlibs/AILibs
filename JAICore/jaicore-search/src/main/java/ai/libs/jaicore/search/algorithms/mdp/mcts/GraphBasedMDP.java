@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
@@ -13,6 +14,7 @@ import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPathGoalTes
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.ILabeledPath;
+import org.api4.java.datastructure.graph.implicit.ILazySuccessorGenerator;
 import org.api4.java.datastructure.graph.implicit.INewNodeDescription;
 import org.api4.java.datastructure.graph.implicit.ISingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.ISuccessorGenerator;
@@ -36,6 +38,8 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 	private final Map<N, Pair<N, A>> backPointers = new HashMap<>();
 	private Logger logger = LoggerFactory.getLogger(GraphBasedMDP.class);
 	private final Map<N, Map<A, N>> successorCache = new HashMap<>();
+	private final boolean lazy;
+	private final ILazySuccessorGenerator<N, A> lazySuccGen;
 
 	public GraphBasedMDP(final IPathSearchWithPathEvaluationsInput<N, A, Double> graph) {
 		super();
@@ -43,6 +47,8 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 		this.root = ((ISingleRootGenerator<N>) this.graph.getGraphGenerator().getRootGenerator()).getRoot();
 		this.succGen = graph.getGraphGenerator().getSuccessorGenerator();
 		this.goalTester = graph.getGoalTester();
+		this.lazySuccGen = this.succGen instanceof ILazySuccessorGenerator ? (ILazySuccessorGenerator<N, A>)this.succGen : null;
+		this.lazy = this.lazySuccGen != null;
 	}
 
 	@Override
@@ -57,13 +63,26 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 
 	@Override
 	public Collection<A> getApplicableActions(final N state) throws InterruptedException {
+		this.logger.debug("Computing applicable actions.");
 		Collection<INewNodeDescription<N, A>> successors = this.succGen.generateSuccessors(state);
 		Collection<A> actions = new ArrayList<>();
 		Map<A, N> cache = new HashMap<>();
+		if (Thread.interrupted()) {
+			throw new InterruptedException("The computation of applicable actions has been interrupted.");
+		}
+		long lastInterruptCheck = System.currentTimeMillis();
 		for (INewNodeDescription<N, A> succ : successors) {
 			A action = succ.getArcLabel();
 			actions.add(action);
 			cache.put(action, succ.getTo());
+			long now = System.currentTimeMillis();
+			if (lastInterruptCheck < now - 10) {
+				lastInterruptCheck = now;
+				if (Thread.interrupted()) {
+					throw new InterruptedException("The computation of applicable actions has been interrupted.");
+				}
+			}
+
 			if (this.backPointers.containsKey(succ.getTo())) {
 				Pair<N, A> backpointer = this.backPointers.get(succ.getTo());
 				boolean sameParent = backpointer.getX().equals(state);
@@ -71,6 +90,13 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 				if (!sameParent || !sameAction) {
 					N otherNode = null;
 					for (N key : this.backPointers.keySet()) {
+						now = System.currentTimeMillis();
+						if (lastInterruptCheck < now - 10) {
+							lastInterruptCheck = now;
+							if (Thread.interrupted()) {
+								throw new InterruptedException("The computation of applicable actions has been interrupted.");
+							}
+						}
 						if (key.equals(succ.getTo())) {
 							otherNode = key;
 							break;
@@ -79,6 +105,7 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 					throw new IllegalStateException("Reaching state " + succ.getTo() + " on a second way, which must not be the case in trees!\n\t1st way: " + backpointer.getX() + "; " + backpointer.getY() + "\n\t2nd way: " + state + "; " + action + "\n\ttoString of existing node: " + otherNode + "\n\tSame parent: " + sameParent + "\n\tSame Action: " + sameAction);
 				}
 			}
+			this.logger.debug("Setting backpointer from {} to {}", succ.getTo(), state);
 			this.backPointers.put(succ.getTo(), new Pair<>(state, action));
 		}
 
@@ -129,6 +156,7 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 		nodes.add(cur);
 		while (cur != this.root) {
 			Pair<N, A> parentEdge = this.backPointers.get(cur);
+			Objects.requireNonNull(parentEdge, "No back pointer defined for non-root node " + cur);
 			cur = parentEdge.getX();
 			nodes.add(0, cur);
 			arcs.add(0, parentEdge.getY());
@@ -154,7 +182,13 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 
 	@Override
 	public boolean isTerminalState(final N state) throws InterruptedException {
-		return this.getApplicableActions(state).isEmpty();
+		if (this.lazy) {
+			this.logger.debug("Determining terminal state condition for lazy graph generator.");
+			return !this.lazySuccGen.getIterativeGenerator(state).hasNext();
+		}
+		else {
+			return this.succGen.generateSuccessors(state).isEmpty();
+		}
 	}
 
 	@Override
@@ -165,9 +199,9 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
-		if (this.graph.getGraphGenerator() instanceof ILoggingCustomizable) {
+		if (this.succGen instanceof ILoggingCustomizable) {
 			this.logger.info("Setting logger of successor generator to {}.gg", name);
-			((ILoggingCustomizable) this.graph.getGraphGenerator()).setLoggerName(name + ".gg");
+			((ILoggingCustomizable) this.succGen).setLoggerName(name + ".gg");
 		}
 		if (this.goalTester instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) this.goalTester).setLoggerName(name + ".gt");
@@ -185,14 +219,15 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 				this.successorCache.clear();
 			}
 			this.successorCache.computeIfAbsent(state, n -> new HashMap<>()).put(ne.getArcLabel(), ne.getTo());
+			this.backPointers.put(ne.getTo(), new Pair<>(state, ne.getArcLabel()));
 			return ne.getArcLabel();
 		}
 		this.logger.debug("The successor generator {} does not support lazy AND randomized successor generation. Now computing all successors and drawing one at random.", this.succGen.getClass());
-		Collection<INewNodeDescription<N, A>> successors = this.succGen.generateSuccessors(state);
-		if (successors.isEmpty()) {
+		Collection<A> actions = this.getApplicableActions(state);
+		if (actions.isEmpty()) {
 			throw new IllegalArgumentException("The given node has no successors: " + state);
 		}
-		return SetUtil.getRandomElement(successors, random).getArcLabel();
+		return SetUtil.getRandomElement(actions, random);
 	}
 
 	@Override

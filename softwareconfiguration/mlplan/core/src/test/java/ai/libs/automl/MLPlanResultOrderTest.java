@@ -18,15 +18,18 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.datastructure.graph.ILabeledPath;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import ai.libs.jaicore.test.MediumTest;
 import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
@@ -39,7 +42,7 @@ import ai.libs.mlplan.core.events.ClassifierFoundEvent;
  * @author Felix Mohr
  *
  */
-public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> {
+public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> extends ATest {
 
 	public abstract AMLPlanBuilder<L, ?> getMLPlanBuilder() throws Exception;
 
@@ -76,6 +79,7 @@ public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabele
 	}
 
 	@Test
+	@MediumTest
 	public void testThatSolutionsArriveInPreferredOrder() throws Exception {
 		MLPlan<L> mlplan = this.prepare(this.getMLPlanBuilder());
 		mlplan.setLoggerName("testedalgorithm");
@@ -86,7 +90,7 @@ public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabele
 
 				@Subscribe
 				public void receiveSolution(final ClassifierFoundEvent e) {
-					System.err.println(e);
+					MLPlanResultOrderTest.this.logger.info("Observed solution {}", e);
 				}
 			});
 			mlplan.call();
@@ -97,9 +101,10 @@ public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabele
 	}
 
 	@Test
+	@MediumTest
 	public void testThatDefaultConfigurationsAreReturnedFirst() throws Exception {
 		MLPlan<L> mlplan = this.prepare(this.getMLPlanBuilder());
-		mlplan.setLoggerName("testedalgorithm");
+		mlplan.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		Set<ComponentInstance> seenUnparametrizedComponents = new HashSet<>();
 		try {
 
@@ -111,7 +116,7 @@ public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabele
 					ComponentInstance ci = e.getComponentDescription();
 					ComponentInstance unparametrizedPipeline = ComponentInstanceUtil.getDefaultParametrization(ci);
 					if (!seenUnparametrizedComponents.contains(unparametrizedPipeline)) {
-						assertTrue("Component instance " + new ComponentSerialization().serialize(ci) + " is the first of its kind but not default parametrized!", ComponentInstanceUtil.isDefaultConfiguration(ci));
+						assertTrue("Component instance " + new ComponentSerialization().serialize(ci) + " is the first of its kind (no other instance of " + new ComponentSerialization().serialize(unparametrizedPipeline) + " has been observed) but not default parametrized!", ComponentInstanceUtil.isDefaultConfiguration(ci));
 						seenUnparametrizedComponents.add(unparametrizedPipeline);
 					}
 				}

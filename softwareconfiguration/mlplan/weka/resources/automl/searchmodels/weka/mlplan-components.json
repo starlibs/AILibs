@@ -1,8 +1,0 @@
-{
-	"repository": "ML-Plan",
-	"include": [
-		"./base/randomtree.json",
-		"./base/randomforest.json"
-	],
-	"components": []
-}

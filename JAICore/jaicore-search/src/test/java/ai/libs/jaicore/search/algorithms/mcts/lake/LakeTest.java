@@ -1,8 +1,6 @@
 package ai.libs.jaicore.search.algorithms.mcts.lake;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.search.algorithms.mcts.MCTSLearningSuccessTester;
 import ai.libs.jaicore.search.exampleproblems.lake.ELakeActions;
@@ -13,7 +11,6 @@ import ai.libs.jaicore.search.probleminputs.IMDP;
 
 public class LakeTest extends MCTSLearningSuccessTester<TimedLakeState, ELakeActions> {
 
-	private Logger logger = LoggerFactory.getLogger("testers");
 	private LakeMDP lastMDP;
 
 	@Override

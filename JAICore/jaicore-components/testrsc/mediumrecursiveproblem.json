@@ -2,7 +2,27 @@
 	"repository": "MediumRecursiveProblem",
 	"components": [
 		{
-			"name": "A",
+			"name": "A1",
+			"requiredInterface": [
+				{
+					"id": "ri1",
+					"name": "Q"
+				}
+			],
+			"providedInterface": [
+				"IFace"
+			],
+			"parameters": [
+				{
+					"name": "a",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": []
+		},
+		{
+			"name": "A2",
 			"requiredInterface": [
 				{
 					"id": "ri1",
@@ -31,7 +51,7 @@
 				{
 					"name": "b",
 					"type": "cat",
-					"default": "v2",
+					"default": "v3",
 					"values": [
 						"v3",
 						"v4"
@@ -50,7 +70,8 @@
 				{
 					"id": "ric2",
 					"name": "R"
-				}],
+				}
+			],
 			"providedInterface": [
 				"Q"
 			],
@@ -59,8 +80,7 @@
 		},
 		{
 			"name": "D",
-			"requiredInterface": [
-			],
+			"requiredInterface": [],
 			"providedInterface": [
 				"Q"
 			],
@@ -73,7 +93,7 @@
 				{
 					"name": "d2",
 					"type": "cat",
-					"default": "v2",
+					"default": "v4",
 					"values": [
 						"v3",
 						"v4"

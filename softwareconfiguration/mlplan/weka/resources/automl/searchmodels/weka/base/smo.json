@@ -17,7 +17,7 @@
 				"WeightedInstancesHandler",
 				"PipelineClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "C",
 					"type": "cat",

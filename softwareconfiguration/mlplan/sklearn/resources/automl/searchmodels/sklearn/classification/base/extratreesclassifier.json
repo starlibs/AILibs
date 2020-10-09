@@ -5,7 +5,7 @@
     "name" : "sklearn.ensemble.ExtraTreesClassifier",
     "providedInterface" : [ "AbstractClassifier", "BasicClassifier", "BaseLearner" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "criterion",
       "default" : "gini",
       "type" : "cat",

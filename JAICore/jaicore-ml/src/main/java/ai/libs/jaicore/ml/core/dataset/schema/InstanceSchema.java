@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.core.dataset.schema;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -7,10 +8,15 @@ import java.util.List;
 import org.api4.java.ai.ml.core.dataset.schema.IInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 
-public class InstanceSchema implements IInstanceSchema {
+public class InstanceSchema implements IInstanceSchema, Serializable {
 
 	private String relationName;
-	private final List<IAttribute> attributeList;
+	private List<IAttribute> attributeList;
+
+	/* just for serialization */
+	public InstanceSchema() {
+
+	}
 
 	public InstanceSchema(final String relationName, final Collection<IAttribute> attributeList) {
 		this.relationName = relationName;

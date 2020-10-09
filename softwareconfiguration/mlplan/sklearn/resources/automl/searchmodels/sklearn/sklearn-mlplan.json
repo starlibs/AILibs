@@ -1,8 +1,0 @@
-{
-	"repository": "ML-Plan with Scikit-Learn Backend for Classification",
-	"include": [
-		"./base/index.json",
-		"./preprocessing/index.json",
-		"./ext/twosteppipeline.json"
-	]
-}

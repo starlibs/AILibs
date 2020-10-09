@@ -30,6 +30,7 @@ import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
 import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
@@ -63,6 +64,10 @@ public class HASCOUtil {
 
 	private HASCOUtil() {
 		/* avoid instantiation */
+	}
+
+	public static int getNumberOfUnparametrizedSolutions(final SoftwareConfigurationProblem<?> problem) {
+		return ComponentUtil.getNumberOfUnparametrizedCompositions(problem.getComponents(), problem.getRequiredInterface());
 	}
 
 	public static <N, A> IPathSearchInput<N, A> getSearchProblem(final Collection<? extends IComponent> components, final String requiredInterface, final INumericParameterRefinementConfigurationMap paramRefinementConfig,

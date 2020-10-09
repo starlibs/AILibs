@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import autofe.algorithm.hasco.filter.generic.WEKAFilter;

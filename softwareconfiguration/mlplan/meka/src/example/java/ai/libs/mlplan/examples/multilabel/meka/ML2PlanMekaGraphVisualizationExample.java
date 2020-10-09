@@ -25,7 +25,7 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
+import ai.libs.mlplan.meka.ML2PlanMekaBuilder;
 import meka.core.MLUtils;
 import weka.core.Instances;
 

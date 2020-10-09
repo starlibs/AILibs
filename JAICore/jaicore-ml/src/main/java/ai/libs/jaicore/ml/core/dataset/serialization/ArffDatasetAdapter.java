@@ -149,8 +149,13 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			String[] relationNameAndOptions = line.substring(line.indexOf('\'') + 1, line.lastIndexOf('\'')).split(SEPARATOR_RELATIONNAME);
 			metaData.put(K_RELATION_NAME, relationNameAndOptions[0].trim());
 			if (relationNameAndOptions.length > 1) {
-				OptionsParser optParser = new OptionsParser(relationNameAndOptions[1]);
-				metaData.put(K_CLASS_INDEX, optParser.get(F_CLASS_INDEX));
+				OptionsParser optParser = new OptionsParser(relationNameAndOptions[1].trim());
+				try {
+					int classIndex = Integer.parseInt(optParser.get(F_CLASS_INDEX).toString());
+					metaData.put(K_CLASS_INDEX, classIndex);
+				} catch (Exception e) {
+					LOGGER.warn("Could not read in class index from relation name: {}, class index: {}", line, optParser.get(F_CLASS_INDEX).toString());
+				}
 			}
 		} else {
 			metaData.put(K_RELATION_NAME, relationDescription);
@@ -217,7 +222,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 	}
 
-	protected static Object parseInstance(final boolean sparseData, final List<IAttribute> attributes, final int targetIndex, final String line) {
+	protected static List<Object> parseInstance(final boolean sparseData, final List<IAttribute> attributes, final int targetIndex, final String line) {
 		if (line.trim().startsWith("%")) {
 			throw new IllegalArgumentException("Cannot create object for commented line!");
 		}
@@ -227,7 +232,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		if (curLine.trim().startsWith("{") && curLine.trim().endsWith("}")) {
 			curLine = curLine.substring(1, curLine.length() - 1);
 			if (curLine.trim().isEmpty()) { // the instance does not mention any explicit values => return an empty map.
-				return new HashMap<>();
+				return Arrays.asList(new HashMap<>(), 0);
 			}
 		}
 
@@ -261,15 +266,21 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			return Arrays.asList(parsedDenseInstance, target);
 		} else {
 			Map<Integer, Object> parsedSparseInstance = new HashMap<>();
+			Object target = 0;
 			for (String sparseValue : lineSplit) {
 				sparseValue = sparseValue.trim(); // remove leading or trailing white spaces.
 				int indexOfFirstSpace = sparseValue.indexOf(' ');
 				int indexOfAttribute = Integer.parseInt(sparseValue.substring(0, indexOfFirstSpace));
 				String attributeValue = sparseValue.substring(indexOfFirstSpace + 1);
 				assert !parsedSparseInstance.containsKey(indexOfAttribute) : "The attribute index " + indexOfAttribute + " has already been set!";
-				parsedSparseInstance.put(indexOfAttribute, attributes.get(indexOfAttribute).deserializeAttributeValue(attributeValue));
+
+				if (indexOfAttribute == targetIndex) {
+					target = attributes.get(indexOfAttribute).deserializeAttributeValue(attributeValue);
+				} else {
+					parsedSparseInstance.put(indexOfAttribute > targetIndex ? indexOfAttribute - 1 : indexOfAttribute, attributes.get(indexOfAttribute).deserializeAttributeValue(attributeValue));
+				}
 			}
-			return parsedSparseInstance;
+			return Arrays.asList(parsedSparseInstance, target);
 		}
 	}
 
@@ -294,6 +305,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile, final int columnWithClassIndex) throws DatasetDeserializationFailedException {
 		String line = null;
 		long lineCounter = 0;
+
 		try (BufferedReader br = Files.newBufferedReader(datasetFile.toPath())) {
 			ILabeledDataset<ILabeledInstance> dataset = null;
 			KVStore relationMetaData = new KVStore();
@@ -330,16 +342,14 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				} else {
 					line = line.trim();
 					if (!line.isEmpty() && !line.startsWith("%")) { // ignore empty and comment lines
-						Object parsedInstance = parseInstance(sparseMode, attributes, relationMetaData.getAsInt(K_CLASS_INDEX), line);
+						List<Object> parsedInstance = parseInstance(sparseMode, attributes, relationMetaData.getAsInt(K_CLASS_INDEX), line);
 						ILabeledInstance newI;
-						if (parsedInstance instanceof List<?>) {
+						if ((parsedInstance.get(0) instanceof Object[])) {
 							newI = new DenseInstance((Object[]) ((List<?>) parsedInstance).get(0), ((List<?>) parsedInstance).get(1));
-						} else if (parsedInstance instanceof Map) {
+						} else if (parsedInstance.get(0) instanceof Map) {
 							@SuppressWarnings("unchecked")
-							Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
-							Object label = (parsedSparseInstance).containsKey(relationMetaData.getAsInt(K_CLASS_INDEX)) ? parsedSparseInstance.remove(relationMetaData.getAsInt(K_CLASS_INDEX)) : 0; // in sparse instance, the class
-							// may be missing; it is then assumed to be 0
-							newI = new SparseInstance(dataset.getNumAttributes(), parsedSparseInstance, label);
+							Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance.get(0);
+							newI = new SparseInstance(dataset.getNumAttributes(), parsedSparseInstance, parsedInstance.get(1));
 						} else {
 							throw new IllegalStateException("Severe Error: The format of the parsed instance is not as expected.");
 						}
@@ -368,6 +378,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 	private static void serializeData(final BufferedWriter bw, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
 		bw.write(EArffItem.DATA.getValue() + "\n");
+
 		for (ILabeledInstance instance : data) {
 			if (instance instanceof SparseInstance) {
 				StringBuilder sb = new StringBuilder();
@@ -385,8 +396,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				sb.append(serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
 				sb.append("}\n");
 				bw.write(sb.toString());
-			}
-			else {
+			} else {
 				Object[] atts = instance.getAttributes();
 				bw.write(IntStream.range(0, atts.length).mapToObj(x -> serializeAttributeValue(data.getInstanceSchema().getAttribute(x), atts[x])).collect(Collectors.joining(",")));
 				bw.write(",");

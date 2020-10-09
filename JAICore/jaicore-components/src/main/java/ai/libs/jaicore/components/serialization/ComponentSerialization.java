@@ -59,8 +59,8 @@ public class ComponentSerialization implements ILoggingCustomizable {
 	public static final String FIELD_CONSTRAINTS = "constraints";
 	public static final String FIELD_PARAMETERS = "parameters";
 
-	public static final String DTYPE_DOUBLE ="double";
-	public static final String DTYPE_INT ="int";
+	public static final String DTYPE_DOUBLE = "double";
+	public static final String DTYPE_INT = "int";
 
 	private static final String FIELD_DEFAULT = "default";
 	private static final String MSG_CANNOT_PARSE_LITERAL = "Cannot parse literal ";
@@ -135,7 +135,7 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		}
 		ArrayNode compNodeAsArray = compNode != null ? (ArrayNode) compNode : om.createArrayNode();
 		if (compNode == null) {
-			((ObjectNode)rootNode).set(FIELD_COMPONENTS, compNodeAsArray);
+			((ObjectNode) rootNode).set(FIELD_COMPONENTS, compNodeAsArray);
 		}
 		if (this.logger.isInfoEnabled()) {
 			compNodeAsArray.forEach(n -> this.logger.info("Adding component {}", n));
@@ -171,7 +171,11 @@ public class ComponentSerialization implements ILoggingCustomizable {
 	}
 
 	public IComponentRepository deserializeRepository(final File jsonFile, final Map<String, String> templateVars) throws IOException {
-		return this.deserializeRepository(this.readRepositoryFile(jsonFile, templateVars));
+		try {
+			return this.deserializeRepository(this.readRepositoryFile(jsonFile, templateVars));
+		} catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Found a problem when parsing repository file " + jsonFile, e);
+		}
 	}
 
 	public IComponentRepository deserializeRepository(final String repository) throws IOException {
@@ -213,18 +217,18 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		String type = parameter.get("type").asText();
 		switch (type) {
 		case DTYPE_INT:
-		case "int-log":
+		case DTYPE_INT + "-log":
 		case DTYPE_DOUBLE:
-		case "double-log":
+		case DTYPE_DOUBLE + "-log":
 			if (!parameter.has("min")) {
 				throw new IllegalArgumentException("No min value defined for parameter " + name);
 			}
-			if (!parameter.has("max")) {
-				throw new IllegalArgumentException("No max value defined for parameter " + name);
-			}
-			double min = parameter.get("min").asDouble();
-			double max = parameter.get("max").asDouble();
-			return new Parameter(name, new NumericParameterDomain(type.equals("int") || type.equals("int-log"), min, max), defValNode.asDouble());
+		if (!parameter.has("max")) {
+			throw new IllegalArgumentException("No max value defined for parameter " + name);
+		}
+		double min = parameter.get("min").asDouble();
+		double max = parameter.get("max").asDouble();
+		return new Parameter(name, new NumericParameterDomain(type.equals("int") || type.equals("int-log"), min, max), defValNode.asDouble());
 
 		case "bool":
 		case "boolean":
@@ -268,7 +272,7 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		}
 		boolean initWithExtremal = false;
 		int refineSplits = parameter.get("refineSplits").asInt();
-		int minInterval = parameter.get("minInterval").asInt();
+		double minInterval = parameter.get("minInterval").asDouble();
 		if (type.endsWith("-log")) {
 			return new NumericParameterRefinementConfiguration(parameter.get("focus").asDouble(), parameter.get("basis").asDouble(), initWithExtremal, refineSplits, minInterval);
 		} else {
@@ -288,11 +292,9 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		IParameter param = component.getParameter(lhs);
 		if (param.isNumeric()) {
 			return this.deserializeDependencyConditionTermForNumericalParam(param, lhs, cond, rhs);
-		}
-		else if (param.isCategorical()) {
+		} else if (param.isCategorical()) {
 			return this.deserializeDependencyConditionTermForCategoricalParam(param, lhs, cond, rhs);
-		}
-		else {
+		} else {
 			throw new IllegalArgumentException("Parameter \"" + param.getName() + "\" must be numeric or categorical!");
 		}
 	}
@@ -386,8 +388,7 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		for (JsonNode requiredInterface : component.path("requiredInterface")) {
 			try {
 				c.addRequiredInterface(this.deserializeRequiredInterface(requiredInterface));
-			}
-			catch (IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new IllegalArgumentException("Error when parsing required interface of component \"" + c.getName() + "\"", e);
 			}
 		}
@@ -410,11 +411,17 @@ public class ComponentSerialization implements ILoggingCustomizable {
 	public INumericParameterRefinementConfigurationMap deserializeParamRefinementConfiguration(final JsonNode component) {
 		NumericParameterRefinementConfigurationMap paramConfigs = new NumericParameterRefinementConfigurationMap();
 		Map<String, NumericParameterRefinementConfiguration> map = new HashMap<>();
-		paramConfigs.put(component.get("name").asText(), map);
+		String componentName = component.get("name").asText();
+		paramConfigs.put(componentName, map);
 		for (JsonNode parameter : component.get(FIELD_PARAMETERS)) {
+			String paramName = parameter.get("name").asText();
 			String type = parameter.get("type").asText();
 			if (type.startsWith(DTYPE_INT) || type.startsWith(DTYPE_DOUBLE)) {
-				map.put(parameter.get("name").asText(), this.deserializeParamRefinement(parameter));
+				try {
+					map.put(paramName, this.deserializeParamRefinement(parameter));
+				} catch (RuntimeException e) {
+					throw new IllegalArgumentException("Observed problems when processing parameter " + paramName + " of component " + componentName);
+				}
 			}
 		}
 		return paramConfigs;
@@ -429,7 +436,7 @@ public class ComponentSerialization implements ILoggingCustomizable {
 			throw new IllegalArgumentException("Constraint has no conclusion: " + constraint);
 		}
 		try {
-			IComponentInstance premise= new ComponentInstanceDeserializer(components).readAsTree(constraint.get("premise"));
+			IComponentInstance premise = new ComponentInstanceDeserializer(components).readAsTree(constraint.get("premise"));
 
 			IComponentInstance conclusion = new ComponentInstanceDeserializer(components).readAsTree(constraint.get("conclusion"));
 			return new ComponentInstanceConstraint(positive, premise, conclusion);

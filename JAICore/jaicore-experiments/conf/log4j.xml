@@ -55,7 +55,34 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
-	<logger name="ai.libs.jaicore.experiments">
-	 <level value="trace" />
+	<logger name="tester">
+		<level value="debug" />
+		<appender-ref ref="console" />
+		<appender-ref ref="infoFileAppender" />
+		<appender-ref ref="warnFileAppender" />
+		<appender-ref ref="errFileAppender" />
+		<appender-ref ref="traceFileAppender" />
+	</logger>
+	
+	<logger name="testedalgorithm">
+		<level value="info" />
+		<appender-ref ref="console" />
+		<appender-ref ref="infoFileAppender" />
+		<appender-ref ref="warnFileAppender" />
+		<appender-ref ref="errFileAppender" />
+		<appender-ref ref="traceFileAppender" />
+	</logger>
+	
+	<logger name="testedalgorithm._orgraphsearch">
+		<level value="warn" />
+	</logger>
+	
+	<logger name="example">
+		<level value="debug" />
+		<appender-ref ref="console" />
+		<appender-ref ref="infoFileAppender" />
+		<appender-ref ref="warnFileAppender" />
+		<appender-ref ref="errFileAppender" />
+		<appender-ref ref="traceFileAppender" />
 	</logger>
 </log4j:configuration>

@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
 import java.util.Random;
 
+import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
 
@@ -17,7 +18,7 @@ public class OSMACSamplingTester extends GeneralSamplingTester<Object> {
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(final ILabeledDataset<?> dataset) {
 		OSMACSamplingFactory factory = new OSMACSamplingFactory();
-		if (dataset != null) {
+		if (dataset != null && dataset.getLabelAttribute() instanceof ICategoricalAttribute) {
 			factory.setPreSampleSize((int) (PRE_SAMPLING_FRACTION * dataset.size()));
 			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * dataset.size());
 			factory.setPilot(new MajorityClassifier());

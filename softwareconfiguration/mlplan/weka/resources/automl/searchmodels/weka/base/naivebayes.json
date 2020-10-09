@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.bayes.NaiveBayes",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "K",
       "type" : "boolean",
       "default" : "false"

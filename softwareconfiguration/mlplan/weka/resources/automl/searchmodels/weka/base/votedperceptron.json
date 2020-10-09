@@ -5,14 +5,14 @@
     "name" : "weka.classifiers.functions.VotedPerceptron",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "I",
       "type" : "int",
       "default" : 1.0,
       "min" : 1.0,
       "max" : 10.0,
       "refineSplits" : 8,
-      "minInterval" : 10
+      "minInterval" : 1
     }, {
       "name" : "M",
       "type" : "int",

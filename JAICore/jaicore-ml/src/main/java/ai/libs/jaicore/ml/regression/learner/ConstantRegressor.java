@@ -30,10 +30,7 @@ public class ConstantRegressor extends ASupervisedLearner<ILabeledInstance, ILab
 		if (dTrain.isEmpty()) {
 			throw new IllegalArgumentException("Cannot train majority classifier with empty training set.");
 		}
-
-		List<Double> targetValues = new ArrayList<>(dTrain.size());
-		dTrain.stream().map(x -> (double) x.getLabel()).forEach(targetValues::add);
-		this.constantValue = targetValues.stream().filter(x -> x != null).mapToDouble(x -> x).average().getAsDouble();
+		this.constantValue = dTrain.stream().filter(x -> x.getLabel() != null).mapToDouble(x -> (double) x.getLabel()).average().getAsDouble();
 	}
 
 	@Override

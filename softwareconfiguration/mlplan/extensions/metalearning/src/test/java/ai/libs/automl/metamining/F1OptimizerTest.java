@@ -2,7 +2,8 @@ package ai.libs.automl.metamining;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -10,6 +11,7 @@ import ai.libs.mlplan.metamining.similaritymeasures.F1Optimizer;
 
 public class F1OptimizerTest {
 
+	@Disabled("This project is currently not maintained")
 	@Test
 	public void test() {
 

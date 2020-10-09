@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.core.events.HASCOSolutionEvaluationEvent;
-import ai.libs.jaicore.db.sql.SQLAdapter;
+import ai.libs.jaicore.db.IDatabaseAdapter;
 
 /**
  * Class to handle HASCOSolutionEvaluationEvents and insert the results into the
@@ -22,7 +22,7 @@ public class IntermediateResultHandler {
 
 	public static final String TABLE_NAME = "performance_samples";
 
-	private SQLAdapter adapter;
+	private IDatabaseAdapter adapter;
 	private String benchmarkName;
 	private String testEvalTechnique;
 	private String testSplitTechnique;
@@ -31,7 +31,7 @@ public class IntermediateResultHandler {
 	private int testSeed;
 	private int valSeed;
 
-	public IntermediateResultHandler(final SQLAdapter adapter, final String benchmarkName, final String testEvalTechnique, final String testSplitTechnique, final int testSeed, final String valEvalTechnique, final String valSplitTechnique,
+	public IntermediateResultHandler(final IDatabaseAdapter adapter, final String benchmarkName, final String testEvalTechnique, final String testSplitTechnique, final int testSeed, final String valEvalTechnique, final String valSplitTechnique,
 			final int valSeed) {
 		this.adapter = adapter;
 		this.benchmarkName = benchmarkName;

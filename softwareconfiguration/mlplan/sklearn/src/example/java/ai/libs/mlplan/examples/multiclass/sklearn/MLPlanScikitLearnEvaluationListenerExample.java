@@ -30,7 +30,7 @@ import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.TimeTrackingLearnerWrapper;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
-import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
+import ai.libs.mlplan.sklearn.builder.MLPlanScikitLearnBuilder;
 
 /**
  * This is an example class that illustrates the usage of ML-Plan on the segment dataset of OpenML. It is configured to run for 30 seconds and to use 70% of the data for search and 30% for selection in its second phase.

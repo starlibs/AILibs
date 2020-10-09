@@ -5,7 +5,7 @@
     "name" : "sklearn.preprocessing.Binarizer",
     "providedInterface" : [ "sklearn.preprocessing.Binarizer", "Preprocessing", "AbstractPreprocessor", "BasicPreprocessor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "threshold",
       "type" : "double",
       "default" : 0.505,

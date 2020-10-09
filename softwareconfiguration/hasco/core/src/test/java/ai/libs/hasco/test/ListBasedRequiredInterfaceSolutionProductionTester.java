@@ -12,18 +12,18 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.hasco.builder.HASCOBuilder;
 import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFD;
 import ai.libs.hasco.core.events.HASCOSolutionEvent;
-import ai.libs.jaicore.basic.Tester;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logging.LoggerUtil;
 
-public class ListBasedRequiredInterfaceSolutionProductionTester extends Tester {
+public class ListBasedRequiredInterfaceSolutionProductionTester extends ATest {
 
 	private static final File folderToTestResources = new File("../../../JAICore/jaicore-components/testrsc/");
 	private static final String reqInterface = "IFace";

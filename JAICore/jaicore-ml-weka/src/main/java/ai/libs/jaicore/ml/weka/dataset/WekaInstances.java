@@ -58,10 +58,14 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 				this.dataset = WekaInstancesUtil.datasetToWekaInstances(dataset);
 			} catch (UnsupportedAttributeTypeException e) {
 				throw new IllegalArgumentException("Could not convert dataset to weka's Instances.", e);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt(); // re-interrupting the thread
+				throw new IllegalStateException("Could not finish instantiating weka instances.", e);
 			}
 		}
 		if (this.dataset.numAttributes() != dataset.getNumAttributes() + 1) {
-			throw new IllegalStateException("Number of attributes in the WekaInstances do not coincide. We have " + this.dataset.numAttributes() + " while given dataset had " + dataset.getNumAttributes() + ". There should be a difference of 1, because WEKA counts the label as an attribute.");
+			throw new IllegalStateException("Number of attributes in the WekaInstances do not coincide. We have " + this.dataset.numAttributes() + " while given dataset had " + dataset.getNumAttributes()
+			+ ". There should be a difference of 1, because WEKA counts the label as an attribute.");
 		}
 		this.reconstructionInstructions = (dataset instanceof IReconstructible) ? ((ReconstructionPlan) ((IReconstructible) dataset).getConstructionPlan()).getInstructions() : null;
 	}

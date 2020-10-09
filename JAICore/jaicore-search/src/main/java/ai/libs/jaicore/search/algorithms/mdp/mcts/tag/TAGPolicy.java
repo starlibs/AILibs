@@ -13,6 +13,7 @@ import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.ActionPredictionFailedException;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.IPathUpdatablePolicy;
 
@@ -50,25 +51,36 @@ public class TAGPolicy<T, A> implements IPathUpdatablePolicy<T, A, Double>, ILog
 	@Override
 	public A getAction(final T node, final Collection<A> actions) throws ActionPredictionFailedException {
 
+		this.logger.info("Getting action for node {}", node);
+
 		/* make sure that each successor has been visited at least once in this stats (by the default policy) */
 		Map<A, Integer> pullMap = this.pullsPerNodeAction.computeIfAbsent(node, n -> new HashMap<>());
 		actions.forEach(a -> pullMap.computeIfAbsent(a, action -> 1));
 		this.visitsPerNode.put(node, this.visitsPerNode.computeIfAbsent(node, n -> 0) + 1);
 
+		this.logger.debug("Adjusting threshold.");
 		this.adjustThreshold(node); // first adjust threshold of node
+		this.logger.debug("Threshold adjusted. Is now {}", this.thresholdPerNode.get(node));
 
 		A choice = null;
 		double best = (this.isMaximize ? -1 : 1) * Double.MAX_VALUE;
 		int k = actions.size();
 		for (A action : actions) {
 			double score = this.getUtilityOfAction(node, action, k);
-			if (this.isMaximize && score > best || !this.isMaximize && score < best) {
+			if (!Double.isNaN(score) && (this.isMaximize && score > best || !this.isMaximize && score < best)) {
 				this.logger.trace("Updating best choice {} with {} since it is better than the current solution with performance {}", choice, action, best);
 				best = score;
 				choice = action;
 			} else {
 				this.logger.trace("Skipping current solution {} since its score {} is not better than the currently best {}.", action, score, best);
 			}
+		}
+
+
+		/* if no choice appears reasonable, return a random one, but also give a warning, because this seems strange. */
+		if (choice == null) {
+			this.logger.warn("All options have score NaN. Returning random element.");
+			return SetUtil.getRandomElement(actions, 0);
 		}
 
 		/* augment pulls for this action by one */
@@ -79,6 +91,10 @@ public class TAGPolicy<T, A> implements IPathUpdatablePolicy<T, A, Double>, ILog
 	public void adjustThreshold(final T node) {
 		Map<A, PriorityQueue<Double>> observations = this.statsPerNode.get(node);
 		double t = this.thresholdPerNode.computeIfAbsent(node, n -> this.isMaximize ? 0.0 : 100.0);
+		this.logger.debug("Initial value for threshold is {}. Observations are: {}", t, observations);
+		if (observations == null) {
+			return;
+		}
 		int sum;
 		boolean first = true;
 		do {
@@ -92,7 +108,8 @@ public class TAGPolicy<T, A> implements IPathUpdatablePolicy<T, A, Double>, ILog
 				sum += entry.getValue().size();
 			}
 			first = false;
-		} while (sum > this.s);
+		} while (sum != Double.NaN && sum > this.s);
+		this.logger.debug("Setting threshold to {}", t);
 		this.thresholdPerNode.put(node, t);
 	}
 
@@ -104,6 +121,10 @@ public class TAGPolicy<T, A> implements IPathUpdatablePolicy<T, A, Double>, ILog
 	 * @return
 	 */
 	public double getUtilityOfAction(final T node, final A action, final int k) {
+
+		if (!this.statsPerNode.containsKey(node) || !this.statsPerNode.get(node).containsKey(action)) {
+			return Double.NaN;
+		}
 
 		/* compute nominator */
 		double alpha = Math.log(2 * this.visitsPerNode.get(node) * k / this.delta);
@@ -146,13 +167,24 @@ public class TAGPolicy<T, A> implements IPathUpdatablePolicy<T, A, Double>, ILog
 			/* update list of best observed scores */
 			Map<A, PriorityQueue<Double>> actionMap = this.statsPerNode.computeIfAbsent(node, n -> new HashMap<>());
 			PriorityQueue<Double> bestScores = actionMap.computeIfAbsent(action, a -> this.isMaximize ? new PriorityQueue<>((c1, c2) -> Double.compare(c2, c1)) : new PriorityQueue<>());
-			accumulatedScores += scores.get(i); // no discounting used here
+
+			assert !bestScores.contains(Double.NaN);
+			if (accumulatedScores != Double.NaN && scores.get(i) != null) {
+				accumulatedScores += scores.get(i); // no discounting used here
+			}
+			else if (!Double.isNaN(accumulatedScores)) {
+				accumulatedScores = Double.NaN;
+			}
+			if (Double.isNaN(accumulatedScores)) {
+				return;
+			}
 			if (bestScores.size() < this.s) {
 				bestScores.add(accumulatedScores);
 			} else if (bestScores.peek() < accumulatedScores) {
 				bestScores.poll();
 				bestScores.add(accumulatedScores);
 			}
+			assert !bestScores.contains(Double.NaN);
 		}
 	}
 

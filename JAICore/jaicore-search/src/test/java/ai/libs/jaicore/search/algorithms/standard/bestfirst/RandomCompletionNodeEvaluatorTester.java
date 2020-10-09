@@ -25,9 +25,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.datastructure.graph.ILabeledPath;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -39,10 +37,9 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeExpansion
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.RCNEPathCompletionFailedException;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
+import ai.libs.jaicore.test.MediumTest;
 
 public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double>> {
-
-	private static final Logger logger = LoggerFactory.getLogger(RandomCompletionNodeEvaluatorTester.class);
 
 	/**
 	 * Tests that the random completion evaluation is really random in the sense that changing the seed changes the behavior.
@@ -58,6 +55,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 	 * @throws RCNEPathCompletionFailedException
 	 */
 	@Test
+	@MediumTest
 	public void testThatEvaluationDependsOnSeed() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, RCNEPathCompletionFailedException {
 
 		final int NUM_SEEDS = 5;
@@ -198,7 +196,8 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		this.testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 2, 10);
 	}
 
-	public void testThatAScoreIsReturnedIfExactlyKSampleSucceed(final int cities, final int k, final int n) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
+	public void testThatAScoreIsReturnedIfExactlyKSampleSucceed(final int cities, final int k, final int n)
+			throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
 
 		final int NUM_SEEDS = 5;
 		final int NUM_SAMPLES = n;
@@ -259,8 +258,8 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		assertEquals(numRepetitions, observedSolutions.get());
 	}
 
-	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> getNodeEvaluator(final int problemDifficulty, final IObjectEvaluator<ILabeledPath<EnhancedTTSPState, String>, Double> oe, final int seed,
-			final int numSamples, final int maxSamples, final int timeoutForNodeEvaluationInMs) {
+	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPState, String, Double> getNodeEvaluator(final int problemDifficulty, final IObjectEvaluator<ILabeledPath<EnhancedTTSPState, String>, Double> oe, final int seed, final int numSamples,
+			final int maxSamples, final int timeoutForNodeEvaluationInMs) {
 
 		/* create search that is the basis for the analysis (provides the nodes to be analyzed and the graph generator) */
 		StandardBestFirst<EnhancedTTSPState, String, Double> bf = this.getBF(problemDifficulty, n -> n.getNodes().size() * 1.0);

@@ -12,7 +12,8 @@ import java.util.List;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import org.api4.java.common.math.IVector;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
@@ -29,6 +30,7 @@ public class DyadDatasetPoolProviderTest {
 
 	private static final String GATSP_DATASET_FILE = "testrsc/ml/dyadranking/ga-tsp/GATSP-Data.txt";
 
+	@Disabled
 	@Test
 	public void testPoolProvider() throws FileNotFoundException {
 		DyadRankingDataset dataset = new DyadRankingDataset();

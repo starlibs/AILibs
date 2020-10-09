@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.rules.DecisionTable",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "PipelineClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "E",
       "type" : "cat",
       "default" : "acc",

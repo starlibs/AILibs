@@ -13,7 +13,8 @@ import org.api4.java.datastructure.kvstore.IKVStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.db.sql.SQLAdapter;
+import ai.libs.jaicore.db.IDatabaseConfig;
+import ai.libs.jaicore.db.sql.DatabaseAdapterFactory;
 import ai.libs.reduction.single.ABestOfKReductionStumpExperimentRunnerWrapper;
 import ai.libs.reduction.single.BestOfKAtRandomExperiment;
 import ai.libs.reduction.single.MySQLReductionExperiment;
@@ -26,8 +27,8 @@ public class BestOfKHeterogeneousReductionStumpExperimentRunnerWrapper extends A
 
 	private final Collection<MySQLReductionExperiment> knownExperiments = new HashSet<>();
 
-	public BestOfKHeterogeneousReductionStumpExperimentRunnerWrapper(final String host, final String user, final String password, final String database, final int k, final int mccvRepeats) {
-		super(new SQLAdapter(host, user, password, database), TABLE_NAME, k, mccvRepeats);
+	public BestOfKHeterogeneousReductionStumpExperimentRunnerWrapper(final IDatabaseConfig config, final int k, final int mccvRepeats) {
+		super(DatabaseAdapterFactory.get(config), TABLE_NAME, k, mccvRepeats);
 		try {
 			this.knownExperiments.addAll(this.getConductedExperiments());
 		} catch (SQLException e) {

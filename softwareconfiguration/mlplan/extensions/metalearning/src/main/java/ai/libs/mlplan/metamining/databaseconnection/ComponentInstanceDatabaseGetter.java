@@ -10,10 +10,10 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.components.exceptions.ComponentNotFoundException;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.db.sql.SQLAdapter;
+import ai.libs.jaicore.db.IDatabaseAdapter;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
+import ai.libs.mlplan.weka.weka.MLPipelineComponentInstanceFactory;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
@@ -37,7 +37,7 @@ public class ComponentInstanceDatabaseGetter extends Thread {
 
 	private int offset;
 	private int limit;
-	private SQLAdapter adapter;
+	private IDatabaseAdapter adapter;
 	private MLPipelineComponentInstanceFactory factory;
 	private boolean finishedSuccessfully = false;
 
@@ -126,7 +126,7 @@ public class ComponentInstanceDatabaseGetter extends Thread {
 	 * @param adapter
 	 *            The used adapter
 	 */
-	public void setAdapter(final SQLAdapter adapter) {
+	public void setAdapter(final IDatabaseAdapter adapter) {
 		this.adapter = adapter;
 	}
 

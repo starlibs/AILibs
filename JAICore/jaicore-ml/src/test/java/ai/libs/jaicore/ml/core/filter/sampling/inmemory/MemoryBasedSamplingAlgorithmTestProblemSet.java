@@ -21,18 +21,18 @@ public class MemoryBasedSamplingAlgorithmTestProblemSet extends AAlgorithmTestPr
 
 	@Override
 	public ILabeledDataset<ILabeledInstance> getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException, InterruptedException {
-		// Load bodyfat data set
+		// Load zoo data set
 		try {
-			return this.loadDatasetFromOpenML(560);
+			return this.loadDatasetFromOpenML(62);
 		} catch (DatasetDeserializationFailedException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
 	}
 
 	public ILabeledDataset<ILabeledInstance> getMediumProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException, InterruptedException {
-		// Load whine quality data set
+		// Load whine quality red data set
 		try {
-			return this.loadDatasetFromOpenML(287);
+			return this.loadDatasetFromOpenML(40691);
 		} catch (DatasetDeserializationFailedException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
@@ -45,7 +45,7 @@ public class MemoryBasedSamplingAlgorithmTestProblemSet extends AAlgorithmTestPr
 			int blowUpFactor = 20;
 			ILabeledDataset<ILabeledInstance> ds = this.loadDatasetFromOpenML(1237); // load large dataset and blow it up by the given factor
 			DatasetDeriver<ILabeledDataset<ILabeledInstance>> deriver = new DatasetDeriver<>(ds);
-			deriver.addIndices(IntStream.range(0, ds.size()).boxed().collect(Collectors.toList()),  blowUpFactor);
+			deriver.addIndices(IntStream.range(0, ds.size()).boxed().collect(Collectors.toList()), blowUpFactor);
 			return deriver.build();
 		} catch (DatasetDeserializationFailedException | DatasetCreationException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);

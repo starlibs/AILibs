@@ -17,9 +17,9 @@ public class StandardProblemFactory {
 
 		/* create planning domain */
 		List<StripsOperation> operations = new ArrayList<>();
-		operations.add(new StripsOperation("pick-up", Arrays.asList(new VariableParam("x")), new Monom("clear(x) & ontable(x) & handempty()"),
+		operations.add(new StripsOperation("pickup", Arrays.asList(new VariableParam("x")), new Monom("clear(x) & ontable(x) & handempty()"),
 				new Monom("holding(x) "), new Monom("clear(x) & ontable(x) & handempty()")));
-		operations.add(new StripsOperation("put-down", Arrays.asList(new VariableParam("x")), new Monom("holding(x)"),
+		operations.add(new StripsOperation("putdown", Arrays.asList(new VariableParam("x")), new Monom("holding(x)"),
 				new Monom("clear(x) & handempty() & ontable(x)"), new Monom("holding(x)")));
 		operations.add(new StripsOperation("stack", Arrays.asList(new VariableParam("x"), new VariableParam("y")), new Monom("holding(x) & clear(y)"),
 				new Monom("clear(x) & handempty() & on(x,y)"), new Monom("holding(x) & clear(y)")));

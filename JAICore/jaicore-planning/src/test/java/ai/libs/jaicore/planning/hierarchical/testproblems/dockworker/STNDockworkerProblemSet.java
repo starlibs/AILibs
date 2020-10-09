@@ -25,22 +25,22 @@ public class STNDockworkerProblemSet extends AAlgorithmTestProblemSet<STNPlannin
 		StripsPlanningDomain dwrStripsDomain = ai.libs.jaicore.planning.classical.problems.strips.StandardProblemFactory.getDockworkerProblem().getDomain();
 
 		/* define non-primitive STN task literals for the domain */
-		Literal taskMoveTopmostContainer = new Literal("move-topmost-container(p1,p2)");
-		Literal taskMoveStack = new Literal("move-stack(p,q)");
+		Literal taskMoveTopmostContainer = new Literal("movetopmostcontainer(p1,p2)");
+		Literal taskMoveStack = new Literal("movestack(p,q)");
 
 		/* define STN methods for the domain */
 		List<Method> methods = new ArrayList<>();
 		Monom p1 = new Monom("top(c,p1) & on(c,x1) & attached(p1,l1) & belong(k,l1) & attached(p2,l2) & top(x2,p2)");
-		methods.add(new Method("take-and-put",
+		methods.add(new Method("takeandput",
 				Arrays.asList(new VariableParam("k"), new VariableParam("c"), new VariableParam("p1"), new VariableParam("p2"), new VariableParam("l1"), new VariableParam("l2"), new VariableParam("x1"), new VariableParam("x2")),
 				taskMoveTopmostContainer, p1, new TaskNetwork("take(k,l1,c,x1,p1) -> put(k,l2,c,x2,p2)"), false));
-		methods.add(new Method("recursive-move", Arrays.asList(new VariableParam("c"), new VariableParam("p"), new VariableParam("q"), new VariableParam("x")), taskMoveStack, new Monom("top(c,p) & on(c,x)"),
-				new TaskNetwork("move-topmost-container(p,q) -> move-stack(p,q)"), false));
-		methods.add(new Method("do-nothing", Arrays.asList(new VariableParam("p")), taskMoveStack, new Monom("top('pallet',p)"), new TaskNetwork(), false));
+		methods.add(new Method("recursivemove", Arrays.asList(new VariableParam("c"), new VariableParam("p"), new VariableParam("q"), new VariableParam("x")), taskMoveStack, new Monom("top(c,p) & on(c,x)"),
+				new TaskNetwork("movetopmostcontainer(p,q) -> movestack(p,q)"), false));
+		methods.add(new Method("donothing", Arrays.asList(new VariableParam("p")), taskMoveStack, new Monom("top('pallet',p)"), new TaskNetwork(), false));
 
 		/* create STN domain */
 		STNPlanningDomain domain = new STNPlanningDomain(dwrStripsDomain.getOperations(), methods);
-		TaskNetwork network = new TaskNetwork("move-stack('p1a', 'p1c') -> move-stack('p1c','p1b') -> move-stack('p2a','p2c') -> move-stack('p2c','p2b') -> move-stack('p3a','p3c') -> move-stack('p3c','p3b')");
+		TaskNetwork network = new TaskNetwork("movestack('p1a', 'p1c') -> movestack('p1c','p1b') -> movestack('p2a','p2c') -> movestack('p2c','p2b') -> movestack('p3a','p3c') -> movestack('p3c','p3b')");
 		return new STNPlanningProblem(domain, null, init, network);
 	}
 
@@ -106,6 +106,6 @@ public class STNDockworkerProblemSet extends AAlgorithmTestProblemSet<STNPlannin
 
 	@Override
 	public STNPlanningProblem getDifficultProblemInputForGeneralTestPurposes() {
-		return getDockworkerProblemForNumberOfContainers(10000,10000,10000);
+		return getDockworkerProblemForNumberOfContainers(100000, 100000, 100000);
 	}
 }

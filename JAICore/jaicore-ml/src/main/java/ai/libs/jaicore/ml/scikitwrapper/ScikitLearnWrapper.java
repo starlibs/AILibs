@@ -28,6 +28,7 @@ import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.Timeout;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 import org.slf4j.Logger;
@@ -77,9 +78,9 @@ import ai.libs.python.IPythonConfig;
  * @author scheiblm
  */
 public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B>
-		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
+implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, ILoggingCustomizable {
 
-	private static final Logger L = LoggerFactory.getLogger(ScikitLearnWrapper.class);
+	private Logger logger = LoggerFactory.getLogger(ScikitLearnWrapper.class);
 	private static final IScikitLearnWrapperConfig CONF = ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class);
 
 	private IPythonConfig pythonConfig = ConfigFactory.create(IPythonConfig.class);
@@ -135,8 +136,8 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		}
 
 		File scriptFile = this.getSKLearnScriptFile();
-		if (!scriptFile.createNewFile() && L.isDebugEnabled()) {
-			L.debug("Script file for configuration UID {} already exists in {}", this.configurationUID, scriptFile.getAbsolutePath());
+		if (!scriptFile.createNewFile() && this.logger.isDebugEnabled()) {
+			this.logger.debug("Script file for configuration UID {} already exists in {}", this.configurationUID, scriptFile.getAbsolutePath());
 		}
 		if (CONF.getDeleteFileOnExit()) {
 			scriptFile.deleteOnExit();
@@ -220,15 +221,15 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 				String[] trainCommand = skLearnWrapperCommandBuilder.toCommandArray();
 
-				if (L.isDebugEnabled()) {
-					L.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
 				}
 				DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
 				this.runProcess(trainCommand, listener);
 
 				if (!listener.getErrorOutput().isEmpty()) {
-					L.error("Raise error message: {}", listener.getErrorOutput());
-					throw new TrainingException(listener.getErrorOutput().split("\\n")[0]);
+					this.logger.error("Raise error message: {}", listener.getErrorOutput());
+					throw new TrainingException(listener.getErrorOutput());
 				}
 			}
 		} catch (TrainingException e) {
@@ -250,16 +251,18 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 *             During the serialization of the data as an arff file something went wrong.
 	 */
 	private synchronized File getArffFile(final ILabeledDataset<? extends ILabeledInstance> data, final String arffName) throws IOException {
+		this.logger.debug("Serializing {}x{} dataset to {}", data.size(), data.getNumAttributes(), arffName);
 		File arffOutputFile = new File(CONF.getTempFolder(), arffName + ".arff");
 		if (CONF.getDeleteFileOnExit()) {
 			arffOutputFile.deleteOnExit();
 		}
 		/* If Instances with the same Instance (given the hash is collision resistant) is already serialized, there is no need for doing it once more. */
 		if (arffOutputFile.exists()) {
-			L.debug("Reusing {}.arff", arffName);
+			this.logger.debug("Reusing {}.arff", arffName);
 			return arffOutputFile;
 		}
 		ArffDatasetAdapter.serializeDataset(arffOutputFile, data);
+		this.logger.debug("Serializating completed.");
 		return arffOutputFile;
 	}
 
@@ -272,7 +275,9 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	@SuppressWarnings("unchecked")
 	@Override
 	public B predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
+		this.logger.info("Predicting {} instances.", dTest.length);
 		ILabeledDataset<ILabeledInstance> data;
+		Objects.requireNonNull(this.dataset, "No dataset has been set. Either train the learner or load it from a model.");
 		try {
 			data = this.dataset.createEmptyCopy();
 		} catch (DatasetCreationException e1) {
@@ -285,11 +290,13 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		File testArff;
 		try {
 			testArff = this.getArffFile(data, arffName);
+			this.logger.info("Prediction dataset serialized, now acquiring predictions.");
 		} catch (IOException e1) {
 			throw new PredictionException("Could not dump arff file for prediction", e1);
 		}
 		File outputFile = this.getResultFile(arffName);
 		outputFile.getParentFile().mkdirs();
+
 
 		/* create prediction file */
 		if (this.withModelDump) {
@@ -298,12 +305,13 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
 
-			if (L.isDebugEnabled()) {
-				L.debug("Run test mode with {}", Arrays.toString(testCommand));
+			if (this.logger.isDebugEnabled()) {
+				this.logger.debug("Run test mode with {}", Arrays.toString(testCommand));
 			}
 
 			try {
-				this.runProcess(testCommand, new DefaultProcessListener(this.listenToPidFromProcess));
+				DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
+				this.runProcess(testCommand, listener);
 			} catch (IOException e) {
 				throw new PredictionException("Could not run scikit-learn classifier.", e);
 			}
@@ -313,8 +321,8 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			skLearnWrapperCommandBuilder.withSeed(this.seed);
 			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
-			if (L.isDebugEnabled()) {
-				L.debug("Run train test mode with {}", Arrays.toString(testCommand));
+			if (this.logger.isDebugEnabled()) {
+				this.logger.debug("Run train test mode with {}", Arrays.toString(testCommand));
 			}
 
 			DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
@@ -323,7 +331,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				if (!listener.getErrorOutput().isEmpty()) {
 					if (listener.getErrorOutput().toLowerCase().contains("convergence")) {
 						// ignore convergence warning
-						L.warn("Learner {} could not converge. Consider increase number of iterations.", this.constructInstruction);
+						this.logger.warn("Learner {} could not converge. Consider increase number of iterations.", this.constructInstruction);
 					} else {
 						throw new PredictionException(listener.getErrorOutput());
 					}
@@ -359,60 +367,13 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			}
 			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().map(x -> x.stream().mapToDouble(y -> y).toArray()).map(SingleLabelClassification::new).collect(Collectors.toList()));
 		} else if (this.problemType == EScikitLearnProblemType.RUL || this.problemType == EScikitLearnProblemType.REGRESSION) {
-			if (L.isInfoEnabled()) {
-				L.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()));
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()));
 			}
-			L.debug("#Created construction string: {}", this.constructInstruction);
+			this.logger.debug("#Created construction string: {}", this.constructInstruction);
 			return (B) new SingleTargetRegressionPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleTargetRegressionPrediction((double) x)).collect(Collectors.toList()));
 		}
 		throw new PredictionException("Unknown Problem Type.");
-	}
-
-	/**
-	 * Makes the given folder a module to be usable as an import for python and creates a string that adds the folder to the python environment and then imports the folder itself as a module.
-	 *
-	 * @param importsFolder
-	 *            Folder to be added as a module.
-	 * @param keepNamespace
-	 *            If true, a class must be called by the modules' name plus the class name. This is only important if multiple modules are imported and the classes' names are ambiguous. Keep in mind that the constructor call for the
-	 *            classifier must be created accordingly.
-	 * @return String which can be appended to other imports to care for the folder to be added as a module.
-	 * @throws IOException
-	 *             The __init__.py couldn't be created in the given folder (which is necessary to declare it as a module).
-	 */
-	public static String createImportStatementFromImportFolder(final File importsFolder, final boolean keepNamespace) throws IOException {
-		if (importsFolder == null || !importsFolder.exists() || importsFolder.list().length == 0) {
-			return "";
-		}
-		/* Make the folder a module. */
-		if (!Arrays.asList(importsFolder.list()).contains("__init__.py")) {
-			File initFile = new File(importsFolder, "__init__.py");
-			if (!initFile.createNewFile() && L.isDebugEnabled()) {
-				L.debug("Init file {} exists already", initFile.getAbsolutePath());
-			}
-		}
-		StringBuilder result = new StringBuilder();
-		String absoluteFolderPath = importsFolder.getAbsolutePath();
-		/* Add the folder to the environment of the python script */
-		result.append("\n");
-		result.append("sys.path.append(r'" + absoluteFolderPath + "')\n");
-		for (File module : importsFolder.listFiles()) {
-			if (!module.getName().startsWith("__")) {
-				/* Either import the module by its name. Then the classes of it have to be referenced by the fully qualified name. */
-				if (keepNamespace) {
-					result.append("import " + module.getName().substring(0, module.getName().length() - 3) + "\n");
-				}
-				/*
-				 * ... else all the content of the module is imported. Than they can be called
-				 * by only their name but therefore there should not be multiple modules
-				 * imported that overlap in class names.
-				 */
-				else {
-					result.append("from " + module.getName().substring(0, module.getName().length() - 3) + " import *\n");
-				}
-			}
-		}
-		return result.toString();
 	}
 
 	/**
@@ -486,18 +447,22 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * Starts a process with the given attributes. The first String in the array is the executed program.
 	 */
 	private void runProcess(final String[] parameters, final AProcessListener listener) throws InterruptedException, IOException {
-		if (L.isDebugEnabled()) {
+		if (this.logger.isDebugEnabled()) {
 			String call = Arrays.toString(parameters).replace(",", "");
-			L.debug("Starting process {}", call.substring(1, call.length() - 1));
+			this.logger.debug("Starting process {}", call.substring(1, call.length() - 1));
 		}
 		ProcessBuilder processBuilder = new ProcessBuilder(parameters).directory(CONF.getTempFolder());
 		Process process = processBuilder.start();
 		try {
-			L.debug("Started process with PID: {}", ProcessUtil.getPID(process));
+			this.logger.debug("Started process with PID: {}. Listener is {}", ProcessUtil.getPID(process), listener);
 		} catch (ProcessIDNotRetrievableException e) {
-			L.warn("Could not retrieve process ID.");
+			this.logger.warn("Could not retrieve process ID.");
 		}
+		listener.setLoggerName(this.getLoggerName() + ".python");
+		this.logger.debug("Set logger name of listener to {}. Now starting python process.", listener.getLoggerName());
+		this.logger.info("Attaching listener {} to process {}", listener, process);
 		listener.listenTo(process);
+		this.logger.info("Listener attached.");
 	}
 
 	public double[] distributionForInstance(final ILabeledInstance instance) {
@@ -629,7 +594,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				processParameters.add("&&");
 			}
 			if (this.timeout != null && os == EOperatingSystem.LINUX) {
-				L.info("Executing with timeout {}s", this.timeout.seconds());
+				ScikitLearnWrapper.this.logger.info("Executing with timeout {}s", this.timeout.seconds());
 				processParameters.add("timeout");
 				processParameters.add(this.timeout.seconds() - 5 + "");
 			}
@@ -683,4 +648,13 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		return this.constructInstruction;
 	}
 
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
+	}
 }

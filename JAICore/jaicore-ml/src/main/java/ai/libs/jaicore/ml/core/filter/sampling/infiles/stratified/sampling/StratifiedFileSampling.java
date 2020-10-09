@@ -186,7 +186,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 		for (Entry<String, Integer> entry : strati.entrySet()) {
 			final int index = i;
 			this.executorService.execute(() -> {
-				String outputFile = this.tempFileHandler.createTempFile();
+				String outputFile = this.tempFileHandler.createTempFile().getName();
 				ReservoirSampling reservoirSampling = new ReservoirSampling(this.random, this.tempFileHandler.getTempFile(entry.getKey()));
 				reservoirSampling.setSampleSize(sampleSizeForStrati[index]);
 				try {

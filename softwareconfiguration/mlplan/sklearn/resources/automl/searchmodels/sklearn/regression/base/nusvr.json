@@ -5,7 +5,7 @@
     "name" : "sklearn.svm.NuSVR",
     "providedInterface" : [ "BasicRegressor", "BaseLearner", "AbstractRegressor" ],
     "requiredInterface" : [ ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "nu",
       "type" : "double",
       "default" : 0.5,

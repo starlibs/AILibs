@@ -13,6 +13,23 @@ dependencies {
   	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }
 
+task testInterruptibilityMCTS(type: Test) {
+	useJUnitPlatform{
+		filter {
+			includeTestsMatching "ai.libs.jaicore.search.algorithms.standard.mcts.*.testInterrupt"
+		}
+	}
+}
+
+task testInterruptibilityDefault(type: Test) {
+	useJUnitPlatform{
+		filter {
+			includeTestsMatching "*testInterrupt"
+			excludeTestsMatching "*mcts*"
+		}
+	}
+}
+
 uploadArchives {
 	repositories {
 		mavenDeployer {

@@ -41,12 +41,16 @@ public class SupervisedLearnerExecutor implements ISupervisedLearnerExecutor, IL
 		long endTrainTime = System.currentTimeMillis();
 		this.logger.debug("Training finished successfully after {}ms. Now acquiring predictions.", endTrainTime - startTrainTime);
 		try {
-			return this.getReportForTrainedLearner(learner, train, test, startTrainTime, endTrainTime);
+			ILearnerRunReport report = this.getReportForTrainedLearner(learner, train, test, startTrainTime, endTrainTime);
+			long now = System.currentTimeMillis();
+			this.logger.info("Run report ready after {}ms with {} comparisons of predictions and ground truth.", now - endTrainTime, report.getPredictionDiffList().size());
+			return report;
 		} catch (InterruptedException e) {
 			long now = System.currentTimeMillis();
 			this.logger.info("Learner was interrupted during prediction after a runtime of {}ms for training and {}ms for testing ({}ms total walltime).", endTrainTime - startTrainTime, now - endTrainTime, now - startTrainTime);
 			if (Thread.currentThread().isInterrupted()) {
-				this.logger.warn("Observed an InterruptedException while evaluating a learner of type {} ({}) AND the thread is interrupted. This should never happen! Here is the detailed information: {}", learner.getClass(), learner, LoggerUtil.getExceptionInfo(e));
+				this.logger.warn("Observed an InterruptedException while evaluating a learner of type {} ({}) AND the thread is interrupted. This should never happen! Here is the detailed information: {}", learner.getClass(), learner,
+						LoggerUtil.getExceptionInfo(e));
 			}
 			throw new LearnerExecutionInterruptedException(startTrainTime, endTrainTime, endTrainTime, System.currentTimeMillis());
 		} catch (PredictionException e) {
@@ -70,6 +74,16 @@ public class SupervisedLearnerExecutor implements ISupervisedLearnerExecutor, IL
 
 	private <I extends ILabeledInstance, D extends ILabeledDataset<? extends I>> ILearnerRunReport getReportForTrainedLearner(final ISupervisedLearner<I, D> learner, final D train, final D test, final long trainingStartTime,
 			final long trainingEndTime) throws PredictionException, InterruptedException {
+		String previousLoggerName = null;
+		if (learner instanceof ILoggingCustomizable) {
+			previousLoggerName = ((ILoggingCustomizable) learner).getLoggerName();
+			String tmpLoggerName = this.getLoggerName() + ".learner";
+			this.logger.debug("Temporarily switching logger of learner {} from {} to {}", learner.getClass(), previousLoggerName, tmpLoggerName);
+			((ILoggingCustomizable) learner).setLoggerName(tmpLoggerName);
+		}
+		else {
+			this.logger.debug("Evaluated learner {} is not {}, so not customizing its logger.", learner.getClass(), ILoggingCustomizable.class);
+		}
 		long start = System.currentTimeMillis();
 		List<? extends IPrediction> predictions = learner.predict(test).getPredictions();
 		long endTestTime = System.currentTimeMillis();
@@ -78,6 +92,9 @@ public class SupervisedLearnerExecutor implements ISupervisedLearnerExecutor, IL
 		TypelessPredictionDiff diff = new TypelessPredictionDiff();
 		for (int i = 0; i < predictions.size(); i++) {
 			diff.addPair(test.get(i).getLabel(), predictions.get(i));
+		}
+		if (learner instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) learner).setLoggerName(previousLoggerName);
 		}
 		return new LearnerRunReport(train, test, trainingStartTime, trainingEndTime, start, endTestTime, diff);
 	}

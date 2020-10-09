@@ -13,7 +13,7 @@
 				"RandomizableBaseClassifier",
 				"PipelineClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "L",
 					"type": "double",
@@ -21,7 +21,7 @@
 					"min": 0.1,
 					"max": 1.0,
 					"refineSplits": 8,
-					"minInterval": 10
+					"minInterval": 0.1
 				},
 				{
 					"name": "M",
@@ -30,7 +30,7 @@
 					"min": 0.1,
 					"max": 1.0,
 					"refineSplits": 8,
-					"minInterval": 10
+					"minInterval": 0.1
 				},
 				{
 					"name": "B",

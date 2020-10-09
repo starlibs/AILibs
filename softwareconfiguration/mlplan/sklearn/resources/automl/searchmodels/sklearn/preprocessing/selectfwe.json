@@ -8,7 +8,7 @@
       "id" : "score_func",
       "name" : "sklearn.feature_selection.f_classif"
     } ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "alpha",
       "type" : "double",
       "default" : 0.025,

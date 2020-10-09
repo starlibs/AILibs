@@ -45,17 +45,17 @@ public class SyntheticExperimentDecoder extends ASearchExperimentDecoder<ITransp
 		int seed = Integer.parseInt(experimentData.get(ISyntheticSearchExperimentConfig.K_SEED));
 		int branchingFactor = Integer.parseInt(experimentData.get(ISyntheticSearchExperimentConfig.K_BRANCHING));
 		int depth = Integer.parseInt(experimentData.get(ISyntheticSearchExperimentConfig.K_DEPTH));
-		double maxIslandSize = Double.parseDouble(experimentData.get(ITreasureIslandExperimentSetConfig.K_ISLANDS_MAXISLANDSIZE));
+		int maxIslandSizeRel = Integer.parseInt(experimentData.get(ITreasureIslandExperimentSetConfig.K_ISLANDS_MAXISLANDSIZE));
 		int numberOfIslandsWithTreasure = Integer.parseInt(experimentData.get(ITreasureIslandExperimentSetConfig.K_ISLANDS_NUMBER_OF_TREASURES));
 
 		/* derive number of leafs in total */
 		BigInteger numberOfLeafs = BigInteger.valueOf(branchingFactor).pow(depth);
-		BigInteger islandSize = new BigDecimal(numberOfLeafs).multiply(BigDecimal.valueOf(maxIslandSize)).round(new MathContext(1, RoundingMode.FLOOR)).toBigInteger();
+		BigInteger maxIslandSizeAbs = new BigDecimal(numberOfLeafs).multiply(BigDecimal.valueOf(maxIslandSizeRel)).round(new MathContext(1, RoundingMode.FLOOR)).toBigInteger();
 
 		/* create graph search input */
-		IIslandModel islandModel = new EqualSizedIslandsModel(islandSize);
+		IIslandModel islandModel = new EqualSizedIslandsModel(maxIslandSizeAbs);
 		ITreasureModel treasureGenerator = this.getTreasureModel(islandModel, numberOfIslandsWithTreasure, new Random(seed), experimentData.get("treasuremodel"));
-		return new DegeneratedGraphSearchWithPathEvaluationsProblem(new Random(seed), 0, branchingFactor, depth, treasureGenerator);
+		return new DegeneratedGraphSearchWithPathEvaluationsProblem(new Random(seed), branchingFactor / 2, branchingFactor, depth, maxIslandSizeAbs.intValue(), numberOfIslandsWithTreasure, islandModel, treasureGenerator);
 	}
 
 
