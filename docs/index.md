@@ -1,6 +1,5 @@
 ---
 layout: main
-version: 0.2.3
 ---
 [![Build Status](https://travis-ci.com/starlibs/AILibs.svg?branch=dev)](https://travis-ci.com/starlibs/AILibs)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=starlibs.ailibs&metric=alert_status)](https://sonarcloud.io/dashboard/index/starlibs.ailibs)

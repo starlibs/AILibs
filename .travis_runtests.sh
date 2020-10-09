@@ -27,3 +27,6 @@ fi
 
 echo "Test task is: ${TEST_TASK}"
 ./gradlew $TEST_PROJECT:$TEST_TASK
+echo "Test finished. This is the report folder:"
+find ./ -maxdepth 10 -path "*/build/reports/tests/${TEST_TASK}" -exec echo {} \; -exec ls -lh {} \;
+exit $?

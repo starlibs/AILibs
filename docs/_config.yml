@@ -1,2 +1,9 @@
 theme: jekyll-theme-minimal
 logo: img/ailibs-logo.png
+defaults:
+  -
+    scope:
+      path: "" # an empty string here means all files in the project
+    values:
+      layout: project
+      version: "0.2.4"
