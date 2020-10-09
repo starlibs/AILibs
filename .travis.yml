@@ -24,6 +24,8 @@ env:
   global:
   - secure: yUfjJ5ZSdOWWYLye5Oc6LnkN8fRFHOvRM/NlH15NXN5ZloRqfsfcQ80TFUBOCkEBwGPwUqhqZn2x7yc6XzVlpZ0lNc8voDvDNvGk2V0R42QOHUPFce0HicAtslM6we05kWA3wmcKvB3nBhRC1rPcrZC3a0G2Vby8yfvO2BEEog7Cb8zhaX5RcOFedSw3pgDrnu/aglZ2mtOjhyt36aYXx7UGY9ueEO24EcF0R8XKNn8h7qSnr7GJtPLioTME4gCOhV57YBBgDbM72I33Rmmr1fvb264/QTozYh5E0e+0uv5BuQO8q4XZU5VjdG+eTISbtkXc3bFSAOeVYUrXJBv7t7C/IhuiaHFRSC8O9dME8MXfaa/0E199CgmI7M23LIjKF7r3gPz6VvBx9BBs3m7zgCnwBhomw8ggk1U21GDYR5AwoaGhYpBCFfdMNPnPiS8vpoXYk9L1dl8vyGRyVLBNpAq7wXthWrUz3X3HEEMVWDyRqnugDzS+lE/hB+Mh7TA+lqVJegRcNOyjHw/JdynEbbvatRXOZQftcgQ4FZ81dUjI+Svin79WCdCSGM8fcTTIB5+/avoggAyLwQpsX5BXewEhADdwl5OcsFiYBPZLbX0gUBtbIKCsEOxUMX55VbzdiLoWOFMjjqUeyXJteGdqVKcFIyEazJ/Eh07lc78SxqE=
   jobs:
+  -
+  
   - TEST_PROJECT=:hasco-core
   - TEST_PROJECT=:hasco-fanova
   - TEST_PROJECT=:JAICore:jaicore-algorithminspector
@@ -74,12 +76,19 @@ script:
 # Assign jobs to stages. The test jobs defined above are implicitly assigned to the test stage: https://docs.travis-ci.com/user/build-stages/#naming-your-build-stages
 jobs:
   exclude:
-    - if: commit_message=~ /--documentation--/ # do not build anything if the commit is only for documentation!
-    - if: (type=push) AND (branch IN (master, dev)) # do never build master and dev in push mode; this is double work, because the branches are protected and always built upon PR
+    - if: (commit_message=~ /--documentation--/) AND (env(DUMMY) != true) # do not build anything if the commit is only for documentation!
+    - if: (type=push) AND (branch IN (master, dev)) AND (env(DUMMY) != true) # do never build master and dev in push mode; this is double work, because the branches are protected and always built upon PR
     - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = long) ## typically we will want to remove dev here, because long is only for master. This is just initially to make sure that also the long tests are built
     - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = medium)
       
   include:
+    - stage: dummy # this stage does nothing but span an immediately succeeding build to not break the github hook (this would happen with [skip ci]
+      env: 
+        jobs:
+          - DUMMY=true
+      script:
+        - echo "Dummy build finished"
+        
     - stage: check_build
       env: 
         jobs:
@@ -93,6 +102,7 @@ jobs:
 
 # configures the *order* of the stages. See https://docs.travis-ci.com/user/build-stages/
 stages:
+  - dummy
   - check_build
   - test
 
