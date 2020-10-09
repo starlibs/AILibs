@@ -13,11 +13,7 @@ cache:
   
 # overriding the install step is important to avoid that ./gradlew assemble is run (which is the default in travis)
 install:
-  - pyenv versions
-  - pyenv global 3.6.7
-  - python --version
-  - pip3 install --upgrade pip
-  - pip3 install liac-arff numpy scipy scikit-learn tpot pandas xgboost
+  - true
 
 # defines a matrix of jobs for testing.
 env:
@@ -67,6 +63,14 @@ addons:
     organization: "starlibs"
 
 script:
+  # first install python in the correct version (this is intentionally not part of the install block to not screw up the dummy build with this stuff)
+  - pyenv versions
+  - pyenv global 3.6.7
+  - python --version
+  - pip3 install --upgrade pip
+  - pip3 install liac-arff numpy scipy scikit-learn tpot pandas xgboost
+  
+  # now run the test
   - echo $TEST_PROJECT
   - ./.travis_runtests.sh
 
