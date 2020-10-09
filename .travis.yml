@@ -85,6 +85,7 @@ jobs:
   include:
     - stage: dummy # this stage does nothing but span an immediately succeeding build to not break the github hook (this would happen with [skip ci]
       script:
+        - ./.verifydummybuild.sh
         - echo "Dummy build finished"
         
     - stage: check_build
