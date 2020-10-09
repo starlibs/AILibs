@@ -75,6 +75,7 @@ script:
 jobs:
   exclude:
     - if: (commit_message=~ /--documentation--/) AND (env(DUMMY) != true) # do not build anything if the commit is only for documentation!
+    - if: (NOT (commit_message=~ /--documentation--/)) AND (env(DUMMY) = true) # exclude the dummy build if this is not a documentation push
     - if: (type=push) AND (branch IN (master, dev)) AND (env(DUMMY) != true) # do never build master and dev in push mode; this is double work, because the branches are protected and always built upon PR
     - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = long) ## typically we will want to remove dev here, because long is only for master. This is just initially to make sure that also the long tests are built
     - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = medium)
