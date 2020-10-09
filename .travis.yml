@@ -78,7 +78,6 @@ script:
 # Assign jobs to stages. The test jobs defined above are implicitly assigned to the test stage: https://docs.travis-ci.com/user/build-stages/#naming-your-build-stages
 jobs:
   exclude:
-    - if: (type=push) AND (branch IN (master, dev)) # do never build master and dev in push mode; this is double work, because the branches are protected and always built upon PR. If this yields to problems, add it to the ignore case below
     - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = long) ## typically we will want to remove dev here, because long is only for master. This is just initially to make sure that also the long tests are built
     - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = medium)
       
@@ -102,10 +101,8 @@ jobs:
 # configures the *order* of the stages. See https://docs.travis-ci.com/user/build-stages/
 stages:
   - name: dummy
-    if: (commit_message=~ /--documentation--/)
+    if: (commit_message=~ /--documentation--/) OR ((type=push) AND (branch IN (master, dev))) # do never build master and dev in push mode; this is double work, because the branches are protected and always built upon PR. This dummy is here in order to trigger a feedback to github, which does not happen if the build job is just skipped.
   - name: check_build
-    if: NOT (commit_message=~ /--documentation--/) # do not build anything if the commit is only for documentation!
+    if: NOT (commit_message=~ /--documentation--/) OR ((type=push) AND (branch IN (master, dev))) # do not build anything if the commit is only for documentation!
   - name: test
-    if: NOT (commit_message=~ /--documentation--/) # do not build anything if the commit is only for documentation!
-
-
+    if: NOT (commit_message=~ /--documentation--/) OR ((type=push) AND (branch IN (master, dev))) # do not build anything if the commit is only for documentation!
