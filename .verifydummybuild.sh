@@ -9,7 +9,7 @@ then
   echo "Only docs were updated, not running the CI."
   exit 0
 else
-  echo "The commit range has changes in non-markdown files, which is forbidden for dummy builds, because this could be used to circumvent the CI when true code changes were made. Here are the changed non-markdown files (one per line):"
+  echo "The commit range has changes in non-markdown files, which is forbidden for dummy builds, because this could be used to circumvent the CI when true code changes were made. Please make sure to not include the --documentation-- tag into your commit message. Here are the changed non-markdown files (one per line):"
   git diff --name-only $TRAVIS_COMMIT_RANGE | grep -vE '(.md$)' | sed 's/.*/ - &/'
   exit 1
 fi
