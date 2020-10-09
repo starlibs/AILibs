@@ -13,11 +13,7 @@ cache:
   
 # overriding the install step is important to avoid that ./gradlew assemble is run (which is the default in travis)
 install:
-  - pyenv versions
-  - pyenv global 3.6.7
-  - python --version
-  - pip3 install --upgrade pip
-  - pip3 install liac-arff numpy scipy scikit-learn tpot pandas xgboost
+  - true
 
 # defines a matrix of jobs for testing.
 env:
@@ -67,6 +63,14 @@ addons:
     organization: "starlibs"
 
 script:
+  # first install python in the correct version (this is intentionally not part of the install block to not screw up the dummy build with this stuff)
+  - pyenv versions
+  - pyenv global 3.6.7
+  - python --version
+  - pip3 install --upgrade pip
+  - pip3 install liac-arff numpy scipy scikit-learn tpot pandas xgboost
+  
+  # now run the test
   - echo $TEST_PROJECT
   - ./.travis_runtests.sh
 
@@ -74,10 +78,16 @@ script:
 # Assign jobs to stages. The test jobs defined above are implicitly assigned to the test stage: https://docs.travis-ci.com/user/build-stages/#naming-your-build-stages
 jobs:
   exclude:
+    - if: (type=push) AND (branch IN (master, dev)) # do never build master and dev in push mode; this is double work, because the branches are protected and always built upon PR. If this yields to problems, add it to the ignore case below
     - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = long) ## typically we will want to remove dev here, because long is only for master. This is just initially to make sure that also the long tests are built
     - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = medium)
       
   include:
+    - stage: dummy # this stage does nothing but span an immediately succeeding build to not break the github hook (this would happen with [skip ci]
+      script:
+        - ./.verifydummybuild.sh
+        - echo "Dummy build finished"
+        
     - stage: check_build
       env: 
         jobs:
@@ -91,7 +101,11 @@ jobs:
 
 # configures the *order* of the stages. See https://docs.travis-ci.com/user/build-stages/
 stages:
-  - check_build
-  - test
+  - name: dummy
+    if: (commit_message=~ /--documentation--/)
+  - name: check_build
+    if: NOT (commit_message=~ /--documentation--/) # do not build anything if the commit is only for documentation!
+  - name: test
+    if: NOT (commit_message=~ /--documentation--/) # do not build anything if the commit is only for documentation!
 
 
