@@ -4,7 +4,6 @@ logo: mlplan-logo.png
 title: ML-Plan
 subtitle: ML-Plan subtitle
 navigation_mode: anchor
-version: 0.2.3
 navigation:
     - { id: "overview", link: "overview", title: "Overview" }
     - { id: "installation", link: "installation", title: "Installation" }
