@@ -8,13 +8,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
@@ -70,30 +76,37 @@ public class MekaPipelineFactoryTest extends ATest {
 		}
 	}
 
-	@Test
-	@LongTest
-	public void testValidRandomConfigInstantiation() throws ComponentInstantiationFailedException, TrainingException, InterruptedException {
+	public static Stream<Arguments> getComponentNames() {
 		List<ComponentInstance> list = new ArrayList<>(ComponentUtil.getAllAlgorithmSelectionInstances("MLClassifier", repository));
-		this.logger.info("Testing {} configurations.", list.size());
+		Set<String> names = list.stream().map(ci -> ci.getComponent().getName()).collect(Collectors.toSet());
+		return names.stream().map(name -> Arguments.of(name, list.stream().filter(ci -> ci.getComponent().getName().equals(name)).collect(Collectors.toList())));
+	}
+
+	@ParameterizedTest(name="Testing component instances of type {0}")
+	@MethodSource("getComponentNames")
+	@LongTest
+	public void testValidRandomConfigInstantiation(final String name, final List<ComponentInstance> instancesToTest) throws ComponentInstantiationFailedException, TrainingException, InterruptedException {
+
+		this.logger.info("Testing {} configurations.", instancesToTest.size());
 
 		AtomicInteger count = new AtomicInteger(0);
 		AtomicDouble currentPercentage = new AtomicDouble(0.0);
 		double step = 0.01;
-		IntStream.range(0, list.size()).parallel().forEach(i -> {
-			this.logger.trace("Checking {}", ComponentInstanceUtil.getComponentInstanceAsComponentNames(list.get(i)));
+		IntStream.range(0, instancesToTest.size()).parallel().forEach(i -> {
+			this.logger.trace("Checking {}", ComponentInstanceUtil.getComponentInstanceAsComponentNames(instancesToTest.get(i)));
 			int currentI = i;
 			boolean success = false;
 			for (int j = 0; j < 5 && !success; j++) {
 				try {
-					mpf.getComponentInstantiation(ComponentUtil.getRandomParametrization(list.get(currentI), new Random(j)));
+					mpf.getComponentInstantiation(ComponentUtil.getRandomParametrization(instancesToTest.get(currentI), new Random(j)));
 					success = true;
 				} catch (ComponentInstantiationFailedException e) {
 					this.logger.warn("Failed to instantiate. Error was: {}", e.getMessage());
 				}
 			};
-			assertTrue(success, "Could not find a realization of component " + list.get(currentI));
+			assertTrue(success, "Could not find a realization of component " + instancesToTest.get(currentI));
 
-			if ((double) count.incrementAndGet() / list.size() >= currentPercentage.get()) {
+			if ((double) count.incrementAndGet() / instancesToTest.size() >= currentPercentage.get()) {
 				this.logger.debug("Current state: {}%", currentPercentage.get() * 100);
 				currentPercentage.addAndGet(step);
 			}
