@@ -82,6 +82,7 @@ public class MekaPipelineFactoryTest extends ATest {
 		return names.stream().map(name -> Arguments.of(name, list.stream().filter(ci -> ci.getComponent().getName().equals(name)).collect(Collectors.toList())));
 	}
 
+	@Disabled
 	@ParameterizedTest(name="Testing component instances of type {0}")
 	@MethodSource("getComponentNames")
 	@LongTest
