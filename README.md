@@ -33,7 +33,7 @@ For example, to bind in our machine learning library `jaicore-ml`, you can do th
 ### Gradle 
 ```gradle
 dependencies {
-    implementation 'ai.libs:jaicore-ml:0.2.3'
+    implementation 'ai.libs:jaicore-ml:0.2.4'
 }
 ```
 For more details, refer to the [documentation](https://starlibs.github.io/AILibs/) of the respective module.
