@@ -1,6 +1,7 @@
 package ai.libs.hasco.metamining;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 
@@ -8,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOUtil;
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -26,7 +27,7 @@ public class MetaMinerBasedSorter implements Comparator<TFDNode> {
 	/**
 	 * Components for the current configuration used to convert TFDNodes to ComponentInstances
 	 */
-	private Collection<Component> components;
+	private Collection<IComponent> components;
 
 	/**
 	 * The "MetaMiner" has access to the meta information of the given {@link ComponentInstance} and possibly its application context. It is used to derive a score of a given ComponentInstance, based on which a comparison of the given
@@ -34,11 +35,11 @@ public class MetaMinerBasedSorter implements Comparator<TFDNode> {
 	 */
 	private IMetaMiner metaminer;
 
-	public MetaMinerBasedSorter(final IMetaMiner metaminer, final Collection<Component> components) {
+	public MetaMinerBasedSorter(final IMetaMiner metaminer, final Collection<? extends IComponent> components) {
 		if (components == null) {
 			this.logger.warn("No Components in sorter!");
 		}
-		this.components = components;
+		this.components = new ArrayList<>(components);
 		this.metaminer = metaminer;
 	}
 

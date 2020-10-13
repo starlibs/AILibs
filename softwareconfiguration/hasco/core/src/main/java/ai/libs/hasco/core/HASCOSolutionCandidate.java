@@ -1,7 +1,7 @@
 package ai.libs.hasco.core;
 
+import ai.libs.jaicore.components.api.IEvaluatedSoftwareConfigurationSolution;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.EvaluatedSoftwareConfigurationSolution;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedGraphSearchBasedPlan;
 
 /**
@@ -12,7 +12,7 @@ import ai.libs.jaicore.planning.core.interfaces.IEvaluatedGraphSearchBasedPlan;
  *
  * @param <T>
  */
-public class HASCOSolutionCandidate<V extends Comparable<V>> implements EvaluatedSoftwareConfigurationSolution<V> {
+public class HASCOSolutionCandidate<V extends Comparable<V>> implements IEvaluatedSoftwareConfigurationSolution<V> {
 
 	private final ComponentInstance componentInstance;
 	private final IEvaluatedGraphSearchBasedPlan<?, ?, V> planningSolution;

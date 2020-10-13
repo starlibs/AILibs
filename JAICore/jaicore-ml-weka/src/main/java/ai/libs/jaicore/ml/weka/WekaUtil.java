@@ -78,78 +78,101 @@ public class WekaUtil {
 
 	public static Collection<String> getBasicLearners() {
 		Collection<String> classifiers = new ArrayList<>();
+		classifiers.add(weka.classifiers.bayes.BayesNet.class.getName());
+		classifiers.add(weka.classifiers.bayes.NaiveBayes.class.getName());
+		classifiers.add(weka.classifiers.bayes.NaiveBayesMultinomial.class.getName());
+		classifiers.add(weka.classifiers.functions.Logistic.class.getName());
+		classifiers.add(weka.classifiers.functions.MultilayerPerceptron.class.getName());
+		classifiers.add(weka.classifiers.functions.SimpleLinearRegression.class.getName());
+		classifiers.add(weka.classifiers.functions.SimpleLogistic.class.getName());
+		classifiers.add(weka.classifiers.functions.SMO.class.getName());
+		classifiers.add(weka.classifiers.functions.VotedPerceptron.class.getName());
+		classifiers.add(weka.classifiers.lazy.IBk.class.getName());
+		classifiers.add(weka.classifiers.lazy.KStar.class.getName());
+		classifiers.add(weka.classifiers.rules.DecisionTable.class.getName());
+		classifiers.add(weka.classifiers.rules.JRip.class.getName());
+		classifiers.add(weka.classifiers.rules.M5Rules.class.getName());
+		classifiers.add(weka.classifiers.rules.OneR.class.getName());
+		classifiers.add(weka.classifiers.rules.PART.class.getName());
+		classifiers.add(weka.classifiers.rules.ZeroR.class.getName());
+		classifiers.add(weka.classifiers.trees.DecisionStump.class.getName());
+		classifiers.add(weka.classifiers.trees.J48.class.getName());
+		classifiers.add(weka.classifiers.trees.LMT.class.getName());
+		classifiers.add(weka.classifiers.trees.M5P.class.getName());
+		classifiers.add(weka.classifiers.trees.RandomForest.class.getName());
+		classifiers.add(weka.classifiers.trees.RandomTree.class.getName());
+		classifiers.add(weka.classifiers.trees.REPTree.class.getName());
+		return classifiers;
+	}
 
-		classifiers.add("weka.classifiers.bayes.BayesNet");
-		classifiers.add("weka.classifiers.bayes.NaiveBayes");
-		classifiers.add("weka.classifiers.bayes.NaiveBayesMultinomial");
-		classifiers.add("weka.classifiers.functions.Logistic");
-		classifiers.add("weka.classifiers.functions.MultilayerPerceptron");
-		classifiers.add("weka.classifiers.functions.SimpleLinearRegression");
-		classifiers.add("weka.classifiers.functions.SimpleLogistic");
-		classifiers.add("weka.classifiers.functions.SMO");
-		classifiers.add("weka.classifiers.functions.VotedPerceptron");
-		classifiers.add("weka.classifiers.lazy.IBk");
-		classifiers.add("weka.classifiers.lazy.KStar");
-		classifiers.add("weka.classifiers.rules.DecisionTable");
-		classifiers.add("weka.classifiers.rules.JRip");
-		classifiers.add("weka.classifiers.rules.M5Rules");
-		classifiers.add("weka.classifiers.rules.OneR");
-		classifiers.add("weka.classifiers.rules.PART");
-		classifiers.add("weka.classifiers.rules.ZeroR");
-		classifiers.add("weka.classifiers.trees.DecisionStump");
-		classifiers.add("weka.classifiers.trees.J48");
-		classifiers.add("weka.classifiers.trees.LMT");
-		classifiers.add("weka.classifiers.trees.M5P");
-		classifiers.add("weka.classifiers.trees.RandomForest");
-		classifiers.add("weka.classifiers.trees.RandomTree");
-		classifiers.add("weka.classifiers.trees.REPTree");
+	public static Collection<String> getBasicClassifiers() {
+		Collection<String> classifiers = new ArrayList<>();
+		classifiers.add(weka.classifiers.bayes.BayesNet.class.getName());
+		classifiers.add(weka.classifiers.bayes.NaiveBayes.class.getName());
+		classifiers.add(weka.classifiers.bayes.NaiveBayesMultinomial.class.getName());
+		classifiers.add(weka.classifiers.functions.Logistic.class.getName());
+		classifiers.add(weka.classifiers.functions.MultilayerPerceptron.class.getName());
+		classifiers.add(weka.classifiers.functions.SimpleLogistic.class.getName());
+		classifiers.add(weka.classifiers.functions.SMO.class.getName());
+		classifiers.add(weka.classifiers.lazy.IBk.class.getName());
+		classifiers.add(weka.classifiers.lazy.KStar.class.getName());
+		classifiers.add(weka.classifiers.rules.DecisionTable.class.getName());
+		classifiers.add(weka.classifiers.rules.JRip.class.getName());
+		classifiers.add(weka.classifiers.rules.OneR.class.getName());
+		classifiers.add(weka.classifiers.rules.PART.class.getName());
+		classifiers.add(weka.classifiers.rules.ZeroR.class.getName());
+		classifiers.add(weka.classifiers.trees.DecisionStump.class.getName());
+		classifiers.add(weka.classifiers.trees.J48.class.getName());
+		classifiers.add(weka.classifiers.trees.LMT.class.getName());
+		classifiers.add(weka.classifiers.trees.RandomForest.class.getName());
+		classifiers.add(weka.classifiers.trees.RandomTree.class.getName());
+		classifiers.add(weka.classifiers.trees.REPTree.class.getName());
 		return classifiers;
 	}
 
 	public static Collection<String> getNativeMultiClassClassifiers() {
 		Collection<String> classifiers = new ArrayList<>();
-
-		classifiers.add("weka.classifiers.bayes.BayesNet");
-		classifiers.add("weka.classifiers.bayes.NaiveBayes");
-		classifiers.add("weka.classifiers.bayes.NaiveBayesMultinomial");
-		classifiers.add("weka.classifiers.functions.Logistic");
-		classifiers.add("weka.classifiers.functions.MultilayerPerceptron");
-		classifiers.add("weka.classifiers.functions.SimpleLogistic");
-		classifiers.add("weka.classifiers.lazy.IBk");
-		classifiers.add("weka.classifiers.lazy.KStar");
-		classifiers.add("weka.classifiers.rules.JRip");
-		classifiers.add("weka.classifiers.rules.M5Rules");
-		classifiers.add("weka.classifiers.rules.OneR");
-		classifiers.add("weka.classifiers.rules.PART");
-		classifiers.add("weka.classifiers.rules.ZeroR");
-		classifiers.add("weka.classifiers.trees.DecisionStump");
-		classifiers.add("weka.classifiers.trees.J48");
-		classifiers.add("weka.classifiers.trees.LMT");
-		classifiers.add("weka.classifiers.trees.M5P");
-		classifiers.add("weka.classifiers.trees.RandomForest");
-		classifiers.add("weka.classifiers.trees.RandomTree");
-		classifiers.add("weka.classifiers.trees.REPTree");
+		classifiers.add(weka.classifiers.bayes.BayesNet.class.getName());
+		classifiers.add(weka.classifiers.bayes.NaiveBayes.class.getName());
+		classifiers.add(weka.classifiers.bayes.NaiveBayesMultinomial.class.getName());
+		classifiers.add(weka.classifiers.functions.Logistic.class.getName());
+		classifiers.add(weka.classifiers.functions.MultilayerPerceptron.class.getName());
+		classifiers.add(weka.classifiers.functions.SimpleLogistic.class.getName());
+		classifiers.add(weka.classifiers.lazy.IBk.class.getName());
+		classifiers.add(weka.classifiers.lazy.KStar.class.getName());
+		classifiers.add(weka.classifiers.rules.JRip.class.getName());
+		classifiers.add(weka.classifiers.rules.M5Rules.class.getName());
+		classifiers.add(weka.classifiers.rules.OneR.class.getName());
+		classifiers.add(weka.classifiers.rules.PART.class.getName());
+		classifiers.add(weka.classifiers.rules.ZeroR.class.getName());
+		classifiers.add(weka.classifiers.trees.DecisionStump.class.getName());
+		classifiers.add(weka.classifiers.trees.J48.class.getName());
+		classifiers.add(weka.classifiers.trees.LMT.class.getName());
+		classifiers.add(weka.classifiers.trees.M5P.class.getName());
+		classifiers.add(weka.classifiers.trees.RandomForest.class.getName());
+		classifiers.add(weka.classifiers.trees.RandomTree.class.getName());
+		classifiers.add(weka.classifiers.trees.REPTree.class.getName());
 		return classifiers;
 	}
 
 	public static Collection<String> getBinaryClassifiers() {
 		Collection<String> classifiers = new ArrayList<>();
-		classifiers.add("weka.classifiers.functions.SMO");
-		classifiers.add("weka.classifiers.functions.VotedPerceptron");
+		classifiers.add(weka.classifiers.functions.SMO.class.getName());
+		classifiers.add(weka.classifiers.functions.VotedPerceptron.class.getName());
 		return classifiers;
 	}
 
 	public static Collection<String> getFeatureEvaluators() {
 		Collection<String> preprocessors = new ArrayList<>();
 
-		preprocessors.add("weka.attributeSelection.CfsSubsetEval");
-		preprocessors.add("weka.attributeSelection.CorrelationAttributeEval");
-		preprocessors.add("weka.attributeSelection.GainRatioAttributeEval");
-		preprocessors.add("weka.attributeSelection.InfoGainAttributeEval");
-		preprocessors.add("weka.attributeSelection.OneRAttributeEval");
-		preprocessors.add("weka.attributeSelection.PrincipalComponents");
-		preprocessors.add("weka.attributeSelection.ReliefFAttributeEval");
-		preprocessors.add("weka.attributeSelection.SymmetricalUncertAttributeEval");
+		preprocessors.add(weka.attributeSelection.CfsSubsetEval.class.getName());
+		preprocessors.add(weka.attributeSelection.CorrelationAttributeEval.class.getName());
+		preprocessors.add(weka.attributeSelection.GainRatioAttributeEval.class.getName());
+		preprocessors.add(weka.attributeSelection.InfoGainAttributeEval.class.getName());
+		preprocessors.add(weka.attributeSelection.OneRAttributeEval.class.getName());
+		preprocessors.add(weka.attributeSelection.PrincipalComponents.class.getName());
+		preprocessors.add(weka.attributeSelection.ReliefFAttributeEval.class.getName());
+		preprocessors.add(weka.attributeSelection.SymmetricalUncertAttributeEval.class.getName());
 		return preprocessors;
 	}
 
@@ -232,14 +255,7 @@ public class WekaUtil {
 		// iterate over every attribute and check.
 		for (Enumeration<Attribute> attributeEnum = wekaInstances.enumerateAttributes(); attributeEnum.hasMoreElements();) {
 			Attribute currentAttr = attributeEnum.nextElement();
-			if (!currentAttr.isNominal()) {
-				continue; // ignore attributes that aren't nominal.
-			}
-			if (currentAttr == classAttribute) {
-				// ignore class attribute (already checked in case ignoreClassAttribute==true):
-				continue;
-			}
-			if (currentAttr.numValues() >= 3) {
+			if (currentAttr.isNominal() && currentAttr != classAttribute && currentAttr.numValues() >= 3) {
 				return true;
 			}
 		}

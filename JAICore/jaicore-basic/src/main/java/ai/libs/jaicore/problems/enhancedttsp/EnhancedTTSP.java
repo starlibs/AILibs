@@ -111,7 +111,7 @@ public class EnhancedTTSP {
 		return new EnhancedTTSPState(null, this.startLocation, this.hourOfDeparture, 0, 0);
 	}
 
-	public EnhancedTTSPState computeSuccessorState(final EnhancedTTSPState n, final short destination) {
+	public EnhancedTTSPState computeSuccessorState(final EnhancedTTSPState n, final short destination) throws InterruptedException {
 
 		this.logger.info("Generating successor for node {} to go to destination {}", n, destination);
 
@@ -141,7 +141,7 @@ public class EnhancedTTSP {
 		boolean arrived = false;
 		double shareOfTheTripDone = 0.0;
 		double timeOfArrival = -1;
-		while (!arrived) {
+		while (!arrived && !Thread.currentThread().isInterrupted()) {
 			double permittedTimeToTravel = Math.min(timeToNextShortBreak, timeToNextLongBreak);
 			double travelTimeWithoutBreak = this.getActualDrivingTimeWithoutBreak(minTravelTime, curTime, shareOfTheTripDone);
 			assert timeToNextShortBreak >= 0 : "Time to next short break cannot be negative!";
@@ -186,6 +186,9 @@ public class EnhancedTTSP {
 					timeToNextLongBreak = this.getTimeToNextLongBreak(curTime, timeSinceLastLongBreak);
 				}
 			}
+		}
+		if (Thread.interrupted()) {
+			throw new InterruptedException("Successor computation interrupted!");
 		}
 		double travelDuration = curTime - n.getTime();
 		this.logger.info("Finished travel simulation. Travel duration: {}", travelDuration);

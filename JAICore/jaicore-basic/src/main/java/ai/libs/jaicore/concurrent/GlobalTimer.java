@@ -5,6 +5,16 @@ import org.slf4j.LoggerFactory;
 
 public class GlobalTimer extends TrackableTimer {
 	private static final Logger logger = LoggerFactory.getLogger(GlobalTimer.class);
+	public static final NamedTimerTask INIT_TASK = new NamedTimerTask("Init task") {
+
+		@Override
+		public void exec() {
+			Thread timerThread = Thread.currentThread();
+			logger.info("Changing global timer thread {} priority from {} to {}", timerThread, timerThread.getPriority(), Thread.MAX_PRIORITY);
+			timerThread.setPriority(Thread.MAX_PRIORITY);
+			logger.info("Priority of global timer thread {} is now {}", timerThread, timerThread.getPriority());
+		}
+	};
 	private static final GlobalTimer instance = new GlobalTimer();
 
 	private GlobalTimer() {
@@ -13,15 +23,7 @@ public class GlobalTimer extends TrackableTimer {
 		super("Global Timer", true);
 
 		/* immediately give the thread of the timer maximum priority */
-		this.schedule(new TrackableTimerTask() {
-			@Override
-			public void exec() {
-				Thread timerThread = Thread.currentThread();
-				logger.info("Changing global timer thread {} priority from {} to {}", timerThread, timerThread.getPriority(), Thread.MAX_PRIORITY);
-				timerThread.setPriority(Thread.MAX_PRIORITY);
-				logger.info("Priority of global timer thread {} is now {}", timerThread, timerThread.getPriority());
-			}
-		}, 0);
+		this.schedule(INIT_TASK, 0);
 	}
 
 	public static GlobalTimer getInstance() {

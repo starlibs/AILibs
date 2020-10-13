@@ -18,6 +18,9 @@ public enum JobShopMetric {
 	}
 
 	public double getScore(final JobSchedulingProblemInput problem, final ISchedule schedule) {
+		if (problem.getJobs().isEmpty()) {
+			throw new IllegalArgumentException("Cannot get score for a problem that has no jobs!");
+		}
 		return this.metricFunction.apply(problem, schedule);
 	}
 }

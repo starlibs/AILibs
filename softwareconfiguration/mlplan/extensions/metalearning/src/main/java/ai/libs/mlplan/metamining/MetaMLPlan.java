@@ -21,7 +21,7 @@ import com.google.common.eventbus.EventBus;
 
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.metamining.MetaMinerBasedSorter;
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EAggregatedClassifierMetric;
@@ -36,10 +36,10 @@ import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.model.travesaltree.ReducedGraphGenerator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
 import ai.libs.mlplan.metamining.databaseconnection.ExperimentRepository;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlan4Weka;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
+import ai.libs.mlplan.weka.MLPlan4Weka;
+import ai.libs.mlplan.weka.MLPlanWekaBuilder;
+import ai.libs.mlplan.weka.weka.MLPipelineComponentInstanceFactory;
+import ai.libs.mlplan.weka.weka.WekaPipelineFactory;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -68,7 +68,7 @@ public class MetaMLPlan extends AbstractClassifier {
 
 	// Search results
 	private IWekaClassifier bestModel;
-	private transient Collection<Component> components;
+	private transient Collection<IComponent> components;
 
 	// For intermediate results
 	private transient EventBus eventBus = new EventBus();

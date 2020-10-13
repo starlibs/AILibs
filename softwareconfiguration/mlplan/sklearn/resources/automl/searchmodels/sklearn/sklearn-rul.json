@@ -1,37 +1,12 @@
 {
 	"repository": "RUL",
 	"include": [
-		"./sklearn-rul-timeseries_transformer.json",
-		"./sklearn-rul-data_cleaner.json",
-		"./sklearn-preprocessors.json",
-		"./sklearn-regressors.json"
+		"./timeseries/index.json",
+		"./datacleaner/index.json",
+		"./preprocessing/index.json",
+		"./regression/base/index.json",
+		"./regression/ext/rulpipeline.json"
 	],
 	"components": [
-		{
-			"name": "sklearn.pipeline.make_pipeline",
-			"providedInterface": [
-				"MLPipeline",
-				"AbstractRegressor"
-			],
-			"requiredInterface": [
-				{
-					"id": "regressor",
-					"name": "BasicRegressor"
-				},
-				{
-					"id": "timeseries_transformer",
-					"name": "TimeseriesTransformer"
-				},
-				{
-					"id": "data_cleaner",
-					"name": "DataCleaner"
-				},
-				{
-					"id": "preprocessor0",
-					"name": "BasicPreprocessor"
-				}
-			],
-			"parameter": []
-		}
 	]
 }

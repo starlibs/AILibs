@@ -6,8 +6,8 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public class QueenNode implements Serializable {
-	private int dimension;
-	private List<Integer> positions;
+	private final int dimension;
+	private final List<Integer> positions;
 
 	/**
 	 * Creates a QueenNode with a empty board
@@ -48,11 +48,8 @@ public class QueenNode implements Serializable {
 	 *            The dimension of the board.
 	 */
 	public QueenNode(final List<Integer> pos, final int y, final int dimension) {
-		this.positions = new ArrayList<>();
-		for (Integer p : pos) {
-			this.positions.add(p);
-		}
-		this.positions.add(y);
+		this.positions = new ArrayList<>(pos);
+		this.positions.add(this.positions.size(), y);
 		this.dimension = dimension;
 	}
 
@@ -69,10 +66,10 @@ public class QueenNode implements Serializable {
 	 *            The dimension of the board.
 	 */
 	public QueenNode(final List<Integer> pos, final int x, final int y, final int dimension) {
+		this.positions = new ArrayList<>(pos);
 		for (Integer p : pos) {
 			this.positions.add(p);
 		}
-		this.positions = pos;
 		this.positions.add(x, y);
 		this.dimension = dimension;
 	}

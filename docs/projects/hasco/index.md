@@ -3,7 +3,6 @@ layout: project
 title: HASCO
 subtitle: HASCO subtitle
 navigation_mode: anchor
-version: 0.2.3
 navigation:
     - { id: "overview", link: "overview", title: "Overview" }
     - { id: "installation", link: "installation", title: "Installation" }
@@ -45,6 +44,13 @@ dependencies {
 ```
 
 # Usage
+## Obtaining a Software Configuration Problem Object
+```java
+RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(problemFile, "interfacename", n -> 0.0);
+```
+Here, we have a benchmark that always assigns 0 to any solution.
+Replace it with a different benchmark to do something meaningful.
+
 ## Obtaining an HASCO instance
 The easiest way to use HASCO is to use the HASCO builder.
 
@@ -135,6 +141,13 @@ for (int i = 0; i < 10; i++) {
 }
 ```
 
+## Serializing Component Instances to JSON
+```java
+new ComponentSerialization().serialize(ci)
+```
+Here, `ci` is your `IComponentInstance` object.
+
+
 # THE HASCO Reduction
 HASCO solves the software configuration problem by conducting a double reduction step.
 First, it reduces the original problem to an HTN planning problem.
@@ -179,10 +192,10 @@ notRefinable(cName, c, pName, p, curval)				# it is allowed to further refine th
 ### Operations
 For each component `c` and each of its provided interfaces `c.i`, HASCO creates an operation
 ```
-satisfy<i>With<c>(c1, c2, p1,.., pm, r1,..,rn)
-	pre-condition: component(c1)
+satisfy<i>With<c>(iHandle, cHandle, p1,.., pm, r1,..,rn)
+	pre-condition: <empty>
 	add-list:
-		component(c2) & resolves(c1, '<i>', '<c>', c2),
+		component(cHandle) & resolves(iHandle, '<i>', '<c>', c2),
 		parameterContainer('<c>', '<p.name>', c2, p1),
 		..,
 		parameterContainer('<c>', '<p.name>', c2, pm),
@@ -275,29 +288,32 @@ init task-network: tResolve<reqInterface>('request', 'solution')
 
 ### Alternative Methods for the case of list interfaces
 ```
-resolve<i>(c1; c2_1,..,c2_<max(I)>)
-	taskName: tResolve<i>(c1)
-	pre-condition: component(c1)
+resolve<i>(cHandle, iGroupHandle; ir_1,..,ir_<max(I)>, cHandle_1,..,cHandle_<max(I>)
+	taskName: tResolveGroup<i>(iGroupHandle)
+	pre-condition: <empty>
 	task-network:
-		tResolveSingle<i>(c1, c2_1) ->
+		defineInterface(cHandle, ir_1) ->
 		..
-		tResolveSingle<i>(c1, c2_<min(I)>) -> 
-		tResolveSingleOptional<i>(c1, c2_<min(I) + 1> ->
+		defineInterface(cHandle, ir_<max(I)>) ->
+		tResolveSingle<i>(iGroupHandle, ir_1, cHandle_1) ->
 		..
-		tResolveSingleOptional<i>(c1, c2_<max(I)>) -> 
-	outputs: c2_1,..,c2_<max(I)>
+		tResolveSingle<i>(iGroupHandle, ir_<min(I)>, cHandle_<min(I)>) -> 
+		tResolveSingleOptional<i>(iGroupHandle, ir_<min(I) + 1>, cHandle_<min(I)> + 1) ->
+		..
+		tResolveSingleOptional<i>(iGroupHandle, ir_<max(I)>, cHandle_<max(I)>) -> 
+	outputs: c2_1,..,c2_<max(I), cHandle_1,..,cHandle_<max(I>>
 
 
-resolve<i>With<c>(c1, c2; p1,.., pm, r1,..,rn)
-	taskName: tResolveSingle<i>(c1, c2)
-	pre-condition: component(c1), !anyOmitted(c1,'<i>')
+resolve<i>With<c>(iHandle, iGroup, cHandle; p1,.., pm, iSubGroup1,..,iSubGroupn)
+	taskName: tResolveSingle<i>(iGroup, iHandle, cHandle)
+	pre-condition: !anyOmitted(iGroup)
 	task-network:
-		satisfy<i>With<c>(c1, c2, p1,.., pm, r1,..,rn) ->
-		tResolve<i1>(c2, r1) ->
+		satisfy<i>With<c>(iHandle, cHandle, p1,.., pm, iSubGroup1,..,iSubGroupn) ->
+		tResolveGroup<i1>(cHandle, iSubGroup1) ->
 		.. ->
-		tResolve<ik>(c2,..,rn) ->
-		tRefineParamsOf<c>(c1, c2, p1, .., pm)
-	outputs: p1,..,pm,r1,..,rn
+		tResolveGroup<ik>(cHandle, iSubGroupn) ->
+		tRefineParamsOf<c>(cHandle, p1, .., pm)
+	outputs: p1,..,pm,iSubGroup1,..,iSubGroupn
 
 doResolve<i>(c1, c2)
 	taskName: tResolveSingleOptional<i>(c1, c2)

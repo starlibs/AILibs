@@ -6,7 +6,7 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 /**
  * Decides, based on a new incoming event, whether the experiment should be stopped.
  *
- * @author felix
+ * @author Felix Mohr
  *
  */
 public interface IExperimentTerminationCriterion {

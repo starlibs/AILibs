@@ -22,13 +22,14 @@ public class ExperimentUtil {
 		subQueries.add("SELECT \"aux\" as pk, COUNT(*) as \"open\" FROM `" + tablename + "` WHERE time_started is null");
 		subQueries.add("SELECT \"aux\" as pk, COUNT(*) as \"running\" FROM `" + tablename + "` WHERE time_started is not null and time_end is null");
 		subQueries.add("SELECT \"aux\" as pk, COUNT(*) as finished, AVG(TIMESTAMPDIFF(SECOND, time_started, time_end)) as avgRuntimeFinished  FROM `" + tablename + "` WHERE time_started is not null and time_end is not null");
+		subQueries.add("SELECT \"aux\" as pk, COUNT(*) as successful FROM `" + tablename + "` where time_end is not null and exception is null");
 		subQueries.add("SELECT \"aux\" as pk, COUNT(*) as failed FROM `" + tablename + "` where exception is not null");
 		subQueries.add("SELECT \"aux\" as pk, COUNT(*) as total FROM `" + tablename + "`");
 
 		/* create main query */
 		StringBuilder sb = new StringBuilder();
 		sb.append(
-				"SELECT open, CONCAT(ROUND(100 * open / total, 2), \"%\") as \"open (rel)\", running, CONCAT(ROUND(100 * running / total, 2), \"%\") as \"running (rel)\", finished, CONCAT(ROUND(100 * finished / total, 2), \"%\") as \"finished (rel)\", failed, total, CONCAT(ROUND(avgRuntimeFinished), \"s\") as \"Average Time of Finished\", CONCAT(ROUND(avgRuntimeFinished * open / "
+				"SELECT total, open, CONCAT(ROUND(100 * open / total, 2), \"%\") as \"open (rel)\", running, CONCAT(ROUND(100 * running / total, 2), \"%\") as \"running (rel)\", finished, CONCAT(ROUND(100 * finished / total, 2), \"%\") as \"finished (rel)\", successful, failed, CONCAT(ROUND(100 * successful / (successful + failed), 2), \"%\") as \"success rate\", CONCAT(ROUND(avgRuntimeFinished), \"s\") as \"Average Time of Finished\", CONCAT(ROUND(avgRuntimeFinished * open / "
 						+ (numberOfParallelJobs > 0 ? numberOfParallelJobs : "running") + "), \"s\") as \"ETA\" FROM ");
 		for (int t = 1; t < subQueries.size(); t++) {
 			sb.append("(");
@@ -57,5 +58,13 @@ public class ExperimentUtil {
 
 	public static String getQueryToListAllFailedExecutions(final String tablename) {
 		return "SELECT * FROM `" + tablename + "` WHERE exception is not null";
+	}
+
+	public static String getOccurredExceptions(final String tablename, final String... ignorePatterns) {
+		StringBuilder sb = new StringBuilder();
+		for (String p : ignorePatterns) {
+			sb.append(" AND `exception` NOT LIKE '%" + p + "%'");
+		}
+		return "SELECT exception, COUNT(*) FROM `" + tablename + "` WHERE exception is not null" + sb.toString() + " GROUP BY exception";
 	}
 }

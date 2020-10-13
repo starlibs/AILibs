@@ -24,9 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
-import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
+import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
-import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 
@@ -149,8 +148,7 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 		this.logger.debug("Creating split with training portion {} and seed {}", trainsplit, seed);
 		Random r = new Random(seed);
 		try {
-			FilterBasedDatasetSplitter<ILabeledDataset<?>> splitter = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), trainsplit, r);
-			List<ILabeledDataset<?>> folds = splitter.split(this.dataset);
+			List<ILabeledDataset<?>> folds = SplitterUtil.getLabelStratifiedTrainTestSplit(this.dataset, seed, trainsplit);
 			this.train = folds.get(0);
 			this.test = folds.get(1);
 

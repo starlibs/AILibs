@@ -1,0 +1,101 @@
+{
+	"repository": "list-requiredinterface-reduction",
+	"components": [
+		{
+			"name": "COMPA",
+			"requiredInterface": [
+				{
+					"id": "rif1",
+					"name": "rif1",
+					"min": 1,
+					"max": 2
+				},
+				{
+					"id": "rif2",
+					"name": "rif2",
+					"min": 0,
+					"max": 2
+				}
+			],
+			"providedInterface": [
+				"IFace"
+			],
+			"parameters": [
+				{
+					"name": "a",
+					"type": "cat",
+					"default": "v2",
+					"values": [
+						"v1",
+						"v2",
+						"v3"
+					]
+				}
+			],
+			"dependencies": []
+		},
+		{
+			"name": "COMPB",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rif1"
+			],
+			"parameters": [
+				{
+					"name": "t",
+					"type": "cat",
+					"default": "1",
+					"values": [
+						"1",
+						"0"
+					]
+				}
+			],
+			"dependencies": []
+		},
+		{
+			"name": "COMPC",
+			"requiredInterface": [
+				{
+					"id": "rif3",
+					"name": "rif3",
+					"optional": "false"
+				}
+			],
+			"providedInterface": [
+				"rif2"
+			],
+			"parameters": [],
+			"dependencies": []
+		},
+		{
+			"name": "COMPE",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rif3"
+			],
+			"parameters": [],
+			"dependencies": []
+		},
+		{
+			"name": "COMPD",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rif3"
+			],
+			"parameters": [
+				{
+					"name": "x",
+					"type": "cat",
+					"default": "v2",
+					"values": [
+						"v1",
+						"v2",
+						"v3"
+					]
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

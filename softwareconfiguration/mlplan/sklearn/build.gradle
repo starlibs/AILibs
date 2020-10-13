@@ -10,8 +10,38 @@ dependencies {
 		exclude group: 'edu.stanford.nlp'
 	}
 	compile project(':mlplan-core')
-	testCompile project(path: ':mlplan-core', configuration: 'testArtifacts')
+	
+	/* dependencies to the test sources of other projects */
+	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-components', configuration: 'testArtifacts')
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-ml', configuration: 'testArtifacts')
+	testCompile project(path: ':mlplan-core', configuration: 'testArtifacts')
+}
+
+task testCoreFunctionality(type: Test) {
+	useJUnitPlatform{
+		filter {
+			excludeTestsMatching "ai.libs.mlplan.sklearnmlplan.MLPlanScikitLearnClassificationResultDeliveryTester"
+			excludeTestsMatching "ai.libs.mlplan.sklearnmlplan.MLPlanScikitLearnRegressionResultDeliveryTester"
+		}
+	}
+}
+
+task testClassification(type: Test) {
+	useJUnitPlatform{
+		filter {
+			includeTestsMatching "ai.libs.mlplan.sklearnmlplan.MLPlanScikitLearnClassificationResultDeliveryTester"
+		}
+	}
+}
+
+task testRegression(type: Test) {
+	useJUnitPlatform{
+		filter {
+			includeTestsMatching "ai.libs.mlplan.sklearnmlplan.MLPlanScikitLearnRegressionResultDeliveryTester"
+		}
+	}
 }
 
 uploadArchives {

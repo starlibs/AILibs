@@ -1,0 +1,22 @@
+{
+  "repository" : "weka.classifiers.bayes.NaiveBayes",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.bayes.NaiveBayes",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "PipelineClassifier" ],
+    "parameters" : [ {
+      "name" : "K",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "D",
+      "type" : "boolean",
+      "default" : "false"
+    } ],
+    "dependencies" : [ {
+      "pre" : "D in {true}",
+      "post" : "K in {false}"
+    } ]
+  } ]
+}

@@ -1,0 +1,28 @@
+{
+  "repository" : "weka.classifiers.lazy.KStar",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.lazy.KStar",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "BoostableBaseClassifier", "PipelineClassifier" ],
+    "parameters" : [ {
+      "name" : "B",
+      "type" : "int",
+      "default" : 20.0,
+      "min" : 1.0,
+      "max" : 100.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "E",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "M",
+      "type" : "cat",
+      "default" : "a",
+      "values" : [ "a", "d", "m", "n" ]
+    } ],
+    "dependencies" : [ ]
+  } ]
+}

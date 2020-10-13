@@ -8,7 +8,7 @@
 		<layout class="org.apache.log4j.PatternLayout">
 			<!-- <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] 
 				- %m%n" /> -->
-			<param name="ConversionPattern" value="%-5p [%t] [%c{1}.%M:%L] - %m%n" />
+			<param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
 		</layout>
 	</appender>
 
@@ -69,7 +69,7 @@
 	</logger>
 	
 	<logger name="tester">
-	  <level value="debug" />
+	  <level value="info" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
@@ -94,13 +94,21 @@
   </logger>
 	
 	<logger name="testedalgorithm">
-    <level value="debug" />
+    <level value="warn" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
     <appender-ref ref="errFileAppender" />
     <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="testedalgorithm._swConfigAlgo">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="testedalgorithm.base._orgraphsearch._algorithm._algorithm">
+  	<level value="warn" />
   </logger>
   
   <logger name="ai.libs.jaicore.timing">
@@ -112,6 +120,10 @@
   </logger>
   
   <logger name="testedalgorithm.search">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="testedalgorithm.search.gg.util">
     <level value="warn" />
   </logger>
   

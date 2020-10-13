@@ -31,6 +31,7 @@ public class SampleComplementComputer {
 		Map<Object, Integer> frequenciesInInput = new HashMap<>();
 		Map<Object, Integer> frequenciesInSubSample = new HashMap<>();
 		Map<Object, Integer> frequenciesInComplement = new HashMap<>();
+
 		for (Object instance : originalData) {
 			frequenciesInInput.put(instance, frequenciesInInput.computeIfAbsent(instance, k -> 0) + 1);
 			frequenciesInComplement.put(instance, 0);

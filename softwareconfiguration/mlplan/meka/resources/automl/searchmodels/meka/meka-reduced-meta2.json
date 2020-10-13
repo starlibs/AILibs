@@ -1,0 +1,8 @@
+{
+	"repository": "MEKA_META",
+	"include": [
+		"./meta/maniac.json",
+		"./meta/deepml.json",
+		"./meta/filteredclassifier.json"
+	]
+}

@@ -1,0 +1,57 @@
+{
+  "repository" : "weka.classifiers.trees.J48",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.trees.J48",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "WeightedInstancesHandler", "PipelineClassifier" ],
+    "parameters" : [ {
+      "name" : "C",
+      "type" : "double",
+      "min" : 0.0,
+      "max" : 1.0,
+      "minInterval" : 0.05,
+      "refineSplits" : 8,
+      "default" : 0.25
+    }, {
+      "name" : "O",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "U",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "B",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "J",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "S",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "A",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "M",
+      "type" : "int",
+      "default" : 2.0,
+      "min" : 1.0,
+      "max" : 64.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    } ],
+    "dependencies" : [ {
+      "pre" : "U in {true}",
+      "post" : "S in {false}"
+    }, {
+      "pre" : "U in {true}",
+      "post" : "C in [0.25,0.25]"
+    } ]
+  } ]
+}

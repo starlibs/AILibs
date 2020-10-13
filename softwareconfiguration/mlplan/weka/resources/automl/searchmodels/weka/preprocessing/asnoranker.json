@@ -1,0 +1,30 @@
+{
+	"repository": "weka.attributeSelection.AttributeSelection.noranker",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.attributeSelection.AttributeSelection.noranker",
+			"providedInterface": [
+				"AbstractPreprocessor"
+			],
+			"requiredInterface": [
+				{
+					"id": "eval",
+					"name": "nonRankBasedEvaluator"
+				},
+				{
+					"id": "search",
+					"name": "nonRankBasedSearcher"
+				}
+			],
+			"parameters": [
+				{
+					"name": "M",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

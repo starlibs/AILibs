@@ -96,11 +96,13 @@ class ArffStructure:
         from the arff file in a one-hot manner.
     """
 
-    def __init__(self, df, class_attribute):
+    def __init__(self, df, class_attribute, assume_numeric=False):
         """ Reads and encapsulates arff_data which is a dictionary returned by the arff.py module.
         """
-        self.data = df
-        self.input_df = pd.get_dummies(df.drop(columns=[class_attribute]))
+        self.input_df = df.drop(columns=[class_attribute])
+        if not assume_numeric:
+        	print("Computing dummy-representation of data")
+        	self.input_df = pd.get_dummies(self.input_df)
         self.input_matrix = self.input_df.values
         self.output_df = df[[class_attribute]]
         self.output_matrix = self.output_df.values
@@ -146,15 +148,29 @@ def load_arff_files(arff_path_train, arff_path_test):
     Returns content.
     """
     # Load the arff dataset and convert the data into array.
+    print("Reading in train data from ", arff_path_train, " and test data from ", arff_path_test)
     dfTrain, class_attribute = parse(arff_path_train)
     dfTest, class_attribute = parse(arff_path_test)
-    dfUnion = pd.concat([dfTrain, dfTest])
-    data = ArffStructure(dfUnion, class_attribute)
-    print(len(data.input_matrix), len(data.output_matrix))
-    dfBinarized = pd.concat([data.input_df, data.output_df], axis=1)
-    dfBinarizedTrain = dfBinarized[:len(dfTrain)]
-    dfBinarizedTest = dfBinarized[len(dfTrain):]
-    return ArffStructure(dfBinarizedTrain, class_attribute), ArffStructure(dfBinarizedTest, class_attribute)
+    print("Dataframes parsed.")
+    if len(dfTrain.drop(columns=[class_attribute]).select_dtypes(include='number').columns) == len(dfTrain.columns) - 1:
+        print("This is a numeric dataset, no binarization required.")
+        dfBinarizedTrain = dfTrain
+        dfBinarizedTest = dfTest
+    else:
+        print("Data required binarization. Merging the data frames")
+        dfUnion = pd.concat([dfTrain, dfTest])
+        print("Deriving ArffStructure from the union")
+        data = ArffStructure(dfUnion, class_attribute)
+        print("Ready. Size of input matrix is ", len(data.input_matrix), " and size of output matrix is ", len(data.output_matrix), ". Now creating train/test split over the binarized dataset if necessary.")
+        dfBinarized = pd.concat([data.input_df, data.output_df], axis=1)
+        dfBinarizedTrain = dfBinarized[:len(dfTrain)]
+        dfBinarizedTest = dfBinarized[len(dfTrain):]
+        
+    print("Now computing ArffStructures for train and test")
+    out1 = ArffStructure(dfBinarizedTrain, class_attribute, assume_numeric=True)
+    out2 = ArffStructure(dfBinarizedTest, class_attribute, assume_numeric=True)
+    print("ready.")
+    return out1, out2
 
 def get_feature_target_matrices(data):
     """
@@ -251,7 +267,11 @@ def run_train_test_mode(data, testdata):
         y = targets[:,0].astype("str")
     else:
         y = targets[:,0]
-    print(len(X), len(y))
+
+    print("Now training on data with ", len(X), "instances")
+    if (len(X) != len(y)):
+    	raise Exception("Input matrix and prediction vector have different sizes. Prediction vector has length " + str(len(y)))
+    	
     # Create instance of classifier with given parameters.
     classifier_instance = {{classifier_construct}}
     classifier_instance.fit(X, y)

@@ -1,0 +1,10 @@
+{
+	"repository": "Tiny repository",
+	"include": [
+		"./base/zeror.json",
+		"./base/bayesnet.json",
+		"./base/j48.json",
+		"./base/kstar.json"
+	],
+	"components": []
+}

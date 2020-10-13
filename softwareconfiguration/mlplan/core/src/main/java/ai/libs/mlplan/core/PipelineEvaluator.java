@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstanceUtil;
@@ -32,7 +33,7 @@ import ai.libs.mlplan.safeguard.IEvaluationSafeGuard;
  *
  * @author fmohr
  */
-public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, Double> implements ILoggingCustomizable {
+public class PipelineEvaluator extends TimedObjectEvaluator<IComponentInstance, Double> implements ILoggingCustomizable {
 
 	private static final String DEFAULT_PIPELINE_EVALUATOR_ID = "PipelineEvaluator";
 
@@ -81,7 +82,7 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 	}
 
 	@Override
-	public Double evaluateSupervised(final ComponentInstance c) throws InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluateSupervised(final IComponentInstance c) throws InterruptedException, ObjectEvaluationFailedException {
 		this.logger.debug("Received request to evaluate component instance {}", c);
 		this.logger.debug("Query evaluation safe guard whether to evaluate this component instance for the given timeout {}.", this.timeoutForEvaluation);
 		try {
@@ -102,8 +103,10 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 			this.eventBus.post(new SupervisedLearnerCreatedEvent(c, learner)); // inform listeners about the creation of the classifier
 
 			ITimeTrackingLearner trackableLearner = new TimeTrackingLearnerWrapper(c, learner);
-			trackableLearner.setPredictedInductionTime(c.getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME));
-			trackableLearner.setPredictedInferenceTime(c.getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME));
+			if (c instanceof ComponentInstance) {
+				trackableLearner.setPredictedInductionTime(((ComponentInstance)c).getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME));
+				trackableLearner.setPredictedInferenceTime(((ComponentInstance)c).getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME));
+			}
 
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, (learner instanceof ScikitLearnWrapper) ? learner.toString() : learner.getClass().getName());
@@ -125,12 +128,12 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 	}
 
 	@Override
-	public Timeout getTimeout(final ComponentInstance item) {
+	public Timeout getTimeout(final IComponentInstance item) {
 		return this.timeoutForEvaluation;
 	}
 
 	@Override
-	public String getMessage(final ComponentInstance item) {
+	public String getMessage(final IComponentInstance item) {
 		return "Pipeline evaluation phase";
 	}
 

@@ -17,7 +17,7 @@ public class EnhancedTTSPSolutionEvaluator implements IObjectEvaluator<ShortList
 	}
 
 	@Override
-	public Double evaluate(final ShortList solutionTour) {
+	public Double evaluate(final ShortList solutionTour) throws InterruptedException {
 		EnhancedTTSPState state = this.problem.getInitalState();
 		Set<Short> seenLocations = new HashSet<>();
 		for (short next : solutionTour) {

@@ -11,6 +11,7 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeInfoAlteredEvent;
+import ai.libs.jaicore.graphvisualizer.events.graph.NodePropertyChangedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeRemovedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
@@ -56,6 +57,12 @@ public class NodeInfoAlgorithmEventPropertyComputer implements AlgorithmEventPro
 			String mainNodeId = this.getIdOfNode(mainNode);
 			String nodeType = nodeAddedEvent.getType();
 			return new NodeInfo(mainNodeId, null, null, nodeType);
+		} else if (algorithmEvent instanceof NodePropertyChangedEvent) {
+			NodePropertyChangedEvent<?> propertyChangedEvent = (NodePropertyChangedEvent<?>) algorithmEvent;
+			Object mainNode = propertyChangedEvent.getNode();
+			String mainNodeId = this.getIdOfNode(mainNode);
+			Map<String, Object> properties= propertyChangedEvent.getChangedProperties();
+			return new NodeInfo(mainNodeId, null, null, null, properties);
 		}
 		return null;
 	}

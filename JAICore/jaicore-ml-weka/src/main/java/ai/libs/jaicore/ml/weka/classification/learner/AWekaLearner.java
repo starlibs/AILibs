@@ -74,6 +74,9 @@ public abstract class AWekaLearner<P extends IPrediction, B extends IPredictionB
 		int n = dTest.size();
 		IWekaInstance[] instances = new IWekaInstance[n];
 		for (int i = 0; i < n; i++) {
+			if (Thread.interrupted()) {
+				throw new InterruptedException("Weka learner was interrupted while predicting.");
+			}
 			instances[i] = wInstances.get(i);
 		}
 		return this.predict(instances);
@@ -107,11 +110,11 @@ public abstract class AWekaLearner<P extends IPrediction, B extends IPredictionB
 			if (this.wrappedLearner instanceof MLPipeline) {
 				MLPipeline pipeline = (MLPipeline) this.wrappedLearner;
 				Classifier classifier = pipeline.getBaseClassifier();
-				ASSearch searcher = pipeline.getPreprocessors().get(0).getSearcher();
-				ASEvaluation evaluator = pipeline.getPreprocessors().get(0).getEvaluator();
-				return new ReconstructionPlan(
-						Arrays.asList(new ReconstructionInstruction(WekaClassifier.class.getMethod("createPipeline", String.class, List.class, String.class, List.class, String.class, List.class), searcher.getClass().getName(),
-								((OptionHandler) searcher).getOptions(), evaluator.getClass().getName(), ((OptionHandler) evaluator).getOptions(), classifier.getClass().getName(), ((OptionHandler) classifier).getOptions())));
+				ASSearch searcher = pipeline.getPreprocessors().isEmpty() ? null : pipeline.getPreprocessors().get(0).getSearcher();
+				ASEvaluation evaluator = pipeline.getPreprocessors().isEmpty() ? null : pipeline.getPreprocessors().get(0).getEvaluator();
+				return new ReconstructionPlan(Arrays.asList(new ReconstructionInstruction(WekaClassifier.class.getMethod("createPipeline", String.class, List.class, String.class, List.class, String.class, List.class),
+						searcher != null ? searcher.getClass().getName() : null, searcher != null ? ((OptionHandler) searcher).getOptions() : null, evaluator != null ? evaluator.getClass().getName() : null,
+						evaluator != null ? ((OptionHandler) evaluator).getOptions() : null, classifier.getClass().getName(), ((OptionHandler) classifier).getOptions())));
 			} else {
 				return new ReconstructionPlan(Arrays.asList(new ReconstructionInstruction(WekaClassifier.class.getMethod("createBaseClassifier", String.class, List.class), this.name, this.getOptionsAsList())));
 			}
@@ -135,6 +138,9 @@ public abstract class AWekaLearner<P extends IPrediction, B extends IPredictionB
 	public B predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
 		List<P> predictions = new ArrayList<>();
 		for (ILabeledInstance inst : dTest) {
+			if (Thread.interrupted()) {
+				throw new InterruptedException("Weka learner was interrupted while predicting.");
+			}
 			predictions.add(this.predict(inst));
 		}
 		return this.getPredictionListAsBatch(predictions);

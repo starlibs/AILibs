@@ -29,7 +29,7 @@ public class LocalCaseControlSamplingTester extends GeneralSamplingTester<Object
 	}
 
 	@Override
-	public void testSampleSizeLargeProblem() {
+	public void testSampleSizeLargeProblem(final MemoryBasedSamplingAlgorithmTestProblemSet problemSet) {
 
 		/* cannot be applied to large data */
 		assertTrue(true);

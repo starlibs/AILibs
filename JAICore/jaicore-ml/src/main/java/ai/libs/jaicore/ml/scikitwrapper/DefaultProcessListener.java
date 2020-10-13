@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.scikitwrapper;
 
 import java.io.IOException;
 
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,10 +11,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author wever
  */
-public class DefaultProcessListener extends AProcessListener {
+public class DefaultProcessListener extends AProcessListener implements ILoggingCustomizable {
 
 	/* Logging */
-	private static final Logger L = LoggerFactory.getLogger(DefaultProcessListener.class);
+	private Logger logger = LoggerFactory.getLogger(DefaultProcessListener.class);
 
 	private StringBuilder errorSB;
 	private StringBuilder defaultSB;
@@ -43,13 +44,13 @@ public class DefaultProcessListener extends AProcessListener {
 	@Override
 	public void handleError(final String error) {
 		this.errorSB.append(error + "\n");
-		L.error(">>> {}", error);
+		this.logger.error(">>> {}", error);
 	}
 
 	@Override
 	public void handleInput(final String input) throws IOException, InterruptedException {
 		this.defaultSB.append(input + "\n");
-		L.info(">>> {}", input);
+		this.logger.info(">>> {}", input);
 	}
 
 	public String getErrorOutput() {
@@ -60,4 +61,14 @@ public class DefaultProcessListener extends AProcessListener {
 		return this.defaultSB.toString();
 	}
 
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
+		super.setLoggerName(name + ".__listener");
+	}
 }

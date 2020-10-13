@@ -1,0 +1,65 @@
+{
+	"repository": "weka.attributeSelection.PrincipalComponents",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.attributeSelection.PrincipalComponents",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rankBasedEvaluator"
+			],
+			"parameters": [
+				{
+					"name": "numActivator",
+					"type": "cat",
+					"default": "0",
+					"values": [
+						"0",
+						"1"
+					]
+				},
+				{
+					"name": "A",
+					"type": "int",
+					"default": "-1",
+					"values": [
+						"-1"
+					],
+					"min": -1.0,
+					"max": -1.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "C",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "R",
+					"type": "double",
+					"default": 0.95,
+					"min": 0.5,
+					"max": 1.0,
+					"refineSplits": 8,
+					"minInterval": 0.05
+				},
+				{
+					"name": "O",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": [
+				{
+					"pre": "numActivator in {0}",
+					"post": "A in {-1}"
+				},
+				{
+					"pre": "numActivator in {1}",
+					"post": "A in [1.0,1024.0]"
+				}
+			]
+		}
+	]
+}

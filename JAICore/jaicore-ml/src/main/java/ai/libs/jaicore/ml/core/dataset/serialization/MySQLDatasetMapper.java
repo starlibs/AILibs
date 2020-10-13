@@ -1,9 +1,13 @@
 package ai.libs.jaicore.ml.core.dataset.serialization;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
@@ -11,10 +15,14 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.dataset.schema.IInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.datastructure.kvstore.IKVStore;
 
 import ai.libs.jaicore.db.IDatabaseAdapter;
@@ -75,8 +83,49 @@ public class MySQLDatasetMapper implements ISQLDatasetMapper {
 	}
 
 	@Override
-	public void writeDatasetToDatabase(final IDataset<?> dataset, final String tableName) {
-		throw new UnsupportedOperationException("Currently, only read access to the database is supported.");
+	public void writeDatasetToDatabase(final IDataset<?> dataset, final String tableName) throws SQLException, IOException {
+		if (this.adapter.doesTableExist(tableName)) {
+			throw new IllegalArgumentException("Table " + tableName + " already exists!");
+		}
+
+		/* create table */
+		List<String> fieldnames = new ArrayList<>();
+		Map<String, String> types = new HashMap<>();
+		List<IAttribute> attributes = dataset.getInstanceSchema().getAttributeList();
+		if (dataset instanceof ILabeledDataset) {
+			attributes.add(((ILabeledDataset<?>)dataset).getInstanceSchema().getLabelAttribute());
+		}
+		dataset.getInstanceSchema().getAttributeList().forEach(a -> {
+			if (!a.getName().equals("id")) {
+				fieldnames.add(a.getName());
+			}
+			String type;
+			if (a.getName().equals("id")) {
+				type = "INT(8)";
+			}
+			else if (a instanceof ICategoricalAttribute) {
+				type = "VARCHAR(100)";
+			}
+			else if (a instanceof INumericAttribute) {
+				type = "DOUBLE";
+			}
+			else {
+				throw new IllegalArgumentException("Unsupported attribute type " + a.getClass());
+			}
+			types.put(a.getName(), type);
+		});
+		this.adapter.createTable(tableName, "id", fieldnames, types, Arrays.asList("id"));
+
+		/* write entries */
+		List<List<? extends Object>> vals = new ArrayList<>();
+		for (IInstance i : dataset) {
+			List<Object> row = new ArrayList<>(Arrays.asList(i.getAttributes()));
+			if (i instanceof ILabeledInstance) {
+				row.add(((ILabeledInstance) i).getLabel());
+			}
+			vals.add(row);
+		}
+		this.adapter.insertMultiple(tableName, attributes.stream().map(IAttribute::getName).collect(Collectors.toList()), vals);
 	}
 
 	@Override

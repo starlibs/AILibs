@@ -1,0 +1,38 @@
+{
+  "repository" : "weka.classifiers.rules.PART",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.rules.PART",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "PipelineClassifier" ],
+    "parameters" : [ {
+      "name" : "N",
+      "type" : "int",
+      "default" : 3.0,
+      "min" : 2.0,
+      "max" : 5.0,
+      "refineSplits" : 8,
+      "minInterval" : 1.0
+    }, {
+      "name" : "M",
+      "type" : "int",
+      "default" : 2.0,
+      "min" : 1.0,
+      "max" : 64.0,
+      "refineSplits" : 8,
+      "minInterval" : 1
+    }, {
+      "name" : "R",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "B",
+      "type" : "boolean",
+      "default" : "false"
+    } ],
+    "dependencies" : [ {
+      "pre" : "R in {false}",
+      "post" : "N in [3.0,3.0]"
+    } ]
+  } ]
+}

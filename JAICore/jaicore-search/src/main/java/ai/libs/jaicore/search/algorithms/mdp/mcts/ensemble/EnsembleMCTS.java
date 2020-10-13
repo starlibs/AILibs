@@ -10,7 +10,7 @@ import ai.libs.jaicore.search.probleminputs.IMDP;
 
 public class EnsembleMCTS<N, A> extends MCTS<N, A> {
 
-	public EnsembleMCTS(final IMDP<N, A, Double> input, final Collection<IPathUpdatablePolicy<N, A, Double>> treePolicies, final double maxIterations, final double gamma, final double epsilon, final Random random, final boolean tabooExhaustedNodes) {
+	public EnsembleMCTS(final IMDP<N, A, Double> input, final Collection<IPathUpdatablePolicy<N, A, Double>> treePolicies, final int maxIterations, final double gamma, final double epsilon, final Random random, final boolean tabooExhaustedNodes) {
 		super(input, new EnsembleTreePolicy<>(treePolicies), new UniformRandomPolicy<>(random), maxIterations, gamma, epsilon, tabooExhaustedNodes);
 	}
 

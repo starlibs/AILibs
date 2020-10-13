@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.weka.classification.timeseries.learner.ensemble;
 
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.ensemble.MajorityConfidenceVote;
+import ai.libs.jaicore.ml.weka.classification.singlelabel.timeseries.learner.ensemble.MajorityConfidenceVote;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.Logistic;

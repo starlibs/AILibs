@@ -19,34 +19,31 @@ import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
-public class DatasetPropertyComputer {
+public class DatasetPropertyComputer implements ILoggingCustomizable {
 
-	private DatasetPropertyComputer() {
-		/* avoids instantiation */
-	}
+	private Logger logger = LoggerFactory.getLogger(DatasetPropertyComputer.class);
 
-	private static final Logger LOG = LoggerFactory.getLogger(DatasetPropertyComputer.class);
-
-	public static Map<Integer, Set<Object>> computeAttributeValues(final IDataset<?> dataset) {
+	public Map<Integer, Set<Object>> computeAttributeValues(final IDataset<?> dataset) {
 		List<Integer> allAttributeIndices = new ArrayList<>();
 		int n = dataset.getNumAttributes();
 		for (int i = 0; i < n; i++) {
 			allAttributeIndices.add(i);
 		}
-		return computeAttributeValues(dataset, allAttributeIndices, 1);
+		return this.computeAttributeValues(dataset, allAttributeIndices, 1);
 	}
 
 	/**
 	 * This method computes for each desired attribute the set of occurring values.
 	 * If numCPU > 1, the computation is done in parallel.
 	 */
-	public static Map<Integer, Set<Object>> computeAttributeValues(final IDataset<?> dataset, final List<Integer> pAttributeIndices, final int numCPUs) {
-		LOG.info("computeAttributeValues(): enter");
+	public Map<Integer, Set<Object>> computeAttributeValues(final IDataset<?> dataset, final List<Integer> pAttributeIndices, final int numCPUs) {
+		this.logger.info("computeAttributeValues(): enter");
 		Map<Integer, Set<Object>> attributeValues = new HashMap<>();
 
 		// SCALE-54: Use target attribute only if no attribute indices are provided
@@ -56,8 +53,8 @@ public class DatasetPropertyComputer {
 			// We assume that the last attribute is the target attribute
 			targetIndex = dataset.getNumAttributes();
 			if ((pAttributeIndices == null || pAttributeIndices.isEmpty())) {
-				if (LOG.isInfoEnabled()) {
-					LOG.info(String.format("No attribute indices provided. Working with target attribute only (index: %d", targetIndex));
+				if (this.logger.isInfoEnabled()) {
+					this.logger.info(String.format("No attribute indices provided. Working with target attribute only (index: %d", targetIndex));
 				}
 				attributeIndices = Collections.singletonList(targetIndex);
 			}
@@ -70,8 +67,8 @@ public class DatasetPropertyComputer {
 			attributeIndices = new ArrayList<>(pAttributeIndices);
 		}
 
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Computing attribute values for attribute indices {}", attributeIndices);
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug("Computing attribute values for attribute indices {}", attributeIndices);
 		}
 
 		// Check validity of the attribute indices
@@ -89,12 +86,12 @@ public class DatasetPropertyComputer {
 		/* partitions the dataset and computes, in parallel, all the values that exist in each partition for each attribute */
 		ExecutorService threadPool = Executors.newFixedThreadPool(numCPUs);
 		List<Future<Map<Integer, Set<Object>>>> futures = new ArrayList<>();
-		if (LOG.isInfoEnabled()) {
-			LOG.info(String.format("Starting %d threads for computation..", numCPUs));
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info(String.format("Starting %d threads for computation..", numCPUs));
 		}
 		int listSize = dataset.size() / numCPUs;
 		for (List<? extends IInstance> sublist : Lists.partition(dataset, listSize)) {
-			futures.add(threadPool.submit(new ListProcessor<>(sublist, new HashSet<>(attributeIndices), dataset)));
+			futures.add(threadPool.submit(new ListProcessor<>(sublist, new HashSet<>(attributeIndices), dataset, this.logger)));
 		}
 		threadPool.shutdown(); // blocks until all computations are ready
 
@@ -113,9 +110,9 @@ public class DatasetPropertyComputer {
 					attributeValues.get(entry.getKey()).addAll(localAttributeValues.get(entry.getKey()));
 				}
 			} catch (ExecutionException e) {
-				LOG.error("Exception while waiting for future to complete..", e);
+				this.logger.error("Exception while waiting for future to complete..", e);
 			} catch (InterruptedException e) {
-				LOG.error("Thread has been interrupted");
+				this.logger.error("Thread has been interrupted");
 				Thread.currentThread().interrupt();
 			}
 		}
@@ -131,23 +128,26 @@ public class DatasetPropertyComputer {
 	 */
 	static class ListProcessor<D extends IDataset<?>> implements Callable<Map<Integer, Set<Object>>> {
 
+		private final Logger logger;
+
 		private List<? extends IInstance> list;
 
 		private Set<Integer> attributeIndices;
 
 		private D dataset;
 
-		public ListProcessor(final List<? extends IInstance> list, final Set<Integer> attributeIndices, final D dataset) {
+		public ListProcessor(final List<? extends IInstance> list, final Set<Integer> attributeIndices, final D dataset, final Logger logger) {
 			super();
 			this.list = list;
 			this.attributeIndices = attributeIndices;
 			this.dataset = dataset;
+			this.logger = logger;
 		}
 
 		@Override
 		public Map<Integer, Set<Object>> call() {
-			if (LOG.isInfoEnabled()) {
-				LOG.info(String.format("Starting computation on local sublist of length %d", this.list.size()));
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info("Starting computation on local sublist of length {}", this.list.size());
 			}
 
 			// Setup local map
@@ -176,9 +176,19 @@ public class DatasetPropertyComputer {
 				}
 			}
 
-			LOG.info("Finished local computation");
+			this.logger.info("Finished local computation. Identified {} values.", attributeValues.size());
 
 			return attributeValues;
 		}
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }

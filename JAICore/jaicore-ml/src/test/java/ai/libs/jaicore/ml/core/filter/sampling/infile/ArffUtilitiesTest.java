@@ -7,9 +7,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.ArffUtilities;
+import ai.libs.jaicore.test.MediumTest;
 
 public class ArffUtilitiesTest {
 
@@ -26,6 +27,7 @@ public class ArffUtilitiesTest {
 	}
 
 	@Test
+	@MediumTest
 	public void testArffDataentryCount() throws IOException {
 		int countedEntries = ArffUtilities.countDatasetEntries(ARFF_DATASET, true);
 		int trueEntries = 20000;

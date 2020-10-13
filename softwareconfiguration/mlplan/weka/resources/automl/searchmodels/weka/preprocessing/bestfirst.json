@@ -1,0 +1,55 @@
+{
+	"repository": "weka.attributeSelection.BestFirst",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.attributeSelection.BestFirst",
+			"requiredInterface": [],
+			"providedInterface": [
+				"nonRankBasedSearcher"
+			],
+			"parameters": [
+				{
+					"name": "D",
+					"type": "cat",
+					"default": "1",
+					"values": [
+						"0",
+						"1",
+						"2"
+					]
+				},
+				{
+					"name": "N",
+					"type": "cat",
+					"default": "1",
+					"values": [
+						"1",
+						"2",
+						"4",
+						"10",
+						"100",
+						"1000"
+					]
+				},
+				{
+					"name": "S",
+					"type": "cat",
+					"default": "1",
+					"values": [
+						"0",
+						"1",
+						"2",
+						"3"
+					]
+				},
+				{
+					"name": "M",
+					"type": "boolean",
+					"default": "false"
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

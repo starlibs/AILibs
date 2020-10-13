@@ -4,11 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.api4.java.common.metric.IDistanceMetric;
-import org.junit.Test;
-
-import ai.libs.jaicore.basic.metric.DerivateDistance;
-import ai.libs.jaicore.basic.metric.DynamicTimeWarping;
-import ai.libs.jaicore.basic.metric.EuclideanDistance;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test suite for the {@link ai.libs.jaicore.basic.metric.DerivateDistance}
@@ -17,6 +14,8 @@ import ai.libs.jaicore.basic.metric.EuclideanDistance;
  * @author fischor
  */
 public class DerivateDistanceTest {
+
+	public static final EuclideanDistance EUCLIDEAN_DISTANCE = new EuclideanDistance();
 
 	/**
 	 * Correctness test. Tests the distance calculation based on an defined input
@@ -47,7 +46,7 @@ public class DerivateDistanceTest {
 		double[] timeSeries2 = { 1, 2, 3, 5, 5, 6 };
 		double alpha = 0.5;
 		IDistanceMetric timeSeriesDistance = new DynamicTimeWarping();
-		IDistanceMetric derivateDistance = new EuclideanDistance();
+		IDistanceMetric derivateDistance = EUCLIDEAN_DISTANCE;
 
 		// Expectation.
 		double expectation = Math.cos(alpha) * 1 + Math.sin(alpha) * Math.sqrt(7);
@@ -62,38 +61,46 @@ public class DerivateDistanceTest {
 	 * Robustness test: When initializing with <code>null</code> for the distance
 	 * measure, the constructor is supposed to throw an IllegalArgumentExpection.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessForNullDistanceMeasure() {
-		new DerivateDistance(0.5, null);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			new DerivateDistance(0.5, null);
+		});
 	}
 
 	/**
 	 * Robustness test: When initializing with <code>null</code> for the derivation
 	 * the constructor is supposed to throw an IllegalArgumentExpection.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessForNullDerivationMeasure() {
-		new DerivateDistance(0.5, null, new EuclideanDistance(), new EuclideanDistance());
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			new DerivateDistance(0.5, null, EUCLIDEAN_DISTANCE, EUCLIDEAN_DISTANCE);
+		});
 	}
 
 	/**
 	 * Robustness test: When initializing with <code>alpha > pi/2</code> the
 	 * constuctor is supposed to thrown an IllegalArgumentException.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessForAlphaGreaterPiHalf() {
-		double alpha = (Math.PI / 2) + 1e4;
-		new DerivateDistance(alpha, new EuclideanDistance());
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			double alpha = (Math.PI / 2) + 1e4;
+			new DerivateDistance(alpha, EUCLIDEAN_DISTANCE);
+		});
 	}
 
 	/**
 	 * Robustness test: When initializing with <code>alpha < 0</code> the constuctor
 	 * is supposed to thrown an IllegalArgumentException.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessForAlphaLessThanZero() {
-		double alpha = 0 - Double.MIN_VALUE;
-		new DerivateDistance(alpha, new EuclideanDistance());
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			double alpha = 0 - Double.MIN_VALUE;
+			new DerivateDistance(alpha, EUCLIDEAN_DISTANCE);
+		});
 	}
 
 	/**
@@ -102,7 +109,7 @@ public class DerivateDistanceTest {
 	 */
 	@Test
 	public void testBoundaryForAlphaEqualToZero() {
-		new DerivateDistance(0, new EuclideanDistance());
+		new DerivateDistance(0, EUCLIDEAN_DISTANCE);
 		assertTrue(true); // this part must be reached
 	}
 
@@ -113,7 +120,7 @@ public class DerivateDistanceTest {
 	@Test
 	public void testBoundaryForAlphaEqualToPiHalf() {
 		double alpha = Math.PI / 2;
-		new DerivateDistance(alpha, new EuclideanDistance());
+		new DerivateDistance(alpha, EUCLIDEAN_DISTANCE);
 		assertTrue(true); // this part must be reached
 	}
 

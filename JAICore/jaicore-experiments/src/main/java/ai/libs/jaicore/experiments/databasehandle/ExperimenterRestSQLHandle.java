@@ -1,15 +1,16 @@
 package ai.libs.jaicore.experiments.databasehandle;
 
-import ai.libs.jaicore.db.sql.rest.IRestDatabaseConfig;
-import ai.libs.jaicore.db.sql.rest.RestSqlAdapter;
+import ai.libs.jaicore.db.IDatabaseAdapter;
+import ai.libs.jaicore.db.sql.DatabaseAdapterFactory;
+import ai.libs.jaicore.db.sql.IRestDatabaseConfig;
 
 public class ExperimenterRestSQLHandle extends AExperimenterSQLHandle {
 
 	public ExperimenterRestSQLHandle(final IRestDatabaseConfig config) {
-		this (new RestSqlAdapter(config), config.getTable());
+		this (DatabaseAdapterFactory.get(config), config.getTable());
 	}
 
-	public ExperimenterRestSQLHandle(final RestSqlAdapter adapter, final String tablename) {
+	public ExperimenterRestSQLHandle(final IDatabaseAdapter adapter, final String tablename) {
 		super (adapter, tablename);
 	}
 }

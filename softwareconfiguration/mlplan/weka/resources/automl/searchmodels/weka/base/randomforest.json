@@ -1,0 +1,73 @@
+{
+  "repository" : "weka.classifiers.trees.RandomForest",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.trees.RandomForest",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "RandomizableBaseClassifier", "PipelineClassifier" ],
+    "parameters" : [ {
+      "name" : "I",
+      "type" : "int",
+      "default" : 10.0,
+      "min" : 2.0,
+      "max" : 256.0,
+      "refineSplits" : 8,
+      "minInterval" : 5
+    }, {
+      "name" : "featuresActivator",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0", "1" ]
+    }, {
+      "name" : "K",
+      "type" : "int",
+      "default" : "0",
+      "min" : 0,
+      "max" : 32,
+      "refineSplits" : 8,
+      "minInterval" : 1
+    }, {
+      "name" : "depthActivator",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0", "1" ]
+    }, {
+      "name" : "B",
+      "type" : "boolean",
+      "default" : "false"
+    },{
+      "name" : "M",
+      "type" : "cat",
+      "default" : "1",
+      "values": ["16","1","128","2","4","32","64","8"]
+    }, {
+      "name" : "N",
+      "type" : "cat",
+      "default" : "0",
+      "values": ["16","0","128","2","4","32","64","8"]
+    },{
+      "name" : "V",
+      "type" : "cat",
+      "default" : "0.001",
+      "values": ["0.1","1.0","10.0","0.0001","0.001","0.01","100.0","1e-06","1e-05"]
+    },{
+      "name" : "depth",
+      "type" : "cat",
+      "values" : [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 ],
+      "default" : "0"
+    } ],
+    "dependencies" : [ {
+      "pre" : "featuresActivator in {0}",
+      "post" : "K in {0}"
+    }, {
+      "pre" : "featuresActivator in {1}",
+      "post" : "K in [1.0,32.0]"
+    }, {
+      "pre" : "depthActivator in {0}",
+      "post" : "depth in {0}"
+    }, {
+      "pre" : "depthActivator in {1}",
+      "post" : "depth in [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 ]"
+    } ]
+  } ]
+}

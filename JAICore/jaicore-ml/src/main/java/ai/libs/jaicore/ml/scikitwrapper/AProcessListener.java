@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,9 +19,9 @@ import ai.libs.jaicore.processes.ProcessUtil;
  *
  * @author scheiblm, wever
  */
-public abstract class AProcessListener implements IProcessListener {
+public abstract class AProcessListener implements IProcessListener, ILoggingCustomizable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AProcessListener.class);
+	private Logger logger = LoggerFactory.getLogger(AProcessListener.class);
 
 	private boolean listenForPIDFromProcess = false;
 	private int processIDObtainedFromListening = -1;
@@ -35,10 +36,13 @@ public abstract class AProcessListener implements IProcessListener {
 
 	@Override
 	public void listenTo(final Process process) throws IOException, InterruptedException {
+		this.logger.info("Starting to listen to process {}", process);
 		try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
 			// While process is alive the output- and error stream is output.
 			while (process.isAlive()) {
+				this.logger.debug("Process is alive.");
 				if (Thread.interrupted()) { // reset flag since we will throw an exception now
+					this.logger.info("Detected interrupt on process execution.");
 					if (this.listenForPIDFromProcess && this.processIDObtainedFromListening > 0) {
 						ProcessUtil.killProcess(this.processIDObtainedFromListening);
 					} else {
@@ -76,9 +80,9 @@ public abstract class AProcessListener implements IProcessListener {
 		if (this.listenForPIDFromProcess && !Strings.isNullOrEmpty(line)) {
 			if (line.startsWith("CURRENT_PID:")) {
 				this.processIDObtainedFromListening = Integer.parseInt(line.replace("CURRENT_PID:", "").trim());
-				LOGGER.debug("Listen to process id: {}", this.processIDObtainedFromListening);
+				this.logger.debug("Listen to process id: {}", this.processIDObtainedFromListening);
 			}
-			LOGGER.trace("Other console output: {}", line);
+			this.logger.trace("Other console output: {}", line);
 		}
 	}
 
@@ -99,4 +103,14 @@ public abstract class AProcessListener implements IProcessListener {
 	 * @throws InterruptedException An interrupted exception is thrown if the thread/process is interrupted while processing the standard output messages.
 	 */
 	public abstract void handleInput(String input) throws IOException, InterruptedException;
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
+	}
 }

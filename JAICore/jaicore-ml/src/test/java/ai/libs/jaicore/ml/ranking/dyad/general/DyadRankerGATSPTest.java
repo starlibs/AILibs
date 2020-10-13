@@ -11,22 +11,21 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import org.api4.java.common.math.IVector;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.ranking.dyad.DyadRankingLossUtil;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
-import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IPLDyadRanker;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IPLNetDyadRankerConfiguration;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.PLNetDyadRanker;
 import ai.libs.jaicore.ml.ranking.dyad.learner.util.AbstractDyadScaler;
@@ -47,8 +46,23 @@ import ai.libs.jaicore.ml.ranking.loss.KendallsTauDyadRankingLoss;
  * @author Jonas Hanselle
  *
  */
-@RunWith(Parameterized.class)
 public class DyadRankerGATSPTest {
+
+	public static Stream<Arguments> supplyDyadRankers() {
+		PLNetDyadRanker plNetRanker = new PLNetDyadRanker();
+		// Use a simple config such that the test finishes quickly
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_ACTIVATION_FUNCTION, "SIGMOID");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "5");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "100");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_INTERVAL, "1");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_PATIENCE, "5");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "false");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_PLNET_LEARNINGRATE, "0.1");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_MINI_BATCH_SIZE, "1");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_PLNET_SEED, Long.toString(SEED));
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_TRAIN_RATIO, "0.8");
+		return Stream.of(Arguments.of(plNetRanker));
+	}
 
 	private static final String XXL_FILE = "testrsc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-LR.txt";
 	private static final String ALTERNATIVES_FEATURE_FILE = "testrsc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-labeldescriptions.csv";
@@ -61,28 +75,17 @@ public class DyadRankerGATSPTest {
 	// seed for shuffling the dataset
 	private static final long SEED = 15;
 
-	private PLNetDyadRanker ranker;
-	private DyadRankingDataset dataset;
+	@Disabled
+	@ParameterizedTest
+	@MethodSource("supplyDyadRankers")
+	public void test(final PLNetDyadRanker ranker) throws PredictionException, InterruptedException, TrainingException {
+		DyadRankingDataset dataset = randomlyTrimSparseDyadRankingInstances(DyadRankingInstanceSupplier.getDyadRankingDataset(55, 200), M);
 
-	public DyadRankerGATSPTest(final PLNetDyadRanker ranker) {
-		this.ranker = ranker;
-	}
-
-	@Before
-	public void init() throws IOException {
-		// load dataset
-		this.dataset = loadDatasetFromXXLAndCSV();
-	}
-
-	@Test
-	public void test() throws PredictionException, InterruptedException, TrainingException {
-		this.dataset = randomlyTrimSparseDyadRankingInstances(this.dataset, M);
-
-		Collections.shuffle(this.dataset, new Random(SEED));
+		Collections.shuffle(dataset, new Random(SEED));
 
 		// split data
-		DyadRankingDataset trainData = new DyadRankingDataset(this.dataset.subList(0, N));
-		DyadRankingDataset testData = new DyadRankingDataset(this.dataset.subList(N, this.dataset.size()));
+		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
+		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
 
 		// trim dyad ranking instances for train data
 
@@ -94,8 +97,8 @@ public class DyadRankerGATSPTest {
 		scaler.transformInstances(testData);
 
 		// train the ranker
-		this.ranker.fit(trainData);
-		double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, this.ranker);
+		ranker.fit(trainData);
+		double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
 		assertTrue(avgKendallTau > 0.5d);
 	}
 
@@ -145,7 +148,6 @@ public class DyadRankerGATSPTest {
 				alternativeFeatures.add(vector);
 			}
 		}
-
 
 		// parse XXL file
 		File xxlFile = new File(XXL_FILE);
@@ -235,22 +237,5 @@ public class DyadRankerGATSPTest {
 			trimmedDataset.add(trimmedDRInstance);
 		}
 		return trimmedDataset;
-	}
-
-	@Parameters
-	public static List<IPLDyadRanker> supplyDyadRankers() {
-		PLNetDyadRanker plNetRanker = new PLNetDyadRanker();
-		// Use a simple config such that the test finishes quickly
-		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_ACTIVATION_FUNCTION, "SIGMOID");
-		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "5");
-		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "100");
-		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_INTERVAL, "1");
-		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_PATIENCE, "5");
-		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "false");
-		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_PLNET_LEARNINGRATE, "0.1");
-		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_MINI_BATCH_SIZE, "1");
-		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_PLNET_SEED, Long.toString(SEED));
-		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_TRAIN_RATIO, "0.8");
-		return Arrays.asList(plNetRanker);
 	}
 }

@@ -4,6 +4,7 @@ dependencies {
 	compile project(":JAICore:jaicore-search")
 	compile project(":JAICore:jaicore-processes")
 	compile project(":JAICore:jaicore-math")
+	compile project(":JAICore:jaicore-components")
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	
 	compile ("$api4AIml")
@@ -29,6 +30,31 @@ configurations.all {
     exclude module: 'weka-dev'
     exclude module: 'interruptible-weka'
     exclude module: 'weka'
+}
+
+task testOpenMLAdapter(type: Test) {
+	useJUnitPlatform{
+		filter {
+			includeTestsMatching "ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetAdapterTest"
+		}
+	}
+}
+
+task testSampling(type: Test) {
+	useJUnitPlatform{
+		filter {
+			includeTestsMatching "ai.libs.jaicore.ml.core.filter.sampling.*"
+		}
+	}
+}
+
+task testOthers(type: Test) {
+	useJUnitPlatform{
+		filter {
+			excludeTestsMatching "ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetAdapterTest"
+			excludeTestsMatching "ai.libs.jaicore.ml.core.filter.sampling.*"
+		}
+	}
 }
 
 uploadArchives {

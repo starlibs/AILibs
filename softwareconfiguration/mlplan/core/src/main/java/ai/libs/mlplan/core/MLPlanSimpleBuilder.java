@@ -8,8 +8,8 @@ import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomData
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
-import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
@@ -80,7 +80,7 @@ public class MLPlanSimpleBuilder extends AMLPlanBuilder<IClassifier, MLPlanSimpl
 				return new ILearnerFactory<IClassifier>() {
 
 					@Override
-					public IClassifier getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
+					public IClassifier getComponentInstantiation(final IComponentInstance groundComponent) throws ComponentInstantiationFailedException {
 						return new MajorityClassifier();
 					}
 				};

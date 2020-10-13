@@ -1,16 +1,15 @@
 package ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
-
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.FStat;
-import junit.framework.Assert;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link FStat}.
- * 
+ *
  * @author Julian Lienen
  *
  */
@@ -29,16 +28,16 @@ public class FStatTest {
 
 		List<Double> distances = Arrays.asList(2d, 4d, 3d);
 		int[] classValues = new int[] { 0, 0, 1 };
-		
+
 		// D_0^bar = 3, D_1^bar = 3, D^bar = 3
 		// Therefore, the assessed quality has to be 0
-		Assert.assertEquals(0, fStat.assessQuality(distances, classValues), EPS_DELTA);
+		assertEquals(0, fStat.assessQuality(distances, classValues), EPS_DELTA);
 
 		distances = Arrays.asList(1d, 4d, 3d);
 		classValues = new int[] { 0, 0, 1 };
 
 		// D_0^bar = 2.5, D_1^bar = 3, D^bar = 8/3
 		// Therefore, the assessed quality has to be (5/36) / (9/2)
-		Assert.assertEquals((5d / 36d) / (9d / 2d), fStat.assessQuality(distances, classValues), EPS_DELTA);
+		assertEquals((5d / 36d) / (9d / 2d), fStat.assessQuality(distances, classValues), EPS_DELTA);
 	}
 }

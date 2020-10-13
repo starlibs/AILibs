@@ -2,14 +2,13 @@ package ai.libs.jaicore.basic.metric;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
-
-import ai.libs.jaicore.basic.metric.DynamicTimeWarping;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test suite for the {@link ai.libs.jaicore.basic.metric.DynamicTimeWarping}
  * implementation.
- * 
+ *
  * @author fischor
  */
 public class DynamicTimeWarpingTest {
@@ -91,9 +90,11 @@ public class DynamicTimeWarpingTest {
 	 * distance measure, the constructor is supposed to throw an
 	 * IllegalArgumentExpection.
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testRobustnessForNullDistanceMeasure() {
-		new DynamicTimeWarping(null);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			new DynamicTimeWarping(null);
+		});
 	}
 
 }

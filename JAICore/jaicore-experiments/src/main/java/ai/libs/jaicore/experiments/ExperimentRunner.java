@@ -35,6 +35,8 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	private final int availableMemoryInMB;
 	private final String executorInfo;
 
+	private final Runtime runtime = Runtime.getRuntime();
+
 	private boolean allExperimentsFinished = false;
 
 	public ExperimentRunner(final IExperimentSetConfig config, final IExperimentSetEvaluator evaluator, final IExperimentDatabaseHandle databaseHandle) throws ExperimentDBInteractionFailedException {
@@ -63,8 +65,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	}
 
 	/**
-	 * Conducts a limited number of not yet conducted experiments randomly chosen
-	 * from the grid.
+	 * Conducts a limited number of not yet conducted experiments randomly chosen from the grid.
 	 *
 	 * @param maxNumberOfExperiments
 	 *            Limit for the number of experiments
@@ -72,7 +73,9 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	 * @throws InterruptedException
 	 */
 	public void randomlyConductExperiments(final int maxNumberOfExperiments) throws ExperimentDBInteractionFailedException, InterruptedException {
-		this.logger.info("Starting to run up to {} experiments.", maxNumberOfExperiments);
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("Starting to run up to {} experiments.", maxNumberOfExperiments);
+		}
 
 		int numberOfConductedExperiments = 0;
 		while ((maxNumberOfExperiments <= 0 || numberOfConductedExperiments < maxNumberOfExperiments)) {
@@ -94,7 +97,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			 * to be interrupted. */
 			ExperimentDBEntry exp = openRandomExperiments.get(0);
 			this.checkExperimentValidity(exp.getExperiment());
-			this.logger.info("Conduct experiment #{} with key values: {}", numberOfConductedExperiments + 1, exp.getExperiment().getValuesOfKeyFields());
+			this.logger.info("Conduct experiment #{} with key values: {}. Memory statistics: {}MB allocated, {}MB free.", numberOfConductedExperiments + 1, exp.getExperiment().getValuesOfKeyFields(), this.runtime.totalMemory() / (1024 * 1024), this.runtime.freeMemory() / (1024 * 1024));
 			Thread expThread = new Thread(() -> {
 				try {
 					this.handle.startExperiment(exp, this.executorInfo);
@@ -109,7 +112,9 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			expThread.start();
 			expThread.join();
 			numberOfConductedExperiments++;
-			this.logger.info("Finished experiment #{} with key values {}", numberOfConductedExperiments, exp.getExperiment().getValuesOfKeyFields());
+			this.logger.info("Finished experiment #{} with key values {}. Memory statistics: {}MB allocated, {}MB free. Now running GC.", numberOfConductedExperiments, exp.getExperiment().getValuesOfKeyFields(), this.runtime.totalMemory() / (1024 * 1024), this.runtime.freeMemory() / (1024 * 1024));
+			System.gc(); // deliberately run the garbage collection to avoid memory accumulation. We found that the JVM is sometimes not able to reasonably clean up later! This is not a guarantee, but better than
+			this.logger.info("GC finished. Memory statistics: {}MB allocated, {}MB free.", this.runtime.totalMemory() / (1024 * 1024), this.runtime.freeMemory() / (1024 * 1024));
 		}
 
 		this.logger.info("Successfully finished {} experiments.", numberOfConductedExperiments);
@@ -121,7 +126,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		int numberOfConductedExperiments = 0;
 		while ((maxNumberOfExperiments <= 0 || numberOfConductedExperiments < maxNumberOfExperiments)) {
 			Optional<ExperimentDBEntry> nextExperiment = this.handle.startNextExperiment(this.executorInfo);
-			if(!nextExperiment.isPresent()) {
+			if (!nextExperiment.isPresent()) {
 				this.logger.info("After running {}/{} experiments, no more un-started experiments were found.", numberOfConductedExperiments, maxNumberOfExperiments);
 				this.allExperimentsFinished = true;
 				break;
@@ -179,18 +184,15 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	}
 
 	/**
-	 * Conducts a single experiment
-	 * The experiment is expected to be marked as started already.
+	 * Conducts a single experiment The experiment is expected to be marked as started already.
 	 *
-	 * @param expEntry the experiment to be conducted
+	 * @param expEntry
+	 *            the experiment to be conducted
 	 * @throws ExperimentDBInteractionFailedException
 	 * @throws ExperimentAlreadyStartedException
 	 * @throws InterruptedException
 	 * @throws Exception
-	 *             These are not the exceptions thrown by the experiment itself,
-	 *             because these are logged into the database. Exceptions thrown
-	 *             here are technical exceptions that occur when arranging the
-	 *             experiment
+	 *             These are not the exceptions thrown by the experiment itself, because these are logged into the database. Exceptions thrown here are technical exceptions that occur when arranging the experiment
 	 */
 	protected void conductExperiment(final ExperimentDBEntry expEntry) throws ExperimentDBInteractionFailedException, InterruptedException {
 		/* run experiment */
@@ -203,20 +205,22 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			if (this.checkMemory) {
 				double memoryDeviation = Math.abs(expEntry.getExperiment().getMemoryInMB() - this.availableMemoryInMB) * 1f / expEntry.getExperiment().getMemoryInMB();
 				if (memoryDeviation > MAX_MEM_DEVIATION) {
-					throw new IllegalStateException("Cannot conduct experiment " + expEntry.getExperiment() + ", because the available memory is " + this.availableMemoryInMB + " where declared is " + expEntry.getExperiment().getMemoryInMB()
-							+ ". Deviation: " + memoryDeviation);
+					this.logger.error("Cannot conduct experiment {}, because the available memory is {} where declared is {}. Deviation: {}", expEntry.getExperiment(), this.availableMemoryInMB, expEntry.getExperiment().getMemoryInMB(),
+							memoryDeviation);
+					return;
 				}
 			}
 			if (expEntry.getExperiment().getNumCPUs() > Runtime.getRuntime().availableProcessors()) {
-				throw new IllegalStateException(
-						"Cannot conduct experiment " + expEntry.getExperiment() + ", because only " + Runtime.getRuntime().availableProcessors() + " CPU cores are available where declared is " + expEntry.getExperiment().getNumCPUs());
+				this.logger.error("Cannot conduct experiment {}, because only {} CPU cores are available where declared is {}", expEntry.getExperiment(), Runtime.getRuntime().availableProcessors(), expEntry.getExperiment().getNumCPUs());
+				return;
 			}
 			this.evaluator.evaluate(expEntry, m -> {
 				try {
-					this.logger.info("Updating experiment with id {} with the following map: {}", expEntry.getId(), m);
+					this.logger.info("Updating experiment with id {} in the following entries (enable DEBUG for values): {}", expEntry.getId(), m.keySet());
+					this.logger.debug("Update map is: {}", m);
 					this.handle.updateExperiment(expEntry, m);
 				} catch (ExperimentUpdateFailedException e) {
-					this.logger.error("Error in updating experiment data. Message of {}: {}", e.getClass().getName(), e.getMessage());
+					this.logger.error("Error in updating experiment data. Message of {}: {}.\nStack trace:\n {}", e.getClass().getName(), e.getMessage(), LoggerUtil.getExceptionInfo(e));
 				}
 			});
 

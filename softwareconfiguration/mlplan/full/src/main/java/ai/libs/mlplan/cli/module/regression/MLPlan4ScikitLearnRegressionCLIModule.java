@@ -11,7 +11,7 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import ai.libs.mlplan.cli.MLPlanCLI;
 import ai.libs.mlplan.cli.module.IMLPlanCLIModule;
 import ai.libs.mlplan.cli.module.UnsupportedModuleConfigurationException;
-import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
+import ai.libs.mlplan.sklearn.builder.MLPlanScikitLearnBuilder;
 
 public class MLPlan4ScikitLearnRegressionCLIModule extends AMLPlan4RegressionCLIModule implements IMLPlanCLIModule {
 

@@ -8,7 +8,7 @@
 			"providedInterface": [
 				"K"
 			],
-			"parameter": [
+			"parameters": [
 			]
 		},
 		{
@@ -18,7 +18,7 @@
 			"providedInterface": [
 				"K"
 			],
-			"parameter": [
+			"parameters": [
 			]
 		},
 		{
@@ -28,7 +28,7 @@
 			"providedInterface": [
 				"K"
 			],
-			"parameter": [
+			"parameters": [
 			]
 		},
 		{
@@ -44,7 +44,7 @@
 				"WekaBaseClassifier",
 				"BaseClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "C",
 					"type": "double",
@@ -80,7 +80,7 @@
 			"providedInterface": [
 				"K"
 			],
-			"parameter": [
+			"parameters": [
 			]
 		}
 	]

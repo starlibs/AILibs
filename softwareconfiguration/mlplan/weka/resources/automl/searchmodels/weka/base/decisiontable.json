@@ -1,0 +1,33 @@
+{
+  "repository" : "weka.classifiers.rules.DecisionTable",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.rules.DecisionTable",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "PipelineClassifier" ],
+    "parameters" : [ {
+      "name" : "E",
+      "type" : "cat",
+      "default" : "acc",
+      "values" : [ "acc", "rmse", "mae", "auc" ]
+    }, {
+      "name" : "I",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "weka.attributeSelection.GreedyStepwise",
+	  "values": ["weka.attributeSelection.GreedyStepwise", "weka.attributeSelection.BestFirst"]
+    }, {
+      "name" : "X",
+      "type" : "int",
+      "min" : 1,
+      "max" : 4,
+      "default" : 4,
+      "minInterval" : 1,
+      "refineSplits" : 4
+    } ],
+    "dependencies" : [ ]
+  } ]
+}

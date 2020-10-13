@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 import org.api4.java.common.math.IVector;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * This class tests every method which can be called on the {@link DenseDoubleVector}.

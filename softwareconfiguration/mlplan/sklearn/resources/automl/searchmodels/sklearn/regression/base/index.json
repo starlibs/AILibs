@@ -1,0 +1,5 @@
+{
+  "repository" : "regressors-index",
+  "include" : [ "./adaboostregressor.json", "./ardregression.json", "./bayesianridge.json", "./decisiontreeregressor.json", "./dummyregressor.json", "./elasticnet.json", "./extratreeregressor.json", "./extratreesregressor.json", "./gradientboostingregressor.json", "./huberregressor.json", "./kneighborsregressor.json", "./lasso.json", "./lassolars.json", "./linearregression.json", "./linearsvr.json", "./nusvr.json", "./orthogonalmatchingpursuit.json", "./passiveaggressiveregressor.json", "./randomforestregressor.json", "./ridge.json", "./sgdregressor.json", "./svr.json" ],
+  "components" : [ ]
+}

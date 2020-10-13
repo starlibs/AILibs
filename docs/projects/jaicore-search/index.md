@@ -1,7 +1,6 @@
 ---
 layout: project
 title: jaicore-search
-version: 0.2.3
 navigation_mode: anchor
 navigation:
     - { id: "overview", link: "overview", title: "Overview" }

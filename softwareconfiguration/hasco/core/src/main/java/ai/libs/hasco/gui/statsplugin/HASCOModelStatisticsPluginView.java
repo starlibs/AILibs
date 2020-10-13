@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 import ai.libs.jaicore.graphvisualizer.events.gui.Histogram;
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfo;
@@ -52,7 +53,7 @@ public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOMo
 	public void updateHistogram() {
 		Collection<List<Pair<String, String>>> activeFilters = this.rootNode.getAllSelectionsOnPathToAnyLeaf();
 		List<ScoredSolutionCandidateInfo> activeSolutions = this.getModel().getAllSeenSolutionCandidateFoundInfosUnordered().stream()
-				.filter(i -> this.getModel().deserializeComponentInstance(i.getSolutionCandidateRepresentation()).matchesPathRestrictions(activeFilters)).collect(Collectors.toList());
+				.filter(i -> ComponentInstanceUtil.matchesPathRestrictions(this.getModel().deserializeComponentInstance(i.getSolutionCandidateRepresentation()), activeFilters)).collect(Collectors.toList());
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		activeSolutions.forEach(s -> stats.addValue(this.getModel().parseScoreToDouble(s.getScore())));
 		Platform.runLater(() -> this.histogram.update(stats));

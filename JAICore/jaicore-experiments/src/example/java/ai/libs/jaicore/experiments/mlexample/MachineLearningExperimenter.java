@@ -23,6 +23,7 @@ import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
+import ai.libs.jaicore.logging.LoggerUtil;
 
 public class MachineLearningExperimenter {
 
@@ -36,11 +37,12 @@ public class MachineLearningExperimenter {
 	private static final Logger logger = LoggerFactory.getLogger(MachineLearningExperimenter.class);
 
 	public static void main(final String[] args) throws ExperimentDBInteractionFailedException, AlgorithmTimeoutedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, InterruptedException, AlgorithmExecutionCanceledException {
-		runExperiments();
+		createTableWithExperiments();
 	}
 
 	public static void createTableWithExperiments() throws ExperimentDBInteractionFailedException, AlgorithmTimeoutedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, InterruptedException, AlgorithmExecutionCanceledException {
 		ExperimentDatabasePreparer preparer = new ExperimentDatabasePreparer(m, dbHandle);
+		preparer.setLoggerName(LoggerUtil.LOGGER_NAME_EXAMPLE);
 		preparer.synchronizeExperiments();
 	}
 

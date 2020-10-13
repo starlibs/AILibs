@@ -50,4 +50,9 @@ public class LinearTreasureModel implements ITreasureModel {
 		this.logger = LoggerFactory.getLogger(name);
 	}
 
+	@Override
+	public boolean isPathToTreasureIsland(final ILabeledPath<ITransparentTreeNode, Integer> path) {
+		throw new UnsupportedOperationException();
+	}
+
 }

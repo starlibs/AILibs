@@ -1,0 +1,19 @@
+{
+  "repository" : "weka.classifiers.functions.Logistic",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.functions.Logistic",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "PipelineClassifier" ],
+    "parameters" : [ {
+      "name" : "R",
+      "type" : "double",
+      "default" : 1.0E-7,
+      "min" : 1.0E-12,
+      "max" : 10.0,
+      "refineSplits" : 8,
+      "minInterval" : 5.0E-7
+    } ],
+    "dependencies" : [ ]
+  } ]
+}

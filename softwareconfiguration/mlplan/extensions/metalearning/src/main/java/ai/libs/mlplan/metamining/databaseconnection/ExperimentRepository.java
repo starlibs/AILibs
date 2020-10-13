@@ -10,8 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.db.sql.SQLAdapter;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
+import ai.libs.jaicore.db.IDatabaseAdapter;
+import ai.libs.mlplan.weka.weka.MLPipelineComponentInstanceFactory;
 import dataHandling.mySQL.MetaDataDataBaseConnection;
 import weka.core.Instances;
 
@@ -26,7 +26,7 @@ public class ExperimentRepository {
 
 	private Logger logger = LoggerFactory.getLogger(ExperimentRepository.class);
 
-	private SQLAdapter adapter;
+	private IDatabaseAdapter adapter;
 	private String host;
 	private String user;
 	private String password;
@@ -139,7 +139,7 @@ public class ExperimentRepository {
 	}
 
 	private void connect() {
-		this.adapter = new SQLAdapter(this.host, this.user, this.password, "pgotfml_hgraf");
+		throw new UnsupportedOperationException();
 	}
 
 	private void disconnect() {

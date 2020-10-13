@@ -1,0 +1,86 @@
+{
+  "repository" : "sklearn.linear_model.ARDRegression",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.linear_model.ARDRegression",
+    "providedInterface" : [ "BasicRegressor", "BaseLearner", "AbstractRegressor" ],
+    "requiredInterface" : [ ],
+    "parameters" : [ {
+      "name" : "n_iter",
+      "type" : "int",
+      "default" : 300,
+      "min" : 1,
+      "max" : 3000,
+      "minInterval" : 1,
+      "refineSplits" : 8
+    }, {
+      "name" : "tol",
+      "type" : "double",
+      "default" : 0.001,
+      "min" : 0.0,
+      "max" : 1.0,
+      "minInterval" : 0.001,
+      "refineSplits" : 8
+    }, {
+      "name" : "alpha_1",
+      "type" : "double",
+      "default" : 1.0E-6,
+      "min" : 0.0,
+      "max" : 1.0,
+      "minInterval" : 1.0E-5,
+      "refineSplits" : 8
+    }, {
+      "name" : "alpha_2",
+      "type" : "double",
+      "default" : 1.0E-6,
+      "min" : 0.0,
+      "max" : 1.0,
+      "minInterval" : 1.0E-5,
+      "refineSplits" : 8
+    }, {
+      "name" : "lambda_1",
+      "type" : "double",
+      "default" : 1.0E-6,
+      "min" : 0.0,
+      "max" : 1.0,
+      "minInterval" : 1.0E-5,
+      "refineSplits" : 8
+    }, {
+      "name" : "lambda_2",
+      "type" : "double",
+      "default" : 1.0E-6,
+      "min" : 0.0,
+      "max" : 1.0,
+      "minInterval" : 1.0E-5,
+      "refineSplits" : 8
+    }, {
+      "name" : "compute_score",
+      "type" : "cat",
+      "values" : [ "True", "False" ],
+      "default" : "False"
+    }, {
+      "name" : "threshold_lambda",
+      "type" : "double",
+      "default" : 10000.0,
+      "min" : 50.0,
+      "max" : 100000.0,
+      "minInterval" : 50,
+      "refineSplits" : 8
+    }, {
+      "name" : "fit_intercept",
+      "type" : "cat",
+      "values" : [ "True", "False" ],
+      "default" : "True"
+    }, {
+      "name" : "normalize",
+      "type" : "cat",
+      "values" : [ "True", "False" ],
+      "default" : "False"
+    }, {
+      "name" : "copy_X",
+      "type" : "cat",
+      "values" : [ "True" ],
+      "default" : "True"
+    } ]
+  } ]
+}

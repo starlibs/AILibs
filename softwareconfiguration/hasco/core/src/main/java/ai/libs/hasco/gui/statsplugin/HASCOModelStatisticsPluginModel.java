@@ -11,8 +11,10 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 import ai.libs.jaicore.components.model.UnparametrizedComponentInstance;
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfo;
@@ -30,7 +32,7 @@ public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCO
 	private ComponentInstanceSerializer componentInstanceSerializer = new ComponentInstanceSerializer();
 
 	private final Map<UnparametrizedComponentInstance, List<ScoredSolutionCandidateInfo>> observedSolutionsGroupedModuloParameters = new HashMap<>();
-	private final Map<String, Component> knownComponents = new HashMap<>();
+	private final Map<String, IComponent> knownComponents = new HashMap<>();
 
 	/**
 	 * Informs the plugin about a new HASCOSolution. This solution will be considered in the combo boxes as well as in the histogram.
@@ -38,7 +40,7 @@ public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCO
 	 * @param solutionEvent
 	 */
 	public final void addEntry(final ScoredSolutionCandidateInfo scoredSolutionCandidateInfo) {
-		ComponentInstance ci = this.deserializeComponentInstance(scoredSolutionCandidateInfo.getSolutionCandidateRepresentation());
+		IComponentInstance ci = this.deserializeComponentInstance(scoredSolutionCandidateInfo.getSolutionCandidateRepresentation());
 		if (ci == null) {
 			return;
 		}
@@ -47,7 +49,7 @@ public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCO
 			this.observedSolutionsGroupedModuloParameters.put(uci, new ArrayList<>());
 		}
 		this.observedSolutionsGroupedModuloParameters.get(uci).add(scoredSolutionCandidateInfo);
-		ci.getContainedComponents().forEach(c -> {
+		ComponentInstanceUtil.getContainedComponents(ci).forEach(c -> {
 			if (!this.knownComponents.containsKey(c.getName())) {
 				this.knownComponents.put(c.getName(), c);
 			}
@@ -69,7 +71,7 @@ public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCO
 	/**
 	 * @return A map that assigns, for each known component, its name to the Component object.
 	 */
-	public Map<String, Component> getKnownComponents() {
+	public Map<String, IComponent> getKnownComponents() {
 		return this.knownComponents;
 	}
 

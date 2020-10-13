@@ -27,7 +27,7 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
+import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 
 public class MLPlanGraphVisualizationExample {
 
@@ -41,7 +41,7 @@ public class MLPlanGraphVisualizationExample {
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(1), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */
-		MLPlanWekaBuilder mlplanBuilder = new MLPlanWekaBuilder().withNumCpus(4).withTimeOut(new Timeout(60, TimeUnit.SECONDS)).withCandidateEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS))
+		MLPlanWekaBuilder mlplanBuilder = new MLPlanWekaBuilder().withNumCpus(4).withTimeOut(new Timeout(600, TimeUnit.SECONDS)).withCandidateEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS))
 				.withNodeEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS)).withDataset(split.get(0));
 		MLPlan<IWekaClassifier> mlplan = mlplanBuilder.build();
 		mlplan.setLoggerName("example");

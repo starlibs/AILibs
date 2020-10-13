@@ -1,0 +1,60 @@
+{
+	"repository": "SimpleProblem",
+	"components": [
+		{
+			"name": "A",
+			"requiredInterface": [{
+				"id": "i1",
+				"name": "IFA"
+			}],
+			"providedInterface": [
+				"IFace"
+			],
+			"parameters": [
+				{
+					"name": "a",
+					"type": "double",
+					"min": 1,
+					"max": 100,
+					"default": "10",
+					"refineSplits": 8,
+					"minInterval": 0.1
+				},
+				{
+					"name": "b",
+					"type": "cat",
+					"default": "v2",
+					"values": [
+						"v1",
+						"v2"
+					]
+				}
+			],
+			"dependencies": []
+		},
+		{
+			"name": "B",
+			"requiredInterface": [],
+			"providedInterface": [
+				"IFA"
+			],
+			"parameters": [
+				{
+					"name": "a",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "b",
+					"type": "cat",
+					"default": "v3",
+					"values": [
+						"v3",
+						"v4"
+					]
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

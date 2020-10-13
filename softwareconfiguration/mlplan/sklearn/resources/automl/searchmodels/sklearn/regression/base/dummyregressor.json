@@ -1,0 +1,15 @@
+{
+  "repository" : "sklearn.dummy.DummyRegressor",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.dummy.DummyRegressor",
+    "providedInterface" : [ "BasicRegressor", "AbstractRegressor" ],
+    "requiredInterface" : [ ],
+    "parameters" : [ {
+      "name" : "strategy",
+      "type" : "cat",
+      "values" : [ "mean", "median" ],
+      "default" : "mean"
+    } ]
+  } ]
+}

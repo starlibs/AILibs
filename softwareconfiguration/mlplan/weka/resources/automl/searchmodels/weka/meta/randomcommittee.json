@@ -1,0 +1,41 @@
+{
+	"repository": "weka.classifiers.meta.RandomCommittee",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.meta.RandomCommittee",
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "RandomizableBaseClassifier"
+				}
+			],
+			"providedInterface": [
+				"AbstractClassifier",
+				"MetaClassifier",
+				"WeightedInstancesHandler",
+				"PipelineClassifier"
+			],
+			"parameters": [
+				{
+					"name": "I",
+					"type": "int",
+					"default": 10.0,
+					"min": 2.0,
+					"max": 64.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "S",
+					"type": "cat",
+					"default": "1",
+					"values": [
+						"1"
+					]
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

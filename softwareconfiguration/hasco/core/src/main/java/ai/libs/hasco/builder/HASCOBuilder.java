@@ -2,8 +2,8 @@ package ai.libs.hasco.builder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
@@ -22,10 +22,10 @@ import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.hasco.core.reduction.planning2search.DefaultHASCOPlanningReduction;
 import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
-import ai.libs.jaicore.components.model.Component;
-import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.Parameter;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
+import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
 import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
@@ -54,10 +54,10 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 	private final Class<V> scoreClass;
 
 	/* problem configuration */
-	private Collection<Component> components;
+	private Collection<IComponent> components;
 	private String requiredInterface;
-	private IObjectEvaluator<ComponentInstance, V> evaluator;
-	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
+	private IObjectEvaluator<IComponentInstance, V> evaluator;
+	private INumericParameterRefinementConfigurationMap paramRefinementConfig;
 	private RefinementConfiguredSoftwareConfigurationProblem<V> problem;
 
 	private IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver;
@@ -135,6 +135,13 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 	}
 
 	public void setProblemInput(final RefinementConfiguredSoftwareConfigurationProblem<V> problemInput) {
+		for (IComponent c : problemInput.getComponents()) {
+			for (IRequiredInterfaceDefinition ri : c.getRequiredInterfaces()) {
+				if (!ri.isOrdered()) {
+					throw new IllegalArgumentException("HASCO does currently not support non-ordered required-interfaces of components, but required interface \"" + ri.getId() + "\" of component \"" + c.getName() + "\" is not ordered!");
+				}
+			}
+		}
 		this.problem = problemInput;
 	}
 
@@ -183,7 +190,7 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 		return this.getSelf();
 	}
 
-	public B withProblem(final File componentFile, final String requiredInterface, final IObjectEvaluator<ComponentInstance, V> compositionEvaluator) throws IOException {
+	public B withProblem(final File componentFile, final String requiredInterface, final IObjectEvaluator<IComponentInstance, V> compositionEvaluator) throws IOException {
 		return this.withProblem(new RefinementConfiguredSoftwareConfigurationProblem<>(componentFile, requiredInterface, compositionEvaluator));
 	}
 
@@ -197,12 +204,12 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 		}
 	}
 
-	public Collection<Component> getComponents() {
+	public Collection<IComponent> getComponents() {
 		return this.components;
 	}
 
-	public B withComponents(final Collection<Component> components) {
-		this.components = components;
+	public B withComponents(final Collection<? extends IComponent> components) {
+		this.components = new ArrayList<>(components);
 		this.compileProblemIfPossible();
 		return this.getSelf();
 	}
@@ -217,21 +224,21 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 		return this.getSelf();
 	}
 
-	public IObjectEvaluator<ComponentInstance, V> getEvaluator() {
+	public IObjectEvaluator<IComponentInstance, V> getEvaluator() {
 		return this.evaluator;
 	}
 
-	public B withEvaluator(final IObjectEvaluator<ComponentInstance, V> evaluator) {
+	public B withEvaluator(final IObjectEvaluator<IComponentInstance, V> evaluator) {
 		this.evaluator = evaluator;
 		this.compileProblemIfPossible();
 		return this.getSelf();
 	}
 
-	public Map<Component, Map<Parameter, ParameterRefinementConfiguration>> getParamRefinementConfig() {
+	public INumericParameterRefinementConfigurationMap getParamRefinementConfig() {
 		return this.paramRefinementConfig;
 	}
 
-	public B withParamRefinementConfig(final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig) {
+	public B withParamRefinementConfig(final INumericParameterRefinementConfigurationMap paramRefinementConfig) {
 		this.paramRefinementConfig = paramRefinementConfig;
 		this.compileProblemIfPossible();
 		return this.getSelf();

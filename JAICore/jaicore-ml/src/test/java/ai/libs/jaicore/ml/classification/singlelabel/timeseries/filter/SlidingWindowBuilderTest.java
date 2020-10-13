@@ -5,20 +5,17 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter.SlidingWindowBuilder;
 
-@RunWith(JUnit4.class)
 public class SlidingWindowBuilderTest {
 
 	private TimeSeriesDataset2 dataset;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		double[] timeseries1 = new double[] { 1, 2, 1, 26, 1, 77 };
@@ -36,6 +33,7 @@ public class SlidingWindowBuilderTest {
 		this.dataset = new TimeSeriesDataset2(futureDataSet, null, null);
 	}
 
+	@Disabled
 	@Test
 	public void test() {
 		SlidingWindowBuilder builder = new SlidingWindowBuilder();

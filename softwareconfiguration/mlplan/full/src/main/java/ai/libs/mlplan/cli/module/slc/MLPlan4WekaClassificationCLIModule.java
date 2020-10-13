@@ -9,7 +9,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 
 import ai.libs.mlplan.cli.MLPlanCLI;
 import ai.libs.mlplan.cli.module.UnsupportedModuleConfigurationException;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
+import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 
 public class MLPlan4WekaClassificationCLIModule extends AMLPlan4ClassificationCLIModule {
 

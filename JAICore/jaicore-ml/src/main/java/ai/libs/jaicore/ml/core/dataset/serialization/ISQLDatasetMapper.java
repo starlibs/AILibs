@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.core.dataset.serialization;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
@@ -17,21 +18,21 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
  */
 public interface ISQLDatasetMapper {
 
-	public IDataset<?> readDatasetFromTable(String tableName) throws SQLException;
+	public IDataset<?> readDatasetFromTable(String tableName) throws SQLException, IOException;
 
-	public IInstanceSchema getInstanceSchemaOfTable(String tableName) throws SQLException;
+	public IInstanceSchema getInstanceSchemaOfTable(String tableName) throws SQLException, IOException;
 
-	public ILabeledInstanceSchema getInstanceSchemaOfTable(String tableName, String labelField) throws SQLException;
+	public ILabeledInstanceSchema getInstanceSchemaOfTable(String tableName, String labelField) throws SQLException, IOException;
 
-	public ILabeledDataset<?> readDatasetFromTable(String tableName, String labelField) throws SQLException;
+	public ILabeledDataset<?> readDatasetFromTable(String tableName, String labelField) throws SQLException, IOException;
 
-	public IDataset<?> readDatasetFromQuery(String sqlQuery) throws SQLException;
+	public IDataset<?> readDatasetFromQuery(String sqlQuery) throws SQLException, IOException;
 
-	public IInstanceSchema getInstanceSchemaForQuery(String sqlQuery) throws SQLException;
+	public IInstanceSchema getInstanceSchemaForQuery(String sqlQuery) throws SQLException, IOException;
 
-	public ILabeledInstanceSchema getInstanceSchemaForQuery(String sqlQuery, String labelField) throws SQLException;
+	public ILabeledInstanceSchema getInstanceSchemaForQuery(String sqlQuery, String labelField) throws SQLException, IOException;
 
-	public ILabeledDataset<?> readDatasetFromQuery(String sqlQuery, String labelField) throws SQLException;
+	public ILabeledDataset<?> readDatasetFromQuery(String sqlQuery, String labelField) throws SQLException, IOException;
 
-	public void writeDatasetToDatabase(IDataset<?> dataset, String tableName) throws SQLException;
+	public void writeDatasetToDatabase(IDataset<?> dataset, String tableName) throws SQLException, IOException;
 }

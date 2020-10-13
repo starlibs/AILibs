@@ -1,0 +1,11 @@
+{
+  "repository" : "weka.classifiers.functions.SimpleLinearRegression",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "weka.classifiers.functions.SimpleLinearRegression",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "Regressor", "BaseClassifier", "PipelineClassifier" ],
+    "parameters" : [ ],
+    "dependencies" : [ ]
+  } ]
+}

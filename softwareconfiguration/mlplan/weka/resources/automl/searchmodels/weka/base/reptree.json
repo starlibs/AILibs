@@ -1,0 +1,85 @@
+{
+	"repository": "weka.classifiers.trees.REPTree",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.trees.REPTree",
+			"requiredInterface": [],
+			"providedInterface": [
+				"AbstractClassifier",
+				"WekaBaseClassifier",
+				"WeightedInstancesHandler",
+				"BaseClassifier",
+				"RandomizableBaseClassifier",
+				"PipelineClassifier"
+			],
+			"parameters": [
+				{
+					"name": "M",
+					"type": "int",
+					"default": 2.0,
+					"min": 1.0,
+					"max": 64.0,
+					"refineSplits": 8,
+					"minInterval": 1
+				},
+				{
+					"name": "V",
+					"type": "double",
+					"default": 0.001,
+					"min": 1.0E-5,
+					"max": 0.1,
+					"refineSplits": 8,
+					"minInterval": 0.05
+				},
+				{
+					"name": "depthActivator",
+					"type": "cat",
+					"default": "0",
+					"values": [
+						"0",
+						"1"
+					]
+				},
+				{
+					"name": "N",
+					"type": "cat",
+					"default": "3",
+					"values": [
+						"16",
+						"2",
+						"3",
+						"4",
+						"32",
+						"64",
+						"8"
+					]
+				},
+				{
+					"name": "L",
+					"type": "int",
+					"default": 2.0,
+					"min": 2.0,
+					"max": 20.0,
+					"refineSplits": 8,
+					"minInterval": 1
+				},
+				{
+					"name": "P",
+					"type": "boolean",
+					"default": "false"
+				}
+			],
+			"dependencies": [
+				{
+					"pre": "depthActivator in {0}",
+					"post": "L in {-1}"
+				},
+				{
+					"pre": "depthActivator in {1}",
+					"post": "L in [2.0,20.0]"
+				}
+			]
+		}
+	]
+}

@@ -8,9 +8,9 @@ import ai.libs.jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
-public class ForwardDecompositionHTNPlannerBasedOnBestFirst<V extends Comparable<V>> extends ForwardDecompositionHTNPlanner<CostSensitiveHTNPlanningProblem<IHTNPlanningProblem, V>, V, GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V>> {
+public class ForwardDecompositionHTNPlannerBasedOnBestFirst<V extends Comparable<V>> extends ForwardDecompositionHTNPlanner<CostSensitiveHTNPlanningProblem<? extends IHTNPlanningProblem, V>, V, GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V>> {
 
-	public ForwardDecompositionHTNPlannerBasedOnBestFirst(final CostSensitiveHTNPlanningProblem<IHTNPlanningProblem, V> problem, final IPathEvaluator<TFDNode, String, V> nodeEvaluator) {
+	public ForwardDecompositionHTNPlannerBasedOnBestFirst(final CostSensitiveHTNPlanningProblem<? extends IHTNPlanningProblem, V> problem, final IPathEvaluator<TFDNode, String, V> nodeEvaluator) {
 		super(problem, new BestFirstForwardDecompositionReducer<>(nodeEvaluator), new BestFirstFactory<>());
 	}
 }

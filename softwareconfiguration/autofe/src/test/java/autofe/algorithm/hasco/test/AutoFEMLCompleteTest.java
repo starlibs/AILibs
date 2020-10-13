@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import autofe.algorithm.hasco.AutoFEMLComplete;

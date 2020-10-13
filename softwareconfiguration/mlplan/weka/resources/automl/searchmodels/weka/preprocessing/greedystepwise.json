@@ -1,0 +1,26 @@
+{
+	"repository": "weka.attributeSelection.GreedyStepwise",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.attributeSelection.GreedyStepwise",
+			"requiredInterface": [],
+			"providedInterface": [
+				"nonRankBasedSearcher"
+			],
+			"parameters": [
+				{
+					"name": "C",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "B",
+					"type": "boolean",
+					"default": "false"
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

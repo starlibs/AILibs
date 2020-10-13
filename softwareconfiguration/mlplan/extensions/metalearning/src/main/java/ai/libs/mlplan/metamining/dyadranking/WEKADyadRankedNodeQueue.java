@@ -1,5 +1,6 @@
 package ai.libs.mlplan.metamining.dyadranking;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
@@ -8,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOUtil;
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IDyadRanker;
@@ -30,7 +31,7 @@ public class WEKADyadRankedNodeQueue extends ADyadRankedNodeQueue<TFDNode, Doubl
 	/**
 	 * the allowed components of the pipelines
 	 */
-	private Collection<Component> components;
+	private Collection<IComponent> components;
 
 	/**
 	 * the characterizer for characterizing (partial) pipelines
@@ -51,9 +52,9 @@ public class WEKADyadRankedNodeQueue extends ADyadRankedNodeQueue<TFDNode, Doubl
 	 *            the scaler to use to scale the dataset - must have been fit to
 	 *            data already
 	 */
-	public WEKADyadRankedNodeQueue(final IVector contextCharacterization, final Collection<Component> components, final IDyadRanker ranker, final AbstractDyadScaler scaler, final IPipelineCharacterizer characterizer) {
+	public WEKADyadRankedNodeQueue(final IVector contextCharacterization, final Collection<? extends IComponent> components, final IDyadRanker ranker, final AbstractDyadScaler scaler, final IPipelineCharacterizer characterizer) {
 		super(contextCharacterization, ranker, scaler);
-		this.components = components;
+		this.components = new ArrayList<>(components);
 		this.characterizer = characterizer;
 	}
 

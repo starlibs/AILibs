@@ -6,21 +6,14 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.search.exampleproblems.nqueens.QueenNode;
 
 public class QueenNodeTester {
 
-	QueenNode n1;
-	QueenNode n2;
-
-	@Before
-	public void before() {
-		this.n1 = new QueenNode(Arrays.asList(1, 3, 0), 2, 4);
-		this.n2 = new QueenNode(Arrays.asList(1, 3), 0, 4);
-	}
+	private final QueenNode n1 = new QueenNode(Arrays.asList(1, 3, 0), 2, 4);
+	private final QueenNode n2 = new QueenNode(Arrays.asList(1, 3), 0, 4);
 
 	@Test
 	public void testGetPositions() {
