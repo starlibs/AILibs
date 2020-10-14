@@ -249,7 +249,7 @@ public class ComponentUtil {
 					int numberOfSolutionPerSlotForThisInterface = getNumberOfUnparametrizedCompositions(components, reqIFace);
 					int subSolutionsForThisInterface = 0;
 					if (reqIFaceDef.isOptional() || reqIFaceDef.getMin() == 0) {
-						subSolutionsForThisInterface ++;
+						subSolutionsForThisInterface++;
 					}
 
 					/* now consider all numbers i of positive realizations of this required interface */
@@ -259,7 +259,7 @@ public class ComponentUtil {
 						for (int j = 0; j < i; j++) {
 							numberOfPossibleRealizationsForThisFixedNumberOfSlots *= numCandidatesForNextSlot;
 							if (reqIFaceDef.isUniqueComponents()) {
-								numCandidatesForNextSlot --;
+								numCandidatesForNextSlot--;
 							}
 						}
 						subSolutionsForThisInterface += numberOfPossibleRealizationsForThisFixedNumberOfSlots;
@@ -280,7 +280,7 @@ public class ComponentUtil {
 	public static ComponentInstance getRandomParametrization(final IComponentInstance componentInstance, final Random rand) {
 		ComponentInstance randomParametrization = getRandomParameterizationOfComponent(componentInstance.getComponent(), rand);
 		componentInstance.getSatisfactionOfRequiredInterfaces().entrySet()
-		.forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), Arrays.asList(getRandomParametrization(x.getValue().iterator().next(), rand))));
+				.forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), Arrays.asList(getRandomParametrization(x.getValue().iterator().next(), rand))));
 		return randomParametrization;
 	}
 
@@ -380,4 +380,5 @@ public class ComponentUtil {
 
 		throw new ComponentNotFoundException("No Component with this name loaded: " + componentName);
 	}
+
 }

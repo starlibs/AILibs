@@ -81,7 +81,9 @@ public class ComponentInstanceUtil {
 		StringBuilder sb = new StringBuilder();
 		sb.append(ci.getComponent().getName());
 		if (!ci.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-			sb.append("(").append(ci.getSatisfactionOfRequiredInterfaces().values().stream().map(ciList -> ciList.stream().map(cil -> ((ComponentInstance)cil).toComponentNameString()).collect(Collectors.joining())).collect(Collectors.joining(", "))).append(")");
+			sb.append("(").append(
+					ci.getSatisfactionOfRequiredInterfaces().values().stream().map(ciList -> ciList.stream().map(cil -> ((ComponentInstance) cil).toComponentNameString()).collect(Collectors.joining())).collect(Collectors.joining(", ")))
+					.append(")");
 		}
 		return sb.toString();
 	}
@@ -165,8 +167,6 @@ public class ComponentInstanceUtil {
 		return ci;
 	}
 
-
-
 	/**
 	 * This method checks, whether a given list of paths of refinements conforms the constraints for parameter refinements.
 	 *
@@ -242,8 +242,24 @@ public class ComponentInstanceUtil {
 		StringBuilder sb = new StringBuilder();
 		sb.append(instance.getComponent().getName());
 		if (!instance.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-			sb.append("{").append(instance.getSatisfactionOfRequiredInterfaces().values().stream().map(ciList -> ciList.stream().map(ComponentInstanceUtil::getComponentInstanceAsComponentNames).collect(Collectors.joining())).collect(Collectors.joining(","))).append("}");
+			sb.append("{").append(instance.getSatisfactionOfRequiredInterfaces().values().stream().map(ciList -> ciList.stream().map(ComponentInstanceUtil::getComponentInstanceAsComponentNames).collect(Collectors.joining()))
+					.collect(Collectors.joining(","))).append("}");
 		}
+		return sb.toString();
+	}
+
+	public static String toRecursiveConstructorString(final IComponentInstance ci) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(ci.getComponent().getName()).append("(");
+		sb.append(ci.getParameterValues().entrySet().stream().map(x -> x.getKey() + "=" + x.getValue()).collect(Collectors.joining(", ")));
+
+		if (!ci.getParameterValues().isEmpty() && !ci.getSatisfactionOfRequiredInterfaces().isEmpty()) {
+			sb.append(", ");
+		}
+
+		sb.append(ci.getSatisfactionOfRequiredInterfaces().entrySet().stream()
+				.map(reqIEntry -> reqIEntry.getKey() + "= [" + reqIEntry.getValue().stream().map(y -> ComponentInstanceUtil.toRecursiveConstructorString(y)).collect(Collectors.joining(", ")) + "]").collect(Collectors.joining(", ")));
+		sb.append(")");
 		return sb.toString();
 	}
 

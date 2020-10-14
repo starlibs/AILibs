@@ -42,6 +42,12 @@
 					"type": "boolean",
 					"default": "false"
 				}
+			],
+			"dependencies": [
+				{
+					"pre": "I in {true}",
+					"post": "F in {false}"
+				}
 			]
 		}
 	]
