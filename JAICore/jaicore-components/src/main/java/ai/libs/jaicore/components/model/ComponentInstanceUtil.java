@@ -258,7 +258,7 @@ public class ComponentInstanceUtil {
 		}
 
 		sb.append(ci.getSatisfactionOfRequiredInterfaces().entrySet().stream()
-				.map(reqIEntry -> reqIEntry.getKey() + "= [" + reqIEntry.getValue().stream().map(y -> ComponentInstanceUtil.toRecursiveConstructorString(y)).collect(Collectors.joining(", ")) + "]").collect(Collectors.joining(", ")));
+				.map(reqIEntry -> reqIEntry.getKey() + "= [" + reqIEntry.getValue().stream().map(ComponentInstanceUtil::toRecursiveConstructorString).collect(Collectors.joining(", ")) + "]").collect(Collectors.joining(", ")));
 		sb.append(")");
 		return sb.toString();
 	}
