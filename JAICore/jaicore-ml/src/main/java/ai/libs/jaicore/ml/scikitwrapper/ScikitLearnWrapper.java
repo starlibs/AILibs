@@ -102,6 +102,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	private final boolean withModelDump;
 
 	private String constructInstruction;
+	private Map<String, Object> templateValues;
 
 	/* Since the ScikitLearn is able to do multi-target prediction but Weka is unable to depict it as a result of classifyInstances correctly, this List of
 	 * Lists will keep the unflattened results until classifyInstances is called again. classifyInstances will only return a flattened representation of a multi-target prediction.
@@ -125,29 +126,13 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		this.listenToPidFromProcess = (ProcessUtil.getOS() == EOperatingSystem.MAC || ProcessUtil.getOS() == EOperatingSystem.LINUX);
 		this.withModelDump = withModelDump;
 		this.constructInstruction = constructInstruction;
-		this.setProblemType(problemType);
-
-		Map<String, Object> templateValues = this.getTemplateValueMap(constructInstruction, imports);
+		
+		templateValues = this.getTemplateValueMap(constructInstruction, imports);
 		String hashCode = StringUtils.join(constructInstruction, imports).hashCode() + "";
 		this.configurationUID = hashCode.startsWith("-") ? hashCode.replace("-", "1") : "0" + hashCode;
-
-		if (!CONF.getTempFolder().exists()) {
-			CONF.getTempFolder().mkdirs();
-		}
-
-		File scriptFile = this.getSKLearnScriptFile();
-		if (!scriptFile.createNewFile() && this.logger.isDebugEnabled()) {
-			this.logger.debug("Script file for configuration UID {} already exists in {}", this.configurationUID, scriptFile.getAbsolutePath());
-		}
-		if (CONF.getDeleteFileOnExit()) {
-			scriptFile.deleteOnExit();
-		}
-
-		/* Prepare SKLearn Script template with the placeholder values */
-		JtwigTemplate template = JtwigTemplate.fileTemplate(this.scikitTemplate);
-		JtwigModel model = JtwigModel.newModel(templateValues);
-		template.render(model, new FileOutputStream(scriptFile));
+		this.setProblemType(problemType);
 	}
+	
 
 	/**
 	 * Starts a new wrapper and creates its underlying script with the given parameters.
@@ -403,13 +388,34 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		return this.rawLastClassificationResults;
 	}
 
-	public void setProblemType(final EScikitLearnProblemType problemType) {
+	public void setProblemType(final EScikitLearnProblemType problemType) throws IOException {
 		if (this.problemType != problemType) {
 			this.problemType = problemType;
-			this.scikitTemplate = new File(ResourceUtil.getResourceAsTempFile(this.problemType.getRessourceScikitTemplate()));
+			setPythonTemplate(ResourceUtil.getResourceAsTempFile(this.problemType.getRessourceScikitTemplate()));
 		}
 	}
+	
+	public void setPythonTemplate(String pythonTemplatePath) throws IOException {
+		this.scikitTemplate = new File(pythonTemplatePath);
+		
+		if (!CONF.getTempFolder().exists()) {
+			CONF.getTempFolder().mkdirs();
+		}
 
+		File scriptFile = this.getSKLearnScriptFile();
+		if (!scriptFile.createNewFile() && this.logger.isDebugEnabled()) {
+			this.logger.debug("Script file for configuration UID {} already exists in {}", this.configurationUID, scriptFile.getAbsolutePath());
+		}
+		if (CONF.getDeleteFileOnExit()) {
+			scriptFile.deleteOnExit();
+		}
+
+		/* Prepare SKLearn Script template with the placeholder values */
+		JtwigTemplate template = JtwigTemplate.fileTemplate(this.scikitTemplate);
+		JtwigModel model = JtwigModel.newModel(templateValues);
+		template.render(model, new FileOutputStream(scriptFile));
+	}
+	
 	public void setSeed(final long seed) {
 		this.seed = seed;
 	}
@@ -598,8 +604,8 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 				processParameters.add("timeout");
 				processParameters.add(this.timeout.seconds() - 5 + "");
 			}
-			if (ScikitLearnWrapper.this.pythonConfig != null && ScikitLearnWrapper.this.pythonConfig.getPath() != null) {
-				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getPath() + File.separator + ScikitLearnWrapper.this.pythonConfig.getPythonCommand());
+			if (ScikitLearnWrapper.this.pythonConfig != null && ScikitLearnWrapper.this.pythonConfig.getPathToPythonExecutable() != null) {
+				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getPathToPythonExecutable() + File.separator + ScikitLearnWrapper.this.pythonConfig.getPythonCommand());
 			} else {
 
 				processParameters.add(ScikitLearnWrapper.this.pythonConfig.getPythonCommand());
