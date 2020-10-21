@@ -1,8 +1,14 @@
 package ai.libs.jaicore.experiments;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
@@ -60,6 +66,20 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		this.executorInfo = executorInfo;
 	}
 
+	/**
+	 * Copy constructor for making a (shallow) copy of an already existing experiment runner.
+	 *
+	 * @param other The experiment runner to be copied.
+	 */
+	public ExperimentRunner(final ExperimentRunner other) {
+		this.config = other.config;
+		this.evaluator = other.evaluator;
+		this.handle = other.handle;
+		this.checkMemory = other.checkMemory;
+		this.availableMemoryInMB = other.availableMemoryInMB;
+		this.executorInfo = other.executorInfo;
+	}
+
 	public void setCheckMemory(final boolean checkMemory) {
 		this.checkMemory = checkMemory;
 	}
@@ -97,7 +117,8 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			 * to be interrupted. */
 			ExperimentDBEntry exp = openRandomExperiments.get(0);
 			this.checkExperimentValidity(exp.getExperiment());
-			this.logger.info("Conduct experiment #{} with key values: {}. Memory statistics: {}MB allocated, {}MB free.", numberOfConductedExperiments + 1, exp.getExperiment().getValuesOfKeyFields(), this.runtime.totalMemory() / (1024 * 1024), this.runtime.freeMemory() / (1024 * 1024));
+			this.logger.info("Conduct experiment #{} with key values: {}. Memory statistics: {}MB allocated, {}MB free.", numberOfConductedExperiments + 1, exp.getExperiment().getValuesOfKeyFields(),
+					this.runtime.totalMemory() / (1024 * 1024), this.runtime.freeMemory() / (1024 * 1024));
 			Thread expThread = new Thread(() -> {
 				try {
 					this.handle.startExperiment(exp, this.executorInfo);
@@ -112,12 +133,84 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			expThread.start();
 			expThread.join();
 			numberOfConductedExperiments++;
-			this.logger.info("Finished experiment #{} with key values {}. Memory statistics: {}MB allocated, {}MB free. Now running GC.", numberOfConductedExperiments, exp.getExperiment().getValuesOfKeyFields(), this.runtime.totalMemory() / (1024 * 1024), this.runtime.freeMemory() / (1024 * 1024));
+			this.logger.info("Finished experiment #{} with key values {}. Memory statistics: {}MB allocated, {}MB free. Now running GC.", numberOfConductedExperiments, exp.getExperiment().getValuesOfKeyFields(),
+					this.runtime.totalMemory() / (1024 * 1024), this.runtime.freeMemory() / (1024 * 1024));
 			System.gc(); // deliberately run the garbage collection to avoid memory accumulation. We found that the JVM is sometimes not able to reasonably clean up later! This is not a guarantee, but better than
 			this.logger.info("GC finished. Memory statistics: {}MB allocated, {}MB free.", this.runtime.totalMemory() / (1024 * 1024), this.runtime.freeMemory() / (1024 * 1024));
 		}
 
 		this.logger.info("Successfully finished {} experiments.", numberOfConductedExperiments);
+	}
+
+	/**
+	 * Conducts a limited number of not yet conducted experiments randomly chosen from the grid.
+	 *
+	 * @param maxNumberOfExperiments
+	 *            Limit for the number of experiments
+	 * @param numThreads Number of threads for running multiple copies of the experiment runner in parallel.
+	 * @throws ExperimentDBInteractionFailedException
+	 * @throws InterruptedException
+	 */
+	public void randomlyConductExperimentsInParallel(final int maxNumberOfExperiments, final int numThreads) throws InterruptedException, ExperimentDBInteractionFailedException {
+		this.logger.info("Starting to run up to {} experiments.", maxNumberOfExperiments);
+
+		// Calculate how many experiments need to be conducted per thread and how many threads are actually needed.
+		final int experimentsPerThread;
+		final int actualNumThreads;
+		if (maxNumberOfExperiments >= 0) {
+			experimentsPerThread = (int) Math.ceil((double) maxNumberOfExperiments / numThreads);
+			if (maxNumberOfExperiments < numThreads) {
+				actualNumThreads = maxNumberOfExperiments;
+				this.logger.info("Reducing the number of cores to {} as there are only {} many experiments to conduct.", actualNumThreads, maxNumberOfExperiments);
+			} else {
+				actualNumThreads = numThreads;
+			}
+		} else {
+			experimentsPerThread = maxNumberOfExperiments;
+			actualNumThreads = numThreads;
+		}
+
+		this.logger.info("Running {} experiments in parallel using {} threads and conducting {} experiments per thread", maxNumberOfExperiments, actualNumThreads, experimentsPerThread);
+
+		ExecutorService pool = Executors.newFixedThreadPool(numThreads);
+		Semaphore sem = new Semaphore(0);
+		List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<>());
+
+		IntStream.range(0, actualNumThreads).mapToObj(x -> new Runnable() {
+			@Override
+			public void run() {
+				if (ExperimentRunner.this.logger.isInfoEnabled()) {
+					ExperimentRunner.this.logger.info("Starting to run {} experiments in thread {}", experimentsPerThread, Thread.currentThread().getName());
+				}
+				try {
+					new ExperimentRunner(ExperimentRunner.this).randomlyConductExperiments(experimentsPerThread);
+				} catch (ExperimentDBInteractionFailedException | InterruptedException e) {
+					exceptions.add(e);
+					sem.release(actualNumThreads);
+				} finally {
+					sem.release();
+				}
+			}
+		}).forEach(pool::submit);
+
+		try {
+			sem.acquire(actualNumThreads);
+		} catch (InterruptedException e) {
+			throw e;
+		} finally {
+			if (!pool.isShutdown()) {
+				pool.shutdownNow();
+			}
+		}
+
+		if (!exceptions.isEmpty()) {
+			Throwable e = exceptions.get(0);
+			if (e instanceof InterruptedException) {
+				throw (InterruptedException) e;
+			} else {
+				throw (ExperimentDBInteractionFailedException) e;
+			}
+		}
 	}
 
 	public void sequentiallyConductExperiments(final int maxNumberOfExperiments) throws ExperimentDBInteractionFailedException, InterruptedException {
