@@ -40,7 +40,6 @@ public abstract class AProcessListener implements IProcessListener, ILoggingCust
 		try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
 			// While process is alive the output- and error stream is output.
 			while (process.isAlive()) {
-				this.logger.debug("Process is alive.");
 				if (Thread.interrupted()) { // reset flag since we will throw an exception now
 					this.logger.info("Detected interrupt on process execution.");
 					if (this.listenForPIDFromProcess && this.processIDObtainedFromListening > 0) {
