@@ -11,7 +11,7 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFDBuilder;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
-import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multiclass.IMLPlanClassifierConfig;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
 
 /**
@@ -57,7 +57,7 @@ public interface IMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, I
 
 	public HASCOViaFDBuilder<Double, ?> getHASCOFactory();
 
-	public MLPlanClassifierConfig getAlgorithmConfig();
+	public IMLPlanClassifierConfig getAlgorithmConfig();
 
 	public IEvaluationSafeGuardFactory getSafeGuardFactory();
 

@@ -14,7 +14,7 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.core.AMLPlanBuilder;
-import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multiclass.IMLPlanClassifierConfig;
 
 public class MLPlanWekaBuilder extends AMLPlanBuilder<IWekaClassifier, MLPlanWekaBuilder> {
 
@@ -22,6 +22,10 @@ public class MLPlanWekaBuilder extends AMLPlanBuilder<IWekaClassifier, MLPlanWek
 
 	public static MLPlanWekaBuilder forClassification() throws IOException {
 		return new MLPlanWekaBuilder(EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS);
+	}
+
+	public static MLPlanWekaBuilder forClassificationReduced() throws IOException {
+		return new MLPlanWekaBuilder(EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS_REDUCED);
 	}
 
 	public static MLPlanWekaBuilder forRegression() throws IOException {
@@ -51,15 +55,15 @@ public class MLPlanWekaBuilder extends AMLPlanBuilder<IWekaClassifier, MLPlanWek
 			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
 		this.withSearchPhaseEvaluatorFactory(new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod));
 		this.withSelectionPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(3).withTrainFoldSize(.7));
-		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + 10);
+		this.getAlgorithmConfig().setProperty(IMLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + 10);
 		throw new UnsupportedOperationException("Learning Curve Prediction based ML-Plan runs are not supported in this release. They will be activated again in the upcoming release.");
 	}
 
 	@Override
 	public MLPlanWekaBuilder withDataset(final ILabeledDataset<?> dataset) {
-//		if (!(dataset.getLabelAttribute() instanceof ICategoricalAttribute)) {
-//			throw new IllegalArgumentException("MLPlanWeka currently only support categorically labeled data!");
-//		}
+		// if (!(dataset.getLabelAttribute() instanceof ICategoricalAttribute)) {
+		// throw new IllegalArgumentException("MLPlanWeka currently only support categorically labeled data!");
+		// }
 		WekaInstances instances = dataset instanceof WekaInstances ? (WekaInstances) dataset : new WekaInstances(dataset);
 		super.withDataset(instances);
 		this.logger.info("Setting dataset as WekaInstances object.");

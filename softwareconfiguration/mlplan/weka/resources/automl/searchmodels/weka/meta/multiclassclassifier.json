@@ -1,11 +1,17 @@
 {
-  "repository" : "weka.classifiers.meta.MultiClassClassifier",
-  "include" : [ ],
-  "components" : [ {
-    "name" : "weka.classifiers.meta.MultiClassClassifier",
-    "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "PipelineClassifier" ],
-    "parameters" : [ ],
-    "dependencies" : [ ]
-  } ]
+	"repository": "weka.classifiers.meta.MultiClassClassifier",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.meta.MultiClassClassifier",
+			"requiredInterface": [],
+			"providedInterface": [
+				"AbstractClassifier",
+				"MetaClassifier",
+				"PipelineClassifier"
+			],
+			"parameters": [],
+			"dependencies": []
+		}
+	]
 }

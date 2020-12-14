@@ -24,8 +24,10 @@ public enum EMLPlanWekaProblemType implements IProblemType<IWekaClassifier> {
 	CLASSIFICATION_MULTICLASS("automl/searchmodels/weka/weka-full.json", "conf/mlplan-weka.json", "mlplan/weka-preferenceList-autoweka.txt", "conf/preferenceList.txt", "AbstractClassifier", new WekaPipelineFactory(),
 			EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //
 
-	CLASSIFICATION_MULTICLASS_REDUCED("automl/searchmodels/weka/weka-reduced.json", "conf/mlplan-weka.json", "mlplan/weka-preferenceList-autoweka.txt", "conf/preferenceList.txt", "AbstractClassifier", new WekaPipelineFactory(),
-			EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //
+	CLASSIFICATION_MULTICLASS_REDUCED("automl/searchmodels/weka/weka-reduced.json", EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
+			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(),
+			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getRequestedInterface(), new WekaPipelineFactory(), EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE,
+			new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //
 
 	CLASSIFICATION_MULTICLASS_BASE("automl/searchmodels/weka/base/index.json", "conf/mlplan-weka.json", "mlplan/weka-preferenceList-autoweka.txt", "conf/preferenceList.txt", "AbstractClassifier", new WekaPipelineFactory(),
 			EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //

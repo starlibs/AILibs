@@ -28,7 +28,7 @@ import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multiclass.IMLPlanClassifierConfig;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -145,7 +145,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 		this.timeout = timeout;
 	}
 
-	public MLPlanClassifierConfig getMLPlanConfig() {
+	public IMLPlanClassifierConfig getMLPlanConfig() {
 		return this.builder.getAlgorithmConfig();
 	}
 

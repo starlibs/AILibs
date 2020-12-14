@@ -23,7 +23,7 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.Alter
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.PipelineEvaluator;
-import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multiclass.IMLPlanClassifierConfig;
 import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 import weka.core.Instances;
 
@@ -65,8 +65,8 @@ public class MLPlanConfigConsistencyTester {
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder().withNodeEvaluationTimeOut(this.timeoutForNodeEvaluation).withCandidateEvaluationTimeOut(this.timeoutForSingleSolutionEvaluation);
 		MLPlan<IWekaClassifier> mlplan = builder.withDataset(new WekaInstances(this.data)).build();
 		mlplan.setLoggerName("testedalgorithm");
-		mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, "" + this.timeoutForNodeEvaluation.milliseconds());
-		mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, "" + this.timeoutForSingleSolutionEvaluation.milliseconds());
+		mlplan.getConfig().setProperty(IMLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, "" + this.timeoutForNodeEvaluation.milliseconds());
+		mlplan.getConfig().setProperty(IMLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, "" + this.timeoutForSingleSolutionEvaluation.milliseconds());
 		IAlgorithmEvent event = mlplan.next(); // now initialize
 		assertTrue(event instanceof AlgorithmInitializedEvent);
 		TwoPhaseHASCO twoPhaseHasco = (TwoPhaseHASCO) mlplan.getOptimizingFactory().getOptimizer();
@@ -96,8 +96,8 @@ public class MLPlanConfigConsistencyTester {
 			double blowUpPostProcessing = Math.sqrt(i / 2.0);
 			MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 			MLPlan<IWekaClassifier> mlplan = builder.withDataset(new WekaInstances(this.data)).build();
-			mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + blowUpSelection);
-			mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, "" + blowUpPostProcessing);
+			mlplan.getConfig().setProperty(IMLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + blowUpSelection);
+			mlplan.getConfig().setProperty(IMLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, "" + blowUpPostProcessing);
 
 			IAlgorithmEvent event = mlplan.next();
 			assertTrue(event instanceof AlgorithmInitializedEvent);
