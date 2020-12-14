@@ -49,9 +49,9 @@ import org.slf4j.LoggerFactory;
 import ai.libs.hasco.core.HASCOUtil;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.FixedSplitClassifierEvaluator;
@@ -104,7 +104,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 	private IObjectEvaluator<ComponentInstance, V> pipelineEvaluator;
 
 	/* Specifies the components of this MLPlan run. */
-	private Collection<Component> components;
+	private Collection<IComponent> components;
 
 	/*
 	 * Specifies the amount of paths that are randomly completed for the computation
@@ -183,20 +183,20 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 		this.classifierFactory = classifierFactory;
 	}
 
-	public DyadRankingBasedNodeEvaluator(final ComponentLoader loader) {
-		this(loader, ConfigFactory.create(DyadRankingBasedNodeEvaluatorConfig.class));
+	public DyadRankingBasedNodeEvaluator(final IComponentRepository repository) {
+		this(repository, ConfigFactory.create(DyadRankingBasedNodeEvaluatorConfig.class));
 	}
 
-	public DyadRankingBasedNodeEvaluator(final ComponentLoader loader, final DyadRankingBasedNodeEvaluatorConfig config) {
+	public DyadRankingBasedNodeEvaluator(final IComponentRepository repository, final DyadRankingBasedNodeEvaluatorConfig config) {
 		this.eventBus = new SolutionEventBus<>();
-		this.components = loader.getComponents();
+		this.components = repository;
 		this.random = new Random(config.getSeed());
 		this.evaluatedPaths = config.getNumberOfEvaluations();
 		this.randomlyCompletedPaths = config.getNumberOfRandomSamples();
 
 		logger.debug("Initialized DyadRankingBasedNodeEvaluator with evalNum: {} and completionNum: {}", this.randomlyCompletedPaths, this.evaluatedPaths);
 
-		this.characterizer = new ComponentInstanceVectorFeatureGenerator(loader.getComponents());
+		this.characterizer = new ComponentInstanceVectorFeatureGenerator(repository);
 
 		this.landmarkers = config.getLandmarkers();
 		this.landmarkerSampleSize = config.getLandmarkerSampleSize();

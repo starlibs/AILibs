@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPGenerator;

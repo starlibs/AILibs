@@ -7,7 +7,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 
@@ -20,6 +21,7 @@ public class DyadRankingDatasetSerializationTest {
 
 	private static final String DATASET_FILE = "testrsc/ml/dyadranking/serialized-dataset.txt";
 
+	@Disabled
 	@Test
 	public void testSerialization() throws FileNotFoundException {
 		DyadRankingDataset dataset = DyadRankingInstanceSupplier.getDyadRankingDataset(5, 15);

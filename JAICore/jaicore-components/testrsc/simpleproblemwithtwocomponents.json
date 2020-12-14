@@ -4,7 +4,7 @@
     "name" : "A",
     "requiredInterface" : [ ],
     "providedInterface" : [ "IFace" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "a",
       "type" : "boolean",
       "default" : "true"
@@ -20,7 +20,7 @@
     "name" : "B",
     "requiredInterface" : [ ],
     "providedInterface" : [ "IFace" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "a",
       "type" : "boolean",
       "default" : "true"

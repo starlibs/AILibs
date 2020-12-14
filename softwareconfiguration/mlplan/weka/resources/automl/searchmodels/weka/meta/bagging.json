@@ -4,19 +4,14 @@
 	"components": [
 		{
 			"name": "weka.classifiers.meta.Bagging",
-			"requiredInterface": [
-				{
-					"id": "W",
-					"name": "BaseClassifier"
-				}
-			],
+			"requiredInterface": [],
 			"providedInterface": [
 				"AbstractClassifier",
 				"MetaClassifier",
 				"WeightedInstancesHandler",
 				"PipelineClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "P",
 					"type": "int",

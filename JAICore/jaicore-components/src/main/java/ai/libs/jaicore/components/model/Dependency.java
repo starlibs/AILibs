@@ -7,24 +7,29 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDependency;
+import ai.libs.jaicore.components.api.IParameterDomain;
 
-public class Dependency implements Serializable {
+public class Dependency implements IParameterDependency, Serializable {
 	private static final long serialVersionUID = -954852106121507946L;
-	private final Collection<Collection<Pair<Parameter, IParameterDomain>>> premise; // semantics are DNF (every entry is an AND-connected constraint)
-	private final Collection<Pair<Parameter, IParameterDomain>> conclusion;
+	private final Collection<Collection<Pair<IParameter, IParameterDomain>>> premise; // semantics are DNF (every entry is an AND-connected constraint)
+	private final Collection<Pair<IParameter, IParameterDomain>> conclusion;
 
 	@JsonCreator
-	public Dependency(@JsonProperty("premise") final Collection<Collection<Pair<Parameter, IParameterDomain>>> premise, @JsonProperty("conclusion") final Collection<Pair<Parameter, IParameterDomain>> conclusion) {
+	public Dependency(@JsonProperty("premise") final Collection<Collection<Pair<IParameter, IParameterDomain>>> premise, @JsonProperty("conclusion") final Collection<Pair<IParameter, IParameterDomain>> conclusion) {
 		super();
 		this.premise = premise;
 		this.conclusion = conclusion;
 	}
 
-	public Collection<Collection<Pair<Parameter, IParameterDomain>>> getPremise() {
+	@Override
+	public Collection<Collection<Pair<IParameter, IParameterDomain>>> getPremise() {
 		return this.premise;
 	}
 
-	public Collection<Pair<Parameter, IParameterDomain>> getConclusion() {
+	@Override
+	public Collection<Pair<IParameter, IParameterDomain>> getConclusion() {
 		return this.conclusion;
 	}
 

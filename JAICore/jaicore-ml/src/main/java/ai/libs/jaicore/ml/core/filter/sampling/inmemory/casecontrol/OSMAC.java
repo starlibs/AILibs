@@ -26,7 +26,8 @@ public class OSMAC<D extends ILabeledDataset<? extends ILabeledInstance>> extend
 	}
 
 	@Override
-	public List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(final D instances, final IClassifier pilotEstimator) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(final D instances, final IClassifier pilotEstimator)
+			throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		double boundaryOfCurrentInstance = 0.0;
 		ArrayList<Pair<ILabeledInstance, Double>> probabilityBoundaries = new ArrayList<>();
 		double sumOfDistributionLosses = 0;

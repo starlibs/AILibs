@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AOptimizer;
+import ai.libs.jaicore.components.api.IEvaluatedSoftwareConfigurationSolution;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstanceUtil;
-import ai.libs.jaicore.components.model.EvaluatedSoftwareConfigurationSolution;
 import ai.libs.jaicore.ml.hpo.multifidelity.MultiFidelitySoftwareConfigurationProblem;
 import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.Hyperband.HyperbandSolutionCandidate;
 import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.Hyperband.MultiFidelityScore;
@@ -98,7 +98,7 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 		}
 	}
 
-	public class HyperbandSolutionCandidate implements EvaluatedSoftwareConfigurationSolution<MultiFidelityScore> {
+	public class HyperbandSolutionCandidate implements IEvaluatedSoftwareConfigurationSolution<MultiFidelityScore> {
 		private ComponentInstance ci;
 		private MultiFidelityScore score;
 

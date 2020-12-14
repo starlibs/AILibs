@@ -1,0 +1,15 @@
+{
+	"repository": "weka.attributeSelection.GainRatioAttributeEval",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.attributeSelection.GainRatioAttributeEval",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rankBasedEvaluator"
+			],
+			"parameters": [],
+			"dependencies": []
+		}
+	]
+}

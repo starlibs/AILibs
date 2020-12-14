@@ -9,6 +9,6 @@ public class ForwardDecompositionTester extends OptimizingHTNPlanningAlgorithmTe
 
 	@Override
 	public IOptimizationAlgorithm<?, ?, ?> getPlanningAlgorithm(final UniformCostHTNPlanningProblem planningProblem) {
-		return new ForwardDecompositionHTNPlannerBasedOnBestFirst<>(planningProblem, n -> 1);
+		return new ForwardDecompositionHTNPlannerBasedOnBestFirst<>(planningProblem, n -> 1.0);
 	}
 }

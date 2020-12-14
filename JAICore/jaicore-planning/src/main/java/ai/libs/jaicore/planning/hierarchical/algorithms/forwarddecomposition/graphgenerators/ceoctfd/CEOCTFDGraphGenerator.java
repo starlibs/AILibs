@@ -22,7 +22,7 @@ import ai.libs.jaicore.planning.hierarchical.problems.stn.MethodInstance;
 
 public class CEOCTFDGraphGenerator extends TFDGraphGenerator {
 
-	private static final Logger logger = LoggerFactory.getLogger(CEOCTFDGraphGenerator.class);
+	private Logger logger = LoggerFactory.getLogger(CEOCTFDGraphGenerator.class);
 
 	public CEOCTFDGraphGenerator(final CEOCSTNPlanningProblem problem) {
 		super(problem);
@@ -31,19 +31,18 @@ public class CEOCTFDGraphGenerator extends TFDGraphGenerator {
 	@Override
 	protected TFDNode postProcessPrimitiveTaskNode(final TFDNode node) {
 		Monom state = node.getState();
-		state.getParameters().stream().filter(p -> p.getName().startsWith("newVar") && !state.contains(new Literal("def('" + p.getName() + "')")))
-		.forEach(p -> state.add(new Literal("def('" + p.getName() + "')")));
+		state.getParameters().stream().filter(p -> p.getName().startsWith("newVar") && !state.contains(new Literal("def('" + p.getName() + "')"))).forEach(p -> state.add(new Literal("def('" + p.getName() + "')")));
 		return node;
 	}
 
 	@Override
 	public boolean isPathSemanticallySubsumed(final List<TFDNode> path, final List<TFDNode> compl) throws InterruptedException {
 		if (compl.size() < path.size()) {
-			logger.debug("Ignoring this partial path, because its completion is shorter than the path we already have.");
+			this.logger.debug("Ignoring this partial path, because its completion is shorter than the path we already have.");
 			return false;
 		}
 		if (path.equals(compl)) {
-			logger.debug("Return true, because the paths are even equal.");
+			this.logger.debug("Return true, because the paths are even equal.");
 			return true;
 		}
 
@@ -58,12 +57,12 @@ public class CEOCTFDGraphGenerator extends TFDGraphGenerator {
 			final Action a2 = partner.getAppliedAction();
 			if ((a1 == null) != (a2 == null)) {
 				allUnifiable = false;
-				logger.trace("Not unifiable because one node applies an action and the other not (either it applies nothing or a method instance).");
+				this.logger.trace("Not unifiable because one node applies an action and the other not (either it applies nothing or a method instance).");
 				break;
 			}
 			if (a1 != null && !a1.getOperation().equals(a2.getOperation())) {
 				allUnifiable = false;
-				logger.trace("Not unifiable because operations {} and {} of a1 and a2 respectively deviate", a1.getOperation(), a2.getOperation());
+				this.logger.trace("Not unifiable because operations {} and {} of a1 and a2 respectively deviate", a1.getOperation(), a2.getOperation());
 				break;
 			}
 			if (a1 == null) {
@@ -77,12 +76,12 @@ public class CEOCTFDGraphGenerator extends TFDGraphGenerator {
 
 				if ((mi1 == null) != (mi2 == null)) {
 					allUnifiable = false;
-					logger.trace("Not unifiable because one node applies a method instance and the other not (either an action or nothing)");
+					this.logger.trace("Not unifiable because one node applies a method instance and the other not (either an action or nothing)");
 					break;
 				}
 				if (!mi1.getMethod().equals(mi2.getMethod())) {
 					allUnifiable = false;
-					logger.trace("Not unifiable because methods {} and {} of m1 and m2 respectively deviate", mi1.getMethod(), mi2.getMethod());
+					this.logger.trace("Not unifiable because methods {} and {} of m1 and m2 respectively deviate", mi1.getMethod(), mi2.getMethod());
 					break;
 				}
 			}
@@ -108,8 +107,7 @@ public class CEOCTFDGraphGenerator extends TFDGraphGenerator {
 
 			/* if the relation between vars in the nodes is completely known, we can easily decide whether they are unifiable */
 			if (unboundVars.isEmpty()) {
-				if (this.getRenamedState(current.getState(), map).equals(partner.getState())
-						&& this.getRenamedRemainingList(current.getRemainingTasks(), map).equals(partner.getRemainingTasks())) {
+				if (this.getRenamedState(current.getState(), map).equals(partner.getState()) && this.getRenamedRemainingList(current.getRemainingTasks(), map).equals(partner.getRemainingTasks())) {
 					continue;
 				} else {
 					allUnifiable = false;
@@ -147,14 +145,12 @@ public class CEOCTFDGraphGenerator extends TFDGraphGenerator {
 
 		/* if all nodes were unifiable, return this path */
 		if (allUnifiable) {
-			logger.info("Returning true, because this path is unifiable with the given one.");
+			this.logger.info("Returning true, because this path is unifiable with the given one.");
 			return true;
 		} else {
 			return false;
 		}
 	}
-
-
 
 	private Monom getRenamedState(final Monom state, final Map<ConstantParam, ConstantParam> map) {
 		return new Monom(state, map);

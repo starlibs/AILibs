@@ -2,7 +2,8 @@ package ai.libs.automl.metamining;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -11,6 +12,7 @@ import ai.libs.mlplan.metamining.similaritymeasures.IHeterogenousSimilarityMeasu
 
 public class F3OptimizerTest {
 
+	@Disabled("This project is currently not maintained")
 	@Test
 	public void optimizeF3() {
 		INDArray r = Nd4j.create(new float[] { 1, 2, 3, 4, 5, 6, 7, 8 }, new int[] { 2, 4 });

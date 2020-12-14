@@ -8,7 +8,7 @@ import ai.libs.jaicore.search.probleminputs.IMDP;
 
 public class DNGMCTS<N, A> extends MCTS<N, A> {
 
-	public DNGMCTS(final IMDP<N, A, Double> input, final double varianceFactor, final double initLambda, final double maxIterations, final double gamma, final double epsilon, final Random random, final boolean tabooExhaustedNodes) {
+	public DNGMCTS(final IMDP<N, A, Double> input, final double varianceFactor, final double initLambda, final int maxIterations, final double gamma, final double epsilon, final Random random, final boolean tabooExhaustedNodes, final boolean maximize) {
 		super(input, new DNGPolicy<>(gamma, t -> {
 			try {
 				return input.isTerminalState(t);
@@ -16,6 +16,6 @@ public class DNGMCTS<N, A> extends MCTS<N, A> {
 				Thread.currentThread().interrupt(); // re-interrupt!
 				return false;
 			}
-		}, varianceFactor, initLambda), new UniformRandomPolicy<>(random), maxIterations, gamma, epsilon, tabooExhaustedNodes);
+		}, varianceFactor, initLambda, maximize), new UniformRandomPolicy<>(random), maxIterations, gamma, epsilon, tabooExhaustedNodes);
 	}
 }

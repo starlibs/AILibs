@@ -45,4 +45,33 @@ public class ReconstructionPlan implements IReconstructionPlan {
 		return Collections.unmodifiableList(this.instructions);
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((this.instructions == null) ? 0 : this.instructions.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		ReconstructionPlan other = (ReconstructionPlan) obj;
+		if (this.instructions == null) {
+			if (other.instructions != null) {
+				return false;
+			}
+		} else if (!this.instructions.equals(other.instructions)) {
+			return false;
+		}
+		return true;
+	}
 }

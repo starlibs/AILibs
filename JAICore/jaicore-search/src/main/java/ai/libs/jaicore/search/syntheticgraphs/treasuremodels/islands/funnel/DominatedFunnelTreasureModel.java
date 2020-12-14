@@ -67,8 +67,8 @@ public class DominatedFunnelTreasureModel extends AIslandTreasureModel {
 			this.getIslandModel().setRootNode(path.getRoot());
 			this.distributeTreasures();
 		}
-		BigInteger positionOnIsland = this.getIslandModel().getPositionOnIsland(path).add(BigInteger.ONE);
-		BigInteger island = this.getIslandModel().getIsland(path);
+		BigInteger positionOnIsland = this.getPositionOnIsland(path);
+		BigInteger island = this.getIsland(path);
 		if (!this.plateausOfIslands.containsKey(island)) {
 			this.plateausOfIslands.put(island, this.bestPlateauOfTreasures - this.maxPlateauAdvantageOfSubOptimals * (.5 - new Random(path.hashCode() + this.seed).nextDouble()));
 		}
@@ -80,7 +80,7 @@ public class DominatedFunnelTreasureModel extends AIslandTreasureModel {
 		}
 
 		/* compute the relative position of the solution on the island */
-		BigInteger islandSize = this.getIslandModel().getSizeOfIsland(path);
+		BigInteger islandSize = this.getIsland(path);
 		if (positionOnIsland.compareTo(islandSize) > 0) {
 			throw new IllegalStateException("Position on island cannot be greater than the island itself.");
 		}
@@ -113,5 +113,11 @@ public class DominatedFunnelTreasureModel extends AIslandTreasureModel {
 	@Override
 	public double getMinimumAchievable() {
 		return 0.0;
+	}
+
+
+	@Override
+	public boolean isPathToTreasureIsland(final ILabeledPath<ITransparentTreeNode, Integer> path) {
+		return this.indicesOfTreasureIslands.contains(this.getIsland(path));
 	}
 }

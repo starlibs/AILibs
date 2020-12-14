@@ -12,9 +12,14 @@
 				"BaseClassifier",
 				"PipelineClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "E",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "F",
 					"type": "boolean",
 					"default": "false"
 				},
@@ -37,8 +42,7 @@
 					"type": "boolean",
 					"default": "false"
 				}
-			],
-			"dependencies": []
+			]
 		}
 	]
 }

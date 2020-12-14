@@ -9,15 +9,14 @@ import org.api4.java.common.math.IVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
-import ai.libs.jaicore.components.model.Component;
-import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 
 /**
- * Characterizes a pipelines by the components that occur in it and the
- * parameters that are set for it.
+ * Characterizes a pipelines by the components that occur in it and the parameters that are set for it.
  *
  * @author Mirko Jürgens
  *
@@ -27,8 +26,7 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 	private static final Logger logger = LoggerFactory.getLogger(ComponentInstanceVectorFeatureGenerator.class);
 
 	/**
-	 * Maps the name of a component to a map that maps the name of the hyper
-	 * parameter to its index in the dyad vector.
+	 * Maps the name of a component to a map that maps the name of the hyper parameter to its index in the dyad vector.
 	 */
 	private Map<String, Map<String, Integer>> componentNameToParameterDyadIndex = new HashMap<>();
 
@@ -43,21 +41,20 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 	private int patternCount;
 
 	/**
-	 * Construct a ComponentInstanceVectorFeatureGenerator that is able to
-	 * characterize pipelines consisting of the given components and parameters.
+	 * Construct a ComponentInstanceVectorFeatureGenerator that is able to characterize pipelines consisting of the given components and parameters.
 	 *
 	 * @param collection
 	 *            the components to use
 	 */
-	public ComponentInstanceVectorFeatureGenerator(final Collection<Component> collection) {
+	public ComponentInstanceVectorFeatureGenerator(final Collection<? extends IComponent> collection) {
 		int counter = 0;
 		logger.debug("Got {} components as input.", collection.size());
-		for (Component component : collection) {
+		for (IComponent component : collection) {
 			logger.debug("Inserting {} at position {}", component.getName(), counter);
 			this.componentNameToDyadIndex.put(component.getName(), counter++);
 			Map<String, Integer> parameterIndices = new HashMap<>();
 			logger.debug("{} has {} parameters.", component.getName(), component.getParameters().size());
-			for (Parameter param : component.getParameters()) {
+			for (IParameter param : component.getParameters()) {
 				if (param.isNumeric()) {
 					parameterIndices.put(param.getName(), counter++);
 				} else if (param.isCategorical()) {
@@ -80,9 +77,9 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 	 *            the patterns found so far
 	 * @return the characterization
 	 */
-	public double[] characterize(final ComponentInstance cI, final IVector patterns) {
+	public double[] characterize(final IComponentInstance cI, final IVector patterns) {
 		// first: get the encapsulated component
-		Component c = cI.getComponent();
+		IComponent c = cI.getComponent();
 		String componentName = c.getName();
 
 		// set the used algorithm to '1'
@@ -93,7 +90,7 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 		Map<String, Integer> parameterIndices = this.componentNameToParameterDyadIndex.get(componentName);
 
 		// assumption: the values is always set in the parameters vector
-		for (Parameter param : c.getParameters()) {
+		for (IParameter param : c.getParameters()) {
 			String parameterName = param.getName();
 			int parameterIndex = parameterIndices.get(parameterName);
 			if (param.isNumeric()) {
@@ -104,14 +101,14 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 		}
 
 		// recursively resolve the patterns for the requiredInterfaces
-		for (ComponentInstance requiredInterface : cI.getSatisfactionOfRequiredInterfaces().values()) {
-			this.characterize(requiredInterface, patterns);
+		for (Collection<IComponentInstance> requiredInterface : cI.getSatisfactionOfRequiredInterfaces().values()) {
+			this.characterize(requiredInterface.iterator().next(), patterns);
 		}
 
 		return patterns.asArray();
 	}
 
-	private void handleNumericalParameter(final ComponentInstance cI, final IVector patterns, final Parameter param, final int parameterIndex) {
+	private void handleNumericalParameter(final IComponentInstance cI, final IVector patterns, final IParameter param, final int parameterIndex) {
 		if (cI.getParameterValue(param) != null) {
 			double value = Double.parseDouble(cI.getParameterValue(param));
 			patterns.setValue(parameterIndex, value);
@@ -121,8 +118,7 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 		}
 	}
 
-	private void handleCatergoricalParameter(final ComponentInstance cI, final IVector patterns, final Parameter param,
-			final int parameterIndex) {
+	private void handleCatergoricalParameter(final IComponentInstance cI, final IVector patterns, final IParameter param, final int parameterIndex) {
 		// the parameters are one-hot-encoded, where the parameterIndex specifies the
 		// one hot index for the first categorical parameter, parameterIndex+1 is the
 		// one-hot index for the second parameter etc.
@@ -145,12 +141,12 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 	}
 
 	@Override
-	public void build(final List<ComponentInstance> pipelines) throws InterruptedException {
+	public void build(final List<? extends IComponentInstance> pipelines) throws InterruptedException {
 		throw new UnsupportedOperationException("This characterizer is not trained!");
 	}
 
 	@Override
-	public double[] characterize(final ComponentInstance pipeline) {
+	public double[] characterize(final IComponentInstance pipeline) {
 		return this.characterize(pipeline, new DenseDoubleVector(this.patternCount, 0.0d));
 	}
 

@@ -2,7 +2,7 @@ package ai.libs.jaicore.basic.metric;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test suite for the {@link ai.libs.jaicore.basic.metric.ManhattanDistance}

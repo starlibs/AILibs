@@ -19,7 +19,7 @@ public class SearchGraphPath<N, A> implements ILabeledPath<N, A> {
 	private final Map<String, Object> annotations;
 
 	public SearchGraphPath(final ILabeledPath<N, A> path) {
-		this (path.getNodes(), path.getArcs(), (path instanceof SearchGraphPath) ? ((SearchGraphPath) path).annotations : new HashMap<>());
+		this (new ArrayList<>(path.getNodes()), new ArrayList<>(path.getArcs()), (path instanceof SearchGraphPath) ? new HashMap<>(((SearchGraphPath) path).annotations) : new HashMap<>());
 	}
 
 	public SearchGraphPath(final ILabeledPath<N, A> pathA, final ILabeledPath<N, A> pathB, final A link) {

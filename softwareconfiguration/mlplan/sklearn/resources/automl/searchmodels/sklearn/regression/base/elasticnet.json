@@ -1,0 +1,67 @@
+{
+  "repository" : "sklearn.linear_model.ElasticNet",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.linear_model.ElasticNet",
+    "providedInterface" : [ "BasicRegressor", "BaseLearner", "AbstractRegressor" ],
+    "requiredInterface" : [ ],
+    "parameters" : [ {
+      "name" : "alpha",
+      "type" : "double",
+      "default" : 1.0,
+      "min" : 0.0,
+      "max" : 2.0,
+      "minInterval" : 0.01,
+      "refineSplits" : 8
+    }, {
+      "name" : "l1_ratio",
+      "type" : "double",
+      "default" : 0.15,
+      "min" : 0.0,
+      "max" : 1.0,
+      "minInterval" : 0.05,
+      "refineSplits" : 8
+    }, {
+      "name" : "fit_intercept",
+      "type" : "cat",
+      "values" : [ "True", "False" ],
+      "default" : "True"
+    }, {
+      "name" : "normalize",
+      "type" : "cat",
+      "values" : [ "True", "False" ],
+      "default" : "False"
+    }, {
+      "name" : "max_iter",
+      "type" : "int",
+      "default" : 1000,
+      "min" : 1,
+      "max" : 10000,
+      "minInterval" : 20,
+      "refineSplits" : 8
+    }, {
+      "name" : "copy_X",
+      "type" : "cat",
+      "values" : [ "True" ],
+      "default" : "True"
+    }, {
+      "name" : "tol",
+      "type" : "double",
+      "default" : 1.0E-5,
+      "min" : 0.0,
+      "max" : 1.0,
+      "minInterval" : 5.0E-4,
+      "refineSplits" : 8
+    }, {
+      "name" : "positive",
+      "type" : "cat",
+      "values" : [ "True", "False" ],
+      "default" : "False"
+    }, {
+      "name" : "selection",
+      "type" : "cat",
+      "default" : "cyclic",
+      "values" : [ "cyclic", "random" ]
+    } ]
+  } ]
+}

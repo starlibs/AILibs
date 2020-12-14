@@ -10,7 +10,7 @@
 				"WekaBaseClassifier",
 				"BaseClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "I",
 					"type": "int",

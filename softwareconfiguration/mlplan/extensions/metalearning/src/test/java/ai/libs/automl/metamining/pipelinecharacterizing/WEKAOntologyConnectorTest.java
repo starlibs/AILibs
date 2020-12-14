@@ -5,53 +5,55 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import ai.libs.mlplan.metamining.pipelinecharacterizing.WEKAOntologyConnector;
 
+@Disabled("This project is currently not maintained")
 public class WEKAOntologyConnectorTest {
-	
+
 	private WEKAOntologyConnector connector;
-	
+
 	@Before
 	public void initializeOntologyConnector() throws OWLOntologyCreationException {
-		connector = new WEKAOntologyConnector();
+		this.connector = new WEKAOntologyConnector();
 	}
-	
+
 	@Test
 	public void testGetAncestorsOfClassifiers() {
-		connector.getAvailableClassifiers().forEach(classifier -> {
-			List<String> ancestors = connector.getAncestorsOfAlgorithm(classifier);
-			assertEquals(connector.getClassifierTopNode(), ancestors.get(0));
+		this.connector.getAvailableClassifiers().forEach(classifier -> {
+			List<String> ancestors = this.connector.getAncestorsOfAlgorithm(classifier);
+			assertEquals(this.connector.getClassifierTopNode(), ancestors.get(0));
 			assertEquals(classifier, ancestors.get(ancestors.size()-1));
 		});
 	}
-	
+
 	@Test
 	public void testGetAncestorsOfEvaluators() {
-		connector.getAvailableEvaluators().forEach(evaluator -> {
-			List<String> ancestors = connector.getAncestorsOfAlgorithm(evaluator);
-			assertEquals(connector.getEvaluatorTopNode(), ancestors.get(0));
+		this.connector.getAvailableEvaluators().forEach(evaluator -> {
+			List<String> ancestors = this.connector.getAncestorsOfAlgorithm(evaluator);
+			assertEquals(this.connector.getEvaluatorTopNode(), ancestors.get(0));
 			assertEquals(evaluator, ancestors.get(ancestors.size()-1));
 		});
 	}
-	
+
 	@Test
 	public void testGetAncestorsOfSearchers() {
-		connector.getAvailableSearchers().forEach(searcher -> {
-			List<String> ancestors = connector.getAncestorsOfAlgorithm(searcher);
-			assertEquals(connector.getSearcherTopNode(), ancestors.get(0));
+		this.connector.getAvailableSearchers().forEach(searcher -> {
+			List<String> ancestors = this.connector.getAncestorsOfAlgorithm(searcher);
+			assertEquals(this.connector.getSearcherTopNode(), ancestors.get(0));
 			assertEquals(searcher, ancestors.get(ancestors.size()-1));
 		});
 	}
-	
+
 	@Test
 	public void testGetAncestorsOfKernelFunctions() {
-		connector.getAvailableKernelFunctions().forEach(searcher -> {
-			List<String> ancestors = connector.getAncestorsOfAlgorithm(searcher);
-			assertEquals(connector.getKernelFunctionTopNode(), ancestors.get(0));
+		this.connector.getAvailableKernelFunctions().forEach(searcher -> {
+			List<String> ancestors = this.connector.getAncestorsOfAlgorithm(searcher);
+			assertEquals(this.connector.getKernelFunctionTopNode(), ancestors.get(0));
 			assertEquals(searcher, ancestors.get(ancestors.size()-1));
-		});	
+		});
 	}
 }

@@ -1,0 +1,47 @@
+{
+	"repository": "weka.attributeSelection.OneRAttributeEval",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.attributeSelection.OneRAttributeEval",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rankBasedEvaluator"
+			],
+			"parameters": [
+				{
+					"name": "S",
+					"type": "cat",
+					"default": "0",
+					"values": [
+						"0"
+					]
+				},
+				{
+					"name": "F",
+					"type": "int",
+					"default": 10.0,
+					"min": 2.0,
+					"max": 15.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "D",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "B",
+					"type": "int",
+					"default": 6.0,
+					"min": 1.0,
+					"max": 64.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

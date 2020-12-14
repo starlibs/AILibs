@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import ai.libs.jaicore.basic.sets.Interval;
+import ai.libs.jaicore.components.api.IParameterDomain;
 
 public class NumericParameterDomain extends Interval implements IParameterDomain {
 

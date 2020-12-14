@@ -68,8 +68,9 @@ public class ExtendedRandomForest extends RandomForest implements RangeQueryPred
 	 *
 	 * @param Instances
 	 *            for which marginal variance contributions are to be estimated
+	 * @throws InterruptedException
 	 */
-	public void prepareForest(final Instances data) {
+	public void prepareForest(final Instances data) throws InterruptedException {
 		this.featureSpace = new FeatureSpace(data);
 		for (Classifier classifier : this.m_Classifiers) {
 			ExtendedRandomTree curTree = (ExtendedRandomTree) classifier;

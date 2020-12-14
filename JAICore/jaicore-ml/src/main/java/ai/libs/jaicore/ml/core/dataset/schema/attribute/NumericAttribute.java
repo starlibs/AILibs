@@ -24,7 +24,7 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 	}
 
 	private double getAttributeValueAsDouble(final Object attributeValue) {
-		if (attributeValue == null) {
+		if (attributeValue == null || attributeValue.toString().trim().isEmpty()) {
 			return Double.NaN;
 		}
 		if (attributeValue instanceof INumericAttributeValue) {
@@ -89,6 +89,6 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 
 	@Override
 	public Double deserializeAttributeValue(final String string) {
-		return Double.parseDouble(string);
+		return string.equals("null") ? null : Double.parseDouble(string);
 	}
 }

@@ -2,8 +2,6 @@ package ai.libs.jaicore.basic;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
@@ -57,24 +55,16 @@ public class StatisticsUtil {
 	/**
 	 * Computes the median of the given collection.
 	 *
-	 * @param values Values to take the median of.
-	 * @return The median of the provided values.
+	 * @param values Values to take the mean of.
+	 * @return The mean of the provided values.
 	 */
 	public static double median(final Collection<? extends Number> values) {
-		if (values.isEmpty()) {
-			return Double.NaN;
-		}
+		List<? extends Number> list = new ArrayList<>(values);
+		list.sort((o1, o2) -> Double.compare(o1.doubleValue(), o2.doubleValue()));
+		int upperIndex = (int) Math.ceil(((double) values.size() + 1) / 2);
+		int lowerIndex = (int) Math.floor(((double) values.size() + 1) / 2);
 
-		List<? extends Number> copy = new ArrayList<>(values);
-		Collections.sort(copy, new Comparator<Number>() {
-			@Override
-			public int compare(final Number o1, final Number o2) {
-				return Double.compare(o1.doubleValue(), o2.doubleValue());
-			}
-		});
-		double upperMedian = copy.get((int) Math.ceil(((double) (copy.size() + 1) / 2)) - 1).doubleValue();
-		double lowerMedian = copy.get((int) Math.floor(((double) (copy.size() + 1) / 2)) - 1).doubleValue();
-		return (upperMedian + lowerMedian) / 2;
+		return (list.get(lowerIndex).doubleValue() + list.get(upperIndex).doubleValue()) / 2;
 	}
 
 	/**

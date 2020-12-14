@@ -8,8 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.LiteralParam;
@@ -24,14 +23,8 @@ import ai.libs.jaicore.logic.fol.structure.VariableParam;
  */
 public class LiteralTest {
 
-	@Before
-	public void setUp() throws Exception {
-	}
-
 	/**
-	 * Tests, if the constructor "Literal(Literal literal, Map<VariableParam,
-	 * VariableParam> mapping)" produces a correctly mapped version of the
-	 * literal parameter.
+	 * Tests, if the constructor "Literal(Literal literal, Map<VariableParam, VariableParam> mapping)" produces a correctly mapped version of the literal parameter.
 	 */
 	@Test
 	public void testMappingConstructor() {
@@ -54,15 +47,9 @@ public class LiteralTest {
 
 		// check mapped version
 		assertEquals("Properties of original and mapped version are unequal!", orig.getProperty(), mappedOrig.getProperty());
-
-		assertEquals("Mapped version has other number of parameters!", orig.getParameters().size(), mappedOrig.getParameters().size());
-
+		assertEquals("Mapped version has other number of parameters!", mappedOrig.getParameters().size(), orig.getParameters().size());
 		assertTrue("Mapped version does not contain variable map target!", mappedOrig.getParameters().contains(new VariableParam("s", dummyType)));
-
 		assertTrue("Mapped version does not contain unmapped parameter!", mappedOrig.getParameters().contains(new VariableParam("v2", dummyType)));
-
 		assertTrue("Mapped version contains the substituted parameter!", !mappedOrig.getParameters().contains(new VariableParam("v1", dummyType)));
-
-	} // testMappingConstructor
-
+	}
 }

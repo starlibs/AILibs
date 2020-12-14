@@ -8,8 +8,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
+import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.model.CategoricalParameterDomain;
-import ai.libs.jaicore.components.model.IParameterDomain;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
 import ai.libs.jaicore.components.model.Parameter;
 

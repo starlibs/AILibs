@@ -4,7 +4,7 @@
     "name" : "weka.classifiers.meta.AdaBoostM1",
     "requiredInterface" : [ {"id": "W", "name": "BoostableBaseClassifier"} ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "pActivator",
       "type" : "cat",
       "default" : "0",
@@ -46,7 +46,7 @@
     "name" : "weka.classifiers.meta.Vote",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier"],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "R",
       "type" : "cat",
       "default" : "AVG",
@@ -62,7 +62,7 @@
     "name" : "weka.classifiers.meta.Stacking",
     "requiredInterface" : [ {"id": "B", "name": "BaseClassifier"} ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "X",
       "type" : "cat",
       "default" : "10",
@@ -79,7 +79,7 @@
     "name" : "weka.classifiers.lazy.LWL",
     "requiredInterface" : [ {"id": "W", "name":"WeightedInstancesHandler" } ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "K",
       "type" : "cat",
       "default" : "-1",
@@ -98,7 +98,7 @@
     "name" : "weka.classifiers.meta.RandomSubSpace",
     "requiredInterface" : [  {"id": "W", "name": "BaseClassifier" } ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "I",
       "type" : "int",
       "default" : 10.0,
@@ -125,7 +125,7 @@
     "name" : "weka.classifiers.meta.Bagging",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler"],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "P",
       "type" : "int",
       "default" : 100.0,
@@ -160,7 +160,7 @@
     "name" : "weka.classifiers.meta.RandomCommittee",
     "requiredInterface" : [ {"id": "W", "name": "RandomizableBaseClassifier" } ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "I",
       "type" : "int",
       "default" : 10.0,
@@ -181,7 +181,7 @@
 	"name": "weka.classifiers.meta.AttributeSelectedClassifier",
 	"requiredInterface": [],
 	"providedInterface": ["AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
-	"parameter": [ {
+	"parameters": [ {
 		"name": "E",
 		"type": "cat",
 		"default": "weka.attributeSelection.CfsSubsetEval",
@@ -199,7 +199,7 @@
     "name" : "weka.classifiers.meta.AdditiveRegression",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "Regressor", "WeightedInstancesHandler" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "sActivator",
       "type" : "cat",
       "default" : "0",
@@ -233,19 +233,19 @@
     "name" : "weka.classifiers.meta.ClassificationViaRegression",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier" ],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "weka.classifiers.meta.LogitBoost",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "weka.classifiers.meta.MultiClassClassifier",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier",  "MetaClassifier" ],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   }]
 }

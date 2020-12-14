@@ -5,7 +5,7 @@
     "name" : "weka.classifiers.trees.J48",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "WeightedInstancesHandler" ],
-    "parameter" : [ {
+    "parameters" : [ {
 		"name": "C",
 		"type": "double",
 		"min": 0.0,
@@ -58,7 +58,7 @@
 				"Regressor",
 				"BaseClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "N",
 					"type": "boolean",
@@ -96,7 +96,7 @@
 				"WekaBaseClassifier",
 				"BaseClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "N",
 					"type": "boolean",
@@ -134,7 +134,7 @@
 				"WekaBaseClassifier",
 				"BaseClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "I",
 					"type": "int",
@@ -176,7 +176,7 @@
 				"Regressor",
 				"BaseClassifier"
 			],
-			"parameter": [
+			"parameters": [
 			],
 			"dependencies": [
 			]
@@ -190,7 +190,7 @@
 				"WekaBaseClassifier",
 				"BaseClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "S",
 					"type": "boolean",
@@ -240,7 +240,7 @@
 				"WekaBaseClassifier",
 				"BaseClassifier"
 			],
-			"parameter": [
+			"parameters": [
 			],
 			"dependencies": [
 			]
@@ -248,7 +248,7 @@
     "name" : "weka.classifiers.trees.LMT",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier","BoostableBaseClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "B",
       "type" : "boolean",
       "default" : "false"
@@ -290,13 +290,13 @@
     "name" : "weka.classifiers.trees.DecisionStump",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier" ],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "weka.classifiers.trees.RandomForest",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "RandomizableBaseClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "I",
       "type" : "int",
       "default" : 10.0,
@@ -348,7 +348,7 @@
     "name" : "weka.classifiers.trees.RandomTree",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "RandomizableBaseClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "M",
       "type" : "int",
       "default" : 1.0,
@@ -424,7 +424,7 @@
     "name" : "weka.classifiers.rules.DecisionTable",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "E",
       "type" : "cat",
       "default" : "acc",
@@ -452,7 +452,7 @@
     "name" : "weka.classifiers.rules.JRip",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "N",
       "type" : "double",
       "default" : 2.0,
@@ -482,7 +482,7 @@
     "name" : "weka.classifiers.rules.OneR",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier","BoostableBaseClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "B",
       "type" : "int",
       "default" : 6.0,
@@ -496,7 +496,7 @@
     "name" : "weka.classifiers.rules.PART",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "N",
       "type" : "int",
       "default" : 3.0,
@@ -529,13 +529,13 @@
     "name" : "weka.classifiers.rules.ZeroR",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier" ],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "weka.classifiers.lazy.IBk",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "E",
       "type" : "boolean",
       "default" : "false"
@@ -561,7 +561,7 @@
     "name" : "weka.classifiers.lazy.KStar",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier" ,"BoostableBaseClassifier"],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "B",
       "type" : "int",
       "default" : 20.0,
@@ -584,7 +584,7 @@
     "name" : "weka.classifiers.functions.MultilayerPerceptron",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier","RandomizableBaseClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "L",
       "type" : "double",
       "default" : 0.3,
@@ -632,7 +632,7 @@
     "name" : "weka.classifiers.functions.SMO",
     "requiredInterface" : [ {"id": "K", "name":  "K" } ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "WeightedInstancesHandler" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "C",
       "type" : "double",
       "default" : 1.0,
@@ -655,7 +655,7 @@
     "name" : "weka.classifiers.functions.supportVector.NormalizedPolyKernel",
     "requiredInterface" : [ ],
     "providedInterface" : [ "K" ],
-    "parameter" : [ 
+    "parameters" : [ 
 		{
 			"name": "E",
 			"type": "double",
@@ -676,7 +676,7 @@
     "name" : "weka.classifiers.functions.supportVector.PolyKernel",
     "requiredInterface" : [ ],
     "providedInterface" : [ "K" ],
-    "parameter" : [
+    "parameters" : [
 		{
 			"name": "E",
 			"type": "double",
@@ -695,7 +695,7 @@
     "name" : "weka.classifiers.functions.supportVector.RBFKernel",
     "requiredInterface" : [ ],
     "providedInterface" : [ "K" ],
-    "parameter" : [ 
+    "parameters" : [ 
 		{
 			"name": "G",
 			"type": "double",
@@ -710,7 +710,7 @@
     "name" : "weka.classifiers.functions.supportVector.Puk",
     "requiredInterface" : [ ],
     "providedInterface" : [ "K" ],
-    "parameter" : [
+    "parameters" : [
 		{
 			"name": "O",
 			"type": "double",
@@ -734,7 +734,7 @@
     "name" : "weka.classifiers.functions.Logistic",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "R",
       "type" : "double",
       "default" : 1.0E-7,
@@ -748,7 +748,7 @@
     "name" : "weka.classifiers.bayes.NaiveBayes",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "K",
       "type" : "boolean",
       "default" : "false"
@@ -766,7 +766,7 @@
     "name" : "weka.classifiers.bayes.BayesNet",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier" ],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "D",
       "type" : "boolean",
       "default" : "false"
@@ -782,7 +782,7 @@
     "name" : "weka.classifiers.trees.REPTree",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier" ,"RandomizableBaseClassifier"],
-    "parameter" : [ {
+    "parameters" : [ {
       "name" : "M",
       "type" : "int",
       "default" : 2.0,

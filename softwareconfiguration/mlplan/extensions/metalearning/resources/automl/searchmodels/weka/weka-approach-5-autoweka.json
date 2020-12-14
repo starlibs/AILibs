@@ -13,6 +13,6 @@
 	  	    		"name": "BaseClassifier"
 	  	    	}
 			],
-	    	"parameter" : [ ]
+	    	"parameters" : [ ]
 	    }]
 }

@@ -5,8 +5,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.logic.fol.structure.ConstantParam;
 import ai.libs.jaicore.logic.fol.structure.Literal;
@@ -18,21 +17,17 @@ import ai.libs.jaicore.logic.fol.structure.VariableParam;
 
 /**
  * Test case for the LiteralSet class.
- * 
+ *
  * @author mbunse
  */
 public class LiteralSetTest {
-
-	@Before
-	public void setUp() throws Exception {
-	}
 
 	/**
 	 * Test for the implies() method.
 	 */
 	@Test
 	public void testImplies() throws InterruptedException {
-		
+
 		TypeModule typeModule = new TypeModule();
 
 		Type dummyType = typeModule.getType("http://dummy.type/");
@@ -65,6 +60,5 @@ public class LiteralSetTest {
 
 		assertTrue("[Q(x, c)] is not implied!", body.implies(head2));
 
-	} // testImplies
-
+	}
 }

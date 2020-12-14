@@ -1,0 +1,47 @@
+{
+  "repository" : "sklearn.linear_model.HuberRegressor",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.linear_model.HuberRegressor",
+    "providedInterface" : [ "BasicRegressor", "BaseLearner", "AbstractRegressor" ],
+    "requiredInterface" : [ ],
+    "parameters" : [ {
+      "name" : "epsilon",
+      "type" : "double",
+      "default" : 1.35,
+      "min" : 1.0,
+      "max" : 10,
+      "minInterval" : 0.2,
+      "refineSplits" : 8
+    }, {
+      "name" : "max_iter",
+      "type" : "int",
+      "default" : 100,
+      "min" : 1,
+      "max" : 1000,
+      "minInterval" : 1,
+      "refineSplits" : 8
+    }, {
+      "name" : "alpha",
+      "type" : "double",
+      "default" : 1.0E-4,
+      "min" : 0.0,
+      "max" : 1.0,
+      "minInterval" : 0.2,
+      "refineSplits" : 8
+    }, {
+      "name" : "fit_intercept",
+      "type" : "cat",
+      "values" : [ "True", "False" ],
+      "default" : "True"
+    }, {
+      "name" : "tol",
+      "type" : "double",
+      "default" : 1.0E-5,
+      "min" : 0.0,
+      "max" : 1.0,
+      "minInterval" : 1.0E-5,
+      "refineSplits" : 8
+    } ]
+  } ]
+}

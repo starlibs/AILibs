@@ -3,10 +3,8 @@ package ai.libs.mlplan.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -35,10 +33,9 @@ import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.jaicore.components.model.Component;
-import ai.libs.jaicore.components.model.Parameter;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.components.api.IComponentRepository;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -64,6 +61,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	private static final File DEF_ALGORITHM_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_ALGORITHM_CONFIG, FS_ALGORITHM_CONFIG);
 
 	/* problem description aspects */
+	private final ComponentSerialization serializer = new ComponentSerialization();
 	private File searchSpaceFile;
 	private String requestedHASCOInterface;
 	private String nameOfHASCOMethodToResolveBareLearner;
@@ -211,12 +209,12 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 		throw new UnsupportedOperationException("Currently only support for BestFirst search. Will be extended in the upcoming release.");
 	}
 
-	public Collection<Component> getComponents() throws IOException {
-		return new ComponentLoader(this.searchSpaceFile).getComponents();
+	public IComponentRepository getComponents() throws IOException {
+		return this.serializer.deserializeRepository(this.searchSpaceFile);
 	}
 
-	public Map<Component, Map<Parameter, ParameterRefinementConfiguration>> getComponentParameterConfigurations() throws IOException {
-		return new ComponentLoader(this.searchSpaceFile).getParamConfigs();
+	public INumericParameterRefinementConfigurationMap getComponentParameterConfigurations() throws IOException {
+		return this.serializer.deserializeParamMap(this.searchSpaceFile);
 	}
 
 	/**
@@ -258,6 +256,11 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 			this.logger.warn("The dataset claims to be reconstructible, but it does not carry any instructions.");
 		}
 		this.dataset = dataset;
+		if (dataset.stream().anyMatch(i -> i.getLabel() == null)) {
+			this.logger.warn("Dataset has instances without label. Dropping those lines!! Number of instances now: {}", this.dataset.size());
+			this.dataset.removeIf(i -> i.getLabel() == null);
+			this.logger.warn("Dataset is now reduced. Number of instances now: {}", this.dataset.size());
+		}
 		return this.getSelf();
 	}
 
@@ -470,6 +473,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
+		this.serializer.setLoggerName(name + ".serializer");
 		this.loggerName = name;
 	}
 

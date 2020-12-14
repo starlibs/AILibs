@@ -10,22 +10,99 @@ cache:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
   - "$HOME/.sonar/cache"
-
+  
 # overriding the install step is important to avoid that ./gradlew assemble is run (which is the default in travis)
 install:
   - true
+
+# defines a matrix of jobs for testing.
+env:
+  global:
+  - secure: yUfjJ5ZSdOWWYLye5Oc6LnkN8fRFHOvRM/NlH15NXN5ZloRqfsfcQ80TFUBOCkEBwGPwUqhqZn2x7yc6XzVlpZ0lNc8voDvDNvGk2V0R42QOHUPFce0HicAtslM6we05kWA3wmcKvB3nBhRC1rPcrZC3a0G2Vby8yfvO2BEEog7Cb8zhaX5RcOFedSw3pgDrnu/aglZ2mtOjhyt36aYXx7UGY9ueEO24EcF0R8XKNn8h7qSnr7GJtPLioTME4gCOhV57YBBgDbM72I33Rmmr1fvb264/QTozYh5E0e+0uv5BuQO8q4XZU5VjdG+eTISbtkXc3bFSAOeVYUrXJBv7t7C/IhuiaHFRSC8O9dME8MXfaa/0E199CgmI7M23LIjKF7r3gPz6VvBx9BBs3m7zgCnwBhomw8ggk1U21GDYR5AwoaGhYpBCFfdMNPnPiS8vpoXYk9L1dl8vyGRyVLBNpAq7wXthWrUz3X3HEEMVWDyRqnugDzS+lE/hB+Mh7TA+lqVJegRcNOyjHw/JdynEbbvatRXOZQftcgQ4FZ81dUjI+Svin79WCdCSGM8fcTTIB5+/avoggAyLwQpsX5BXewEhADdwl5OcsFiYBPZLbX0gUBtbIKCsEOxUMX55VbzdiLoWOFMjjqUeyXJteGdqVKcFIyEazJ/Eh07lc78SxqE=
+  jobs:
+  - TEST_PROJECT=:hasco-core
+  - TEST_PROJECT=:hasco-fanova
+  - TEST_PROJECT=:JAICore:jaicore-algorithminspector
+  - TEST_PROJECT=:JAICore:jaicore-basic
+  - TEST_PROJECT=:JAICore:jaicore-components
+  - TEST_PROJECT=:JAICore:jaicore-ea
+  - TEST_PROJECT=:JAICore:jaicore-experiments
+  - TEST_PROJECT=:JAICore:jaicore-logic
+  - TEST_PROJECT=:JAICore:jaicore-math
+  - TEST_PROJECT=:JAICore:jaicore-ml TEST_TASK=testOpenMLAdapter TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-ml TEST_TASK=testSampling TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-ml TEST_TASK=testOthers
+  - TEST_PROJECT=:JAICore:jaicore-ml-meka 
+  - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testInterruptibility TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testCancelability TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testTimeoutability TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-ml-weka TEST_TASK=testWithoutICT
+  - TEST_PROJECT=:JAICore:jaicore-planning
+  - TEST_PROJECT=:JAICore:jaicore-processes
+  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testInterruptibilityDefault TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testInterruptibilityMCTS TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testCancelability TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testTimeoutability TEST_CAT=medium
+  - TEST_PROJECT=:JAICore:jaicore-search TEST_TASK=testWithoutICT
+  - TEST_PROJECT=:mlplan-core
+  - TEST_PROJECT=:mlplan-ext-reduction
+
+  - TEST_PROJECT=:mlplan-full
+  - TEST_PROJECT=:mlplan-gui
+  - TEST_PROJECT=:mlplan-meka
+  - TEST_PROJECT=:mlplan-sklearn TEST_TASK=testCoreFunctionality
+  - TEST_PROJECT=:mlplan-sklearn TEST_TASK=testClassification TEST_CAT=long
+  - TEST_PROJECT=:mlplan-sklearn TEST_TASK=testRegression TEST_CAT=long
+  - TEST_PROJECT=:mlplan-weka TEST_TASK=testCoreFunctionality
+  - TEST_PROJECT=:mlplan-weka TEST_TASK=testClassification TEST_CAT=long
+  - TEST_PROJECT=:mlplan-weka TEST_TASK=testRegression TEST_CAT=long
+
 
 addons:
   sonarcloud:
     organization: "starlibs"
 
 script:
-  - ./gradlew compileJava
-  - ./gradlew testClasses
-  - git fetch --no-tags --unshallow https://github.com/starlibs/AILibs.git +master:refs/heads/master
-  - git fetch --no-tags https://github.com/starlibs/AILibs.git +dev:refs/heads/dev
-  - ./gradlew sonarqube -x test
+  # first install python in the correct version (this is intentionally not part of the install block to not screw up the dummy build with this stuff)
+  - pyenv versions
+  - pyenv global 3.6.7
+  - python --version
+  - pip3 install --upgrade pip
+  - pip3 install liac-arff numpy scipy scikit-learn tpot pandas xgboost
+  
+  # now run the test
+  - echo $TEST_PROJECT
+  - ./.travis_runtests.sh
 
-env:
-  global:
-  - secure: yUfjJ5ZSdOWWYLye5Oc6LnkN8fRFHOvRM/NlH15NXN5ZloRqfsfcQ80TFUBOCkEBwGPwUqhqZn2x7yc6XzVlpZ0lNc8voDvDNvGk2V0R42QOHUPFce0HicAtslM6we05kWA3wmcKvB3nBhRC1rPcrZC3a0G2Vby8yfvO2BEEog7Cb8zhaX5RcOFedSw3pgDrnu/aglZ2mtOjhyt36aYXx7UGY9ueEO24EcF0R8XKNn8h7qSnr7GJtPLioTME4gCOhV57YBBgDbM72I33Rmmr1fvb264/QTozYh5E0e+0uv5BuQO8q4XZU5VjdG+eTISbtkXc3bFSAOeVYUrXJBv7t7C/IhuiaHFRSC8O9dME8MXfaa/0E199CgmI7M23LIjKF7r3gPz6VvBx9BBs3m7zgCnwBhomw8ggk1U21GDYR5AwoaGhYpBCFfdMNPnPiS8vpoXYk9L1dl8vyGRyVLBNpAq7wXthWrUz3X3HEEMVWDyRqnugDzS+lE/hB+Mh7TA+lqVJegRcNOyjHw/JdynEbbvatRXOZQftcgQ4FZ81dUjI+Svin79WCdCSGM8fcTTIB5+/avoggAyLwQpsX5BXewEhADdwl5OcsFiYBPZLbX0gUBtbIKCsEOxUMX55VbzdiLoWOFMjjqUeyXJteGdqVKcFIyEazJ/Eh07lc78SxqE=
+
+# Assign jobs to stages. The test jobs defined above are implicitly assigned to the test stage: https://docs.travis-ci.com/user/build-stages/#naming-your-build-stages
+jobs:
+  exclude:
+    - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = long) ## typically we will want to remove dev here, because long is only for master. This is just initially to make sure that also the long tests are built
+    - if: (NOT (branch IN (master, dev))) AND (env(TEST_CAT) = medium)
+      
+  include:
+    - stage: dummy # this stage does nothing but span an immediately succeeding build to not break the github hook (this would happen with [skip ci]
+      script:
+        - ./.verifydummybuild.sh
+        - echo "Dummy build finished"
+        
+    - stage: check_build
+      env: 
+        jobs:
+          - TEST_PROJECT=NONE
+      script:
+        - ./gradlew compileJava
+        - ./gradlew testClasses
+        - git fetch --no-tags --unshallow https://github.com/fmohr/AILibs.git +master:refs/heads/master
+        - git fetch --no-tags https://github.com/fmohr/AILibs.git +dev:refs/heads/dev
+        - ./gradlew sonarqube -x test
+
+# configures the *order* of the stages. See https://docs.travis-ci.com/user/build-stages/
+stages:
+  - name: dummy
+    if: (commit_message=~ /--documentation--/) OR ((type=push) AND (branch IN (master, dev))) # do never build master and dev in push mode; this is double work, because the branches are protected and always built upon PR. This dummy is here in order to trigger a feedback to github, which does not happen if the build job is just skipped.
+  - name: check_build
+    if: NOT ((commit_message=~ /--documentation--/) OR ((type=push) AND (branch IN (master, dev)))) # do not build anything if the commit is only for documentation!
+  - name: test
+    if: NOT ((commit_message=~ /--documentation--/) OR ((type=push) AND (branch IN (master, dev)))) # do not build anything if the commit is only for documentation!

@@ -1,10 +1,10 @@
 package ai.libs.jaicore.processes;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ProcessUtilTest {
 
@@ -12,7 +12,7 @@ public class ProcessUtilTest {
 	public void testGetPID() throws ProcessIDNotRetrievableException, IOException {
 		Process p = new ProcessBuilder("ping", "127.0.0.1", "-n 3").start();
 		int pid = ProcessUtil.getPID(p);
-		assertTrue("Invalid process ID obtained", pid > 1);
+		assertTrue(pid > 1, "Invalid process ID obtained");
 		p.destroyForcibly();
 	}
 

@@ -7,14 +7,15 @@
 			"requiredInterface": [
 				{
 					"id": "B",
-					"name": "MultipleBaseLearnerList"
+					"name": "BaseClassifier"
 				}
 			],
 			"providedInterface": [
 				"AbstractClassifier",
-				"MetaClassifier"
+				"MetaClassifier",
+				"PipelineClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "X",
 					"type": "cat",

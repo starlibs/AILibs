@@ -10,6 +10,7 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
@@ -22,8 +23,8 @@ public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements
 	private Logger logger = LoggerFactory.getLogger(HASCOReductionSolutionEvaluator.class);
 	private final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem;
 	private final HASCOReduction<V> reduction;
-	private final IObjectEvaluator<ComponentInstance, V> evaluator;
-	private final TimeRecordingObjectEvaluator<ComponentInstance, V> timedEvaluator;
+	private final IObjectEvaluator<IComponentInstance, V> evaluator;
+	private final TimeRecordingObjectEvaluator<IComponentInstance, V> timedEvaluator;
 
 	public HASCOReductionSolutionEvaluator(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final HASCOReduction<V> reduction) {
 		super();
@@ -70,11 +71,11 @@ public class HASCOReductionSolutionEvaluator<V extends Comparable<V>> implements
 		}
 	}
 
-	public IObjectEvaluator<ComponentInstance, V> getEvaluator() {
+	public IObjectEvaluator<IComponentInstance, V> getEvaluator() {
 		return this.evaluator;
 	}
 
-	public TimeRecordingObjectEvaluator<ComponentInstance, V> getTimedEvaluator() {
+	public TimeRecordingObjectEvaluator<IComponentInstance, V> getTimedEvaluator() {
 		return this.timedEvaluator;
 	}
 }

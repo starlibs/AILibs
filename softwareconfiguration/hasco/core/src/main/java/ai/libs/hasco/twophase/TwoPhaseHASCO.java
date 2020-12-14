@@ -16,6 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -39,9 +40,9 @@ import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithm;
-import ai.libs.jaicore.components.serialization.CompositionSerializer;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.concurrent.NamedTimerTask;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
@@ -65,6 +66,8 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 
 	private final double blowupInSelection;
 	private final double blowupInPostProcessing;
+
+	private final ComponentSerialization serializer = new ComponentSerialization();
 
 	/* statistics */
 	private long timeOfStart = -1;
@@ -124,6 +127,19 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		}); // this is to register solutions during runtime
 	}
 
+	private void awaitTerminationOfHASCO() throws InterruptedException {
+
+		/* wait HASCO to complete the cancel */
+		AtomicBoolean cancelCompleted = this.hasco.getCancelCompleted();
+		synchronized (cancelCompleted) {
+			this.logger.info("Waiting for HACSO to complete cancel.");
+			while (!cancelCompleted.get()) {
+				cancelCompleted.wait();
+			}
+		}
+		this.logger.info("HASCO completed cancel. Now throwing a cancelation exception.");
+	}
+
 	@Override
 	public IAlgorithmEvent nextWithException() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		this.logger.info("Stepping 2phase HASCO. Current state: {}", this.getState());
@@ -167,7 +183,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 								TwoPhaseHASCO.this.logger.info("Canceling HASCO (first phase). {}ms remaining.", timeRemaining);
 								TwoPhaseHASCO.this.hasco.cancel();
 								TwoPhaseHASCO.this.logger.info("HASCO canceled successfully after {}ms", (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart) - timeElapsed);
-								this.cancel();
+								this.cancel(); // cancels the TIMER, not 2PHASE-HASCO!!
 							}
 						} catch (Exception e) {
 							TwoPhaseHASCO.this.logger.error("Observed {} while checking termination of phase 1. Stack trace is: {}", e.getClass().getName(),
@@ -182,8 +198,9 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 			try {
 				this.hasco.call();
 			} catch (AlgorithmExecutionCanceledException e) {
-				this.logger.info("HASCO has terminated due to a cancel.");
+				this.logger.info("HASCO has terminated due to a cancel. My own cancel state is: {}", this.isCanceled());
 				if (this.isCanceled()) {
+					this.awaitTerminationOfHASCO();
 					throw new AlgorithmExecutionCanceledException(e.getDelay());
 				}
 			} catch (AlgorithmTimeoutedException e) {
@@ -199,6 +216,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 			this.logger.info("HASCO has finished. {} solutions were found.", this.phase1ResultQueue.size());
 			if (this.phase1ResultQueue.isEmpty() && this.getRemainingTimeToDeadline().seconds() < 10) {
 				this.logger.info("No solution found within phase 1. Throwing an AlgorithmTimeoutedException (This is conventional behavior for when an algorithm has not identified its solution when the timeout bound is hit.)");
+				this.awaitTerminationOfHASCO();
 				this.terminate(); // this sends the AlgorithmFinishedEvent
 				throw new AlgorithmTimeoutedException(this.getRemainingTimeToDeadline().milliseconds() * -1);
 			}
@@ -210,7 +228,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 					this.logger.info("Entering phase 2.");
 					this.logger.debug("Solutions seen so far had the following (internal) errors and evaluation times (one per line): {}",
 							this.phase1ResultQueue.stream()
-							.map(e -> "\n\t" + MathExt.round(e.getScore(), 4) + " in " + e.getTimeToEvaluateCandidate() + "ms (" + CompositionSerializer.serializeComponentInstance(e.getComponentInstance()) + ")")
+							.map(e -> "\n\t" + MathExt.round(e.getScore(), 4) + " in " + e.getTimeToEvaluateCandidate() + "ms (" + this.serializer.serialize(e.getComponentInstance()) + ")")
 							.collect(Collectors.joining()));
 				}
 				this.post(new TwoPhaseHASCOPhaseSwitchEvent(this));
@@ -234,6 +252,12 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 			}
 			this.setBestSeenSolution(this.selectedHASCOSolution);
 			assert this.getBestSeenSolution().equals(this.selectedHASCOSolution);
+
+			this.logger.info("TwoPhaseHASCO has finished. Possibly awaiting HASCO termination. State of HASCO cancellation: {}", this.hasco.getCancelCompleted().get());
+			if (this.hasco.isCanceled()) {
+				this.awaitTerminationOfHASCO();
+				this.logger.info("TwoPhaseHASCO has finished and HASCO canceallation is {}/{} (canceled/cancel completed)", this.hasco.isCanceled(), this.hasco.getCancelCompleted().get());
+			}
 			return this.terminate();
 
 		default:
@@ -377,7 +401,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 			this.logger.info(
 					"We expect phase 2 to consume {}ms for {} candidates, and post-processing is assumed to take at most {}ms, which is a total remaining runtime of {}ms. {}ms are permitted by timeout. The following candidates are considered (one per line with the internal error of phase 1): {}",
 					expectedTimeForPhase2, ensembleToSelectFrom.size(), expectedPostprocessingTime, expectedMaximumRemainingRuntime, remainingTime,
-					ensembleToSelectFrom.stream().map(e -> "\n\t" + MathExt.round(e.getScore(), 4) + " in " + e.getTimeToEvaluateCandidate() + "ms (" + CompositionSerializer.serializeComponentInstance(e.getComponentInstance()) + ")")
+					ensembleToSelectFrom.stream().map(e -> "\n\t" + MathExt.round(e.getScore(), 4) + " in " + e.getTimeToEvaluateCandidate() + "ms (" + this.serializer.serialize(e.getComponentInstance()) + ")")
 					.collect(Collectors.joining()));
 		}
 		return ensembleToSelectFrom.stream().sorted((c1,c2) -> Double.compare(c1.getScore(), c2.getScore())).collect(Collectors.toList());
@@ -411,7 +435,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		/* evaluate each candidate */
 		final Semaphore sem = new Semaphore(0);
 		long timestampOfDeadline = this.timeOfStart + this.getTimeout().milliseconds() - 2000;
-		final IObjectEvaluator<ComponentInstance, Double> evaluator = this.getInput().getSelectionBenchmark();
+		final IObjectEvaluator<IComponentInstance, Double> evaluator = this.getInput().getSelectionBenchmark();
 		final double timeoutTolerance = TwoPhaseHASCO.this.getConfig().selectionPhaseTimeoutTolerance();
 		final String loggerNameForWorkers = this.getLoggerName() + ".worker";
 		for (HASCOSolutionCandidate<Double> c : ensembleToSelectFrom) {
@@ -439,7 +463,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		if (bestEvaluatedSolution.isPresent()) {
 			TwoPhaseCandidateEvaluator selectedModel = bestEvaluatedSolution.get();
 			HASCOSolutionCandidate<Double> solution = selectedModel.getSolution();
-			this.logger.info("Selected a configuration: {}. Its internal score was {}. Selection score was {}", CompositionSerializer.serializeComponentInstance(solution.getComponentInstance()), solution.getScore(), selectedModel.getSelectionScore());
+			this.logger.info("Selected a configuration: {}. Its internal score was {}. Selection score was {}", this.serializer.serialize(solution.getComponentInstance()), solution.getScore(), selectedModel.getSelectionScore());
 			return solution;
 		} else {
 			this.logger.warn("Could not select any real solution in selection phase, just returning the best we have seen in HASCO.");
@@ -480,7 +504,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 	public void cancel() {
 		this.logger.info("Received cancel signal.");
 		super.cancel();
-		this.logger.debug("Cancelling HASCO");
+		this.logger.debug("Cancelling HASCO. My own cancel flag is {}", this.isCanceled());
 		if (this.hasco != null) {
 			this.hasco.cancel();
 		}
@@ -539,6 +563,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
+		this.serializer.setLoggerName(name + ".serializer");
 		this.setHASCOLoggerNameIfPossible();
 		super.setLoggerName(this.loggerName + "._orgraphsearch");
 	}

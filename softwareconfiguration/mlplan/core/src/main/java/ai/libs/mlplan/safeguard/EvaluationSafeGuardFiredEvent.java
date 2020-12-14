@@ -2,19 +2,19 @@ package ai.libs.mlplan.safeguard;
 
 import org.api4.java.common.event.IEvent;
 
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 
 public class EvaluationSafeGuardFiredEvent implements IEvent {
 
-	private final ComponentInstance ci;
+	private final IComponentInstance ci;
 	private final long timestamp;
 
-	public EvaluationSafeGuardFiredEvent(final ComponentInstance ci) {
+	public EvaluationSafeGuardFiredEvent(final IComponentInstance ci) {
 		this.timestamp = System.currentTimeMillis();
 		this.ci = ci;
 	}
 
-	public ComponentInstance getComponentInstance() {
+	public IComponentInstance getComponentInstance() {
 		return this.ci;
 	}
 

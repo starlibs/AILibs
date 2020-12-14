@@ -1,0 +1,30 @@
+{
+  "repository" : "sklearn.linear_model.LinearRegression",
+  "include" : [ ],
+  "components" : [ {
+    "name" : "sklearn.linear_model.LinearRegression",
+    "providedInterface" : [ "BasicRegressor", "BaseLearner", "AbstractRegressor" ],
+    "requiredInterface" : [ ],
+    "parameters" : [ {
+      "name" : "fit_intercept",
+      "type" : "cat",
+      "values" : [ "True", "False" ],
+      "default" : "True"
+    }, {
+      "name" : "normalize",
+      "type" : "cat",
+      "values" : [ "True", "False" ],
+      "default" : "False"
+    }, {
+      "name" : "copy_X",
+      "type" : "cat",
+      "values" : [ "True" ],
+      "default" : "True"
+    }, {
+      "name" : "n_jobs",
+      "type" : "cat",
+      "values" : [ "1" ],
+      "default" : "1"
+    } ]
+  } ]
+}

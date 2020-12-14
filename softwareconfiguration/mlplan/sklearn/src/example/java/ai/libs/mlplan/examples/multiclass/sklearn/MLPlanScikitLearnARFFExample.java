@@ -22,7 +22,7 @@ import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.sklearn.builder.MLPlanScikitLearnBuilder;
+import ai.libs.mlplan.sklearn.builder.MLPlanScikitLearnBuilder;
 
 public class MLPlanScikitLearnARFFExample {
 

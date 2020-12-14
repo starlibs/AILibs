@@ -1,0 +1,44 @@
+{
+	"repository": "weka.attributeSelection.ReliefFAttributeEval",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.attributeSelection.ReliefFAttributeEval",
+			"requiredInterface": [],
+			"providedInterface": [
+				"rankBasedEvaluator"
+			],
+			"parameters": [
+				{
+					"name": "K",
+					"type": "int",
+					"default": 10.0,
+					"min": 2.0,
+					"max": 64.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "W",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "A",
+					"type": "int",
+					"default": 2.0,
+					"min": 1.0,
+					"max": 8.0,
+					"refineSplits": 8,
+					"minInterval": 1.0
+				}
+			],
+			"dependencies": [
+				{
+					"pre": "W in {false}",
+					"post": "A in [2.0,2.0]"
+				}
+			]
+		}
+	]
+}

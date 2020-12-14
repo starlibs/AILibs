@@ -19,7 +19,7 @@ import ai.libs.jaicore.ml.classification.multilabel.learner.IMekaClassifier;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multilabel.mekamlplan.ML2PlanMekaBuilder;
+import ai.libs.mlplan.meka.ML2PlanMekaBuilder;
 import meka.core.MLUtils;
 import weka.core.Instances;
 

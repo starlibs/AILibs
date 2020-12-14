@@ -18,8 +18,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,16 +32,11 @@ public abstract class SolutionCandidateFinderTester extends GeneralAlgorithmTest
 	private AlgorithmicProblemReduction<Object, Object, Object, Object> reduction;
 	private Map<Object, Collection<?>> reducedProblemsWithOriginalSolutions = new HashMap<>(); // keys are (possibly reduced) problem inputs, and outputs are original solutions
 
-	@Before
-	public <I, O> void loadProblemsAndSolutions() throws InterruptedException {
+	public <I, O> void loadProblemsAndSolutions(final IAlgorithmTestProblemSet<Object> problemSet) throws InterruptedException {
 
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InterruptedException("Cannot load problems and solutions, because the thread has been interrupted.");
 		}
-
-		/* get problem set */
-		@SuppressWarnings("unchecked")
-		IAlgorithmTestProblemSet<Object> problemSet = (IAlgorithmTestProblemSet<Object>) this.getProblemSet();
 
 		/* create a single reduction that recurses over all applied reductions */
 		IAlgorithmTestProblemSet<Object> current = problemSet;

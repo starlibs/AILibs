@@ -1,0 +1,12 @@
+{
+	"repository" : "ML-Plan with Scikit-Learn Backend with Unlimited-Length Pipelines for Classification",
+	"include": [
+		"./preprocessing/index.json",
+		"./regression/base/extratreeregressor.json",
+		"./regression/base/extratreesregressor.json",
+		"./classification/base/index.json",
+		"./classification/ext/twosteppipeline.json",
+		"./classification/ext/make_union.json",
+		"./classification/ext/make_forward.json"
+	]
+}

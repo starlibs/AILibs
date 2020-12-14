@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
 

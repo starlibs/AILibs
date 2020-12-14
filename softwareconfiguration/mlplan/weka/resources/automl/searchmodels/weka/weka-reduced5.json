@@ -1,0 +1,13 @@
+{
+	"repository": "WEKA - Auto-WEKA Searchspace",
+	"include": [
+		"./ext/twosteppipeline.json",
+		"./preprocessing/index.json",
+    	"./base/naivebayes.json",
+    	"./base/smo_kernel/index.json",
+    	"./base/smo.json",
+    	"./base/ibk.json",
+    	"./base/j48.json",
+    	"./base/randomforest.json"
+	]
+}

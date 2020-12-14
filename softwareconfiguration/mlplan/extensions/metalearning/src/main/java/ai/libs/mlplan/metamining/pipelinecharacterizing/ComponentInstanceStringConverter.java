@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -15,12 +14,12 @@ import org.apache.commons.math3.geometry.partitioning.Region.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.components.model.Component;
-import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.NumericParameterDomain;
-import ai.libs.jaicore.components.model.Parameter;
-import ai.libs.jaicore.components.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfigurationMap;
+import ai.libs.jaicore.components.api.INumericParameterRefinementConfiguration;
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.model.CompositionProblemUtil;
+import ai.libs.jaicore.components.model.NumericParameterDomain;
 import treeminer.util.TreeRepresentationUtils;
 
 public class ComponentInstanceStringConverter extends Thread {
@@ -36,17 +35,17 @@ public class ComponentInstanceStringConverter extends Thread {
 
 	private IOntologyConnector ontologyConnector;
 
-	private List<ComponentInstance> cIs;
+	private List<IComponentInstance> cIs;
 
 	private Properties wekaLabels;
 
 	private List<String> convertedPipelines;
 
-	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> componentParameters;
+	private INumericParameterRefinementConfigurationMap componentParameters;
 
-	public ComponentInstanceStringConverter(final IOntologyConnector ontologyConnector, final List<ComponentInstance> cIs, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> componentParameters) {
+	public ComponentInstanceStringConverter(final IOntologyConnector ontologyConnector, final List<? extends IComponentInstance> cIs, final INumericParameterRefinementConfigurationMap componentParameters) {
 		this.ontologyConnector = ontologyConnector;
-		this.cIs = cIs;
+		this.cIs = new ArrayList<>(cIs);
 		this.convertedPipelines = new ArrayList<>(cIs.size());
 		this.componentParameters = componentParameters;
 		InputStream fis = this.getClass().getClassLoader().getResourceAsStream(WEKA_LABEL_FILE);
@@ -61,7 +60,7 @@ public class ComponentInstanceStringConverter extends Thread {
 
 	@Override
 	public void run() {
-		for (ComponentInstance cI : this.cIs) {
+		for (IComponentInstance cI : this.cIs) {
 			String pipeline = this.makeStringTreeRepresentation(cI);
 			this.convertedPipelines.add(pipeline);
 		}
@@ -76,9 +75,9 @@ public class ComponentInstanceStringConverter extends Thread {
 	 * @return The string representation of the tree deduced from the pipeline
 	 *
 	 */
-	public String makeStringTreeRepresentation(final ComponentInstance pipeline) {
+	public String makeStringTreeRepresentation(final IComponentInstance pipeline) {
 		List<String> pipelineBranches = new ArrayList<>();
-		ComponentInstance classifierCI;
+		IComponentInstance classifierCI;
 
 		// Component is pipeline
 		if (pipeline == null) {
@@ -87,17 +86,17 @@ public class ComponentInstanceStringConverter extends Thread {
 		}
 
 		if (pipeline.getComponent().getName().equals("pipeline")) {
-			ComponentInstance preprocessorCI = pipeline.getSatisfactionOfRequiredInterfaces().get("preprocessor");
+			IComponentInstance preprocessorCI = pipeline.getSatisfactionOfRequiredInterface("preprocessor").iterator().next();
 
 			if (preprocessorCI != null) {
 				// Characterize searcher
-				this.addCharacterizationOfPipelineElement(pipelineBranches, preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search"));
+				this.addCharacterizationOfPipelineElement(pipelineBranches, preprocessorCI.getSatisfactionOfRequiredInterface("search").iterator().next());
 
 				// Characterize evaluator
-				this.addCharacterizationOfPipelineElement(pipelineBranches, preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval"));
+				this.addCharacterizationOfPipelineElement(pipelineBranches, preprocessorCI.getSatisfactionOfRequiredInterface("eval").iterator().next());
 			}
 
-			classifierCI = pipeline.getSatisfactionOfRequiredInterfaces().get("classifier");
+			classifierCI = pipeline.getSatisfactionOfRequiredInterface("classifier").iterator().next();
 
 			// Component is just a classifier
 		} else {
@@ -130,7 +129,7 @@ public class ComponentInstanceStringConverter extends Thread {
 	 * @param componentInstance
 	 *            The pipeline element to be characterized
 	 */
-	protected void addCharacterizationOfPipelineElement(final List<String> pipelineBranches, final ComponentInstance componentInstance) {
+	protected void addCharacterizationOfPipelineElement(final List<String> pipelineBranches, final IComponentInstance componentInstance) {
 		if (componentInstance != null) {
 			String wekaName = componentInstance.getComponent().getName();
 			// Get generalization
@@ -153,7 +152,7 @@ public class ComponentInstanceStringConverter extends Thread {
 	 *            The ComponentInstance for which to get the parameters
 	 * @return A list of parameter descriptions represented as Strings
 	 */
-	protected List<String> getParametersForComponentInstance(final ComponentInstance componentInstance) {
+	protected List<String> getParametersForComponentInstance(final IComponentInstance componentInstance) {
 		List<String> parameters = new ArrayList<>();
 
 		// Get Parameters of base classifier if this is a meta classifier
@@ -162,14 +161,14 @@ public class ComponentInstanceStringConverter extends Thread {
 				// so far, only have the "K" interface & this has no param so can directly get
 				List<String> kernelFunctionCharacterisation = new ArrayList<>();
 				kernelFunctionCharacterisation.add(requiredInterface);
-				kernelFunctionCharacterisation.addAll(this.ontologyConnector.getAncestorsOfAlgorithm(component.getComponent().getName()));
+				kernelFunctionCharacterisation.addAll(this.ontologyConnector.getAncestorsOfAlgorithm(component.iterator().next().getComponent().getName()));
 				parameters.add(TreeRepresentationUtils.addChildrenToNode(requiredInterface, Arrays.asList(TreeRepresentationUtils.makeRepresentationForBranch(kernelFunctionCharacterisation))));
 			});
 		}
 
 		// Get other parameters
 
-		for (Parameter parameter : componentInstance.getComponent().getParameters()) {
+		for (IParameter parameter : componentInstance.getComponent().getParameters()) {
 			// Check if the parameter even has a value!
 			String parameterName = parameter.getName();
 			if (!componentInstance.getParameterValues().containsKey(parameterName)) {
@@ -196,8 +195,8 @@ public class ComponentInstanceStringConverter extends Thread {
 		return parameters;
 	}
 
-	private void resolveNumericParameter(final ComponentInstance componentInstance, final Parameter parameter, final String parameterName, final List<String> parameterRefinement) {
-		ParameterRefinementConfiguration parameterRefinementConfiguration = this.componentParameters.get(componentInstance.getComponent()).get(parameter);
+	private void resolveNumericParameter(final IComponentInstance componentInstance, final IParameter parameter, final String parameterName, final List<String> parameterRefinement) {
+		INumericParameterRefinementConfiguration parameterRefinementConfiguration = this.componentParameters.getRefinement(componentInstance.getComponent(), parameter);
 		NumericParameterDomain parameterDomain = ((NumericParameterDomain) parameter.getDefaultDomain());
 		Interval currentInterval = null;
 		Interval nextInterval = new Interval(parameterDomain.getMin(), parameterDomain.getMax());

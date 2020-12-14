@@ -4,157 +4,157 @@
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_HorizontalRunLengthSmoothing",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_ImageQuantization",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_ImageNormalization",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_MorphologicGradientImage",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_KirschCompassEdgeDetector",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_IsotropicCompassEdgeDetector",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_RobertsCrossEdgeDetector",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_SobelCompassEdgeDetector",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_WeightedMedian",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },{
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_NonePreprocessor",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_GaussianBlur",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_SobelEdgeDetector",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   }, {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_ExtraBoundary",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_DifferenceEdgeDetector",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_Erosion",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_FastVariance",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_Emboss",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_GaborFilter",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_HighBoost",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter_HomogenityEdgeDetector",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicPreprocessor", "Preprocessor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   },  {
     "name" : "autofe.algorithm.hasco.filter.image.LocalBinaryPatternFilter",
     "requiredInterface" : [ ],
     "providedInterface" : [ "BasicExtractor", "AbstractFilter"],
-    "parameter" : [ ],
+    "parameters" : [ ],
     "dependencies" : [ ]
   }, {
   	"name": "CatalanoExtractor_NoneExtractor",
   	"requiredInterface": [],
   	"providedInterface": ["BasicExtractor", "AbstractFilter"],
-  	"parameter": [],
+  	"parameters": [],
   	"dependencies": []
   }, {
   	"name": "CatalanoExtractor_UniformLocalBinaryPattern",
   	"requiredInterface": [],
   	"providedInterface": ["BasicExtractor", "AbstractFilter"],
-  	"parameter": [],
+  	"parameters": [],
   	"dependencies": []
   }, {
   	"name": "CatalanoExtractor_RobustLocalBinaryPattern",
   	"requiredInterface": [],
   	"providedInterface": ["BasicExtractor", "AbstractFilter"],
-  	"parameter": [],
+  	"parameters": [],
   	"dependencies": []
   }, {
   	"name": "PCA",
   	"requiredInterface": [],
   	"providedInterface": ["BasicExtractor", "AbstractFilter"],
-  	"parameter": [],
+  	"parameters": [],
   	"dependencies": []
   }, {
   	"name": "autofe.algorithm.hasco.filter.image.PretrainedNN",
   	"requiredInterface": [],
   	"providedInterface": ["PretrainedNN", "AbstractFilter"],
-  	"parameter": [{
+  	"parameters": [{
     	"name" : "net",
     	"type" : "cat",
     	"default" : "VGG16",

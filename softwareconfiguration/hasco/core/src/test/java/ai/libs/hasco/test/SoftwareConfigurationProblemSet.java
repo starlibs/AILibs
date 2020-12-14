@@ -6,8 +6,8 @@ import java.util.Random;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithmTestProblemSet;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
+import ai.libs.jaicore.components.exceptions.UnresolvableRequiredInterfaceException;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.jaicore.components.serialization.UnresolvableRequiredInterfaceException;
 
 public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<RefinementConfiguredSoftwareConfigurationProblem<Double>> {
 
@@ -46,6 +46,14 @@ public class SoftwareConfigurationProblemSet extends AAlgorithmTestProblemSet<Re
 	public RefinementConfiguredSoftwareConfigurationProblem<Double> getSimpleRecursiveProblemInput() throws AlgorithmTestProblemSetCreationException {
 		try {
 			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/simplerecursiveproblem.json"), "IFace", n -> this.random.nextDouble() * 0.1);
+		} catch (UnresolvableRequiredInterfaceException | IOException e) {
+			throw new AlgorithmTestProblemSetCreationException(e);
+		}
+	}
+
+	public RefinementConfiguredSoftwareConfigurationProblem<Double> getMediumRecursiveProblemInput() throws AlgorithmTestProblemSetCreationException {
+		try {
+			return new RefinementConfiguredSoftwareConfigurationProblem<>(new File(PATH_TO_SOFTWARECONFIG + "testrsc/mediumrecursiveproblem.json"), "IFace", n -> this.random.nextDouble() * 0.1);
 		} catch (UnresolvableRequiredInterfaceException | IOException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}

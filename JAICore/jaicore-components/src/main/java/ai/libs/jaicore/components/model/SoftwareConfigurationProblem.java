@@ -8,18 +8,19 @@ import java.util.Map;
 
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 
-import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IComponentRepository;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class SoftwareConfigurationProblem<V extends Comparable<V>> {
-	private final Collection<Component> components;
+	private final IComponentRepository components;
 	private final String requiredInterface;
-	private final IObjectEvaluator<ComponentInstance, V> compositionEvaluator;
+	private final IObjectEvaluator<IComponentInstance, V> compositionEvaluator;
 
-	public SoftwareConfigurationProblem(final File configurationFile, final String requiredInerface, final IObjectEvaluator<ComponentInstance, V> compositionEvaluator) throws IOException {
-		ComponentLoader cl = new ComponentLoader();
-		cl.loadComponents(configurationFile);
-		this.components = cl.getComponents();
+	public SoftwareConfigurationProblem(final File configurationFile, final String requiredInerface, final IObjectEvaluator<IComponentInstance, V> compositionEvaluator) throws IOException {
+		this.components = new ComponentSerialization().deserializeRepository(configurationFile);
 		this.requiredInterface = requiredInerface;
 		if (requiredInerface == null || requiredInerface.isEmpty()) {
 			throw new IllegalArgumentException("Invalid required interface \"" + requiredInerface + "\"");
@@ -27,9 +28,9 @@ public class SoftwareConfigurationProblem<V extends Comparable<V>> {
 		this.compositionEvaluator = compositionEvaluator;
 	}
 
-	public SoftwareConfigurationProblem(final Collection<Component> components, final String requiredInterface, final IObjectEvaluator<ComponentInstance, V> compositionEvaluator) {
+	public SoftwareConfigurationProblem(final Collection<? extends IComponent> components, final String requiredInterface, final IObjectEvaluator<IComponentInstance, V> compositionEvaluator) {
 		super();
-		this.components = components;
+		this.components = new ComponentRepository(components);
 		this.requiredInterface = requiredInterface;
 		this.compositionEvaluator = compositionEvaluator;
 		if (requiredInterface == null || requiredInterface.isEmpty()) {
@@ -41,7 +42,7 @@ public class SoftwareConfigurationProblem<V extends Comparable<V>> {
 		this(problem.getComponents(), problem.requiredInterface, problem.compositionEvaluator);
 	}
 
-	public Collection<Component> getComponents() {
+	public IComponentRepository getComponents() {
 		return this.components;
 	}
 
@@ -49,7 +50,7 @@ public class SoftwareConfigurationProblem<V extends Comparable<V>> {
 		return this.requiredInterface;
 	}
 
-	public IObjectEvaluator<ComponentInstance, V> getCompositionEvaluator() {
+	public IObjectEvaluator<IComponentInstance, V> getCompositionEvaluator() {
 		return this.compositionEvaluator;
 	}
 

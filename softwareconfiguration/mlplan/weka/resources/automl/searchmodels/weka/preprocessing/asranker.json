@@ -1,0 +1,30 @@
+{
+	"repository": "weka.attributeSelection.AttributeSelection.ranker",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.attributeSelection.AttributeSelection.ranker",
+			"providedInterface": [
+				"AbstractPreprocessor"
+			],
+			"requiredInterface": [
+				{
+					"id": "eval",
+					"name": "rankBasedEvaluator"
+				},
+				{
+					"id": "search",
+					"name": "rankBasedSearcher"
+				}
+			],
+			"parameters": [
+				{
+					"name": "M",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

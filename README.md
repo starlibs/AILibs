@@ -26,14 +26,14 @@ For example, to bind in our machine learning library `jaicore-ml`, you can do th
 <dependency>
   <groupId>ai.libs</groupId>
   <artifactId>jaicore-ml</artifactId>
-  <version>0.2.3</version>
+  <version>0.2.4</version>
 </dependency>
 ```
 
 ### Gradle 
 ```gradle
 dependencies {
-    implementation 'ai.libs:jaicore-ml:0.2.3'
+    implementation 'ai.libs:jaicore-ml:0.2.4'
 }
 ```
 For more details, refer to the [documentation](https://starlibs.github.io/AILibs/) of the respective module.

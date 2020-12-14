@@ -28,7 +28,9 @@ implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithS
 	public GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPBinaryTelescopeNode, String, Double> encodeProblem(final EnhancedTTSP problem) {
 		return new GraphSearchWithSubpathEvaluationsInput<>(new EnhancedTTSPTelescopeGraphGenerator(problem), new EnhancedTTSPBinaryTelescopeSolutionPredicate(problem), path -> {
 			ShortList tour = this.decodeSolution(path);
-			return this.linkFunction.applyAsDouble(problem.getSolutionEvaluator().evaluate(tour));
+			double score = problem.getSolutionEvaluator().evaluate(tour);
+			double linkedScore = this.linkFunction.applyAsDouble(score);
+			return linkedScore;
 		});
 	}
 

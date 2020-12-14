@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.planning.classical.problems.strips.Operation;
@@ -17,6 +19,16 @@ public class STNPlanningDomain implements Serializable {
 
 	public STNPlanningDomain(final Collection<? extends Operation> operations, final Collection<? extends Method> methods) {
 		super();
+		Set<String> names = new HashSet<>();
+		for (Method m : methods) {
+			if (m.getName().contains("-")) {
+				throw new IllegalArgumentException("Illegal method name " + m.getName() + ". Currently no support for methods with hyphens in the name. Please use only [a-zA-z0-9] to name methods!");
+			}
+			if (names.contains(m.getName())) {
+				throw new IllegalArgumentException("Double definition of method " + m.getName());
+			}
+			names.add(m.getName());
+		}
 		this.operations = operations;
 		this.methods = methods;
 		this.checkValidity();

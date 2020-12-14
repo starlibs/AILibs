@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -30,12 +31,14 @@ import ai.libs.hasco.core.reduction.planning2search.IHASCOPlanningReduction;
 import ai.libs.hasco.core.reduction.softcomp2planning.HASCOReductionSolutionEvaluator;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.model.CompositionProblemUtil;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.model.UnparametrizedComponentInstance;
 import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithm;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedGraphSearchBasedPlan;
@@ -77,9 +80,11 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 	private final Set<UnparametrizedComponentInstance> returnedUnparametrizedComponentInstances = new HashSet<>();
 	private Map<EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>, HASCOSolutionEvent<V>> hascoSolutionEventCache = new ConcurrentHashMap<>();
 	private boolean createComponentInstancesFromNodesInsteadOfPlans = false;
+	private AtomicBoolean cancelCompleted = new AtomicBoolean();
+	private final ComponentSerialization serializer = new ComponentSerialization();
 
 	/* runtime variables of algorithm */
-	private final TimeRecordingObjectEvaluator<ComponentInstance, V> timeGrabbingEvaluationWrapper;
+	private final TimeRecordingObjectEvaluator<IComponentInstance, V> timeGrabbingEvaluationWrapper;
 
 	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver,
 			final IOptimalPathInORGraphSearchFactory<IPathSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory) {
@@ -185,10 +190,12 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 						throw new IllegalStateException("The time recording object evaluator has no information about component instance " + objectInstance);
 					}
 					score = solutionEvent.getSolutionCandidate().getScore();
-					HASCO.this.logger.info("Received new solution with score {} from search, communicating this solution to the HASCO listeners. Number of returned unparametrized solutions is now {}/{}.", score,
-							HASCO.this.returnedUnparametrizedComponentInstances.size(), HASCO.this.numUnparametrizedSolutions);
 					IEvaluatedGraphSearchBasedPlan<N, A, V> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score, searchPath);
 					HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan, HASCO.this.timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
+					if (HASCO.this.logger.isInfoEnabled()) {
+						HASCO.this.logger.info("Received new solution {} with score {} from search, communicating this solution to the HASCO listeners. Number of returned unparametrized solutions is now {}/{}.", HASCO.this.serializer.serialize(solution.getComponentInstance()), score,
+								HASCO.this.returnedUnparametrizedComponentInstances.size(), HASCO.this.numUnparametrizedSolutions);
+					}
 					HASCO.this.updateBestSeenSolution(solution);
 					HASCO.this.listOfAllRecognizedSolutions.add(solution);
 					HASCOSolutionEvent<V> hascoSolutionEvent = new HASCOSolutionEvent<>(HASCO.this, solution);
@@ -260,6 +267,10 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 		this.logger.info("Finished, now terminating. Thread interruption flag is {}", Thread.currentThread().isInterrupted());
 		this.terminate();
 		this.logger.info("Cancel completed. Thread interruption flag is {}", Thread.currentThread().isInterrupted());
+		synchronized (this.cancelCompleted) {
+			this.cancelCompleted.set(true);
+			this.cancelCompleted.notifyAll();
+		}
 	}
 
 	public IHASCOPlanningReduction<N, A> getPlanningGraphGeneratorDeriver() {
@@ -308,6 +319,11 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger for {} with name {}", this.getId(), name);
 		super.setLoggerName(this.loggerName + "._swConfigAlgo");
+
+		/* set logger in planning problem evaluator */
+		((HASCOReductionSolutionEvaluator<?>)this.planningProblem.getPlanEvaluator()).setLoggerName(name + ".planevaluator");
+
+		/* set logger in benchmark */
 		if (this.getInput().getCompositionEvaluator() instanceof ILoggingCustomizable) {
 			this.logger.info("Setting logger of HASCO solution evaluator {} to {}.solutionevaluator.", this.getInput().getCompositionEvaluator().getClass().getName(), name);
 			((ILoggingCustomizable) this.getInput().getCompositionEvaluator()).setLoggerName(name + ".solutionevaluator");
@@ -338,5 +354,9 @@ public class HASCO<N, A, V extends Comparable<V>> extends SoftwareConfigurationA
 				listener.accept(e);
 			}
 		});
+	}
+
+	public AtomicBoolean getCancelCompleted() {
+		return this.cancelCompleted;
 	}
 }

@@ -11,7 +11,7 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.abstractVersioning;
 //import java.util.List;
 //import java.util.Set;
 //
-//import org.junit.Test;
+//import org.junit.jupiter.api.Test;
 //
 //import jaicore.graph.IGraphAlgorithmListener;
 //import jaicore.search.algorithms.EvaluatedSearchAlgorithmSolution;

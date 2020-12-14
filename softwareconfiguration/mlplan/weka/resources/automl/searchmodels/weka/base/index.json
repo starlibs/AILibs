@@ -1,5 +1,5 @@
 {
-	"repository": "weka_base-index",
+	"repository": "base-index",
 	"include": [
 		"./bayesnet.json",
 		"./decisionstump.json",
@@ -7,15 +7,9 @@
 		"./ibk.json",
 		"./j48.json",
 		"./jrip.json",
-		"./kernel/normalizedpolykernel.json",
-		"./kernel/polykernel.json",
-		"./kernel/puk.json",
-		"./kernel/rbfkernel.json",
 		"./kstar.json",
 		"./lmt.json",
 		"./logistic.json",
-		"./m5p.json",
-		"./m5rules.json",
 		"./multilayerperceptron.json",
 		"./naivebayes.json",
 		"./naivebayesmultinomial.json",
@@ -24,9 +18,9 @@
 		"./randomforest.json",
 		"./randomtree.json",
 		"./reptree.json",
-		"./sgd.json",
 		"./simplelinearregression.json",
 		"./simplelogistic.json",
+		"./smo_kernel/index.json",
 		"./smo.json",
 		"./votedperceptron.json",
 		"./zeror.json"

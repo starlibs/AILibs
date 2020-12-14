@@ -5,7 +5,7 @@
 			"name": "A",
 			"requiredInterface": [],
 			"providedInterface": [ "IFace" ],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "c",
 					"type": "double-log",

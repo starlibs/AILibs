@@ -10,7 +10,7 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
 import ai.libs.mlplan.cli.MLPlanCLI;
 import ai.libs.mlplan.cli.module.UnsupportedModuleConfigurationException;
-import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
+import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 
 public class MLPlan4WEKARegressionCLIModule extends AMLPlan4RegressionCLIModule {
 

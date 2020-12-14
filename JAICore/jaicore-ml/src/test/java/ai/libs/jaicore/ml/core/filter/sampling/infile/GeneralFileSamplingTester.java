@@ -6,20 +6,19 @@ import static org.junit.Assert.assertTrue;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.junit.AfterClass;
-import org.junit.Test;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.Arguments;
 import org.openml.apiconnector.io.OpenmlConnector;
 
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
+import ai.libs.jaicore.basic.algorithm.IAlgorithmTestProblemSet;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.AFileSamplingAlgorithm;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.ArffUtilities;
 
@@ -35,19 +34,9 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 	protected static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 	protected static final String OUTPUT_FILE_NAME = System.getProperty("user.home") + File.separator + UUID.randomUUID().toString() + ".arff";
 
-	@Parameters(name = "problemset = {0}")
-	public static Collection<Object[]> data() {
-		List<Object> problemSets = new ArrayList<>();
-
-		problemSets.add(new FileBasedSamplingAlgorithmTestProblemSet());
-		List<Collection<Object>> input = new ArrayList<>();
-		input.add(problemSets);
-
-		Object[][] data = new Object[problemSets.size()][1];
-		for (int i = 0; i < data.length; i++) {
-			data[i][0] = problemSets.get(i);
-		}
-		return Arrays.asList(data);
+	public static Stream<Arguments> getProblemSets() {
+		IAlgorithmTestProblemSet<?> problemSet = new FileBasedSamplingAlgorithmTestProblemSet();
+		return Stream.of(Arguments.of(problemSet));
 	}
 
 	/**
@@ -80,7 +69,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 
 	private void testSampleSize(final File input) throws Exception {
 		AFileSamplingAlgorithm samplingAlgorithm = (AFileSamplingAlgorithm) this.getAlgorithm(input);
-		samplingAlgorithm.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		samplingAlgorithm.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		this.logger.info("Testing {}.", samplingAlgorithm.getClass().getName());
 		int inputSize = ArffUtilities.countDatasetEntries(input, true);
 		int sampleSize = (int) (inputSize * DEFAULT_SAMPLE_FRACTION);

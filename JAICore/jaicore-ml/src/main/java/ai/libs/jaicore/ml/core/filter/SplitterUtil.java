@@ -10,6 +10,8 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.common.reconstruction.IReconstructible;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
 import ai.libs.jaicore.ml.core.dataset.splitter.ReproducibleSplit;
@@ -23,8 +25,19 @@ public class SplitterUtil {
 	}
 
 	public static <D extends ILabeledDataset<?>> List<D> getLabelStratifiedTrainTestSplit(final D dataset, final long seed, final double relativeTrainSize) throws SplitFailedException, InterruptedException {
+		return getLabelStratifiedTrainTestSplit(dataset, seed, relativeTrainSize, null);
+
+	}
+	public static <D extends ILabeledDataset<?>> List<D> getLabelStratifiedTrainTestSplit(final D dataset, final long seed, final double relativeTrainSize, final String loggerName) throws SplitFailedException, InterruptedException {
+		Logger logger = LoggerFactory.getLogger(loggerName != null ? loggerName : SplitterUtil.class.getName());
 		boolean isReproducible = dataset instanceof IReconstructible;
-		List<D> folds = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<D>(), relativeTrainSize, new Random(seed)).split(dataset);
+		logger.info("Creating splitter");
+		FilterBasedDatasetSplitter<D> splitter = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), relativeTrainSize, new Random(seed));
+		if (loggerName != null) {
+			logger.info("Setting loggername of splitter to {}", loggerName);
+			splitter.setLoggerName(loggerName);
+		}
+		List<D> folds = splitter.split(dataset);
 		if (!isReproducible) {
 			return folds;
 		}

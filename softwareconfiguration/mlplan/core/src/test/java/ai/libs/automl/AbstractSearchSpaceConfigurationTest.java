@@ -1,62 +1,63 @@
 package ai.libs.automl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.hasco.builder.HASCOBuilder;
 import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFD;
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.basic.FileUtil;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
-import ai.libs.jaicore.components.serialization.CompositionSerializer;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logging.LoggerUtil;
+import ai.libs.jaicore.test.LongTest;
 import ai.libs.mlplan.core.IProblemType;
 
-public abstract class AbstractSearchSpaceConfigurationTest {
+public abstract class AbstractSearchSpaceConfigurationTest extends ATest {
 
 	private static final boolean FAIL_IMMEDIATELY = true;
-
-	protected Logger LOGGER = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER);
-
-	protected final IProblemType<?> problemType;
-	protected final List<ComponentInstance> allComponentInstances;
 	protected StringBuilder stringBuilder;
-	protected final File searchSpaceFile;
+	protected final ComponentSerialization compSerializer = new ComponentSerialization();
 
-	public AbstractSearchSpaceConfigurationTest(final IProblemType<?> problemType) throws IOException {
-		this.problemType = problemType;
-		this.searchSpaceFile = FileUtil.getExistingFileWithHighestPriority(this.problemType.getSearchSpaceConfigFileFromResource(), this.problemType.getSearchSpaceConfigFromFileSystem());
-		this.allComponentInstances = new ArrayList<>(ComponentUtil.getAllAlgorithmSelectionInstances(this.problemType.getRequestedInterface(), new ComponentLoader(this.searchSpaceFile).getComponents()));
-
+	public File getSearchSpaceFile(final IProblemType<?> problemType) {
+		return FileUtil.getExistingFileWithHighestPriority(problemType.getSearchSpaceConfigFileFromResource(), problemType.getSearchSpaceConfigFromFileSystem());
 	}
 
-	@Test
-	public void testNoExceptionsInGraphGeneration() throws Exception {
-		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(this.searchSpaceFile, this.problemType.getRequestedInterface(), ci -> {
-			this.LOGGER.info("Evaluating ci {}", CompositionSerializer.serializeComponentInstance(ci));
+	public Collection<IComponentInstance> getComponentInstances(final IProblemType<?> problemType) throws IOException {
+		return new ArrayList<>(ComponentUtil.getAllAlgorithmSelectionInstances(problemType.getRequestedInterface(), this.compSerializer.deserializeRepository(this.getSearchSpaceFile(problemType))));
+	}
+
+	public abstract void prepare(IProblemType<?> problemType) throws Exception;
+
+	@LongTest
+	@ParameterizedTest(name="Test no exceptions in generation of graph for {0}")
+	@MethodSource("getProblemTypes")
+	public void testNoExceptionsInGraphGeneration(final IProblemType<?> problemType) throws Exception {
+		this.prepare(problemType);
+		File searchSpaceFile = this.getSearchSpaceFile(problemType);
+		RefinementConfiguredSoftwareConfigurationProblem<Double> problem = new RefinementConfiguredSoftwareConfigurationProblem<>(searchSpaceFile, problemType.getRequestedInterface(), ci -> {
+			this.logger.info("Evaluating ci {}", this.compSerializer.serialize(ci));
 			try {
-				ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner = this.problemType.getLearnerFactory().getComponentInstantiation(ci);
+				problemType.getLearnerFactory().getComponentInstantiation(ci);
 			} catch (ComponentInstantiationFailedException e) {
 				e.printStackTrace();
 				return Double.MAX_VALUE;
@@ -68,42 +69,45 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		hasco.setTimeout(new Timeout(30, TimeUnit.SECONDS));
 		try {
 			hasco.call();
-		}
-		catch (AlgorithmTimeoutedException e) {
+		} catch (AlgorithmTimeoutedException e) {
 			/* expected behavior */
 		}
 		assertTrue(true);
 	}
 
-	@Test
-	public void testExecutabilityOfDefaultConfigs() throws Exception {
-		this.LOGGER.info("Testing default configurations for {}", this.problemType.getName());
+	@LongTest
+	@ParameterizedTest(name="Test executability of default configs for {0}")
+	@MethodSource("getProblemTypes")
+	public void testExecutabilityOfDefaultConfigs(final IProblemType<?> problemType) throws Exception {
+		this.logger.info("Testing default configurations for {}", problemType.getName());
+		this.prepare(problemType);
 		int numberOfPipelinesFound = 0;
 		int numberOfErrorsFound = 0;
 		this.stringBuilder = new StringBuilder();
 
-		int n = this.allComponentInstances.size();
+		Collection<IComponentInstance> allComponentInstances = this.getComponentInstances(problemType);
+		int n = allComponentInstances.size();
 		int i = 0;
-		for (ComponentInstance ciToInstantiate : this.allComponentInstances) {
+		for (IComponentInstance ciToInstantiate : allComponentInstances) {
 			i++;
-			this.LOGGER.info("Considering composition {}/{}", i, n);
+			this.logger.info("Considering composition {}/{}", i, n);
 
-			List<ComponentInstance> queue = new LinkedList<>();
+			List<IComponentInstance> queue = new LinkedList<>();
 			queue.add(ciToInstantiate);
-			this.LOGGER.trace("Sample parameters for contained components.");
+			this.logger.trace("Sample parameters for contained components.");
 			while (!queue.isEmpty()) {
-				ComponentInstance currentCI = queue.remove(0);
+				IComponentInstance currentCI = queue.remove(0);
 				if (!currentCI.getComponent().getParameters().isEmpty()) {
 					ComponentInstance parametrization = null;
 					try {
 						parametrization = ComponentUtil.getDefaultParameterizationOfComponent(currentCI.getComponent());
 						currentCI.getParameterValues().putAll(parametrization.getParameterValues());
 					} catch (Exception e) {
-						this.LOGGER.warn("Could not instantiate component instance {} with max parameters", ciToInstantiate, e);
+						this.logger.warn("Could not instantiate component instance {} with max parameters", ciToInstantiate, e);
 					}
 				}
 				if (!currentCI.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-					queue.addAll(currentCI.getSatisfactionOfRequiredInterfaces().values());
+					currentCI.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> queue.addAll(cil));
 				}
 			}
 			if (ciToInstantiate.getComponent().getRequiredInterfaces().size() == ciToInstantiate.getSatisfactionOfRequiredInterfaces().size()) {
@@ -120,38 +124,42 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		this.stringBuilder.append(numberOfErrorsFound);
 		this.stringBuilder.append(" errors found.");
 
-		assertEquals(this.stringBuilder.toString(), 0, numberOfErrorsFound, 0.0001);
+		assertEquals(0, numberOfErrorsFound, 0.0001, this.stringBuilder.toString());
 	}
 
-	@Test
-	public void testExecutabilityOfMinConfigs() throws Exception {
-		this.LOGGER.info("Testing minimum configurations for {}", this.problemType.getName());
+	@LongTest
+	@ParameterizedTest(name="Test executability of min configs for {0}")
+	@MethodSource("getProblemTypes")
+	public void testExecutabilityOfMinConfigs(final IProblemType<?> problemType) throws Exception {
+		this.logger.info("Testing minimum configurations for {}", problemType.getName());
+		this.prepare(problemType);
 		int numberOfPipelinesFound = 0;
 		int numberOfErrorsFound = 0;
 		this.stringBuilder = new StringBuilder();
 
-		int n = this.allComponentInstances.size();
+		Collection<IComponentInstance> allComponentInstances = this.getComponentInstances(problemType);
+		int n = allComponentInstances.size();
 		int i = 0;
-		for (ComponentInstance ciToInstantiate : this.allComponentInstances) {
+		for (IComponentInstance ciToInstantiate : allComponentInstances) {
 
 			/* compute version of composition in which all parameters are set to their minimum */
 			i++;
-			this.LOGGER.info("Considering composition {}/{}", i, n);
-			List<ComponentInstance> queue = new LinkedList<>();
+			this.logger.info("Considering composition {}/{}", i, n);
+			List<IComponentInstance> queue = new LinkedList<>();
 			queue.add(ciToInstantiate);
 			while (!queue.isEmpty()) {
-				ComponentInstance currentCI = queue.remove(0);
+				IComponentInstance currentCI = queue.remove(0);
 				if (!currentCI.getComponent().getParameters().isEmpty()) {
-					ComponentInstance parametrization = null;
+					IComponentInstance parametrization = null;
 					try {
 						parametrization = ComponentUtil.minParameterizationOfComponent(currentCI.getComponent());
 						currentCI.getParameterValues().putAll(parametrization.getParameterValues());
 					} catch (Exception e) {
-						this.LOGGER.error("Could not instantiate component instance {} with min parameters", ciToInstantiate, e);
+						this.logger.error("Could not instantiate component instance {} with min parameters", ciToInstantiate, e);
 					}
 				}
 				if (!currentCI.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-					queue.addAll(currentCI.getSatisfactionOfRequiredInterfaces().values());
+					currentCI.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> queue.addAll(cil));
 				}
 			}
 			if (ciToInstantiate.getComponent().getRequiredInterfaces().size() == ciToInstantiate.getSatisfactionOfRequiredInterfaces().size()) {
@@ -168,41 +176,45 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		this.stringBuilder.append(numberOfErrorsFound);
 		this.stringBuilder.append(" errors found.");
 
-		assertEquals(this.stringBuilder.toString(), 0, numberOfErrorsFound, 0.0001);
+		assertEquals(0, numberOfErrorsFound, 0.0001, this.stringBuilder.toString());
 	}
 
-	@Test
-	public void testExecutabilityOfMaxConfigs() throws Exception {
-		this.LOGGER.info("Testing maximum configurations for {}", this.problemType.getName());
+	@LongTest
+	@ParameterizedTest(name="Test executability of max configs for {0}")
+	@MethodSource("getProblemTypes")
+	public void testExecutabilityOfMaxConfigs(final IProblemType<?> problemType) throws Exception {
+		this.logger.info("Testing maximum configurations for {}", problemType.getName());
+		this.prepare(problemType);
 		int numberOfPipelinesFound = 0;
 		int numberOfErrorsFound = 0;
 		this.stringBuilder = new StringBuilder();
 
-		int n = this.allComponentInstances.size();
+		Collection<IComponentInstance> allComponentInstances = this.getComponentInstances(problemType);
+		int n = allComponentInstances.size();
 		int i = 0;
-		for (ComponentInstance ciToInstantiate : this.allComponentInstances) {
+		for (IComponentInstance ciToInstantiate : allComponentInstances) {
 			i++;
-			this.LOGGER.info("Considering composition {}/{}", i, n);
+			this.logger.info("Considering composition {}/{}", i, n);
 
-			List<ComponentInstance> queue = new LinkedList<>();
+			List<IComponentInstance> queue = new LinkedList<>();
 			queue.add(ciToInstantiate);
 
-			this.LOGGER.trace("Sample parameters for contained components.");
+			this.logger.trace("Sample parameters for contained components.");
 			while (!queue.isEmpty()) {
-				ComponentInstance currentCI = queue.remove(0);
+				IComponentInstance currentCI = queue.remove(0);
 				if (!currentCI.getComponent().getParameters().isEmpty()) {
-					ComponentInstance parametrization = null;
+					IComponentInstance parametrization = null;
 					while (parametrization == null) {
 						try {
 							parametrization = ComponentUtil.maxParameterizationOfComponent(currentCI.getComponent());
 						} catch (Exception e) {
-							this.LOGGER.warn("Could not instantiate component instance {} with max parameters", ciToInstantiate, e);
+							this.logger.warn("Could not instantiate component instance {} with max parameters", ciToInstantiate, e);
 						}
 					}
 					currentCI.getParameterValues().putAll(parametrization.getParameterValues());
 				}
 				if (!currentCI.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-					queue.addAll(currentCI.getSatisfactionOfRequiredInterfaces().values());
+					currentCI.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> queue.addAll(cil));
 				}
 			}
 			if (ciToInstantiate.getComponent().getRequiredInterfaces().size() == ciToInstantiate.getSatisfactionOfRequiredInterfaces().size()) {
@@ -219,41 +231,45 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		this.stringBuilder.append(numberOfErrorsFound);
 		this.stringBuilder.append(" errors found.");
 
-		assertEquals(this.stringBuilder.toString(), 0, numberOfErrorsFound, 0.0001);
+		assertEquals(0, numberOfErrorsFound, 0.0001, this.stringBuilder.toString());
 	}
 
-	@Test
-	public void testExecutabilityOfCatConfigs() throws Exception {
-		this.LOGGER.info("Testing categorical configurations for {}", this.problemType.getName());
+
+	@ParameterizedTest(name="Test executability of cat configs for {0}")
+	@MethodSource("getProblemTypes")
+	public void testExecutabilityOfCatConfigs(final IProblemType<?> problemType) throws Exception {
+		this.logger.info("Testing categorical configurations for {}", problemType.getName());
+		this.prepare(problemType);
 		int numberOfPipelinesFound = 0;
 		int numberOfErrorsFound = 0;
 		this.stringBuilder = new StringBuilder();
 
-		for (ComponentInstance componentInstance : this.allComponentInstances) {
-			List<ComponentInstance> componentInstanceClonesWithAllPosibleCategoricalParameters = new ArrayList<>();
-			List<ComponentInstance> queue = new LinkedList<>();
+		Collection<IComponentInstance> allComponentInstances = this.getComponentInstances(problemType);
+		for (IComponentInstance componentInstance : allComponentInstances) {
+			List<IComponentInstance> componentInstanceClonesWithAllPosibleCategoricalParameters = new ArrayList<>();
+			List<IComponentInstance> queue = new LinkedList<>();
 			queue.add(componentInstance);
 			while (!queue.isEmpty()) {
-				ComponentInstance currentCI = queue.remove(0);
+				IComponentInstance currentCI = queue.remove(0);
 				if (!currentCI.getComponent().getParameters().isEmpty()) {
-					List<ComponentInstance> parameterizedComponentInstances = new ArrayList<>();
+					List<IComponentInstance> parameterizedComponentInstances = new ArrayList<>();
 					String currentComponentName = currentCI.getComponent().getName();
 					try {
 						parameterizedComponentInstances.addAll(ComponentUtil.categoricalParameterizationsOfComponent(currentCI.getComponent()));
 					} catch (Exception e) {
-						this.LOGGER.warn("Could not instantiate component instance {} with categorical parameters", componentInstance, e);
+						this.logger.warn("Could not instantiate component instance {} with categorical parameters", componentInstance, e);
 					}
-					for (ComponentInstance parameterization : parameterizedComponentInstances) {
-						ComponentInstance option = new ComponentInstance(componentInstance);
-						List<ComponentInstance> optionQueue = new LinkedList<>();
+					for (IComponentInstance parameterization : parameterizedComponentInstances) {
+						IComponentInstance option = new ComponentInstance((ComponentInstance) componentInstance);
+						List<IComponentInstance> optionQueue = new LinkedList<>();
 						optionQueue.add(option);
 						while (!optionQueue.isEmpty()) {
-							ComponentInstance currentOption = optionQueue.remove(0);
+							IComponentInstance currentOption = optionQueue.remove(0);
 							if (!currentOption.getComponent().getParameters().isEmpty() && currentOption.getComponent().getName().equals(currentComponentName)) {
 								currentOption.getParameterValues().putAll(parameterization.getParameterValues());
 							}
 							if (!currentOption.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-								optionQueue.addAll(currentOption.getSatisfactionOfRequiredInterfaces().values());
+								currentOption.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> optionQueue.addAll(cil));
 							}
 
 						}
@@ -261,10 +277,10 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 					}
 				}
 				if (currentCI.getComponent().getRequiredInterfaces().size() == currentCI.getSatisfactionOfRequiredInterfaces().size()) {
-					queue.addAll(currentCI.getSatisfactionOfRequiredInterfaces().values());
+					currentCI.getSatisfactionOfRequiredInterfaces().values().forEach(cil -> queue.addAll(cil));
 				}
 			}
-			for (ComponentInstance instance : componentInstanceClonesWithAllPosibleCategoricalParameters.stream().distinct().collect(Collectors.toList())) {
+			for (IComponentInstance instance : componentInstanceClonesWithAllPosibleCategoricalParameters.stream().distinct().collect(Collectors.toList())) {
 				numberOfPipelinesFound++;
 				if (this.doesExecutionFail(instance)) {
 					numberOfErrorsFound++;
@@ -278,18 +294,17 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		this.stringBuilder.append(numberOfErrorsFound);
 		this.stringBuilder.append(" errors found.");
 
-		assertEquals(this.stringBuilder.toString(), 0, numberOfErrorsFound, 0.0001);
+		assertEquals(0, numberOfErrorsFound, 0.0001, this.stringBuilder.toString());
 	}
 
-	private boolean doesExecutionFail(final ComponentInstance componentInstance) throws Exception {
+	private boolean doesExecutionFail(final IComponentInstance componentInstance) throws Exception {
 		try {
 			this.execute(componentInstance);
 			return false;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			this.stringBuilder.append("\n\n========================================================================================\n");
 			this.stringBuilder.append("Could not execute pipeline:\n");
-			this.stringBuilder.append(CompositionSerializer.serializeComponentInstance(componentInstance));
+			this.stringBuilder.append(this.compSerializer.serialize(componentInstance));
 			this.stringBuilder.append("\n");
 			this.stringBuilder.append("Unknown Reason\n" + this.getReasonForFailure(e));
 			if (FAIL_IMMEDIATELY) {
@@ -299,7 +314,7 @@ public abstract class AbstractSearchSpaceConfigurationTest {
 		}
 	}
 
-	public abstract void execute(final ComponentInstance componentInstance) throws Exception;
+	public abstract void execute(final IComponentInstance componentInstance) throws Exception;
 
 	public abstract String getReasonForFailure(Exception e);
 

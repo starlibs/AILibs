@@ -60,26 +60,38 @@ public class TempFileHandler implements Closeable {
 	 *
 	 * @return UUID associated with the new temporary file.
 	 */
-	public String createTempFile() {
-		String uuid = UUID.randomUUID().toString();
-		String path = this.tempFileDirectory.getAbsolutePath() + File.separator + uuid;
+	public File createTempFile() {
+		return this.createTempFile(UUID.randomUUID().toString());
+	}
 
+	public File createTempFile(final String name) {
+		String path = this.tempFileDirectory.getAbsolutePath() + File.separator + name;
 		FileUtil.touch(path);
 		File file = new File(path);
 		file.deleteOnExit();
-		this.tempFiles.put(uuid, file);
-		return uuid;
+		this.tempFiles.put(name, file);
+		return file;
+	}
+
+	public boolean doesTempFileExist(final String name) {
+		return new File(this.tempFileDirectory + File.separator + name).exists();
 	}
 
 	/**
-	 * Get the temporary file with the UUID.
+	 * Get the temporary file with some name.
 	 *
-	 * @param uuid
-	 *            UUID of the file.
-	 * @return File object associated with the UUID.
+	 * @param name
+	 *            name of the temporary file.
+	 * @return File object associated with the name.
 	 */
-	public File getTempFile(final String uuid) {
-		return this.tempFiles.get(uuid);
+	public File getTempFile(final String name) {
+		if (!this.tempFiles.containsKey(name)) {
+			if (!this.doesTempFileExist(name)) {
+				throw new IllegalArgumentException("The temporary file " + name + " does not exist!");
+			}
+			this.tempFiles.put(name, new File(this.tempFileDirectory.getAbsolutePath() + File.separator + name));
+		}
+		return this.tempFiles.get(name);
 	}
 
 	/**
@@ -88,8 +100,9 @@ public class TempFileHandler implements Closeable {
 	 * @param uuid
 	 *            UUID of the temporary file.
 	 * @return An existing or new file reader for the given temporary file.
+	 * @throws FileNotFoundException
 	 */
-	public BufferedReader getFileReaderForTempFile(final String uuid) {
+	public BufferedReader getFileReaderForTempFile(final String uuid) throws FileNotFoundException {
 		if (this.tempFileReaders.containsKey(uuid)) {
 			try {
 				this.tempFileReaders.get(uuid).close();
@@ -98,15 +111,9 @@ public class TempFileHandler implements Closeable {
 			}
 			this.tempFileReaders.remove(uuid);
 		}
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(this.tempFiles.get(uuid)));
-			this.tempFileReaders.put(uuid, reader);
-			return reader;
-		} catch (FileNotFoundException e) {
-			this.logger.error(String.format("File for UUID %s does not exist!", uuid), e);
-		}
-
-		return null;
+		BufferedReader reader = new BufferedReader(new FileReader(this.tempFiles.get(uuid)));
+		this.tempFileReaders.put(uuid, reader);
+		return reader;
 	}
 
 	/**
@@ -115,21 +122,17 @@ public class TempFileHandler implements Closeable {
 	 * @param uuid
 	 *            UUID of the temporary file.
 	 * @return An existing or new file writer for the given temporary file.
+	 * @throws IOException
 	 */
-	public FileWriter getFileWriterForTempFile(final String uuid) {
+	public FileWriter getFileWriterForTempFile(final String uuid) throws IOException {
 		if (this.tempFileWriters.containsKey(uuid)) {
 			return this.tempFileWriters.get(uuid);
 		} else {
-			try {
-				FileWriter writer = new FileWriter(this.tempFiles.get(uuid));
-				this.tempFileWriters.put(uuid, writer);
-				return writer;
-			} catch (IOException e) {
-				this.logger.error(String.format("Cannot create FileWriter for file with UUID %s", uuid), e);
-			}
+			FileWriter writer = new FileWriter(this.tempFiles.get(uuid));
+			this.tempFileWriters.put(uuid, writer);
+			return writer;
 
 		}
-		return null;
 	}
 
 	/***

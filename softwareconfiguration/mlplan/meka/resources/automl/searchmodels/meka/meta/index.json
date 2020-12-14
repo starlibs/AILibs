@@ -1,0 +1,18 @@
+{
+	"repository": "meta-index",
+	"include": [
+		"./baggingml.json",
+		"./baggingmldup.json",
+		"./cm.json",
+		"./em.json",
+		"./ensembleml.json",
+		"./mbr.json",
+		"./mlcbmad.json",
+		"./randomsubspaceml.json",
+		"./subsetmapper.json",
+		"./deepml.json",
+		"./filteredclassifier.json",
+		"./maniac.json"
+	],
+	"components": []
+}

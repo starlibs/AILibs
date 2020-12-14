@@ -8,7 +8,7 @@ import java.util.concurrent.TimeoutException;
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class MOEAFrameworkAlgorithmTest {
 

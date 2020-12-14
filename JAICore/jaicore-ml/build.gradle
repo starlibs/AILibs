@@ -32,6 +32,31 @@ configurations.all {
     exclude module: 'weka'
 }
 
+task testOpenMLAdapter(type: Test) {
+	useJUnitPlatform{
+		filter {
+			includeTestsMatching "ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetAdapterTest"
+		}
+	}
+}
+
+task testSampling(type: Test) {
+	useJUnitPlatform{
+		filter {
+			includeTestsMatching "ai.libs.jaicore.ml.core.filter.sampling.*"
+		}
+	}
+}
+
+task testOthers(type: Test) {
+	useJUnitPlatform{
+		filter {
+			excludeTestsMatching "ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetAdapterTest"
+			excludeTestsMatching "ai.libs.jaicore.ml.core.filter.sampling.*"
+		}
+	}
+}
+
 uploadArchives {
 	repositories {
 		mavenDeployer {

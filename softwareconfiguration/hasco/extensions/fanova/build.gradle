@@ -1,4 +1,6 @@
 dependencies {
 	compile project(':hasco-core')
 	compile project(':JAICore:jaicore-ml-weka')
+	
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }

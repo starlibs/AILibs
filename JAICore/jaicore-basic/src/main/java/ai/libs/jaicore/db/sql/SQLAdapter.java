@@ -35,7 +35,7 @@ import ai.libs.jaicore.db.IDatabaseConfig;
  *
  */
 @SuppressWarnings("serial")
-public class SQLAdapter implements IDatabaseAdapter {
+class SQLAdapter implements IDatabaseAdapter {
 
 	private transient Logger logger = LoggerFactory.getLogger(SQLAdapter.class);
 
@@ -183,7 +183,6 @@ public class SQLAdapter implements IDatabaseAdapter {
 			}
 		} while (tries < 3);
 		this.logger.error("Quitting execution as no database connection could be established");
-		System.exit(1);
 	}
 
 	/**
@@ -209,6 +208,7 @@ public class SQLAdapter implements IDatabaseAdapter {
 			this.connect();
 		}
 		this.timestampOfLastAction = System.currentTimeMillis();
+		Objects.requireNonNull(this.connect, "Connection object is null!");
 	}
 
 	/**
@@ -388,25 +388,22 @@ public class SQLAdapter implements IDatabaseAdapter {
 		int n = datarows.size();
 		this.checkConnection();
 		List<Integer> ids = new ArrayList<>(n);
-		try (Statement stmt = this.connect.createStatement()) {
-			for (int i = 0; i < Math.ceil(n * 1.0 / chunkSize); i++) {
-				int startIndex = i * chunkSize;
-				int endIndex = Math.min((i + 1) * chunkSize, n);
-				String sql = this.queryBuilder.buildMultiInsertSQLCommand(table, keys, datarows.subList(startIndex, endIndex));
+		for (int i = 0; i < Math.ceil(n * 1.0 / chunkSize); i++) {
+			int startIndex = i * chunkSize;
+			int endIndex = Math.min((i + 1) * chunkSize, n);
+			String sql = this.queryBuilder.buildMultiInsertSQLCommand(table, keys, datarows.subList(startIndex, endIndex));
+			try (PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 				this.logger.debug("Created SQL for {} entries", endIndex - startIndex);
-				this.logger.trace("Adding sql statement {} to batch", sql);
-				stmt.addBatch(sql);
-			}
-			this.logger.debug("Start batch execution.");
-			stmt.executeBatch();
-			this.logger.debug("Finished batch execution.");
-			try (ResultSet rs = stmt.getGeneratedKeys()) {
-				while (rs.next()) {
-					ids.add(rs.getInt(1));
+				stmt.executeUpdate();
+				this.logger.debug("Finished batch execution.");
+				try (ResultSet rs = stmt.getGeneratedKeys()) {
+					while (rs.next()) {
+						ids.add(rs.getInt(1));
+					}
 				}
 			}
-			return ids.stream().mapToInt(x -> x).toArray();
 		}
+		return ids.stream().mapToInt(x -> x).toArray();
 	}
 
 	/**
@@ -606,6 +603,9 @@ public class SQLAdapter implements IDatabaseAdapter {
 		StringBuilder sqlMainTable = new StringBuilder();
 		StringBuilder keyFieldsSB = new StringBuilder();
 		sqlMainTable.append("CREATE TABLE IF NOT EXISTS `" + tablename + "` (");
+		if (!types.containsKey(nameOfPrimaryField)) {
+			throw new IllegalArgumentException("No type definition given for primary field!");
+		}
 		sqlMainTable.append("`" + nameOfPrimaryField + "` " + types.get(nameOfPrimaryField) + " NOT NULL AUTO_INCREMENT,");
 		for (String key : fieldnames) {
 			if (!types.containsKey(key)) {
@@ -622,5 +622,27 @@ public class SQLAdapter implements IDatabaseAdapter {
 			this.logger.info("Executing query: {}", sqlMainTable);
 			stmt.execute(sqlMainTable.toString());
 		}
+	}
+
+	@Override
+	public int delete(final String table, final Map<String, ? extends Object> conditions) throws SQLException {
+		StringBuilder conditionSB = new StringBuilder();
+		for (Entry<String, ? extends Object> entry : conditions.entrySet()) {
+			if (conditionSB.length() > 0) {
+				conditionSB.append(STR_SPACE_AND);
+			}
+			if (entry.getValue() != null) {
+				conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
+			} else {
+				conditionSB.append(entry.getKey());
+				conditionSB.append(" IS NULL");
+			}
+		}
+		return this.update("DELETE FROM `" + table + "` " + STR_SPACE_WHERE + " " + conditionSB);
+	}
+
+	@Override
+	public boolean doesTableExist(final String tablename) throws IOException, SQLException {
+		return this.getResultsOfQuery("SHOW TABLES").stream().anyMatch(r -> r.values().iterator().next().equals(tablename));
 	}
 }

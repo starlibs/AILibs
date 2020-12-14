@@ -9,7 +9,7 @@
                 "WekaBaseClassifier",
                 "BaseClassifier"
             ],
-            "parameter": [
+            "parameters": [
                 {
                     "name": "K",
                     "type": "boolean",
@@ -34,7 +34,7 @@
             "providedInterface": [
                 "K"
             ],
-            "parameter": []
+            "parameters": []
         },
         {
             "name": "weka.classifiers.functions.supportVector.PolyKernel",
@@ -42,7 +42,7 @@
             "providedInterface": [
                 "K"
             ],
-            "parameter": []
+            "parameters": []
         },
         {
             "name": "weka.classifiers.functions.supportVector.RBFKernel",
@@ -50,7 +50,7 @@
             "providedInterface": [
                 "K"
             ],
-            "parameter": []
+            "parameters": []
         },
         {
             "name": "weka.classifiers.functions.SMO",
@@ -65,7 +65,7 @@
                 "WekaBaseClassifier",
                 "BaseClassifier"
             ],
-            "parameter": [
+            "parameters": [
                 {
                     "name": "C",
                     "type": "double",
@@ -99,7 +99,7 @@
             "providedInterface": [
                 "K"
             ],
-            "parameter": []
+            "parameters": []
         },
         {
             "name": "weka.classifiers.lazy.IBk",
@@ -109,7 +109,7 @@
                 "WekaBaseClassifier",
                 "BaseClassifier"
             ],
-            "parameter": [
+            "parameters": [
                 {
                     "name": "E",
                     "type": "boolean",
@@ -156,7 +156,7 @@
                 "BaseClassifier",
                 "Test"
             ],
-            "parameter": [
+            "parameters": [
                 {
                     "name": "O",
                     "type": "boolean",
@@ -202,7 +202,7 @@
                 "WekaBaseClassifier",
                 "BaseClassifier"
             ],
-            "parameter": [
+            "parameters": [
                 {
                     "name": "I",
                     "type": "int",

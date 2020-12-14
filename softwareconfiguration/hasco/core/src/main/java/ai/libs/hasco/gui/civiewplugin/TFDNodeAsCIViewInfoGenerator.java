@@ -1,12 +1,15 @@
 package ai.libs.hasco.gui.civiewplugin;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
 
 import ai.libs.hasco.core.HASCOUtil;
-import ai.libs.jaicore.components.model.Component;
+import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
@@ -18,10 +21,10 @@ import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
  */
 public class TFDNodeAsCIViewInfoGenerator implements NodeInfoGenerator<BackPointerPath<TFDNode, String, Double>> {
 
-	private Collection<Component> components;
+	private Collection<IComponent> components;
 
-	public TFDNodeAsCIViewInfoGenerator(final Collection<Component> components) {
-		this.components = components;
+	public TFDNodeAsCIViewInfoGenerator(final Collection<? extends IComponent> components) {
+		this.components = new ArrayList<>(components);
 	}
 
 	@Override
@@ -34,7 +37,7 @@ public class TFDNodeAsCIViewInfoGenerator implements NodeInfoGenerator<BackPoint
 		}
 	}
 
-	private String visualizeComponentInstance(final ComponentInstance ci) {
+	private String visualizeComponentInstance(final IComponentInstance ci) {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("<div style=\"border: 1px solid #333; padding: 10px; font-family: Arial, non-serif;\">");
@@ -45,7 +48,7 @@ public class TFDNodeAsCIViewInfoGenerator implements NodeInfoGenerator<BackPoint
 		sb.append("<tr style=\"background: #e0e0e0;\"><th>Parameter</th><th>Value</th></tr>");
 
 		int i = 0;
-		for (Parameter parameter : ci.getComponent().getParameters()) {
+		for (IParameter parameter : ci.getComponent().getParameters()) {
 			if (i % 2 == 0) {
 				sb.append("<tr style=\"background: #f2f2f2;\">");
 			} else {
@@ -59,9 +62,9 @@ public class TFDNodeAsCIViewInfoGenerator implements NodeInfoGenerator<BackPoint
 		}
 		sb.append("</table>");
 
-		for (Entry<String, ComponentInstance> subComponent : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+		for (Entry<String, List<IComponentInstance>> subComponent : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			sb.append(subComponent.getKey());
-			sb.append(this.visualizeComponentInstance(subComponent.getValue()));
+			subComponent.getValue().forEach(subCi -> sb.append(this.visualizeComponentInstance(subCi)));
 		}
 		sb.append("</div>");
 

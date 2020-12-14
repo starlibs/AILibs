@@ -5,18 +5,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import ai.libs.jaicore.db.sql.SQLAdapter;
+import ai.libs.jaicore.db.IDatabaseAdapter;
 import ai.libs.jaicore.ml.weka.classification.learner.reduction.splitter.RandomSplitter;
 
 public abstract class ABestOfKReductionStumpExperimentRunnerWrapper {
 
-	private final SQLAdapter adapter;
+	private final IDatabaseAdapter adapter;
 	private final String tableName;
 	private final int k;
 
 	private final int mccvrepeats;
 
-	protected ABestOfKReductionStumpExperimentRunnerWrapper(final SQLAdapter adapter, final String tableName, final int k, final int mccvrepeats) {
+	protected ABestOfKReductionStumpExperimentRunnerWrapper(final IDatabaseAdapter adapter, final String tableName, final int k, final int mccvrepeats) {
 		this.adapter = adapter;
 		this.tableName = tableName;
 		this.k = k;
@@ -56,7 +56,7 @@ public abstract class ABestOfKReductionStumpExperimentRunnerWrapper {
 		return this.mccvrepeats;
 	}
 
-	public SQLAdapter getAdapter() {
+	public IDatabaseAdapter getAdapter() {
 		return this.adapter;
 	}
 }

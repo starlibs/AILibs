@@ -13,7 +13,7 @@
 				"RandomizableBaseClassifier",
 				"PipelineClassifier"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "M",
 					"type": "int",
@@ -39,6 +39,20 @@
 					"values": [
 						"0",
 						"1"
+					]
+				},
+				{
+					"name": "N",
+					"type": "cat",
+					"default": "3",
+					"values": [
+						"16",
+						"2",
+						"3",
+						"4",
+						"32",
+						"64",
+						"8"
 					]
 				},
 				{

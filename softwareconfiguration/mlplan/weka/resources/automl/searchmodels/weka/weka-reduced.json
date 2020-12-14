@@ -1,0 +1,33 @@
+{
+	"repository": "WEKA Reduced Searchspace (e.g. for runtime prediction)",
+	"include": [
+		"./base/bayesnet.json",
+		"./base/decisionstump.json",
+		"./base/decisiontable.json",
+		"./base/ibk.json",
+		"./base/j48.json",
+		"./base/jrip.json",
+		"./base/lmt.json",
+		"./base/logistic.json",
+		"./base/multilayerperceptron.json",
+		"./base/naivebayes.json",
+		"./base/naivebayesmultinomial.json",
+		"./base/oner.json",
+		"./base/part.json",
+		"./base/randomforest.json",
+		"./base/randomtree.json",
+		"./base/reptree.json",
+		"./base/simplelinearregression.json",
+		"./base/simplelogistic.json",
+		"./base/smo.json",
+		"./base/smo_kernel/index.json",
+		"./base/votedperceptron.json",
+		"./base/zeror.json",
+		
+		"./meta/adaboostm1.json",
+		"./meta/randomsubspace.json",
+		"./meta/bagging.json",
+		"./meta/randomcommittee.json",
+		"./meta/logitboost.json"
+	]
+}

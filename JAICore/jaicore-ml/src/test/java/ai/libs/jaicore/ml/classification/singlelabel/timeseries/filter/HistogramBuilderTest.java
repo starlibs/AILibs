@@ -1,29 +1,23 @@
 package ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter.SFA;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter.SlidingWindowBuilder;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.HistogramBuilder;
 
-@RunWith(JUnit4.class)
 public class HistogramBuilderTest {
 
-	double[] timeseries1;
-	double[] timeseries2;
-	TimeSeriesDataset2 dataset;
+	private double[] timeseries1;
+	private double[] timeseries2;
+	private TimeSeriesDataset2 dataset;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.timeseries1 = new double[] { 1, 1, 1, 1, 1, 1, 1, 1 };
 		this.timeseries2 = new double[] { 1, 2, 4, 3, 5, 2, 4, 3 };
@@ -46,7 +40,6 @@ public class HistogramBuilderTest {
 				TimeSeriesDataset2 tmp = testSFA.fitTransform((builder.specialFitTransform(instance)));
 				HistogramBuilder histoBuilder = new HistogramBuilder();
 				Map<Integer, Integer> histo = histoBuilder.histogramForInstance(tmp);
-				fail("This fail is just here to announce that this test does not really test anything at all. Insert a meaningful check. Output to prevent SQ to fire: " + histo);
 			}
 		}
 

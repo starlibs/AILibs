@@ -6,52 +6,63 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
+
 @JsonPropertyOrder({ "id", "name", "optional", "min", "max" })
-public class Interface implements Serializable {
+public class Interface implements IRequiredInterfaceDefinition, Serializable {
 	private static final long serialVersionUID = -668580435561427897L;
 	private final String id;
 	private final String name;
+	private final boolean optional;
+	private final boolean uniqueComponents;
+	private final boolean ordered;
 	private final Integer min;
 	private final Integer max;
 
 	@JsonCreator
-	public Interface(@JsonProperty("id") final String id, @JsonProperty("name") final String name, @JsonProperty("optional") final Boolean optional, @JsonProperty("min") final Integer min, @JsonProperty("max") final Integer max) {
+	public Interface(@JsonProperty("id") final String id, @JsonProperty("name") final String name, @JsonProperty("optional") final Boolean optional, @JsonProperty("uniquecomponents") final Boolean uniqueComponents, @JsonProperty("ordered") final Boolean ordered, @JsonProperty("min") final Integer min, @JsonProperty("max") final Integer max) {
 		this.id = id;
 		this.name = name;
-
-		if (optional == null && (min != null && max != null)) {
-			this.min = min;
-			this.max = max;
-		} else if (optional != null && (min == null && max == null)) {
-			this.min = 0;
-			this.max = 1;
-		} else {
-			this.min = 1;
-			this.max = 1;
-		}
-	}
-
-	public Interface(final String id, final String name, final Integer min, final Integer max) {
-		this.id = id;
-		this.name = name;
+		this.optional = optional;
+		this.ordered = ordered;
+		this.uniqueComponents = uniqueComponents;
 		this.min = min;
 		this.max = max;
 	}
 
+	@Override
 	public String getId() {
 		return this.id;
 	}
 
+	@Override
 	public String getName() {
 		return this.name;
 	}
 
+	@Override
 	public int getMin() {
 		return this.min;
 	}
 
+	@Override
 	public int getMax() {
 		return this.max;
+	}
+
+	@Override
+	public boolean isUniqueComponents() {
+		return this.uniqueComponents;
+	}
+
+	@Override
+	public boolean isOrdered() {
+		return this.ordered;
+	}
+
+	@Override
+	public boolean isOptional() {
+		return this.optional;
 	}
 
 	@Override
@@ -62,6 +73,9 @@ public class Interface implements Serializable {
 		result = prime * result + ((this.max == null) ? 0 : this.max.hashCode());
 		result = prime * result + ((this.min == null) ? 0 : this.min.hashCode());
 		result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+		result = prime * result + (this.optional ? 1231 : 1237);
+		result = prime * result + (this.ordered ? 1231 : 1237);
+		result = prime * result + (this.uniqueComponents ? 1231 : 1237);
 		return result;
 	}
 
@@ -105,6 +119,12 @@ public class Interface implements Serializable {
 		} else if (!this.name.equals(other.name)) {
 			return false;
 		}
-		return true;
+		if (this.optional != other.optional) {
+			return false;
+		}
+		if (this.ordered != other.ordered) {
+			return false;
+		}
+		return this.uniqueComponents == other.uniqueComponents;
 	}
 }

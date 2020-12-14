@@ -39,10 +39,11 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
 import ai.libs.jaicore.basic.reconstruction.ReconstructionUtil;
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
-import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.optimizingfactory.OptimizingFactory;
 import ai.libs.jaicore.components.optimizingfactory.OptimizingFactoryProblem;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.core.dataset.DatasetUtil;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -56,9 +57,10 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	private Logger logger = LoggerFactory.getLogger(MLPlan.class);
 	private String loggerName;
 
+	private final ComponentSerialization serializer = new ComponentSerialization();
 	private L selectedClassifier;
 	private double internalValidationErrorOfSelectedClassifier;
-	private ComponentInstance componentInstanceOfSelectedClassifier;
+	private IComponentInstance componentInstanceOfSelectedClassifier;
 
 	private final IMLPlanBuilder<L, ?> builder;
 	private TwoPhaseHASCOBuilder<TFDNode, String> twoPhaseHASCOFactory;
@@ -213,7 +215,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 					} else if (event instanceof HASCOSolutionEvent) {
 						HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
 						try {
-							MLPlan.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", solution.getComponentInstance().getNestedComponentDescription(), solution.getScore(),
+							MLPlan.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", MLPlan.this.serializer.serialize(solution.getComponentInstance()), solution.getScore(),
 									solution.getTimeToEvaluateCandidate());
 						} catch (Exception e) {
 							MLPlan.this.logger.warn("Could not print log due to exception while preparing the log message.", e);
@@ -305,6 +307,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			this.logger.debug("Optimizingfactory has not been set yet, so not customizing its logger.");
 		}
 
+		this.serializer.setLoggerName(name + ".ser");
 		this.logger.info("Switched ML-Plan logger to {}", name);
 	}
 
@@ -330,7 +333,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 		return this.selectedClassifier;
 	}
 
-	public ComponentInstance getComponentInstanceOfSelectedClassifier() {
+	public IComponentInstance getComponentInstanceOfSelectedClassifier() {
 		return this.componentInstanceOfSelectedClassifier;
 	}
 

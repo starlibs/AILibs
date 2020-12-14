@@ -1,6 +1,6 @@
 package ai.libs.mlplan.cli.report;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.execution.LearnerExecutionFailedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
@@ -53,7 +53,7 @@ public class OpenMLAutoMLBenchmarkReportTest {
 
 	private void testReportOutput(final File expectedOutput, final ILearnerRunReport runReport) throws IOException {
 		OpenMLAutoMLBenchmarkReport analysisReport = new OpenMLAutoMLBenchmarkReport(runReport);
-		assertEquals(expectedOutput.getAbsolutePath() + " does not match the returned report.", FileUtil.readFileAsString(expectedOutput).trim(), analysisReport.toString().trim());
+		assertEquals(FileUtil.readFileAsString(expectedOutput).trim(), analysisReport.toString().trim(), expectedOutput.getAbsolutePath() + " does not match the returned report.");
 	}
 
 }

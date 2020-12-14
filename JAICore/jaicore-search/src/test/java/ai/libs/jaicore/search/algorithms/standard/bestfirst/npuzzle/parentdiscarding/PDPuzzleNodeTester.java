@@ -2,8 +2,8 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.npuzzle.parentdisca
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.search.exampleproblems.npuzzle.parentdiscarding.PDPuzzleNode;
 
@@ -12,7 +12,7 @@ public class PDPuzzleNodeTester {
 	private PDPuzzleNode n1;
 	private PDPuzzleNode n2;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		int[][] board = { { 0, 1 }, { 1, 1 } };
 		this.n = new PDPuzzleNode(board, 0, 0);

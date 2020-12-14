@@ -6,8 +6,9 @@ import ai.libs.jaicore.search.probleminputs.IMDP;
 public class TAGMCTSFactory<N, A> extends MCTSFactory<N, A, TAGMCTSFactory<N, A>> {
 
 	private double explorationConstant = Math.sqrt(2);
-	private int s = 10;
-	private double delta = 1000;
+	private int s = 100;
+	private double delta = 0.01;
+	private double thresholdIncrement = 0.001;
 
 	public double getExplorationConstant() {
 		return this.explorationConstant;
@@ -33,8 +34,17 @@ public class TAGMCTSFactory<N, A> extends MCTSFactory<N, A, TAGMCTSFactory<N, A>
 		this.delta = delta;
 	}
 
+	/**
+	 * The DELTA in the Streeter paper
+	 *
+	 * @param thresholdIncrement
+	 */
+	public void setThresholdIncrement(final double thresholdIncrement) {
+		this.thresholdIncrement = thresholdIncrement;
+	}
+
 	@Override
 	public TAGMCTS<N, A> getAlgorithm(final IMDP<N, A, Double> input) {
-		return new TAGMCTS<>(input, this.explorationConstant, this.s, this.delta, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.getRandom(), this.isTabooExhaustedNodes());
+		return new TAGMCTS<>(input, this.explorationConstant, this.s, this.delta, this.thresholdIncrement, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.getRandom(), this.isTabooExhaustedNodes());
 	}
 }

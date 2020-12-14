@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 

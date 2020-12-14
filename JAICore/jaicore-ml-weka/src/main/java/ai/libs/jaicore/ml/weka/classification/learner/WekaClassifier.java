@@ -22,8 +22,8 @@ public class WekaClassifier extends AWekaLearner<ISingleLabelClassification, ISi
 
 	public static WekaClassifier createPipeline(final String searcher, final List<String> searcherOptions, final String evaluator, final List<String> evaluatorOptions, final String classifier, final List<String> classifierOptions)
 			throws Exception {
-		ASSearch search = ASSearch.forName(searcher, searcherOptions.toArray(new String[0]));
-		ASEvaluation eval = ASEvaluation.forName(evaluator, evaluatorOptions.toArray(new String[0]));
+		ASSearch search = searcher != null ? ASSearch.forName(searcher, searcherOptions.toArray(new String[0])) : null;
+		ASEvaluation eval = evaluator != null ? ASEvaluation.forName(evaluator, evaluatorOptions.toArray(new String[0])) : null;
 		Classifier c = AbstractClassifier.forName(classifier, classifierOptions.toArray(new String[0]));
 		return new WekaClassifier(new MLPipeline(search, eval, c));
 	}
