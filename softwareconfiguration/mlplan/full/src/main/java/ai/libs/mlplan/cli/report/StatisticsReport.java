@@ -41,6 +41,7 @@ public class StatisticsReport {
 		root.put("selected_solution", ComponentInstanceUtil.getComponentInstanceString(this.selectedSolution));
 		root.put("num_evaluations", this.statsListener.getNumModelsEvaluated());
 		root.put("model_evaluation_stats", this.statsListener.getRootLearnerStatistics());
+		root.put("final_candidate_predict_time_ms", this.runReport.getTestEndTime() - this.runReport.getTestStartTime());
 
 		if (this.runReport.getTestSet().getLabelAttribute() instanceof ICategoricalAttribute) { // classification data
 			List<String> labels = ((ICategoricalAttribute) this.runReport.getTestSet().getLabelAttribute()).getLabels();
@@ -58,9 +59,9 @@ public class StatisticsReport {
 				predictions.add(pred.getIntPrediction());
 			}
 
-			root.put("predictions", predictions);
+			root.put("predictions", predictions.stream().map(x -> labels.get(x)).collect(Collectors.toList()));
 			root.put("probabilities", probabilities);
-			root.put("truth", castedReport.getGroundTruthAsList());
+			root.put("truth", castedReport.getGroundTruthAsList().stream().map(x -> labels.get(x)).collect(Collectors.toList()));
 		} else { // regression data
 			IPredictionAndGroundTruthTable<Double, IRegressionPrediction> castedReport = this.runReport.getPredictionDiffList().getCastedView(Double.class, IRegressionPrediction.class);
 			root.put("predictions", castedReport.getPredictionsAsList().stream().map(x -> x.getDoublePrediction()).collect(Collectors.toList()));

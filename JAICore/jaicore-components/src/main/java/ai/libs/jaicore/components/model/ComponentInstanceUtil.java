@@ -253,13 +253,13 @@ public class ComponentInstanceUtil {
 
 		sb.append(ci.getComponent().getName()).append("{");
 
-		String parameters = ci.getParameterValues().entrySet().stream().map(x -> x.getKey() + "=" + x.getValue()).collect(Collectors.joining(","));
+		String parameters = ci.getParameterValues().entrySet().stream().map(x -> x.getKey() + "=" + x.getValue()).collect(Collectors.joining(", "));
 		sb.append(parameters);
 
 		String reqIs = ci.getSatisfactionOfRequiredInterfaces().entrySet().stream().map(x -> x.getKey() + "=[" + x.getValue().stream().map(y -> getComponentInstanceString(y)).collect(Collectors.joining(",")) + "]")
 				.collect(Collectors.joining(","));
 		if (!parameters.isEmpty() && !reqIs.isEmpty()) {
-			sb.append(",");
+			sb.append(", ");
 		}
 
 		sb.append(reqIs).append("}");

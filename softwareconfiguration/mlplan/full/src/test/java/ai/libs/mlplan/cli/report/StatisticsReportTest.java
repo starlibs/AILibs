@@ -1,10 +1,12 @@
 package ai.libs.mlplan.cli.report;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
@@ -16,7 +18,9 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.components.api.IComponentRepository;
@@ -32,7 +36,7 @@ import weka.classifiers.trees.RandomForest;
 
 public class StatisticsReportTest {
 
-	private static final ResourceFile resFile = new ResourceFile("automl/searchmodels/weka/weka-all-autoweka.json");
+	private static final ResourceFile resFile = new ResourceFile("automl/searchmodels/weka/weka-full.json");
 	private static final ObjectMapper mapper = new ObjectMapper();
 
 	private static final String LEARNER = "weka.classifiers.trees.RandomForest";
@@ -68,10 +72,19 @@ public class StatisticsReportTest {
 
 	private void testReportOutput(final File expectedOutput, final int datasetID, final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner)
 			throws IOException, SplitFailedException, InterruptedException, DatasetDeserializationFailedException, LearnerExecutionFailedException {
-		List<ILabeledDataset<? extends ILabeledInstance>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(OpenMLDatasetReader.deserializeDataset(datasetID), 0, .7);
+		List<ILabeledDataset<? extends ILabeledInstance>> split = SplitterUtil.getSimpleTrainTestSplit(OpenMLDatasetReader.deserializeDataset(datasetID), 0, .7);
 		ILearnerRunReport runReport = new SupervisedLearnerExecutor().execute(learner, split.get(0), split.get(1));
 		StatisticsReport analysisReport = new StatisticsReport(new StatisticsListener(), ci, runReport);
-		assertEquals(expectedOutput.getAbsolutePath() + " does not match the returned report.", mapper.readTree(expectedOutput), mapper.readTree(analysisReport.toString()));
+		System.out.println(analysisReport);
+
+		ObjectNode expected = (ObjectNode) mapper.readTree(expectedOutput);
+		JsonNode actual = mapper.readTree(analysisReport.toString());
+
+		Iterator<Entry<String, JsonNode>> fieldsIt = expected.fields();
+		while (fieldsIt.hasNext()) {
+			Entry<String, JsonNode> field = fieldsIt.next();
+			assertTrue(actual.has(field.getKey()), "Statistics report is missing field with name " + field.getKey());
+		}
 	}
 
 }
