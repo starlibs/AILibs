@@ -22,14 +22,6 @@
 						"MIN",
 						"MAX"
 					]
-				},
-				{
-					"name": "S",
-					"type": "cat",
-					"default": "1",
-					"values": [
-						"1"
-					]
 				}
 			],
 			"dependencies": []
