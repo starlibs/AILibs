@@ -19,9 +19,10 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.jaicore.basic.ResourceFile;
+import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentUtil;
-import ai.libs.jaicore.components.serialization.ComponentLoader;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
@@ -36,7 +37,7 @@ public class StatisticsReportTest {
 
 	private static final String LEARNER = "weka.classifiers.trees.RandomForest";
 
-	private static ComponentLoader cl;
+	private static IComponentRepository compRepo;
 	private static ComponentInstance ci;
 
 	private static final File BASE_DIR = new File("testrsc/report/statistics-report/");
@@ -46,8 +47,8 @@ public class StatisticsReportTest {
 
 	@BeforeClass
 	public static void setup() throws IOException {
-		cl = new ComponentLoader(resFile);
-		ci = ComponentUtil.getDefaultParameterizationOfComponent(cl.getComponentWithName(LEARNER));
+		compRepo = new ComponentSerialization().deserializeRepository(resFile);
+		ci = ComponentUtil.getDefaultParameterizationOfComponent(compRepo.getComponent(LEARNER));
 	}
 
 	@Test

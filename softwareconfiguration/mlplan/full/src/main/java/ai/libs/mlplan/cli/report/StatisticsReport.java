@@ -17,17 +17,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.model.ComponentInstanceUtil;
 
 public class StatisticsReport {
 
 	private static final ObjectMapper mapper = new ObjectMapper();
 
-	private final ComponentInstance selectedSolution;
+	private final IComponentInstance selectedSolution;
 	private final StatisticsListener statsListener;
 	private final ILearnerRunReport runReport;
 
-	public StatisticsReport(final StatisticsListener statsListener, final ComponentInstance selectedSolution, final ILearnerRunReport runReport) {
+	public StatisticsReport(final StatisticsListener statsListener, final IComponentInstance selectedSolution, final ILearnerRunReport runReport) {
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		this.statsListener = statsListener;
 		this.selectedSolution = selectedSolution;
@@ -37,7 +38,7 @@ public class StatisticsReport {
 	@Override
 	public String toString() {
 		Map<String, Object> root = new HashMap<>();
-		root.put("selected_solution", getComponentInstanceString(this.selectedSolution));
+		root.put("selected_solution", ComponentInstanceUtil.getComponentInstanceString(this.selectedSolution));
 		root.put("num_evaluations", this.statsListener.getNumModelsEvaluated());
 		root.put("model_evaluation_stats", this.statsListener.getRootLearnerStatistics());
 
@@ -70,24 +71,6 @@ public class StatisticsReport {
 		} catch (JsonProcessingException e) {
 			throw new IllegalArgumentException(e);
 		}
-	}
-
-	private static final String getComponentInstanceString(final ComponentInstance ci) {
-		StringBuilder sb = new StringBuilder();
-
-		sb.append(ci.getComponent().getName()).append("(");
-
-		String parameterString = ci.getParameterValues().entrySet().stream().map(x -> x.getKey() + "=" + x.getValue()).collect(Collectors.joining(", "));
-		sb.append(parameterString);
-
-		String requiredInterfacesString = ci.getSatisfactionOfRequiredInterfaces().entrySet().stream().map(x -> x.getKey() + "=" + getComponentInstanceString(x.getValue())).collect(Collectors.joining(", "));
-		if (!requiredInterfacesString.trim().isEmpty() && !parameterString.trim().isEmpty()) {
-			sb.append(", ");
-		}
-		sb.append(requiredInterfacesString);
-		sb.append(")");
-
-		return sb.toString();
 	}
 
 }
