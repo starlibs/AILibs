@@ -18,6 +18,16 @@
 			],
 			"parameters": [
 				{
+					"name": "Q",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "use-estimated-priors",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
 					"name": "H",
 					"type": "cat",
 					"default": "1.0",
@@ -49,7 +59,8 @@
 						"5",
 						"10",
 						"20",
-						"50"
+						"50",
+						"100"
 					]
 				},
 				{

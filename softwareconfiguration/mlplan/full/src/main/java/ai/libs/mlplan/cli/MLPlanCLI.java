@@ -74,11 +74,11 @@ public class MLPlanCLI {
 	private static final TimeUnit DEF_TIME_UNIT = TimeUnit.valueOf(CONFIG.getDefaultTimeUnit());
 	private static final int DEF_NUM_RANDOM_COMPLETIONS = 3;
 
-	public static final String O_HELP = "h";
-	public static final String O_MODULE = "m";
-	public static final String O_FIT_DATASET = "f";
-	public static final String O_PREDICT_DATASET = "p";
-	public static final String O_LOSS = "l";
+	public static final String O_HELP = "h"; // print help
+	public static final String O_MODULE = "m"; // select module
+	public static final String O_FIT_DATASET = "f"; // provide fit dataset
+	public static final String O_PREDICT_DATASET = "p"; // provide predict dataset
+	public static final String O_LOSS = "l"; // specify loss function to use
 	public static final String O_SEED = "s";
 	public static final String O_SSC = "ssc";
 	public static final String O_NUM_CPUS = "ncpus";
@@ -88,7 +88,7 @@ public class MLPlanCLI {
 	public static final String O_NODE_EVAL_TIMEOUT = "tn";
 	public static final String O_POS_CLASS_INDEX = "pci";
 	public static final String O_POS_CLASS_NAME = "pcn";
-	public static final String O_OPENML_TASK = "openMLTask";
+	public static final String O_OPENML_TASK = "openMLTask"; // id of an openML taks as an alternative to fit and predict datasets
 
 	public static final String O_OUT_OPENML_BENCHMARK = "ooab";
 	public static final String O_OUT_STATS = "os";
@@ -255,9 +255,9 @@ public class MLPlanCLI {
 			builder.withCandidateEvaluationTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_CANDIDATE_TIMEOUT)), DEF_TIME_UNIT));
 		} else {
 			Timeout candidateTimeout;
-			if (builder.getTimeOut().seconds() < 60 * 5) {
+			if (builder.getTimeOut().seconds() <= 60 * 15) {
 				candidateTimeout = new Timeout(30, DEF_TIME_UNIT);
-			} else if (builder.getTimeOut().seconds() < 60 * 60) {
+			} else if (builder.getTimeOut().seconds() <= 2 * 60 * 60) {
 				candidateTimeout = new Timeout(300, DEF_TIME_UNIT);
 			} else if (builder.getTimeOut().seconds() < 60 * 60 * 12) {
 				candidateTimeout = new Timeout(600, DEF_TIME_UNIT);

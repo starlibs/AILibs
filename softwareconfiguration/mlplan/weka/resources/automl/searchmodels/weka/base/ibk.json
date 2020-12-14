@@ -7,10 +7,9 @@
 			"requiredInterface": [],
 			"providedInterface": [
 				"AbstractClassifier",
-				"WekaBaseClassifier",
-				"WeightedInstancesHandler",
+				"Classifier",
 				"BaseClassifier",
-				"PipelineClassifier"
+				"WeightedInstancesHandler"
 			],
 			"parameters": [
 				{
@@ -41,6 +40,17 @@
 					"name": "I",
 					"type": "boolean",
 					"default": "false"
+				},
+				{
+					"name": "A",
+					"type": "cat",
+					"default": "weka.core.neighboursearch.LinearNNSearch",
+					"values": [
+						"weka.core.neighboursearch.LinearNNSearch",
+						"weka.core.neighboursearch.BallTree",
+						"weka.core.neighboursearch.KDTree",
+						"weka.core.neighboursearch.CoverTree"
+					]
 				}
 			]
 		}

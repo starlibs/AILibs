@@ -6,11 +6,9 @@
 			"name": "weka.classifiers.rules.M5Rules",
 			"requiredInterface": [],
 			"providedInterface": [
-				"AbstractClassifier",
-				"WekaBaseClassifier",
+				"AbstractRegressor",
 				"Regressor",
-				"BaseClassifier",
-				"PipelineClassifier"
+				"BaseRegressor"
 			],
 			"parameter": [
 				{

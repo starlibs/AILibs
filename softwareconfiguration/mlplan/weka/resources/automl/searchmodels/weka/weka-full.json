@@ -1,9 +1,18 @@
 {
 	"repository": "WEKA Full Searchspace",
 	"include": [
-		"./ext/twosteppipeline.json",
+		"./ext/twostep-classification-pipeline.json",
 		"./base/index.json",
-		"./meta/index.json",
+		"./meta/adaboostm1.json",
+		"./meta/bagging.json",
+		"./meta/classificationviaregression.json",
+		"./meta/logitboost.json",
+		"./meta/lwl.json",
+		"./meta/multiclassclassifier.json",
+		"./meta/randomcommittee.json",
+		"./meta/randomsubspace.json",
+		"./meta/stacking.json",
+		"./meta/vote.json",
 		"./preprocessing/index.json"
 	]
 }

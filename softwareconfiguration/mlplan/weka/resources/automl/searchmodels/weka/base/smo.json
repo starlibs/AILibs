@@ -12,10 +12,9 @@
 			],
 			"providedInterface": [
 				"AbstractClassifier",
-				"WekaBaseClassifier",
+				"Classifier",
 				"BaseClassifier",
-				"WeightedInstancesHandler",
-				"PipelineClassifier"
+				"WeightedInstancesHandler"
 			],
 			"parameters": [
 				{

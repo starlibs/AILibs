@@ -15,7 +15,7 @@
 				},
 				{
 					"id": "classifier",
-					"name": "BaseClassifier"
+					"name": "Classifier"
 				}
 			],
 			"parameters": []
