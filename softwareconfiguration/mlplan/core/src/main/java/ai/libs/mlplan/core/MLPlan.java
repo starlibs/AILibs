@@ -141,15 +141,15 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			/* dynamically compute blow-ups */
 			if (Double.isNaN(this.getConfig().expectedBlowupInSelection())) {
 				double blowUpInSelectionPhase = 1;
-				this.getConfig().setProperty(IMLPlanClassifierConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
+				this.getConfig().setProperty(TwoPhaseHASCOConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
 				this.logger.info("No expected blow-up for selection phase has been defined. Automatically configuring {}", blowUpInSelectionPhase);
 			}
 			if (!this.buildSelectedClasifierOnGivenData) {
-				this.getConfig().setProperty(IMLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(0));
+				this.getConfig().setProperty(TwoPhaseHASCOConfig.K_BLOWUP_POSTPROCESS, String.valueOf(0));
 				this.logger.info("Selected classifier won't be built, so now blow-up is calculated.");
 			} else if (Double.isNaN(this.getConfig().expectedBlowupInPostprocessing())) {
 				double blowUpInPostprocessing = 1;
-				this.getConfig().setProperty(IMLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
+				this.getConfig().setProperty(TwoPhaseHASCOConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
 				this.logger.info("No expected blow-up for postprocessing phase has been defined. Automatically configuring {}", blowUpInPostprocessing);
 			}
 
@@ -327,7 +327,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	}
 
 	public void setRandomSeed(final int seed) {
-		this.getConfig().setProperty(IMLPlanClassifierConfig.K_RANDOM_SEED, String.valueOf(seed));
+		this.getConfig().setProperty(TwoPhaseHASCOConfig.K_RANDOM_SEED, String.valueOf(seed));
 	}
 
 	public L getSelectedClassifier() {

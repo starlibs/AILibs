@@ -92,9 +92,6 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 		} catch (LearnerExecutionFailedException | SplitFailedException e) {
 			this.logger.debug("Failed to evaluate the learner {}. Exception: {}", learner, ExceptionUtils.getStackTrace(e));
 			throw new ObjectEvaluationFailedException(e);
-		} catch (Throwable e) {
-			e.printStackTrace();
-			throw e;
 		}
 	}
 

@@ -6,6 +6,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.twophase.TwoPhaseHASCOConfig;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearningCurveExtrapolationEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
@@ -14,7 +15,6 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.core.AMLPlanBuilder;
-import ai.libs.mlplan.multiclass.IMLPlanClassifierConfig;
 
 public class MLPlanWekaBuilder extends AMLPlanBuilder<IWekaClassifier, MLPlanWekaBuilder> {
 
@@ -55,7 +55,7 @@ public class MLPlanWekaBuilder extends AMLPlanBuilder<IWekaClassifier, MLPlanWek
 			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
 		this.withSearchPhaseEvaluatorFactory(new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod));
 		this.withSelectionPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(3).withTrainFoldSize(.7));
-		this.getAlgorithmConfig().setProperty(IMLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + 10);
+		this.getAlgorithmConfig().setProperty(TwoPhaseHASCOConfig.K_BLOWUP_SELECTION, "" + 10);
 		throw new UnsupportedOperationException("Learning Curve Prediction based ML-Plan runs are not supported in this release. They will be activated again in the upcoming release.");
 	}
 
