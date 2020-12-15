@@ -78,7 +78,7 @@ import ai.libs.python.IPythonConfig;
  * @author scheiblm
  */
 public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B>
-implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, ILoggingCustomizable {
+		implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(ScikitLearnWrapper.class);
 	private static final IScikitLearnWrapperConfig CONF = ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class);
@@ -126,13 +126,12 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 		this.listenToPidFromProcess = (ProcessUtil.getOS() == EOperatingSystem.MAC || ProcessUtil.getOS() == EOperatingSystem.LINUX);
 		this.withModelDump = withModelDump;
 		this.constructInstruction = constructInstruction;
-		
-		templateValues = this.getTemplateValueMap(constructInstruction, imports);
+
+		this.templateValues = this.getTemplateValueMap(constructInstruction, imports);
 		String hashCode = StringUtils.join(constructInstruction, imports).hashCode() + "";
 		this.configurationUID = hashCode.startsWith("-") ? hashCode.replace("-", "1") : "0" + hashCode;
 		this.setProblemType(problemType);
 	}
-	
 
 	/**
 	 * Starts a new wrapper and creates its underlying script with the given parameters.
@@ -195,7 +194,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 
 			if (data.getLabelAttribute() instanceof ICategoricalAttribute) {
 				this.problemType = EScikitLearnProblemType.CLASSIFICATION;
-			} else if (data.getLabelAttribute() instanceof INumericAttribute && this.problemType != EScikitLearnProblemType.RUL) {
+			} else if (data.getLabelAttribute() instanceof INumericAttribute && this.problemType != EScikitLearnProblemType.RUL && this.problemType != EScikitLearnProblemType.FEATURE_ENGINEERING) {
 				this.problemType = EScikitLearnProblemType.REGRESSION;
 			}
 
@@ -351,7 +350,7 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 				return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification(numClasses, x.intValue())).collect(Collectors.toList()));
 			}
 			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().map(x -> x.stream().mapToDouble(y -> y).toArray()).map(SingleLabelClassification::new).collect(Collectors.toList()));
-		} else if (this.problemType == EScikitLearnProblemType.RUL || this.problemType == EScikitLearnProblemType.REGRESSION) {
+		} else if (this.problemType == EScikitLearnProblemType.RUL || this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING || this.problemType == EScikitLearnProblemType.REGRESSION) {
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()));
 			}
@@ -391,13 +390,13 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 	public void setProblemType(final EScikitLearnProblemType problemType) throws IOException {
 		if (this.problemType != problemType) {
 			this.problemType = problemType;
-			setPythonTemplate(ResourceUtil.getResourceAsTempFile(this.problemType.getRessourceScikitTemplate()));
+			this.setPythonTemplate(ResourceUtil.getResourceAsTempFile(this.problemType.getRessourceScikitTemplate()));
 		}
 	}
-	
-	public void setPythonTemplate(String pythonTemplatePath) throws IOException {
+
+	public void setPythonTemplate(final String pythonTemplatePath) throws IOException {
 		this.scikitTemplate = new File(pythonTemplatePath);
-		
+
 		if (!CONF.getTempFolder().exists()) {
 			CONF.getTempFolder().mkdirs();
 		}
@@ -412,10 +411,10 @@ implements ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabel
 
 		/* Prepare SKLearn Script template with the placeholder values */
 		JtwigTemplate template = JtwigTemplate.fileTemplate(this.scikitTemplate);
-		JtwigModel model = JtwigModel.newModel(templateValues);
+		JtwigModel model = JtwigModel.newModel(this.templateValues);
 		template.render(model, new FileOutputStream(scriptFile));
 	}
-	
+
 	public void setSeed(final long seed) {
 		this.seed = seed;
 	}
