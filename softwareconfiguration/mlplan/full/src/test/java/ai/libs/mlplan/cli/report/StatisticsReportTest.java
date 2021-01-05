@@ -15,8 +15,8 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.execution.LearnerExecutionFailedException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,7 +49,7 @@ public class StatisticsReportTest {
 	private static final File EXP_MULTINOMIAL = new File(BASE_DIR, "multinomial.txt");
 	private static final File EXP_REGRESSION = new File(BASE_DIR, "regression.txt");
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws IOException {
 		compRepo = new ComponentSerialization().deserializeRepository(resFile);
 		ci = ComponentUtil.getDefaultParameterizationOfComponent(compRepo.getComponent(LEARNER));
@@ -72,11 +72,9 @@ public class StatisticsReportTest {
 
 	private void testReportOutput(final File expectedOutput, final int datasetID, final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner)
 			throws IOException, SplitFailedException, InterruptedException, DatasetDeserializationFailedException, LearnerExecutionFailedException {
-		List<ILabeledDataset<? extends ILabeledInstance>> split = SplitterUtil.getSimpleTrainTestSplit(OpenMLDatasetReader.deserializeDataset(datasetID), 0, .7);
+		List<ILabeledDataset<?>> split = SplitterUtil.getSimpleTrainTestSplit(OpenMLDatasetReader.deserializeDataset(datasetID), 0, .7);
 		ILearnerRunReport runReport = new SupervisedLearnerExecutor().execute(learner, split.get(0), split.get(1));
 		StatisticsReport analysisReport = new StatisticsReport(new StatisticsListener(), ci, runReport);
-		System.out.println(analysisReport);
-
 		ObjectNode expected = (ObjectNode) mapper.readTree(expectedOutput);
 		JsonNode actual = mapper.readTree(analysisReport.toString());
 

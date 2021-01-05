@@ -43,6 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
 import ai.libs.jaicore.basic.ResourceUtil;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
@@ -115,6 +116,9 @@ public class MLPlanCLI {
 			new MLPlan4ScikitLearnRegressionCLIModule());
 	private static Map<String, IMLPlanCLIModule> moduleRegistry = null;
 	private static Map<String, String> defaults = new HashMap<>();
+
+	private static Double testPerformance;
+	private static IComponentInstance incumbent;
 
 	private static Map<String, IMLPlanCLIModule> getModuleRegistry() {
 		if (moduleRegistry != null) {
@@ -380,6 +384,7 @@ public class MLPlanCLI {
 		// call ml-plan to obtain the optimal supervised learner
 		logger.info("Build mlplan classifier");
 		ISupervisedLearner optimizedLearner = mlplan.call();
+		incumbent = mlplan.getComponentInstanceOfSelectedClassifier();
 
 		if (predictDataset != null || cl.hasOption(O_PREDICT_DATASET)) {
 			if (cl.hasOption(O_PREDICT_DATASET)) {
@@ -390,6 +395,7 @@ public class MLPlanCLI {
 
 			ILearnerRunReport runReport = new SupervisedLearnerExecutor().execute(optimizedLearner, predictDataset);
 			logger.info("Run report of the module: {}", module.getRunReportAsString(mlplan.getSelectedClassifier(), runReport));
+			testPerformance = builder.getMetricForSearchPhase().loss(runReport.getPredictionDiffList());
 
 			if (cl.hasOption(O_OUT_OPENML_BENCHMARK)) {
 				String outputFile = cl.getOptionValue(O_OUT_OPENML_BENCHMARK, getDefault(O_OUT_OPENML_BENCHMARK));
@@ -405,9 +411,19 @@ public class MLPlanCLI {
 		}
 	}
 
+	public static IComponentInstance incumbent() {
+		return incumbent;
+	}
+
+	public static Double testPerformance() {
+		return testPerformance;
+	}
+
 	private static void writeFile(final String fileName, final String value) {
 		File file = new File(fileName);
-		file.getParentFile().mkdirs();
+		if (file.getParentFile() != null) {
+			file.getParentFile().mkdirs();
+		}
 
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
 			bw.write(value);

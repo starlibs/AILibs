@@ -19,6 +19,15 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstanceUtil;
+import ai.libs.jaicore.ml.classification.loss.dataset.AreaUnderPrecisionRecallCurve;
+import ai.libs.jaicore.ml.classification.loss.dataset.AveragedInstanceLoss;
+import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
+import ai.libs.jaicore.ml.classification.loss.dataset.F1Measure;
+import ai.libs.jaicore.ml.classification.loss.instance.LogLoss;
+import ai.libs.jaicore.ml.regression.loss.dataset.MeanAbsoluteError;
+import ai.libs.jaicore.ml.regression.loss.dataset.MeanAbsolutePercentageError;
+import ai.libs.jaicore.ml.regression.loss.dataset.R2;
+import ai.libs.jaicore.ml.regression.loss.dataset.RootMeanSquaredError;
 
 public class StatisticsReport {
 
@@ -62,10 +71,23 @@ public class StatisticsReport {
 			root.put("predictions", predictions.stream().map(x -> labels.get(x)).collect(Collectors.toList()));
 			root.put("probabilities", probabilities);
 			root.put("truth", castedReport.getGroundTruthAsList().stream().map(x -> labels.get(x)).collect(Collectors.toList()));
+			root.put("m_error_rate", EClassificationPerformanceMeasure.ERRORRATE.loss(castedReport));
+			if (labels.size() == 2) {
+				root.put("m_auc_0", new AreaUnderPrecisionRecallCurve(0).score(castedReport));
+				root.put("m_auc_1", new AreaUnderPrecisionRecallCurve(1).score(castedReport));
+				root.put("m_f1_0", new F1Measure(0).score(castedReport));
+				root.put("m_f1_1", new F1Measure(1).score(castedReport));
+			} else {
+				root.put("m_logloss", new AveragedInstanceLoss(new LogLoss()).loss(castedReport));
+			}
 		} else { // regression data
 			IPredictionAndGroundTruthTable<Double, IRegressionPrediction> castedReport = this.runReport.getPredictionDiffList().getCastedView(Double.class, IRegressionPrediction.class);
 			root.put("predictions", castedReport.getPredictionsAsList().stream().map(x -> x.getDoublePrediction()).collect(Collectors.toList()));
 			root.put("truth", castedReport.getGroundTruthAsList());
+			root.put("m_rmse", new RootMeanSquaredError().loss(castedReport));
+			root.put("m_mae", new MeanAbsoluteError().loss(castedReport));
+			root.put("m_rmse", new MeanAbsolutePercentageError().loss(castedReport));
+			root.put("m_r2", new R2().loss(castedReport));
 		}
 		try {
 			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
