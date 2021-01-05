@@ -7,14 +7,14 @@
 			"requiredInterface": [
 				{
 					"id": "W",
-					"name": "BaseClassifier"
+					"name": "BaseRegressor"
 				}
 			],
 			"providedInterface": [
-				"AbstractClassifier",
-				"MetaClassifier",
-				"WeightedInstancesHandler",
-				"PipelineClassifier"
+				"AbstractRegressor",
+				"MetaRegressor",
+				"Regressor",
+				"WeightedInstancesHandler"
 			],
 			"parameters": [
 				{

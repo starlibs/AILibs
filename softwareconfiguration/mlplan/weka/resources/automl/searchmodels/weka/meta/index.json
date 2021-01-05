@@ -3,7 +3,6 @@
 	"include": [
 		"./adaboostm1.json",
 		"./additiveregression.json",
-		"./attributeselectedclassifier.json",
 		"./bagging.json",
 		"./classificationviaregression.json",
 		"./logitboost.json",

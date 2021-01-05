@@ -14,7 +14,7 @@
 				"Regressor",
 				"BaseRegressor"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "F",
 					"type": "cat",

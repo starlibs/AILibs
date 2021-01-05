@@ -7,9 +7,9 @@
 			"requiredInterface": [],
 			"providedInterface": [
 				"AbstractClassifier",
-				"WekaBaseClassifier",
+				"Classifier",
 				"BaseClassifier",
-				"PipelineClassifier"
+				"Regressor"
 			],
 			"parameters": [
 				{

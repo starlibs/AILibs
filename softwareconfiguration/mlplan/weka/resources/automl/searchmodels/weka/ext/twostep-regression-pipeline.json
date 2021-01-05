@@ -6,7 +6,7 @@
 			"name": "pipeline",
 			"providedInterface": [
 				"MLPipeline",
-				"AbstractClassifier"
+				"AbstractRegressor"
 			],
 			"requiredInterface": [
 				{
@@ -15,7 +15,7 @@
 				},
 				{
 					"id": "classifier",
-					"name": "Classifier"
+					"name": "Regressor"
 				}
 			],
 			"parameters": []

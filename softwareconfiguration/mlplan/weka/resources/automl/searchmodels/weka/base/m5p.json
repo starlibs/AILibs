@@ -10,7 +10,7 @@
 				"Regressor",
 				"BaseRegressor"
 			],
-			"parameter": [
+			"parameters": [
 				{
 					"name": "N",
 					"type": "boolean",

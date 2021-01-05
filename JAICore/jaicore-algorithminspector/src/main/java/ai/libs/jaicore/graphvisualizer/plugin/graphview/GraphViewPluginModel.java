@@ -72,6 +72,7 @@ public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginV
 		this.graph = new SingleGraph("Search Graph");
 
 		try {
+			System.out.println(searchGraphCSSPath.getPath());
 			this.graph.setAttribute("ui.stylesheet", FileUtil.readFileAsString(searchGraphCSSPath.getPath()));
 		} catch (IOException e) {
 			this.logger.warn("Could not load css stylesheet for graph view plugin. Continue without stylesheet", e);

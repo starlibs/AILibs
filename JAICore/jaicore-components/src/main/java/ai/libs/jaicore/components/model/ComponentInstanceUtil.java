@@ -77,7 +77,7 @@ public class ComponentInstanceUtil {
 		}
 	}
 
-	public static ComponentInstance getDefaultParametrization(final IComponentInstance ci) {
+	public static IComponentInstance getDefaultParametrization(final IComponentInstance ci) {
 		Map<String, List<IComponentInstance>> defaultRequiredInterfaces = new HashMap<>();
 		ci.getSatisfactionOfRequiredInterfaces().forEach((name, ciReqList) -> {
 			List<IComponentInstance> l = ciReqList.stream().map(ComponentInstanceUtil::getDefaultParametrization).collect(Collectors.toList());

@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import ai.libs.jaicore.basic.kvstore.KVStore;
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.exceptions.ComponentNotFoundException;
@@ -379,5 +380,45 @@ public class ComponentUtil {
 		}
 
 		throw new ComponentNotFoundException("No Component with this name loaded: " + componentName);
+	}
+
+	/**
+	 * Creates a randomly samples instantiation of the component. Required interfaces are configured at random too.
+	 *
+	 * @param component The root component to be instantiated.
+	 * @param componentRepository The repository of available components for satisfying required interfaces.
+	 * @param random The pseudo-randomness object.
+	 * @return A component instance of the provided component that is fully configured including the satisfaction of required interfaces.
+	 */
+	public static IComponentInstance getRandomInstantiationOfComponent(final String componentName, final IComponentRepository componentRepository, final Random random) {
+		return getRandomInstantiationOfComponent(componentRepository.getComponent(componentName), componentRepository, random);
+	}
+
+	/**
+	 * Creates a randomly samples instantiation of the component. Required interfaces are configured at random too.
+	 *
+	 * @param component The root component to be instantiated.
+	 * @param componentRepository The repository of available components for satisfying required interfaces.
+	 * @param random The pseudo-randomness object.
+	 * @return A component instance of the provided component that is fully configured including the satisfaction of required interfaces.
+	 */
+	public static IComponentInstance getRandomInstantiationOfComponent(final IComponent component, final IComponentRepository componentRepository, final Random random) {
+		IComponentInstance ci = getRandomParameterizationOfComponent(component, random);
+		for (IRequiredInterfaceDefinition reqI : component.getRequiredInterfaces()) {
+			int numSatisfactions = 0;
+			if (reqI.getMin() == reqI.getMax()) {
+				numSatisfactions = reqI.getMin();
+			} else {
+				numSatisfactions = reqI.getMin() + ((int) Math.round(random.nextDouble() * (reqI.getMax() - reqI.getMin())));
+			}
+
+			List<IComponent> pluginComponents = new ArrayList<>(ComponentUtil.getComponentsProvidingInterface(componentRepository, reqI.getName()));
+			List<IComponentInstance> satCIList = new ArrayList<>();
+			for (int i = 0; i < numSatisfactions; i++) {
+				satCIList.add(getRandomInstantiationOfComponent(pluginComponents.get(random.nextInt(pluginComponents.size())), componentRepository, random));
+			}
+			ci.getSatisfactionOfRequiredInterfaces().put(reqI.getId(), satCIList);
+		}
+		return ci;
 	}
 }

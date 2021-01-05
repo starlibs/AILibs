@@ -74,6 +74,10 @@
 				{
 					"pre": "U in {true}",
 					"post": "C in [0.25,0.25]"
+				},
+				{
+					"pre": "R in {true}",
+					"post": "C in [0.25,0.25]"
 				}
 			]
 		}

@@ -10,7 +10,10 @@
 				"Classifier",
 				"BaseClassifier",
 				"WeightedInstancesHandler",
-				"RandomizableBaseClassifier"
+				"RandomizableBaseClassifier",
+				"AbstractRegressor",
+				"Regressor",
+				"BaseRegressor"
 			],
 			"parameters": [
 				{

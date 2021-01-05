@@ -7,11 +7,56 @@
 			"requiredInterface": [],
 			"providedInterface": [
 				"AbstractClassifier",
-				"MetaClassifier",
-				"PipelineClassifier"
+				"Classifier",
+				"MetaClassifier"
 			],
-			"parameters": [],
-			"dependencies": []
+			"parameters": [
+				{
+					"name": "M",
+					"type": "cat",
+					"default": "0",
+					"values": [
+						"0",
+						"1",
+						"2",
+						"3"
+					]
+				},
+				{
+					"name": "R",
+					"type": "double",
+					"default": 2.0,
+					"min": 1.0,
+					"max": 10.0,
+					"refineSplits": 8,
+					"minInterval": 0.5
+				},
+				{
+					"name": "P",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "L",
+					"type": "boolean",
+					"default": "false"
+				}
+			],
+			"dependencies": [
+				{
+					"pre": "M in {0,1,2}",
+					"post": "P in {false}"
+				},
+				{
+					"pre": "M in {0,2,3}",
+					"post": "R in [2.0,2.0]"
+				},
+				{
+					"pre": "M in {0,3}",
+					"post": "L in {false}"
+				}
+			
+			]
 		}
 	]
 }

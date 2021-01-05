@@ -6,21 +6,18 @@
 			"name": "weka.classifiers.meta.Stacking",
 			"requiredInterface": [
 				{
-					"id": "M",
-					"name": "BaseClassifier"
+					"id": "B",
+					"name": "BaseRegressor"
 				},
 				{
-					"id": "B",
-					"name": "BaseClassifier",
-					"min": 2,
-					"max": 10
+					"id": "M",
+					"name": "BaseRegressor"
 				}
 			],
 			"providedInterface": [
-				"AbstractClassifier",
-				"Classifier",
-				"MetaRegressor",
-				"MetaClassifier"
+				"AbstractRegressor",
+				"Regressor",
+				"MetaRegressor"
 			],
 			"parameters": [
 				{

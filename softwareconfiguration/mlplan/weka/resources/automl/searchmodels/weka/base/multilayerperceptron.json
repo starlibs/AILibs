@@ -10,7 +10,10 @@
 				"Classifier",
 				"BaseClassifier",
 				"WeightedInstancesHandler",
-				"RandomizableBaseClassifier"
+				"RandomizableBaseClassifier",
+				"AbstractRegressor",
+				"Regressor",
+				"BaseRegressor"
 			],
 			"parameters": [
 				{
@@ -33,12 +36,12 @@
 				},
 				{
 					"name": "V",
-					"type": "double",
+					"type": "int",
 					"default": 0.0,
 					"min": 0.0,
 					"max": 100.0,
 					"refineSplits": 8,
-					"minInterval": 0.05
+					"minInterval": 1
 				},
 				{
 					"name": "E",

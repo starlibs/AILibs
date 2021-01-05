@@ -223,12 +223,12 @@ public class ComponentSerialization implements ILoggingCustomizable {
 			if (!parameter.has("min")) {
 				throw new IllegalArgumentException("No min value defined for parameter " + name);
 			}
-		if (!parameter.has("max")) {
-			throw new IllegalArgumentException("No max value defined for parameter " + name);
-		}
-		double min = parameter.get("min").asDouble();
-		double max = parameter.get("max").asDouble();
-		return new Parameter(name, new NumericParameterDomain(type.equals("int") || type.equals("int-log"), min, max), defValNode.asDouble());
+			if (!parameter.has("max")) {
+				throw new IllegalArgumentException("No max value defined for parameter " + name);
+			}
+			double min = parameter.get("min").asDouble();
+			double max = parameter.get("max").asDouble();
+			return new Parameter(name, new NumericParameterDomain(type.equals("int") || type.equals("int-log"), min, max), defValNode.asDouble());
 
 		case "bool":
 		case "boolean":

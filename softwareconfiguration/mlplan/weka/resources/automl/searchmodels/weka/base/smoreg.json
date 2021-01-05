@@ -1,0 +1,59 @@
+{
+	"repository": "weka.classifiers.functions.SMOreg",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.functions.SMOreg",
+			"requiredInterface": [
+				{
+					"id": "K",
+					"name": "K"
+				}
+			],
+			"providedInterface": [
+				"AbstractRegressor",
+				"Regressor",
+				"BaseRegressor"
+			],
+			"parameters": [
+				{
+					"name": "C",
+					"type": "cat",
+					"default": 1.0,
+					"values": [
+						"0.1",
+						"1.0",
+						"10.0",
+						"10000.0",
+						"0.0001",
+						"0.001",
+						"0.01",
+						"1000.0",
+						"100.0",
+						"1e-06",
+						"1e-05"
+					]
+				},
+				{
+					"name": "N",
+					"type": "cat",
+					"default": "0",
+					"values": [
+						"0",
+						"1",
+						"2"
+					]
+				},
+				{
+					"name": "I",
+					"type": "cat",
+					"default": "weka.classifiers.functions.supportVector.RegSMOImproved",
+					"values": [
+						"weka.classifiers.functions.supportVector.RegSMOImproved"
+					]
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

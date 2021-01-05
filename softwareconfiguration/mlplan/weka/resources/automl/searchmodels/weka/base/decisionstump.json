@@ -9,7 +9,11 @@
 				"AbstractClassifier",
 				"Classifier",
 				"BaseClassifier",
-				"WeightedInstancesHandler"
+				"WeightedInstancesHandler",
+				"AbstractRegressor",
+				"Regressor",
+				"BaseRegressor",
+				"BoostableBaseRegressor"
 			],
 			"parameters": [],
 			"dependencies": []

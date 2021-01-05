@@ -8,7 +8,8 @@
 			"providedInterface": [
 				"AbstractClassifier",
 				"Classifier",
-				"BaseClassifier"
+				"BaseClassifier",
+				"Regressor"
 			],
 			"parameters": [
 				{

@@ -29,16 +29,6 @@
 						"weka.classifiers.bayes.net.search.local.TabuSearch",
 						"weka.classifiers.bayes.net.search.local.TAN"
 					]
-				},
-				{
-					"name": "E",
-					"type": "cat",
-					"default": "weka.classifiers.bayes.net.estimate.SimpleEstimator",
-					"values": [
-						"weka.classifiers.bayes.net.estimate.SimpleEstimator",
-						"weka.classifiers.bayes.net.estimate.MultiNomialBMAEstimator",
-						"weka.classifiers.bayes.net.estimate.BMAEstimator"
-					]
 				}
 			],
 			"dependencies": []

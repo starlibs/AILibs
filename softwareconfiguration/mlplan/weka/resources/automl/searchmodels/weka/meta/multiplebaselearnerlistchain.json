@@ -1,5 +1,5 @@
 {
-	"repository": "REMOVED_MultipleBaseLearnerListChain",
+	"repository": "MultipleBaseLearnerListChain",
 	"include": [],
 	"components": [
 		{
@@ -16,7 +16,7 @@
 			],
 			"providedInterface": [
 				"ModelHelper",
-				"REMOVED_MultipleBaseLearnerList"
+				"MultipleBaseLearnerList"
 			],
 			"parameter": [],
 			"dependencies": []

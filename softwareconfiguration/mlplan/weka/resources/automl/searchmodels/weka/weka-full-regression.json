@@ -3,7 +3,13 @@
 	"include": [
 		"./ext/twostep-regression-pipeline.json",
 		"./base/index.json",
-		"./meta/index.json",
+		"./meta/adaboostm1-reg.json",
+		"./meta/additiveregression.json",
+		"./meta/bagging-reg.json",
+		"./meta/logitboost-reg.json",
+		"./meta/randomcommittee.json",
+		"./meta/randomsubspace-reg.json",
+		"./meta/stacking-reg.json",
 		"./preprocessing/index.json"
 	]
 }

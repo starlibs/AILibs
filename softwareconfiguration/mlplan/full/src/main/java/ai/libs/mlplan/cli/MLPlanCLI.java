@@ -2,9 +2,11 @@ package ai.libs.mlplan.cli;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +29,12 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.Timeout;
+import org.openml.apiconnector.io.OpenmlConnector;
+import org.openml.apiconnector.xml.DataFeature;
+import org.openml.apiconnector.xml.DataFeature.Feature;
+import org.openml.apiconnector.xml.DataSetDescription;
+import org.openml.apiconnector.xml.Task;
+import org.openml.apiconnector.xml.Task.Input;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +47,10 @@ import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
-import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
+import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapperConfig;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import ai.libs.jaicore.search.gui.plugins.rolloutboxplots.SearchRolloutBoxplotPlugin;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
@@ -57,6 +66,10 @@ import ai.libs.mlplan.cli.report.StatisticsReport;
 import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.python.IPythonConfig;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 
 public class MLPlanCLI {
 
@@ -235,11 +248,85 @@ public class MLPlanCLI {
 		ILabeledDataset predictDataset = null;
 		if (cl.hasOption(O_OPENML_TASK)) {
 			String[] taskSpec = cl.getOptionValues(O_OPENML_TASK);
-			List<ILabeledDataset<ILabeledInstance>> split = OpenMLDatasetReader.loadTaskFold(Integer.parseInt(taskSpec[0]), Integer.parseInt(taskSpec[1]));
+			int taskID = Integer.parseInt(taskSpec[0]);
+			int fold = Integer.parseInt(taskSpec[1]);
+
+			logger.info("Load train test split of task {} and fold {}", taskID, fold);
+			OpenmlConnector con = new OpenmlConnector();
+			Task omlTask = con.taskGet(taskID);
+			File foldAssignmentFile = con.taskSplitsGet(omlTask);
+
+			Instances splitDescription = new Instances(new FileReader(foldAssignmentFile));
+			splitDescription.setClassIndex(splitDescription.numAttributes() - 1);
+			List<Integer> fitFold = new ArrayList<>();
+			List<Integer> predictFold = new ArrayList<>();
+
+			for (Instance i : splitDescription) {
+				if (((int) i.classValue()) == fold) {
+					int instanceIndex = (int) i.value(1);
+					switch (splitDescription.attribute(0).value((int) i.value(0))) {
+					case "TRAIN":
+						fitFold.add(instanceIndex);
+						break;
+					case "TEST":
+						predictFold.add(instanceIndex);
+						break;
+					default:
+						/* ignore this case */
+						break;
+					}
+				}
+			}
+
+			ILabeledDataset<?> dataset = null;
+			for (Input input : omlTask.getInputs()) {
+				if (input.getName().equals("source_data")) {
+					DataSetDescription dsd = input.getData_set().getDataSetDescription(con);
+					DataFeature feature = con.dataFeatures(dsd.getId());
+
+					List<String> removeAttributes = new ArrayList<>();
+					for (Entry<String, Feature> featureEntry : feature.getFeaturesAsMap().entrySet()) {
+						if (featureEntry.getValue().getIs_row_identifier() || featureEntry.getValue().getIs_ignore()) {
+							removeAttributes.add(featureEntry.getKey());
+						}
+					}
+
+					Instances wekaData = new Instances(new FileReader(con.datasetGet(con.dataGet(input.getData_set().getData_set_id()))));
+					String rangeList = removeAttributes.stream().map(x -> (wekaData.attribute(x).index() + 1) + "").collect(Collectors.joining(","));
+					Remove remove = new Remove();
+					remove.setAttributeIndices(rangeList);
+					remove.setInputFormat(wekaData);
+					Instances cleanWekaData = Filter.useFilter(wekaData, remove);
+
+					Integer classIndex = null;
+					String targetName = input.getData_set().getTarget_feature();
+					for (int i = 0; i < cleanWekaData.numAttributes(); i++) {
+						if (cleanWekaData.attribute(i).name().equals(targetName)) {
+							classIndex = i;
+						}
+					}
+
+					if (classIndex == null) {
+						logger.error("Could not find target attribute with name {}. Assuming last column to be the target instead.", targetName);
+						classIndex = cleanWekaData.numAttributes() - 1;
+					}
+					cleanWekaData.setClassIndex(classIndex);
+
+					dataset = new WekaInstances(cleanWekaData);
+				}
+			}
+
+			List<ILabeledDataset<ILabeledInstance>> split = SplitterUtil.getRealizationOfSplitSpecification(dataset, Arrays.asList(fitFold, predictFold));
 			fitDataset = split.get(0);
 			predictDataset = split.get(1);
 		} else {
-			fitDataset = ArffDatasetAdapter.readDataset(new File(cl.getOptionValue(O_FIT_DATASET)));
+			if (cl.getOptionValue(O_MODULE).equals(MLPlan4ScikitLearnRegressionCLIModule.M_RUL)) {
+				fitDataset = ArffDatasetAdapter.readDataset(new File(cl.getOptionValue(O_FIT_DATASET)));
+			} else {
+				Instances wekaData = new Instances(new FileReader(new File(cl.getOptionValue(O_FIT_DATASET))));
+				wekaData.setClassIndex(wekaData.numAttributes() - 1);
+				fitDataset = new WekaInstances(wekaData);
+			}
 		}
 
 		// retrieve builder from module
@@ -319,7 +406,10 @@ public class MLPlanCLI {
 	}
 
 	private static void writeFile(final String fileName, final String value) {
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File(fileName)))) {
+		File file = new File(fileName);
+		file.getParentFile().mkdirs();
+
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
 			bw.write(value);
 		} catch (IOException e) {
 			logger.error("Could not write value to file {}: {}", fileName, value);
