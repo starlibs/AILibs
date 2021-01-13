@@ -148,11 +148,9 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 
 						// if early termination is activated and the number of generations without change exceeds the configured generations, stop the evolution
 						int generationsWithoutImprovementCounter = GrammarBasedGeneticProgramming.this.earlyStoppingCounter.getAndIncrement();
-						if (GrammarBasedGeneticProgramming.this.getConfig().getEarlyStopping() >= 1) {
-							if (generationsWithoutImprovementCounter > GrammarBasedGeneticProgramming.this.getConfig().getEarlyStopping()) {
-								LOGGER.info("Best candidate did not change for {} generations: Thus, stop early.", GrammarBasedGeneticProgramming.this.getConfig().getEarlyStopping());
-								break;
-							}
+						if (GrammarBasedGeneticProgramming.this.getConfig().getEarlyStopping() >= 1 && generationsWithoutImprovementCounter > GrammarBasedGeneticProgramming.this.getConfig().getEarlyStopping()) {
+							LOGGER.info("Best candidate did not change for {} generations: Thus, stop early.", GrammarBasedGeneticProgramming.this.getConfig().getEarlyStopping());
+							break;
 						}
 
 						List<CandidateProgram> offspring = new ArrayList<>(GrammarBasedGeneticProgramming.this.getConfig().getPopulationSize());
@@ -211,6 +209,7 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 					LOGGER.debug("GGP thread got interrupted, release semaphore and shutdown.");
 					Thread.currentThread().interrupt();
 				} catch (Exception e) {
+					LOGGER.error("Unexpected exception occurred and forced GGP to terminate.", e);
 					e.printStackTrace();
 				} finally {
 					finished.release();
@@ -220,7 +219,9 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 
 			try {
 				if (this.getConfig().getTimeout().milliseconds() > 0) { // a timeout is specified, thus, finish with what occurs first: timeout or max generations reached
-					LOGGER.debug("Wait for " + this.getConfig().getTimeout().milliseconds() + "ms");
+					if (LOGGER.isDebugEnabled()) {
+						LOGGER.debug("Wait for {} ms", this.getConfig().getTimeout().milliseconds());
+					}
 					boolean acquired = finished.tryAcquire(this.getConfig().getTimeout().milliseconds(), TimeUnit.MILLISECONDS);
 					if (!acquired) {
 						LOGGER.debug("Timeout occurred for evo thread. Now shut it down.");
@@ -257,12 +258,11 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 	}
 
 	private void evaluate(final List<CandidateProgram> population) throws InterruptedException {
+		ExecutorService pool = Executors.newFixedThreadPool(this.getConfig().cpus());
+		AtomicBoolean interrupted = new AtomicBoolean(false);
+		Semaphore semaphore = new Semaphore(0);
+
 		try {
-			ExecutorService pool = Executors.newFixedThreadPool(this.getConfig().cpus());
-			Semaphore semaphore = new Semaphore(0);
-
-			AtomicBoolean interrupted = new AtomicBoolean(false);
-
 			for (CandidateProgram individual : population) {
 				if (this.cacheMap.containsKey(individual.toString())) {
 					((GRCandidateProgram) individual).setFitnessValue(this.cacheMap.get(individual.toString()));
@@ -287,7 +287,7 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 								Thread.currentThread().interrupt();
 							}
 						} catch (Exception e) {
-							LOGGER.warn("Could not evaluate individual {}", individual.toString(), e);
+							LOGGER.warn("Could not evaluate individual {}", individual, e);
 						} finally {
 							semaphore.release();
 						}
@@ -295,13 +295,9 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 					pool.submit(evaluateTask);
 				}
 			}
-			try {
-				semaphore.acquire(population.size());
-			} catch (InterruptedException e) {
-				interrupted.set(true);
-				pool.shutdownNow();
-				throw e;
-			}
+
+			// wait for all the evaluations to finish.
+			semaphore.acquire(population.size());
 
 			// try to put the fitness score into the cache to not re-evaluate any candidate solutions
 			population.stream().forEach(x -> {
@@ -313,6 +309,8 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 			});
 		} catch (InterruptedException e) {
 			LOGGER.debug("Got interrupted while evaluating population. Shutdown task now.");
+			interrupted.set(true);
+			pool.shutdownNow();
 			throw e;
 		}
 	}
