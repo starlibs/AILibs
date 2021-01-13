@@ -420,5 +420,5 @@ public class ComponentUtil {
 			ci.getSatisfactionOfRequiredInterfaces().put(reqI.getId(), satCIList);
 		}
 		return ci;
-	}
+  }
 }
