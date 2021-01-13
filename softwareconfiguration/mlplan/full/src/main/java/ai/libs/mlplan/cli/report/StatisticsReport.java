@@ -86,7 +86,7 @@ public class StatisticsReport {
 			root.put("truth", castedReport.getGroundTruthAsList());
 			root.put("m_rmse", new RootMeanSquaredError().loss(castedReport));
 			root.put("m_mae", new MeanAbsoluteError().loss(castedReport));
-			root.put("m_rmse", new MeanAbsolutePercentageError().loss(castedReport));
+			root.put("m_mape", new MeanAbsolutePercentageError().loss(castedReport));
 			root.put("m_r2", new R2().loss(castedReport));
 		}
 		try {
