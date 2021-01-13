@@ -160,8 +160,7 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 		this.logger = LoggerFactory.getLogger(name);
 		if (this.wrappedSLClassifier instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) this.wrappedSLClassifier).setLoggerName(name + ".bl");
-		}
-		else {
+		} else {
 			this.logger.info("Underlying learner {} is not {}, so not customizing its logger.", this.wrappedSLClassifier.getClass(), ILoggingCustomizable.class);
 		}
 	}

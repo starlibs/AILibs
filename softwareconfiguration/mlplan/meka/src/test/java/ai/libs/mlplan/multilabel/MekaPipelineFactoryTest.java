@@ -26,6 +26,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.basic.FileUtil;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.ComponentInstance;
@@ -61,8 +62,8 @@ public class MekaPipelineFactoryTest extends ATest {
 	@Disabled
 	@Test
 	public void testValidDefaultConfigInstantiation() throws ComponentInstantiationFailedException, TrainingException, InterruptedException {
-		Collection<ComponentInstance> algorithmSelections = ComponentUtil.getAllAlgorithmSelectionInstances("MLClassifier", repository);
-		List<ComponentInstance> list = new ArrayList<>(algorithmSelections);
+		Collection<IComponentInstance> algorithmSelections = ComponentUtil.getAllAlgorithmSelectionInstances("MLClassifier", repository);
+		List<IComponentInstance> list = new ArrayList<>(algorithmSelections);
 
 		double currentPercentage = 0.0;
 		double step = 0.05;
@@ -77,13 +78,13 @@ public class MekaPipelineFactoryTest extends ATest {
 	}
 
 	public static Stream<Arguments> getComponentNames() {
-		List<ComponentInstance> list = new ArrayList<>(ComponentUtil.getAllAlgorithmSelectionInstances("MLClassifier", repository));
+		List<IComponentInstance> list = new ArrayList<>(ComponentUtil.getAllAlgorithmSelectionInstances("MLClassifier", repository));
 		Set<String> names = list.stream().map(ci -> ci.getComponent().getName()).collect(Collectors.toSet());
 		return names.stream().map(name -> Arguments.of(name, list.stream().filter(ci -> ci.getComponent().getName().equals(name)).collect(Collectors.toList())));
 	}
 
 	@Disabled
-	@ParameterizedTest(name="Testing component instances of type {0}")
+	@ParameterizedTest(name = "Testing component instances of type {0}")
 	@MethodSource("getComponentNames")
 	@LongTest
 	public void testValidRandomConfigInstantiation(final String name, final List<ComponentInstance> instancesToTest) throws ComponentInstantiationFailedException, TrainingException, InterruptedException {
@@ -104,7 +105,8 @@ public class MekaPipelineFactoryTest extends ATest {
 				} catch (ComponentInstantiationFailedException e) {
 					this.logger.warn("Failed to instantiate. Error was: {}", e.getMessage());
 				}
-			};
+			}
+			;
 			assertTrue(success, "Could not find a realization of component " + instancesToTest.get(currentI));
 
 			if ((double) count.incrementAndGet() / instancesToTest.size() >= currentPercentage.get()) {

@@ -192,18 +192,18 @@ public class ComponentUtil {
 	 *            The collection fo components that is used for resolving required interfaces recursively.
 	 * @return A collection of component instances of the given root component with all possible algorithm choices.
 	 */
-	public static Collection<ComponentInstance> getAllAlgorithmSelectionInstances(final IComponent rootComponent, final Collection<? extends IComponent> components) {
-		Collection<ComponentInstance> instanceList = new LinkedList<>();
+	public static Collection<IComponentInstance> getAllAlgorithmSelectionInstances(final IComponent rootComponent, final Collection<? extends IComponent> components) {
+		Collection<IComponentInstance> instanceList = new LinkedList<>();
 		instanceList.add(ComponentUtil.getDefaultParameterizationOfComponent(rootComponent));
 
 		for (IRequiredInterfaceDefinition requiredInterface : rootComponent.getRequiredInterfaces()) {
-			List<ComponentInstance> tempList = new LinkedList<>();
+			List<IComponentInstance> tempList = new LinkedList<>();
 
 			Collection<IComponent> possiblePlugins = ComponentUtil.getComponentsProvidingInterface(components, requiredInterface.getName());
-			for (ComponentInstance ci : instanceList) {
+			for (IComponentInstance ci : instanceList) {
 				for (IComponent possiblePlugin : possiblePlugins) {
-					for (ComponentInstance reqICI : getAllAlgorithmSelectionInstances(possiblePlugin, components)) {
-						ComponentInstance copyOfCI = new ComponentInstance(ci.getComponent(), new HashMap<>(ci.getParameterValues()), new HashMap<>(ci.getSatisfactionOfRequiredInterfaces()));
+					for (IComponentInstance reqICI : getAllAlgorithmSelectionInstances(possiblePlugin, components)) {
+						IComponentInstance copyOfCI = new ComponentInstance(ci.getComponent(), new HashMap<>(ci.getParameterValues()), new HashMap<>(ci.getSatisfactionOfRequiredInterfaces()));
 						copyOfCI.getSatisfactionOfRequiredInterfaces().put(requiredInterface.getId(), Arrays.asList(reqICI));
 						tempList.add(copyOfCI);
 					}
@@ -226,8 +226,8 @@ public class ComponentUtil {
 	 *            The collection fo components that is used for resolving required interfaces recursively.
 	 * @return A collection of component instances of the given root component with all possible algorithm choices.
 	 */
-	public static Collection<ComponentInstance> getAllAlgorithmSelectionInstances(final String requiredInterface, final Collection<? extends IComponent> components) {
-		Collection<ComponentInstance> instanceList = new ArrayList<>();
+	public static Collection<IComponentInstance> getAllAlgorithmSelectionInstances(final String requiredInterface, final Collection<? extends IComponent> components) {
+		Collection<IComponentInstance> instanceList = new ArrayList<>();
 		components.stream().filter(x -> x.getProvidedInterfaces().contains(requiredInterface)).map(x -> getAllAlgorithmSelectionInstances(x, components)).forEach(instanceList::addAll);
 		return instanceList;
 	}
@@ -249,7 +249,7 @@ public class ComponentUtil {
 					int numberOfSolutionPerSlotForThisInterface = getNumberOfUnparametrizedCompositions(components, reqIFace);
 					int subSolutionsForThisInterface = 0;
 					if (reqIFaceDef.isOptional() || reqIFaceDef.getMin() == 0) {
-						subSolutionsForThisInterface ++;
+						subSolutionsForThisInterface++;
 					}
 
 					/* now consider all numbers i of positive realizations of this required interface */
@@ -259,7 +259,7 @@ public class ComponentUtil {
 						for (int j = 0; j < i; j++) {
 							numberOfPossibleRealizationsForThisFixedNumberOfSlots *= numCandidatesForNextSlot;
 							if (reqIFaceDef.isUniqueComponents()) {
-								numCandidatesForNextSlot --;
+								numCandidatesForNextSlot--;
 							}
 						}
 						subSolutionsForThisInterface += numberOfPossibleRealizationsForThisFixedNumberOfSlots;
@@ -280,7 +280,7 @@ public class ComponentUtil {
 	public static ComponentInstance getRandomParametrization(final IComponentInstance componentInstance, final Random rand) {
 		ComponentInstance randomParametrization = getRandomParameterizationOfComponent(componentInstance.getComponent(), rand);
 		componentInstance.getSatisfactionOfRequiredInterfaces().entrySet()
-		.forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), Arrays.asList(getRandomParametrization(x.getValue().iterator().next(), rand))));
+				.forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), Arrays.asList(getRandomParametrization(x.getValue().iterator().next(), rand))));
 		return randomParametrization;
 	}
 
