@@ -409,7 +409,7 @@ public class ComponentUtil {
 			if (reqI.getMin() == reqI.getMax()) {
 				numSatisfactions = reqI.getMin();
 			} else {
-				numSatisfactions = reqI.getMin() + ((int) Math.round(random.nextDouble() * (reqI.getMax() - reqI.getMin())));
+				numSatisfactions = reqI.getMin() + random.nextInt(reqI.getMax() - reqI.getMin());
 			}
 
 			List<IComponent> pluginComponents = new ArrayList<>(ComponentUtil.getComponentsProvidingInterface(componentRepository, reqI.getName()));

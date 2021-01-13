@@ -1,5 +1,7 @@
 package ai.libs.jaicore.ml.hpo.ggp;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -11,6 +13,7 @@ import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.Component;
@@ -19,7 +22,7 @@ import ai.libs.jaicore.components.model.Parameter;
 import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
 import ai.libs.jaicore.ml.hpo.ggp.GrammarBasedGeneticProgramming.GGPSolutionCandidate;
 
-public class GrammarBasedGeneticProgrammingTest {
+public class GrammarBasedGeneticProgrammingTest extends ATest {
 
 	private static SoftwareConfigurationProblem<Double> input;
 
@@ -46,7 +49,8 @@ public class GrammarBasedGeneticProgrammingTest {
 	public void randomEvalTest() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		GrammarBasedGeneticProgramming ggp = new GrammarBasedGeneticProgramming(input);
 		GGPSolutionCandidate sol = ggp.call();
-		System.out.println(sol.getScore() + " " + sol.getComponentInstance());
+		this.getLogger().info("Found solution with score {}: {}", sol.getScore(), sol.getComponentInstance());
+		assertTrue(sol.getScore() < 0.01);
 	}
 
 }

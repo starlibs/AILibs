@@ -77,4 +77,13 @@ public interface IGrammarBasedGeneticProgrammingConfig extends IOwnerBasedAlgori
 	@DefaultValue("10")
 	public int getRandomRestart();
 
+	/**
+	 * If the evaluation of an individual fails, we will need to nevertheless assign it a score. Ideally, this score is worse than
+	 * any scores that can be obtained by successfully evaluating individuals.
+	 * @return The score that is assigned to individuals that failed to be evaluated.
+	 */
+	@Key("ggp.failed_eval_score")
+	@DefaultValue("10000")
+	public double getFailedEvaluationScore();
+
 }

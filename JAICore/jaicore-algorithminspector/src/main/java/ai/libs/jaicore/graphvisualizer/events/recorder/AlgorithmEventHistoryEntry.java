@@ -13,9 +13,10 @@ import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEv
 public class AlgorithmEventHistoryEntry implements Serializable {
 
 	/**
-	 *
+	 * Auto-generated serial version UID.
 	 */
 	private static final long serialVersionUID = 7213427866393560711L;
+
 	private IPropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent;
 	private long timeEventWasReceived;
 

@@ -31,7 +31,7 @@ import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.core.Instances;
 
 @RunWith(Parameterized.class)
-public class WekaInstancesTester {
+public class WekaInstancesTest {
 
 	// creates the test data
 	@Parameters(name = "{0}")

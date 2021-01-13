@@ -256,8 +256,7 @@ public class ComponentInstanceUtil {
 		String parameters = ci.getParameterValues().entrySet().stream().map(x -> x.getKey() + "=" + x.getValue()).collect(Collectors.joining(", "));
 		sb.append(parameters);
 
-		String reqIs = ci.getSatisfactionOfRequiredInterfaces().entrySet().stream().map(x -> x.getKey() + "=[" + x.getValue().stream().map(y -> getComponentInstanceString(y)).collect(Collectors.joining(",")) + "]")
-				.collect(Collectors.joining(","));
+		String reqIs = ci.getSatisfactionOfRequiredInterfaces().entrySet().stream().map(ComponentInstanceUtil::satisfiedRequiredInterfaceToString).collect(Collectors.joining(","));
 		if (!parameters.isEmpty() && !reqIs.isEmpty()) {
 			sb.append(", ");
 		}
@@ -265,6 +264,10 @@ public class ComponentInstanceUtil {
 		sb.append(reqIs).append("}");
 
 		return sb.toString();
+	}
+
+	private static String satisfiedRequiredInterfaceToString(final Entry<String, List<IComponentInstance>> satisfiedRequiredInterface) {
+		return satisfiedRequiredInterface.getKey() + "=[" + satisfiedRequiredInterface.getValue().stream().map(ComponentInstanceUtil::getComponentInstanceString).collect(Collectors.joining(",")) + "]";
 	}
 
 	public static boolean isSubInstance(final IComponentInstance sub, final IComponentInstance sup) {

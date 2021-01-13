@@ -42,12 +42,24 @@ import ai.libs.jaicore.components.model.SoftwareConfigurationProblem;
 import ai.libs.jaicore.ml.hpo.ggp.GrammarBasedGeneticProgramming.GGPSolutionCandidate;
 
 /**
- * HyperBand is a simple but effective hyper-parameter optimization technique, heavily relying on a technique called successive halving.
- * Given a maximum amount of allocatable resources r_max and an integer parameter eta > 1, it allocates resources in a clever way, racing
- * randomly sampled solution candidates with increasing resources for more promising ones.
+ * Grammar-based genetic programming is an evolutionary algorithm capable of evolving individuals in the form of trees, where the trees are derived from a context-free grammar (CFG).
+ * As in standard evolutionary algorithms (EA), a population is maintained that is evaluated by means of a fitness function and subsequently individuals are recombined with each
+ * other and mutated. In contrast to standard EAs, special operators need to be applied to adhere to the rules imposed by the CFG and therefore to not invalidate individuals.
  *
- * For more details, refer to the published paper by Li et al. from 2018:
- * Hyperband: A Novel Bandit-Based Approach to Hyperparameter Optimization. In: Journal of Machine Learning research 18 (2018) 1-52
+ * This specific implementation allows for both limiting the execution by number of evaluations (generations*population_size) or a timeout. If the number of generations is set to an
+ * infeasible value, it will be assumed that the number of generations is set to infinity and thus a timeout will be required. As soon as the timeout is hit, the best solution seen so far
+ * will be returned. If the timeout is set to an infeasible value, the number of generations will be a required configuration value. When running the algorithm, it will run to the specified
+ * number of generation and return the best result found until this point. If both stopping criterions are set, the algorithm will terminate with the criterion that is first evaluated to true.
+ * So, either the timeout is hit or the maximum number of generations reached.
+ *
+ * Early Stopping:
+ * If the algorithm is already converged early, i.e., before the timeout is hit or the maximum number of generations is reached, it will terminate if the algorithm has not seen any improvements
+ * for a specified number of generations.
+ *
+ * Random Restart:
+ * Sometimes the algorithm may get stuck in local optima. To overcome this issue and move away from the local optima, there is a soft reset option called random restart. If random restart is
+ * configured, every x generations the algorithm could not find any improvement, the current population is wiped except for the best individuals (defined via the elitism config). Then, the
+ * population is filled up with new randomly sampled individuals. Thereby, the algorithm is able to move to other areas of the search space easily (given there are better fitness values).
  *
  * @author mwever
  *
@@ -56,8 +68,6 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 
 	private static final IGrammarBasedGeneticProgrammingConfig DEF_CONFIG = ConfigFactory.create(IGrammarBasedGeneticProgrammingConfig.class);
 	private static final Logger LOGGER = LoggerFactory.getLogger(GrammarBasedGeneticProgramming.class);
-
-	private ExecutorService pool = null;
 
 	private final MersenneTwisterFast rng;
 	private final IObjectEvaluator<IComponentInstance, Double> evaluator;
@@ -110,124 +120,116 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 			LOGGER.info("Start GrammarBasedGeneticProgramming run");
 			Semaphore finished = new Semaphore(0);
 
-			Thread evoThread = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						String grammarString = GrammarBasedGeneticProgramming.this.converter.toGrammar();
-						LOGGER.debug("Generated the following grammar string for the provided component repository:\n{}", grammarString);
+			Thread evoThread = new Thread(() -> {
+				try {
+					String grammarString = GrammarBasedGeneticProgramming.this.converter.toGrammar();
+					LOGGER.debug("Generated the following grammar string for the provided component repository:\n{}", grammarString);
 
-						GrammarBasedGeneticProgramming.this.grammar = new Grammar(grammarString);
+					GrammarBasedGeneticProgramming.this.grammar = new Grammar(grammarString);
 
-						// For initializing the population.
-						GrowInitialiser initPop = new GrowInitialiser(GrammarBasedGeneticProgramming.this.rng, GrammarBasedGeneticProgramming.this.grammar, GrammarBasedGeneticProgramming.this.getConfig().getPopulationSize(),
-								GrammarBasedGeneticProgramming.this.getConfig().getMaxDepth(), false);
+					// For initializing the population.
+					GrowInitialiser initPop = new GrowInitialiser(GrammarBasedGeneticProgramming.this.rng, GrammarBasedGeneticProgramming.this.grammar, GrammarBasedGeneticProgramming.this.getConfig().getPopulationSize(),
+							GrammarBasedGeneticProgramming.this.getConfig().getMaxDepth(), false);
 
-						// Set initial population list and sort the population
-						List<CandidateProgram> population = new ArrayList<>(initPop.getInitialPopulation());
+					// Set initial population list and sort the population
+					List<CandidateProgram> population = new ArrayList<>(initPop.getInitialPopulation());
 
-						int g = 0;
-						while (!Thread.currentThread().isInterrupted() && (GrammarBasedGeneticProgramming.this.getConfig().getNumGenerations() <= 0 || g < GrammarBasedGeneticProgramming.this.getConfig().getNumGenerations())) {
-							LOGGER.debug("Evaluate population of generation {}.", (g + 1));
-							try {
-								GrammarBasedGeneticProgramming.this.evaluate(population);
-							} catch (InterruptedException e) {
-								LOGGER.info("Got interrupted. Shutdown task now.");
-								finished.release();
+					int g = 0;
+					while (!Thread.currentThread().isInterrupted() && (GrammarBasedGeneticProgramming.this.getConfig().getNumGenerations() <= 0 || g < GrammarBasedGeneticProgramming.this.getConfig().getNumGenerations())) {
+						LOGGER.debug("Evaluate population of generation {}.", (g + 1));
+						GrammarBasedGeneticProgramming.this.evaluate(population);
+						Collections.sort(population);
+
+						// print fitness statistics of current generation if enabled.
+						if (GrammarBasedGeneticProgramming.this.getConfig().getPrintFitnessStats()) {
+							List<Double> fitnessList = population.stream().map(x -> ((GRCandidateProgram) x).getFitnessValue()).collect(Collectors.toList());
+							LOGGER.info("Generation #{} (population size: {}) - min: {} - mean: {} - max: {}", g + 1, fitnessList.size(), StatisticsUtil.min(fitnessList), StatisticsUtil.mean(fitnessList), StatisticsUtil.max(fitnessList));
+						}
+
+						// if early termination is activated and the number of generations without change exceeds the configured generations, stop the evolution
+						int generationsWithoutImprovementCounter = GrammarBasedGeneticProgramming.this.earlyStoppingCounter.getAndIncrement();
+						if (GrammarBasedGeneticProgramming.this.getConfig().getEarlyStopping() >= 1) {
+							if (generationsWithoutImprovementCounter > GrammarBasedGeneticProgramming.this.getConfig().getEarlyStopping()) {
+								LOGGER.info("Best candidate did not change for {} generations: Thus, stop early.", GrammarBasedGeneticProgramming.this.getConfig().getEarlyStopping());
 								break;
 							}
-							Collections.sort(population);
-
-							// print fitness statistics of current generation if enabled.
-							if (GrammarBasedGeneticProgramming.this.getConfig().getPrintFitnessStats()) {
-								List<Double> fitnessList = population.stream().map(x -> ((GRCandidateProgram) x).getFitnessValue()).collect(Collectors.toList());
-								LOGGER.info("Generation #{} (population size: {}) - min: {} - mean: {} - max: {}", g + 1, fitnessList.size(), StatisticsUtil.min(fitnessList), StatisticsUtil.mean(fitnessList),
-										StatisticsUtil.max(fitnessList));
-							}
-
-							// if early termination is activated and the number of generations without change exceeds the configured generations, stop the evolution
-							if (GrammarBasedGeneticProgramming.this.getConfig().getEarlyStopping() >= 1) {
-								int currentCounter = GrammarBasedGeneticProgramming.this.earlyStoppingCounter.getAndIncrement();
-								if (currentCounter > GrammarBasedGeneticProgramming.this.getConfig().getEarlyStopping()) {
-									LOGGER.info("Best candidate did not change for {} generations: Thus, stop early.", GrammarBasedGeneticProgramming.this.getConfig().getEarlyStopping());
-									break;
-								}
-							}
-
-							List<CandidateProgram> offspring = new ArrayList<>(GrammarBasedGeneticProgramming.this.getConfig().getPopulationSize());
-							// keep elite
-							for (int i = 0; i < GrammarBasedGeneticProgramming.this.getConfig().getElitismSize(); i++) {
-								offspring.add(population.get(i));
-							}
-							if (Thread.interrupted()) {
-								System.out.println("Thread got interrupted, cancel GGP.");
-								throw new InterruptedException();
-							}
-
-							// if enabled, perform random restart every x generations
-							if (GrammarBasedGeneticProgramming.this.getConfig().getRandomRestart() > 0 && ((g + 1) % GrammarBasedGeneticProgramming.this.getConfig().getRandomRestart() == 0)) {
-								LOGGER.debug("It is about time to perform a random restart in generation {}. Randomly generate {} individuals for restart.", g,
-										GrammarBasedGeneticProgramming.this.getConfig().getPopulationSize() - GrammarBasedGeneticProgramming.this.getConfig().getElitismSize());
-								GrowInitialiser randRestartPop = new GrowInitialiser(GrammarBasedGeneticProgramming.this.rng, GrammarBasedGeneticProgramming.this.grammar,
-										GrammarBasedGeneticProgramming.this.getConfig().getPopulationSize() - GrammarBasedGeneticProgramming.this.getConfig().getElitismSize(), GrammarBasedGeneticProgramming.this.getConfig().getMaxDepth(),
-										false);
-								offspring.addAll(randRestartPop.getInitialPopulation());
-							} else {
-								// fill up offspring with recombinations
-								while (offspring.size() < GrammarBasedGeneticProgramming.this.getConfig().getPopulationSize()) {
-									if (Thread.interrupted()) {
-										throw new InterruptedException();
-									}
-
-									CandidateProgram child1 = GrammarBasedGeneticProgramming.this.tournament(population).clone();
-									CandidateProgram child2 = GrammarBasedGeneticProgramming.this.tournament(population).clone();
-
-									double randomX = GrammarBasedGeneticProgramming.this.rng.nextDouble();
-									if (randomX < GrammarBasedGeneticProgramming.this.getConfig().getCrossoverRate()) {
-										WhighamCrossover xover = new WhighamCrossover(GrammarBasedGeneticProgramming.this.rng);
-										CandidateProgram[] xoverprograms = xover.crossover(child1.clone(), child2.clone());
-										if (xoverprograms != null) {
-											child1 = xoverprograms[0];
-											child2 = xoverprograms[1];
-										}
-									}
-
-									child1 = GrammarBasedGeneticProgramming.this.mutate(child1);
-									child2 = GrammarBasedGeneticProgramming.this.mutate(child2);
-
-									offspring.add(child1);
-									if (offspring.size() < GrammarBasedGeneticProgramming.this.getConfig().getPopulationSize()) {
-										offspring.add(child2);
-									}
-								}
-							}
-							population = offspring;
-							g++;
 						}
-					} catch (InterruptedException e) {
-						System.err.println("GGP thread got interrupted, release semaphore and shutdown.");
-					} catch (Exception e) {
-						e.printStackTrace();
-					} finally {
-						finished.release();
+
+						List<CandidateProgram> offspring = new ArrayList<>(GrammarBasedGeneticProgramming.this.getConfig().getPopulationSize());
+						// keep elite
+						for (int i = 0; i < GrammarBasedGeneticProgramming.this.getConfig().getElitismSize(); i++) {
+							offspring.add(population.get(i));
+						}
+
+						// check whether thread has been interrupted. If so, terminate the algorithm.
+						if (Thread.interrupted()) {
+							LOGGER.debug("Thread got interrupted, exit GGP.");
+							throw new InterruptedException();
+						}
+
+						// if enabled, perform random restart every x generations
+						if (GrammarBasedGeneticProgramming.this.getConfig().getRandomRestart() > 0 && ((generationsWithoutImprovementCounter) % GrammarBasedGeneticProgramming.this.getConfig().getRandomRestart() == 0)) {
+							LOGGER.debug("It is about time to perform a random restart in generation {}. Randomly generate {} individuals for restart.", g,
+									GrammarBasedGeneticProgramming.this.getConfig().getPopulationSize() - GrammarBasedGeneticProgramming.this.getConfig().getElitismSize());
+							GrowInitialiser randRestartPop = new GrowInitialiser(GrammarBasedGeneticProgramming.this.rng, GrammarBasedGeneticProgramming.this.grammar,
+									GrammarBasedGeneticProgramming.this.getConfig().getPopulationSize() - GrammarBasedGeneticProgramming.this.getConfig().getElitismSize(), GrammarBasedGeneticProgramming.this.getConfig().getMaxDepth(),
+									false);
+							offspring.addAll(randRestartPop.getInitialPopulation());
+						} else {
+							// fill up offspring with recombinations
+							while (offspring.size() < GrammarBasedGeneticProgramming.this.getConfig().getPopulationSize()) {
+								if (Thread.interrupted()) {
+									throw new InterruptedException();
+								}
+
+								CandidateProgram child1 = GrammarBasedGeneticProgramming.this.tournament(population).clone();
+								CandidateProgram child2 = GrammarBasedGeneticProgramming.this.tournament(population).clone();
+
+								double randomX = GrammarBasedGeneticProgramming.this.rng.nextDouble();
+								if (randomX < GrammarBasedGeneticProgramming.this.getConfig().getCrossoverRate()) {
+									WhighamCrossover xover = new WhighamCrossover(GrammarBasedGeneticProgramming.this.rng);
+									CandidateProgram[] xoverprograms = xover.crossover(child1.clone(), child2.clone());
+									if (xoverprograms != null) {
+										child1 = xoverprograms[0];
+										child2 = xoverprograms[1];
+									}
+								}
+
+								child1 = GrammarBasedGeneticProgramming.this.mutate(child1);
+								child2 = GrammarBasedGeneticProgramming.this.mutate(child2);
+
+								offspring.add(child1);
+								if (offspring.size() < GrammarBasedGeneticProgramming.this.getConfig().getPopulationSize()) {
+									offspring.add(child2);
+								}
+							}
+						}
+						population = offspring;
+						g++;
 					}
+				} catch (InterruptedException e) {
+					LOGGER.debug("GGP thread got interrupted, release semaphore and shutdown.");
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					finished.release();
 				}
 			});
 			evoThread.start();
 
 			try {
 				if (this.getConfig().getTimeout().milliseconds() > 0) { // a timeout is specified, thus, finish with what occurs first: timeout or max generations reached
-					System.out.println("Wait for " + this.getConfig().getTimeout().milliseconds() + "ms");
+					LOGGER.debug("Wait for " + this.getConfig().getTimeout().milliseconds() + "ms");
 					boolean acquired = finished.tryAcquire(this.getConfig().getTimeout().milliseconds(), TimeUnit.MILLISECONDS);
 					if (!acquired) {
-						System.err.println("Timeout occurred for evo thread. Now interrupt it.");
+						LOGGER.debug("Timeout occurred for evo thread. Now shut it down.");
 						evoThread.interrupt();
 					}
 				} else { // no timeout configured: wait until max generations are reached.
 					finished.acquire();
 				}
 			} catch (InterruptedException e) {
-				System.err.println("Main GGP thread got interrupted, now interrupt evoThread.");
+				LOGGER.debug("Main GGP thread got interrupted, now interrupt evoThread.");
 				evoThread.interrupt();
 			}
 			return this.terminate();
@@ -246,68 +248,67 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 	}
 
 	private CandidateProgram tournament(final List<CandidateProgram> population) {
-		List<CandidateProgram> candidates = new ArrayList<CandidateProgram>(population);
+		List<CandidateProgram> candidates = new ArrayList<>(population);
 		Collections.shuffle(candidates, new Random(this.rng.nextLong()));
-		List<CandidateProgram> tournamentCandidates = IntStream.range(0, this.getConfig().getTournamentSize()).mapToObj(x -> candidates.get(x)).collect(Collectors.toList());
+		List<CandidateProgram> tournamentCandidates = IntStream.range(0, this.getConfig().getTournamentSize()).mapToObj(candidates::get).collect(Collectors.toList());
 		Collections.sort(tournamentCandidates);
 		return tournamentCandidates.get(0);
 	}
 
 	private void evaluate(final List<CandidateProgram> population) throws InterruptedException {
-		ExecutorService pool = Executors.newFixedThreadPool(this.getConfig().cpus());
-		Semaphore semaphore = new Semaphore(0);
+		try {
+			ExecutorService pool = Executors.newFixedThreadPool(this.getConfig().cpus());
+			Semaphore semaphore = new Semaphore(0);
 
-		AtomicBoolean interrupted = new AtomicBoolean(false);
+			AtomicBoolean interrupted = new AtomicBoolean(false);
 
-		for (CandidateProgram individual : population) {
-			if (this.cacheMap.containsKey(individual.toString())) {
-				((GRCandidateProgram) individual).setFitnessValue(this.cacheMap.get(individual.toString()));
-				semaphore.release();
-			} else {
-				Runnable evaluateTask = new Runnable() {
-					@Override
-					public void run() {
+			for (CandidateProgram individual : population) {
+				if (this.cacheMap.containsKey(individual.toString())) {
+					((GRCandidateProgram) individual).setFitnessValue(this.cacheMap.get(individual.toString()));
+					semaphore.release();
+				} else {
+					Runnable evaluateTask = () -> {
+						GRCandidateProgram realInd = ((GRCandidateProgram) individual);
 						try {
 							if (Thread.interrupted() || interrupted.get()) {
 								semaphore.release();
 							}
 							ComponentInstance ci = GrammarBasedGeneticProgramming.this.converter.grammarStringToComponentInstance(individual.toString());
-							GRCandidateProgram realInd = ((GRCandidateProgram) individual);
-							try {
-								double fitnessValue = GrammarBasedGeneticProgramming.this.evaluator.evaluate(ci);
-								if (GrammarBasedGeneticProgramming.this.updateBestSeenSolution(new GGPSolutionCandidate(ci, fitnessValue))) {
-									GrammarBasedGeneticProgramming.this.earlyStoppingCounter.set(0);
-								}
-								realInd.setFitnessValue(fitnessValue);
-							} catch (ObjectEvaluationFailedException | InterruptedException e) {
-								realInd.setFitnessValue(10000.0);
-							} finally {
-								semaphore.release();
+							double fitnessValue = GrammarBasedGeneticProgramming.this.evaluator.evaluate(ci);
+							if (GrammarBasedGeneticProgramming.this.updateBestSeenSolution(new GGPSolutionCandidate(ci, fitnessValue))) {
+								GrammarBasedGeneticProgramming.this.earlyStoppingCounter.set(0);
 							}
-						} catch (Throwable e) {
-							System.err.println(individual.toString());
-							e.printStackTrace();
+							realInd.setFitnessValue(fitnessValue);
+						} catch (ObjectEvaluationFailedException | InterruptedException e) {
+							realInd.setFitnessValue(GrammarBasedGeneticProgramming.this.getConfig().getFailedEvaluationScore());
+						} catch (Exception e) {
+							LOGGER.warn("Could not evaluate individual {}", individual.toString(), e);
 							semaphore.release();
 						}
-					}
-				};
-				pool.submit(evaluateTask);
+					};
+					pool.submit(evaluateTask);
+				}
 			}
-		}
-		try {
-			semaphore.acquire(population.size());
+			try {
+				semaphore.acquire(population.size());
+			} catch (InterruptedException e) {
+				interrupted.set(true);
+				pool.shutdownNow();
+				throw e;
+			}
+
+			// try to put the fitness score into the cache to not re-evaluate any candidate solutions
+			population.stream().forEach(x -> {
+				try {
+					this.cacheMap.put(x.toString(), x.getFitness());
+				} catch (Exception e) {
+					// could not cache fitness => nullpointer exception must have occurred, so ignore the candidate and do not put it into the cache.
+				}
+			});
 		} catch (InterruptedException e) {
-			interrupted.set(true);
-			pool.shutdownNow();
+			LOGGER.debug("Got interrupted while evaluating population. Shutdown task now.");
 			throw e;
 		}
-		population.stream().forEach(x -> {
-			try {
-				this.cacheMap.put(x.toString(), x.getFitness());
-			} catch (Exception e) {
-				// could not cache fitness => nullpointer exception must have occurred, so ignore the candidate and do not put it into the cache.
-			}
-		});
 	}
 
 	@Override

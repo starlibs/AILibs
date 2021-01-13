@@ -1,5 +1,6 @@
 package ai.libs.mlplan.wekamlplan.searchspace;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -12,7 +13,6 @@ import java.util.stream.Stream;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.provider.Arguments;
@@ -20,6 +20,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
@@ -31,47 +32,45 @@ import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
-import ai.libs.jaicore.test.MediumParameterizedTest;
+import ai.libs.jaicore.test.LongParameterizedTest;
 import ai.libs.mlplan.weka.weka.WekaPipelineFactory;
 
-public class RandomComponentValidityTest {
+public class RandomComponentValidityTest extends ATest {
 
 	private static ILabeledDataset<ILabeledInstance> classificationDataset;
 	private static ILabeledDataset<ILabeledInstance> regressionDataset;
 	private static final List<String> CHECK_COMPONENTS = Arrays.asList();
 
-	private static IComponentRepository repo;
+	private static IComponentRepository repoClassification;
+	private static IComponentRepository repoRegression;
 	private static WekaPipelineFactory factory;
 
 	private static final int NUM_PARAMETRIZATIONS = 50;
 
-	private static final boolean TEST_CLASSIFICATION = false;
-	private static ILabeledDataset<ILabeledInstance> dataset;
-
 	@BeforeAll
 	public static void setup() throws DatasetDeserializationFailedException, IOException {
-		if (TEST_CLASSIFICATION) {
-			dataset = OpenMLDatasetReader.deserializeDataset(50);
-			repo = new ComponentSerialization().deserializeRepository(new ResourceFile("automl/searchmodels/weka/weka-full.json"));
-		} else {
-			dataset = OpenMLDatasetReader.deserializeDataset(232);
-			repo = new ComponentSerialization().deserializeRepository(new ResourceFile("automl/searchmodels/weka/weka-full-regression.json"));
-		}
+		classificationDataset = OpenMLDatasetReader.deserializeDataset(50);
+		repoClassification = new ComponentSerialization().deserializeRepository(new ResourceFile("automl/searchmodels/weka/weka-full.json"));
+		regressionDataset = OpenMLDatasetReader.deserializeDataset(232);
+		repoRegression = new ComponentSerialization().deserializeRepository(new ResourceFile("automl/searchmodels/weka/weka-full-regression.json"));
 		factory = new WekaPipelineFactory();
 	}
 
 	public static Stream<Arguments> getComponentsToTestRandomConfigurations() {
-		List<Arguments> argumentsList = ComponentUtil.getComponentsProvidingInterface(repo, "Regressor").stream().filter(x -> !CHECK_COMPONENTS.contains(x.getName())).map(x -> Arguments.of(x.getName(), NUM_PARAMETRIZATIONS))
-				.collect(Collectors.toList());
+		List<Arguments> argumentsList = ComponentUtil.getComponentsProvidingInterface(repoRegression, "Regressor").stream().filter(x -> !CHECK_COMPONENTS.contains(x.getName()))
+				.map(x -> Arguments.of(regressionDataset, repoRegression, x.getName(), NUM_PARAMETRIZATIONS)).collect(Collectors.toList());
+		argumentsList.addAll(ComponentUtil.getComponentsProvidingInterface(repoClassification, "Classifier").stream().filter(x -> !CHECK_COMPONENTS.contains(x.getName()))
+				.map(x -> Arguments.of(classificationDataset, repoClassification, x.getName(), NUM_PARAMETRIZATIONS)).collect(Collectors.toList()));
 		return argumentsList.stream();
 	}
 
 	@Disabled
-	@MediumParameterizedTest
+	@LongParameterizedTest
 	@MethodSource("getComponentsToTestRandomConfigurations")
-	public void testRandomConfigurationsInstantiation(final String componentName, final int numParameterizations) throws IOException, ComponentInstantiationFailedException {
+	public void testRandomConfigurationsInstantiation(final ILabeledDataset<ILabeledInstance> dataset, final IComponentRepository repo, final String componentName, final int numParameterizations)
+			throws IOException, ComponentInstantiationFailedException {
 		IComponent compToTest = repo.getComponent(componentName);
-		System.out.println("Test " + numParameterizations + " random configuration of component: " + compToTest.getName());
+		this.getLogger().info("Test {} random configuration of component: {}", numParameterizations, compToTest.getName());
 		if (compToTest.getParameters().isEmpty() && compToTest.getRequiredInterfaces().isEmpty()) {
 			return;
 		}
@@ -85,32 +84,38 @@ public class RandomComponentValidityTest {
 			}
 			try {
 				IWekaClassifier learner = factory.getComponentInstantiation(ci);
-				ILearnerRunReport report = new SupervisedLearnerExecutor().execute(learner, regressionDataset, regressionDataset);
+				new SupervisedLearnerExecutor().execute(learner, dataset, dataset);
 			} catch (Exception e) {
-				System.out.println(ComponentInstanceUtil.getComponentInstanceString(ci));
+				this.getLogger().error("Could not build or execute {}", ComponentInstanceUtil.getComponentInstanceString(ci), e);
 				e.printStackTrace();
 				fail(e);
 			}
 
 			if ((i + 1) % 10 == 0) {
-				System.out.println((i + 1) + " components tested");
+				this.getLogger().info("{} components of {} evaluated", (i + 1), compToTest);
 			}
 		}
 	}
 
 	public static Stream<Arguments> getComponentsToTestRandomInstantiations() {
-		return ComponentUtil.getComponentsProvidingInterface(repo, "MetaRegressor").stream().map(x -> Arguments.of(x.getName(), NUM_PARAMETRIZATIONS));
+		List<Arguments> argumentList = ComponentUtil.getComponentsProvidingInterface(repoRegression, "MetaRegressor").stream().map(x -> Arguments.of(regressionDataset, repoRegression, x.getName(), NUM_PARAMETRIZATIONS))
+				.collect(Collectors.toList());
+		argumentList.addAll(
+				ComponentUtil.getComponentsProvidingInterface(repoClassification, "MetaClassifier").stream().map(x -> Arguments.of(classificationDataset, repoClassification, x.getName(), NUM_PARAMETRIZATIONS)).collect(Collectors.toList()));
+		return argumentList.stream();
 	}
 
-	@MediumParameterizedTest
+	@Disabled
+	@LongParameterizedTest
 	@MethodSource("getComponentsToTestRandomInstantiations")
-	public void testRandomInstantiation(final String componentName, final int numInstantiations) throws JsonProcessingException {
+	public void testRandomInstantiation(final ILabeledDataset<ILabeledInstance> dataset, final IComponentRepository repo, final String componentName, final int numInstantiations) throws JsonProcessingException {
 		IComponent compToTest = repo.getComponent(componentName);
-		System.out.println("Test " + numInstantiations + " random instantiation of component: " + compToTest);
+		this.getLogger().info("Test {} random instantiation of component: {}", numInstantiations, compToTest);
 		if (compToTest.getParameters().isEmpty() && compToTest.getRequiredInterfaces().isEmpty()) {
 			return;
 		}
 
+		boolean allSucceeded = true;
 		for (int i = 0; i < numInstantiations; i++) {
 			IComponentInstance ci = ComponentUtil.getRandomInstantiationOfComponent(compToTest, repo, new Random(i));
 			if (componentName.toLowerCase().contains("randomforest")) {
@@ -120,17 +125,20 @@ public class RandomComponentValidityTest {
 			}
 			try {
 				IWekaClassifier learner = factory.getComponentInstantiation(ci);
-				ILearnerRunReport report = new SupervisedLearnerExecutor().execute(learner, regressionDataset, regressionDataset);
+				new SupervisedLearnerExecutor().execute(learner, dataset, dataset);
 			} catch (Exception e) {
-				System.out.println("Failed for: " + ComponentInstanceUtil.getComponentInstanceString(ci));
+				this.getLogger().error("Could not build or execute {}", ComponentInstanceUtil.getComponentInstanceString(ci), e);
+				allSucceeded = false;
 				e.printStackTrace();
 				fail(e);
 			}
 
 			if ((i + 1) % 10 == 0) {
-				System.out.println((i + 1) + " components tested");
+				this.getLogger().info("{} components of {} evaluated", (i + 1), compToTest);
 			}
 		}
+
+		assertTrue(allSucceeded, "Successfully tested random instantiations of " + componentName);
 	}
 
 }

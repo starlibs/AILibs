@@ -64,13 +64,13 @@ public class StatisticsReport {
 			// add all the prediction rows.
 			for (int i = 0; i < castedReport.size(); i++) {
 				ISingleLabelClassification pred = castedReport.getPrediction(i);
-				probabilities.add(IntStream.range(0, labels.size()).mapToDouble(x -> pred.getProbabilityOfLabel(x)).toArray());
+				probabilities.add(IntStream.range(0, labels.size()).mapToDouble(pred::getProbabilityOfLabel).toArray());
 				predictions.add(pred.getIntPrediction());
 			}
 
-			root.put("predictions", predictions.stream().map(x -> labels.get(x)).collect(Collectors.toList()));
+			root.put("predictions", predictions.stream().map(labels::get).collect(Collectors.toList()));
 			root.put("probabilities", probabilities);
-			root.put("truth", castedReport.getGroundTruthAsList().stream().map(x -> labels.get(x)).collect(Collectors.toList()));
+			root.put("truth", castedReport.getGroundTruthAsList().stream().map(labels::get).collect(Collectors.toList()));
 			root.put("m_error_rate", EClassificationPerformanceMeasure.ERRORRATE.loss(castedReport));
 			if (labels.size() == 2) {
 				root.put("m_auc_0", new AreaUnderPrecisionRecallCurve(0).score(castedReport));
@@ -82,7 +82,7 @@ public class StatisticsReport {
 			}
 		} else { // regression data
 			IPredictionAndGroundTruthTable<Double, IRegressionPrediction> castedReport = this.runReport.getPredictionDiffList().getCastedView(Double.class, IRegressionPrediction.class);
-			root.put("predictions", castedReport.getPredictionsAsList().stream().map(x -> x.getDoublePrediction()).collect(Collectors.toList()));
+			root.put("predictions", castedReport.getPredictionsAsList().stream().map(IRegressionPrediction::getDoublePrediction).collect(Collectors.toList()));
 			root.put("truth", castedReport.getGroundTruthAsList());
 			root.put("m_rmse", new RootMeanSquaredError().loss(castedReport));
 			root.put("m_mae", new MeanAbsoluteError().loss(castedReport));

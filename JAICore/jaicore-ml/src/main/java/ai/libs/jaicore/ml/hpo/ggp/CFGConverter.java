@@ -19,6 +19,11 @@ import ai.libs.jaicore.components.model.NumericParameterDomain;
 
 public class CFGConverter {
 
+	private static final String OR_OP = " | ";
+	private static final String PRODUCTION_OP = " ::= ";
+	private static final String NON_TERMINAL_PATTERN = "<%s>";
+	private static final String START_SYMBOL = String.format(NON_TERMINAL_PATTERN, "START");
+
 	private final Collection<? extends IComponent> components;
 	private final String requestedInterface;
 
@@ -31,7 +36,7 @@ public class CFGConverter {
 		StringBuilder sb = new StringBuilder();
 		Collection<? extends IComponent> matchingComponents = ComponentUtil.getComponentsProvidingInterface(this.components, this.requestedInterface);
 		Map<String, String> productions = new HashMap<>();
-		sb.append("<START> ::= ").append(this.componentsToOrListOfNonTerminals(matchingComponents)).append("\n");
+		sb.append(START_SYMBOL).append(PRODUCTION_OP).append(this.componentsToOrListOfNonTerminals(matchingComponents)).append("\n");
 		for (IComponent component : matchingComponents) {
 			this.addComponentProductions(this.components, component, productions);
 		}
@@ -40,42 +45,43 @@ public class CFGConverter {
 	}
 
 	private String componentsToOrListOfNonTerminals(final Collection<? extends IComponent> components) {
-		return components.stream().map(x -> "<" + x.getName() + ">").collect(Collectors.joining(" | "));
+		return components.stream().map(x -> String.format(NON_TERMINAL_PATTERN, x.getName())).collect(Collectors.joining(OR_OP));
 	}
 
 	private void addComponentProductions(final Collection<? extends IComponent> components, final IComponent component, final Map<String, String> productions) {
 		StringBuilder compProduction = new StringBuilder();
-		String compNT = "<" + component.getName() + ">";
+		String compNT = String.format(NON_TERMINAL_PATTERN, component.getName());
 		if (productions.containsKey(compNT)) {
 			return;
 		}
-		compProduction.append(compNT).append(" ::= ").append(component.getName());
+		compProduction.append(compNT).append(PRODUCTION_OP).append(component.getName());
 
 		for (IParameter param : component.getParameters()) {
 			String nsParam = component.getName() + "." + param.getName();
-			String paramNT = "<" + nsParam + ">";
+			String paramNT = String.format(NON_TERMINAL_PATTERN, nsParam);
 			compProduction.append(" ").append(nsParam).append(" ").append(paramNT);
 
 			if (param.getDefaultDomain() instanceof NumericParameterDomain) {
 				NumericParameterDomain dom = (NumericParameterDomain) param.getDefaultDomain();
 				if (dom.isInteger()) {
-					productions.put(paramNT, paramNT + " ::= RANDINT_TYPE0(" + (int) dom.getMin() + "," + (int) dom.getMax() + ")\n");
+					productions.put(paramNT, paramNT + PRODUCTION_OP + "RANDINT_TYPE0(" + (int) dom.getMin() + "," + (int) dom.getMax() + ")\n");
 				} else {
-					productions.put(paramNT, paramNT + " ::= RANDFLOAT(" + dom.getMin() + "," + dom.getMax() + ")\n");
+					productions.put(paramNT, paramNT + PRODUCTION_OP + "RANDFLOAT(" + dom.getMin() + "," + dom.getMax() + ")\n");
 				}
 			} else if (param.getDefaultDomain() instanceof CategoricalParameterDomain) {
 				CategoricalParameterDomain dom = (CategoricalParameterDomain) param.getDefaultDomain();
-				productions.put(paramNT, paramNT + " ::= " + Arrays.stream(dom.getValues()).map(x -> x.contains(" ") ? x.replaceAll(" ", "_") : x).collect(Collectors.joining(" | ")) + "\n");
+				productions.put(paramNT, paramNT + PRODUCTION_OP + Arrays.stream(dom.getValues()).map(x -> x.contains(" ") ? x.replace(" ", "_") : x).collect(Collectors.joining(OR_OP)) + "\n");
 			}
 		}
 
 		for (IRequiredInterfaceDefinition requiredInterface : component.getRequiredInterfaces()) {
 			String nsI = component.getName() + "." + requiredInterface.getId();
-			String reqINT = "<" + requiredInterface.getName() + ">";
+			String reqINT = String.format(NON_TERMINAL_PATTERN, requiredInterface.getName());
 			compProduction.append(" ").append(nsI).append(" ").append(reqINT);
+
 			if (!productions.containsKey(reqINT)) {
 				Collection<? extends IComponent> componentsMatching = ComponentUtil.getComponentsProvidingInterface(components, requiredInterface.getName());
-				productions.put(reqINT, reqINT + " ::= " + this.componentsToOrListOfNonTerminals(componentsMatching) + "\n");
+				productions.put(reqINT, reqINT + PRODUCTION_OP + this.componentsToOrListOfNonTerminals(componentsMatching) + "\n");
 				componentsMatching.stream().forEach(c -> this.addComponentProductions(components, c, productions));
 			}
 		}
@@ -87,7 +93,7 @@ public class CFGConverter {
 		String[] tokens = grammarString.split(" ");
 		Map<String, String> paramValues = new HashMap<>();
 		for (int i = 1; i < tokens.length; i = i + 2) {
-			paramValues.put(tokens[i], tokens[i + 1].contains("_") ? tokens[i + 1].replaceAll("_", " ") : tokens[i + 1]);
+			paramValues.put(tokens[i], tokens[i + 1].contains("_") ? tokens[i + 1].replace("_", " ") : tokens[i + 1]);
 		}
 		return this.buildComponentInstanceFromMap(tokens[0], paramValues);
 	}

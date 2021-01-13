@@ -3,6 +3,7 @@ package ai.libs.mlplan.weka.weka;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -92,7 +93,7 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 							} catch (ComponentInstantiationFailedException e) {
 								return null;
 							}
-						}).filter(x -> x != null).collect(Collectors.toList());
+						}).filter(Objects::nonNull).collect(Collectors.toList());
 						if (baseClassifierList.size() != reqI.getValue().size()) {
 							this.logger.error("Could not instantiate base learners correctly.");
 							throw new ComponentInstantiationFailedException("Could not instantiate base learner list of Stacking.");
