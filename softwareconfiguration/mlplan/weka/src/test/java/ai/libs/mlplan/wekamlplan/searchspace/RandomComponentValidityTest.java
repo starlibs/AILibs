@@ -64,7 +64,7 @@ public class RandomComponentValidityTest extends ATest {
 		return argumentsList.stream();
 	}
 
-	@Disabled
+	@Disabled("Fails because of illegal configurations for the given data")
 	@LongParameterizedTest
 	@MethodSource("getComponentsToTestRandomConfigurations")
 	public void testRandomConfigurationsInstantiation(final ILabeledDataset<ILabeledInstance> dataset, final IComponentRepository repo, final String componentName, final int numParameterizations)
@@ -105,7 +105,7 @@ public class RandomComponentValidityTest extends ATest {
 		return argumentList.stream();
 	}
 
-	@Disabled
+	@Disabled("Fails because of illegal configurations for the given data")
 	@LongParameterizedTest
 	@MethodSource("getComponentsToTestRandomInstantiations")
 	public void testRandomInstantiation(final ILabeledDataset<ILabeledInstance> dataset, final IComponentRepository repo, final String componentName, final int numInstantiations) throws JsonProcessingException {
