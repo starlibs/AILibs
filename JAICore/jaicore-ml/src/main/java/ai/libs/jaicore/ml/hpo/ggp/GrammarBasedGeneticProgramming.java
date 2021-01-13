@@ -209,6 +209,7 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 					}
 				} catch (InterruptedException e) {
 					LOGGER.debug("GGP thread got interrupted, release semaphore and shutdown.");
+					Thread.currentThread().interrupt();
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
@@ -271,8 +272,9 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 						GRCandidateProgram realInd = ((GRCandidateProgram) individual);
 						try {
 							if (Thread.interrupted() || interrupted.get()) {
-								semaphore.release();
+								throw new InterruptedException();
 							}
+
 							ComponentInstance ci = GrammarBasedGeneticProgramming.this.converter.grammarStringToComponentInstance(individual.toString());
 							double fitnessValue = GrammarBasedGeneticProgramming.this.evaluator.evaluate(ci);
 							if (GrammarBasedGeneticProgramming.this.updateBestSeenSolution(new GGPSolutionCandidate(ci, fitnessValue))) {
@@ -281,8 +283,12 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 							realInd.setFitnessValue(fitnessValue);
 						} catch (ObjectEvaluationFailedException | InterruptedException e) {
 							realInd.setFitnessValue(GrammarBasedGeneticProgramming.this.getConfig().getFailedEvaluationScore());
+							if (e instanceof InterruptedException) {
+								Thread.currentThread().interrupt();
+							}
 						} catch (Exception e) {
 							LOGGER.warn("Could not evaluate individual {}", individual.toString(), e);
+						} finally {
 							semaphore.release();
 						}
 					};

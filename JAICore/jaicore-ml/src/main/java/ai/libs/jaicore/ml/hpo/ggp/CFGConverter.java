@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.hpo.ggp;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -79,11 +80,12 @@ public class CFGConverter {
 			String reqINT = String.format(NON_TERMINAL_PATTERN, requiredInterface.getName());
 			compProduction.append(" ").append(nsI).append(" ").append(reqINT);
 
-			if (!productions.containsKey(reqINT)) {
-				Collection<? extends IComponent> componentsMatching = ComponentUtil.getComponentsProvidingInterface(components, requiredInterface.getName());
-				productions.put(reqINT, reqINT + PRODUCTION_OP + this.componentsToOrListOfNonTerminals(componentsMatching) + "\n");
-				componentsMatching.stream().forEach(c -> this.addComponentProductions(components, c, productions));
-			}
+			Collection<IComponent> componentsMatching = new ArrayList<>();
+			productions.computeIfAbsent(reqINT, t -> {
+				componentsMatching.addAll(ComponentUtil.getComponentsProvidingInterface(components, requiredInterface.getName()));
+				return t + PRODUCTION_OP + this.componentsToOrListOfNonTerminals(componentsMatching) + "\n";
+			});
+			componentsMatching.stream().forEach(c -> this.addComponentProductions(components, c, productions));
 		}
 		compProduction.append("\n");
 		productions.put(compNT, compProduction.toString());

@@ -234,7 +234,7 @@ public class MLPlanCLI {
 		}
 
 		if (cl.hasOption(O_PYTHON_CMD)) {
-			ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class).setProperty(IScikitLearnWrapperConfig.KEY_PYTHON, cl.getOptionValue(O_PYTHON_CMD));
+			ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class).setProperty(IPythonConfig.KEY_PYTHON, cl.getOptionValue(O_PYTHON_CMD));
 			ConfigCache.getOrCreate(IPythonConfig.class).setProperty(IPythonConfig.KEY_PYTHON, cl.getOptionValue(O_PYTHON_CMD));
 		}
 
