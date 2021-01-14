@@ -3,6 +3,8 @@ package ai.libs.mlplan.weka.weka;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +24,10 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.functions.SMO;
+import weka.classifiers.functions.SMOreg;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.meta.Stacking;
+import weka.classifiers.meta.Vote;
 import weka.core.OptionHandler;
 
 public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
@@ -54,6 +58,7 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 				Classifier c = AbstractClassifier.forName(groundComponent.getComponent().getName(), this.getParameterList(groundComponent).toArray(new String[0]));
 				List<String> options = this.getParameterList(groundComponent);
 				options.add("-do-not-check-capabilities");
+
 				if (c instanceof OptionHandler) {
 					((OptionHandler) c).setOptions(options.toArray(new String[0]));
 				}
@@ -68,19 +73,43 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 						}
 						break;
 					case "K":
-						if (c instanceof SMO) {
+						if (c instanceof SMO || c instanceof SMOreg) {
 							IComponentInstance kernel = reqI.getValue().iterator().next();
 							Kernel k = (Kernel) Class.forName(kernel.getComponent().getName()).newInstance();
 							k.setOptions(this.getParameterList(kernel).toArray(new String[0]));
-							((SMO) c).setKernel(k);
+							if (c instanceof SMO) {
+								((SMO) c).setKernel(k);
+							} else if (c instanceof SMOreg) {
+								((SMOreg) c).setKernel(k);
+							}
 						} else {
 							this.logger.error("Got required interface K but classifier {} is not SMO", c.getClass().getName());
 						}
 						break;
 					case "B": // suppose that this defines a base classifier
-						Classifier baseClassifier = this.getComponentInstantiation(reqI.getValue().iterator().next()).getClassifier();
+						List<Classifier> baseClassifierList = reqI.getValue().stream().map(x -> {
+							try {
+								return this.getComponentInstantiation(x).getClassifier();
+							} catch (ComponentInstantiationFailedException e) {
+								return null;
+							}
+						}).filter(Objects::nonNull).collect(Collectors.toList());
+						if (baseClassifierList.size() != reqI.getValue().size()) {
+							this.logger.error("Could not instantiate base learners correctly.");
+							throw new ComponentInstantiationFailedException("Could not instantiate base learner list of Stacking.");
+						}
 						if (c instanceof Stacking) {
-							((Stacking) c).setClassifiers(new Classifier[] { baseClassifier });
+							((Stacking) c).setClassifiers(baseClassifierList.toArray(new Classifier[] {}));
+						} else if (c instanceof Vote) {
+							((Vote) c).setClassifiers(baseClassifierList.toArray(new Classifier[] {}));
+						} else {
+							this.logger.error("Unsupported option B for classifier {}", c.getClass().getName());
+						}
+						break;
+					case "M":
+						if (c instanceof Stacking) {
+							Classifier baseClassifier = this.getComponentInstantiation(reqI.getValue().iterator().next()).getClassifier();
+							((Stacking) c).setMetaClassifier(baseClassifier);
 						} else {
 							this.logger.error("Unsupported option B for classifier {}", c.getClass().getName());
 						}

@@ -8,12 +8,20 @@
 			"requiredInterface": [],
 			"providedInterface": [
 				"AbstractClassifier",
-				"WekaBaseClassifier",
-				"WeightedInstancesHandler",
+				"Classifier",
 				"BaseClassifier",
-				"PipelineClassifier"
+				"WeightedInstancesHandler"
 			],
 			"parameters": [
+				{
+					"name": "C",
+					"type": "double",
+					"default": 0.25,
+					"min": 0.0,
+					"max": 1.0,
+					"refineSplits": 8,
+					"minInterval": 0.05
+				},
 				{
 					"name": "N",
 					"type": "int",
@@ -57,6 +65,10 @@
 				{
 					"pre": "R in {false}",
 					"post": "N in [3.0,3.0]"
+				},
+				{
+					"pre": "R in {true}",
+					"post": "C in [0.25,0.25]"
 				}
 			]
 		}

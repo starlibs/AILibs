@@ -394,10 +394,10 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 
 		// One HashSet of split points for each feature
 		this.splitPoints = new ArrayList<>(this.featureSpace.getDimensionality());
-		ArrayList<ArrayList<Double>> splitPointsList = new ArrayList<>(this.featureSpace.getDimensionality());
+		List<List<Double>> splitPointsList = new ArrayList<>(this.featureSpace.getDimensionality());
 		for (int i = 0; i < this.featureSpace.getDimensionality(); i++) {
-			this.splitPoints.add(i, new HashSet<Double>());
-			splitPointsList.add(i, new ArrayList<Double>());
+			this.splitPoints.add(i, new HashSet<>());
+			splitPointsList.add(i, new ArrayList<>());
 		}
 
 		Queue<Tree> queueOfNodes = new LinkedList<>();

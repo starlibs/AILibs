@@ -1,0 +1,42 @@
+{
+	"repository": "weka.classifiers.meta.RandomSubSpace",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.meta.RandomSubSpace",
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BaseRegressor"
+				}
+			],
+			"providedInterface": [
+				"AbstractRegressor",
+				"Regressor",
+				"MetaRegressor",
+				"WeightedInstancesHandler"
+			],
+			"parameters": [
+				{
+					"name": "I",
+					"type": "int",
+					"default": 10.0,
+					"min": 2.0,
+					"max": 64.0,
+					"refineSplits": 8,
+					"minInterval": 1
+				},
+				{
+					"name": "P",
+					"type": "double",
+					"default": 0.5,
+					"min": 0.1,
+					"max": 1.0,
+					"refineSplits": 8,
+					"minInterval": 0.05
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

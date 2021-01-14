@@ -327,6 +327,8 @@ allprojects {
 	}
 }
 
+
+
 task showDirs {
     doLast {
         logger.quiet(rootDir.toPath().relativize(project.reportsDir.toPath()).toString())

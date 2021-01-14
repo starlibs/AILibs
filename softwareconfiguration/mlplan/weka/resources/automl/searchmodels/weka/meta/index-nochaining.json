@@ -1,0 +1,19 @@
+{
+	"repository": "weka_meta-index-nochaining",
+	"include": [
+		"./adaboostm1.json",
+		"./additiveregression.json",
+		"./attributeselectedclassifier.json",
+		"./bagging.json",
+		"./classificationviaregression.json",
+		"./logitboost.json",
+		"./lwl.json",
+		"./multiclassclassifier.json",
+		"./multiplebaselearnerlistelement.json",
+		"./randomcommittee.json",
+		"./randomsubspace.json",
+		"./stacking.json",
+		"./vote.json"
+	],
+	"components": []
+}

@@ -12,9 +12,9 @@
 			],
 			"providedInterface": [
 				"AbstractClassifier",
+				"Classifier",
 				"MetaClassifier",
-				"WeightedInstancesHandler",
-				"PipelineClassifier"
+				"WeightedInstancesHandler"
 			],
 			"parameters": [
 				{

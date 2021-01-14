@@ -98,8 +98,7 @@ public class FileUtil {
 		try (BufferedReader r = Files.newBufferedReader(Paths.get(filename), StandardCharsets.UTF_8)) {
 			String line;
 			while ((line = r.readLine()) != null) {
-				sb.append(line);
-				sb.append("\n");
+				sb.append(line).append("\n");
 			}
 		}
 		return sb.toString();

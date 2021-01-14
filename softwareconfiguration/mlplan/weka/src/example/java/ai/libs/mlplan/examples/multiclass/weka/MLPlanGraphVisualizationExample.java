@@ -1,6 +1,5 @@
 package ai.libs.mlplan.examples.multiclass.weka;
 
-import java.io.File;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -19,7 +18,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
-import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
+import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
@@ -36,13 +35,12 @@ public class MLPlanGraphVisualizationExample {
 	public static void main(final String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
-		File datasetFile = new File("testrsc/car.arff");
-		ILabeledDataset<?> ds = ArffDatasetAdapter.readDataset(datasetFile);
+		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(40709);
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(1), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */
-		MLPlanWekaBuilder mlplanBuilder = new MLPlanWekaBuilder().withNumCpus(4).withTimeOut(new Timeout(600, TimeUnit.SECONDS)).withCandidateEvaluationTimeOut(new Timeout(10, TimeUnit.SECONDS))
-				.withNodeEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS)).withDataset(split.get(0));
+		MLPlanWekaBuilder mlplanBuilder = MLPlanWekaBuilder.forClassification().withNumCpus(2).withTimeOut(new Timeout(600, TimeUnit.SECONDS)).withCandidateEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS))
+				.withNodeEvaluationTimeOut(new Timeout(150, TimeUnit.SECONDS)).withDataset(split.get(0));
 		MLPlan<IWekaClassifier> mlplan = mlplanBuilder.build();
 		mlplan.setLoggerName("example");
 

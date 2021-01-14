@@ -22,7 +22,6 @@ import weka.core.neighboursearch.NearestNeighbourSearch;
  */
 public class KNNAugSpaceSampler extends AbstractAugmentedSpaceSampler {
 
-
 	private static final Logger logger = LoggerFactory.getLogger(KNNAugSpaceSampler.class);
 	private final NearestNeighbourSearch nearestNeighbour;
 	private int k;
@@ -37,14 +36,14 @@ public class KNNAugSpaceSampler extends AbstractAugmentedSpaceSampler {
 		this.k = k;
 		DistanceFunction dist = new EuclideanDistance(preciseInsts);
 		String distOptionColumns = String.format("-R first-%d", preciseInsts.numAttributes() - 1);
-		String[] distOptions = {distOptionColumns};
+		String[] distOptions = { distOptionColumns };
 
 		try {
 			dist.setOptions(distOptions);
 			nearestNeighbour.setDistanceFunction(dist);
 			nearestNeighbour.setInstances(preciseInsts);
 		} catch (Exception e) {
-			logger.error("Could not configure distance function or setup nearest neighbour: {}", e);
+			logger.error("Could not configure distance function or setup nearest neighbour.", e);
 		}
 		nearestNeighbour.setMeasurePerformance(false);
 		this.nearestNeighbour = nearestNeighbour;
@@ -60,7 +59,7 @@ public class KNNAugSpaceSampler extends AbstractAugmentedSpaceSampler {
 		try {
 			kNNs = this.nearestNeighbour.kNearestNeighbours(x, this.k);
 		} catch (Exception e) {
-			logger.error("Creating the augmented space sample failed with exception: {}", e);
+			logger.error("Creating the augmented space sample failed with exception.", e);
 		}
 
 		ArrayList<Instance> sampledPoints = new ArrayList<>();

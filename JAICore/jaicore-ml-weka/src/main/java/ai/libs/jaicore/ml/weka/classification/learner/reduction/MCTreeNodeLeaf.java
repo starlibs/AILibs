@@ -57,7 +57,7 @@ public class MCTreeNodeLeaf extends MCTreeNode {
 
 	@Override
 	public String toString() {
-		return this.classIndex + "";
+		return this.toStringWithOffset("", null);
 	}
 
 	@Override
@@ -66,13 +66,10 @@ public class MCTreeNodeLeaf extends MCTreeNode {
 	}
 
 	@Override
-	public String toStringWithOffset(final String offset) {
+	public String toStringWithOffset(final String offset, final String indent) {
 		StringBuilder sb = new StringBuilder();
-
-		sb.append(offset);
-		sb.append("(");
-		sb.append(this.getContainedClasses());
-		sb.append(")");
+		sb.append(offset).append("(").append(this.getContainedClasses()).append(")");
 		return sb.toString();
 	}
+
 }

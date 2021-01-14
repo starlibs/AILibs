@@ -53,7 +53,7 @@ class SQLAdapter implements IDatabaseAdapter {
 	private final String database;
 	private final boolean ssl;
 	private final Properties connectionProperties;
-	private final ISQLQueryBuilder queryBuilder = new MySQLQueryBuilder();
+	private final transient ISQLQueryBuilder queryBuilder = new MySQLQueryBuilder();
 
 	/* Connection object */
 	private transient Connection connect;

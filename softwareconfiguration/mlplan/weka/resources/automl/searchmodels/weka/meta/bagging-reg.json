@@ -1,0 +1,52 @@
+{
+	"repository": "weka.classifiers.meta.Bagging",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.meta.Bagging",
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BaseRegressor"
+				}
+			],
+			"providedInterface": [
+				"AbstractRegressor",
+				"Regressor",
+				"WeightedInstancesHandler",
+				"MetaRegressor"
+			],
+			"parameters": [
+				{
+					"name": "P",
+					"type": "int",
+					"default": 100.0,
+					"min": 10.0,
+					"max": 200.0,
+					"refineSplits": 8,
+					"minInterval": 5
+				},
+				{
+					"name": "I",
+					"type": "int",
+					"default": 10.0,
+					"min": 2.0,
+					"max": 128.0,
+					"refineSplits": 8,
+					"minInterval": 5
+				},
+				{
+					"name": "O",
+					"type": "boolean",
+					"default": "false"
+				}
+			],
+			"dependencies": [
+				{
+					"pre": "O in {true}",
+					"post": "P in {100}"
+				}
+			]
+		}
+	]
+}

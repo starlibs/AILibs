@@ -12,8 +12,8 @@
 			],
 			"providedInterface": [
 				"AbstractClassifier",
-				"MetaClassifier",
-				"PipelineClassifier"
+				"Classifier",
+				"MetaClassifier"
 			],
 			"parameters": [
 				{
@@ -37,6 +37,17 @@
 					"max": 4,
 					"refineSplits": 5,
 					"minInterval": 1
+				},
+				{
+					"name": "A",
+					"type": "cat",
+					"default": "weka.core.neighboursearch.LinearNNSearch",
+					"values": [
+						"weka.core.neighboursearch.LinearNNSearch",
+						"weka.core.neighboursearch.BallTree",
+						"weka.core.neighboursearch.KDTree",
+						"weka.core.neighboursearch.CoverTree"
+					]
 				}
 			],
 			"dependencies": []

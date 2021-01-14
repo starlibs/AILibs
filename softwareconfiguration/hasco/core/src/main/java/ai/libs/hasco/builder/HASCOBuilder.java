@@ -45,7 +45,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
  * @param <B> Type of the builder (for chaining)
  */
 public abstract class HASCOBuilder<N, A, V extends Comparable<V>, B extends HASCOBuilder<N, A, V, B>>
-implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V, HASCO<N, A, V>> {
+		implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V, HASCO<N, A, V>> {
 
 	public enum Reduction {
 		FORWARD
@@ -161,16 +161,19 @@ implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareCon
 		return this.getSelf();
 	}
 
-	public void withDefaultAlgorithmConfig() {
+	public B withDefaultAlgorithmConfig() {
 		this.withAlgorithmConfig(ConfigCache.getOrCreate(HASCOConfig.class));
+		return this.getSelf();
 	}
 
-	public void withAlgorithmConfig(final HASCOConfig hascoConfig) {
+	public B withAlgorithmConfig(final HASCOConfig hascoConfig) {
 		this.hascoConfig = hascoConfig;
+		return this.getSelf();
 	}
 
-	public void withAlgorithmConfigFile(final File hascoConfigFile) {
+	public B withAlgorithmConfigFile(final File hascoConfigFile) {
 		this.hascoConfig = (HASCOConfig) ConfigFactory.create(HASCOConfig.class).loadPropertiesFromFile(hascoConfigFile);
+		return this.getSelf();
 	}
 
 	public HASCOConfig getHascoConfig() {

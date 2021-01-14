@@ -1,0 +1,21 @@
+{
+	"repository": "MultipleBaseLearnerListElement",
+	"include": [],
+	"components": [
+		{
+			"name": "MultipleBaseLearnerListElement",
+			"requiredInterface": [
+				{
+					"id": "classifier",
+					"name": "BaseClassifier"
+				}
+			],
+			"providedInterface": [
+				"ModelHelper",
+				"MultipleBaseLearnerList"
+			],
+			"parameter": [],
+			"dependencies": []
+		}
+	]
+}
