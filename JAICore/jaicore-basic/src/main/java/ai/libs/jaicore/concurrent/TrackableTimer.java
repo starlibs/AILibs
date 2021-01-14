@@ -150,12 +150,9 @@ public class TrackableTimer extends Timer implements ICancelable {
 		if (this.scheduledSingleInvocationTasks.contains(task)) {
 			return !this.hasTaskBeenExecutedInPast(task);
 		}
-		if (this.scheduledReocurringTasks.contains(task)) {
-			return true;
-		}
 
-		/* if we come here, the TimerTask has not been scheduled in this timer */
-		return false;
+		/* if not contained here, the TimerTask has not been scheduled in this timer */
+		return (this.scheduledReocurringTasks.contains(task));
 	}
 
 	@Override

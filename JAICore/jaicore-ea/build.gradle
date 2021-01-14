@@ -1,5 +1,7 @@
 dependencies {
     compile project(":JAICore:jaicore-basic")
+    compile project(":JAICore:jaicore-components")
+    
     
     compile("$moea")
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')

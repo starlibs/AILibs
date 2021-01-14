@@ -49,7 +49,7 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorCons
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
 import ai.libs.mlplan.core.events.MLPlanPhaseSwitchedEvent;
-import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multiclass.IMLPlanClassifierConfig;
 
 public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> extends AAlgorithm<ILabeledDataset<?>, L> implements ILoggingCustomizable {
 
@@ -141,15 +141,15 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			/* dynamically compute blow-ups */
 			if (Double.isNaN(this.getConfig().expectedBlowupInSelection())) {
 				double blowUpInSelectionPhase = 1;
-				this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
+				this.getConfig().setProperty(TwoPhaseHASCOConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
 				this.logger.info("No expected blow-up for selection phase has been defined. Automatically configuring {}", blowUpInSelectionPhase);
 			}
 			if (!this.buildSelectedClasifierOnGivenData) {
-				this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(0));
+				this.getConfig().setProperty(TwoPhaseHASCOConfig.K_BLOWUP_POSTPROCESS, String.valueOf(0));
 				this.logger.info("Selected classifier won't be built, so now blow-up is calculated.");
 			} else if (Double.isNaN(this.getConfig().expectedBlowupInPostprocessing())) {
 				double blowUpInPostprocessing = 1;
-				this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
+				this.getConfig().setProperty(TwoPhaseHASCOConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
 				this.logger.info("No expected blow-up for postprocessing phase has been defined. Automatically configuring {}", blowUpInPostprocessing);
 			}
 
@@ -158,7 +158,8 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			Pair<PipelineEvaluator, PipelineEvaluator> evaluators;
 			try {
 				evaluators = MLPlanUtil.getPipelineEvaluators(this.builder.getLearnerEvaluationFactoryForSearchPhase(), this.builder.getMetricForSearchPhase(), this.builder.getLearnerEvaluationFactoryForSelectionPhase(),
-						this.builder.getMetricForSelectionPhase(), new Random(this.seed), dataShownToSearch, dataShownToSelection, this.builder.getSafeGuardFactory(), this.builder.getLearnerFactory(), this.getConfig().getTimeout());
+						this.builder.getMetricForSelectionPhase(), new Random(this.seed), dataShownToSearch, dataShownToSelection, this.builder.getSafeGuardFactory(), this.builder.getLearnerFactory(),
+						this.getConfig().getTimeoutForCandidateEvaluation());
 			} catch (LearnerEvaluatorConstructionFailedException e2) {
 				throw new AlgorithmException("Could not create the evaluators.", e2);
 			}
@@ -176,10 +177,10 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info(
 						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tRemaining Time after initialization: {}s\n\tTimeout Precaution Offset: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tData points used during search: {}\n\tData points used during selection: {}\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
-						this.getInput().getRelationName(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getRemainingTimeToDeadline().seconds(), this.getConfig().precautionOffset(), this.getConfig().timeoutForCandidateEvaluation() / 1000, this.getConfig().timeoutForNodeEvaluation() / 1000,
-						this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), dataShownToSearch.size(), dataShownToSelection != null ? dataShownToSelection.size() : 0,
-								this.classifierEvaluatorForSearch.getBenchmark(), this.classifierEvaluatorForSelection != null ? this.classifierEvaluatorForSelection.getBenchmark() : null, this.getConfig().expectedBlowupInSelection(),
-										this.getConfig().expectedBlowupInPostprocessing());
+						this.getInput().getRelationName(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getRemainingTimeToDeadline().seconds(), this.getConfig().precautionOffset(),
+						this.getConfig().timeoutForCandidateEvaluation() / 1000, this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(),
+						MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), dataShownToSearch.size(), dataShownToSelection != null ? dataShownToSelection.size() : 0, this.classifierEvaluatorForSearch.getBenchmark(),
+						this.classifierEvaluatorForSelection != null ? this.classifierEvaluatorForSelection.getBenchmark() : null, this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
 			}
 
 			/* create 2-phase software configuration problem */
@@ -312,7 +313,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	}
 
 	public void setPortionOfDataForPhase2(final double portion) {
-		this.getConfig().setProperty(MLPlanClassifierConfig.SELECTION_PORTION, String.valueOf(portion));
+		this.getConfig().setProperty(IMLPlanClassifierConfig.SELECTION_PORTION, String.valueOf(portion));
 	}
 
 	@Override
@@ -321,12 +322,12 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 	}
 
 	@Override
-	public MLPlanClassifierConfig getConfig() {
-		return (MLPlanClassifierConfig) super.getConfig();
+	public IMLPlanClassifierConfig getConfig() {
+		return (IMLPlanClassifierConfig) super.getConfig();
 	}
 
 	public void setRandomSeed(final int seed) {
-		this.getConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_SEED, String.valueOf(seed));
+		this.getConfig().setProperty(TwoPhaseHASCOConfig.K_RANDOM_SEED, String.valueOf(seed));
 	}
 
 	public L getSelectedClassifier() {

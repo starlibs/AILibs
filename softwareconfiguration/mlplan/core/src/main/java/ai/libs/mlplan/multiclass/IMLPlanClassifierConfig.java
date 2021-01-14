@@ -7,7 +7,7 @@ import org.aeonbits.owner.Config.Sources;
 import ai.libs.hasco.twophase.TwoPhaseHASCOConfig;
 
 @Sources({ "file:conf/mlplan.properties" })
-public interface MLPlanClassifierConfig extends TwoPhaseHASCOConfig {
+public interface IMLPlanClassifierConfig extends TwoPhaseHASCOConfig {
 
 	public static final String PREFERRED_COMPONENTS = "mlplan.preferredComponents";
 	public static final String SELECTION_PORTION = "mlplan.selectionportion";

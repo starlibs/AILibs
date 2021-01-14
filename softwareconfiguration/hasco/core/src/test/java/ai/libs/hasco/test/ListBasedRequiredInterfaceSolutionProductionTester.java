@@ -18,7 +18,7 @@ import ai.libs.hasco.builder.HASCOBuilder;
 import ai.libs.hasco.builder.forwarddecomposition.HASCOViaFD;
 import ai.libs.hasco.core.events.HASCOSolutionEvent;
 import ai.libs.jaicore.basic.ATest;
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logging.LoggerUtil;
@@ -59,7 +59,7 @@ public class ListBasedRequiredInterfaceSolutionProductionTester extends ATest {
 		HASCOViaFD<Double> hasco = HASCOBuilder.get(problem).withBlindSearch().getAlgorithm();
 		hasco.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 
-		//		new AlgorithmVisualizationWindow(hasco).withMainPlugin(new GraphViewPlugin()).withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())));
+		// new AlgorithmVisualizationWindow(hasco).withMainPlugin(new GraphViewPlugin()).withPlugin(new NodeInfoGUIPlugin(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())));
 
 		/* enumerate all solutions */
 		Set<String> seenSolutions = new HashSet<>();
@@ -67,7 +67,7 @@ public class ListBasedRequiredInterfaceSolutionProductionTester extends ATest {
 			IAlgorithmEvent event = hasco.nextWithException();
 			if (event instanceof HASCOSolutionEvent) {
 				@SuppressWarnings("unchecked")
-				ComponentInstance solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate().getComponentInstance();
+				IComponentInstance solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate().getComponentInstance();
 				String serializedSolution = new ComponentSerialization().serialize(solution).toString();
 				assertFalse("Double solution " + serializedSolution, seenSolutions.contains(serializedSolution));
 				seenSolutions.add(serializedSolution);

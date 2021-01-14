@@ -50,10 +50,7 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 			values.add(new Data<>(entry.getKey() / 1000.0, entry.getValue()));
 		}
 		this.logger.info("Adding {} values to chart.", values.size());
-		Platform.runLater(() -> {
-			this.performanceSeries.getData().addAll(values);
-		});
-
+		Platform.runLater(() -> this.performanceSeries.getData().addAll(values));
 	}
 
 	@Override

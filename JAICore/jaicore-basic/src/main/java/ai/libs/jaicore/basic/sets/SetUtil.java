@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -1127,12 +1126,7 @@ public class SetUtil {
 	 * @return The list representing the split string.
 	 */
 	public static List<String> explode(final String stringList, final String separator) {
-		List<String> values = new LinkedList<>();
-		String[] split = stringList.split(separator);
-		for (String splitElement : split) {
-			values.add(splitElement);
-		}
-		return values;
+		return Arrays.stream(stringList.split(separator)).collect(Collectors.toList());
 	}
 
 	/**

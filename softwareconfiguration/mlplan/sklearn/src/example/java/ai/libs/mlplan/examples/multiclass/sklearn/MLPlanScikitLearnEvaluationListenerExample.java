@@ -80,7 +80,7 @@ public class MLPlanScikitLearnEvaluationListenerExample {
 					learner = (ScikitLearnWrapper) wrapper.getLearner();
 				}
 				if (learner != null) {
-					ILearnerRunReport report = event.getReport();
+					ILearnerRunReport report = event.getLastReport();
 					String exceptionStackTrace = ExceptionUtils.getStackTrace(report.getException());
 					long candidateRuntime = (report.getTrainEndTime() - report.getTrainStartTime()) + (report.getTestEndTime() - report.getTestStartTime());
 					LOGGER.info("Received failed evaluation within {}ms for pipeline: {}", candidateRuntime, learner.toString(), exceptionStackTrace);

@@ -77,16 +77,7 @@ public class ComponentInstanceUtil {
 		}
 	}
 
-	public static String toComponentNameString(final IComponentInstance ci) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(ci.getComponent().getName());
-		if (!ci.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-			sb.append("(").append(ci.getSatisfactionOfRequiredInterfaces().values().stream().map(ciList -> ciList.stream().map(cil -> ((ComponentInstance)cil).toComponentNameString()).collect(Collectors.joining())).collect(Collectors.joining(", "))).append(")");
-		}
-		return sb.toString();
-	}
-
-	public static ComponentInstance getDefaultParametrization(final IComponentInstance ci) {
+	public static IComponentInstance getDefaultParametrization(final IComponentInstance ci) {
 		Map<String, List<IComponentInstance>> defaultRequiredInterfaces = new HashMap<>();
 		ci.getSatisfactionOfRequiredInterfaces().forEach((name, ciReqList) -> {
 			List<IComponentInstance> l = ciReqList.stream().map(ComponentInstanceUtil::getDefaultParametrization).collect(Collectors.toList());
@@ -165,8 +156,6 @@ public class ComponentInstanceUtil {
 		return ci;
 	}
 
-
-
 	/**
 	 * This method checks, whether a given list of paths of refinements conforms the constraints for parameter refinements.
 	 *
@@ -238,13 +227,47 @@ public class ComponentInstanceUtil {
 		return components;
 	}
 
+	public static String toComponentNameString(final IComponentInstance ci) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(ci.getComponent().getName());
+		if (!ci.getSatisfactionOfRequiredInterfaces().isEmpty()) {
+			sb.append("(").append(
+					ci.getSatisfactionOfRequiredInterfaces().values().stream().map(ciList -> ciList.stream().map(cil -> ((ComponentInstance) cil).toComponentNameString()).collect(Collectors.joining())).collect(Collectors.joining(", ")))
+					.append(")");
+		}
+		return sb.toString();
+	}
+
 	public static String getComponentInstanceAsComponentNames(final IComponentInstance instance) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(instance.getComponent().getName());
 		if (!instance.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-			sb.append("{").append(instance.getSatisfactionOfRequiredInterfaces().values().stream().map(ciList -> ciList.stream().map(ComponentInstanceUtil::getComponentInstanceAsComponentNames).collect(Collectors.joining())).collect(Collectors.joining(","))).append("}");
+			sb.append("{").append(instance.getSatisfactionOfRequiredInterfaces().values().stream().map(ciList -> ciList.stream().map(ComponentInstanceUtil::getComponentInstanceAsComponentNames).collect(Collectors.joining()))
+					.collect(Collectors.joining(","))).append("}");
 		}
 		return sb.toString();
+	}
+
+	public static String getComponentInstanceString(final IComponentInstance ci) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(ci.getComponent().getName()).append("{");
+
+		String parameters = ci.getParameterValues().entrySet().stream().map(x -> x.getKey() + "=" + x.getValue()).collect(Collectors.joining(", "));
+		sb.append(parameters);
+
+		String reqIs = ci.getSatisfactionOfRequiredInterfaces().entrySet().stream().map(ComponentInstanceUtil::satisfiedRequiredInterfaceToString).collect(Collectors.joining(","));
+		if (!parameters.isEmpty() && !reqIs.isEmpty()) {
+			sb.append(", ");
+		}
+
+		sb.append(reqIs).append("}");
+
+		return sb.toString();
+	}
+
+	private static String satisfiedRequiredInterfaceToString(final Entry<String, List<IComponentInstance>> satisfiedRequiredInterface) {
+		return satisfiedRequiredInterface.getKey() + "=[" + satisfiedRequiredInterface.getValue().stream().map(ComponentInstanceUtil::getComponentInstanceString).collect(Collectors.joining(",")) + "]";
 	}
 
 	public static boolean isSubInstance(final IComponentInstance sub, final IComponentInstance sup) {

@@ -29,8 +29,8 @@ import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.components.api.IComponent;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.api.IComponentRepository;
-import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logging.LoggerUtil;
@@ -135,7 +135,7 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 		if (numberOfExpectedSolutions < 0) {
 			return;
 		}
-		List<ComponentInstance> solutions = new ArrayList<>();
+		List<IComponentInstance> solutions = new ArrayList<>();
 		hasco.registerListener(new Object() {
 
 			@Subscribe
@@ -160,7 +160,7 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 			if (numberOfExpectedSolutions < 0) {
 				continue;
 			}
-			List<ComponentInstance> solutions = new ArrayList<>();
+			List<IComponentInstance> solutions = new ArrayList<>();
 			for (IAlgorithmEvent e : hasco) {
 				if (e instanceof HASCOSolutionEvent) {
 					solutions.add(((HASCOSolutionEvent<Double>) e).getSolutionCandidate().getComponentInstance());

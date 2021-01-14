@@ -72,6 +72,10 @@
     <level value="warn" />
   </logger>
   
+  <logger name="ai.libs.jaicore.ml.hpo">
+    <level value="trace" />
+  </logger>
+  
   <logger name="ai.libs.jaicore.ml.core.filter.sampling.inmemory.GeneralSamplingTester">
   	<level value="debug" />
   </logger>
