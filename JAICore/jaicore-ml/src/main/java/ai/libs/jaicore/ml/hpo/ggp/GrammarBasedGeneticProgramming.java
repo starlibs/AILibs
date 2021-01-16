@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -77,6 +78,8 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 	private Grammar grammar;
 
 	private AtomicInteger earlyStoppingCounter = new AtomicInteger(0);
+	
+	private ConcurrentLinkedQueue<GGPSolutionCandidate> ratedSolutionCandidatesInPopulation;
 
 	public class GGPSolutionCandidate implements ScoredItem<Double> {
 
@@ -108,6 +111,7 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 		this.rng = new MersenneTwisterFast(42);
 		this.evaluator = input.getCompositionEvaluator();
 		this.converter = new CFGConverter(input.getComponents(), input.getRequiredInterface());
+		this.ratedSolutionCandidatesInPopulation = new ConcurrentLinkedQueue<>();
 	}
 
 	@Override
@@ -258,6 +262,8 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 	}
 
 	private void evaluate(final List<CandidateProgram> population) throws InterruptedException {
+		ratedSolutionCandidatesInPopulation.clear();
+		
 		ExecutorService pool = Executors.newFixedThreadPool(this.getConfig().cpus());
 		AtomicBoolean interrupted = new AtomicBoolean(false);
 		Semaphore semaphore = new Semaphore(0);
@@ -277,7 +283,9 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 
 							ComponentInstance ci = GrammarBasedGeneticProgramming.this.converter.grammarStringToComponentInstance(individual.toString());
 							double fitnessValue = GrammarBasedGeneticProgramming.this.evaluator.evaluate(ci);
-							if (GrammarBasedGeneticProgramming.this.updateBestSeenSolution(new GGPSolutionCandidate(ci, fitnessValue))) {
+							GGPSolutionCandidate solutionCandidate = new GGPSolutionCandidate(ci, fitnessValue);
+							ratedSolutionCandidatesInPopulation.add(solutionCandidate);
+							if (GrammarBasedGeneticProgramming.this.updateBestSeenSolution(solutionCandidate)) {
 								GrammarBasedGeneticProgramming.this.earlyStoppingCounter.set(0);
 							}
 							realInd.setFitnessValue(fitnessValue);
@@ -313,6 +321,10 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 			pool.shutdownNow();
 			throw e;
 		}
+	}
+	
+	public List<GGPSolutionCandidate> getLastRatedPopulation(){
+		return new ArrayList<>(ratedSolutionCandidatesInPopulation);
 	}
 
 	@Override
