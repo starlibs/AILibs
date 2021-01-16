@@ -192,15 +192,18 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			this.trainArff = this.getArffFile(data, arffName);
 			this.dataset = (ILabeledDataset<ILabeledInstance>) data.createEmptyCopy();
 
-			if (data.getLabelAttribute() instanceof ICategoricalAttribute) {
-				this.problemType = EScikitLearnProblemType.CLASSIFICATION;
-			} else if (data.getLabelAttribute() instanceof INumericAttribute && this.problemType != EScikitLearnProblemType.RUL && this.problemType != EScikitLearnProblemType.FEATURE_ENGINEERING) {
-				this.problemType = EScikitLearnProblemType.REGRESSION;
+			if (data.getLabelAttribute() instanceof ICategoricalAttribute && this.problemType != EScikitLearnProblemType.CLASSIFICATION
+					&& this.problemType != EScikitLearnProblemType.FEATURE_ENGINEERING) {
+				this.logger.warn("The chosen problem type {} does not fit to the given data {}, as its label are not categorical.", this.problemType, data.getRelationName());
+			} else if (data.getLabelAttribute() instanceof INumericAttribute && this.problemType != EScikitLearnProblemType.REGRESSION && this.problemType != EScikitLearnProblemType.RUL
+					&& this.problemType != EScikitLearnProblemType.FEATURE_ENGINEERING) {
+				this.logger.warn("The chosen problem type {} does not fit to the given data {}, as its label are not numerical.", this.problemType, data.getRelationName());
 			}
 
 			if (this.withModelDump) {
 				this.modelFile = new File(CONF.getModelDumpsDirectory(), this.configurationUID + "_" + arffName + CONF.getPickleFileExtension());
-				ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff).withOutputFile(this.modelFile);
+				ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff)
+						.withOutputFile(this.modelFile);
 				skLearnWrapperCommandBuilder.withSeed(this.seed);
 				skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 				String[] trainCommand = skLearnWrapperCommandBuilder.toCommandArray();
@@ -278,84 +281,100 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		} catch (IOException e1) {
 			throw new PredictionException("Could not dump arff file for prediction", e1);
 		}
-		File outputFile = this.getResultFile(arffName);
+
+		File outputFile;
+		if (this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING) {
+			outputFile = new File(CONF.getModelDumpsDirectory(), 1 + "_" + this.seed + "_" + this.constructInstruction.hashCode() + "_train.arff");// TODO split#
+		} else {
+			outputFile = new File(CONF.getModelDumpsDirectory(), this.configurationUID + "_" + arffName + CONF.getPickleFileExtension());
+		}
 		outputFile.getParentFile().mkdirs();
 
+		if (!outputFile.exists()) {
+			/* create prediction file */
+			if (this.withModelDump) {
+				ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff)
+						.withModelFile(this.modelFile).withOutputFile(outputFile);
+				skLearnWrapperCommandBuilder.withSeed(this.seed);
+				skLearnWrapperCommandBuilder.withTimeout(this.timeout);
+				String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
 
-		/* create prediction file */
-		if (this.withModelDump) {
-			ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff).withModelFile(this.modelFile).withOutputFile(outputFile);
-			skLearnWrapperCommandBuilder.withSeed(this.seed);
-			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
-			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
-
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Run test mode with {}", Arrays.toString(testCommand));
-			}
-
-			try {
-				DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
-				this.runProcess(testCommand, listener);
-			} catch (IOException e) {
-				throw new PredictionException("Could not run scikit-learn classifier.", e);
-			}
-		} else {
-			ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff).withTestArffFile(testArff)
-					.withOutputFile(outputFile);
-			skLearnWrapperCommandBuilder.withSeed(this.seed);
-			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
-			String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Run train test mode with {}", Arrays.toString(testCommand));
-			}
-
-			DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
-			try {
-				this.runProcess(testCommand, listener);
-				if (!listener.getErrorOutput().isEmpty()) {
-					if (listener.getErrorOutput().toLowerCase().contains("convergence")) {
-						// ignore convergence warning
-						this.logger.warn("Learner {} could not converge. Consider increase number of iterations.", this.constructInstruction);
-					} else {
-						throw new PredictionException(listener.getErrorOutput());
-					}
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("Run test mode with {}", Arrays.toString(testCommand));
 				}
-			} catch (InterruptedException | PredictionException e) {
-				throw e;
-			} catch (Exception e) {
-				throw new PredictionException("Could not run scikit-learn classifier.", e);
+
+				try {
+					DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
+					this.runProcess(testCommand, listener);
+				} catch (IOException e) {
+					throw new PredictionException("Could not run scikit-learn classifier.", e);
+				}
+			} else {
+				ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff)
+						.withTestArffFile(testArff).withOutputFile(outputFile);
+
+				skLearnWrapperCommandBuilder.withSeed(this.seed);
+				skLearnWrapperCommandBuilder.withTimeout(this.timeout);
+				String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("Run train test mode with {}", Arrays.toString(testCommand));
+				}
+
+				DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
+				try {
+					this.runProcess(testCommand, listener);
+					if (!listener.getErrorOutput().isEmpty()) {
+						if (listener.getErrorOutput().toLowerCase().contains("convergence")) {
+							// ignore convergence warning
+							this.logger.warn("Learner {} could not converge. Consider increase number of iterations.", this.constructInstruction);
+						} else {
+							throw new PredictionException(listener.getErrorOutput());
+						}
+					}
+				} catch (InterruptedException | PredictionException e) {
+					throw e;
+				} catch (Exception e) {
+					throw new PredictionException("Could not run scikit-learn classifier.", e);
+				}
 			}
 		}
 
-		String fileContent = "";
-		try {
-			/* Parse the result */
-			fileContent = FileUtil.readFileAsString(outputFile);
-			if (CONF.getDeleteFileOnExit()) {
-				Files.delete(outputFile.toPath());
+		if (this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING) {
+			return null;
+		} else {
+			String fileContent = "";
+			try {
+				/* Parse the result */
+				fileContent = FileUtil.readFileAsString(outputFile);
+				if (CONF.getDeleteFileOnExit()) {
+					Files.delete(outputFile.toPath());
+				}
+				ObjectMapper objMapper = new ObjectMapper();
+				this.rawLastClassificationResults = objMapper.readValue(fileContent, List.class);
+			} catch (IOException e) {
+				throw new PredictionException("Could not read result file or parse the json content to a list.", e);
 			}
-			ObjectMapper objMapper = new ObjectMapper();
-			this.rawLastClassificationResults = objMapper.readValue(fileContent, List.class);
-		} catch (IOException e) {
-			throw new PredictionException("Could not read result file or parse the json content to a list.", e);
-		}
 
-		/* Since Scikit supports multiple target results but Weka does not, the results have to be flattened.
-		 * The structured results of the last classifyInstances call is accessable over
-		 * getRawLastClassificationResults().
-		 * */
-		if (this.problemType == EScikitLearnProblemType.CLASSIFICATION) {
-			if (this.rawLastClassificationResults.get(0).size() == 1) { // classifier cannot predict any probabilities. Thus, create pseudo probability from the obtained output
-				int numClasses = ((ICategoricalAttribute) this.dataset.getLabelAttribute()).getLabels().size();
-				return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification(numClasses, x.intValue())).collect(Collectors.toList()));
+			/* Since Scikit supports multiple target results but Weka does not, the results have to be flattened.
+			 * The structured results of the last classifyInstances call is accessable over
+			 * getRawLastClassificationResults().
+			 * */
+			if (this.problemType == EScikitLearnProblemType.CLASSIFICATION) {
+				if (this.rawLastClassificationResults.get(0).size() == 1) { // classifier cannot predict any probabilities. Thus, create pseudo probability from the obtained output
+					int numClasses = ((ICategoricalAttribute) this.dataset.getLabelAttribute()).getLabels().size();
+					return (B) new SingleLabelClassificationPredictionBatch(
+							this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification(numClasses, x.intValue())).collect(Collectors.toList()));
+				}
+				return (B) new SingleLabelClassificationPredictionBatch(
+						this.rawLastClassificationResults.stream().map(x -> x.stream().mapToDouble(y -> y).toArray()).map(SingleLabelClassification::new).collect(Collectors.toList()));
+			} else if (this.problemType == EScikitLearnProblemType.RUL || this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING || this.problemType == EScikitLearnProblemType.REGRESSION) {
+				if (this.logger.isInfoEnabled()) {
+					this.logger.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()));
+				}
+				this.logger.debug("#Created construction string: {}", this.constructInstruction);
+				return (B) new SingleTargetRegressionPredictionBatch(
+						this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleTargetRegressionPrediction((double) x)).collect(Collectors.toList()));
 			}
-			return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().map(x -> x.stream().mapToDouble(y -> y).toArray()).map(SingleLabelClassification::new).collect(Collectors.toList()));
-		} else if (this.problemType == EScikitLearnProblemType.RUL || this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING || this.problemType == EScikitLearnProblemType.REGRESSION) {
-			if (this.logger.isInfoEnabled()) {
-				this.logger.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()));
-			}
-			this.logger.debug("#Created construction string: {}", this.constructInstruction);
-			return (B) new SingleTargetRegressionPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleTargetRegressionPrediction((double) x)).collect(Collectors.toList()));
 		}
 		throw new PredictionException("Unknown Problem Type.");
 	}
