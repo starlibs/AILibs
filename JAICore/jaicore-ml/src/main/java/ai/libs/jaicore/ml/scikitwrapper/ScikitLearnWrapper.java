@@ -284,7 +284,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 
 		File outputFile;
 		if (this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING) {
-			outputFile = new File(CONF.getModelDumpsDirectory(), 1 + "_" + this.seed + "_" + this.constructInstruction.hashCode() + "_train.arff");// TODO split#
+			outputFile = new File(CONF.getModelDumpsDirectory(), data.hashCode() + "_" + this.constructInstruction.hashCode() + "_train.arff");// TODO split#
 		} else {
 			outputFile = new File(CONF.getModelDumpsDirectory(), this.configurationUID + "_" + arffName + CONF.getPickleFileExtension());
 		}
