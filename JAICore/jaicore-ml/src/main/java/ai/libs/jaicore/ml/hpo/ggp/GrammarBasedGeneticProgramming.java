@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.hpo.ggp;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,7 +143,14 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 					while (!Thread.currentThread().isInterrupted() && (GrammarBasedGeneticProgramming.this.getConfig().getNumGenerations() <= 0 || g < GrammarBasedGeneticProgramming.this.getConfig().getNumGenerations())) {
 						LOGGER.debug("Evaluate population of generation {}.", (g + 1));
 						GrammarBasedGeneticProgramming.this.evaluate(population);
-						Collections.sort(population);
+						Collections.sort(population, new Comparator<CandidateProgram>() {
+
+						    @Override
+						     public int compare(final CandidateProgram o1, final CandidateProgram o2) {
+						         return Double.compare(((GRCandidateProgram) o1).getFitnessValue(), ((GRCandidateProgram) o2).getFitnessValue());
+						     }
+
+						}); 
 
 						// print fitness statistics of current generation if enabled.
 						if (GrammarBasedGeneticProgramming.this.getConfig().getPrintFitnessStats()) {
@@ -321,6 +329,7 @@ public class GrammarBasedGeneticProgramming extends AOptimizer<SoftwareConfigura
 			pool.shutdownNow();
 			throw e;
 		}
+		pool.shutdown();
 	}
 	
 	public List<GGPSolutionCandidate> getLastRatedPopulation(){
