@@ -307,7 +307,25 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		return (P) this.predict(new ILabeledInstance[] { instance }).get(0);
 	}
 
-	@SuppressWarnings("unchecked")
+	@Override
+	public B predict(final ILabeledDataset<? extends ILabeledInstance> dTest) throws PredictionException, InterruptedException {
+		CONF.getModelDumpsDirectory().mkdirs();
+		String arffName = this.getArffName(dTest);
+		File testArff;
+		try {
+			testArff = this.getOrWriteArffFile(dTest, arffName);
+			this.logger.info("Prediction dataset serialized, now acquiring predictions.");
+		} catch (IOException e1) {
+			throw new PredictionException("Could not dump arff file for prediction", e1);
+		}
+
+		try {
+			return this.runActualPrediction(arffName, testArff);
+		} catch (Exception e) {
+			throw new PredictionException("Could not run scikit-learn classifier.", e);
+		}
+	}
+
 	@Override
 	public B predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
 		this.logger.info("Predicting {} instances.", dTest.length);
@@ -319,22 +337,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			throw new PredictionException("Could not replicate labeled dataset instance", e1);
 		}
 		Arrays.stream(dTest).forEach(data::add);
-
-		CONF.getModelDumpsDirectory().mkdirs();
-		String arffName = this.getArffName(data);
-		File testArff;
-		try {
-			testArff = this.getOrWriteArffFile(data, arffName);
-			this.logger.info("Prediction dataset serialized, now acquiring predictions.");
-		} catch (IOException e1) {
-			throw new PredictionException("Could not dump arff file for prediction", e1);
-		}
-
-		try {
-			return this.runActualPrediction(arffName, testArff);
-		} catch (Exception e) {
-			throw new PredictionException("Could not run scikit-learn classifier.", e);
-		}
+		return this.predict(data);
 	}
 
 	public B predict(final String arffFileName) throws PredictionException, InterruptedException {
@@ -358,7 +361,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	private B runActualPrediction(final String arffName, final File testArff) throws InterruptedException, PredictionException, Exception {
 		File outputFile;
 		if (this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING) {
-			outputFile = new File(CONF.getModelDumpsDirectory(), arffName + "_" + this.constructInstruction.hashCode());
+			outputFile = new File(CONF.getTempFolder(), arffName + "_" + this.constructInstruction.hashCode());
 		} else {
 			outputFile = this.getResultFile(arffName);
 		}
