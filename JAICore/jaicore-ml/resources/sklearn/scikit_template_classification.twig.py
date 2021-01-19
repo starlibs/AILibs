@@ -32,6 +32,7 @@ def parse(arff_, is_path=True):
         
     ## automatically find out whether the file is a sparse file
     seenData = False
+    dense_mode = True
     for x in arff_data:
         if x.isspace():
             continue
