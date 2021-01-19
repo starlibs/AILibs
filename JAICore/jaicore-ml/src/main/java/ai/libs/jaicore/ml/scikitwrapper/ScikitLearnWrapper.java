@@ -361,7 +361,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	private B runActualPrediction(final String arffName, final File testArff) throws InterruptedException, PredictionException, Exception {
 		File outputFile;
 		if (this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING) {
-			outputFile = new File(CONF.getTempFolder(), arffName + "_" + this.constructInstruction.hashCode());
+			outputFile = new File(CONF.getTempFolder(), arffName + "_" + this.constructInstruction.hashCode() + ".arff");
 		} else {
 			outputFile = this.getResultFile(arffName);
 		}
