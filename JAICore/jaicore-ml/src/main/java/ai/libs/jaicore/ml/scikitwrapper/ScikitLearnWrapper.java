@@ -693,7 +693,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			if (ScikitLearnWrapper.this.pythonConfig != null && ScikitLearnWrapper.this.pythonConfig.getAnacondaEnvironment() != null) {
 				if (os == EOperatingSystem.MAC) {
 					processParameters.add("source");
-					processParameters.add("~/anaconda3/etc/profile.d/conda.sh");
+					processParameters.add(ScikitLearnWrapper.this.pythonConfig.getPathToAnacondaExecutable());
 					processParameters.add("&&");
 				}
 				processParameters.add("conda");
