@@ -2,8 +2,11 @@ package ai.libs.jaicore.ml.scikitwrapper;
 
 import java.io.File;
 
+import org.aeonbits.owner.Config.Sources;
+
 import ai.libs.python.IPythonConfig;
 
+@Sources({ "file:conf/scikitlearn_wrapper.properties" })
 public interface IScikitLearnWrapperConfig extends IPythonConfig {
 
 	public static final String K_TEMP_FOLDER = "sklearn.wrapper.temp.folder";
