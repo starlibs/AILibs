@@ -220,14 +220,15 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			this.trainArff = this.getOrWriteArffFile(data, arffName);
 			this.dataset = (ILabeledDataset<ILabeledInstance>) data.createEmptyCopy();
 
-			if (data.getLabelAttribute() instanceof ICategoricalAttribute && this.problemType != EScikitLearnProblemType.CLASSIFICATION && this.problemType != EScikitLearnProblemType.FEATURE_ENGINEERING) {
+			if (data.getLabelAttribute() instanceof ICategoricalAttribute && this.problemType != EScikitLearnProblemType.CLASSIFICATION
+					&& this.problemType != EScikitLearnProblemType.FEATURE_ENGINEERING) {
 				this.logger.warn("The chosen problem type {} does not fit to the given data {}, as its label are not categorical.", this.problemType, data.getRelationName());
 			} else if (data.getLabelAttribute() instanceof INumericAttribute && this.problemType != EScikitLearnProblemType.REGRESSION && this.problemType != EScikitLearnProblemType.RUL
 					&& this.problemType != EScikitLearnProblemType.FEATURE_ENGINEERING) {
 				this.logger.warn("The chosen problem type {} does not fit to the given data {}, as its label are not numerical.", this.problemType, data.getRelationName());
 			}
 
-			performActualFitting(arffName);
+			this.performActualFitting(arffName);
 
 		} catch (TrainingException e) {
 			throw e;
@@ -236,20 +237,21 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		}
 	}
 
-	public void fit(String arffFileName) throws TrainingException, InterruptedException {
+	public void fit(final String arffFileName) throws TrainingException, InterruptedException {
 		try {
 			CONF.getModelDumpsDirectory().mkdirs();
 			this.trainArff = this.getArffFile(arffFileName);
-			performActualFitting(arffFileName);
+			this.performActualFitting(arffFileName);
 		} catch (Exception e) {
 			throw new TrainingException("An exception occurred while training.", e);
 		}
 	}
 
-	private void performActualFitting(String arffName) throws InterruptedException, IOException, TrainingException {
+	private void performActualFitting(final String arffName) throws InterruptedException, IOException, TrainingException {
 		if (this.withModelDump) {
 			this.modelFile = new File(CONF.getModelDumpsDirectory(), this.configurationUID + "_" + arffName + CONF.getPickleFileExtension());
-			ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff).withOutputFile(this.modelFile);
+			ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff)
+					.withOutputFile(this.modelFile);
 			skLearnWrapperCommandBuilder.withSeed(this.seed);
 			skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 			String[] trainCommand = skLearnWrapperCommandBuilder.toCommandArray();
@@ -278,7 +280,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 */
 	private synchronized File getOrWriteArffFile(final ILabeledDataset<? extends ILabeledInstance> data, final String arffName) throws IOException {
 		this.logger.debug("Serializing {}x{} dataset to {}", data.size(), data.getNumAttributes(), arffName);
-		File arffOutputFile = getArffFile(arffName);
+		File arffOutputFile = this.getArffFile(arffName);
 		if (CONF.getDeleteFileOnExit()) {
 			arffOutputFile.deleteOnExit();
 		}
@@ -295,7 +297,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		return arffOutputFile;
 	}
 
-	private synchronized File getArffFile(String arffName) {
+	private synchronized File getArffFile(final String arffName) {
 		return new File(CONF.getTempFolder(), arffName + ".arff");
 	}
 
@@ -329,31 +331,31 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		}
 
 		try {
-			return runActualPrediction(arffName, testArff);
+			return this.runActualPrediction(arffName, testArff);
 		} catch (Exception e) {
 			throw new PredictionException("Could not run scikit-learn classifier.", e);
 		}
 	}
 
-	public B predict(String arffFileName) throws PredictionException, InterruptedException {
+	public B predict(final String arffFileName) throws PredictionException, InterruptedException {
 		CONF.getModelDumpsDirectory().mkdirs();
 		File testArff;
 		testArff = this.getArffFile(arffFileName);
 
 		try {
-			return runActualPrediction(arffFileName, testArff);
+			return this.runActualPrediction(arffFileName, testArff);
 		} catch (Exception e) {
 			throw new PredictionException("Could not run scikit-learn classifier.", e);
 		}
 	}
 
-	public B fitAndPredict(String trainArffFileName, String testArffFileName) throws TrainingException, PredictionException, InterruptedException {
-		fit(trainArffFileName);
-		return predict(testArffFileName);
+	public B fitAndPredict(final String trainArffFileName, final String testArffFileName) throws TrainingException, PredictionException, InterruptedException {
+		this.fit(trainArffFileName);
+		return this.predict(testArffFileName);
 	}
 
 	@SuppressWarnings("unchecked")
-	private B runActualPrediction(String arffName, File testArff) throws InterruptedException, PredictionException, Exception {
+	private B runActualPrediction(final String arffName, final File testArff) throws InterruptedException, PredictionException, Exception {
 		File outputFile;
 		if (this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING) {
 			outputFile = new File(CONF.getModelDumpsDirectory(), arffName + "_" + this.constructInstruction.hashCode());
@@ -365,7 +367,8 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		if (!outputFile.exists()) {
 			/* create prediction file */
 			if (this.withModelDump) {
-				ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff).withModelFile(this.modelFile).withOutputFile(outputFile);
+				ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff)
+						.withModelFile(this.modelFile).withOutputFile(outputFile);
 				skLearnWrapperCommandBuilder.withSeed(this.seed);
 				skLearnWrapperCommandBuilder.withTimeout(this.timeout);
 				String[] testCommand = skLearnWrapperCommandBuilder.toCommandArray();
@@ -381,8 +384,8 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 					throw new PredictionException("Could not run scikit-learn classifier.", e);
 				}
 			} else {
-				ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff).withTestArffFile(testArff)
-						.withOutputFile(outputFile);
+				ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff)
+						.withTestArffFile(testArff).withOutputFile(outputFile);
 
 				skLearnWrapperCommandBuilder.withSeed(this.seed);
 				skLearnWrapperCommandBuilder.withTimeout(this.timeout);
@@ -436,15 +439,18 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 																			// probabilities. Thus, create pseudo
 																			// probability from the obtained output
 					int numClasses = ((ICategoricalAttribute) this.dataset.getLabelAttribute()).getLabels().size();
-					return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification(numClasses, x.intValue())).collect(Collectors.toList()));
+					return (B) new SingleLabelClassificationPredictionBatch(
+							this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification(numClasses, x.intValue())).collect(Collectors.toList()));
 				}
-				return (B) new SingleLabelClassificationPredictionBatch(this.rawLastClassificationResults.stream().map(x -> x.stream().mapToDouble(y -> y).toArray()).map(SingleLabelClassification::new).collect(Collectors.toList()));
+				return (B) new SingleLabelClassificationPredictionBatch(
+						this.rawLastClassificationResults.stream().map(x -> x.stream().mapToDouble(y -> y).toArray()).map(SingleLabelClassification::new).collect(Collectors.toList()));
 			} else if (this.problemType == EScikitLearnProblemType.RUL || this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING || this.problemType == EScikitLearnProblemType.REGRESSION) {
 				if (this.logger.isInfoEnabled()) {
 					this.logger.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()));
 				}
 				this.logger.debug("#Created construction string: {}", this.constructInstruction);
-				return (B) new SingleTargetRegressionPredictionBatch(this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleTargetRegressionPrediction((double) x)).collect(Collectors.toList()));
+				return (B) new SingleTargetRegressionPredictionBatch(
+						this.rawLastClassificationResults.stream().flatMap(List::stream).map(x -> new SingleTargetRegressionPrediction((double) x)).collect(Collectors.toList()));
 			}
 		}
 		throw new PredictionException("Unknown Problem Type.");
@@ -535,9 +541,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * @return A hash for the given Instances.
 	 */
 	private String getArffName(final ILabeledDataset<? extends ILabeledInstance> data) {
-		String hash = "" + data.hashCode();
-		hash = hash.startsWith("-") ? hash.replace("-", "1") : "0" + hash;
-		return hash;
+		return data.getRelationName();
 	}
 
 	/**
@@ -686,7 +690,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 			if (ScikitLearnWrapper.this.pythonConfig != null && ScikitLearnWrapper.this.pythonConfig.getAnacondaEnvironment() != null) {
 				if (os == EOperatingSystem.MAC) {
 					processParameters.add("source");
-					processParameters.add("/Users/hetzer/Development/programs/anaconda/anaconda3/etc/profile.d/conda.sh");
+					processParameters.add("~/anaconda3/etc/profile.d/conda.sh");
 					processParameters.add("&&");
 				}
 				processParameters.add("conda");
