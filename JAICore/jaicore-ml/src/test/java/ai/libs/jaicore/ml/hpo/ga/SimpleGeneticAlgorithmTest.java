@@ -11,6 +11,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -34,7 +35,7 @@ public class SimpleGeneticAlgorithmTest {
 	public static final double ALLOWED_DELTA = 0.1;
 
 	private interface SolutionTester {
-		public boolean acceptSolution(IComponentInstance solution);
+		public boolean acceptSolution(SimpleGeneticAlgorithm algo, IComponentInstance solution);
 	}
 
 	public static Arguments getSimpleProblem() {
@@ -50,7 +51,7 @@ public class SimpleGeneticAlgorithmTest {
 
 		IComponentInstanceHPOGAInput input = new ComponentInstanceHPOGAInput(ci, evaluator);
 
-		SolutionTester tester = (r) -> {
+		SolutionTester tester = (a, r) -> {
 			double xParam = Double.parseDouble(r.getParameterValue("x"));
 			return xParam > 0 && Math.abs(5 - xParam) < ALLOWED_DELTA;
 		};
@@ -75,12 +76,11 @@ public class SimpleGeneticAlgorithmTest {
 		IObjectEvaluator<IComponentInstance, Double> evaluator = (o) -> {
 			double xParam = Double.parseDouble(o.getParameterValue("x"));
 			double yParam = Double.parseDouble(o.getSatisfactionOfRequiredInterfaces().get("N").get(0).getParameterValue("y"));
-			double val = Math.pow((xParam - 5) * (yParam - 3), 2);
-			return val;
+			return Math.pow((xParam - 5) * (yParam - 3), 2);
 		};
 		IComponentInstanceHPOGAInput input = new ComponentInstanceHPOGAInput(ci, evaluator);
 
-		SolutionTester tester = (r) -> {
+		SolutionTester tester = (a, r) -> {
 			double xParam = Double.parseDouble(r.getParameterValue("x"));
 			double yParam = Double.parseDouble(r.getSatisfactionOfRequiredInterfaces().get("N").get(0).getParameterValue("y"));
 			boolean res = true;
@@ -127,7 +127,7 @@ public class SimpleGeneticAlgorithmTest {
 		};
 		IComponentInstanceHPOGAInput input = new ComponentInstanceHPOGAInput(ci, evaluator);
 
-		SolutionTester tester = (r) -> {
+		SolutionTester tester = (a, r) -> {
 			double xParam = Double.parseDouble(r.getParameterValue("x"));
 			String zParam = r.getParameterValue("z");
 			double yParam = Double.parseDouble(r.getSatisfactionOfRequiredInterfaces().get("N").get(0).getParameterValue("y"));
@@ -142,8 +142,55 @@ public class SimpleGeneticAlgorithmTest {
 		return Arguments.of(ConfigFactory.create(ISimpleGeneticAlgorithmConfig.class), input, tester);
 	}
 
+	public static Arguments getMaxEvaluationsProblem() {
+		PartialOrderedSet<IParameter> parameters = new PartialOrderedSet<>();
+		parameters.add(new Parameter("x", new NumericParameterDomain(false, -10, 10), 1));
+		Component comp = new Component("A", Arrays.asList("RI"), new ArrayList<IRequiredInterfaceDefinition>(), parameters, new ArrayList<>());
+		IComponentInstance ci = ComponentUtil.getDefaultParameterizationOfComponent(comp);
+
+		IObjectEvaluator<IComponentInstance, Double> evaluator = (o) -> {
+			return Math.pow(0.75 * (Double.parseDouble(o.getParameterValues().get("x")) - 5), 2);
+		};
+
+		IComponentInstanceHPOGAInput input = new ComponentInstanceHPOGAInput(ci, evaluator);
+		SolutionTester tester = (a, r) -> {
+			return a.getNumEvaluations() == 20;
+		};
+
+		ISimpleGeneticAlgorithmConfig config = ConfigFactory.create(ISimpleGeneticAlgorithmConfig.class);
+		config.setProperty(ISimpleGeneticAlgorithmConfig.K_MAX_EVALUATIONS, "20");
+
+		return Arguments.of(config, input, tester);
+	}
+
 	public static Stream<Arguments> getGAProblems() {
-		return Stream.of(getSimpleProblem(), getSimpleNestedProblem(), getSimpleNestedListProblem());
+		return Stream.of(/*getSimpleProblem(), getSimpleNestedProblem(), getSimpleNestedListProblem(),*/ getMaxEvaluationsProblem());
+	}
+
+	@Test
+	public void testAnytimeSimpleGeneticAlgorithm() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+		ISimpleGeneticAlgorithmConfig config = ConfigFactory.create(ISimpleGeneticAlgorithmConfig.class);
+		config.setProperty(ISimpleGeneticAlgorithmConfig.K_MAX_GENERATIONS, "-1");
+		config.setProperty(ISimpleGeneticAlgorithmConfig.K_MAX_RUNTIME, "5000");
+
+		PartialOrderedSet<IParameter> parameters = new PartialOrderedSet<>();
+		parameters.add(new Parameter("x", new NumericParameterDomain(false, -10, 10), 1));
+		Component comp = new Component("A", Arrays.asList("RI"), new ArrayList<IRequiredInterfaceDefinition>(), parameters, new ArrayList<>());
+		IComponentInstance ci = ComponentUtil.getDefaultParameterizationOfComponent(comp);
+
+		IObjectEvaluator<IComponentInstance, Double> evaluator = (o) -> {
+			double val = Math.pow(0.75 * (Double.parseDouble(o.getParameterValues().get("x")) - 5), 2);
+			return val;
+		};
+
+		IComponentInstanceHPOGAInput input = new ComponentInstanceHPOGAInput(ci, evaluator);
+
+		SimpleGeneticAlgorithm algo = new SimpleGeneticAlgorithm(config, input);
+		long startTime = System.currentTimeMillis();
+		algo.call();
+		long duration = System.currentTimeMillis() - startTime;
+
+		assertTrue(duration > 4000 && duration < 6000, "Runtime was not on time (plus/minus a second), so it was " + duration + "ms instead of " + 5000 + "ms");
 	}
 
 	@ParameterizedTest
@@ -153,7 +200,7 @@ public class SimpleGeneticAlgorithmTest {
 		SimpleGeneticAlgorithm algo = new SimpleGeneticAlgorithm(config, input);
 		IEvaluatedSoftwareConfigurationSolution<Double> solution = algo.call();
 		System.out.println(ComponentInstanceUtil.getComponentInstanceString(solution.getComponentInstance()));
-		assertTrue(tester.acceptSolution(solution.getComponentInstance()), "Solution deviates for at least one parameter by more than " + ALLOWED_DELTA + " from the expected results.");
+		assertTrue(tester.acceptSolution(algo, solution.getComponentInstance()), "Solution deviates for at least one parameter by more than " + ALLOWED_DELTA + " from the expected results.");
 	}
 
 }

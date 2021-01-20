@@ -9,6 +9,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.IntStream;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -37,6 +39,7 @@ public class SimpleGeneticAlgorithm extends AOptimizer<IComponentInstanceHPOGAIn
 	private int generation;
 	private int generationsSinceLastBestUpdate;
 	private AtomicInteger numEvaluations;
+	private Lock evaluationsLock = new ReentrantLock();
 
 	private IGeneticOperator crossover;
 	private IGeneticOperator mutation;
@@ -49,31 +52,45 @@ public class SimpleGeneticAlgorithm extends AOptimizer<IComponentInstanceHPOGAIn
 		super(config, input);
 	}
 
-	private boolean isEvolutionaryProcessTerminated() {
+	private boolean isEvolutionaryProcessTerminated() throws InterruptedException {
+		if (Thread.interrupted()) {
+			throw new InterruptedException("Thread is interrupted");
+		}
+
 		if (this.getConfig().getMaxGenerations() > 0 && this.generation + 1 >= this.getConfig().getMaxGenerations()) {
 			return true;
 		}
 		if (this.getConfig().getMaxEvaluations() > 0 && this.numEvaluations.get() >= this.getConfig().getMaxEvaluations()) {
 			return true;
 		}
-		if (this.getConfig().getMaxEvaluations() > 0 && this.generationsSinceLastBestUpdate >= this.getConfig().getEarlyTermination()) {
+		if (this.getConfig().getEarlyTermination() > 0 && this.generationsSinceLastBestUpdate >= this.getConfig().getEarlyTermination()) {
 			return true;
 		}
 		return false;
 	}
 
-	private void evaluateAll(final List<IIndividual> population) throws EvaluationBudgetExhaustedException {
+	private void evaluateAll(final List<IIndividual> population) throws EvaluationBudgetExhaustedException, InterruptedException {
 		List<Runnable> populationEval = new ArrayList<>(population.size());
 		AtomicBoolean budgetExhausted = new AtomicBoolean(false);
 		Semaphore syncSemaphore = new Semaphore(0);
 
 		for (IIndividual ind : population) {
 			populationEval.add(() -> {
+				// still budget left for evaluation of individual?
+				this.evaluationsLock.lock();
 				try {
-					if (this.numEvaluations.incrementAndGet() > this.getConfig().getMaxEvaluations() && this.getConfig().getMaxEvaluations() > 0) {
+					if (this.numEvaluations.get() >= this.getConfig().getMaxEvaluations() && this.getConfig().getMaxEvaluations() > 0) {
 						budgetExhausted.set(true);
 						return;
 					}
+					this.numEvaluations.incrementAndGet();
+				} finally {
+					this.evaluationsLock.unlock();
+					syncSemaphore.release();
+				}
+
+				// evaluate individual
+				try {
 					IComponentInstance ci = this.getInput().convertIndividualToComponentInstance(ind);
 
 					double score = this.getInput().getEvaluator().evaluate(ci);
@@ -100,8 +117,10 @@ public class SimpleGeneticAlgorithm extends AOptimizer<IComponentInstanceHPOGAIn
 
 		try {
 			syncSemaphore.acquire(population.size());
+			pool.awaitTermination(5, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			pool.shutdownNow();
+			throw e;
 		}
 
 		if (budgetExhausted.get()) {
@@ -134,9 +153,14 @@ public class SimpleGeneticAlgorithm extends AOptimizer<IComponentInstanceHPOGAIn
 					while (!this.isEvolutionaryProcessTerminated()) {
 						this.generation++;
 						this.generationsSinceLastBestUpdate++;
+						this.logger.debug("Evaluate generation #{}", this.generation);
 
 						// evaluate population
 						this.evaluateAll(this.population);
+
+						if (Thread.interrupted()) {
+							throw new InterruptedException("Evolutionary process was interrupted.");
+						}
 
 						// sort population
 						Collections.sort(this.population);
@@ -150,7 +174,8 @@ public class SimpleGeneticAlgorithm extends AOptimizer<IComponentInstanceHPOGAIn
 						}
 
 						// check whether to perform a soft restart
-						if (this.getConfig().getSoftRestart() > 0 && this.generationsSinceLastBestUpdate % this.getConfig().getSoftRestart() == 0) {
+						if (this.getConfig().getSoftRestart() > 0 && this.generationsSinceLastBestUpdate > 0 && this.generationsSinceLastBestUpdate % this.getConfig().getSoftRestart() == 0) {
+							this.logger.debug("Best individual has not changed since {} generations, thus, do a random restart.", this.generationsSinceLastBestUpdate);
 							while (offspring.size() < this.getConfig().getPopulationSize()) {
 								offspring.add(this.getInput().newRandomIndividual(this.rand));
 							}
@@ -172,23 +197,26 @@ public class SimpleGeneticAlgorithm extends AOptimizer<IComponentInstanceHPOGAIn
 						}
 
 						// override population
-						this.population.clear();
-						this.population.addAll(offspring);
+						this.population = offspring;
 					}
 				} catch (EvaluationBudgetExhaustedException e) {
 					this.logger.info("Evaluation budget has been exhausted. Thus, terminate the algorithm.");
+				} catch (InterruptedException e) {
+					this.logger.debug("Evolutionary process was interrupted, so, shutdown.");
 				} finally {
 					evoSem.release();
 				}
 			});
 
+			// start evolutionary process in thread
 			evoThread.start();
 
-			if (this.getConfig().getMaxRuntimeInMS() > 0) {
-				evoSem.tryAcquire(this.getConfig().getMaxRuntimeInMS(), TimeUnit.MILLISECONDS);
-			} else {
-				evoSem.acquire();
+			// if a timeout is given, account for it
+			if (this.getConfig().getMaxRuntimeInMS() > 0 && !evoSem.tryAcquire(this.getConfig().getMaxRuntimeInMS(), TimeUnit.MILLISECONDS)) {
+				this.logger.debug("Went out of runtime, so, send an interrupt");
+				evoThread.interrupt();
 			}
+			evoSem.acquire();
 
 			return this.terminate();
 		default:
