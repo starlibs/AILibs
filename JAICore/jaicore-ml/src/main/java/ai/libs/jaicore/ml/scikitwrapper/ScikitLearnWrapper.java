@@ -384,7 +384,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 					DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
 					this.runProcess(testCommand, listener);
 				} catch (IOException e) {
-					throw new PredictionException("Could not run scikit-learn classifier.", e);
+					throw new PredictionException("Could not run scikit-learn pipeline.", e);
 				}
 			} else {
 				ScikitLearnWrapper<P, B>.ScikitLearnWrapperCommandBuilder skLearnWrapperCommandBuilder = new ScikitLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff)
@@ -405,13 +405,17 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 							// ignore convergence warning
 							this.logger.warn("Learner {} could not converge. Consider increase number of iterations.", this.constructInstruction);
 						} else {
+							if (this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING) {
+								FileUtil.touch(outputFile.getAbsolutePath().replace("test", "train"));
+								FileUtil.touch(outputFile.getAbsolutePath());
+							}
 							throw new PredictionException(listener.getErrorOutput());
 						}
 					}
 				} catch (InterruptedException | PredictionException e) {
 					throw e;
 				} catch (Exception e) {
-					throw new PredictionException("Could not run scikit-learn classifier.", e);
+					throw new PredictionException("Could not run scikit-learn pipeline.", e);
 				}
 			}
 		}
