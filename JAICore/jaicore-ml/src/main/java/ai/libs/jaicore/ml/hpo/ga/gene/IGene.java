@@ -4,6 +4,8 @@ public interface IGene {
 
 	public Object getValue();
 
+	public String getValueAsString();
+
 	public void setValue(Object value);
 
 	public IGene copy();

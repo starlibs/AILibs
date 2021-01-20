@@ -63,7 +63,8 @@ public class ComponentInstanceHPOGAInput implements IComponentInstanceHPOGAInput
 		List<IGene> genotype = new ArrayList<>();
 		for (Entry<String, IParameter> p : this.paramMap.entrySet()) {
 			if (p.getValue().isCategorical()) {
-				genotype.add(new NominalGene(Arrays.stream(((CategoricalParameterDomain) p.getValue().getDefaultDomain()).getValues()).collect(Collectors.toList())));
+				IGene nominal = new NominalGene(Arrays.stream(((CategoricalParameterDomain) p.getValue().getDefaultDomain()).getValues()).collect(Collectors.toList()), rand);
+				genotype.add(nominal);
 			} else {
 				NumericParameterDomain dom = (NumericParameterDomain) p.getValue().getDefaultDomain();
 				if (dom.isInteger()) {
@@ -73,6 +74,7 @@ public class ComponentInstanceHPOGAInput implements IComponentInstanceHPOGAInput
 				}
 			}
 		}
+
 		return new Individual(genotype, 1);
 	}
 
@@ -92,11 +94,10 @@ public class ComponentInstanceHPOGAInput implements IComponentInstanceHPOGAInput
 			}
 
 			// set value of the parameter
-			String value = individual.getGene(paramIndex).getValue() + "";
+			String value = individual.getGene(paramIndex).getValueAsString();
 			currentCI.getParameterValues().put(parameterTrace.get(0), value);
 			paramIndex++;
 		}
-
 		return ci;
 	}
 

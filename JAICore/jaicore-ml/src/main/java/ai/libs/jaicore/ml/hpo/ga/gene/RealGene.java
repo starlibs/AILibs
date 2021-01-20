@@ -51,4 +51,9 @@ public class RealGene implements INumericGene {
 		return new RealGene(this.lowerBound, this.upperBound, this.value);
 	}
 
+	@Override
+	public String toString() {
+		return this.getValue() + "";
+	}
+
 }

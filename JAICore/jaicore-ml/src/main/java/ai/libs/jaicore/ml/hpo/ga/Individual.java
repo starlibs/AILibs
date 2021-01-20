@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.hpo.ga;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,13 +80,20 @@ public class Individual implements IIndividual {
 			}
 		}
 
-		if (allBetter) {
+		if (allBetter && allWorse) {
+			return 0;
+		} else if (allBetter) {
 			return -1;
 		} else if (allWorse) {
 			return 1;
 		} else {
 			return 0;
 		}
+	}
+
+	@Override
+	public String toString() {
+		return this.genotype + " (" + Arrays.toString(this.objectives) + ")";
 	}
 
 }

@@ -8,6 +8,10 @@ public interface IIndividual extends Comparable<IIndividual> {
 
 	public int size();
 
+	default List<IGene> getGenotype() {
+		return this.getPrefixOfIndividual(0);
+	}
+
 	public IGene getGene(int index);
 
 	public int getNumObjectives();

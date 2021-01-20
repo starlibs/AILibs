@@ -6,4 +6,9 @@ public interface INumericGene extends IGene {
 
 	public Number getLowerBound();
 
+	@Override
+	default String getValueAsString() {
+		return this.getValue() + "";
+	}
+
 }

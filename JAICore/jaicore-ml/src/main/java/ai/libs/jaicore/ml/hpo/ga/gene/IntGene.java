@@ -66,4 +66,9 @@ public class IntGene implements INumericGene {
 		return new IntGene(this.lowerBound, this.upperBound, this.value);
 	}
 
+	@Override
+	public String toString() {
+		return this.getValue() + "";
+	}
+
 }
