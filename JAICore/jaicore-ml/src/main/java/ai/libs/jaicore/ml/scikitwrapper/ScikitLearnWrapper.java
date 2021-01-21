@@ -206,7 +206,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * @return The file where the results are to be stored.
 	 */
 	private File getResultFile(final String arffName) {
-		return new File(CONF.getModelDumpsDirectory(), arffName + "_" + this.configurationUID + CONF.getResultFileExtension());
+		return new File(CONF.getModelDumpsDirectory(), this.configurationUID + "_" + arffName + CONF.getResultFileExtension());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -361,7 +361,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	private B runActualPrediction(final String arffName, final File testArff) throws InterruptedException, PredictionException, Exception {
 		File outputFile;
 		if (this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING) {
-			outputFile = new File(CONF.getTempFolder(), arffName + "_" + this.constructInstruction.hashCode() + ".arff");
+			outputFile = new File(CONF.getTempFolder(), this.configurationUID + "_" + arffName + ".arff");
 		} else {
 			outputFile = this.getResultFile(arffName);
 		}
@@ -548,7 +548,13 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * @return A hash for the given Instances.
 	 */
 	private String getArffName(final ILabeledDataset<? extends ILabeledInstance> data) {
-		return data.getRelationName();
+		if (this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING) {
+			return data.getRelationName();
+		} else {
+			String hash = "" + data.hashCode();
+			hash = hash.startsWith("-") ? hash.replace("-", "1") : "0" + hash;
+			return hash;
+		}
 	}
 
 	/**
