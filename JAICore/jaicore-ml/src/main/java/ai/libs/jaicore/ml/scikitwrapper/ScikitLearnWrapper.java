@@ -671,7 +671,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 
 		private ScikitLearnWrapperCommandBuilder withArffFile(final File arffFile) {
 			if (!arffFile.exists()) {
-				throw new IllegalArgumentException("Arff File does not exist.");
+				throw new IllegalArgumentException("Arff File does not exist: " + arffFile.getAbsolutePath());
 			}
 			this.arffFile = arffFile.getAbsolutePath();
 			return this;

@@ -3,6 +3,7 @@ package ai.libs.jaicore.logging;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -59,7 +60,7 @@ public class ToJSONStringUtil {
 
 		root.set(rootName, innerObject);
 
-		for (Entry<String, Object> field : fields.entrySet()) {
+		for (Entry<String, Object> field : fields.entrySet().stream().sorted((o1, o2) -> o1.getKey().compareTo(o2.getKey())).collect(Collectors.toList())) {
 			innerObject.set(field.getKey(), parseObjectToJsonNode(field.getValue(), om));
 		}
 
