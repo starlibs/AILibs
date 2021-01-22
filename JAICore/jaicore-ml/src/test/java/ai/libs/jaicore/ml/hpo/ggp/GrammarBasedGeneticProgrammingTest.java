@@ -47,7 +47,7 @@ public class GrammarBasedGeneticProgrammingTest extends ATest {
 
 	@Test
 	public void randomEvalTest() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		GrammarBasedGeneticProgramming ggp = new GrammarBasedGeneticProgramming(input);
+		GrammarBasedGeneticProgramming ggp = new GrammarBasedGeneticProgramming(input, 42);
 		GGPSolutionCandidate sol = ggp.call();
 		this.getLogger().info("Found solution with score {}: {}", sol.getScore(), sol.getComponentInstance());
 		assertTrue(sol.getScore() < 0.01);
