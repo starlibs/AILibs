@@ -18,6 +18,7 @@ import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeEx
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
+import ai.libs.jaicore.ml.core.dataset.SparseInstance;
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
@@ -53,9 +54,16 @@ public class WekaInstancesUtil {
 			if (inst.getNumAttributes() != expectedAttributes) {
 				throw new IllegalStateException("Dataset scheme defines a number of " + expectedAttributes + " attributes, but instance has " + inst.getNumAttributes() + ".");
 			}
-			double[] point = inst.getPoint();
-			double[] pointWithLabel = Arrays.copyOf(point, point.length + 1);
-			DenseInstance iNew = new DenseInstance(1, pointWithLabel);
+
+			Instance iNew;
+			if (inst instanceof SparseInstance) {
+				iNew = new weka.core.SparseInstance(1, inst.getPoint());
+			}
+			else {
+				double[] point = inst.getPoint();
+				double[] pointWithLabel = Arrays.copyOf(point, point.length + 1);
+				iNew = new DenseInstance(1, pointWithLabel);
+			}
 			iNew.setDataset(wekaInstances);
 			if (dataset.getLabelAttribute() instanceof ICategoricalAttribute) {
 				iNew.setClassValue(((ICategoricalAttribute) dataset.getLabelAttribute()).getLabelOfCategory((int) inst.getLabel()));

@@ -6,8 +6,19 @@ import ai.libs.jaicore.search.probleminputs.IMDP;
 
 public class UCTFactory<N, A> extends MCTSFactory<N, A, UCTFactory<N, A>> {
 
+	private double explorationConstant = Math.sqrt(2);
+
 	@Override
 	public MCTS<N, A> getAlgorithm(final IMDP<N, A, Double> input) {
-		return new UCT<>(input, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.getRandom(), this.isTabooExhaustedNodes());
+		return new UCT<>(input, this.explorationConstant, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.getRandom(), this.isTabooExhaustedNodes());
+	}
+
+	public double getExplorationConstant() {
+		return this.explorationConstant;
+	}
+
+	public UCTFactory<N, A> withExplorationConstant(final double explorationConstant) {
+		this.explorationConstant = explorationConstant;
+		return this.getSelf();
 	}
 }

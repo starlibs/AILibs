@@ -1,6 +1,8 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -12,6 +14,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.event.IEvent;
+import org.api4.java.datastructure.graph.ILabeledPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,5 +156,14 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 
 	public int getNumberOfNodesInMemory() {
 		return this.mcts.getNumberOfNodesInMemory();
+	}
+
+	public void tellRolloutResult(final ILabeledPath<N, A> p, final double score) {
+		List<Double> scores = new ArrayList<>();
+		for (int i = 0; i < p.getNumberOfNodes() - 2; i++) {
+			scores.add(0.0);
+		}
+		scores.add(score); // only last action has a score
+		this.mcts.getTreePolicy().updatePath(p, scores);
 	}
 }

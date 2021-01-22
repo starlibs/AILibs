@@ -40,7 +40,7 @@ import ai.libs.jaicore.ml.hpo.multifidelity.hyperband.Hyperband.MultiFidelitySco
  */
 public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProblem<Double>, HyperbandSolutionCandidate, MultiFidelityScore> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(Hyperband.class);
+	private Logger logger = LoggerFactory.getLogger(Hyperband.class);
 
 	public class MultiFidelityScore implements Comparable<MultiFidelityScore> {
 
@@ -159,7 +159,7 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 			if (this.getConfig().cpus() > 1) {
 				this.pool = Executors.newFixedThreadPool(this.getConfig().cpus());
 			}
-			LOGGER.info("Initialized HyperBand with eta={}, r_max={}, s_max={}, b={} and parallelizing with {} cpu cores.", this.eta, this.rMax, this.sMax, this.b, this.getConfig().cpus());
+			this.logger.info("Initialized HyperBand with eta={}, r_max={}, s_max={}, b={} and parallelizing with {} cpu cores.", this.eta, this.rMax, this.sMax, this.b, this.getConfig().cpus());
 			return super.activate();
 		case INACTIVE:
 			throw new AlgorithmException("Algorithm has already finished.");
@@ -168,10 +168,12 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 			for (int s = this.sMax; s >= 0; s--) {
 				int n = (int) Math.ceil((this.b / this.rMax) * (Math.pow(this.eta, s) / (s + 1)));
 				double r = (this.rMax) * Math.pow(this.eta, -s);
-				LOGGER.info("Execute round {} of HyperBand with n={}, r={}", (this.sMax - s + 1), n, r);
+				this.logger.info("Execute round {} of HyperBand with n={}, r={}", (this.sMax - s + 1), n, r);
 
 				// sample random configurations
+				this.logger.debug("Start candidate generation.");
 				List<ComponentInstance> t = this.getNCandidates(n);
+				this.logger.debug("Generated {} candidates, now evaluating them.", t.size());
 				// begin successive halving with (n,r) inner loop
 				for (int i = 0; i <= s; i++) {
 					int nI = (int) Math.floor(n / Math.pow(this.eta, i));
@@ -207,6 +209,7 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 
 		for (ComponentInstance ci : t) {
 			runnables.add(() -> {
+				this.logger.debug("Starting evaluation of {}", ci);
 				double score;
 				try {
 					score = Hyperband.this.getInput().getCompositionEvaluator().evaluate(ci, budget);
@@ -216,8 +219,8 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 				} catch (ObjectEvaluationFailedException e) {
 					score = Hyperband.this.crashedEvaluationScore;
 				}
-
 				lock.lock();
+				this.logger.debug("Finished evaluation of {} with score {}. Lock has been released", ci, score);
 				try {
 					candidateList.add(new HyperbandSolutionCandidate(ci, budget, score));
 				} finally {
@@ -248,6 +251,17 @@ public class Hyperband extends AOptimizer<MultiFidelitySoftwareConfigurationProb
 	@Override
 	public IHyperbandConfig getConfig() {
 		return (IHyperbandConfig) super.getConfig();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		super.setLoggerName(name + ".abstract");
+		this.logger = LoggerFactory.getLogger(name);
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
 	}
 
 }

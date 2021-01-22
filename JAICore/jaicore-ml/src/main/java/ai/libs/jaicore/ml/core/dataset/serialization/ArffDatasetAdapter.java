@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.io.FileUtils;
 import org.api4.java.ai.ml.core.dataset.descriptor.IDatasetDescriptor;
 import org.api4.java.ai.ml.core.dataset.descriptor.IFileDatasetDescriptor;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
@@ -93,8 +94,9 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 	}
 
-	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IFileDatasetDescriptor datasetFile, final String nameOfClassAttribute) throws DatasetDeserializationFailedException {
+	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IFileDatasetDescriptor datasetFile, final String nameOfClassAttribute, final int maxNumberOfInstances, final List<Integer> ignoredAttributes) throws DatasetDeserializationFailedException {
 		Objects.requireNonNull(datasetFile, "No dataset has been configured.");
+
 		/* read the file until the class parameter is found and count the params */
 		int numAttributes = 0;
 		try (BufferedReader br = Files.newBufferedReader(datasetFile.getDatasetDescription().toPath())) {
@@ -113,12 +115,13 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 
 		LOGGER.info("Successfully identified class attribute index {} for attribute with name {}", numAttributes, nameOfClassAttribute);
-		return this.deserializeDataset(datasetFile, numAttributes);
+		return this.deserializeDataset(datasetFile, numAttributes, maxNumberOfInstances, ignoredAttributes);
 	}
 
-	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IFileDatasetDescriptor datasetDescriptor, final int columnWithClassIndex) throws DatasetDeserializationFailedException {
+	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IFileDatasetDescriptor datasetDescriptor, final int columnWithClassIndex, final int maxNumberOfInstances, final List<Integer> ignoredAttributes)
+			throws DatasetDeserializationFailedException {
 		Objects.requireNonNull(datasetDescriptor, "No dataset has been configured.");
-		return readDataset(this.sparseMode, datasetDescriptor.getDatasetDescription(), columnWithClassIndex);
+		return readDataset(this.sparseMode, datasetDescriptor.getDatasetDescription(), columnWithClassIndex, maxNumberOfInstances, ignoredAttributes);
 	}
 
 	@Override
@@ -126,7 +129,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		if (!(datasetDescriptor instanceof IFileDatasetDescriptor)) {
 			throw new DatasetDeserializationFailedException("Cannot handle dataset descriptor of type " + datasetDescriptor.getClass().getName());
 		}
-		return this.deserializeDataset((IFileDatasetDescriptor) datasetDescriptor, -1);
+		return this.deserializeDataset((IFileDatasetDescriptor) datasetDescriptor, -1, -1, Arrays.asList());
 	}
 
 	public ILabeledDataset<ILabeledInstance> deserializeDataset() throws InterruptedException, DatasetDeserializationFailedException {
@@ -136,7 +139,8 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	/**
 	 * Extracts meta data about a relation from a string.
 	 *
-	 * @param line The line which is to be parsed to extract the necessary information from the relation name.
+	 * @param line
+	 *            The line which is to be parsed to extract the necessary information from the relation name.
 	 * @return A KVStore containing the parsed meta data.
 	 */
 	protected static KVStore parseRelation(final String line) {
@@ -223,6 +227,13 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	protected static List<Object> parseInstance(final boolean sparseData, final List<IAttribute> attributes, final int targetIndex, final String line) {
+		int numAttributes = attributes.size();
+		boolean[] ignored = new boolean[numAttributes];
+		int[] numSkipped = new int[numAttributes];
+		return parseInstance(sparseData, attributes, targetIndex, line, numAttributes, ignored, numSkipped);
+	}
+
+	protected static List<Object> parseInstance(final boolean sparseData, final List<IAttribute> attributes, final int targetIndex, final String line, final int numAttributes, final boolean[] ignoreAttributes, final int[] numSkippedAttributes) {
 		if (line.trim().startsWith("%")) {
 			throw new IllegalArgumentException("Cannot create object for commented line!");
 		}
@@ -246,50 +257,71 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				throw new IllegalArgumentException("Cannot parse instance as this is not a sparse instance but has less columns than there are attributes defined. Expected values: " + attributes.size() + ". Actual number of values: "
 						+ lineSplit.length + ". Values: " + Arrays.toString(lineSplit));
 			}
-			Object[] parsedDenseInstance = new Object[lineSplit.length - 1];
+			Object[] parsedDenseInstance = new Object[numAttributes];
 			Object target = null;
 			int cI = 0;
+			boolean labelParsed = false;
 			for (int i = 0; i < lineSplit.length; i++) {
-				final Object value;
-				if (lineSplit[i].trim().equals(V_MISSING_VALUE)) {
-					value = null;
-				} else {
-					value = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
-				}
+				if (i == targetIndex || (!labelParsed && !ignoreAttributes[i]) || (labelParsed && !ignoreAttributes[i - 1])) {
+					final Object value;
+					if (lineSplit[i].trim().equals(V_MISSING_VALUE)) {
+						value = null;
+					} else {
+						value = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
+					}
 
-				if (i == targetIndex) {
-					target = value;
-				} else {
-					parsedDenseInstance[cI++] = value;
+					if (i == targetIndex) {
+						target = value;
+						labelParsed = true;
+					} else {
+						parsedDenseInstance[cI++] = value;
+					}
 				}
 			}
 			return Arrays.asList(parsedDenseInstance, target);
 		} else {
 			Map<Integer, Object> parsedSparseInstance = new HashMap<>();
 			Object target = 0;
+			boolean labelParsed = false;
+
 			for (String sparseValue : lineSplit) {
 				sparseValue = sparseValue.trim(); // remove leading or trailing white spaces.
 				int indexOfFirstSpace = sparseValue.indexOf(' ');
 				int indexOfAttribute = Integer.parseInt(sparseValue.substring(0, indexOfFirstSpace));
-				String attributeValue = sparseValue.substring(indexOfFirstSpace + 1);
-				assert !parsedSparseInstance.containsKey(indexOfAttribute) : "The attribute index " + indexOfAttribute + " has already been set!";
+				if ((!labelParsed && !ignoreAttributes[indexOfAttribute]) || (labelParsed && !ignoreAttributes[indexOfAttribute - 1])) {
+					String attributeValue = sparseValue.substring(indexOfFirstSpace + 1);
+					assert !parsedSparseInstance.containsKey(indexOfAttribute) : "The attribute index " + indexOfAttribute + " has already been set!";
 
-				if (indexOfAttribute == targetIndex) {
-					target = attributes.get(indexOfAttribute).deserializeAttributeValue(attributeValue);
+					if (indexOfAttribute == targetIndex) {
+						target = attributes.get(indexOfAttribute).deserializeAttributeValue(attributeValue);
+						labelParsed = true;
+					} else {
+						parsedSparseInstance.put((indexOfAttribute > targetIndex ? indexOfAttribute - 1 : indexOfAttribute) - numSkippedAttributes[indexOfAttribute],
+								attributes.get(indexOfAttribute).deserializeAttributeValue(attributeValue));
+					}
 				} else {
-					parsedSparseInstance.put(indexOfAttribute > targetIndex ? indexOfAttribute - 1 : indexOfAttribute, attributes.get(indexOfAttribute).deserializeAttributeValue(attributeValue));
+					LOGGER.debug("Ignoring column {}", indexOfAttribute);
 				}
 			}
 			return Arrays.asList(parsedSparseInstance, target);
 		}
 	}
 
-	protected static ILabeledDataset<ILabeledInstance> createDataset(final KVStore relationMetaData, final List<IAttribute> attributes) {
+	protected static ILabeledDataset<ILabeledInstance> createDataset(final KVStore relationMetaData, final List<IAttribute> attributes, final List<Integer> ignoredAttributes) {
 		if (!relationMetaData.containsKey(K_CLASS_INDEX) || relationMetaData.getAsInt(K_CLASS_INDEX) < 0) {
 			throw new IllegalArgumentException("No (valid) class index given!");
 		}
 		List<IAttribute> attributeList = new ArrayList<>(attributes);
 		IAttribute labelAttribute = attributeList.remove((int) relationMetaData.getAsInt(K_CLASS_INDEX));
+		int shiftIndex = 0;
+		for (int i : ignoredAttributes.stream().sorted().collect(Collectors.toList())) {
+			int delIndex = i - shiftIndex;
+			if (delIndex >= attributeList.size()) {
+				throw new IllegalArgumentException("Illegal ignore list  with entry " + i + ", but the attribute list has length only " + attributeList.size());
+			}
+			attributeList.remove(delIndex);
+			shiftIndex ++;
+		}
 		ILabeledInstanceSchema schema = new LabeledInstanceSchema(relationMetaData.getAsString(K_RELATION_NAME), attributeList, labelAttribute);
 		return new Dataset(schema);
 	}
@@ -299,10 +331,11 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile) throws DatasetDeserializationFailedException {
-		return readDataset(sparseMode, datasetFile, -1);
+		return readDataset(sparseMode, datasetFile, -1, -1, Arrays.asList());
 	}
 
-	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile, final int columnWithClassIndex) throws DatasetDeserializationFailedException {
+	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile, final int columnWithClassIndex, final int maxNumberOfInstances, final List<Integer> ignoredAttributes)
+			throws DatasetDeserializationFailedException {
 		String line = null;
 		long lineCounter = 0;
 
@@ -312,7 +345,10 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			List<IAttribute> attributes = new ArrayList<>();
 
 			boolean instanceReadMode = false;
-			while ((line = br.readLine()) != null) {
+			int numRemainingAttributes = 0;
+			boolean[] ignoreAttributes = null;
+			int[] numSkippedAttributes = null;
+			while ((line = br.readLine()) != null && (maxNumberOfInstances < 0 || dataset == null || dataset.size() < maxNumberOfInstances)) {
 				lineCounter++;
 				if (!instanceReadMode) {
 					if (line.toLowerCase().startsWith(EArffItem.RELATION.getValue())) {
@@ -331,18 +367,40 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 									"Error while parsing arff-file on line " + lineCounter + ": There is more in this line than just the data declaration " + EArffItem.DATA.getValue() + ", which is not supported");
 						}
 						instanceReadMode = true;
+
+						/* create dataset object and indices to skip columns */
 						if (relationMetaData.containsKey(K_CLASS_INDEX) && relationMetaData.getAsInt(K_CLASS_INDEX) >= 0) {
-							dataset = createDataset(relationMetaData, attributes);
+							dataset = createDataset(relationMetaData, attributes, ignoredAttributes);
 						} else {
 							LOGGER.warn("Invalid class index in the dataset's meta data ({}): Assuming last column to be the target attribute!", relationMetaData.get(K_CLASS_INDEX));
 							relationMetaData.put(K_CLASS_INDEX, attributes.size() - 1);
-							dataset = createDataset(relationMetaData, attributes);
+							dataset = createDataset(relationMetaData, attributes, ignoredAttributes);
 						}
+
+						/* define indices to ignore */
+						numRemainingAttributes = attributes.size() - ignoredAttributes.size() - 1;
+						ignoreAttributes = new boolean[attributes.size()];
+						for (int i : ignoredAttributes) {
+							ignoreAttributes[i < (int)relationMetaData.get(K_CLASS_INDEX) ? i : (i - 1)] = true;
+						}
+						numSkippedAttributes = new int[attributes.size()];
+						int currentSkipIndex = 0;
+						int curNumOfSkippedAttributes = 0;
+						if (!ignoredAttributes.isEmpty()) {
+							for (int i = 0; i < numSkippedAttributes.length; i++) {
+								if (currentSkipIndex < ignoredAttributes.size() && ignoredAttributes.get(currentSkipIndex) == i) {
+									currentSkipIndex++;
+									curNumOfSkippedAttributes++;
+								}
+								numSkippedAttributes[i] = curNumOfSkippedAttributes;
+							}
+						}
+
 					}
 				} else {
 					line = line.trim();
 					if (!line.isEmpty() && !line.startsWith("%")) { // ignore empty and comment lines
-						List<Object> parsedInstance = parseInstance(sparseMode, attributes, relationMetaData.getAsInt(K_CLASS_INDEX), line);
+						List<Object> parsedInstance = parseInstance(sparseMode, attributes, relationMetaData.getAsInt(K_CLASS_INDEX), line, numRemainingAttributes, ignoreAttributes, numSkippedAttributes);
 						ILabeledInstance newI;
 						if ((parsedInstance.get(0) instanceof Object[])) {
 							newI = new DenseInstance((Object[]) ((List<?>) parsedInstance).get(0), ((List<?>) parsedInstance).get(1));
@@ -360,13 +418,15 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 					}
 				}
 			}
+			LOGGER.info("Deserialized dataset of size {} x {}.", dataset.size(), dataset.getNumAttributes());
 			return dataset;
 		} catch (Exception e) {
-			throw new DatasetDeserializationFailedException("Could not deserialize dataset from ARFF file. Error occurred on line " + lineCounter + ": " + line, e);
+			throw new DatasetDeserializationFailedException("Could not deserialize dataset from ARFF file " + datasetFile + ". Error occurred on line " + lineCounter + ": " + line, e);
 		}
 	}
 
 	public static void serializeDataset(final File arffOutputFile, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
+		FileUtils.forceMkdir(arffOutputFile.getParentFile());
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(arffOutputFile))) {
 			// write metadata
 			serializeMetaData(bw, data);

@@ -1,9 +1,11 @@
 package ai.libs.mlplan.weka.weka;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +14,7 @@ import ai.libs.jaicore.components.api.IParameter;
 import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.NumericParameterDomain;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
 import ai.libs.jaicore.ml.weka.classification.pipeline.MLPipeline;
@@ -26,15 +29,16 @@ import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.meta.Stacking;
 import weka.core.OptionHandler;
 
-public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
+public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(WekaPipelineFactory.class);
 
 	private static final String L_CLASSIFIER = "classifier";
+	private static final ComponentSerialization serializer = new ComponentSerialization();
 
 	@Override
 	public IWekaClassifier getComponentInstantiation(final IComponentInstance groundComponent) throws ComponentInstantiationFailedException {
-		this.logger.debug("Instantiate weka classifier from component instance {}.", groundComponent);
+		this.logger.debug("Instantiate weka classifier from component instance {}.", serializer.serialize(groundComponent));
 		try {
 			if (groundComponent.getComponent().getName().equals("pipeline")) {
 				IComponentInstance preprocessorCI = null;
@@ -51,13 +55,14 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 				return new WekaClassifier(new MLPipeline(search, eval, c.getClassifier()));
 
 			} else {
-				Classifier c = AbstractClassifier.forName(groundComponent.getComponent().getName(), this.getParameterList(groundComponent).toArray(new String[0]));
+				String classifierName = groundComponent.getComponent().getName();
 				List<String> options = this.getParameterList(groundComponent);
+				this.logger.debug("Trying to create a single learner of class {} with params {}", classifierName, options);
+				Classifier c = AbstractClassifier.forName(classifierName, options.toArray(new String[0]));
 				options.add("-do-not-check-capabilities");
-				if (c instanceof OptionHandler) {
-					((OptionHandler) c).setOptions(options.toArray(new String[0]));
+				if (this.logger.isDebugEnabled() && (c instanceof OptionHandler)) {
+					this.logger.debug("Options in created classifier are: {}", Arrays.toString(((OptionHandler) c).getOptions()));
 				}
-
 				for (Entry<String, List<IComponentInstance>> reqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
 					switch (reqI.getKey()) {
 					case "W":
@@ -89,6 +94,9 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 						this.logger.error("Got required interface {} for classifier {}. Dont know what to do with it...", reqI.getKey(), c.getClass().getName());
 						break;
 					}
+				}
+				if (this.logger.isDebugEnabled() && (c instanceof OptionHandler)) {
+					this.logger.debug("Options in created classifier at end of factory are: {}", Arrays.toString(((OptionHandler) c).getOptions()));
 				}
 				return new WekaClassifier(c);
 			}
@@ -136,5 +144,15 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 		}
 
 		return parameters;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }

@@ -136,7 +136,26 @@ public class OpenMLDatasetAdapterTest {
 				23512, // higgs
 				// /**/ 40594, // Reuters => Multi target
 				40668, // connect-4
-				41064 // convex
+				41064, // convex
+				41167, // dionis
+				41142, // christine
+				42732, // sf-police-incidents
+				//				42734 // okcupid-stem,
+
+				1461,
+				1486,
+				4534,
+				4135,
+				4541,
+				40670,
+				40701,
+				40978,
+				40981,
+				41162,
+				41143,
+				41147,
+				40975,
+				31
 				// /**/ 42123 // articleinfluence => string attribute
 				));
 	}

@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -31,17 +32,19 @@ public class CSVDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<I
 	}
 
 	public static void writeDataset(final File arffOutputFile, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
+		List<IAttribute> al = data.getInstanceSchema().getAttributeList();
+		IAttribute labelAtt = data.getInstanceSchema().getLabelAttribute();
+
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(arffOutputFile))) {
 			// write header line for csv
-			bw.write(data.getInstanceSchema().getAttributeList().stream().map(x -> "\"" + x.getName() + "\"").collect(Collectors.joining(",")));
+			bw.write(al.stream().map(x -> "\"" + x.getName() + "\"").collect(Collectors.joining(",")));
 			bw.write(",");
 			bw.write("\"" + data.getLabelAttribute().getName() + "\"");
 			bw.write("\n");
-
 			for (ILabeledInstance instance : data) {
 				bw.write(IntStream.range(0, instance.getNumAttributes()).mapToObj(x -> serializeAttributeValue(data.getAttribute(x), instance.getAttributeValue(x))).collect(Collectors.joining(",")));
 				bw.write(",");
-				bw.write(serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
+				bw.write(serializeAttributeValue(labelAtt, instance.getLabel()));
 				bw.write("\n");
 			}
 		}

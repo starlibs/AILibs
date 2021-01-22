@@ -78,8 +78,7 @@ public class SparseInstance extends AInstance {
 
 	@Override
 	public void removeColumn(final int columnPos) {
-		this.attributeMap.remove(columnPos);
-		this.numAttributes --;
+		throw new UnsupportedOperationException("The removal of attribute values was flawed and is currently deactivated!");
 	}
 
 	@Override

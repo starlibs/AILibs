@@ -77,7 +77,11 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 
 	@Override
 	public void removeColumn(final int columnPos) {
-		throw new UnsupportedOperationException("Not yet implemented.");
+		if (columnPos < 0 || columnPos >= this.schema.getNumAttributes()) {
+			throw new IllegalArgumentException("Illegal column index " + columnPos + " for a scheme with " + this.schema.getNumAttributes() + " attributes.");
+		}
+		this.schema.removeAttribute(columnPos);
+		this.getList().deleteAttributeAt(columnPos);
 	}
 
 	@Override
@@ -176,7 +180,7 @@ public class WekaInstances implements IWekaInstances, IListDecorator<Instances, 
 
 	@Override
 	public void removeColumn(final IAttribute attribute) {
-		throw new UnsupportedOperationException();
+		this.removeColumn(this.schema.getAttributeList().indexOf(attribute));
 	}
 
 	@Override

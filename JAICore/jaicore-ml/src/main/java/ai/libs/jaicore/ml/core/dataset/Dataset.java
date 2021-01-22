@@ -46,6 +46,10 @@ public class Dataset extends ArrayList<ILabeledInstance> implements ILabeledData
 		return new Dataset(this.schema);
 	}
 
+	public Object[] getColumn(final int pos) {
+		return IntStream.range(0, this.size()).mapToObj(x -> this.get(x).getAttributeValue(pos)).toArray();
+	}
+
 	@Override
 	public Object[][] getFeatureMatrix() {
 		return (Object[][]) IntStream.range(0, this.size()).mapToObj(x -> this.get(x).getAttributes()).toArray();

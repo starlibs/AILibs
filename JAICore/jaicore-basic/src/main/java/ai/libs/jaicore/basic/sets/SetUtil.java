@@ -741,8 +741,7 @@ public class SetUtil {
 	}
 
 	/**
-	 * Computes all total mappings that satisfy some given predicate. The predicate is already applied to the partial mappings from which the total mappings are computed in order to prune and speed up
-	 * the computation.
+	 * Computes all total mappings that satisfy some given predicate. The predicate is already applied to the partial mappings from which the total mappings are computed in order to prune and speed up the computation.
 	 *
 	 * @param domain
 	 *            The domain set.
@@ -911,7 +910,11 @@ public class SetUtil {
 		return copy.stream().limit(k).collect(Collectors.toList());
 	}
 
-	public static Collection<Integer> getRandomSetOfIntegers(final int maxExclusive, final int k, final Random random) {
+	public static <T> List<T> getRandomSubset(final List<T> list, final int k, final Random random) {
+		return (List<T>) getRandomSubset((Collection<T>) list, k, random);
+	}
+
+	public static List<Integer> getRandomSetOfIntegers(final int maxExclusive, final int k, final Random random) {
 		List<Integer> ints = new ArrayList<>(k);
 		IntStream.range(0, maxExclusive).forEach(ints::add);
 		return getRandomSubset(ints, k, random);
@@ -1112,7 +1115,8 @@ public class SetUtil {
 	/**
 	 * Splits a string into multiple strings using "," as a separator and returns the result as a list.
 	 *
-	 * @param stringList The list in the form of a string.
+	 * @param stringList
+	 *            The list in the form of a string.
 	 * @return
 	 */
 	public static List<String> explode(final String stringList) {
@@ -1122,8 +1126,10 @@ public class SetUtil {
 	/**
 	 * Splits a string into multiple strings by the given separator and returns the result as a list.
 	 *
-	 * @param stringList The list in the form of a string.
-	 * @param separator The separator to be used for splitting.
+	 * @param stringList
+	 *            The list in the form of a string.
+	 * @param separator
+	 *            The separator to be used for splitting.
 	 * @return The list representing the split string.
 	 */
 	public static List<String> explode(final String stringList, final String separator) {
@@ -1137,8 +1143,11 @@ public class SetUtil {
 
 	/**
 	 * Concatenates toString representations of objects separated by the given separator to a single string.
-	 * @param collection The collection of objects to be concatenated.
-	 * @param separator The separator for separating elements.
+	 *
+	 * @param collection
+	 *            The collection of objects to be concatenated.
+	 * @param separator
+	 *            The separator for separating elements.
 	 * @return The collection of objects concatenated to a string.
 	 */
 	public static String implode(final Collection<? extends Object> collection, final String separator) {
@@ -1244,7 +1253,7 @@ public class SetUtil {
 		if (totalSize < numSamples) {
 			throw new IllegalArgumentException("Cannot generate a sample of size " + numSamples + " for a hypercube with only " + totalSize + " entries.");
 		}
-		int stepSize = (int)Math.floor(totalSize * 1.0 / numSamples);
+		int stepSize = (int) Math.floor(totalSize * 1.0 / numSamples);
 
 		/* compute full hypercube */
 		int i = 0;

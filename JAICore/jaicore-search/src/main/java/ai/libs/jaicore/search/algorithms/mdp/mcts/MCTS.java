@@ -521,4 +521,8 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 	public boolean isTabooExhaustedNodes() {
 		return this.tabooExhaustedNodes;
 	}
+
+	public Collection<N> getTpReadyStates() {
+		return this.tpReadyStates;
+	}
 }

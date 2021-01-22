@@ -150,6 +150,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 				this.logger.debug("Graph generator is not lazy or cannot cope with randomness. Computing all successors of node. Timeout is {}ms", toForSuccessorComputation.milliseconds());
 				long start = System.currentTimeMillis();
 				List<INewNodeDescription<N, A>> successors;
+				if (toForSuccessorComputation.milliseconds() <= 0) {
+					throw new AlgorithmTimeoutedException(-1 * this.getRemainingTimeToDeadline().milliseconds());
+				}
 				try {
 					successors = TimedComputation.compute(() -> this.gen.generateSuccessors(node), toForSuccessorComputation, "Successor computation in RandomSearch");
 				} catch (ExecutionException e) {
@@ -207,8 +210,8 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		assert this.exploredGraph.hasItem(from) : "The head " + from + " of the path with " + path.getNumberOfNodes() + " nodes is not part of the explored graph! Here is the path: \n\t"
 		+ path.getNodes().stream().map(Object::toString).collect(Collectors.joining("\n\t"));
 		this.exploredGraph.addItem(to);
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug("Added node with hash code {} to graph.", to.hashCode());
+		if (this.logger.isTraceEnabled()) {
+			this.logger.trace("Added node with hash code {} to graph.", to.hashCode());
 		}
 		assert this.exploredGraph.hasItem(to);
 		assert this.exploredGraph.isGraphSane();
@@ -219,8 +222,8 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		this.exploredGraph.addEdge(from, to, label);
 		SearchGraphPath<N, A> extendedPath = new SearchGraphPath<>(path, to, label);
 		boolean isGoalNode = this.goalTester.isGoal(extendedPath);
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug("Added node {} as a successor of {} with edge label {} to the model. Contained in prioritized: {}", to.hashCode(), from.hashCode(), label, this.prioritizedNodes.contains(to));
+		if (this.logger.isTraceEnabled()) {
+			this.logger.trace("Added node {} as a successor of {} with edge label {} to the model. Contained in prioritized: {}", to.hashCode(), from.hashCode(), label, this.prioritizedNodes.contains(to));
 		}
 		this.post(new NodeAddedEvent<>(this, from, to, isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
 		return extendedPath;
@@ -305,9 +308,12 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		}
 		this.checkAndConductTermination();
 		assert this.exploredGraph.isGraphSane();
+		if (!this.exploredGraph.hasItem(path.getHead())) {
+			throw new IllegalArgumentForPathExtensionException("The head of the path is not in the explored graph! The graph has " + this.exploredGraph.getItems().size() + " nodes.\n\nThe head is: " + path.getHead(), path);
+		}
 
 		/* if the root is exhausted, cancel */
-		if (this.exhausted.contains(path)) {
+		if (this.exhausted.contains(path.getHead())) {
 			return null;
 		}
 
@@ -385,13 +391,14 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 						cPath = cPath.getPathToParentOfHead();
 						head = cPath.getHead();
 						triedStepbacks++;
-						if (triedStepbacks > 50) {
+						if (triedStepbacks > 1000) {
+							this.logger.warn("Did 1000 stepbacks. Giving up on finding a priorizied path!");
 							chasePrioritizedPath = false;
 						}
 						continue;
 					} else {
 						this.logger.debug(
-								"The current head is not prioritized, and we throught that there should be more prioritized nodes. But we have reached the root and hence know that there are none. Hence, we change the flag and now follow unprioritized nodes!");
+								"The current head is not prioritized, and we thought that there should be more prioritized nodes. But we have reached the root and hence know that there are none. Hence, we change the flag and now follow unprioritized nodes!");
 						chasePrioritizedPath = false;
 						continue; // this will make the RandomSearch try the same node again (now not chasing prioritized nodes anymore)
 					}
@@ -415,7 +422,10 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		/* propagate exhausted state */
 		this.logger.trace("Head node {} has been exhausted.", head);
 		this.exhausted.add(head);
-		this.prioritizedNodes.remove(head);
+		boolean headIsPrioritized = this.prioritizedNodes.contains(head);
+		if (headIsPrioritized) {
+			this.prioritizedNodes.remove(head);
+		}
 		this.updateExhaustedAndPrioritizedState(head);
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug("Returning next solution path. Hash code is {}", cPath.hashCode());
@@ -423,6 +433,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IPathSearchInput
 		if (cPath.getRoot() != path.getRoot()) {
 			throw new IllegalStateException("Root got lost over the path!");
 		}
+		this.logger.info("Created path of length {}. Head prioritized: {}", cPath.getNumberOfNodes(), headIsPrioritized);
 		return head == this.root ? null : cPath;
 	}
 

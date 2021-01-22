@@ -19,23 +19,10 @@
 					"default": "false"
 				},
 				{
-					"name": "F",
-					"type": "boolean",
-					"default": "false"
-				},
-				{
 					"name": "K",
-					"type": "int",
-					"default": 1.0,
-					"min": 1.0,
-					"max": 64.0,
-					"refineSplits": 8,
-					"minInterval": 1
-				},
-				{
-					"name": "X",
-					"type": "boolean",
-					"default": "false"
+					"type": "cat",
+					"default": 1,
+					"values": [1, 2, 3, 4, 5, 6, 7, 8, 10, 16, 32]
 				},
 				{
 					"name": "I",

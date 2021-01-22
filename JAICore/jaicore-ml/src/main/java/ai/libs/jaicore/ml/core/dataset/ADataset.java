@@ -17,6 +17,10 @@ public abstract class ADataset<I extends ILabeledInstance> extends ArrayList<I> 
 
 	private transient ILabeledInstanceSchema schema;
 
+	protected ADataset() {
+
+	}
+
 	protected ADataset(final ILabeledInstanceSchema schema) {
 		super();
 		this.schema = schema;
@@ -25,6 +29,10 @@ public abstract class ADataset<I extends ILabeledInstance> extends ArrayList<I> 
 	@Override
 	public ILabeledInstanceSchema getInstanceSchema() {
 		return this.schema;
+	}
+
+	protected void setInstanceScehma(final ILabeledInstanceSchema schema) {
+		this.schema = schema;
 	}
 
 	@Override

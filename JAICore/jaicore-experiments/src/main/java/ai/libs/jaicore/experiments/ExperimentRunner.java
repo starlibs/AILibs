@@ -254,6 +254,9 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		if (this.handle instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) this.handle).setLoggerName(name + ".handle");
 		}
+		if (this.evaluator instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.evaluator).setLoggerName(name + ".eval");
+		}
 	}
 
 	public boolean mightHaveMoreExperiments() {

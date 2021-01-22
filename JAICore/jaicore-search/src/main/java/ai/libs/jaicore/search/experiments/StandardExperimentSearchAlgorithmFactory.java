@@ -1,6 +1,7 @@
 package ai.libs.jaicore.search.experiments;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Random;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -31,7 +32,10 @@ import ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer.
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearchFactory;
 import ai.libs.jaicore.search.algorithms.standard.mcts.MCTSPathSearch;
+import ai.libs.jaicore.search.algorithms.standard.nmcs.NMCS;
+import ai.libs.jaicore.search.algorithms.standard.nrpa.NRPA;
 import ai.libs.jaicore.search.algorithms.standard.random.RandomSearchFactory;
+import ai.libs.jaicore.search.algorithms.standard.rrm.RoundRobinMetaSearch;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchWithPathEvaluationsInputToGraphSearchWithSubpathEvaluationViaUninformedness;
 
@@ -125,6 +129,32 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IPathSearc
 			IteratingGraphSearchOptimizerFactory<I, N, A, Double> dfsFactory = new IteratingGraphSearchOptimizerFactory<>();
 			dfsFactory.setBaseAlgorithmFactory(new DepthFirstSearchFactory<>());
 			return dfsFactory.getAlgorithm((I)input);
+		case "nmcs-1":
+			return new NMCS<>((I)input, new Random(0), 1, false);
+		case "nmcs-2":
+			return new NMCS<>((I)input, new Random(0), 2, false);
+		case "nmcs-3":
+			return new NMCS<>((I)input, new Random(0), 3, false);
+		case "nmcs-4":
+			return new NMCS<>((I)input, new Random(0), 4, false);
+		case "nmcs-10":
+			return new NMCS<>((I)input, new Random(0), 10, false);
+		case "nrpa-1":
+			return new NRPA<>((I)input, new Random(0), 1, 1, 100, false);
+		case "nrpa-2":
+			return new NRPA<>((I)input, new Random(0), 2, 1, 100, false);
+		case "nrpa-3":
+			return new NRPA<>((I)input, new Random(0), 3, 1, 100, false);
+		case "nrpa-4":
+			return new NRPA<>((I)input, new Random(0), 4, 1, 100, false);
+		case "nrpa-10":
+			return new NRPA<>((I)input, new Random(0), 10, 1, 100, false);
+		case "rrm":
+			Experiment expAux1 = new Experiment(experiment.getMemoryInMB(), experiment.getNumCPUs(), new HashMap<>(experiment.getValuesOfKeyFields()));
+			expAux1.getValuesOfKeyFields().put(IAlgorithmNameConfig.K_ALGORITHM_NAME, "random");
+			Experiment expAux2 = new Experiment(experiment.getMemoryInMB(), experiment.getNumCPUs(), new HashMap<>(experiment.getValuesOfKeyFields()));
+			expAux2.getValuesOfKeyFields().put(IAlgorithmNameConfig.K_ALGORITHM_NAME, "bf-informed");
+			return new RoundRobinMetaSearch<>((I)input, Arrays.asList(this.getAlgorithm(expAux1, input), this.getAlgorithm(expAux2, input)));
 		default:
 			throw new IllegalArgumentException("Unsupported algorithm " + algorithm);
 		}

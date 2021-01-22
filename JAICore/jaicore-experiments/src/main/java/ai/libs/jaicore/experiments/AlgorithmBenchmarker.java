@@ -50,7 +50,6 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 
 	@Override
 	public final void evaluate(final ExperimentDBEntry experimentEntry, final IExperimentIntermediateResultProcessor processor) throws ExperimentEvaluationFailedException, InterruptedException {
-
 		try {
 			this.logger.info("Starting evaluation of experiment entry with keys {}", experimentEntry.getExperiment().getValuesOfKeyFields());
 
@@ -59,6 +58,10 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 			this.logger.debug("Created algorithm {} of class {} for problem instance {}. Configuring logger name if possible.", algorithm, algorithm.getClass(), algorithm.getInput());
 			if (algorithm instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) algorithm).setLoggerName(this.getLoggerName() + ".algorithm");
+				this.logger.info("Customized logger name of algorithm. Is is now set to {}", ((ILoggingCustomizable) algorithm).getLoggerName());
+			}
+			else {
+				this.logger.info("Not customizing logger of algorithm of class {}, because it is not a {}", algorithm.getClass(), ILoggingCustomizable.class);
 			}
 
 			/* set algorithm timeout */

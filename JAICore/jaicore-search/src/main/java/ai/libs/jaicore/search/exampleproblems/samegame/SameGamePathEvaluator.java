@@ -16,7 +16,7 @@ public class SameGamePathEvaluator implements IPathEvaluator<SameGameNode, SameG
 
 	public SameGamePathEvaluator(final SameGameState initState, final boolean maximize, final boolean relativeScores) {
 		this.minScore = -10000;
-		this.maxScore = (int) Math.pow(initState.getNumberOfPiecesPerColor().values().stream().max(Integer::compare).get() - 2.0, 2);
+		this.maxScore = (int) Math.pow(initState.getNumberOfPiecesPerColor().values().stream().max(Integer::compare).get() - 2.0, 2) + 1000;
 		this.relativeScores = relativeScores;
 		this.maximize = maximize;
 	}

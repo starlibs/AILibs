@@ -148,6 +148,18 @@ public class ComponentInstanceUtil {
 		return ci;
 	}
 
+	public static IComponentInstance sampleRandomParameterVariationOfInstance(final IComponentInstance ci, final Random rand) {
+		IComponentInstance derivedCI = ComponentUtil.getRandomParameterizationOfComponent(ci.getComponent(), rand);
+		for (Entry<String, List<IComponentInstance>> ciOnReqInterface : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
+			List<IComponentInstance> variedChildren = new ArrayList<>();
+			for (IComponentInstance child : ciOnReqInterface.getValue()) {
+				variedChildren.add(sampleRandomParameterVariationOfInstance(child, rand));
+			}
+			derivedCI.getSatisfactionOfRequiredInterfaces().put(ciOnReqInterface.getKey(), variedChildren);
+		}
+		return derivedCI;
+	}
+
 	/**
 	 * Samples a random component instance with default parameters.
 	 *

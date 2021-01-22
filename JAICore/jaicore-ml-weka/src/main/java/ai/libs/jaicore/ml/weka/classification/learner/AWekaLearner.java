@@ -37,6 +37,7 @@ public abstract class AWekaLearner<P extends IPrediction, B extends IPredictionB
 
 	protected String name;
 	protected Classifier wrappedLearner;
+	protected boolean trained;
 
 	protected ILabeledInstanceSchema schema;
 
@@ -56,10 +57,14 @@ public abstract class AWekaLearner<P extends IPrediction, B extends IPredictionB
 	@Override
 	public void fit(final ILabeledDataset<? extends ILabeledInstance> dTrain) throws TrainingException, InterruptedException {
 		this.schema = dTrain.getInstanceSchema();
+		if (this.schema == null) {
+			throw new IllegalStateException("The instance schema must not be null!");
+		}
 		WekaInstances data = new WekaInstances(dTrain);
 
 		try {
 			this.wrappedLearner.buildClassifier(data.getInstances());
+			this.trained = true;
 		} catch (InterruptedException e) {
 			throw e;
 		} catch (Exception e) {
@@ -114,7 +119,7 @@ public abstract class AWekaLearner<P extends IPrediction, B extends IPredictionB
 				ASEvaluation evaluator = pipeline.getPreprocessors().isEmpty() ? null : pipeline.getPreprocessors().get(0).getEvaluator();
 				return new ReconstructionPlan(Arrays.asList(new ReconstructionInstruction(WekaClassifier.class.getMethod("createPipeline", String.class, List.class, String.class, List.class, String.class, List.class),
 						searcher != null ? searcher.getClass().getName() : null, searcher != null ? ((OptionHandler) searcher).getOptions() : null, evaluator != null ? evaluator.getClass().getName() : null,
-						evaluator != null ? ((OptionHandler) evaluator).getOptions() : null, classifier.getClass().getName(), ((OptionHandler) classifier).getOptions())));
+								evaluator != null ? ((OptionHandler) evaluator).getOptions() : null, classifier.getClass().getName(), ((OptionHandler) classifier).getOptions())));
 			} else {
 				return new ReconstructionPlan(Arrays.asList(new ReconstructionInstruction(WekaClassifier.class.getMethod("createBaseClassifier", String.class, List.class), this.name, this.getOptionsAsList())));
 			}
@@ -136,6 +141,9 @@ public abstract class AWekaLearner<P extends IPrediction, B extends IPredictionB
 
 	@Override
 	public B predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
+		if (!this.trained) {
+			throw new IllegalStateException("Cannot make predictions, learner has not been trained.");
+		}
 		List<P> predictions = new ArrayList<>();
 		for (ILabeledInstance inst : dTest) {
 			if (Thread.interrupted()) {

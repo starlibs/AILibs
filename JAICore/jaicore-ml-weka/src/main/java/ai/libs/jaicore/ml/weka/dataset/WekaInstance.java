@@ -40,8 +40,10 @@ public class WekaInstance extends ElementDecorator<Instance> implements IWekaIns
 	}
 
 	@Override
-	public Double getAttributeValue(final int pos) {
-		return this.getElement().value(pos);
+	public Object getAttributeValue(final int pos) {
+		Instance inst = this.getElement();
+		double internalValue = this.getElement().value(pos);
+		return inst.dataset().attribute(pos).isNominal() ? inst.dataset().attribute(pos).value((int)internalValue) : internalValue;
 	}
 
 	@Override
@@ -66,7 +68,7 @@ public class WekaInstance extends ElementDecorator<Instance> implements IWekaIns
 
 	@Override
 	public void removeColumn(final int columnPos) {
-		throw new UnsupportedOperationException("Not yet implemented!");
+		this.getElement().deleteAttributeAt(columnPos);
 	}
 
 	@Override
