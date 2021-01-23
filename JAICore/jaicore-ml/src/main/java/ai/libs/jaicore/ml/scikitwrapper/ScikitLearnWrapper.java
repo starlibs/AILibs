@@ -399,20 +399,17 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 
 				DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
 				try {
+
 					this.runProcess(testCommand, listener);
 					if (!listener.getErrorOutput().isEmpty()) {
 						if (listener.getErrorOutput().toLowerCase().contains("convergence")) {
 							// ignore convergence warning
 							this.logger.warn("Learner {} could not converge. Consider increase number of iterations.", this.constructInstruction);
 						} else {
-							if (this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING) {
-								FileUtil.touch(outputFile.getAbsolutePath().replace("test", "train"));
-								FileUtil.touch(outputFile.getAbsolutePath());
-							}
-							throw new PredictionException(listener.getErrorOutput());
+							new PredictionException("Could not run scikit-learn pipeline.");
 						}
 					}
-				} catch (InterruptedException | PredictionException e) {
+				} catch (InterruptedException e) {
 					throw e;
 				} catch (Exception e) {
 					throw new PredictionException("Could not run scikit-learn pipeline.", e);
@@ -421,6 +418,11 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		}
 
 		if (this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING) {
+			if (!new File(outputFile.getAbsolutePath().replace("test", "train")).exists() || !new File(outputFile.getAbsolutePath()).exists()) {
+				FileUtil.touch(outputFile.getAbsolutePath().replace("test", "train"));
+				FileUtil.touch(outputFile.getAbsolutePath());
+				throw new TrainingException("Executing python failed.");
+			}
 			return null;
 		} else {
 			String fileContent = "";
