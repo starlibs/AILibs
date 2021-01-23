@@ -564,10 +564,10 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * the executed program.
 	 */
 	private void runProcess(final String[] parameters, final AProcessListener listener) throws InterruptedException, IOException {
-		if (this.logger.isDebugEnabled()) {
-			String call = Arrays.toString(parameters).replace(",", "");
-			this.logger.debug("Starting process {}", call.substring(1, call.length() - 1));
-		}
+		// if (this.logger.isDebugEnabled()) {
+		String call = Arrays.toString(parameters).replace(",", "");
+		this.logger.info("Starting process {}", call.substring(1, call.length() - 1));
+		// }
 		ProcessBuilder processBuilder = new ProcessBuilder(parameters).directory(CONF.getTempFolder());
 		Process process = processBuilder.start();
 		try {
