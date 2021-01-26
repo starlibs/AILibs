@@ -21,7 +21,6 @@ public class ScikitLearnRULFactory extends AScikitLearnLearnerFactory {
 
 	@Override
 	public String getPipelineBuildString(final IComponentInstance groundComponent, final Set<String> importSet) {
-		// Feature
 		StringBuilder sb = new StringBuilder();
 		List<IComponentInstance> timeseriesFeatureGenerator = groundComponent.getSatisfactionOfRequiredInterface("timeseries_feature_generator");
 		sb.append(this.getTimeseriesConstructionInstruction(timeseriesFeatureGenerator, importSet));
