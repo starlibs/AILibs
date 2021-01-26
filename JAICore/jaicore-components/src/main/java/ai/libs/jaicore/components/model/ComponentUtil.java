@@ -414,11 +414,46 @@ public class ComponentUtil {
 
 			List<IComponent> pluginComponents = new ArrayList<>(ComponentUtil.getComponentsProvidingInterface(componentRepository, reqI.getName()));
 			List<IComponentInstance> satCIList = new ArrayList<>();
-			for (int i = 0; i < numSatisfactions; i++) {
-				satCIList.add(getRandomInstantiationOfComponent(pluginComponents.get(random.nextInt(pluginComponents.size())), componentRepository, random));
+			while (satCIList.size() < numSatisfactions) {
+				IComponentInstance randomCI = getRandomInstantiationOfComponent(pluginComponents.get(random.nextInt(pluginComponents.size())), componentRepository, random);
+				if (reqI.isUniqueComponents()) {
+					if (satCIList.isEmpty() || !isAlreadyContained(satCIList, randomCI)) {
+						satCIList.add(randomCI);
+					}
+				} else {
+					satCIList.add(randomCI);
+				}
 			}
 			ci.getSatisfactionOfRequiredInterfaces().put(reqI.getId(), satCIList);
 		}
 		return ci;
-  }
+	}
+
+	private static boolean isAlreadyContained(final List<IComponentInstance> satCIList, final IComponentInstance componentInstance) {
+		boolean isAlreadyContained = false;
+		for (IComponentInstance satCI : satCIList) {
+			if (areSame(satCI, componentInstance)) {
+				isAlreadyContained = true;
+			}
+		}
+		return isAlreadyContained;
+	}
+
+	public static boolean areSame(final IComponentInstance c1, final IComponentInstance c2) {
+		if (!c1.getComponent().getName().equals(c2.getComponent().getName())) {
+			return false;
+		}
+
+		for (IRequiredInterfaceDefinition reqI : c1.getComponent().getRequiredInterfaces()) {
+			for (IComponentInstance c1Child : c1.getSatisfactionOfRequiredInterface(reqI.getId())) {
+				for (IComponentInstance c2Child : c2.getSatisfactionOfRequiredInterface(reqI.getId())) {
+					if (!areSame(c1Child, c2Child)) {
+						return false;
+					}
+				}
+			}
+		}
+
+		return true;
+	}
 }
