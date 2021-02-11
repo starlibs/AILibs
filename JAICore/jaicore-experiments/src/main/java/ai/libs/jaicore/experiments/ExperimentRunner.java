@@ -49,7 +49,8 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		this(config, evaluator, databaseHandle, null);
 	}
 
-	public ExperimentRunner(final IExperimentSetConfig config, final IExperimentSetEvaluator evaluator, final IExperimentDatabaseHandle databaseHandle, final String executorInfo) throws ExperimentDBInteractionFailedException {
+	public ExperimentRunner(final IExperimentSetConfig config, final IExperimentSetEvaluator evaluator, final IExperimentDatabaseHandle databaseHandle, final String executorInfo)
+			throws ExperimentDBInteractionFailedException {
 
 		if (databaseHandle == null) {
 			throw new IllegalArgumentException("Cannot create ExperimentRunner without database handle!");
@@ -133,8 +134,8 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			expThread.start();
 			expThread.join();
 			numberOfConductedExperiments++;
-			this.logger.info("Finished experiment #{} with key values {}. Memory statistics: {}MB allocated, {}MB free. Now running GC.", numberOfConductedExperiments, exp.getExperiment().getValuesOfKeyFields(),
-					this.runtime.totalMemory() / (1024 * 1024), this.runtime.freeMemory() / (1024 * 1024));
+			this.logger.info("Finished experiment #{} with key values {}. Memory statistics: {}MB allocated, {}MB free. Now running GC.", numberOfConductedExperiments,
+					exp.getExperiment().getValuesOfKeyFields(), this.runtime.totalMemory() / (1024 * 1024), this.runtime.freeMemory() / (1024 * 1024));
 			System.gc(); // deliberately run the garbage collection to avoid memory accumulation. We found that the JVM is sometimes not able to reasonably clean up later! This is not a guarantee, but better than
 			this.logger.info("GC finished. Memory statistics: {}MB allocated, {}MB free.", this.runtime.totalMemory() / (1024 * 1024), this.runtime.freeMemory() / (1024 * 1024));
 		}
@@ -187,6 +188,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 				} catch (ExperimentDBInteractionFailedException | InterruptedException e) {
 					exceptions.add(e);
 					sem.release(actualNumThreads);
+					Thread.currentThread().interrupt();
 				} finally {
 					sem.release();
 				}
@@ -298,13 +300,14 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			if (this.checkMemory) {
 				double memoryDeviation = Math.abs(expEntry.getExperiment().getMemoryInMB() - this.availableMemoryInMB) * 1f / expEntry.getExperiment().getMemoryInMB();
 				if (memoryDeviation > MAX_MEM_DEVIATION) {
-					this.logger.error("Cannot conduct experiment {}, because the available memory is {} where declared is {}. Deviation: {}", expEntry.getExperiment(), this.availableMemoryInMB, expEntry.getExperiment().getMemoryInMB(),
-							memoryDeviation);
+					this.logger.error("Cannot conduct experiment {}, because the available memory is {} where declared is {}. Deviation: {}", expEntry.getExperiment(), this.availableMemoryInMB,
+							expEntry.getExperiment().getMemoryInMB(), memoryDeviation);
 					return;
 				}
 			}
 			if (expEntry.getExperiment().getNumCPUs() > Runtime.getRuntime().availableProcessors()) {
-				this.logger.error("Cannot conduct experiment {}, because only {} CPU cores are available where declared is {}", expEntry.getExperiment(), Runtime.getRuntime().availableProcessors(), expEntry.getExperiment().getNumCPUs());
+				this.logger.error("Cannot conduct experiment {}, because only {} CPU cores are available where declared is {}", expEntry.getExperiment(), Runtime.getRuntime().availableProcessors(),
+						expEntry.getExperiment().getNumCPUs());
 				return;
 			}
 			this.evaluator.evaluate(expEntry, m -> {
@@ -332,7 +335,8 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		ExperimentSetAnalyzer analyzer = new ExperimentSetAnalyzer(this.config);
 		List<String> keyFields = this.config.getKeyFields().stream().map(k -> analyzer.getNameTypeSplitForAttribute(k).getX()).collect(Collectors.toList());
 		if (SetUtil.differenceNotEmpty(keyFields, experiment.getValuesOfKeyFields().keySet())) {
-			throw new IllegalArgumentException("The experiment " + experiment + " is invalid, because key fields have not been defined: " + SetUtil.difference(this.config.getKeyFields(), experiment.getValuesOfKeyFields().keySet()));
+			throw new IllegalArgumentException("The experiment " + experiment + " is invalid, because key fields have not been defined: "
+					+ SetUtil.difference(this.config.getKeyFields(), experiment.getValuesOfKeyFields().keySet()));
 		}
 	}
 
