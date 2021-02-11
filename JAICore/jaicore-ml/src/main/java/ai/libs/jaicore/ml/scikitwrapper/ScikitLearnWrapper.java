@@ -189,7 +189,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 		return this.problemType;
 	}
 
-	public void setScikitLearnWrapperConfig(final IScikitLearnWrapperConfig scikitLearnWrapperConfig) throws IOException {
+	public void setScikitLearnWrapperConfig(final IScikitLearnWrapperConfig scikitLearnWrapperConfig) {
 		this.scikitLearnWrapperConfig = scikitLearnWrapperConfig;
 	}
 
@@ -366,7 +366,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	}
 
 	@SuppressWarnings("unchecked")
-	private B runActualPrediction(final String arffName, final File testArff) throws InterruptedException, PredictionException, Exception {
+	private B runActualPrediction(final String arffName, final File testArff) throws InterruptedException, PredictionException, TrainingException {
 		File outputFile;
 		if (this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING) {
 			outputFile = new File(this.scikitLearnWrapperConfig.getTempFolder(), this.configurationUID + "_" + arffName + ".arff");
@@ -414,7 +414,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 							// ignore convergence warning
 							this.logger.warn("Learner {} could not converge. Consider increase number of iterations.", this.constructInstruction);
 						} else {
-							new PredictionException("Could not run scikit-learn pipeline.");
+							throw new PredictionException("Could not run scikit-learn pipeline.");
 						}
 					}
 				} catch (InterruptedException e) {
@@ -461,7 +461,7 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 				}
 				return (B) new SingleLabelClassificationPredictionBatch(
 						this.rawLastClassificationResults.stream().map(x -> x.stream().mapToDouble(y -> y).toArray()).map(SingleLabelClassification::new).collect(Collectors.toList()));
-			} else if (this.problemType == EScikitLearnProblemType.RUL || this.problemType == EScikitLearnProblemType.FEATURE_ENGINEERING || this.problemType == EScikitLearnProblemType.REGRESSION) {
+			} else if (this.problemType == EScikitLearnProblemType.RUL || this.problemType == EScikitLearnProblemType.REGRESSION) {
 				if (this.logger.isInfoEnabled()) {
 					this.logger.info("{}", this.rawLastClassificationResults.stream().flatMap(List::stream).collect(Collectors.toList()));
 				}
@@ -572,10 +572,10 @@ public class ScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatc
 	 * the executed program.
 	 */
 	private void runProcess(final String[] parameters, final AProcessListener listener) throws InterruptedException, IOException {
-		// if (this.logger.isDebugEnabled()) {
-		String call = Arrays.toString(parameters).replace(",", "");
-		this.logger.info("Starting process {}", call.substring(1, call.length() - 1));
-		// }
+		if (this.logger.isDebugEnabled()) {
+			String call = Arrays.toString(parameters).replace(",", "");
+			this.logger.info("Starting process {}", call.substring(1, call.length() - 1));
+		}
 		ProcessBuilder processBuilder = new ProcessBuilder(parameters).directory(this.scikitLearnWrapperConfig.getTempFolder());
 		Process process = processBuilder.start();
 		try {
