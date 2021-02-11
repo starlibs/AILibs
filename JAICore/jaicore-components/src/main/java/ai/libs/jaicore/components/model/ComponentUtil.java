@@ -419,27 +419,13 @@ public class ComponentUtil {
 				IComponent randomComponent = pluginComponents.get(random.nextInt(pluginComponents.size()));
 				IComponentInstance randomCI = getRandomInstantiationOfComponent(randomComponent, componentRepository, random);
 				if (reqI.isUniqueComponents()) {
-					if (satCIList.isEmpty() || !isAlreadyContained(satCIList, randomCI)) {
-						satCIList.add(randomCI);
-						pluginComponents.remove(randomComponent);
-					}
-				} else {
-					satCIList.add(randomCI);
+					pluginComponents.remove(randomComponent);
 				}
+				satCIList.add(randomCI);
 			}
 			ci.getSatisfactionOfRequiredInterfaces().put(reqI.getId(), satCIList);
 		}
 		return ci;
-	}
-
-	private static boolean isAlreadyContained(final List<IComponentInstance> satCIList, final IComponentInstance componentInstance) {
-		boolean isAlreadyContained = false;
-		for (IComponentInstance satCI : satCIList) {
-			if (areSame(satCI, componentInstance)) {
-				isAlreadyContained = true;
-			}
-		}
-		return isAlreadyContained;
 	}
 
 	public static boolean areSame(final IComponentInstance c1, final IComponentInstance c2) {
