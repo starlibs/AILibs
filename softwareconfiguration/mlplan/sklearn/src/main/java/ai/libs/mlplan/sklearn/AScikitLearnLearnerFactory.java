@@ -2,7 +2,6 @@ package ai.libs.mlplan.sklearn;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -60,7 +59,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 		Set<String> importSet = new HashSet<>();
 		constructInstruction.append(this.extractSKLearnConstructInstruction(groundComponent, importSet));
 		StringBuilder imports = new StringBuilder();
-		importSet.forEach(imports::append);
+		importSet.stream().sorted().collect(Collectors.toList()).forEach(imports::append);
 
 		String constructionString = constructInstruction.toString();
 		this.logger.info("Created construction string: {}", constructionString);
@@ -116,13 +115,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("p2").iterator().next(), importSet));
 		} else {
 			boolean first = true;
-			for (Entry<String, String> parameterValue : groundComponent.getParameterValues().entrySet().stream().sorted(new Comparator<Entry<String, String>>() {
-
-				@Override
-				public int compare(final Entry<String, String> o1, final Entry<String, String> o2) {
-					return o1.getKey().compareTo(o2.getKey());
-				}
-			}).collect(Collectors.toList())) {
+			for (Entry<String, String> parameterValue : groundComponent.getParameterValues().entrySet().stream().sorted((o1, o2) -> o1.getKey().compareTo(o2.getKey())).collect(Collectors.toList())) {
 				if (first) {
 					first = false;
 				} else {
@@ -157,14 +150,8 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 				}
 			}
 
-			for (Entry<String, List<IComponentInstance>> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet().stream()
-					.sorted(new Comparator<Entry<String, List<IComponentInstance>>>() {
-
-						@Override
-						public int compare(final Entry<String, List<IComponentInstance>> o1, final Entry<String, List<IComponentInstance>> o2) {
-							return o1.getKey().compareTo(o2.getKey());
-						}
-					}).collect(Collectors.toList())) {
+			for (Entry<String, List<IComponentInstance>> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet().stream().sorted((o1, o2) -> o1.getKey().compareTo(o2.getKey()))
+					.collect(Collectors.toList())) {
 				if (first) {
 					first = false;
 				} else {
