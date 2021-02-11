@@ -405,20 +405,23 @@ public class ComponentUtil {
 	public static IComponentInstance getRandomInstantiationOfComponent(final IComponent component, final IComponentRepository componentRepository, final Random random) {
 		IComponentInstance ci = getRandomParameterizationOfComponent(component, random);
 		for (IRequiredInterfaceDefinition reqI : component.getRequiredInterfaces()) {
+			List<IComponent> pluginComponents = new ArrayList<>(ComponentUtil.getComponentsProvidingInterface(componentRepository, reqI.getName()));
+
 			int numSatisfactions = 0;
 			if (reqI.getMin() == reqI.getMax()) {
 				numSatisfactions = reqI.getMin();
 			} else {
-				numSatisfactions = reqI.getMin() + random.nextInt(reqI.getMax() - reqI.getMin());
+				numSatisfactions = Math.min(pluginComponents.size(), (reqI.getMin() + random.nextInt(reqI.getMax() - reqI.getMin())));
 			}
 
-			List<IComponent> pluginComponents = new ArrayList<>(ComponentUtil.getComponentsProvidingInterface(componentRepository, reqI.getName()));
 			List<IComponentInstance> satCIList = new ArrayList<>();
 			while (satCIList.size() < numSatisfactions) {
-				IComponentInstance randomCI = getRandomInstantiationOfComponent(pluginComponents.get(random.nextInt(pluginComponents.size())), componentRepository, random);
+				IComponent randomComponent = pluginComponents.get(random.nextInt(pluginComponents.size()));
+				IComponentInstance randomCI = getRandomInstantiationOfComponent(randomComponent, componentRepository, random);
 				if (reqI.isUniqueComponents()) {
 					if (satCIList.isEmpty() || !isAlreadyContained(satCIList, randomCI)) {
 						satCIList.add(randomCI);
+						pluginComponents.remove(randomComponent);
 					}
 				} else {
 					satCIList.add(randomCI);
@@ -440,20 +443,6 @@ public class ComponentUtil {
 	}
 
 	public static boolean areSame(final IComponentInstance c1, final IComponentInstance c2) {
-		if (!c1.getComponent().getName().equals(c2.getComponent().getName())) {
-			return false;
-		}
-
-		for (IRequiredInterfaceDefinition reqI : c1.getComponent().getRequiredInterfaces()) {
-			for (IComponentInstance c1Child : c1.getSatisfactionOfRequiredInterface(reqI.getId())) {
-				for (IComponentInstance c2Child : c2.getSatisfactionOfRequiredInterface(reqI.getId())) {
-					if (!areSame(c1Child, c2Child)) {
-						return false;
-					}
-				}
-			}
-		}
-
-		return true;
+		return c1.getComponent().getName().equals(c2.getComponent().getName());
 	}
 }
