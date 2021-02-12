@@ -20,6 +20,7 @@ import ai.libs.jaicore.components.model.NumericParameterDomain;
 
 public class CFGConverter {
 
+	private static final String SPACE_REPLACEMENT = "#_#";
 	private static final String OR_OP = " | ";
 	private static final String PRODUCTION_OP = " ::= ";
 	private static final String NON_TERMINAL_PATTERN = "<%s>";
@@ -71,7 +72,7 @@ public class CFGConverter {
 				}
 			} else if (param.getDefaultDomain() instanceof CategoricalParameterDomain) {
 				CategoricalParameterDomain dom = (CategoricalParameterDomain) param.getDefaultDomain();
-				productions.put(paramNT, paramNT + PRODUCTION_OP + Arrays.stream(dom.getValues()).map(x -> x.contains(" ") ? x.replace(" ", "_") : x).collect(Collectors.joining(OR_OP)) + "\n");
+				productions.put(paramNT, paramNT + PRODUCTION_OP + Arrays.stream(dom.getValues()).map(x -> x.contains(" ") ? x.replace(" ", SPACE_REPLACEMENT) : x).collect(Collectors.joining(OR_OP)) + "\n");
 			}
 		}
 
@@ -95,7 +96,7 @@ public class CFGConverter {
 		String[] tokens = grammarString.split(" ");
 		Map<String, String> paramValues = new HashMap<>();
 		for (int i = 1; i < tokens.length; i = i + 2) {
-			paramValues.put(tokens[i], tokens[i + 1].contains("_") ? tokens[i + 1].replace("_", " ") : tokens[i + 1]);
+			paramValues.put(tokens[i], tokens[i + 1].contains(SPACE_REPLACEMENT) ? tokens[i + 1].replace(SPACE_REPLACEMENT, " ") : tokens[i + 1]);
 		}
 		return this.buildComponentInstanceFromMap(tokens[0], paramValues);
 	}

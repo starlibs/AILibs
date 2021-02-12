@@ -1,7 +1,10 @@
 package ai.libs.jaicore.ml.hpo.ggp;
 
+import org.aeonbits.owner.Config.Sources;
+
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 
+@Sources({ "file:conf/ggp.properties" })
 public interface IGrammarBasedGeneticProgrammingConfig extends IOwnerBasedAlgorithmConfig {
 
 	/**
@@ -27,6 +30,7 @@ public interface IGrammarBasedGeneticProgrammingConfig extends IOwnerBasedAlgori
 
 	/**
 	 * The maximum number of generations to conduct. A value <= 0 refers to infinite number of generations and requires a timeout to be set instead.
+	 *
 	 * @return The maximum number of generations to conduct.
 	 */
 	@Key("ggp.generations")
@@ -62,6 +66,7 @@ public interface IGrammarBasedGeneticProgrammingConfig extends IOwnerBasedAlgori
 	 * Early stopping terminates the evolutionary process early if there were no changes for a certain amount of time.
 	 * If configured with a value x > 0, GGP will check whether the best solution was updated within the last x generations.
 	 * As soon as the number of generations the best solution did not change exceeds x it will terminate the evolutionary run.
+	 *
 	 * @return The number of generations to wait for the best solution to change.
 	 */
 	@Key("ggp.early_stopping")
@@ -71,6 +76,7 @@ public interface IGrammarBasedGeneticProgrammingConfig extends IOwnerBasedAlgori
 	/**
 	 * In order to increase diversity, the population (except for elite individuals) is substituted by randomly generated individuals to perform a random restart (seeded with elite individuals only).
 	 * If this option is set to <= 0, this feature is deactivated.
+	 *
 	 * @return The number of generations after which to perform a random restart.
 	 */
 	@Key("ggp.random_restart")
@@ -80,6 +86,7 @@ public interface IGrammarBasedGeneticProgrammingConfig extends IOwnerBasedAlgori
 	/**
 	 * If the evaluation of an individual fails, we will need to nevertheless assign it a score. Ideally, this score is worse than
 	 * any scores that can be obtained by successfully evaluating individuals.
+	 *
 	 * @return The score that is assigned to individuals that failed to be evaluated.
 	 */
 	@Key("ggp.failed_eval_score")

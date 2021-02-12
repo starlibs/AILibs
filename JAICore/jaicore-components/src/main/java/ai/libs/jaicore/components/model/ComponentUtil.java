@@ -405,20 +405,30 @@ public class ComponentUtil {
 	public static IComponentInstance getRandomInstantiationOfComponent(final IComponent component, final IComponentRepository componentRepository, final Random random) {
 		IComponentInstance ci = getRandomParameterizationOfComponent(component, random);
 		for (IRequiredInterfaceDefinition reqI : component.getRequiredInterfaces()) {
+			List<IComponent> pluginComponents = new ArrayList<>(ComponentUtil.getComponentsProvidingInterface(componentRepository, reqI.getName()));
+
 			int numSatisfactions = 0;
 			if (reqI.getMin() == reqI.getMax()) {
 				numSatisfactions = reqI.getMin();
 			} else {
-				numSatisfactions = reqI.getMin() + random.nextInt(reqI.getMax() - reqI.getMin());
+				numSatisfactions = Math.min(pluginComponents.size(), (reqI.getMin() + random.nextInt(reqI.getMax() - reqI.getMin())));
 			}
 
-			List<IComponent> pluginComponents = new ArrayList<>(ComponentUtil.getComponentsProvidingInterface(componentRepository, reqI.getName()));
 			List<IComponentInstance> satCIList = new ArrayList<>();
-			for (int i = 0; i < numSatisfactions; i++) {
-				satCIList.add(getRandomInstantiationOfComponent(pluginComponents.get(random.nextInt(pluginComponents.size())), componentRepository, random));
+			while (satCIList.size() < numSatisfactions) {
+				IComponent randomComponent = pluginComponents.get(random.nextInt(pluginComponents.size()));
+				IComponentInstance randomCI = getRandomInstantiationOfComponent(randomComponent, componentRepository, random);
+				if (reqI.isUniqueComponents()) {
+					pluginComponents.remove(randomComponent);
+				}
+				satCIList.add(randomCI);
 			}
 			ci.getSatisfactionOfRequiredInterfaces().put(reqI.getId(), satCIList);
 		}
 		return ci;
-  }
+	}
+
+	public static boolean areSame(final IComponentInstance c1, final IComponentInstance c2) {
+		return c1.getComponent().getName().equals(c2.getComponent().getName());
+	}
 }

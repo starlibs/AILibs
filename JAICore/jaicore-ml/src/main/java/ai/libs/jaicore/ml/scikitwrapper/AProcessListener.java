@@ -37,10 +37,10 @@ public abstract class AProcessListener implements IProcessListener, ILoggingCust
 	@Override
 	public void listenTo(final Process process) throws IOException, InterruptedException {
 		this.logger.info("Starting to listen to process {}", process);
-		try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+		try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
 			// While process is alive the output- and error stream is output.
 			while (process.isAlive()) {
-				this.logger.debug("Process is alive.");
 				if (Thread.interrupted()) { // reset flag since we will throw an exception now
 					this.logger.info("Detected interrupt on process execution.");
 					if (this.listenForPIDFromProcess && this.processIDObtainedFromListening > 0) {
@@ -58,7 +58,7 @@ public abstract class AProcessListener implements IProcessListener, ILoggingCust
 					}
 					this.handleInput(line);
 				}
-				while (this.checkReady(inputReader) && (line = errorReader.readLine()) != null) {
+				while (this.checkReady(errorReader) && (line = errorReader.readLine()) != null) {
 					if (line.contains("import imp") || line.contains("imp module")) {
 						continue;
 					}

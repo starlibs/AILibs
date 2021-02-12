@@ -25,8 +25,8 @@ public class PythonUtil {
 
 	public PythonUtil(final IPythonConfig config) {
 		this.pythonCommand = config.getPythonCommand();
-		String path = config.getPath();
-		this.pathToPythonExecutable = path != null ? new File(config.getPath()) : null;
+		String path = config.getPathToPythonExecutable();
+		this.pathToPythonExecutable = (path != null) ? new File(config.getPathToPythonExecutable()) : null;
 		if (this.pathToPythonExecutable != null) {
 			if (!this.pathToPythonExecutable.exists()) {
 				throw new IllegalArgumentException("The path to python executable " + this.pathToPythonExecutable.getAbsolutePath() + " does not exist.");

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
@@ -58,7 +59,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 		Set<String> importSet = new HashSet<>();
 		constructInstruction.append(this.extractSKLearnConstructInstruction(groundComponent, importSet));
 		StringBuilder imports = new StringBuilder();
-		importSet.forEach(imports::append);
+		importSet.stream().sorted().collect(Collectors.toList()).forEach(imports::append);
 
 		String constructionString = constructInstruction.toString();
 		this.logger.info("Created construction string: {}", constructionString);
@@ -108,15 +109,13 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 		sb.append("(");
 		if (groundComponent.getComponent().getName().contains("make_pipeline")) {
 			sb.append(this.getPipelineBuildString(groundComponent, importSet));
-		} else if (groundComponent.getComponent().getName().contains("make_union"))
-
-		{
+		} else if (groundComponent.getComponent().getName().contains("make_union")) {
 			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("p1").iterator().next(), importSet));
 			sb.append(",");
 			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("p2").iterator().next(), importSet));
 		} else {
 			boolean first = true;
-			for (Entry<String, String> parameterValue : groundComponent.getParameterValues().entrySet()) {
+			for (Entry<String, String> parameterValue : groundComponent.getParameterValues().entrySet().stream().sorted((o1, o2) -> o1.getKey().compareTo(o2.getKey())).collect(Collectors.toList())) {
 				if (first) {
 					first = false;
 				} else {
@@ -151,7 +150,8 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<Scik
 				}
 			}
 
-			for (Entry<String, List<IComponentInstance>> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
+			for (Entry<String, List<IComponentInstance>> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet().stream().sorted((o1, o2) -> o1.getKey().compareTo(o2.getKey()))
+					.collect(Collectors.toList())) {
 				if (first) {
 					first = false;
 				} else {
