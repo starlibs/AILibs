@@ -1,5 +1,6 @@
 package ai.libs.mlplan.sklearn;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -8,16 +9,20 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
+import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
+
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstance;
-import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
+import ai.libs.jaicore.ml.scikitwrapper.AScikitLearnWrapper;
+import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnRULWrapper;
 
 public class ScikitLearnRULFactory extends AScikitLearnLearnerFactory {
 
 	private static final String ELEMENT_SEPARATOR = ", ";
 
 	public ScikitLearnRULFactory() {
-		super(EScikitLearnProblemType.RUL);
+		super();
 	}
 
 	@Override
@@ -54,5 +59,10 @@ public class ScikitLearnRULFactory extends AScikitLearnLearnerFactory {
 			return "make_union(" + stringJoiner.toString() + ")";
 		}
 		return stringJoiner.toString();
+	}
+
+	@Override
+	public AScikitLearnWrapper<IPrediction, IPredictionBatch> getScikitLearnWrapper(final String constructionString, final String imports) throws IOException {
+		return new ScikitLearnRULWrapper<>(constructionString, imports);
 	}
 }

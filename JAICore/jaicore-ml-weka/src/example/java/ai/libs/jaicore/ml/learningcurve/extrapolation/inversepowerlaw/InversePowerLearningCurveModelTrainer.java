@@ -5,10 +5,12 @@ import java.io.FileReader;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
+import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
-import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
-import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
+import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapper;
+import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnRegressionWrapper;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.core.Instances;
 import weka.filters.Filter;
@@ -50,12 +52,12 @@ public class InversePowerLearningCurveModelTrainer {
 		removeFilter.setInvertSelection(true);
 		removeFilter.setInputFormat(data);
 		WekaInstances newData = new WekaInstances(Filter.useFilter(data, removeFilter));
-		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor(activation='logistic', solver='lbfgs', max_iter=1000)", "from sklearn.neural_network import MLPRegressor", EScikitLearnProblemType.REGRESSION);
-		slw.setModelPath(new File(modelPath));
-		slw.setProblemType(EScikitLearnProblemType.REGRESSION);
+		IScikitLearnWrapper slw = new ScikitLearnRegressionWrapper<IPrediction, IPredictionBatch>("MLPRegressor(activation='logistic', solver='lbfgs', max_iter=1000)",
+				"from sklearn.neural_network import MLPRegressor");
+		slw.setModelPath(modelPath);
 
 		int s = newData.getNumAttributes();
-		slw.setTargets(s - 3, s - 2, s - 1);
+		// slw.setTargets(s - 3, s - 2, s - 1); // TODO
 		slw.fit(newData);
 		return slw;
 	}

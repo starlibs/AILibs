@@ -4,8 +4,6 @@ import java.util.Random;
 
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.evaluation.IPrediction;
-import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
@@ -15,27 +13,33 @@ import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
 import ai.libs.jaicore.ml.regression.loss.ERegressionPerformanceMeasure;
 import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
-import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
+import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapper;
+import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.core.IProblemType;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
 
-public enum EMLPlanScikitLearnProblemType implements IProblemType<ScikitLearnWrapper<IPrediction, IPredictionBatch>> {
+public enum EMLPlanScikitLearnProblemType implements IProblemType<IScikitLearnWrapper> {
 
-	CLASSIFICATION_MULTICLASS(EScikitLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/sklearn-classification.json", "conf/mlplan-sklearn.json", "automl/searchmodels/sklearn/sklearn-preferenceList.txt",
-			"conf/sklearn-preferenceList.txt", "AbstractClassifier", "BasicClassifier", EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new ScikitLearnClassifierFactory(),
-			new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>()), new ScikitLearnPipelineValidityCheckingNodeEvaluator()), //
+	CLASSIFICATION_MULTICLASS(EScikitLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/sklearn-classification.json", "conf/mlplan-sklearn.json",
+			"automl/searchmodels/sklearn/sklearn-preferenceList.txt", "conf/sklearn-preferenceList.txt", "AbstractClassifier", "BasicClassifier", EClassificationPerformanceMeasure.ERRORRATE,
+			EClassificationPerformanceMeasure.ERRORRATE, new ScikitLearnClassifierFactory(), new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>()),
+			new ScikitLearnPipelineValidityCheckingNodeEvaluator()), //
 
-	CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES(EScikitLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/sklearn-classification-ul.json", EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
-			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(),
-			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getRequestedInterface(), EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getRequestedBasicProblemInterface(), EClassificationPerformanceMeasure.ERRORRATE,
-			EClassificationPerformanceMeasure.ERRORRATE, CLASSIFICATION_MULTICLASS.getLearnerFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter(), CLASSIFICATION_MULTICLASS.getValidityCheckingNodeEvaluator()), //
+	CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES(EScikitLearnProblemType.CLASSIFICATION, "automl/searchmodels/sklearn/sklearn-classification-ul.json",
+			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
+			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(),
+			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getRequestedInterface(),
+			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getRequestedBasicProblemInterface(), EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE,
+			CLASSIFICATION_MULTICLASS.getLearnerFactory(), CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter(), CLASSIFICATION_MULTICLASS.getValidityCheckingNodeEvaluator()), //
 
 	REGRESSION(EScikitLearnProblemType.REGRESSION, "automl/searchmodels/sklearn/sklearn-regression.json", EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
-			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), "AbstractRegressor",
-			"BasicRegressor", ERegressionPerformanceMeasure.RMSE, ERegressionPerformanceMeasure.RMSE, new ScikitLearnRegressorFactory(), new RandomHoldoutSplitter<>(new Random(0), 0.7), null), //
+			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(),
+			EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), "AbstractRegressor", "BasicRegressor", ERegressionPerformanceMeasure.RMSE,
+			ERegressionPerformanceMeasure.RMSE, new ScikitLearnRegressorFactory(), new RandomHoldoutSplitter<>(new Random(0), 0.7), null), //
 
-	RUL(EScikitLearnProblemType.RUL, "automl/searchmodels/sklearn/sklearn-rul.json", "conf/sklearn-rul.json", null, "conf/sklearn-preferenceList.txt", "MLPipeline", "BasicRegressor", ERulPerformanceMeasure.ASYMMETRIC_LOSS,
-			ERulPerformanceMeasure.ASYMMETRIC_LOSS, new ScikitLearnRULFactory(), EMLPlanScikitLearnProblemType.REGRESSION.getSearchSelectionDatasetSplitter(), null);
+	RUL(EScikitLearnProblemType.RUL, "automl/searchmodels/sklearn/sklearn-rul.json", "conf/sklearn-rul.json", null, "conf/sklearn-preferenceList.txt", "MLPipeline", "BasicRegressor",
+			ERulPerformanceMeasure.ASYMMETRIC_LOSS, ERulPerformanceMeasure.ASYMMETRIC_LOSS, new ScikitLearnRULFactory(), EMLPlanScikitLearnProblemType.REGRESSION.getSearchSelectionDatasetSplitter(),
+			null);
 
 	private final EScikitLearnProblemType problemType;
 
@@ -51,15 +55,16 @@ public enum EMLPlanScikitLearnProblemType implements IProblemType<ScikitLearnWra
 	private final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSearchPhase;
 	private final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase;
 
-	private final AScikitLearnLearnerFactory learnerFactory;
+	private final ILearnerFactory<IScikitLearnWrapper> learnerFactory;
 
 	private final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter;
 	private PipelineValidityCheckingNodeEvaluator validityCheckingNoteEvaluator;
 
-	private EMLPlanScikitLearnProblemType(final EScikitLearnProblemType problemType, final String searchSpaceConfigFileFromResource, final String systemSearchSpaceConfigFromFileSystem, final String preferedComponentsListFromResource,
-			final String preferedComponentsListFromFileSystem, final String requestedHascoInterface, final String requestedBasicProblemInterface, final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSearchPhase,
-			final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase, final AScikitLearnLearnerFactory learnerFactory,
-			final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter, final PipelineValidityCheckingNodeEvaluator validityCheckingNodeEvaluator) {
+	private EMLPlanScikitLearnProblemType(final EScikitLearnProblemType problemType, final String searchSpaceConfigFileFromResource, final String systemSearchSpaceConfigFromFileSystem,
+			final String preferedComponentsListFromResource, final String preferedComponentsListFromFileSystem, final String requestedHascoInterface, final String requestedBasicProblemInterface,
+			final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSearchPhase, final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase,
+			final ILearnerFactory<IScikitLearnWrapper> learnerFactory, final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter,
+			final PipelineValidityCheckingNodeEvaluator validityCheckingNodeEvaluator) {
 		this.problemType = problemType;
 
 		this.searchSpaceConfigFileFromResource = searchSpaceConfigFileFromResource;
@@ -142,7 +147,7 @@ public enum EMLPlanScikitLearnProblemType implements IProblemType<ScikitLearnWra
 	}
 
 	@Override
-	public AScikitLearnLearnerFactory getLearnerFactory() {
+	public ILearnerFactory<IScikitLearnWrapper> getLearnerFactory() {
 		return this.learnerFactory;
 	}
 

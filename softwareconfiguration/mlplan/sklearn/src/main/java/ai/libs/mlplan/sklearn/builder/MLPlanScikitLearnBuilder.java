@@ -5,13 +5,12 @@ import java.io.IOException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.evaluation.IPrediction;
-import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.algorithm.Timeout;
 
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.AMonteCarloCrossValidationBasedEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
-import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
+import ai.libs.jaicore.ml.scikitwrapper.AScikitLearnWrapper;
+import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapper;
 import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.core.IProblemType;
 import ai.libs.mlplan.core.MLPlan;
@@ -20,12 +19,9 @@ import ai.libs.mlplan.sklearn.EMLPlanScikitLearnProblemType;
 import ai.libs.python.IPythonConfig;
 import ai.libs.python.PythonRequirementDefinition;
 
-public class MLPlanScikitLearnBuilder extends AMLPlanBuilder<ScikitLearnWrapper<IPrediction, IPredictionBatch>, MLPlanScikitLearnBuilder> {
+public class MLPlanScikitLearnBuilder extends AMLPlanBuilder<IScikitLearnWrapper, MLPlanScikitLearnBuilder> {
 
-	private static final int PYTHON_MINIMUM_REQUIRED_VERSION_REL = 3;
-	private static final int PYTHON_MINIMUM_REQUIRED_VERSION_MAJ = 5;
-	private static final int PYTHON_MINIMUM_REQUIRED_VERSION_MIN = 0;
-	private static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn", "tpot", "pandas", "xgboost" };
+	private static final String[] PYTHON_REQUIRED_MODULES = ArrayUtils.addAll(AScikitLearnWrapper.PYTHON_REQUIRED_MODULES, new String[] { "tpot", "xgboost" });
 
 	private IPythonConfig pythonConfig;
 	private String[] pythonAdditionalRequiredModules;
@@ -72,7 +68,7 @@ public class MLPlanScikitLearnBuilder extends AMLPlanBuilder<ScikitLearnWrapper<
 	}
 
 	@Override
-	public MLPlanScikitLearnBuilder withProblemType(final IProblemType<ScikitLearnWrapper<IPrediction, IPredictionBatch>> problemType) throws IOException {
+	public MLPlanScikitLearnBuilder withProblemType(final IProblemType<IScikitLearnWrapper> problemType) throws IOException {
 		super.withProblemType(problemType);
 		this.pythonAdditionalRequiredModules = ((EMLPlanScikitLearnProblemType) problemType).getSkLearnProblemType().getPythonRequiredModules();
 		return this.getSelf();
@@ -113,10 +109,10 @@ public class MLPlanScikitLearnBuilder extends AMLPlanBuilder<ScikitLearnWrapper<
 	}
 
 	@Override
-	public MLPlan<ScikitLearnWrapper<IPrediction, IPredictionBatch>> build() {
+	public MLPlan<IScikitLearnWrapper> build() {
 		if (!this.skipSetupCheck) {
-			new PythonRequirementDefinition(PYTHON_MINIMUM_REQUIRED_VERSION_REL, PYTHON_MINIMUM_REQUIRED_VERSION_MAJ, PYTHON_MINIMUM_REQUIRED_VERSION_MIN, ArrayUtils.addAll(PYTHON_REQUIRED_MODULES, this.pythonAdditionalRequiredModules))
-			.check(this.pythonConfig);
+			new PythonRequirementDefinition(AScikitLearnWrapper.PYTHON_MINIMUM_REQUIRED_VERSION_REL, AScikitLearnWrapper.PYTHON_MINIMUM_REQUIRED_VERSION_MAJ,
+					AScikitLearnWrapper.PYTHON_MINIMUM_REQUIRED_VERSION_MIN, ArrayUtils.addAll(PYTHON_REQUIRED_MODULES, this.pythonAdditionalRequiredModules)).check(this.pythonConfig);
 		}
 		this.setDeterministicDatasetSplitter(this.getLearnerEvaluationFactoryForSearchPhase());
 		this.setDeterministicDatasetSplitter(this.getLearnerEvaluationFactoryForSelectionPhase());

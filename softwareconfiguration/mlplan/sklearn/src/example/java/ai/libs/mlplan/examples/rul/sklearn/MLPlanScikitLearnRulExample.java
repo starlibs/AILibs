@@ -20,7 +20,7 @@ import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.regression.loss.ERulPerformanceMeasure;
-import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
+import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapper;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.sklearn.EMLPlanScikitLearnProblemType;
 import ai.libs.mlplan.sklearn.builder.MLPlanScikitLearnBuilder;
@@ -49,12 +49,12 @@ public class MLPlanScikitLearnRulExample {
 		builder.withNumCpus(4);
 		builder.withSeed(42);
 
-		MLPlan<ScikitLearnWrapper<IPrediction, IPredictionBatch>> mlplan = builder.withDataset(splits.get(0)).build();
+		MLPlan<IScikitLearnWrapper> mlplan = builder.withDataset(splits.get(0)).build();
 		mlplan.setLoggerName("testedalgorithm");
 
 		try {
 			start = System.currentTimeMillis();
-			ScikitLearnWrapper<IPrediction, IPredictionBatch> optimizedRegressor = mlplan.call();
+			IScikitLearnWrapper optimizedRegressor = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
 			LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));
@@ -64,7 +64,8 @@ public class MLPlanScikitLearnRulExample {
 			ILearnerRunReport report = executor.execute(optimizedRegressor, splits.get(1));
 			List<Double> expected = (List<Double>) report.getPredictionDiffList().getGroundTruthAsList();
 			List<IRegressionPrediction> predicted = (List<IRegressionPrediction>) report.getPredictionDiffList().getPredictionsAsList();
-			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}", ERulPerformanceMeasure.ASYMMETRIC_LOSS.loss(expected, predicted), mlplan.getInternalValidationErrorOfSelectedClassifier());
+			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}", ERulPerformanceMeasure.ASYMMETRIC_LOSS.loss(expected, predicted),
+					mlplan.getInternalValidationErrorOfSelectedClassifier());
 		} catch (NoSuchElementException e) {
 			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}
