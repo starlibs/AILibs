@@ -10,8 +10,8 @@ The following configuration files can be imported in eclipse:
 
 <div style="font-weight: bold;">Attachments: Eclipse editor configuration files</div>
 <div style="border-top: 1px solid #ccc; padding: 10px; background: #f9f9f9">
-	<div style="float: left; padding: 5px;"><a href="{{ "/codestyle/formatter.xml" | absolute_url }}" target="_blank" style="display: block; text-align: center; width: 72px;"><img src="{{ "/img/xml-file-icon.png" | absolute_url }}" height="32" alt="Download Eclipse Formatter"><br>Eclipse Formatter</a></div>
-	<div style="float: left; padding: 5px;"><a href="{{ "/codestyle/cleanUpTasks.xml"  | absolute_url }}" target="_blank" style="display: block; text-align: center; width: 72px;"><img src="{{ "/img/xml-file-icon.png" | absolute_url }}" height="32" alt="Download Eclipse CleanUp Tasks"><br>Eclipse CleanUpTasks</a></div>
+	<div style="float: left; padding: 5px;"><a href="{{ "/docs/dev/codestyle/formatter.xml" | absolute_url }}" target="_blank" style="display: block; text-align: center; width: 72px;"><img src="{{ "/img/xml-file-icon.png" | absolute_url }}" height="32" alt="Download Eclipse Formatter"><br>Eclipse Formatter</a></div>
+	<div style="float: left; padding: 5px;"><a href="{{ "/docs/dev/codestyle/cleanUpTasks.xml"  | absolute_url }}" target="_blank" style="display: block; text-align: center; width: 72px;"><img src="{{ "/img/xml-file-icon.png" | absolute_url }}" height="32" alt="Download Eclipse CleanUp Tasks"><br>Eclipse CleanUpTasks</a></div>
 	<div style="clear: left;"></div>
 </div>
 <br>
