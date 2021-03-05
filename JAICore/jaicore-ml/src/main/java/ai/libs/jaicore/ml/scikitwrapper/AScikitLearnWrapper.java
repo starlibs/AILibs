@@ -48,7 +48,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 	public static final int PYTHON_MINIMUM_REQUIRED_VERSION_REL = 3;
 	public static final int PYTHON_MINIMUM_REQUIRED_VERSION_MAJ = 5;
 	public static final int PYTHON_MINIMUM_REQUIRED_VERSION_MIN = 0;
-	public static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn", "pandas" };
+	public static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn", "pandas" };// , "xgboost"
 
 	private static final String SCIKIT_LEARN_TEMPLATE = "sklearn/sklearn_template.twig.py";
 
@@ -67,7 +67,6 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 
 	protected File modelFile;
 	protected ILabeledDataset<ILabeledInstance> data;
-	// protected File trainingDataFile;
 	protected long seed;
 	protected Timeout timeout;
 	private boolean listenToPidFromProcess; // If true, the PID is obtained from the python process being started by listening to according output.
@@ -137,17 +136,13 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 		this.timeout = timeout;
 	}
 
-	// public void setTargets(final int... targetColumns) {
-	// this.targetColumns = targetColumns;
-	// }
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public void fit(final ILabeledDataset<? extends ILabeledInstance> trainingData) throws TrainingException, InterruptedException {
 		try {
 			String dataFileName = this.getDataName(trainingData);
 			this.data = (ILabeledDataset<ILabeledInstance>) trainingData.createEmptyCopy();
-			if (this.doLabelFitToProblemType(this.data)) {
+			if (this.doLabelsFitToProblemType(this.data)) {
 				File trainingDataFile = this.getOrWriteDataFile(trainingData, dataFileName);
 				this.fit(trainingDataFile, dataFileName);
 			} else {
@@ -262,7 +257,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 				this.runProcess(fitAndPredictCommand);
 			}
 
-			return this.handleOutput(testingOutputFile);
+			return this.handleOutput(trainingOutputFile, testingOutputFile);
 		} catch (ScikitLearnWrapperExecutionFailedException e) {
 			throw new TrainingException(COULD_NOT_RUN_SCIKIT_LEARN_MODEL, e);
 		}
@@ -305,10 +300,14 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 		return new File(this.scikitLearnWrapperConfig.getTempFolder(), datasetName + ".arff"); // TODO extension
 	}
 
-	protected abstract boolean doLabelFitToProblemType(final ILabeledDataset<? extends ILabeledInstance> data);
+	protected abstract boolean doLabelsFitToProblemType(final ILabeledDataset<? extends ILabeledInstance> data);
 
 	protected ScikitLearnWrapperCommandBuilder getCommandBuilder() {
 		ScikitLearnWrapperCommandBuilder commandBuilder = new ScikitLearnWrapperCommandBuilder(this.problemType.getScikitLearnCommandLineFlag(), this.getSKLearnScriptFile());
+		return this.getCommandBuilder(commandBuilder);
+	}
+
+	protected ScikitLearnWrapperCommandBuilder getCommandBuilder(final ScikitLearnWrapperCommandBuilder commandBuilder) {
 		commandBuilder.withLogger(this.logger);
 		commandBuilder.withSeed(this.seed);
 		commandBuilder.withTimeout(this.timeout);
@@ -388,6 +387,10 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 	}
 
 	protected abstract B handleOutput(final File outputFile) throws PredictionException, TrainingException;
+
+	protected B handleOutput(final File fitOutputFile, final File predictOutputFile) throws PredictionException, TrainingException {
+		return this.handleOutput(predictOutputFile);
+	}
 
 	@SuppressWarnings("unchecked")
 	protected List<List<Double>> getRawPredictionResults(final File outputFile) throws PredictionException {

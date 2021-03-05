@@ -38,8 +38,8 @@ from sklearn.pipeline import make_pipeline, make_union
 class ProblemType:
     CLASSIFICATION = 'classification'
     REGRESSION = 'regression'
-    RUL = 'rul'
-    FEATURE_ENGINEERING = 'fe'
+    TIME_SERIES_REGRESSION = 'ts-reg'
+    TIME_SERIES_FEATURE_ENGINEERING = 'ts-fe'
 
     @staticmethod
     def get(identifier):
@@ -47,10 +47,10 @@ class ProblemType:
             return ProblemType.CLASSIFICATION
         if identifier == ProblemType.REGRESSION:
             return ProblemType.REGRESSION
-        elif identifier == ProblemType.RUL:
-            return ProblemType.RUL
-        elif identifier == ProblemType.FEATURE_ENGINEERING:
-            return ProblemType.FEATURE_ENGINEERING
+        elif identifier == ProblemType.TIME_SERIES_REGRESSION:
+            return ProblemType.TIME_SERIES_REGRESSION
+        elif identifier == ProblemType.TIME_SERIES_FEATURE_ENGINEERING:
+            return ProblemType.TIME_SERIES_FEATURE_ENGINEERING
         else:
             raise RuntimeError("Unsupported problem type: " + identifier)
 
@@ -81,7 +81,7 @@ class ArgsHandler:
         accessable as a list.
         """
         parser = argparse.ArgumentParser()
-        parser.add_argument('--problem', choices=['classification', 'regression', 'rul', 'fe'], required=True, help="If set, converts the data for use by tsfresh.")
+        parser.add_argument('--problem', choices=[ProblemType.CLASSIFICATION, ProblemType.REGRESSION, ProblemType.TIME_SERIES_REGRESSION, ProblemType.TIME_SERIES_FEATURE_ENGINEERING], required=True, help="If set, converts the data for use by tsfresh.")
         parser.add_argument('--mode', choices=['fit', 'predict', 'fitAndPredict'], required=True, help="Selecting whether a train or a test is run.")
         parser.add_argument('--fit', help="Path or data to use for training.")
         parser.add_argument('--fitOutput', help="In train mode set the file where the model shall be dumped; in test mode set the file where the prediction results shall be serialized to.")
@@ -334,7 +334,7 @@ class ArffData:
             finally:
                 file.close()
 
-class FeatureEngineering:
+class TimeSeriesBasedModel:
 
     def __init__(self):
         print("Executing feature engineering with the following configuration:")
@@ -370,7 +370,7 @@ class FeatureEngineering:
         train_targets = train_data_frame.y
         pipeline.fit(X=raw_train_data, y=train_targets)
 
-        if problem_type == ProblemType.FEATURE_ENGINEERING:
+        if problem_type == ProblemType.TIME_SERIES_FEATURE_ENGINEERING:
             print('\tTransforming training data ...')
             relation_name = raw_train_data['relation'].replace('test', 'train')
             train_data_transformed = pipeline.transform(raw_train_data)
@@ -382,11 +382,11 @@ class FeatureEngineering:
         test_data_frame = PandasDataFrameWrapper(raw_test_data)
         test_targets = test_data_frame.y
 
-        if problem_type == ProblemType.FEATURE_ENGINEERING:
+        if problem_type == ProblemType.TIME_SERIES_FEATURE_ENGINEERING:
             test_data_transformed = pipeline.transform(raw_test_data)
             self.serialize_feature_representation(relation_name, test_data_transformed, test_targets, ArgsHandler.get_predict_output_file_path())
 
-        elif problem_type == ProblemType.RUL:
+        elif problem_type == ProblemType.TIME_SERIES_REGRESSION:
             predictions = pipeline.predict(raw_test_data)
             print("\tPredictions:" + str(predictions))
             serialize_prediction(predictions, ArgsHandler.get_predict_output_file_path())
@@ -419,7 +419,7 @@ if __name__ == "__main__":
 
     ArgsHandler.setup()
     problem_type = ArgsHandler.get_problem_type()
-    if problem_type == ProblemType.FEATURE_ENGINEERING or problem_type == ProblemType.RUL:
-        FeatureEngineering()
+    if problem_type == ProblemType.TIME_SERIES_FEATURE_ENGINEERING or problem_type == ProblemType.TIME_SERIES_REGRESSION:
+        TimeSeriesBasedModel()
     else:
         SingleTargetLearningModel()

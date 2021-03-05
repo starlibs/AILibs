@@ -31,9 +31,8 @@ public class PythonUtil {
 	public PythonUtil(final IPythonConfig config) {
 		this.pythonCommand = config.getPythonCommand();
 
-		EOperatingSystem os = ProcessUtil.getOS();
 		if (config != null && config.getAnacondaEnvironment() != null) {
-			if (os == EOperatingSystem.MAC) {
+			if (config.getPathToAnacondaExecutable() != null) {
 				String path = config.getPathToAnacondaExecutable();
 				this.pathToAnacondaExecutable = (path != null) ? path : null;
 			}

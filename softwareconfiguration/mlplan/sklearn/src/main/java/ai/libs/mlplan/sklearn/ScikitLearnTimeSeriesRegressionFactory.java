@@ -15,13 +15,11 @@ import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.ml.scikitwrapper.AScikitLearnWrapper;
-import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnRULWrapper;
+import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnTimeSeriesRegressionWrapper;
 
-public class ScikitLearnRULFactory extends AScikitLearnLearnerFactory {
+public class ScikitLearnTimeSeriesRegressionFactory extends AScikitLearnLearnerFactory {
 
-	private static final String ELEMENT_SEPARATOR = ", ";
-
-	public ScikitLearnRULFactory() {
+	public ScikitLearnTimeSeriesRegressionFactory() {
 		super();
 	}
 
@@ -30,19 +28,18 @@ public class ScikitLearnRULFactory extends AScikitLearnLearnerFactory {
 		StringBuilder sb = new StringBuilder();
 		List<IComponentInstance> timeseriesFeatureGenerator = groundComponent.getSatisfactionOfRequiredInterface("timeseries_feature_generator");
 		sb.append(this.getTimeseriesConstructionInstruction(timeseriesFeatureGenerator, importSet));
-		sb.append(ELEMENT_SEPARATOR);
+		sb.append(",");
 		sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterface("regressor").iterator().next(), importSet));
 		return sb.toString();
 	}
 
 	private String getTimeseriesConstructionInstruction(final List<IComponentInstance> timeseriesComponentInstances, final Set<String> importSet) {
-		StringJoiner stringJoiner = new StringJoiner(ELEMENT_SEPARATOR);
+		StringJoiner stringJoiner = new StringJoiner(",");
 		int numberOfComponentInstancesFound = 0;
-		for (IComponentInstance componentInstance : timeseriesComponentInstances.stream().sorted((o1, o2) -> o1.getComponent().getName().compareTo(o2.getComponent().getName()))
-				.collect(Collectors.toList())) {
+		for (IComponentInstance componentInstance : timeseriesComponentInstances.stream().sorted((o1, o2) -> o1.getComponent().getName().compareTo(o2.getComponent().getName())).collect(Collectors.toList())) {
 			if (componentInstance.getComponent().getName().endsWith("UniToMultivariateNumpyBasedFeatureGenerator")) {
-				for (IComponentInstance satCI : componentInstance.getSatisfactionOfRequiredInterface("univariate_ts_feature_generator").stream()
-						.sorted((o1, o2) -> o1.getComponent().getName().compareTo(o2.getComponent().getName())).collect(Collectors.toList())) {
+				for (IComponentInstance satCI : componentInstance.getSatisfactionOfRequiredInterface("univariate_ts_feature_generator").stream().sorted((o1, o2) -> o1.getComponent().getName().compareTo(o2.getComponent().getName()))
+						.collect(Collectors.toList())) {
 					Map<String, List<IComponentInstance>> satisfactionOfRequiredInterfaces = new HashMap<>();
 					satisfactionOfRequiredInterfaces.put("univariate_ts_feature_generator", Arrays.asList(satCI));
 					IComponentInstance newCI = new ComponentInstance(componentInstance.getComponent(), componentInstance.getParameterValues(), satisfactionOfRequiredInterfaces);
@@ -63,6 +60,6 @@ public class ScikitLearnRULFactory extends AScikitLearnLearnerFactory {
 
 	@Override
 	public AScikitLearnWrapper<IPrediction, IPredictionBatch> getScikitLearnWrapper(final String constructionString, final String imports) throws IOException {
-		return new ScikitLearnRULWrapper<>(constructionString, imports);
+		return new ScikitLearnTimeSeriesRegressionWrapper<>(constructionString, imports);
 	}
 }

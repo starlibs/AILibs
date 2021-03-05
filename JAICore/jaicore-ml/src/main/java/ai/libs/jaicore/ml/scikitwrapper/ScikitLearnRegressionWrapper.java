@@ -28,7 +28,7 @@ public class ScikitLearnRegressionWrapper<P extends IPrediction, B extends IPred
 	}
 
 	@Override
-	protected boolean doLabelFitToProblemType(final ILabeledDataset<? extends ILabeledInstance> data) {
+	protected boolean doLabelsFitToProblemType(final ILabeledDataset<? extends ILabeledInstance> data) {
 		return data.getLabelAttribute() instanceof NumericAttribute;
 	}
 
@@ -36,8 +36,11 @@ public class ScikitLearnRegressionWrapper<P extends IPrediction, B extends IPred
 	@Override
 	protected B handleOutput(final File outputFile) throws PredictionException, TrainingException {
 		List<List<Double>> rawLastPredictionResults = this.getRawPredictionResults(outputFile);
-		return (B) new SingleTargetRegressionPredictionBatch(
-				rawLastPredictionResults.stream().flatMap(List::stream).map(x -> new SingleTargetRegressionPrediction((double) x)).collect(Collectors.toList()));
+		if (!rawLastPredictionResults.isEmpty()) {
+			return (B) new SingleTargetRegressionPredictionBatch(
+					rawLastPredictionResults.stream().flatMap(List::stream).map(x -> new SingleTargetRegressionPrediction((double) x)).collect(Collectors.toList()));
+		}
+		throw new PredictionException("Reading the output file lead to empty predictions.");
 	}
 
 }

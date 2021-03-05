@@ -24,7 +24,7 @@ public class ScikitLearnClassificationWrapper<P extends IPrediction, B extends I
 	}
 
 	@Override
-	protected boolean doLabelFitToProblemType(final ILabeledDataset<? extends ILabeledInstance> data) {
+	protected boolean doLabelsFitToProblemType(final ILabeledDataset<? extends ILabeledInstance> data) {
 		return data.getLabelAttribute() instanceof ICategoricalAttribute;
 	}
 
@@ -33,13 +33,16 @@ public class ScikitLearnClassificationWrapper<P extends IPrediction, B extends I
 	protected B handleOutput(final File outputFile) throws PredictionException, TrainingException {
 		List<List<Double>> rawLastPredictionResults = this.getRawPredictionResults(outputFile);
 
-		if (rawLastPredictionResults.get(0).size() == 1) {
-			int numClasses = ((ICategoricalAttribute) this.data.getLabelAttribute()).getLabels().size();
+		if (!rawLastPredictionResults.isEmpty()) {
+			if (rawLastPredictionResults.get(0).size() == 1) {
+				int numClasses = ((ICategoricalAttribute) this.data.getLabelAttribute()).getLabels().size();
+				return (B) new SingleLabelClassificationPredictionBatch(
+						rawLastPredictionResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification(numClasses, x.intValue())).collect(Collectors.toList()));
+			}
 			return (B) new SingleLabelClassificationPredictionBatch(
-					rawLastPredictionResults.stream().flatMap(List::stream).map(x -> new SingleLabelClassification(numClasses, x.intValue())).collect(Collectors.toList()));
+					rawLastPredictionResults.stream().map(x -> x.stream().mapToDouble(y -> y).toArray()).map(SingleLabelClassification::new).collect(Collectors.toList()));
 		}
-		return (B) new SingleLabelClassificationPredictionBatch(
-				rawLastPredictionResults.stream().map(x -> x.stream().mapToDouble(y -> y).toArray()).map(SingleLabelClassification::new).collect(Collectors.toList()));
+		throw new PredictionException("Reading the output file lead to empty predictions.");
 	}
 
 }

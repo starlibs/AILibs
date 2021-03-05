@@ -2,24 +2,26 @@ package ai.libs.jaicore.ml.scikitwrapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
+import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 
-public class ScikitLearnFeatureEngineeringWrapper<P extends IPrediction, B extends IPredictionBatch> extends AScikitLearnWrapper<P, B> {
+public class ScikitLearnTimeSeriesFeatureEngineeringWrapper<P extends IPrediction, B extends IPredictionBatch> extends AScikitLearnWrapper<P, B> {
 
-	public ScikitLearnFeatureEngineeringWrapper(final String pipeline, final String imports) throws IOException {
-		super(EScikitLearnProblemType.FEATURE_ENGINEERING, pipeline, imports);
+	public ScikitLearnTimeSeriesFeatureEngineeringWrapper(final String pipeline, final String imports) throws IOException {
+		super(EScikitLearnProblemType.TIME_SERIES_FEATURE_ENGINEERING, pipeline, imports);
 	}
 
 	@Override
-	protected boolean doLabelFitToProblemType(final ILabeledDataset<? extends ILabeledInstance> data) {
+	protected boolean doLabelsFitToProblemType(final ILabeledDataset<? extends ILabeledInstance> data) {
 		return true;
 	}
 
@@ -34,12 +36,20 @@ public class ScikitLearnFeatureEngineeringWrapper<P extends IPrediction, B exten
 	}
 
 	@Override
+	protected ScikitLearnWrapperCommandBuilder getCommandBuilder() {
+		ScikitLearnTimeSeriesFeatureEngineeringWrapperCommandBuilder commandBuilder = new ScikitLearnTimeSeriesFeatureEngineeringWrapperCommandBuilder(this.problemType.getScikitLearnCommandLineFlag(),
+				this.getSKLearnScriptFile());
+		return super.getCommandBuilder(commandBuilder);
+	}
+
+	@Override
 	protected String[] constructCommandLineParametersForFitMode(final File modelFile, final File trainingDataFile, final File outputFile) {
 		ScikitLearnWrapperCommandBuilder commandBuilder = this.getCommandBuilder();
 		commandBuilder.withFitMode();
 		commandBuilder.withModelFile(modelFile);
 		commandBuilder.withFitDataFile(trainingDataFile);
 		commandBuilder.withFitOutputFile(outputFile);
+		System.out.println(commandBuilder.toCommandArray());
 		return commandBuilder.toCommandArray();
 	}
 
@@ -56,12 +66,41 @@ public class ScikitLearnFeatureEngineeringWrapper<P extends IPrediction, B exten
 
 	@Override
 	protected B handleOutput(final File outputFile) throws TrainingException {
-		if (!new File(outputFile.getAbsolutePath().replace("test", "train")).exists() || !new File(outputFile.getAbsolutePath()).exists()) {
-			FileUtil.touch(outputFile.getAbsolutePath().replace("test", "train"));
+		if (!outputFile.exists()) {
 			FileUtil.touch(outputFile.getAbsolutePath());
 			throw new TrainingException("Executing python failed.");
 		}
 		return null;
+	}
+
+	@Override
+	protected B handleOutput(final File fitOutputFile, final File predictOutputFile) throws PredictionException, TrainingException {
+		this.handleOutput(fitOutputFile);
+		this.handleOutput(predictOutputFile);
+		return null;
+	}
+
+	class ScikitLearnTimeSeriesFeatureEngineeringWrapperCommandBuilder extends ScikitLearnWrapperCommandBuilder {
+
+		protected ScikitLearnTimeSeriesFeatureEngineeringWrapperCommandBuilder(final String problemTypeFlag, final File scriptFile) {
+			super(problemTypeFlag, scriptFile);
+		}
+
+		@Override
+		protected void checkRequirementsTrainMode() {
+			Objects.requireNonNull(this.fitDataFile);
+			Objects.requireNonNull(this.modelFile);
+			Objects.requireNonNull(this.fitOutputFile);
+		}
+
+		@Override
+		protected void checkRequirementsTrainTestMode() {
+			Objects.requireNonNull(this.fitDataFile);
+			Objects.requireNonNull(this.fitOutputFile);
+			Objects.requireNonNull(this.predictDataFile);
+			Objects.requireNonNull(this.predictOutputFile);
+		}
+
 	}
 
 }

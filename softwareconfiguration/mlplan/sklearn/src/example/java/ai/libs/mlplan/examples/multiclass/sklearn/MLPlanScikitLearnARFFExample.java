@@ -58,8 +58,7 @@ public class MLPlanScikitLearnARFFExample {
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
 			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}",
-					EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList().getCastedView(Integer.class, ISingleLabelClassification.class)),
-					mlplan.getInternalValidationErrorOfSelectedClassifier());
+					EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList().getCastedView(Integer.class, ISingleLabelClassification.class)), mlplan.getInternalValidationErrorOfSelectedClassifier());
 		} catch (NoSuchElementException e) {
 			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}

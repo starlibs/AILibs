@@ -47,14 +47,14 @@ public class ScikitLearnWrapperCommandBuilder {
 	private String problemTypeFlag;
 	private File scriptFile;
 	private EWrapperExecutionMode executionMode;
-	private String modelFile;
-	private String fitDataFile;
-	private String fitOutputFile;
-	private String predictDataFile;
-	private String predictOutputFile;
+	protected String modelFile;
+	protected String fitDataFile;
+	protected String fitOutputFile;
+	protected String predictDataFile;
+	protected String predictOutputFile;
 	private long seed;
 	private Timeout timeout;
-	private List<String> additionalParameters;
+	protected List<String> additionalParameters;
 
 	protected ScikitLearnWrapperCommandBuilder(final String problemTypeFlag, final File scriptFile) {
 		this.problemTypeFlag = problemTypeFlag;
@@ -135,13 +135,6 @@ public class ScikitLearnWrapperCommandBuilder {
 		this.additionalParameters = additionalCommandLineParameters;
 		return this;
 	}
-	// TODO
-	// if (ScikitLearnWrapper.this.targetColumns != null && ScikitLearnWrapper.this.targetColumns.length > 0) {
-	// processParameters.add("--targets");
-	// for (int i : ScikitLearnWrapper.this.targetColumns) {
-	// processParameters.add("" + i);
-	// }
-	// }
 
 	public void checkRequirements() {
 		if (!this.scriptFile.exists()) {
@@ -150,35 +143,38 @@ public class ScikitLearnWrapperCommandBuilder {
 
 		Objects.requireNonNull(this.problemTypeFlag);
 		Objects.requireNonNull(this.executionMode);
-		// switch (this.executionMode) {
-		// case FIT:
-		// this.checkRequirementsTrainMode();
-		// break;
-		// case PREDICT:
-		// this.checkRequirementsTestMode();
-		// break;
-		// case FIT_AND_PREDICT:
-		// this.checkRequirementsTrainTestMode();
-		// break;
-		// }
-		// Objects.requireNonNull(this.outputFile);
+		switch (this.executionMode) {
+		case FIT:
+			this.checkRequirementsTrainMode();
+			break;
+		case PREDICT:
+			this.checkRequirementsTestMode();
+			break;
+		case FIT_AND_PREDICT:
+			this.checkRequirementsTrainTestMode();
+			break;
+		}
 	}
 
-	// protected void checkRequirementsTrainMode() {
-	// Objects.requireNonNull(this.fitDataFile);
-	// }
-	//
-	// protected void checkRequirementsTestMode() {
-	// Objects.requireNonNull(this.modelFile);
-	// Objects.requireNonNull(this.predictDataFile);
-	// }
-	//
-	// protected void checkRequirementsTrainTestMode() {
-	// Objects.requireNonNull(this.fitDataFile);
-	// Objects.requireNonNull(this.predictDataFile);
-	// }
+	protected void checkRequirementsTrainMode() {
+		Objects.requireNonNull(this.fitDataFile);
+		Objects.requireNonNull(this.modelFile);
+	}
+
+	protected void checkRequirementsTestMode() {
+		Objects.requireNonNull(this.modelFile);
+		Objects.requireNonNull(this.predictDataFile);
+		Objects.requireNonNull(this.predictOutputFile);
+	}
+
+	protected void checkRequirementsTrainTestMode() {
+		Objects.requireNonNull(this.fitDataFile);
+		Objects.requireNonNull(this.predictDataFile);
+		Objects.requireNonNull(this.predictOutputFile);
+	}
 
 	public String[] toCommandArray() {
+		this.checkRequirements();
 		List<String> processParameters = new ArrayList<>();
 		EOperatingSystem os = ProcessUtil.getOS();
 		if (this.timeout != null && os == EOperatingSystem.LINUX) {

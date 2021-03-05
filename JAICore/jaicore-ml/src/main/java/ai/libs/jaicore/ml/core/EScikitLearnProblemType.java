@@ -4,8 +4,8 @@ public enum EScikitLearnProblemType {
 
 	REGRESSION("regression"), //
 	CLASSIFICATION("classification"), //
-	RUL("rul", "rul-python-connection"), //
-	FEATURE_ENGINEERING("fe", "rul-python-connection");
+	TIME_SERIES_REGRESSION("ts-reg", "rul-python-connection"), //
+	TIME_SERIES_FEATURE_ENGINEERING("ts-fe", "rul-python-connection");
 
 	private final String scikitLearnCommandLineFlag;
 	private final String[] pythonRequiredModules;

@@ -12,6 +12,14 @@ import org.api4.java.common.control.ILoggingCustomizable;
 
 import ai.libs.python.IPythonConfig;
 
+/**
+ * Handles the execution of a scikit-learn pipeline in python and makes the according predictions available. A scikit-learn pipeline is a composition of one or multiple (ML) algorithms.
+ *
+ * @see <a href="https://scikit-learn.org/stable/modules/compose.html">scikit-learn: Pipelines and composite estimators</a>
+ *
+ * @author tornede
+ *
+ */
 public interface IScikitLearnWrapper extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, ILoggingCustomizable {
 
 	public void setPythonTemplate(final String pythonTemplatePath) throws IOException;
@@ -23,10 +31,6 @@ public interface IScikitLearnWrapper extends ISupervisedLearner<ILabeledInstance
 	public void setSeed(final long seed);
 
 	public void setTimeout(final Timeout timeout);
-
-	// public void setTargets(final int... targetColumns) {
-	// this.targetColumns = targetColumns;
-	// }
 
 	public void fit(final String trainingDataName) throws TrainingException, InterruptedException;
 
