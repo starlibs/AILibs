@@ -24,7 +24,7 @@ public class SensorTimeSeriesAttribute extends AGenericObjectAttribute<SensorTim
 
 	@Override
 	public boolean isValidValue(final Object value) {
-		return (value instanceof SensorTimeSeries);
+		return (value instanceof SensorTimeSeries || value instanceof SensorTimeSeriesAttributeValue);
 	}
 
 	@Override
@@ -34,12 +34,10 @@ public class SensorTimeSeriesAttribute extends AGenericObjectAttribute<SensorTim
 
 	@Override
 	public IAttributeValue getAsAttributeValue(final Object object) {
-		if (this.isValidValue(object)) {
-			if (object instanceof SensorTimeSeriesAttributeValue) {
-				return new SensorTimeSeriesAttributeValue(this, ((SensorTimeSeriesAttributeValue) object).getValue());
-			} else {
-				return new SensorTimeSeriesAttributeValue(this, (SensorTimeSeries) object);
-			}
+		if (object instanceof SensorTimeSeriesAttributeValue) {
+			return new SensorTimeSeriesAttributeValue(this, ((SensorTimeSeriesAttributeValue) object).getValue());
+		} else if (object instanceof SensorTimeSeries) {
+			return new SensorTimeSeriesAttributeValue(this, (SensorTimeSeries) object);
 		}
 		throw new IllegalArgumentException("No valid value for this attribute");
 	}
@@ -55,7 +53,7 @@ public class SensorTimeSeriesAttribute extends AGenericObjectAttribute<SensorTim
 	@Override
 	public String serializeAttributeValue(final Object value) {
 		StringJoiner sj = new StringJoiner(DATA_POINT_SEPARATOR);
-		SensorTimeSeries sensorTimeSeries = (SensorTimeSeries) value;
+		SensorTimeSeries sensorTimeSeries = (SensorTimeSeries) value; // FIXME - warum ist hier kein test auf valid?
 		for (int t = 0; t <= sensorTimeSeries.getLength(); t++) {
 			if (sensorTimeSeries.getValueOrNull(t) != null) {
 				sj.add(t + TIMESTEP_VALUE_SEPARATOR + sensorTimeSeries.getValueOrNull(t));
@@ -68,7 +66,7 @@ public class SensorTimeSeriesAttribute extends AGenericObjectAttribute<SensorTim
 	 * {@inheritDoc} Given format:: "t1:v1 t2:v2 ... tn:vn"
 	 */
 	@Override
-	public Object deserializeAttributeValue(String string) {
+	public SensorTimeSeries deserializeAttributeValue(String string) {
 		string = string.replace(SENSOR_TIME_SERIES_BORDER_FLAG, EMPTY_STRING);
 		String[] splittedString = string.split(SPLIT_MULTIPLE_WHITESPACES);
 		SensorTimeSeries sensorTimeSeries = new SensorTimeSeries();
