@@ -1,8 +1,10 @@
 package ai.libs.jaicore.ml.core.dataset.serialization.arff;
 
+import ai.libs.jaicore.ml.core.dataset.schema.InstanceSchema;
+
 /**
- * enum of differnet Attributes that are implemented in the parser. They are mainly definied in rg.api4.java.ai.ml.core.dataset.schema
- * documentation by Lukas Fehring
+ * Enum of different Attributes that are implemented in the parser. They are mainly defined in
+ * {@link InstanceSchema}
  *
  */
 public enum EArffAttributeType {

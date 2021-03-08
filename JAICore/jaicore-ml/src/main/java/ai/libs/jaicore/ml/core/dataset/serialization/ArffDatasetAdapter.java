@@ -194,9 +194,9 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		if (type.startsWith("{") && type.endsWith("}")) {
 			values = type.substring(1, type.length() - 1).split(SEPARATOR_DENSE_INSTANCE_VALUES);
 			attType = EArffAttributeType.NOMINAL;
-		} else if (type.startsWith("MULTIDIMENSIONAL")) {// multidimensional Attributes have the form MULTIDIMENSIONAL(sizex,sizey) which has to be trimmed
+		} else if (type.toLowerCase().startsWith(EArffAttributeType.MULTIDIMENSIONAL.getName())) {// multidimensional Attributes have the form MULTIDIMENSIONAL(sizex,sizey) which has to be trimmed
 			attType = EArffAttributeType.MULTIDIMENSIONAL;
-			values = type.substring("MULTIDIMENSIONAL".length() + 1, type.length() - 1).split(SEPARATOR_DENSE_INSTANCE_VALUES);
+			values = type.toLowerCase().substring(EArffAttributeType.MULTIDIMENSIONAL.getName().length() + 1, type.length() - 1).split(SEPARATOR_DENSE_INSTANCE_VALUES); // TODO test ob das hier funktioniert
 		} else {
 			try {
 				attType = EArffAttributeType.valueOf(type.toUpperCase());
@@ -221,7 +221,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			} else {
 				throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
 			}
-		case MULTIDIMENSIONAL:// FIXME warum sind heir keien Break Statements? Wenn Nominal beispielsweise geparsed wird, dann würde auch direkt versucht werden meins zu parsen, was ziemlich
+		case MULTIDIMENSIONAL:
 			int breadth = Integer.parseInt(values[0]);
 			int width = Integer.parseInt(values[1]);
 			return new MultidimensionalAttribute(name, breadth, width);
@@ -262,7 +262,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			}
 		}
 
-		String[] lineSplit = curLine.split(",");
+		String[] lineSplit = curLine.split(","); // FIXME is there an error here? - there is no , in the tstdata
 		if (!(lineSplit[0].startsWith("'") && lineSplit[0].endsWith("'") || lineSplit[0].startsWith("\"") && lineSplit[0].endsWith("\"")) && lineSplit[0].contains(" ") && tryParseInt(lineSplit[0].split(" ")[0])) {
 			sparseMode = true;
 		}
@@ -277,7 +277,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			int cI = 0;
 			for (int i = 0; i < lineSplit.length; i++) {
 				final Object value;
-				if (lineSplit[i].trim().equals(V_MISSING_VALUE)) { // vmissingvalue == ? kinda
+				if (lineSplit[i].trim().equals(V_MISSING_VALUE)) {
 					value = null;
 				} else {
 					value = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
@@ -329,7 +329,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	/**
-	 * parsed ARFF file to a "parsed instance?"
+	 * parsed ARFF file to a "parsed instance"
 	 *
 	 * @param sparseMode
 	 * @param datasetFile file to be parsed
@@ -383,7 +383,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 					line = line.trim();
 					if (!line.isEmpty() && !line.startsWith("%")) { // ignore empty and comment lines
 						List<Object> parsedInstance = parseInstance(sparseMode, attributes, relationMetaData.getAsInt(K_CLASS_INDEX), line);
-						// create empty list and parse object?? - parseinstance gibt liste an attribute values
+						// create empty list and parse object
 						ILabeledInstance newI;
 						if ((parsedInstance.get(0) instanceof Object[])) {
 							newI = new DenseInstance((Object[]) ((List<?>) parsedInstance).get(0), ((List<?>) parsedInstance).get(1));

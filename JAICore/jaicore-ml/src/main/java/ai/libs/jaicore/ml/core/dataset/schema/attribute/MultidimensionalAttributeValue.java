@@ -25,17 +25,38 @@ public class MultidimensionalAttributeValue implements IAttributeValue {
 		return this.value;
 	}
 
-	/**
-	 * {@inheritDoc} two objects of class MultidimensionalAttributeValue are equal if and only if they have the same instance
-	 * of MultidimensionalAttribute as attribute and their doulbe[][] value holds the same values(therefore the same content)
-	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((this.attribute == null) ? 0 : this.attribute.hashCode());
+		result = prime * result + Arrays.deepHashCode(this.value);
+		return result;
+	}
+
 	@Override
 	public boolean equals(final Object obj) {
-		if (obj instanceof MultidimensionalAttributeValue) {
-			MultidimensionalAttributeValue compAttributeValue = (MultidimensionalAttributeValue) obj;
-			return (this.attribute.equals(compAttributeValue.getAttribute()) && Arrays.deepEquals(this.value, compAttributeValue.getValue()));
+		if (this == obj) {
+			return true;
 		}
-		throw new IllegalArgumentException("the given parameter obj is not of Type MultidimensionalAttributeValue");
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		MultidimensionalAttributeValue other = (MultidimensionalAttributeValue) obj;
+		if (this.attribute == null) {
+			if (other.attribute != null) {
+				return false;
+			}
+		} else if (!this.attribute.equals(other.attribute)) {
+			return false;
+		}
+		if (!Arrays.deepEquals(this.value, other.value)) {
+			return false;
+		}
+		return true;
 	}
 
 }
