@@ -90,23 +90,18 @@ public class MultidimensionalAttribute2d extends MultidimensionalAttribute<doubl
 		return "[MDA2] " + this.getName();
 	}
 
-	@Override
-	public double toDouble(final Object object) {
-		throw new UnsupportedOperationException("Not yet implemented in MultidimensionalAttribute");
-	}
-
 	/**
 	 * {@inheritDoc} parses String string to MutidimensionalAttributeValue
 	 */
 	@Override
 	public double[][] deserializeAttributeValue(final String string) {
-		String arraystring = string.replace(this.INPUTSTRING_INNER_SPLITTER, this.ARRAY_STRING_SPLITTER);
+		String arraystring = string.replaceAll(this.INPUTSTRING_INNER_SPLITTER, this.ARRAY_STRING_SPLITTER);
 		String[] test = arraystring.split(this.INNTER_ARRAY_SPLITTER);
 		test[0] = test[0].substring(2);
 		test[test.length - 1] = test[test.length - 1].substring(0, test[test.length - 1].length() - 2);
 		double[][] values = new double[this.xsize][this.ysize];
 		for (int i = 0; i < test.length; i++) {
-			String[] tmp = test[i].split(",");// FIXME
+			String[] tmp = test[i].split(this.ARRAY_STRING_SPLITTER);
 			for (int j = 0; j < tmp.length; j++) {
 				values[i][j] = Double.parseDouble(tmp[j]);
 			}

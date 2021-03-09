@@ -10,9 +10,11 @@ public class MultidimensionalAttribute3d extends MultidimensionalAttribute<doubl
 
 	private static final long serialVersionUID = 1L;
 
-	protected MultidimensionalAttribute3d(final String name, final int xsize, final int ysize, final int zsize) {
+	public MultidimensionalAttribute3d(final String name, final int i, final int j, final int k) {
 		super(name);
-		// TODO Auto-generated constructor stub
+		this.xsize = i;
+		this.ysize = j;
+		this.zsize = k;
 	}
 
 	/**
@@ -41,9 +43,27 @@ public class MultidimensionalAttribute3d extends MultidimensionalAttribute<doubl
 	}
 
 	@Override
-	public Object deserializeAttributeValue(final String string) {
-		// TODO Auto-generated method stub
-		return null;
+	public double[][][] deserializeAttributeValue(final String string) {// TODO TESTCASE if it works maybe chagne 2d version
+		String formatstring = string.replaceAll(this.OPEN_OR_CLOSED_BRACES_REGEX, this.EMPTY_STRING);
+		String[] stringvalues = formatstring.split(this.INPUTSTRING_INNER_SPLITTER);
+		double[][][] doublevalues = new double[this.xsize][this.ysize][this.zsize];
+
+		int position = 0;
+		for (int x = 0; x < this.xsize; x++) {
+			double[][] nextdouble = new double[this.ysize][this.zsize];
+			for (int y = 0; y < this.ysize; y++) {
+				double[] nextsingle = new double[this.zsize];
+				for (int z = 0; z < this.zsize; z++) {
+					nextsingle[z] = Double.parseDouble(stringvalues[position]);
+					position++;
+				}
+				nextdouble[y] = nextsingle;
+			}
+			doublevalues[x] = nextdouble;
+		}
+
+		return doublevalues;
+
 	}
 
 }

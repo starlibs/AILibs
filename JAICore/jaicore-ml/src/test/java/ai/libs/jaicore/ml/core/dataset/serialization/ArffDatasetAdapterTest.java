@@ -27,6 +27,7 @@ import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.ml.core.dataset.DatasetTestUtil;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultidimensionalAttribute2d;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultidimensionalAttribute3d;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 import ai.libs.jaicore.ml.pdm.dataset.SensorTimeSeries;
 import ai.libs.jaicore.ml.pdm.dataset.SensorTimeSeriesAttribute;
@@ -35,7 +36,7 @@ import ai.libs.jaicore.test.LongTest;
 public class ArffDatasetAdapterTest {
 
 	private static final String RELATION_NAME = "probing_nonan_noid";
-	private static final int CLASS_INDEX = 3;
+	private static final int CLASS_INDEX = 4;
 	private static final String RELATION_STRING = "@relation '" + RELATION_NAME + ": -C " + CLASS_INDEX + "'";
 
 	private static final String ATTRIBUTE_NAME = "myAtt";
@@ -45,22 +46,26 @@ public class ArffDatasetAdapterTest {
 			"Neal", "Nigam", "Peterson", "Power", "Riley", "Robert", "Shea", "Sherwin", "Taylor", "Vernon", "Vision", "Walters", "Wilson");
 	private static final String NOMINAL_ATTRIBUTE_STRING = "@attribute '" + ATTRIBUTE_NAME + "' {" + SetUtil.implode(CATEGORICAL_VALUES, ",") + "}";
 	private static final String SENSOR_TIME_SERIES_ATTRIBUTE_STRING = "@attribute " + ATTRIBUTE_NAME + " timeseries";
-	private static final String MULTI_DIMENSIONAL_ATTRIBUTE_ATTRIBUTE_STRING = "@attribute" + ATTRIBUTE_NAME + "(3,2)";
+	private static final String MULTI_DIMENSIONAL_ATTRIBUTE2D_STRING = "@attribute" + ATTRIBUTE_NAME + "(3,2)";
+	private static final String MULTI_DIMENSIONAL_ATTRIBUTE3D_STRING = "@attribute" + ATTRIBUTE_NAME + "(4,3,2)";
 
 	private static final IAttribute TEST_NUM_ATT = new NumericAttribute("numAtt");
 	private static final IAttribute TEST_CAT_ATT = new IntBasedCategoricalAttribute("catAtt", CATEGORICAL_VALUES);
 	private static final IAttribute TEST_STS_ATT = new SensorTimeSeriesAttribute("sensorTimeSeriesAttibute");
-	private static final IAttribute TEST_MUL_ATT = new MultidimensionalAttribute2d("multidimensionalAttribute", 3, 2);
+	private static final IAttribute TEST_MUL2D_ATT = new MultidimensionalAttribute2d("multidimensionalAttribute", 3, 2);
+	private static final IAttribute TEST_MUL3D_ATT = new MultidimensionalAttribute3d(ATTRIBUTE_NAME, 4, 3, 2);
 
 	private static final double TEST_NUMERIC_VAL = 231.0;
 	private static final int TEST_CATEGORICAL_VAL = (int) TEST_CAT_ATT.deserializeAttributeValue(CATEGORICAL_VALUES.get(1));
 	private static final SensorTimeSeries TEST_STS_VAL = (SensorTimeSeries) TEST_STS_ATT.deserializeAttributeValue("1#0.5 2#0.34 5#93.4");
-	private static final double[][] TEST_MUL_VAL = { { 1.0, 2.0 }, { 3.0, 4.0 }, { 5.0, 6.0 } };
+	private static final double[][] TEST_MUL2D_VAL = { { 1.0, 2.0 }, { 3.0, 4.0 }, { 5.0, 6.0 } };
+	private static final double[][][] TEST_MUL3D_VAL = { { { 1.0, 2.0 }, { 3.0, 4.0 }, { 5.0, 6.0 } }, { { 1.1, 2.1 }, { 3.1, 4.1 }, { 5.1, 6.1 } }, { { 1.2, 2.2 }, { 3.2, 4.2 }, { 5.2, 6.2 } },
+			{ { 1.3, 2.3 }, { 3.3, 4.3 }, { 5.3, 6.3 } } };
 
-	private static final List<IAttribute> TEST_ATTRIBUTES = Arrays.asList(TEST_NUM_ATT, TEST_STS_ATT, TEST_MUL_ATT, TEST_CAT_ATT);
-	private static final Object[] TEST_INSTANCE = { TEST_NUMERIC_VAL, TEST_STS_VAL, TEST_MUL_VAL, TEST_CATEGORICAL_VAL };
-	private static final Object[] TEST_INSTANCE_WITH_MISSING_NUMERIC_VAL = { null, TEST_STS_VAL, TEST_MUL_VAL, TEST_CATEGORICAL_VAL };
-	private static final Object[] TEST_INSTANCE_WITH_MISSING_CATEGORICAL_VAL = { TEST_NUMERIC_VAL, TEST_STS_VAL, TEST_MUL_VAL, null };
+	private static final List<IAttribute> TEST_ATTRIBUTES = Arrays.asList(TEST_NUM_ATT, TEST_STS_ATT, TEST_MUL2D_ATT, TEST_MUL3D_ATT, TEST_CAT_ATT);
+	private static final Object[] TEST_INSTANCE = { TEST_NUMERIC_VAL, TEST_STS_VAL, TEST_MUL2D_VAL, TEST_MUL3D_VAL, TEST_CATEGORICAL_VAL };
+	private static final Object[] TEST_INSTANCE_WITH_MISSING_NUMERIC_VAL = { null, TEST_STS_VAL, TEST_MUL2D_VAL, TEST_MUL3D_VAL, TEST_CATEGORICAL_VAL };
+	private static final Object[] TEST_INSTANCE_WITH_MISSING_CATEGORICAL_VAL = { TEST_NUMERIC_VAL, TEST_STS_VAL, TEST_MUL2D_VAL, TEST_MUL3D_VAL, null };
 
 	private static String generateDenseInstanceString(final List<IAttribute> attributes, final Object[] instanceArray) {
 		return IntStream.range(0, instanceArray.length).mapToObj(x -> attributes.get(x).serializeAttributeValue(instanceArray[x])).reduce((a, b) -> a + "," + b).get();
@@ -115,6 +120,8 @@ public class ArffDatasetAdapterTest {
 			} else {
 				if (parsedDenseInstance[i] instanceof double[][]) {
 					assertTrue("Attribute value at position " + i + " " + parsedDenseInstance[i] + " is not equal to the expected value ", Arrays.deepEquals((double[][]) parsedDenseInstance[i], (double[][]) TEST_INSTANCE[i]));
+				} else if (parsedDenseInstance[i] instanceof double[][][]) {
+					assertTrue("Attribute value at position " + i + " " + parsedDenseInstance[i] + " is not equal to the expected value ", Arrays.deepEquals((double[][][]) parsedDenseInstance[i], (double[][][]) TEST_INSTANCE[i]));
 				} else {
 					assertEquals("Attribute value at position " + i + " " + parsedDenseInstance[i] + " is not equal to the expected value " + TEST_INSTANCE[i], TEST_INSTANCE[i], parsedDenseInstance[i]);
 				}
@@ -137,6 +144,8 @@ public class ArffDatasetAdapterTest {
 			}
 			if (parsedSparseInstance.get(i) instanceof double[][]) {
 				assertTrue("Attribute value at position " + i + " " + parsedSparseInstance.get(i) + " is not equal to the expected value ", Arrays.deepEquals((double[][]) parsedSparseInstance.get(i), (double[][]) TEST_INSTANCE[i]));
+			} else if (parsedSparseInstance.get(i) instanceof double[][][]) {
+				assertTrue("Attribute value at position " + i + " " + parsedSparseInstance.get(i) + " is not equal to the expected value ", Arrays.deepEquals((double[][][]) parsedSparseInstance.get(i), (double[][][]) TEST_INSTANCE[i]));
 			} else {
 				assertEquals("Attribute value at position " + i + " " + parsedSparseInstance.get(i) + " is not equal to the expected value " + TEST_INSTANCE[i], TEST_INSTANCE[i], parsedSparseInstance.get(i));
 			}
@@ -189,7 +198,8 @@ public class ArffDatasetAdapterTest {
 		assertNotNull(parsedSparseInstance.get(0));
 		assertNotNull(parsedSparseInstance.get(1));
 		assertNotNull(parsedSparseInstance.get(2));
-		assertNull(parsedSparseInstance.get(3));
+		assertNotNull(parsedSparseInstance.get(3));
+		assertNull(parsedSparseInstance.get(4));
 	}
 
 	@Test

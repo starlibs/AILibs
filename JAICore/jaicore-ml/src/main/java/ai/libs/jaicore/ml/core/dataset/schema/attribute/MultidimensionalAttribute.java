@@ -6,8 +6,10 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IObjectAttribute;
 
 public abstract class MultidimensionalAttribute<O> extends AGenericObjectAttribute<O> implements IObjectAttribute<NumericAttribute> {
 
-	protected final char INPUTSTRING_INNER_SPLITTER = ' ';
-	protected final char ARRAY_STRING_SPLITTER = ',';
+	protected final String INPUTSTRING_INNER_SPLITTER = " ";
+	protected final String ARRAY_STRING_SPLITTER = ",";
+	protected final String EMPTY_STRING = "";
+	protected final String OPEN_OR_CLOSED_BRACES_REGEX = "\\[|\\]";
 	protected final String INNTER_ARRAY_SPLITTER = "\\],\\[";
 	protected final String DOUBLE_SPACE = "  ";
 	protected final String SPACE = " ";

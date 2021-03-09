@@ -41,6 +41,7 @@ import ai.libs.jaicore.ml.core.dataset.SparseInstance;
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultidimensionalAttribute2d;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultidimensionalAttribute3d;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.StringAttribute;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffAttributeType;
@@ -221,10 +222,14 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			} else {
 				throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
 			}
-		case MULTIDIMENSIONAL: // TODO figure out what to do in 2d / 3d pics
-			int breadth = Integer.parseInt(values[0]);
-			int width = Integer.parseInt(values[1]);
-			return new MultidimensionalAttribute2d(name, breadth, width);
+		case MULTIDIMENSIONAL: // TODO figure out if this works - test for 3d
+			if (values.length == 2) {
+				int breadth = Integer.parseInt(values[0]);
+				int width = Integer.parseInt(values[1]);
+				return new MultidimensionalAttribute2d(name, breadth, width);
+			} else if (values.length == 3) {
+				return new MultidimensionalAttribute3d(name, Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2]));
+			}
 		default:
 			throw new UnsupportedAttributeTypeException("Can not deal with attribute type " + type);
 		}
@@ -262,7 +267,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			}
 		}
 
-		String[] lineSplit = curLine.split(","); // FIXME is there an error here? - there is no , in the tstdata
+		String[] lineSplit = curLine.split(",");
 		if (!(lineSplit[0].startsWith("'") && lineSplit[0].endsWith("'") || lineSplit[0].startsWith("\"") && lineSplit[0].endsWith("\"")) && lineSplit[0].contains(" ") && tryParseInt(lineSplit[0].split(" ")[0])) {
 			sparseMode = true;
 		}
