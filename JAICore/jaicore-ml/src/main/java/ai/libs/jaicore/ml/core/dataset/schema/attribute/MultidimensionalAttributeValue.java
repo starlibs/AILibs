@@ -1,16 +1,13 @@
 package ai.libs.jaicore.ml.core.dataset.schema.attribute;
 
-import java.util.Arrays;
-
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 
-public class MultidimensionalAttributeValue implements IAttributeValue {
+public abstract class MultidimensionalAttributeValue<O> implements IAttributeValue {
+	protected O value;
+	protected MultidimensionalAttribute<O> attribute;
 
-	private final double[][] value;
-	private final MultidimensionalAttribute attribute;
-
-	public MultidimensionalAttributeValue(final MultidimensionalAttribute attribute, final double[][] value) {
+	public MultidimensionalAttributeValue(final MultidimensionalAttribute<O> attribute, final O value) {
 		this.value = value;
 		this.attribute = attribute;
 	}
@@ -21,7 +18,7 @@ public class MultidimensionalAttributeValue implements IAttributeValue {
 	}
 
 	@Override
-	public double[][] getValue() {
+	public O getValue() {
 		return this.value;
 	}
 
@@ -30,7 +27,7 @@ public class MultidimensionalAttributeValue implements IAttributeValue {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((this.attribute == null) ? 0 : this.attribute.hashCode());
-		result = prime * result + Arrays.deepHashCode(this.value);
+		result = prime * result + ((this.value == null) ? 0 : this.value.hashCode());
 		return result;
 	}
 
@@ -45,7 +42,7 @@ public class MultidimensionalAttributeValue implements IAttributeValue {
 		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
-		MultidimensionalAttributeValue other = (MultidimensionalAttributeValue) obj;
+		MultidimensionalAttributeValue<O> other = (MultidimensionalAttributeValue<O>) obj;
 		if (this.attribute == null) {
 			if (other.attribute != null) {
 				return false;
@@ -53,7 +50,11 @@ public class MultidimensionalAttributeValue implements IAttributeValue {
 		} else if (!this.attribute.equals(other.attribute)) {
 			return false;
 		}
-		if (!Arrays.deepEquals(this.value, other.value)) {
+		if (this.value == null) {
+			if (other.value != null) {
+				return false;
+			}
+		} else if (!this.value.equals(other.value)) {
 			return false;
 		}
 		return true;

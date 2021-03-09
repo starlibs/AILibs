@@ -40,7 +40,7 @@ import ai.libs.jaicore.ml.core.dataset.DenseInstance;
 import ai.libs.jaicore.ml.core.dataset.SparseInstance;
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultidimensionalAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultidimensionalAttribute2d;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.StringAttribute;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffAttributeType;
@@ -195,7 +195,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			values = type.substring(1, type.length() - 1).split(SEPARATOR_DENSE_INSTANCE_VALUES);
 			attType = EArffAttributeType.NOMINAL;
 		} else if (type.toLowerCase().startsWith(EArffAttributeType.MULTIDIMENSIONAL.getName())) {// multidimensional Attributes have the form MULTIDIMENSIONAL(sizex,sizey) which has to be trimmed
-			attType = EArffAttributeType.MULTIDIMENSIONAL;
+			attType = EArffAttributeType.MULTIDIMENSIONAL; // TODO3dcase - does it work
 			values = type.toLowerCase().substring(EArffAttributeType.MULTIDIMENSIONAL.getName().length() + 1, type.length() - 1).split(SEPARATOR_DENSE_INSTANCE_VALUES); // TODO test ob das hier funktioniert
 		} else {
 			try {
@@ -221,10 +221,10 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			} else {
 				throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
 			}
-		case MULTIDIMENSIONAL:
+		case MULTIDIMENSIONAL: // TODO figure out what to do in 2d / 3d pics
 			int breadth = Integer.parseInt(values[0]);
 			int width = Integer.parseInt(values[1]);
-			return new MultidimensionalAttribute(name, breadth, width);
+			return new MultidimensionalAttribute2d(name, breadth, width);
 		default:
 			throw new UnsupportedAttributeTypeException("Can not deal with attribute type " + type);
 		}

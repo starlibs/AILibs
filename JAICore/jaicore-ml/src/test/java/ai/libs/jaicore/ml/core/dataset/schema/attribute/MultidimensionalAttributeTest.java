@@ -13,11 +13,11 @@ public class MultidimensionalAttributeTest extends AAttributeTest {
 	private final static int Test_ATTR_XSIZE = 3;
 	private final static int Test_ATTR_YSIZE = 2;
 
-	static MultidimensionalAttribute testAttr;
+	static MultidimensionalAttribute2d testAttr;
 
 	@BeforeAll
 	public static void SetupApi() {
-		testAttr = new MultidimensionalAttribute(TEST_ATTR_NAME, Test_ATTR_XSIZE, Test_ATTR_YSIZE);
+		testAttr = new MultidimensionalAttribute2d(TEST_ATTR_NAME, Test_ATTR_XSIZE, Test_ATTR_YSIZE);
 	}
 
 	@Override
