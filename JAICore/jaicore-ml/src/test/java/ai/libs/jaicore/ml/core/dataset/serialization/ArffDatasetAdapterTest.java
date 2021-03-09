@@ -62,13 +62,6 @@ public class ArffDatasetAdapterTest {
 	private static final Object[] TEST_INSTANCE_WITH_MISSING_NUMERIC_VAL = { null, TEST_STS_VAL, TEST_MUL_VAL, TEST_CATEGORICAL_VAL };
 	private static final Object[] TEST_INSTANCE_WITH_MISSING_CATEGORICAL_VAL = { TEST_NUMERIC_VAL, TEST_STS_VAL, TEST_MUL_VAL, null };
 
-	/*
-	private static final String MULTIDIMENSIONALATTRIBUTE_TEST_STRING = "@ATTRIBUTE attribute_4 MULTIDIMENSIONAL(3,2)";
-	private static final int MULTIDIMENSIONALATTRIBUTE_TESTX = 3;
-	private static final int MULTIDIMENSIONALATTRIBUTE_TESTY = 2;
-	private static final String MULTIDIMENSIONALATTRIBUTE_VALUE_TE_STRING = "[[1.0 2.0] [3.0 4.0] [5.0 6.0]]";
-	private static final double[][] MULTIDIMENSIONALATTRIBUTE_TEST_ARRAY = { { 1.0, 2.0 }, { 3.0, 4.0 }, { 5.0, 6.0 } };*/
-
 	private static String generateDenseInstanceString(final List<IAttribute> attributes, final Object[] instanceArray) {
 		return IntStream.range(0, instanceArray.length).mapToObj(x -> attributes.get(x).serializeAttributeValue(instanceArray[x])).reduce((a, b) -> a + "," + b).get();
 	}
@@ -107,19 +100,6 @@ public class ArffDatasetAdapterTest {
 		assertTrue("Returned attribute is not of type IObjectAttribute", attribute instanceof IObjectAttribute);
 		assertEquals("Name of attribute could not be extracted correctly", ATTRIBUTE_NAME, attribute.getName());
 	}
-
-	/*
-	@Test
-	public void testParseMultidimensionalAttribute() throws UnsupportedAttributeTypeException, InvalidAlgorithmParameterException {
-		MultidimensionalAttribute attribute = (MultidimensionalAttribute) ArffDatasetAdapter.parseAttribute(MULTIDIMENSIONALATTRIBUTE_TEST_STRING);
-		MultidimensionalAttributeValue value = attribute.deserializeAttributeValue(MULTIDIMENSIONALATTRIBUTE_VALUE_TE_STRING);
-		MultidimensionalAttributeValue compareValue = new MultidimensionalAttributeValue(attribute, MULTIDIMENSIONALATTRIBUTE_TEST_ARRAY);
-	
-		assertEquals("name in the multidimensional Attribute fits ", "attribute_4", attribute.getName());
-		assertTrue("x and y coords not used right", attribute.getXsize() == MULTIDIMENSIONALATTRIBUTE_TESTX && attribute.getYsize() == MULTIDIMENSIONALATTRIBUTE_TESTY);
-		assertTrue("right parsed value and equals", value.equals(compareValue));
-	
-	}*/
 
 	@Test
 	public void testParseDenseInstance() {
