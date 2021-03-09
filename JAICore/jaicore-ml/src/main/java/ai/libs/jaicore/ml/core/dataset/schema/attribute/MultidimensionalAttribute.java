@@ -11,7 +11,7 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IObjectAttribute;
  * @author Lukas
  *
  */
-public class MultidimensionalAttribute extends AGenericObjectAttribute<double[]> implements IObjectAttribute<NumericAttribute> {
+public class MultidimensionalAttribute extends AGenericObjectAttribute<double[][]> implements IObjectAttribute<NumericAttribute> {
 	private static final long serialVersionUID = 1L;
 
 	private final char INPUTSTRING_INNER_SPLITTER = ' ';
@@ -132,8 +132,16 @@ public class MultidimensionalAttribute extends AGenericObjectAttribute<double[]>
 	}
 
 	@Override
-	protected double[] getValueAsTypeInstance(final Object object) {
-		return null;
+	protected double[][] getValueAsTypeInstance(final Object object) {
+		if (this.isValidValue(object)) {
+			if (object instanceof MultidimensionalAttributeValue) {
+				return ((MultidimensionalAttributeValue) object).getValue();
+			} else {
+				return (double[][]) object;
+			}
+		}
+		throw new IllegalArgumentException("No valid value for this attribute");
+
 	}
 
 }
