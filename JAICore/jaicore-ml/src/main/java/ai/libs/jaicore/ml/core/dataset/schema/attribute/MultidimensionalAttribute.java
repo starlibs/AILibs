@@ -6,6 +6,9 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IObjectAttribute;
 
 public abstract class MultidimensionalAttribute<O> extends AGenericObjectAttribute<O> implements IObjectAttribute<NumericAttribute> {
 
+	private static final long serialVersionUID = -1416829149499898655L; // TODO What is an UID used for in this context - The same as in distributed Algorithms? -> is this done in a distributed Fashion
+
+	// TODO should constants have a comment ? In some guidelines they do in some they don't
 	protected final String SINGLE_SPACE = " ";
 	protected final String ARRAY_STRING_SPLITTER = ",";
 	protected final String EMPTY_STRING = "";
@@ -19,7 +22,7 @@ public abstract class MultidimensionalAttribute<O> extends AGenericObjectAttribu
 
 	@Override
 	public double toDouble(final Object object) {
-		throw new UnsupportedOperationException("Not yet implemented in MultidimensionalAttribute");
+		throw new UnsupportedOperationException("Not yet implemented in MultidimensionalAttribute"); // TODO check what is with those methods now.
 	}
 
 	/**

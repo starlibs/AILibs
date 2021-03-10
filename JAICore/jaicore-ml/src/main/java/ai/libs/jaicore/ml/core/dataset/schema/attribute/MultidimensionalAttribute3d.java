@@ -4,21 +4,23 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 
 public class MultidimensionalAttribute3d extends MultidimensionalAttribute<double[][][]> {
 
-	private int xsize;
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 6878673196924994437L; // TODO what is that
+	private int xsize;// TODO check with Tanja if xsize and ysize should be in MzltidimensionalAttribute
 	private int ysize;
 	private int zsize;
 
-	private static final long serialVersionUID = 1L;
-
-	public MultidimensionalAttribute3d(final String name, final int i, final int j, final int k) {
+	public MultidimensionalAttribute3d(final String name, final int xsize, final int ysize, final int zsize) {
 		super(name);
-		this.xsize = i;
-		this.ysize = j;
-		this.zsize = k;
+		this.xsize = xsize;
+		this.ysize = ysize;
+		this.zsize = zsize;
 	}
 
 	/**
-	 * {@inheritDoc} takes object type double[][] or MultidimensionalAttributeValue - parsed to MultidimensionalAttributeValue
+	 * {@inheritDoc} takes object type double[][][] or MultidimensionalAttributeValue3d - parsed to MultidimensionalAttributeValue3d
 	 */
 	@Override
 	public IAttributeValue getAsAttributeValue(final Object object) {
@@ -39,13 +41,14 @@ public class MultidimensionalAttribute3d extends MultidimensionalAttribute<doubl
 
 	@Override
 	public String getStringDescriptionOfDomain() {
-		return "[MDA3] " + this.getName();
+		return "[MDA3] " + this.getName(); // TODO check with Tanja if i can just choose String descriptors like this
 	}
 
 	@Override
-	public double[][][] deserializeAttributeValue(final String string) {// TODO TESTCASE if it works maybe chagne 2d version
+	public double[][][] deserializeAttributeValue(final String string) {
 		String formatstring = string.replaceAll(this.OPEN_OR_CLOSED_BRACES_REGEX, this.EMPTY_STRING);
-		String[] stringvalues = formatstring.split(this.SINGLE_SPACE);
+		String[] stringvalues = formatstring.split(this.SINGLE_SPACE); // TODO check those 2 lines could be in upper class in theory if MultidimensionalAttribute2d got changed accordingly. The lower lines could be
+		// done by a new private Method that is definied in the upper class and lower classes have to implement
 		double[][][] doublevalues = new double[this.xsize][this.ysize][this.zsize];
 
 		int position = 0;
