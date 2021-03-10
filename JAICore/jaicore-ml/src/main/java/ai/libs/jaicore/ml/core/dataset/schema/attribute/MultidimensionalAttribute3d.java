@@ -45,7 +45,7 @@ public class MultidimensionalAttribute3d extends MultidimensionalAttribute<doubl
 	@Override
 	public double[][][] deserializeAttributeValue(final String string) {// TODO TESTCASE if it works maybe chagne 2d version
 		String formatstring = string.replaceAll(this.OPEN_OR_CLOSED_BRACES_REGEX, this.EMPTY_STRING);
-		String[] stringvalues = formatstring.split(this.INPUTSTRING_INNER_SPLITTER);
+		String[] stringvalues = formatstring.split(this.SINGLE_SPACE);
 		double[][][] doublevalues = new double[this.xsize][this.ysize][this.zsize];
 
 		int position = 0;

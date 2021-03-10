@@ -95,7 +95,7 @@ public class MultidimensionalAttribute2d extends MultidimensionalAttribute<doubl
 	 */
 	@Override
 	public double[][] deserializeAttributeValue(final String string) {
-		String arraystring = string.replaceAll(this.INPUTSTRING_INNER_SPLITTER, this.ARRAY_STRING_SPLITTER);
+		String arraystring = string.replaceAll(this.SINGLE_SPACE, this.ARRAY_STRING_SPLITTER);
 		String[] test = arraystring.split(this.INNTER_ARRAY_SPLITTER);
 		test[0] = test[0].substring(2);
 		test[test.length - 1] = test[test.length - 1].substring(0, test[test.length - 1].length() - 2);

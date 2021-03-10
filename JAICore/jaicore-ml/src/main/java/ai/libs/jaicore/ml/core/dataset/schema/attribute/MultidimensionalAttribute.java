@@ -6,13 +6,12 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IObjectAttribute;
 
 public abstract class MultidimensionalAttribute<O> extends AGenericObjectAttribute<O> implements IObjectAttribute<NumericAttribute> {
 
-	protected final String INPUTSTRING_INNER_SPLITTER = " ";
+	protected final String SINGLE_SPACE = " ";
 	protected final String ARRAY_STRING_SPLITTER = ",";
 	protected final String EMPTY_STRING = "";
 	protected final String OPEN_OR_CLOSED_BRACES_REGEX = "\\[|\\]";
 	protected final String INNTER_ARRAY_SPLITTER = "\\],\\[";
 	protected final String DOUBLE_SPACE = "  ";
-	protected final String SPACE = " ";
 
 	protected MultidimensionalAttribute(final String name) {
 		super(name);
@@ -30,7 +29,7 @@ public abstract class MultidimensionalAttribute<O> extends AGenericObjectAttribu
 	public String serializeAttributeValue(final Object value) {
 		Object[] castvalue = (Object[]) value;
 		String serialisedString = Arrays.deepToString(castvalue);
-		return serialisedString.replace(this.ARRAY_STRING_SPLITTER, this.INPUTSTRING_INNER_SPLITTER).replace(this.DOUBLE_SPACE, this.SPACE);
+		return serialisedString.replace(this.ARRAY_STRING_SPLITTER, this.SINGLE_SPACE).replace(this.DOUBLE_SPACE, this.SINGLE_SPACE);
 	}
 
 	@Override
