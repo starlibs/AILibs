@@ -46,8 +46,8 @@ public class ArffDatasetAdapterTest {
 			"Neal", "Nigam", "Peterson", "Power", "Riley", "Robert", "Shea", "Sherwin", "Taylor", "Vernon", "Vision", "Walters", "Wilson");
 	private static final String NOMINAL_ATTRIBUTE_STRING = "@attribute '" + ATTRIBUTE_NAME + "' {" + SetUtil.implode(CATEGORICAL_VALUES, ",") + "}";
 	private static final String SENSOR_TIME_SERIES_ATTRIBUTE_STRING = "@attribute " + ATTRIBUTE_NAME + " timeseries";
-	private static final String MULTI_DIMENSIONAL_ATTRIBUTE2D_STRING = "@attribute" + ATTRIBUTE_NAME + "(3,2)";
-	private static final String MULTI_DIMENSIONAL_ATTRIBUTE3D_STRING = "@attribute" + ATTRIBUTE_NAME + "(4,3,2)";
+	private static final String MULTI_DIMENSIONAL_ATTRIBUTE2D_STRING = "@attribute " + ATTRIBUTE_NAME + " Multidimensional(3,2)";
+	private static final String MULTI_DIMENSIONAL_ATTRIBUTE3D_STRING = "@attribute " + ATTRIBUTE_NAME + " Multidimensional(4,3,2)";
 
 	private static final IAttribute TEST_NUM_ATT = new NumericAttribute("numAtt");
 	private static final IAttribute TEST_CAT_ATT = new IntBasedCategoricalAttribute("catAtt", CATEGORICAL_VALUES);
@@ -87,6 +87,16 @@ public class ArffDatasetAdapterTest {
 		IAttribute attribute = ArffDatasetAdapter.parseAttribute(NUMERIC_ATTRIBUTE_STRING);
 		assertTrue("Returned attribute is not of type INumericAttribtue", attribute instanceof INumericAttribute);
 		assertEquals("Name of attribute could not be extracted correctly", ATTRIBUTE_NAME, attribute.getName());
+	}
+
+	@Test
+	public void testMultidimensionalAttribute() throws UnsupportedAttributeTypeException {
+		IAttribute attribute2d = ArffDatasetAdapter.parseAttribute(MULTI_DIMENSIONAL_ATTRIBUTE2D_STRING);
+		IAttribute attribute3d = ArffDatasetAdapter.parseAttribute(MULTI_DIMENSIONAL_ATTRIBUTE3D_STRING);
+
+		assertTrue("Returned attribute is not of type MultidimensionalAttribute2d", attribute2d instanceof MultidimensionalAttribute2d);
+		assertTrue("Returned attribute is not of type MultidimensionalAttribute3d", attribute3d instanceof MultidimensionalAttribute3d);
+		assertTrue("Name of attrtibute could not be extracted correctly", attribute2d.getName().equals(attribute3d.getName()) && attribute2d.getName().equals(ATTRIBUTE_NAME));
 	}
 
 	@Test
