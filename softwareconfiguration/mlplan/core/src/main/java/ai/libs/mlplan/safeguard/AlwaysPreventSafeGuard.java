@@ -14,8 +14,8 @@ public class AlwaysPreventSafeGuard implements IEvaluationSafeGuard {
 		if (!(ci instanceof ComponentInstance)) {
 			throw new IllegalArgumentException("Only works with ComponentInstance objects");
 		}
-		((ComponentInstance)ci).putAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME, Integer.MAX_VALUE + "");
-		((ComponentInstance)ci).putAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME, Integer.MAX_VALUE + "");
+		((ComponentInstance) ci).setAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME, Integer.MAX_VALUE + "");
+		((ComponentInstance) ci).setAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME, Integer.MAX_VALUE + "");
 		return false;
 	}
 

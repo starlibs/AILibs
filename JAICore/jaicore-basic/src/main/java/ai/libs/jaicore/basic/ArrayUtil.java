@@ -239,6 +239,12 @@ public class ArrayUtil {
 		IntStream.range(0, sum.length).forEach(x -> sum[x] += summand[x]);
 	}
 
+	public static void multiplyScalar(final double[] mult, final double scalar) {
+		for (int i = 0; i < mult.length; i++) {
+			mult[i] *= scalar;
+		}
+	}
+
 	public static <T> T[] mergeArrays(final T[] array0, final T[] array1) {
 		@SuppressWarnings("unchecked")
 		T[] merged = (T[]) Array.newInstance(array0.getClass(), array0.length + array1.length);

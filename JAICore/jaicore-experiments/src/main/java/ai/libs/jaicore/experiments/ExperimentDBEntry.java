@@ -1,5 +1,10 @@
 package ai.libs.jaicore.experiments;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import ai.libs.jaicore.logging.ToJSONStringUtil;
+
 /**
  * This class describes concrete experiment entities contained in the database.
  * Each ExperimentDBEntry has a unique id (for the context of the experiment setup) and is bound to a conceptual experiment description in form of an Experiment object.
@@ -57,6 +62,14 @@ public class ExperimentDBEntry {
 			return false;
 		}
 		return this.id == other.id;
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("id", this.id);
+		map.put("experiment", this.experiment);
+		return ToJSONStringUtil.toJSONString(map);
 	}
 
 }

@@ -12,10 +12,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.ArrayUtil;
 import meka.classifiers.multilabel.AbstractMultiLabelClassifier;
 import meka.classifiers.multilabel.BR;
-import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.core.F;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -35,9 +33,8 @@ public class HOMERNode extends AbstractMultiLabelClassifier {
 
 	private List<HOMERNode> children;
 
-	private MultiLabelClassifier baselearner;
+	private BR baselearner;
 	private String baselearnerName;
-	private boolean doThreshold = false;
 
 	public HOMERNode(final HOMERNode... nodes) {
 		this(Arrays.asList(nodes));
@@ -52,14 +49,14 @@ public class HOMERNode extends AbstractMultiLabelClassifier {
 			Collections.sort(o2Labels);
 			return o1Labels.get(0).compareTo(o2Labels.get(0));
 		});
-		this.baselearner = new BR();
 	}
 
-	public void setThreshold(final boolean doThreshold) {
-		this.doThreshold = doThreshold;
+	public HOMERNode(final List<HOMERNode> nodes, final BR baselearner) {
+		this(nodes);
+		this.baselearner = baselearner;
 	}
 
-	public void setBaselearner(final MultiLabelClassifier baselearner) {
+	public void setBaselearner(final BR baselearner) {
 		this.baselearner = baselearner;
 	}
 
@@ -109,13 +106,12 @@ public class HOMERNode extends AbstractMultiLabelClassifier {
 			currentDataset.remove((int) removeInstances.get(i));
 		}
 
-		this.baselearner.buildClassifier(currentDataset);
-
 		for (HOMERNode child : this.children) {
 			if (child.getLabels().size() > 1) {
 				child.buildClassifier(trainingSet);
 			}
 		}
+		this.baselearner.buildClassifier(currentDataset);
 	}
 
 	@Override
@@ -125,33 +121,16 @@ public class HOMERNode extends AbstractMultiLabelClassifier {
 
 		Instances prepared = this.prepareInstances(copy);
 
-		int length;
-		int[] tDist = {};
-		double[] dist = {};
-		if (this.doThreshold) {
-			tDist = ArrayUtil.thresholdDoubleToBinaryArray(this.baselearner.distributionForInstance(prepared.get(0)), THRESHOLD);
-			length = tDist.length;
-		} else {
-			dist = this.baselearner.distributionForInstance(prepared.get(0));
-			length = dist.length;
-		}
+		double[] dist = this.baselearner.distributionForInstance(prepared.get(0));
 		double[] returnDist = new double[testInstance.classIndex()];
-
-		for (int i = 0; i < length; i++) {
-			if (this.doThreshold && tDist[i] == 1) {
-				if (this.children.get(i).getLabels().size() == 1) {
-					returnDist[this.children.get(i).getLabels().iterator().next()] = 1.0;
-				} else {
-					ArrayUtil.add(returnDist, this.children.get(i).distributionForInstance(testInstance));
-				}
-			} else if (!this.doThreshold) {
-				if (this.children.get(i).getLabels().size() == 1) {
-					returnDist[this.children.get(i).getLabels().iterator().next()] = dist[i];
-				} else {
-					double[] childDist = this.children.get(i).distributionForInstance(testInstance);
-					for (Integer childLabel : this.children.get(i).getLabels()) {
-						returnDist[childLabel] = childDist[childLabel] * dist[i];
-					}
+		for (int i = 0; i < dist.length; i++) {
+			for (int label : this.children.get(i).getLabels()) {
+				returnDist[label] = dist[i];
+			}
+			if (dist[i] >= THRESHOLD && !(this.children.get(i) instanceof HOMERLeaf)) {
+				double[] childDist = this.children.get(i).distributionForInstance(testInstance);
+				for (Integer childLabel : this.children.get(i).getLabels()) {
+					returnDist[childLabel] *= childDist[childLabel];
 				}
 			}
 		}
@@ -181,13 +160,10 @@ public class HOMERNode extends AbstractMultiLabelClassifier {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		if (!HIERARCHICAL_STRING) {
-			String actualBaselearnerName = this.baselearner.getOptions()[1];
-			sb.append(actualBaselearnerName.substring(actualBaselearnerName.lastIndexOf('.') + 1, actualBaselearnerName.length()));
-			sb.append("(");
-			sb.append(this.children.stream().map(HOMERNode::toString).collect(Collectors.joining(",")));
-			sb.append(")");
-		}
+		sb.append(this.baselearnerName.substring(this.baselearnerName.lastIndexOf('.') + 1));
+		sb.append("(");
+		sb.append(this.children.stream().map(HOMERNode::toString).collect(Collectors.joining(",")));
+		sb.append(")");
 		return sb.toString();
 	}
 }

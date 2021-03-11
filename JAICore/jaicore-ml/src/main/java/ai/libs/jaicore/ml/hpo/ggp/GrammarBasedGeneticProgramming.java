@@ -44,19 +44,19 @@ import ai.libs.jaicore.ml.hpo.ggp.GrammarBasedGeneticProgramming.GGPSolutionCand
 /**
  * Grammar-based genetic programming is an evolutionary algorithm capable of evolving individuals in the form of trees, where the trees are derived from a context-free grammar (CFG).
  * As in standard evolutionary algorithms (EA), a population is maintained that is evaluated by means of a fitness function and subsequently individuals are recombined with each
- * other and mutated. In contrast to standard EAs, special operators need to be applied to adhere to the rules imposed by the CFG and therefore to not invalidate individuals.
- *
+ * other and mutated. In contrast to standard EAs, special operators need to be applied to adhere to the rules imposed by the CFG and therefore to not invalidate individuals.<br>
+ * <br>
  * This specific implementation allows for both limiting the execution by number of evaluations (generations*population_size) or a timeout. If the number of generations is set to an
  * infeasible value, it will be assumed that the number of generations is set to infinity and thus a timeout will be required. As soon as the timeout is hit, the best solution seen so far
  * will be returned. If the timeout is set to an infeasible value, the number of generations will be a required configuration value. When running the algorithm, it will run to the specified
  * number of generation and return the best result found until this point. If both stopping criterions are set, the algorithm will terminate with the criterion that is first evaluated to true.
- * So, either the timeout is hit or the maximum number of generations reached.
- *
- * Early Stopping:
+ * So, either the timeout is hit or the maximum number of generations reached.<br>
+ * <br>
+ * <b>Early Stopping:</b>
  * If the algorithm is already converged early, i.e., before the timeout is hit or the maximum number of generations is reached, it will terminate if the algorithm has not seen any improvements
- * for a specified number of generations.
- *
- * Random Restart:
+ * for a specified number of generations.<br>
+ * <br>
+ * <b>Random Restart:</b>
  * Sometimes the algorithm may get stuck in local optima. To overcome this issue and move away from the local optima, there is a soft reset option called random restart. If random restart is
  * configured, every x generations the algorithm could not find any improvement, the current population is wiped except for the best individuals (defined via the elitism config). Then, the
  * population is filled up with new randomly sampled individuals. Thereby, the algorithm is able to move to other areas of the search space easily (given there are better fitness values).

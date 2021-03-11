@@ -26,8 +26,8 @@ public class AlwaysEvaluateSafeGuard implements IEvaluationSafeGuard {
 		if (!(ci instanceof ComponentInstance)) {
 			throw new IllegalArgumentException("Only works with ComponentInstance objects");
 		}
-		((ComponentInstance)ci).putAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME, "0.0");
-		((ComponentInstance)ci).putAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME, "0.0");
+		((ComponentInstance) ci).setAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME, "0.0");
+		((ComponentInstance) ci).setAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME, "0.0");
 		// always predict that it will adhere to the timeout, no matter what timeout is given.
 		return true;
 	}

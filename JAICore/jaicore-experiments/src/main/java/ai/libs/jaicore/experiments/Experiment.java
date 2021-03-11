@@ -3,6 +3,8 @@ package ai.libs.jaicore.experiments;
 import java.util.HashMap;
 import java.util.Map;
 
+import ai.libs.jaicore.logging.ToJSONStringUtil;
+
 /**
  * Basic experiment class that describes an experiment conceptually in terms of hardware information and semantic keys.
  *
@@ -115,5 +117,14 @@ public class Experiment {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> map = new HashMap<>();
+		map.put("memoryInMB", this.memoryInMB);
+		map.put("numCPUs", this.numCPUs);
+		map.put("valuesOfKeyFields", this.valuesOfKeyFields);
+		return ToJSONStringUtil.toJSONString(map);
 	}
 }

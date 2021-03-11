@@ -104,8 +104,8 @@ public class PipelineEvaluator extends TimedObjectEvaluator<IComponentInstance, 
 
 			ITimeTrackingLearner trackableLearner = new TimeTrackingLearnerWrapper(c, learner);
 			if (c instanceof ComponentInstance) {
-				trackableLearner.setPredictedInductionTime(((ComponentInstance)c).getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME));
-				trackableLearner.setPredictedInferenceTime(((ComponentInstance)c).getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME));
+				trackableLearner.setPredictedInductionTime(((ComponentInstance) c).getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME) + "");
+				trackableLearner.setPredictedInferenceTime(((ComponentInstance) c).getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME) + "");
 			}
 
 			if (this.logger.isDebugEnabled()) {

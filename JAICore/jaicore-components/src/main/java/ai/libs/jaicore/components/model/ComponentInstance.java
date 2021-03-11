@@ -41,7 +41,7 @@ public class ComponentInstance implements IComponentInstance, Serializable {
 	private final Map<String, String> parameterValues;
 	private final Map<String, List<IComponentInstance>> satisfactionOfRequiredInterfaces;
 
-	private final Map<String, String> annotations = new HashMap<>();
+	private final Map<String, Object> annotations = new HashMap<>();
 
 	@SuppressWarnings("unused")
 	private ComponentInstance() {
@@ -226,22 +226,6 @@ public class ComponentInstance implements IComponentInstance, Serializable {
 		return sb.toString();
 	}
 
-	public void putAnnotation(final String key, final String annotation) {
-		this.annotations.put(key, annotation);
-	}
-
-	public String getAnnotation(final String key) {
-		return this.annotations.get(key);
-	}
-
-	public void appendAnnotation(final String key, final String annotation) {
-		if (this.annotations.containsKey(key)) {
-			this.annotations.put(key, this.annotations.get(key) + annotation);
-		} else {
-			this.annotations.put(key, annotation);
-		}
-	}
-
 	@Override
 	public List<IComponentInstance> getSatisfactionOfRequiredInterface(final String idOfRequiredInterface) {
 		if (!this.component.hasRequiredInterfaceWithId(idOfRequiredInterface)) {
@@ -249,5 +233,10 @@ public class ComponentInstance implements IComponentInstance, Serializable {
 					+ this.component.getRequiredInterfaces().stream().map(ri -> "\n\t- " + ri.getId()).collect(Collectors.joining()));
 		}
 		return this.satisfactionOfRequiredInterfaces.get(idOfRequiredInterface);
+	}
+
+	@Override
+	public Map<String, Object> getAnnotations() {
+		return this.annotations;
 	}
 }
