@@ -13,10 +13,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import ai.libs.jaicore.basic.kvstore.KVStore;
+import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.exceptions.ComponentNotFoundException;
 
@@ -278,10 +280,73 @@ public class ComponentUtil {
 		return numCandidates;
 	}
 
+	public static int getNumberOfParametrizations(final IComponent component) {
+		int combos = 1;
+		for (IParameter p : component.getParameters()) {
+			IParameterDomain domain = p.getDefaultDomain();
+			if (domain instanceof NumericParameterDomain) {
+				NumericParameterDomain nDomain = (NumericParameterDomain) domain;
+				if (!nDomain.isInteger()) {
+					return Integer.MAX_VALUE;
+				}
+				combos *= nDomain.getMax() - nDomain.getMin() + 1;
+			} else if (domain instanceof CategoricalParameterDomain) {
+				combos *= ((CategoricalParameterDomain) domain).getValues().length;
+			}
+		}
+		return combos;
+	}
+
+	public static Collection<IComponentInstance> getAllInstantiations(final IComponent component) {
+		if (!component.getRequiredInterfaces().isEmpty()) {
+			throw new IllegalArgumentException("Full grounding only enabled for atomic components (without required interfaces).");
+		}
+		int numInstances = getNumberOfParametrizations(component);
+		if (numInstances > 100000) {
+			throw new IllegalArgumentException("Component " + component.getName() + " has " + numInstances + " possible instantiations. Only up to 100000 are supported.");
+		}
+
+		/* collect param domains as lists */
+		List<String> paramNames = new ArrayList<>();
+		List<Collection<Object>> params = new ArrayList<>();
+		for (IParameter p : component.getParameters()) {
+			paramNames.add(p.getName());
+			IParameterDomain domain = p.getDefaultDomain();
+			if (domain instanceof NumericParameterDomain) {
+				NumericParameterDomain nDomain = (NumericParameterDomain) domain;
+				List<Object> items = new ArrayList<>();
+				for (int i = (int) nDomain.getMin(); i <= nDomain.getMax(); i++) {
+					items.add(i);
+				}
+				params.add(items);
+			} else if (domain instanceof CategoricalParameterDomain) {
+				params.add(Arrays.asList(((CategoricalParameterDomain) domain).getValues()));
+			}
+		}
+
+		/* if this one is not parametrizable */
+		if (params.isEmpty()) {
+			return Arrays.asList(ComponentUtil.getDefaultParameterizationOfComponent(component));
+		}
+
+		/* build cartesian product */
+		Collection<List<Object>> combos = SetUtil.cartesianProduct(params);
+		System.out.println(combos.size() + " combos.");
+		List<IComponentInstance> instances = new ArrayList<>();
+		combos.forEach(c -> {
+			Map<String, String> paramMap = new HashMap<>();
+			for (int i = 0; i < paramNames.size(); i++) {
+				paramMap.put(paramNames.get(i), c.get(i).toString());
+			}
+			instances.add(new ComponentInstance(component, paramMap, new HashMap<>()));
+		});
+		return instances;
+	}
+
 	public static ComponentInstance getRandomParametrization(final IComponentInstance componentInstance, final Random rand) {
 		ComponentInstance randomParametrization = getRandomParameterizationOfComponent(componentInstance.getComponent(), rand);
 		componentInstance.getSatisfactionOfRequiredInterfaces().entrySet()
-				.forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), Arrays.asList(getRandomParametrization(x.getValue().iterator().next(), rand))));
+		.forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), Arrays.asList(getRandomParametrization(x.getValue().iterator().next(), rand))));
 		return randomParametrization;
 	}
 
@@ -385,9 +450,12 @@ public class ComponentUtil {
 	/**
 	 * Creates a randomly samples instantiation of the component. Required interfaces are configured at random too.
 	 *
-	 * @param component The root component to be instantiated.
-	 * @param componentRepository The repository of available components for satisfying required interfaces.
-	 * @param random The pseudo-randomness object.
+	 * @param component
+	 *            The root component to be instantiated.
+	 * @param componentRepository
+	 *            The repository of available components for satisfying required interfaces.
+	 * @param random
+	 *            The pseudo-randomness object.
 	 * @return A component instance of the provided component that is fully configured including the satisfaction of required interfaces.
 	 */
 	public static IComponentInstance getRandomInstantiationOfComponent(final String componentName, final IComponentRepository componentRepository, final Random random) {
@@ -397,9 +465,12 @@ public class ComponentUtil {
 	/**
 	 * Creates a randomly samples instantiation of the component. Required interfaces are configured at random too.
 	 *
-	 * @param component The root component to be instantiated.
-	 * @param componentRepository The repository of available components for satisfying required interfaces.
-	 * @param random The pseudo-randomness object.
+	 * @param component
+	 *            The root component to be instantiated.
+	 * @param componentRepository
+	 *            The repository of available components for satisfying required interfaces.
+	 * @param random
+	 *            The pseudo-randomness object.
 	 * @return A component instance of the provided component that is fully configured including the satisfaction of required interfaces.
 	 */
 	public static IComponentInstance getRandomInstantiationOfComponent(final IComponent component, final IComponentRepository componentRepository, final Random random) {

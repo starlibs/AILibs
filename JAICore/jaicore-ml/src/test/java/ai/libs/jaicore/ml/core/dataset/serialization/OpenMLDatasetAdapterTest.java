@@ -111,8 +111,9 @@ public class OpenMLDatasetAdapterTest {
 				1590, // adult
 				40691, // wine-quality-red
 				41066, // secom
-				42734 // okcupid-steam
-		));
+				42734, // okcupid-steam
+				1475, 1468, 1489, 23517, 4538, 4134, 41027, 40981, 40982, 40983, 40984, 40685, 40900, 1111, 42733, 40498, 41161, 41163, 41164, 41165, 41166, 41168, 41169, 41144, 41145, 41146, 41150, 41156, 41157, 41158, 41159, 41138,
+				54, 188, 1494, 1464, 1487, 1067, 1049));
 	}
 
 	public static Stream<Arguments> getMediumDatasets() throws IOException, Exception {
@@ -130,23 +131,27 @@ public class OpenMLDatasetAdapterTest {
 				// 1152, // AP_Prostate_Ovary
 				// 1156, // AP_Omentum_Ovary
 				// 1240, // AirlinesCodmaAdult
-				// 1457, // amazon
+				1457, // amazon
 				// 4136, // dexter
 				// 4137, // dorothea
-				// 23512, // higgs
+				23512, // higgs
 				// /**/ 40594, // Reuters => Multi target
-				// 40668, // connect-4
-				// 41064, // convex
-				42734 // okcupid-steam
-		// /**/ 42123 // articleinfluence => string attribute
-		));
+				40668, // connect-4
+				41064, // convex
+				41167, // dionis
+				41142, // christine
+				42732, // sf-police-incidents
+				1461, 1486, 4534, 4135, 4541, 40670, 40701, 40978, 40981, 41162, 41143, 41147, 40975, 31
+				// /**/ 42123 // articleinfluence => string attribute
+				));
 	}
 
 	public static Stream<Arguments> getBigDatasets() throws IOException, Exception {
 		return readDatasets(Arrays.asList(40927, // CIFAR-10 // this is even TOO big for a 4GB test
 				41026, // gisette // this is even TOO big for a 4GB test
-				41065 // mnist rotation // this in fact just fits into a 4GB test but sometime can cause problems; its a borderline case
-		));
+				41065, // mnist rotation // this in fact just fits into a 4GB test but sometime can cause problems; its a borderline case
+				40996 // fashion-mnist
+				));
 	}
 
 	private static int lastCachedId; // this is to detect whether the current dataset hold in dataset fits the current problem set
@@ -216,7 +221,7 @@ public class OpenMLDatasetAdapterTest {
 
 	@ParameterizedTest(name = "test reconstructibility of {0}")
 	@MethodSource("getSmallDatasets")
-	public void testWriteOnSmallDatasetOnSmallDataset(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException, ReconstructionException, ClassNotFoundException {
+	public void testReconstructibilityOnSmallDataset(final OpenMLProblemSet problemSet) throws IOException, DatasetDeserializationFailedException, InterruptedException, ReconstructionException, ClassNotFoundException {
 		this.testReconstructibility(problemSet);
 	}
 

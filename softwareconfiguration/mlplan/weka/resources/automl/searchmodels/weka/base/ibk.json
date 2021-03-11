@@ -55,17 +55,6 @@
 						"weka.core.neighboursearch.CoverTree"
 					]
 				}
-			],
-			"dependencies": [
-				{
-					"pre": "I in {true}",
-					"post": "F in {false}"
-				},
-				{
-					"pre": "A in {weka.core.neighboursearch.CoverTree}",
-					"post": "X in {false}"
-				}
-			
 			]
 		}
 	]

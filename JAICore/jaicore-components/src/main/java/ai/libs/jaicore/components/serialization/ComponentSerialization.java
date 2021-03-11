@@ -78,6 +78,69 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		this.setLoggerName(loggerName);
 	}
 
+	public JsonNode serialize(final Collection<? extends IComponent> components) {
+		ObjectMapper om = new ObjectMapper();
+		ObjectNode on = om.createObjectNode();
+		on.put("repository", "derived");
+		ArrayNode componentArray = om.createArrayNode();
+		for (IComponent c : components) {
+			componentArray.add(this.serialize(c));
+		}
+		on.set("components", componentArray);
+		return on;
+	}
+
+	public JsonNode serialize(final IComponent component) {
+		ObjectMapper om = new ObjectMapper();
+		ObjectNode on = om.createObjectNode();
+		on.put("name", component.getName());
+		ArrayNode params = om.createArrayNode();
+		for (IParameter p : component.getParameters()) {
+			params.add(this.serialize(p));
+		}
+		on.set(FIELD_PARAMETERS, params);
+
+		ArrayNode requiredInterfaces = om.createArrayNode();
+		for (IRequiredInterfaceDefinition ri : component.getRequiredInterfaces()) {
+			ObjectNode rin = om.createObjectNode();
+			rin.put("id", ri.getId());
+			rin.put("name", ri.getName());
+			requiredInterfaces.add(rin);
+		}
+		on.set("requiredInterface", requiredInterfaces);
+
+		ArrayNode providedInterfaces = om.createArrayNode();
+		for (String pi : component.getProvidedInterfaces()) {
+			requiredInterfaces.add(pi);
+		}
+		on.set("providedInterface", providedInterfaces);
+
+		return on;
+	}
+
+	public JsonNode serialize(final IParameter param) {
+		ObjectMapper om = new ObjectMapper();
+		ObjectNode on = om.createObjectNode();
+		on.put("name", param.getName());
+		IParameterDomain domain = param.getDefaultDomain();
+		on.put(FIELD_DEFAULT, param.getDefaultValue().toString());
+		if (domain instanceof CategoricalParameterDomain) {
+			on.put("type", "cat");
+			ArrayNode vals = om.createArrayNode();
+			for (String val : ((CategoricalParameterDomain) domain).getValues()) {
+				vals.add(val);
+			}
+			on.set("values", vals);
+		}
+		else {
+			NumericParameterDomain nDomain = (NumericParameterDomain)domain;
+			on.put("type", nDomain.isInteger() ? DTYPE_INT : DTYPE_DOUBLE);
+			on.put("min", nDomain.getMin());
+			on.put("max", nDomain.getMax());
+		}
+		return on;
+	}
+
 	public JsonNode serialize(final IComponentInstance instance) {
 		Objects.requireNonNull(instance);
 		ObjectMapper om = new ObjectMapper();
@@ -223,12 +286,12 @@ public class ComponentSerialization implements ILoggingCustomizable {
 			if (!parameter.has("min")) {
 				throw new IllegalArgumentException("No min value defined for parameter " + name);
 			}
-			if (!parameter.has("max")) {
-				throw new IllegalArgumentException("No max value defined for parameter " + name);
-			}
-			double min = parameter.get("min").asDouble();
-			double max = parameter.get("max").asDouble();
-			return new Parameter(name, new NumericParameterDomain(type.equals("int") || type.equals("int-log"), min, max), defValNode.asDouble());
+		if (!parameter.has("max")) {
+			throw new IllegalArgumentException("No max value defined for parameter " + name);
+		}
+		double min = parameter.get("min").asDouble();
+		double max = parameter.get("max").asDouble();
+		return new Parameter(name, new NumericParameterDomain(type.equals("int") || type.equals("int-log"), min, max), defValNode.asDouble());
 
 		case "bool":
 		case "boolean":

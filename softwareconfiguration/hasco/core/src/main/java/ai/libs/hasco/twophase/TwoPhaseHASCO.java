@@ -269,7 +269,8 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		Collection<HASCOSolutionCandidate<Double>> currentSelection = this.getSelectionForPhase2();
 		int estimateForRemainingRuntime = this.getExpectedTotalRemainingRuntimeForAGivenPool(currentSelection, true);
 		boolean terminatePhase1 = estimateForRemainingRuntime + 5000 > timeRemaining;
-		this.logger.debug("{}ms of the available time remaining in total, and we estimate a remaining runtime of {}ms. Terminate phase 1: {}", timeRemaining, estimateForRemainingRuntime, terminatePhase1);
+		int currentMemoryConsumption = (int)((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024);
+		this.logger.info("{}ms of the available time remaining in total, and we estimate a remaining runtime of {}ms. Terminate phase 1: {}. Current memory consumption: {}MB", timeRemaining, estimateForRemainingRuntime, terminatePhase1, currentMemoryConsumption);
 		return terminatePhase1;
 	}
 
@@ -361,7 +362,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		int estimateEvaluationTimeForSelectionPhase = (int) (inSearchMCEvalTime * this.blowupInSelection);
 		int usableCPUs = Math.min(this.getConfig().cpus(), solutions.size());
 		int runtime = estimateEvaluationTimeForSelectionPhase / Math.max(1, usableCPUs);
-		this.logger.debug("Expected runtime is {} = {} * {} / {} for a pool of size {}", runtime, inSearchMCEvalTime, this.blowupInSelection, usableCPUs, solutions.size());
+		this.logger.debug("Expected runtime is {} = {} * {} / {} for a candidate pool of size {}", runtime, inSearchMCEvalTime, this.blowupInSelection, usableCPUs, solutions.size());
 		return runtime;
 	}
 
