@@ -42,13 +42,13 @@ import ai.libs.jaicore.processes.ProcessUtil;
 import ai.libs.python.IPythonConfig;
 import ai.libs.python.PythonRequirementDefinition;
 
-public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B>
-		implements IScikitLearnWrapper {
+public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B> implements IScikitLearnWrapper {
 
 	public static final int PYTHON_MINIMUM_REQUIRED_VERSION_REL = 3;
 	public static final int PYTHON_MINIMUM_REQUIRED_VERSION_MAJ = 5;
 	public static final int PYTHON_MINIMUM_REQUIRED_VERSION_MIN = 0;
-	public static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn", "pandas" };// , "xgboost"
+	public static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn", "pandas" };
+	public static final String[] PYTHON_OPTIONAL_MODULES = {};
 
 	private static final String SCIKIT_LEARN_TEMPLATE = "sklearn/sklearn_template.twig.py";
 
@@ -67,6 +67,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 
 	protected File modelFile;
 	protected ILabeledDataset<ILabeledInstance> data;
+	protected int[] targetIndices;
 	protected long seed;
 	protected Timeout timeout;
 	private boolean listenToPidFromProcess; // If true, the PID is obtained from the python process being started by listening to according output.
@@ -75,6 +76,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 		this.problemType = problemType;
 		this.pipeline = pipeline;
 		this.imports = imports;
+		this.targetIndices = new int[0];
 
 		String hashCode = Hashing.sha256().hashString(this.pipeline, StandardCharsets.UTF_8).toString();
 		this.configurationUID = hashCode.startsWith("-") ? hashCode.replace("-", "1") : "0" + hashCode;
@@ -85,8 +87,8 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 		this.scikitLearnWrapperConfig.getTempFolder().mkdirs();
 		this.scikitLearnWrapperConfig.getModelDumpsDirectory().mkdirs();
 
-		new PythonRequirementDefinition(PYTHON_MINIMUM_REQUIRED_VERSION_REL, PYTHON_MINIMUM_REQUIRED_VERSION_MAJ, PYTHON_MINIMUM_REQUIRED_VERSION_MIN,
-				ArrayUtils.addAll(PYTHON_REQUIRED_MODULES, problemType.getPythonRequiredModules())).check(this.pythonConfig);
+		new PythonRequirementDefinition(PYTHON_MINIMUM_REQUIRED_VERSION_REL, PYTHON_MINIMUM_REQUIRED_VERSION_MAJ, PYTHON_MINIMUM_REQUIRED_VERSION_MIN, ArrayUtils.addAll(PYTHON_REQUIRED_MODULES, problemType.getPythonRequiredModules()),
+				ArrayUtils.addAll(PYTHON_OPTIONAL_MODULES, problemType.getPythonOptionalModules())).check(this.pythonConfig);
 
 		this.setPythonTemplate(ResourceUtil.getResourceAsTempFile(SCIKIT_LEARN_TEMPLATE));
 	}
@@ -124,6 +126,11 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 	@Override
 	public File getModelPath() {
 		return this.modelFile;
+	}
+
+	@Override
+	public void setTargets(final int... targetIndices) {
+		this.targetIndices = targetIndices;
 	}
 
 	@Override
@@ -230,8 +237,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public B fitAndPredict(final ILabeledDataset<? extends ILabeledInstance> trainingData, final ILabeledDataset<? extends ILabeledInstance> testingData)
-			throws TrainingException, PredictionException, InterruptedException {
+	public B fitAndPredict(final ILabeledDataset<? extends ILabeledInstance> trainingData, final ILabeledDataset<? extends ILabeledInstance> testingData) throws TrainingException, PredictionException, InterruptedException {
 		try {
 			String trainingDataFileName = this.getDataName(trainingData);
 			this.data = (ILabeledDataset<ILabeledInstance>) trainingData.createEmptyCopy();
@@ -246,8 +252,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 		}
 	}
 
-	public B fitAndPredict(final File trainingDataFile, final String trainingDataName, final File testingDataFile, final String testingDataName)
-			throws TrainingException, PredictionException, InterruptedException {
+	public B fitAndPredict(final File trainingDataFile, final String trainingDataName, final File testingDataFile, final String testingDataName) throws TrainingException, PredictionException, InterruptedException {
 		try {
 			File trainingOutputFile = this.getOutputFile(trainingDataName);
 			File testingOutputFile = this.getOutputFile(testingDataName);
@@ -322,6 +327,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 		commandBuilder.withFitMode();
 		commandBuilder.withModelFile(modelFile);
 		commandBuilder.withFitDataFile(trainingDataFile);
+		commandBuilder.withTargetIndices(this.targetIndices);
 		return commandBuilder.toCommandArray();
 	}
 
@@ -330,6 +336,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 		commandBuilder.withPredictMode();
 		commandBuilder.withModelFile(modelFile);
 		commandBuilder.withPredictDataFile(testingDataFile);
+		commandBuilder.withTargetIndices(this.targetIndices);
 		commandBuilder.withPredictOutputFile(outputFile);
 		return commandBuilder.toCommandArray();
 	}
@@ -340,10 +347,12 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 		commandBuilder.withFitDataFile(trainingDataFile);
 		commandBuilder.withPredictDataFile(testingDataFile);
 		commandBuilder.withPredictOutputFile(testingOutputFile);
+		commandBuilder.withTargetIndices(this.targetIndices);
 		return commandBuilder.toCommandArray();
 	}
 
 	private void runProcess(final String[] commandLineParameters) throws InterruptedException, ScikitLearnWrapperExecutionFailedException {
+		System.out.println("Starting process: " + Arrays.toString(commandLineParameters));
 		DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
 		try {
 			listener.setLoggerName(this.logger.getName() + ".python");

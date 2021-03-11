@@ -41,6 +41,7 @@ public class ScikitLearnWrapperCommandBuilder {
 	private static final String FIT_OUTPUT_FLAG = "--fitOutput";
 	private static final String PREDICT_DATA_FLAG = "--predict";
 	private static final String PREDICT_OUTPUT_FLAG = "--predictOutput";
+	private static final String TARGETS_FLAG = "--targets";
 	private static final String SEED_FLAG = "--seed";
 
 	private IPythonConfig pythonConfiguration;
@@ -52,6 +53,7 @@ public class ScikitLearnWrapperCommandBuilder {
 	protected String fitOutputFile;
 	protected String predictDataFile;
 	protected String predictOutputFile;
+	private int[] targetIndices;
 	private long seed;
 	private Timeout timeout;
 	protected List<String> additionalParameters;
@@ -121,6 +123,11 @@ public class ScikitLearnWrapperCommandBuilder {
 		return this;
 	}
 
+	public ScikitLearnWrapperCommandBuilder withTargetIndices(final int... targetIndices) {
+		this.targetIndices = targetIndices;
+		return this;
+	}
+
 	public ScikitLearnWrapperCommandBuilder withSeed(final long seed) {
 		this.seed = seed;
 		return this;
@@ -159,18 +166,21 @@ public class ScikitLearnWrapperCommandBuilder {
 	protected void checkRequirementsTrainMode() {
 		Objects.requireNonNull(this.fitDataFile);
 		Objects.requireNonNull(this.modelFile);
+		Objects.requireNonNull(this.targetIndices);
 	}
 
 	protected void checkRequirementsTestMode() {
 		Objects.requireNonNull(this.modelFile);
 		Objects.requireNonNull(this.predictDataFile);
 		Objects.requireNonNull(this.predictOutputFile);
+		Objects.requireNonNull(this.targetIndices);
 	}
 
 	protected void checkRequirementsTrainTestMode() {
 		Objects.requireNonNull(this.fitDataFile);
 		Objects.requireNonNull(this.predictDataFile);
 		Objects.requireNonNull(this.predictOutputFile);
+		Objects.requireNonNull(this.targetIndices);
 	}
 
 	public String[] toCommandArray() {
@@ -202,6 +212,9 @@ public class ScikitLearnWrapperCommandBuilder {
 			processParameters.addAll(Arrays.asList(PREDICT_OUTPUT_FLAG, this.predictOutputFile));
 		}
 		processParameters.addAll(Arrays.asList(SEED_FLAG, String.valueOf(this.seed)));
+		if (this.targetIndices != null && this.targetIndices.length > 0) {
+			processParameters.addAll(Arrays.asList(TARGETS_FLAG, String.valueOf(this.targetIndices)));
+		}
 		if (this.additionalParameters != null) {
 			processParameters.addAll(this.additionalParameters);
 		}

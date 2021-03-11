@@ -19,7 +19,6 @@ import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstanceUtil;
-import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedObjectEvaluator;
 import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
 import ai.libs.mlplan.core.events.TimeTrackingLearnerEvaluationEvent;
@@ -94,8 +93,7 @@ public class PipelineEvaluator extends TimedObjectEvaluator<IComponentInstance, 
 		} catch (EvaluationSafeGuardException | InterruptedException e) {
 			throw e;
 		} catch (Exception e) {
-			this.logger.error("Could not use evaluation safe guard for component instance of {}. Continue with business as usual. Here is the stacktrace:",
-					ComponentInstanceUtil.toComponentNameString(c), e);
+			this.logger.error("Could not use evaluation safe guard for component instance of {}. Continue with business as usual. Here is the stacktrace:", ComponentInstanceUtil.toComponentNameString(c), e);
 		}
 
 		try {
@@ -111,13 +109,13 @@ public class PipelineEvaluator extends TimedObjectEvaluator<IComponentInstance, 
 			}
 
 			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, (learner instanceof IScikitLearnWrapper) ? learner.toString() : learner.getClass().getName());
+				this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, learner);
 			}
 
 			Double score = this.benchmark.evaluate(trackableLearner);
 			trackableLearner.setScore(score);
 			if (this.logger.isInfoEnabled()) {
-				this.logger.info("Obtained score {} for classifier {}", score, (learner instanceof IScikitLearnWrapper) ? learner.toString() : learner.getClass().getName());
+				this.logger.info("Obtained score {} for classifier {}", score, learner);
 			}
 
 			this.eventBus.post(new TimeTrackingLearnerEvaluationEvent(trackableLearner));
