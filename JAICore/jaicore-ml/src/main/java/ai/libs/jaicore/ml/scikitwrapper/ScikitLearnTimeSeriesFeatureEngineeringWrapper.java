@@ -32,36 +32,34 @@ public class ScikitLearnTimeSeriesFeatureEngineeringWrapper<P extends IPredictio
 
 	@Override
 	public File getOutputFile(final String dataName) {
-		return new File(this.scikitLearnWrapperConfig.getTempFolder(), this.configurationUID + "_" + dataName + ".arff"); // TODO extension
+		return new File(this.scikitLearnWrapperConfig.getTempFolder(), this.configurationUID + "_" + dataName + ".arff");
 	}
 
 	@Override
 	protected ScikitLearnWrapperCommandBuilder getCommandBuilder() {
-		ScikitLearnTimeSeriesFeatureEngineeringWrapperCommandBuilder commandBuilder = new ScikitLearnTimeSeriesFeatureEngineeringWrapperCommandBuilder(this.problemType.getScikitLearnCommandLineFlag(),
-				this.getSKLearnScriptFile());
+		ScikitLearnTimeSeriesFeatureEngineeringWrapperCommandBuilder commandBuilder = new ScikitLearnTimeSeriesFeatureEngineeringWrapperCommandBuilder(this.problemType.getScikitLearnCommandLineFlag(), this.getSKLearnScriptFile());
 		return super.getCommandBuilder(commandBuilder);
 	}
 
 	@Override
-	protected String[] constructCommandLineParametersForFitMode(final File modelFile, final File trainingDataFile, final File outputFile) {
+	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForFitMode(final File modelFile, final File trainingDataFile, final File outputFile) {
 		ScikitLearnWrapperCommandBuilder commandBuilder = this.getCommandBuilder();
 		commandBuilder.withFitMode();
 		commandBuilder.withModelFile(modelFile);
 		commandBuilder.withFitDataFile(trainingDataFile);
 		commandBuilder.withFitOutputFile(outputFile);
-		System.out.println(commandBuilder.toCommandArray());
-		return commandBuilder.toCommandArray();
+		return commandBuilder;
 	}
 
 	@Override
-	protected String[] constructCommandLineParametersForFitAndPredictMode(final File trainingDataFile, final File trainingOutputFile, final File testingDataFile, final File testingOutputFile) {
+	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForFitAndPredictMode(final File trainingDataFile, final File trainingOutputFile, final File testingDataFile, final File testingOutputFile) {
 		ScikitLearnWrapperCommandBuilder commandBuilder = this.getCommandBuilder();
 		commandBuilder.withFitAndPredictMode();
 		commandBuilder.withFitDataFile(trainingDataFile);
 		commandBuilder.withFitOutputFile(trainingOutputFile);
 		commandBuilder.withPredictDataFile(testingDataFile);
 		commandBuilder.withPredictOutputFile(testingOutputFile);
-		return commandBuilder.toCommandArray();
+		return commandBuilder;
 	}
 
 	@Override

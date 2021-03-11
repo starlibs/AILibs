@@ -141,6 +141,12 @@ class ArgsHandler:
         return path
 
     @staticmethod
+    def get_target_indices():
+        target_indices = list(map(int, sys.argv["targets"].split()))
+        print("* Target Indices: ", str(target_indices))
+        return target_indices
+
+    @staticmethod
     def get_seed():
         seed = sys.argv["seed"]
         print("* Seed: ", seed)
@@ -267,6 +273,7 @@ class ArffData:
     def __init__(self, data_path, assume_numeric_targets):
         """ Reads and encapsulates arff_data which is a dictionary returned by the arff.py module.
         """
+        # TODO MultiTarget
         df, class_attribute = self.parse(data_path)
         self.input_df = df.drop(columns=[class_attribute])
         if not assume_numeric_targets:

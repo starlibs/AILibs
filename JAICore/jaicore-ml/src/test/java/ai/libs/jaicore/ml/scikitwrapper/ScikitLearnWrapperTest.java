@@ -86,19 +86,18 @@ public class ScikitLearnWrapperTest {
 
 	public static Stream<Arguments> arguments() throws IOException {
 		return Stream.of( //
-				Arguments.of(EScikitLearnProblemType.CLASSIFICATION, "dataset_31_credit-g.arff",
-						new ScikitLearnClassificationWrapper<>("RandomForestClassifier(n_estimators=100)", "from sklearn.ensemble import RandomForestClassifier\n")), //
+				Arguments.of(EScikitLearnProblemType.CLASSIFICATION, "dataset_31_credit-g.arff", new ScikitLearnClassificationWrapper<>("RandomForestClassifier(n_estimators=100)", "from sklearn.ensemble import RandomForestClassifier\n")), //
 				Arguments.of(EScikitLearnProblemType.REGRESSION, "0532052678.arff", new ScikitLearnRegressionWrapper<>("LinearRegression()", "from sklearn.linear_model import LinearRegression\n")), //
 				Arguments.of(EScikitLearnProblemType.TIME_SERIES_REGRESSION, "CMAPSS_FD001_train.arff", new ScikitLearnTimeSeriesRegressionWrapper<>(
 						"make_pipeline(UniToMultivariateNumpyBasedFeatureGenerator(univariate_ts_feature_generator=UltraFastShapeletsFeatureExtractor(keep_candidates_percentage=0.1212768581941968)), SVR(C=0.27332631373580385,coef0=1.3310979035891473,degree=3,gamma=1.2,kernel=\"poly\",max_iter=5236,shrinking=True,tol=0.27707849007413665))",
 						"from python_connection.feature_generation.ultra_fast_shapelets_feature_generator import UltraFastShapeletsFeatureExtractor\n"
-								+ "from python_connection.feature_generation.uni_to_multi_numpy_feature_generator import UniToMultivariateNumpyBasedFeatureGenerator\n"
-								+ "from sklearn.pipeline import make_pipeline\n" + "from sklearn.svm import SVR\n")), //
-				Arguments.of(EScikitLearnProblemType.TIME_SERIES_FEATURE_ENGINEERING, "CMAPSS_FD001_train.arff", new ScikitLearnTimeSeriesFeatureEngineeringWrapper<>(
-						"make_pipeline(UniToMultivariateNumpyBasedFeatureGenerator(univariate_ts_feature_generator=UltraFastShapeletsFeatureExtractor(keep_candidates_percentage=0.1212768581941968)))",
-						"from python_connection.feature_generation.ultra_fast_shapelets_feature_generator import UltraFastShapeletsFeatureExtractor\n"
-								+ "from python_connection.feature_generation.uni_to_multi_numpy_feature_generator import UniToMultivariateNumpyBasedFeatureGenerator\n"
-								+ "from sklearn.pipeline import make_pipeline\n")) //
+								+ "from python_connection.feature_generation.uni_to_multi_numpy_feature_generator import UniToMultivariateNumpyBasedFeatureGenerator\n" + "from sklearn.pipeline import make_pipeline\n"
+								+ "from sklearn.svm import SVR\n")), //
+				Arguments.of(EScikitLearnProblemType.TIME_SERIES_FEATURE_ENGINEERING, "CMAPSS_FD001_train.arff",
+						new ScikitLearnTimeSeriesFeatureEngineeringWrapper<>(
+								"make_pipeline(UniToMultivariateNumpyBasedFeatureGenerator(univariate_ts_feature_generator=UltraFastShapeletsFeatureExtractor(keep_candidates_percentage=0.1212768581941968)))",
+								"from python_connection.feature_generation.ultra_fast_shapelets_feature_generator import UltraFastShapeletsFeatureExtractor\n"
+										+ "from python_connection.feature_generation.uni_to_multi_numpy_feature_generator import UniToMultivariateNumpyBasedFeatureGenerator\n" + "from sklearn.pipeline import make_pipeline\n")) //
 		);
 	}
 

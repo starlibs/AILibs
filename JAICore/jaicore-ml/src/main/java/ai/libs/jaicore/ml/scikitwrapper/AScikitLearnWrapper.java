@@ -171,7 +171,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 			File outputFile = this.getOutputFile(trainingDataName);
 			if (!outputFile.exists()) {
 				this.modelFile = new File(this.scikitLearnWrapperConfig.getModelDumpsDirectory(), this.getModelFileName(trainingDataName));
-				String[] trainCommand = this.constructCommandLineParametersForFitMode(this.modelFile, trainingDataFile, outputFile);
+				String[] trainCommand = this.constructCommandLineParametersForFitMode(this.modelFile, trainingDataFile, outputFile).toCommandArray();
 				this.logger.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
 				this.runProcess(trainCommand);
 			}
@@ -202,7 +202,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 		try {
 			File outputFile = this.getOutputFile(testingDataName);
 			if (!outputFile.exists()) {
-				String[] testCommand = this.constructCommandLineParametersForPredictMode(this.modelFile, testingDataFile, outputFile);
+				String[] testCommand = this.constructCommandLineParametersForPredictMode(this.modelFile, testingDataFile, outputFile).toCommandArray();
 				this.logger.debug("Run test mode with {}", Arrays.toString(testCommand));
 				this.runProcess(testCommand);
 			}
@@ -257,7 +257,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 			File trainingOutputFile = this.getOutputFile(trainingDataName);
 			File testingOutputFile = this.getOutputFile(testingDataName);
 			if (!trainingOutputFile.exists() && !testingOutputFile.exists()) {
-				String[] fitAndPredictCommand = this.constructCommandLineParametersForFitAndPredictMode(trainingDataFile, trainingOutputFile, testingDataFile, testingOutputFile);
+				String[] fitAndPredictCommand = this.constructCommandLineParametersForFitAndPredictMode(trainingDataFile, trainingOutputFile, testingDataFile, testingOutputFile).toCommandArray();
 				this.logger.debug("{} run fitAndPredict mode {}", Thread.currentThread().getName(), Arrays.toString(fitAndPredictCommand));
 				this.runProcess(fitAndPredictCommand);
 			}
@@ -322,33 +322,33 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 		return commandBuilder;
 	}
 
-	protected String[] constructCommandLineParametersForFitMode(final File modelFile, final File trainingDataFile, final File outputFile) {
+	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForFitMode(final File modelFile, final File trainingDataFile, final File outputFile) {
 		ScikitLearnWrapperCommandBuilder commandBuilder = this.getCommandBuilder();
 		commandBuilder.withFitMode();
 		commandBuilder.withModelFile(modelFile);
 		commandBuilder.withFitDataFile(trainingDataFile);
 		commandBuilder.withTargetIndices(this.targetIndices);
-		return commandBuilder.toCommandArray();
+		return commandBuilder;
 	}
 
-	protected String[] constructCommandLineParametersForPredictMode(final File modelFile, final File testingDataFile, final File outputFile) {
+	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForPredictMode(final File modelFile, final File testingDataFile, final File outputFile) {
 		ScikitLearnWrapperCommandBuilder commandBuilder = this.getCommandBuilder();
 		commandBuilder.withPredictMode();
 		commandBuilder.withModelFile(modelFile);
 		commandBuilder.withPredictDataFile(testingDataFile);
 		commandBuilder.withTargetIndices(this.targetIndices);
 		commandBuilder.withPredictOutputFile(outputFile);
-		return commandBuilder.toCommandArray();
+		return commandBuilder;
 	}
 
-	protected String[] constructCommandLineParametersForFitAndPredictMode(final File trainingDataFile, final File trainingOutputFile, final File testingDataFile, final File testingOutputFile) {
+	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForFitAndPredictMode(final File trainingDataFile, final File trainingOutputFile, final File testingDataFile, final File testingOutputFile) {
 		ScikitLearnWrapperCommandBuilder commandBuilder = this.getCommandBuilder();
 		commandBuilder.withFitAndPredictMode();
 		commandBuilder.withFitDataFile(trainingDataFile);
 		commandBuilder.withPredictDataFile(testingDataFile);
 		commandBuilder.withPredictOutputFile(testingOutputFile);
 		commandBuilder.withTargetIndices(this.targetIndices);
-		return commandBuilder.toCommandArray();
+		return commandBuilder;
 	}
 
 	private void runProcess(final String[] commandLineParameters) throws InterruptedException, ScikitLearnWrapperExecutionFailedException {

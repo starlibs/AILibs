@@ -213,7 +213,7 @@ public class ScikitLearnWrapperCommandBuilder {
 		}
 		processParameters.addAll(Arrays.asList(SEED_FLAG, String.valueOf(this.seed)));
 		if (this.targetIndices != null && this.targetIndices.length > 0) {
-			processParameters.addAll(Arrays.asList(TARGETS_FLAG, String.valueOf(this.targetIndices)));
+			processParameters.addAll(Arrays.asList(TARGETS_FLAG, Arrays.toString(this.targetIndices).replaceAll("\\s+", "")));
 		}
 		if (this.additionalParameters != null) {
 			processParameters.addAll(this.additionalParameters);
