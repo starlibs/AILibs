@@ -112,7 +112,7 @@ public class OpenMLDatasetAdapterTest {
 				40691, // wine-quality-red
 				41066, // secom
 				42734, // okcupid-steam
-				1475, 1468, 1489, 23517, 4538, 4134, 41027, 40981, 40982, 40983, 40984, 40685, 40900, 1111, 42733, 40498, 41161, 41163, 41164, 41165, 41166, 41168, 41169, 41144, 41145, 41146, 41150, 41156, 41157, 41158, 41159, 41138,
+				1475, 1468, 1489, 23517, 4538, 4134, 41027, 40981, 40982, 40983, 40984, 40685, 40900, 40498, 41169, 41144, 41145, 41146, 41156, 41157, 41158, 41138,
 				54, 188, 1494, 1464, 1487, 1067, 1049));
 	}
 
@@ -141,8 +141,11 @@ public class OpenMLDatasetAdapterTest {
 				41167, // dionis
 				41142, // christine
 				42732, // sf-police-incidents
-				1461, 1486, 4534, 4135, 4541, 40670, 40701, 40978, 40981, 41162, 41143, 41147, 40975, 31
+				1461, 1486, 4534, 4135, 4541, 40670, 40701, 40978, 40981, 41162, 41143, 41147, 40975, 31,
 				// /**/ 42123 // articleinfluence => string attribute
+				41164, // fabert
+				41168, // jannis
+				41150 // MiniBooNE
 				));
 	}
 
@@ -150,7 +153,14 @@ public class OpenMLDatasetAdapterTest {
 		return readDatasets(Arrays.asList(40927, // CIFAR-10 // this is even TOO big for a 4GB test
 				41026, // gisette // this is even TOO big for a 4GB test
 				41065, // mnist rotation // this in fact just fits into a 4GB test but sometime can cause problems; its a borderline case
-				40996 // fashion-mnist
+				40996, // fashion-mnist
+				1111, // KDDCup09
+				42733, // Click_predictions (small)
+				41161, // riccardo
+				41163, //dilbert
+				41165, // robert
+				41166, // volkert
+				41159 // guilermo
 				));
 	}
 
