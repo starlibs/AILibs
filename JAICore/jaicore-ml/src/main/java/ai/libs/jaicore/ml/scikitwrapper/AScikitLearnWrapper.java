@@ -47,8 +47,8 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 	public static final int PYTHON_MINIMUM_REQUIRED_VERSION_REL = 3;
 	public static final int PYTHON_MINIMUM_REQUIRED_VERSION_MAJ = 5;
 	public static final int PYTHON_MINIMUM_REQUIRED_VERSION_MIN = 0;
-	public static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn", "pandas" };
-	public static final String[] PYTHON_OPTIONAL_MODULES = {};
+	protected static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn", "pandas" };
+	protected static final String[] PYTHON_OPTIONAL_MODULES = {};
 
 	private static final String SCIKIT_LEARN_TEMPLATE = "sklearn/sklearn_template.twig.py";
 
@@ -61,7 +61,6 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 	protected final String configurationUID;
 
 	protected EScikitLearnProblemType problemType;
-	private File scikitTemplate;
 	protected String pipeline;
 	private String imports;
 
@@ -72,7 +71,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 	protected Timeout timeout;
 	private boolean listenToPidFromProcess; // If true, the PID is obtained from the python process being started by listening to according output.
 
-	public AScikitLearnWrapper(final EScikitLearnProblemType problemType, final String pipeline, final String imports) throws IOException {
+	protected AScikitLearnWrapper(final EScikitLearnProblemType problemType, final String pipeline, final String imports) throws IOException {
 		this.problemType = problemType;
 		this.pipeline = pipeline;
 		this.imports = imports;
@@ -95,7 +94,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 
 	@Override
 	public void setPythonTemplate(final String pythonTemplatePath) throws IOException {
-		this.scikitTemplate = new File(pythonTemplatePath);
+		File scikitTemplate = new File(pythonTemplatePath);
 
 		File scriptFile = this.getSKLearnScriptFile();
 		if (!scriptFile.createNewFile()) {
@@ -113,7 +112,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 		templateValues.put("imports", this.imports != null ? this.imports : "");
 		templateValues.put("pipeline", this.pipeline);
 
-		JtwigTemplate template = JtwigTemplate.fileTemplate(this.scikitTemplate);
+		JtwigTemplate template = JtwigTemplate.fileTemplate(scikitTemplate);
 		JtwigModel model = JtwigModel.newModel(templateValues);
 		template.render(model, new FileOutputStream(scriptFile));
 	}
@@ -288,7 +287,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 		}
 
 		if (dataFile.exists()) {
-			this.logger.debug("Reusing dataset: {}", dataFileName); // TODO extension
+			this.logger.debug("Reusing dataset: {}", dataFileName);
 			return dataFile;
 		}
 
@@ -302,7 +301,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 	}
 
 	private synchronized File getDatasetFile(final String datasetName) {
-		return new File(this.scikitLearnWrapperConfig.getTempFolder(), datasetName + ".arff"); // TODO extension
+		return new File(this.scikitLearnWrapperConfig.getTempFolder(), datasetName + ".arff");
 	}
 
 	protected abstract boolean doLabelsFitToProblemType(final ILabeledDataset<? extends ILabeledInstance> data);
@@ -364,12 +363,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 			}
 			ProcessBuilder processBuilder = new ProcessBuilder(commandLineParameters).directory(this.scikitLearnWrapperConfig.getTempFolder());
 			Process process = processBuilder.start();
-			try {
-				this.logger.debug("Started process with PID: {}. Listener is {}", ProcessUtil.getPID(process), listener);
-			} catch (ProcessIDNotRetrievableException e) {
-				this.logger.warn("Could not retrieve process ID.");
-			}
-
+			this.logger.debug("Started process with PID: {}. Listener is {}", ProcessUtil.getPID(process), listener);
 			this.logger.info("Attaching listener {} to process {}", listener, process);
 			listener.listenTo(process);
 			this.logger.info("Listener attached.");
@@ -384,6 +378,8 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 			}
 		} catch (InterruptedException e) {
 			throw e;
+		} catch (ProcessIDNotRetrievableException e) {
+			this.logger.warn("Could not retrieve process ID.");
 		} catch (Exception e) {
 			throw new ScikitLearnWrapperExecutionFailedException(COULD_NOT_RUN_SCIKIT_LEARN_MODEL, e);
 		}
@@ -391,8 +387,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 
 	@Override
 	public File getOutputFile(final String dataName) {
-		File outputFile = new File(this.scikitLearnWrapperConfig.getModelDumpsDirectory(), this.configurationUID + "_" + dataName + this.scikitLearnWrapperConfig.getResultFileExtension());
-		return outputFile;
+		return new File(this.scikitLearnWrapperConfig.getModelDumpsDirectory(), this.configurationUID + "_" + dataName + this.scikitLearnWrapperConfig.getResultFileExtension());
 	}
 
 	protected abstract B handleOutput(final File outputFile) throws PredictionException, TrainingException;

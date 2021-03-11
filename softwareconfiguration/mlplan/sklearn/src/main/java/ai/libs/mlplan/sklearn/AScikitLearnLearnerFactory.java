@@ -41,7 +41,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<ISci
 	private long seed;
 	private Timeout timeout;
 
-	public AScikitLearnLearnerFactory() {
+	protected AScikitLearnLearnerFactory() {
 		super();
 	}
 
@@ -146,8 +146,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<ISci
 				}
 			}
 
-			for (Entry<String, List<IComponentInstance>> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet().stream().sorted((o1, o2) -> o1.getKey().compareTo(o2.getKey()))
-					.collect(Collectors.toList())) {
+			for (Entry<String, List<IComponentInstance>> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet().stream().sorted((o1, o2) -> o1.getKey().compareTo(o2.getKey())).collect(Collectors.toList())) {
 				if (first) {
 					first = false;
 				} else {
