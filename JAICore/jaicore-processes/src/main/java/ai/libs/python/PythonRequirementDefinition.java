@@ -13,7 +13,7 @@ import ai.libs.jaicore.basic.sets.SetUtil;
 
 public class PythonRequirementDefinition {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(PythonRequirementDefinition.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PythonRequirementDefinition.class);
 
 	private final int release;
 	private final int major;
@@ -75,8 +75,8 @@ public class PythonRequirementDefinition {
 				throw new SystemRequirementsNotMetException("Could not find required python modules: " + SetUtil.implode(missingRequiredPythonModules, ", "));
 			}
 			List<String> missingOptionalPythonModules = pu.getMissingModules(this.optionalModules);
-			if (!missingOptionalPythonModules.isEmpty()) {
-				LOGGER.warn("Could not find optional python modules: " + SetUtil.implode(missingOptionalPythonModules, ", "));
+			if (!missingOptionalPythonModules.isEmpty() && LOGGER.isWarnEnabled()) {
+				LOGGER.warn("Could not find optional python modules: {}", SetUtil.implode(missingOptionalPythonModules, ", "));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

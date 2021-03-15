@@ -171,7 +171,9 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 			if (!outputFile.exists()) {
 				this.modelFile = new File(this.scikitLearnWrapperConfig.getModelDumpsDirectory(), this.getModelFileName(trainingDataName));
 				String[] trainCommand = this.constructCommandLineParametersForFitMode(this.modelFile, trainingDataFile, outputFile).toCommandArray();
-				this.logger.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
+				}
 				this.runProcess(trainCommand);
 			}
 		} catch (ScikitLearnWrapperExecutionFailedException e) {
@@ -202,7 +204,9 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 			File outputFile = this.getOutputFile(testingDataName);
 			if (!outputFile.exists()) {
 				String[] testCommand = this.constructCommandLineParametersForPredictMode(this.modelFile, testingDataFile, outputFile).toCommandArray();
-				this.logger.debug("Run test mode with {}", Arrays.toString(testCommand));
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("Run test mode with {}", Arrays.toString(testCommand));
+				}
 				this.runProcess(testCommand);
 			}
 
@@ -257,7 +261,9 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 			File testingOutputFile = this.getOutputFile(testingDataName);
 			if (!trainingOutputFile.exists() && !testingOutputFile.exists()) {
 				String[] fitAndPredictCommand = this.constructCommandLineParametersForFitAndPredictMode(trainingDataFile, trainingOutputFile, testingDataFile, testingOutputFile).toCommandArray();
-				this.logger.debug("{} run fitAndPredict mode {}", Thread.currentThread().getName(), Arrays.toString(fitAndPredictCommand));
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("{} run fitAndPredict mode {}", Thread.currentThread().getName(), Arrays.toString(fitAndPredictCommand));
+				}
 				this.runProcess(fitAndPredictCommand);
 			}
 
@@ -351,7 +357,6 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 	}
 
 	private void runProcess(final String[] commandLineParameters) throws InterruptedException, ScikitLearnWrapperExecutionFailedException {
-		System.out.println("Starting process: " + Arrays.toString(commandLineParameters));
 		DefaultProcessListener listener = new DefaultProcessListener(this.listenToPidFromProcess);
 		try {
 			listener.setLoggerName(this.logger.getName() + ".python");

@@ -19,8 +19,6 @@ import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictio
 
 public class ScikitLearnMultiTargetRegressionWrapper<P extends IPrediction, B extends IPredictionBatch> extends AScikitLearnWrapper<P, B> {
 
-	int[] targetIndices;
-
 	public ScikitLearnMultiTargetRegressionWrapper(final String pipeline, final String imports, final int[] targetIndices) throws IOException {
 		super(EScikitLearnProblemType.REGRESSION, pipeline, imports);
 		this.targetIndices = targetIndices;
