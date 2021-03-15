@@ -128,7 +128,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 	}
 
 	@Override
-	public void setTargets(final int... targetIndices) {
+	public void setTargetIndices(final int... targetIndices) {
 		this.targetIndices = targetIndices;
 	}
 

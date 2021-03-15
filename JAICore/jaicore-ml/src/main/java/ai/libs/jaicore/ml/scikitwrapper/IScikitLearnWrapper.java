@@ -46,6 +46,6 @@ public interface IScikitLearnWrapper extends ISupervisedLearner<ILabeledInstance
 
 	public File getModelFile();
 
-	public void setTargets(int... targetIndices);
+	public void setTargetIndices(int... targetIndices);
 
 }
