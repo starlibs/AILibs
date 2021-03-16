@@ -30,8 +30,15 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 			if (dsd.getDefault_target_attribute().contains(",")) {
 				throw new IllegalArgumentException("The dataset with ID " + openMLId + " cannot be read as it is a multi-target dataset which is currently not supported.");
 			}
-			return deserializeDataset(openMLId, dsd.getDefault_target_attribute());
+			ILabeledDataset<ILabeledInstance> dataset = deserializeDataset(openMLId, dsd.getDefault_target_attribute());
+			if (dsd.getIgnore_attribute() != null) {
+				for (String columnNameToIgnore : dsd.getIgnore_attribute()) {
+					dataset.removeColumn(columnNameToIgnore);
+				}
+			}
+			return dataset;
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new DatasetDeserializationFailedException("Could not deserialize OpenML dataset with id " + openMLId, e);
 		}
 	}

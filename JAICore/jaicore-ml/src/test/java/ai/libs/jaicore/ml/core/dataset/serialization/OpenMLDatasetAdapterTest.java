@@ -111,9 +111,7 @@ public class OpenMLDatasetAdapterTest {
 				1590, // adult
 				40691, // wine-quality-red
 				41066, // secom
-				42734, // okcupid-steam
-				1475, 1468, 1489, 23517, 4538, 4134, 41027, 40981, 40982, 40983, 40984, 40685, 40900, 40498, 41169, 41144, 41145, 41146, 41156, 41157, 41158, 41138,
-				54, 188, 1494, 1464, 1487, 1067, 1049));
+				1475, 1468, 1489, 4538, 41027, 40981, 40982, 40983, 40984, 40685, 40900, 40498, 41144, 41146, 41156, 41157, 54, 188, 1494, 1464, 1487, 1067, 1049));
 	}
 
 	public static Stream<Arguments> getMediumDatasets() throws IOException, Exception {
@@ -132,6 +130,7 @@ public class OpenMLDatasetAdapterTest {
 				// 1156, // AP_Omentum_Ovary
 				// 1240, // AirlinesCodmaAdult
 				1457, // amazon
+				4134, // Bioresponse
 				// 4136, // dexter
 				// 4137, // dorothea
 				23512, // higgs
@@ -141,12 +140,17 @@ public class OpenMLDatasetAdapterTest {
 				41167, // dionis
 				41142, // christine
 				42732, // sf-police-incidents
-				1461, 1486, 4534, 4135, 4541, 40670, 40701, 40978, 40981, 41162, 41143, 41147, 40975, 31,
+				1461, 1486, 4534, 4135, 4541, 40670, 40701, 40978, 40981, 41162, 41143, 41147, 40975, 31, 41138, // APSFailure
+				41145, // philippine
+				41158, // gina
+				41169, // helena
 				// /**/ 42123 // articleinfluence => string attribute
 				41164, // fabert
 				41168, // jannis
+				42734, // okcupid-steam
+				23517, // numerai28.6
 				41150 // MiniBooNE
-				));
+		));
 	}
 
 	public static Stream<Arguments> getBigDatasets() throws IOException, Exception {
@@ -157,11 +161,11 @@ public class OpenMLDatasetAdapterTest {
 				1111, // KDDCup09
 				42733, // Click_predictions (small)
 				41161, // riccardo
-				41163, //dilbert
+				41163, // dilbert
 				41165, // robert
 				41166, // volkert
 				41159 // guilermo
-				));
+		));
 	}
 
 	private static int lastCachedId; // this is to detect whether the current dataset hold in dataset fits the current problem set

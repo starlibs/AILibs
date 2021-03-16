@@ -195,6 +195,13 @@ public class ArffDatasetAdapterTest {
 	}
 
 	@Test
+	public void testSplitDentInstanceLine() {
+		String testLine = "a,\"a\",\"a,a\",'a,b',a,a'a,a\"a,'a'";
+		System.out.println(testLine);
+		System.out.println(Arrays.toString(ArffDatasetAdapter.splitDenseInstanceLine(testLine)));
+	}
+
+	@Test
 	public void testWritingASingleLabelDatasetToFile() throws DatasetDeserializationFailedException, IOException {
 		File datasetFile = new File("testrsc/dataset/arff/krvskp.arff");
 		ILabeledDataset<?> ds = ArffDatasetAdapter.readDataset(datasetFile);

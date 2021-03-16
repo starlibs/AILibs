@@ -54,6 +54,8 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	public static final String K_RELATION_NAME = "relationName";
 	public static final String K_CLASS_INDEX = "classIndex";
 
+	public static final Pattern REG_EXP_DATA_LINE = Pattern.compile("(?<=,|^)('([^']*)'|\"([^\"]*)\"|([^,]*))(?=,|$)");// Pattern.compile("'([^']*)'|\"([^\"]*)\"|(?<=,|^)([^,]*)(?=,|$)");
+
 	private static final String F_CLASS_INDEX = "C";
 
 	private static final String SEPARATOR_RELATIONNAME = ":";
@@ -222,6 +224,19 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 	}
 
+	public static String[] splitDenseInstanceLine(final String line) {
+		List<String> lineSplit = new ArrayList<>();
+		Matcher matcher = REG_EXP_DATA_LINE.matcher(line);
+		while (matcher.find()) {
+			String entry = matcher.group();
+			// if ((entry.startsWith("'") && entry.endsWith("'")) || (entry.startsWith("\"") && entry.endsWith("\""))) {
+			// entry = entry.substring(1, entry.length() - 1);
+			// }
+			lineSplit.add(entry);
+		}
+		return lineSplit.toArray(new String[] {});
+	}
+
 	protected static List<Object> parseInstance(final boolean sparseData, final List<IAttribute> attributes, final int targetIndex, final String line) {
 		if (line.trim().startsWith("%")) {
 			throw new IllegalArgumentException("Cannot create object for commented line!");
@@ -242,6 +257,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 
 		if (!sparseMode) {
+			lineSplit = splitDenseInstanceLine(curLine);
 			if (lineSplit.length != attributes.size()) {
 				throw new IllegalArgumentException("Cannot parse instance as this is not a sparse instance but has less columns than there are attributes defined. Expected values: " + attributes.size() + ". Actual number of values: "
 						+ lineSplit.length + ". Values: " + Arrays.toString(lineSplit));
