@@ -2,17 +2,20 @@ package ai.libs.jaicore.ml.core.dataset.schema.attribute;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 
-public class MultidimensionalAttribute3d extends MultidimensionalAttribute<double[][][]> {
+/**
+ * A {@link MultidimensionalAttribute} that holds Threedimensional DoubleArrays
+ *
+ * @author Lukas
+ *
+ */
+public class ThreeDimensionalAttribute extends MultidimensionalAttribute<double[][][]> {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 6878673196924994437L; // TODO what is that
-	private int xsize;// TODO check with Tanja if xsize and ysize should be in MzltidimensionalAttribute
+	private static final long serialVersionUID = 6878673196924994437L;
+	private int xsize;
 	private int ysize;
 	private int zsize;
 
-	public MultidimensionalAttribute3d(final String name, final int xsize, final int ysize, final int zsize) {
+	public ThreeDimensionalAttribute(final String name, final int xsize, final int ysize, final int zsize) {
 		super(name);
 		this.xsize = xsize;
 		this.ysize = ysize;
@@ -20,14 +23,14 @@ public class MultidimensionalAttribute3d extends MultidimensionalAttribute<doubl
 	}
 
 	/**
-	 * {@inheritDoc} takes object type double[][][] or MultidimensionalAttributeValue3d - parsed to MultidimensionalAttributeValue3d
+	 * {@inheritDoc} takes object type double[][][] or {@link ThreeDimensionalAttributeValue} and returns a {@link ThreeDimensionalAttributeValue} that holds the same values
 	 */
 	@Override
 	public IAttributeValue getAsAttributeValue(final Object object) {
 		if (object instanceof double[][][]) {
-			return new MultidimensionalAttributeValue3d(this, (double[][][]) object);
-		} else if (object instanceof MultidimensionalAttributeValue2d) {
-			return new MultidimensionalAttributeValue3d(this, ((MultidimensionalAttributeValue3d) object).getValue());
+			return new ThreeDimensionalAttributeValue(this, (double[][][]) object);
+		} else if (object instanceof TwoDimensionalAttributeValue) {
+			return new ThreeDimensionalAttributeValue(this, ((ThreeDimensionalAttributeValue) object).getValue());
 		}
 
 		throw new IllegalArgumentException("No valid value for this attribute");
@@ -36,19 +39,18 @@ public class MultidimensionalAttribute3d extends MultidimensionalAttribute<doubl
 
 	@Override
 	public boolean isValidValue(final Object value) {
-		return (value instanceof MultidimensionalAttributeValue3d || value instanceof double[][][]);
+		return (value instanceof ThreeDimensionalAttributeValue || value instanceof double[][][]);
 	}
 
 	@Override
 	public String getStringDescriptionOfDomain() {
-		return "[MDA3] " + this.getName(); // TODO check with Tanja if i can just choose String descriptors like this
+		return "[3d] " + this.getName(); // TODO check with Tanja if i can just choose String descriptors like this
 	}
 
 	@Override
 	public double[][][] deserializeAttributeValue(final String string) {
 		String formatstring = string.replaceAll(this.OPEN_OR_CLOSED_BRACES_REGEX, this.EMPTY_STRING);
-		String[] stringvalues = formatstring.split(this.SINGLE_SPACE); // TODO check those 2 lines could be in upper class in theory if MultidimensionalAttribute2d got changed accordingly. The lower lines could be
-		// done by a new private Method that is definied in the upper class and lower classes have to implement
+		String[] stringvalues = formatstring.split(this.SINGLE_SPACE);
 		double[][][] doublevalues = new double[this.xsize][this.ysize][this.zsize];
 
 		int position = 0;

@@ -53,7 +53,7 @@ public class SensorTimeSeriesAttribute extends AGenericObjectAttribute<SensorTim
 	@Override
 	public String serializeAttributeValue(final Object value) {
 		StringJoiner sj = new StringJoiner(DATA_POINT_SEPARATOR);
-		SensorTimeSeries sensorTimeSeries = (SensorTimeSeries) value; // FIXME - warum ist hier kein test auf valid?
+		SensorTimeSeries sensorTimeSeries = (SensorTimeSeries) value;
 		for (int t = 0; t <= sensorTimeSeries.getLength(); t++) {
 			if (sensorTimeSeries.getValueOrNull(t) != null) {
 				sj.add(t + TIMESTEP_VALUE_SEPARATOR + sensorTimeSeries.getValueOrNull(t));

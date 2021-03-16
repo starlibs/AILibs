@@ -26,9 +26,9 @@ import ai.libs.jaicore.basic.kvstore.KVStore;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.ml.core.dataset.DatasetTestUtil;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultidimensionalAttribute2d;
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultidimensionalAttribute3d;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.ThreeDimensionalAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.TwoDimensionalAttribute;
 import ai.libs.jaicore.ml.pdm.dataset.SensorTimeSeries;
 import ai.libs.jaicore.ml.pdm.dataset.SensorTimeSeriesAttribute;
 import ai.libs.jaicore.test.LongTest;
@@ -52,8 +52,8 @@ public class ArffDatasetAdapterTest {
 	private static final IAttribute TEST_NUM_ATT = new NumericAttribute("numAtt");
 	private static final IAttribute TEST_CAT_ATT = new IntBasedCategoricalAttribute("catAtt", CATEGORICAL_VALUES);
 	private static final IAttribute TEST_STS_ATT = new SensorTimeSeriesAttribute("sensorTimeSeriesAttibute");
-	private static final IAttribute TEST_MUL2D_ATT = new MultidimensionalAttribute2d("multidimensionalAttribute", 3, 2);
-	private static final IAttribute TEST_MUL3D_ATT = new MultidimensionalAttribute3d(ATTRIBUTE_NAME, 4, 3, 2);
+	private static final IAttribute TEST_MUL2D_ATT = new TwoDimensionalAttribute("multidimensionalAttribute", 3, 2);
+	private static final IAttribute TEST_MUL3D_ATT = new ThreeDimensionalAttribute(ATTRIBUTE_NAME, 4, 3, 2);
 
 	private static final double TEST_NUMERIC_VAL = 231.0;
 	private static final int TEST_CATEGORICAL_VAL = (int) TEST_CAT_ATT.deserializeAttributeValue(CATEGORICAL_VALUES.get(1));
@@ -90,13 +90,22 @@ public class ArffDatasetAdapterTest {
 	}
 
 	@Test
-	public void testMultidimensionalAttribute() throws UnsupportedAttributeTypeException {
+	public void testTwoDimensionalAttribute() throws UnsupportedAttributeTypeException {
 		IAttribute attribute2d = ArffDatasetAdapter.parseAttribute(MULTI_DIMENSIONAL_ATTRIBUTE2D_STRING);
+
+		assertTrue("Returned attribute is not of type MultidimensionalAttribute2d", attribute2d instanceof TwoDimensionalAttribute);
+
+		assertTrue("Name of attrtibute could not be extracted correctly", attribute2d.getName().equals(ATTRIBUTE_NAME));
+	}
+
+	@Test
+	public void testThreDimensionalAttribute() throws UnsupportedAttributeTypeException {
 		IAttribute attribute3d = ArffDatasetAdapter.parseAttribute(MULTI_DIMENSIONAL_ATTRIBUTE3D_STRING);
 
-		assertTrue("Returned attribute is not of type MultidimensionalAttribute2d", attribute2d instanceof MultidimensionalAttribute2d);
-		assertTrue("Returned attribute is not of type MultidimensionalAttribute3d", attribute3d instanceof MultidimensionalAttribute3d);
-		assertTrue("Name of attrtibute could not be extracted correctly", attribute2d.getName().equals(attribute3d.getName()) && attribute2d.getName().equals(ATTRIBUTE_NAME));
+		assertTrue("Returned attribute is not of type MultidimensionalAttribute3d", attribute3d instanceof ThreeDimensionalAttribute);
+
+		assertTrue("Name of attrtibute could not be extracted correctly", attribute3d.getName().equals(attribute3d.getName()));
+
 	}
 
 	@Test

@@ -40,16 +40,16 @@ import ai.libs.jaicore.ml.core.dataset.DenseInstance;
 import ai.libs.jaicore.ml.core.dataset.SparseInstance;
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultidimensionalAttribute2d;
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultidimensionalAttribute3d;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.StringAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.ThreeDimensionalAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.TwoDimensionalAttribute;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffAttributeType;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffItem;
 import ai.libs.jaicore.ml.pdm.dataset.SensorTimeSeriesAttribute;
 
 /**
- * an Adapter that reads an ARFF File and parses it into Attribute Value Objects by using instances of Attribute
+ * Handles dataset files in the arff format {@link https://waikato.github.io/weka-wiki/formats_and_processing/arff/}
  */
 public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<ILabeledInstance>> {
 
@@ -170,20 +170,20 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	/**
-	 * parsing Arff string that defines an Attribute to an IAttribute
+	 * parses an attribute definition of an ARff file. General format: {@literal @}Attribute {@literal <}attribute_name {@literal >} {@literal <}attribute_type{@literal >}
 	 *
-	 * @param line to be analysed
+	 * @param line to be analyzed
 	 * @return Object of class IAttribute
-	 * @throws UnsupportedAttributeTypeException when parsed Attribute not implemented
+	 * @throws UnsupportedAttributeTypeException when the parsed Attribute not implemented
 	 */
 	protected static IAttribute parseAttribute(final String line) throws UnsupportedAttributeTypeException {
-		String attributeDefinitionSplit = line.replace("\\t", " ").substring(EArffItem.ATTRIBUTE.getValue().length() + 1).trim(); // gets length of strign attribute
+		String attributeDefinitionSplit = line.replace("\\t", " ").substring(EArffItem.ATTRIBUTE.getValue().length() + 1).trim();
 		Matcher m = REG_EXP_ATTRIBUTE_DESCRIPTION.matcher(attributeDefinitionSplit);
 		if (!m.find()) {
 			throw new IllegalArgumentException("Cannot parse attribute definition: " + line);
 		}
 		String name = m.group(1);
-		String type = m.group(2); // type of the value
+		String type = m.group(2);
 
 		name = name.trim();
 		if ((name.startsWith("'") && name.endsWith("'")) || (name.startsWith("\"") && name.endsWith("\""))) {
@@ -195,8 +195,8 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		if (type.startsWith("{") && type.endsWith("}")) {
 			values = type.substring(1, type.length() - 1).split(SEPARATOR_DENSE_INSTANCE_VALUES);
 			attType = EArffAttributeType.NOMINAL;
-		} else if (type.toLowerCase().startsWith(EArffAttributeType.MULTIDIMENSIONAL.getName())) {// multidimensional Attributes have the form MULTIDIMENSIONAL(sizex,sizey) which has to be trimmed
-			attType = EArffAttributeType.MULTIDIMENSIONAL; // TODO3dcase - does it work
+		} else if (type.toLowerCase().startsWith(EArffAttributeType.MULTIDIMENSIONAL.getName())) {
+			attType = EArffAttributeType.MULTIDIMENSIONAL;
 			values = type.toLowerCase().substring(EArffAttributeType.MULTIDIMENSIONAL.getName().length() + 1, type.length() - 1).split(SEPARATOR_DENSE_INSTANCE_VALUES); // TODO test ob das hier funktioniert
 		} else {
 			try {
@@ -222,13 +222,11 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			} else {
 				throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
 			}
-		case MULTIDIMENSIONAL: // TODO figure out if this works - test for 3d
+		case MULTIDIMENSIONAL:
 			if (values.length == 2) {
-				int breadth = Integer.parseInt(values[0]);
-				int width = Integer.parseInt(values[1]);
-				return new MultidimensionalAttribute2d(name, breadth, width);
+				return new TwoDimensionalAttribute(name, Integer.parseInt(values[0]), Integer.parseInt(values[1]));
 			} else if (values.length == 3) {
-				return new MultidimensionalAttribute3d(name, Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2]));
+				return new ThreeDimensionalAttribute(name, Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2]));
 			}
 		default:
 			throw new UnsupportedAttributeTypeException("Can not deal with attribute type " + type);
@@ -245,7 +243,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	/**
-	 * deserialising one instance of data (1 line)
+	 * Parses a single instance of an arff file containing values for each attribute given.
 	 *
 	 * @param sparseData if true there are ? in the data - if it false there are not
 	 * @param attributes List of IAttribute Objects.
@@ -334,7 +332,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	/**
-	 * parsed ARFF file to a "parsed instance"
+	 * Parses the ARff dataset from the given file into a {@link ILabeledDataset}
 	 *
 	 * @param sparseMode
 	 * @param datasetFile file to be parsed
@@ -388,7 +386,6 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 					line = line.trim();
 					if (!line.isEmpty() && !line.startsWith("%")) { // ignore empty and comment lines
 						List<Object> parsedInstance = parseInstance(sparseMode, attributes, relationMetaData.getAsInt(K_CLASS_INDEX), line);
-						// create empty list and parse object
 						ILabeledInstance newI;
 						if ((parsedInstance.get(0) instanceof Object[])) {
 							newI = new DenseInstance((Object[]) ((List<?>) parsedInstance).get(0), ((List<?>) parsedInstance).get(1));
