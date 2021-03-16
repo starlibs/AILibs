@@ -3,12 +3,12 @@ package ai.libs.jaicore.ml.core.dataset.schema.attribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 
-public abstract class MultidimensionalAttributeValue<O> implements IAttributeValue {
+public class MultidimensionalAttributeValue<O> implements IAttributeValue {
 	protected O value;
 	protected MultidimensionalAttribute<O> attribute;
 
-	public MultidimensionalAttributeValue(final MultidimensionalAttribute<O> attribute, final O value) {
-		this.value = value;
+	public MultidimensionalAttributeValue(final MultidimensionalAttribute<O> attribute, final O object) {
+		this.value = object;
 		this.attribute = attribute;
 	}
 

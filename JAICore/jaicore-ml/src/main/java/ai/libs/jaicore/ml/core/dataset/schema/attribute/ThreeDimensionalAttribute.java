@@ -23,14 +23,14 @@ public class ThreeDimensionalAttribute extends MultidimensionalAttribute<double[
 	}
 
 	/**
-	 * {@inheritDoc} takes object type double[][][] or {@link ThreeDimensionalAttributeValue} and returns a {@link ThreeDimensionalAttributeValue} that holds the same values
+	 * {@inheritDoc} takes object type double[][][] or {@link MultidimensionalAttributeValue} and returns a {@link MultidimensionalAttributeValue} that holds the same values
 	 */
 	@Override
 	public IAttributeValue getAsAttributeValue(final Object object) {
 		if (object instanceof double[][][]) {
-			return new ThreeDimensionalAttributeValue(this, (double[][][]) object);
-		} else if (object instanceof TwoDimensionalAttributeValue) {
-			return new ThreeDimensionalAttributeValue(this, ((ThreeDimensionalAttributeValue) object).getValue());
+			return new MultidimensionalAttributeValue<double[][][]>(this, (double[][][]) object);
+		} else if (object instanceof MultidimensionalAttributeValue) {
+			return new MultidimensionalAttributeValue<double[][][]>(this, (double[][][]) ((MultidimensionalAttributeValue) object).getValue());
 		}
 
 		throw new IllegalArgumentException("No valid value for this attribute");
@@ -39,12 +39,12 @@ public class ThreeDimensionalAttribute extends MultidimensionalAttribute<double[
 
 	@Override
 	public boolean isValidValue(final Object value) {
-		return (value instanceof ThreeDimensionalAttributeValue || value instanceof double[][][]);
+		return (value instanceof MultidimensionalAttributeValue || value instanceof double[][][]);
 	}
 
 	@Override
 	public String getStringDescriptionOfDomain() {
-		return "[3d] " + this.getName(); // TODO check with Tanja if i can just choose String descriptors like this
+		return "[3d] " + this.getName();
 	}
 
 	@Override

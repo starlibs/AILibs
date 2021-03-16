@@ -59,14 +59,14 @@ public class TwoDimensionalAttribute extends MultidimensionalAttribute<double[][
 	}
 
 	/**
-	 * {@inheritDoc} This method takes a parameter of type double[][] or {@link TwoDimensionalAttributeValue} and returns a {@link TwoDimensionalAttributeValue} that holds the same values
+	 * {@inheritDoc} This method takes a parameter of type double[][] or {@link MultidimensionalAttributeValue} and returns a {@link MultidimensionalAttributeValue} that holds the same values
 	 */
 	@Override
 	public IAttributeValue getAsAttributeValue(final Object object) {
 		if (object instanceof double[][]) {
-			return new TwoDimensionalAttributeValue(this, (double[][]) object);
-		} else if (object instanceof TwoDimensionalAttributeValue) {
-			return new TwoDimensionalAttributeValue(this, ((TwoDimensionalAttributeValue) object).getValue());
+			return new MultidimensionalAttributeValue(this, object);
+		} else if (object instanceof MultidimensionalAttributeValue) {
+			return new MultidimensionalAttributeValue<double[][]>(this, (double[][]) ((MultidimensionalAttributeValue) object).getValue());
 		}
 
 		throw new IllegalArgumentException("No valid value for this attribute");
@@ -75,7 +75,7 @@ public class TwoDimensionalAttribute extends MultidimensionalAttribute<double[][
 
 	@Override
 	public boolean isValidValue(final Object value) {
-		return (value instanceof TwoDimensionalAttributeValue || value instanceof double[][]);
+		return (value instanceof MultidimensionalAttributeValue || value instanceof double[][]);
 	}
 
 	@Override
