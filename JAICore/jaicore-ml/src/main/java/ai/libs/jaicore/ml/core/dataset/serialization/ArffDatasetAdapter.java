@@ -243,10 +243,10 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	/**
-	 * Parses a single instance of an arff file containing values for each attribute given.
+	 * Parses a single instance of an ARff file containing values for each attribute given (attributes parameter). Syntax <attribute1_value>, <attribute2_value>, ...
 	 *
 	 * @param sparseData if true there are ? in the data - if it false there are not
-	 * @param attributes List of IAttribute Objects.
+	 * @param attributes List of given IAttribute Objects.
 	 * @param targetIndex
 	 * @param line line of data
 	 * @return list of IAttribute values
