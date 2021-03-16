@@ -15,8 +15,6 @@ import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFail
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.evaluation.IPrediction;
-import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
@@ -27,16 +25,17 @@ import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
-import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
+import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedComputation;
+import ai.libs.mlplan.core.ILearnerFactory;
 import ai.libs.mlplan.core.IProblemType;
-import ai.libs.mlplan.sklearn.AScikitLearnLearnerFactory;
 import ai.libs.mlplan.sklearn.EMLPlanScikitLearnProblemType;
 
 public class MLPlanScikitLearnSearchSpaceConfigurationTest extends AbstractSearchSpaceConfigurationTest {
 
 	public static Stream<EMLPlanScikitLearnProblemType> getProblemTypes() {
-		return Stream.of(EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS, EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES, EMLPlanScikitLearnProblemType.RUL);
+		return Stream.of(EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS, EMLPlanScikitLearnProblemType.CLASSIFICATION_MULTICLASS_UNLIMITED_LENGTH_PIPELINES,
+				EMLPlanScikitLearnProblemType.RUL);
 	}
 
 	public static final String MSG_DISABLED = "This test is disabled for WEKA, because it does not make sense";
@@ -44,7 +43,7 @@ public class MLPlanScikitLearnSearchSpaceConfigurationTest extends AbstractSearc
 	public static final String DATASET_DEFAULT = "testrsc/car.arff";
 	public static final String DATASET_RUL = "testrsc/rul_smallExample.arff";
 
-	private AScikitLearnLearnerFactory factory;
+	private ILearnerFactory<IScikitLearnWrapper> factory;
 	private MonteCarloCrossValidationEvaluator evaluator;
 
 	@Override
@@ -58,13 +57,13 @@ public class MLPlanScikitLearnSearchSpaceConfigurationTest extends AbstractSearc
 		}
 
 		this.factory = problemType.getLearnerFactory();
-		this.evaluator = new MonteCarloCrossValidationEvaluatorFactory().withData(data).withNumMCIterations(1).withTrainFoldSize(0.7).withMeasure(problemType.getPerformanceMetricForSearchPhase()).withRandom(new Random(42))
-				.getLearnerEvaluator();
+		this.evaluator = new MonteCarloCrossValidationEvaluatorFactory().withData(data).withNumMCIterations(1).withTrainFoldSize(0.7).withMeasure(problemType.getPerformanceMetricForSearchPhase())
+				.withRandom(new Random(42)).getLearnerEvaluator();
 	}
 
 	@Override
 	public void execute(final IComponentInstance componentInstance) throws ComponentInstantiationFailedException, InterruptedException, AlgorithmTimeoutedException, ExecutionException {
-		ScikitLearnWrapper<IPrediction, IPredictionBatch> model = this.factory.getComponentInstantiation(componentInstance);
+		IScikitLearnWrapper model = this.factory.getComponentInstantiation(componentInstance);
 		TimedComputation.compute(new Callable<Double>() {
 			@Override
 			public Double call() throws Exception {
