@@ -410,7 +410,6 @@ class TimeSeriesBasedModel:
         data['data'] = list()
         for i, instance in enumerate(instances):
             data['data'].append([str(f) for f in instance] + [targets[i]])
-
         with open(output_file, 'a') as file:
             arff.dump(data, file)
 
