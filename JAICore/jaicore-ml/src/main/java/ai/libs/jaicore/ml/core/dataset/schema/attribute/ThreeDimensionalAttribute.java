@@ -48,9 +48,7 @@ public class ThreeDimensionalAttribute extends MultidimensionalAttribute<double[
 	}
 
 	@Override
-	public double[][][] deserializeAttributeValue(final String string) {
-		String formatstring = string.replaceAll(this.OPEN_OR_CLOSED_BRACES_REGEX, this.EMPTY_STRING);
-		String[] stringvalues = formatstring.split(this.SINGLE_SPACE);
+	public double[][][] formGenereicMultidimensionalArray(final String[] stringvalues) {
 		double[][][] doublevalues = new double[this.xsize][this.ysize][this.zsize];
 
 		int position = 0;

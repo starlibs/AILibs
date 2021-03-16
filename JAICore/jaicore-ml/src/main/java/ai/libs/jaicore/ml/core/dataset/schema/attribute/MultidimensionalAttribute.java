@@ -42,6 +42,17 @@ public abstract class MultidimensionalAttribute<O> extends AGenericObjectAttribu
 		return serialisedString.replace(this.ARRAY_STRING_SPLITTER, this.SINGLE_SPACE).replaceAll(this.WHITESPACE_REGEX, this.SINGLE_SPACE);
 	}
 
+	protected abstract O formGenereicMultidimensionalArray(String[] values);
+
+	@Override
+	public O deserializeAttributeValue(final String string) {
+		String formatstring = string.replaceAll(this.OPEN_OR_CLOSED_BRACES_REGEX, this.EMPTY_STRING);
+		String[] stringvalues = formatstring.split(this.SINGLE_SPACE);
+
+		return this.formGenereicMultidimensionalArray(stringvalues);
+
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	protected O getValueAsTypeInstance(final Object object) {

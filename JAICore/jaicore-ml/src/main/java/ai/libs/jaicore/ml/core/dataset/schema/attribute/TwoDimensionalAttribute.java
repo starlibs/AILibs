@@ -87,19 +87,21 @@ public class TwoDimensionalAttribute extends MultidimensionalAttribute<double[][
 	 * {@inheritDoc} parses String string to MutidimensionalAttributeValue
 	 */
 	@Override
-	public double[][] deserializeAttributeValue(final String string) {
-		String arraystring = string.replaceAll(this.SINGLE_SPACE, this.ARRAY_STRING_SPLITTER); // TODO Refactor
-		String[] test = arraystring.split(this.INNTER_ARRAY_SPLITTER);
-		test[0] = test[0].substring(2);
-		test[test.length - 1] = test[test.length - 1].substring(0, test[test.length - 1].length() - 2);
-		double[][] values = new double[this.xsize][this.ysize];
-		for (int i = 0; i < test.length; i++) {
-			String[] tmp = test[i].split(this.ARRAY_STRING_SPLITTER);
-			for (int j = 0; j < tmp.length; j++) {
-				values[i][j] = Double.parseDouble(tmp[j]);
+	public double[][] formGenereicMultidimensionalArray(final String[] stringvalues) {
+		double[][] doublevalues = new double[this.xsize][this.ysize];
+
+		int position = 0;
+		for (int x = 0; x < this.xsize; x++) {
+			double[] innterarray = new double[this.ysize];
+			for (int y = 0; y < this.ysize; y++) {
+				innterarray[y] = Double.parseDouble(stringvalues[position]);
+				position++;
 			}
+			doublevalues[x] = innterarray;
 		}
-		return values;
+
+		return doublevalues;
+
 	}
 
 }
