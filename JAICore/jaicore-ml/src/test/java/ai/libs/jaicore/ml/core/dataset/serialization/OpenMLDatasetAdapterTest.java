@@ -164,7 +164,8 @@ public class OpenMLDatasetAdapterTest {
 				41163, // dilbert
 				41165, // robert
 				41166, // volkert
-				41159 // guilermo
+				41159, // guilermo
+				42732 // sf-police-incidents
 		));
 	}
 
