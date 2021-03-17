@@ -34,7 +34,6 @@ public class ThreeDimensionalAttribute extends MultidimensionalAttribute<double[
 		}
 
 		throw new IllegalArgumentException("No valid value for this attribute");
-
 	}
 
 	@Override
