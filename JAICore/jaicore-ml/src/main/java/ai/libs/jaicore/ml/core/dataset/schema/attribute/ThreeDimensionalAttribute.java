@@ -31,6 +31,7 @@ public class ThreeDimensionalAttribute extends MultidimensionalAttribute<double[
 			return new MultidimensionalAttributeValue<double[][][]>(this, (double[][][]) object);
 		} else if (object instanceof MultidimensionalAttributeValue) {
 			return new MultidimensionalAttributeValue<double[][][]>(this, (double[][][]) ((MultidimensionalAttributeValue) object).getValue());
+
 		}
 
 		throw new IllegalArgumentException("No valid value for this attribute");
