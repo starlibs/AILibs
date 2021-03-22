@@ -62,7 +62,7 @@ allprojects {
 	    apacheCommonsLang = 'org.apache.commons:commons-lang3:3.9'
 	    
 	    // openml dependencies
-	    openmlAPIConnector = 'org.openml:apiconnector:1.0.23'
+	    openmlAPIConnector = 'org.openml:apiconnector:1.0.25'
 	    
 	    // graphstream
 	    gsCore = 'com.github.mwever:gs-core:2.0.2-synchrofix'
