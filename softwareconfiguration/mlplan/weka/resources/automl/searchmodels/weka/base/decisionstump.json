@@ -1,11 +1,22 @@
 {
-  "repository" : "weka.classifiers.trees.DecisionStump",
-  "include" : [ ],
-  "components" : [ {
-    "name" : "weka.classifiers.trees.DecisionStump",
-    "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "PipelineClassifier" ],
-    "parameters" : [ ],
-    "dependencies" : [ ]
-  } ]
+	"repository": "weka.classifiers.trees.DecisionStump",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.trees.DecisionStump",
+			"requiredInterface": [],
+			"providedInterface": [
+				"AbstractClassifier",
+				"Classifier",
+				"BaseClassifier",
+				"WeightedInstancesHandler",
+				"AbstractRegressor",
+				"Regressor",
+				"BaseRegressor",
+				"BoostableBaseRegressor"
+			],
+			"parameters": [],
+			"dependencies": []
+		}
+	]
 }

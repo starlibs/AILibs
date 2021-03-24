@@ -30,8 +30,8 @@ public class SetUtilTest {
 		b.add("R3");
 
 		/* numerical test */
-		assertTrue(SetUtil.allMappings(a, b, true, false, false).size() == Math.pow(b.size(), a.size()));
-		assertTrue(SetUtil.allMappings(a, b, false, false, false).size() == Math.pow(1 + b.size(), a.size()));
+		assertEquals(Math.pow(b.size(), a.size()), SetUtil.allMappings(a, b, true, false, false).size(), 1E-8);
+		assertEquals(Math.pow(1 + b.size(), a.size()), SetUtil.allMappings(a, b, false, false, false).size(), 1E-8);
 
 		/* check injectivity */
 		for (Map<String, String> map : SetUtil.allMappings(a, b, false, true, false)) {
@@ -151,7 +151,7 @@ public class SetUtilTest {
 		set.add(a);
 		set.add(b);
 		set.addABeforeB(a, b);
-		assertTrue(set.getOrder().get(a).size() == 1);
+		assertEquals(1, set.getOrder().get(a).size());
 		assertTrue(set.getOrder().get(a).contains(b));
 	}
 
@@ -197,7 +197,7 @@ public class SetUtilTest {
 		unorderedSet.add(b);
 		unorderedSet.add(c);
 		unorderedSet.add(d);
-		assertTrue(SetUtil.calculateNumberOfTotalOrderings(unorderedSet) == 24);
+		assertEquals(24, SetUtil.calculateNumberOfTotalOrderings(unorderedSet));
 
 		final PartialOrderedSet<String> sortedSetA = new PartialOrderedSet<>();
 		sortedSetA.add(a);
@@ -206,7 +206,7 @@ public class SetUtilTest {
 		sortedSetA.add(d);
 		sortedSetA.addABeforeB(a, b);
 		sortedSetA.addABeforeB(c, d);
-		assertTrue(SetUtil.calculateNumberOfTotalOrderings(sortedSetA) == 6);
+		assertEquals(6, SetUtil.calculateNumberOfTotalOrderings(sortedSetA));
 
 		final PartialOrderedSet<String> sortedSetB = new PartialOrderedSet<>();
 		sortedSetB.add(a);
@@ -215,6 +215,6 @@ public class SetUtilTest {
 		sortedSetB.add(d);
 		sortedSetB.addABeforeB(a, b);
 		sortedSetB.addABeforeB(b, c);
-		assertTrue(SetUtil.calculateNumberOfTotalOrderings(sortedSetB) == 4);
+		assertEquals(4, SetUtil.calculateNumberOfTotalOrderings(sortedSetB));
 	}
 }

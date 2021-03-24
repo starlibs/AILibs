@@ -9,8 +9,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.evaluation.IPrediction;
-import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
@@ -24,9 +22,7 @@ import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.TrainTestSplitEvaluationFailedEvent;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
-import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
-import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
-import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
+import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapper;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.TimeTrackingLearnerWrapper;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
@@ -56,7 +52,7 @@ public class MLPlanScikitLearnEvaluationListenerExample {
 		builder.withTimeOut(new Timeout(2, TimeUnit.MINUTES));
 		builder.withSeed(42);
 
-		MLPlan<ScikitLearnWrapper<IPrediction, IPredictionBatch>> mlplan = builder.withDataset(split.get(0)).build();
+		MLPlan<IScikitLearnWrapper> mlplan = builder.withDataset(split.get(0)).build();
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("testedalgorithm");
 
@@ -67,20 +63,20 @@ public class MLPlanScikitLearnEvaluationListenerExample {
 			@Subscribe
 			public void receiveEvent(final ClassifierFoundEvent event) {
 				@SuppressWarnings("rawtypes")
-				ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> learner = (ScikitLearnWrapper) event.getSolutionCandidate();
+				IScikitLearnWrapper learner = (IScikitLearnWrapper) event.getSolutionCandidate();
 				LOGGER.info("Received successful evaluation with error={} within {}ms for pipeline: {}", event.getInSampleError(), event.getTimeToEvaluate(), learner.toString());
 			}
 
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Subscribe
 			public void receiveEvent(final TrainTestSplitEvaluationFailedEvent<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> event) {
-				ScikitLearnWrapper<SingleTargetRegressionPrediction, SingleTargetRegressionPredictionBatch> learner = null;
+				IScikitLearnWrapper learner = null;
 				if (event.getLearner() instanceof TimeTrackingLearnerWrapper) {
 					TimeTrackingLearnerWrapper wrapper = ((TimeTrackingLearnerWrapper) event.getLearner());
-					learner = (ScikitLearnWrapper) wrapper.getLearner();
+					learner = (IScikitLearnWrapper) wrapper.getLearner();
 				}
 				if (learner != null) {
-					ILearnerRunReport report = event.getReport();
+					ILearnerRunReport report = event.getLastReport();
 					String exceptionStackTrace = ExceptionUtils.getStackTrace(report.getException());
 					long candidateRuntime = (report.getTrainEndTime() - report.getTrainStartTime()) + (report.getTestEndTime() - report.getTestStartTime());
 					LOGGER.info("Received failed evaluation within {}ms for pipeline: {}", candidateRuntime, learner.toString(), exceptionStackTrace);
@@ -90,7 +86,7 @@ public class MLPlanScikitLearnEvaluationListenerExample {
 
 		try {
 			long start = System.currentTimeMillis();
-			ScikitLearnWrapper<IPrediction, IPredictionBatch> optimizedClassifier = mlplan.call();
+			IScikitLearnWrapper optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			LOGGER.info("Finished build of the classifier. Training time was {}s.", trainTime);
 			LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));
@@ -99,7 +95,8 @@ public class MLPlanScikitLearnEvaluationListenerExample {
 			SupervisedLearnerExecutor executor = new SupervisedLearnerExecutor();
 			ILearnerRunReport report = executor.execute(optimizedClassifier, split.get(1));
 			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}",
-					EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList().getCastedView(Integer.class, ISingleLabelClassification.class)), mlplan.getInternalValidationErrorOfSelectedClassifier());
+					EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList().getCastedView(Integer.class, ISingleLabelClassification.class)),
+					mlplan.getInternalValidationErrorOfSelectedClassifier());
 		} catch (NoSuchElementException e) {
 			LOGGER.error("Building the classifier failed: {}", LoggerUtil.getExceptionInfo(e));
 		}

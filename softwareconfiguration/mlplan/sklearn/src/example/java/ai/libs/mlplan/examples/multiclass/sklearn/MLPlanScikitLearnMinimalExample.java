@@ -8,12 +8,13 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
-import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
+import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapper;
 import ai.libs.mlplan.sklearn.builder.MLPlanScikitLearnBuilder;
 
 public class MLPlanScikitLearnMinimalExample {
 
-	public static void main(final String[] args) throws AlgorithmTimeoutedException, AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, IOException, DatasetDeserializationFailedException {
-		ScikitLearnWrapper c = MLPlanScikitLearnBuilder.forClassification().withDataset(OpenMLDatasetReader.deserializeDataset(3)).build().call();
+	public static void main(final String[] args)
+			throws AlgorithmTimeoutedException, AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, IOException, DatasetDeserializationFailedException {
+		IScikitLearnWrapper c = MLPlanScikitLearnBuilder.forClassification().withDataset(OpenMLDatasetReader.deserializeDataset(3)).build().call();
 	}
 }

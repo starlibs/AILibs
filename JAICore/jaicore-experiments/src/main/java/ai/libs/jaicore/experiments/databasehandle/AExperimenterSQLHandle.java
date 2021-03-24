@@ -96,7 +96,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 			throw new IllegalArgumentException("DB user must not be null in experiment config.");
 		}
 		if (config.getDBPassword() == null) {
-			throw new IllegalArgumentException("DB password must not be null in experiment config.");
+			config.setProperty(IDatabaseConfig.DB_PASS, "");
 		}
 		if (config.getDBDatabaseName() == null) {
 			throw new IllegalArgumentException("DB database name must not be null in experiment config.");

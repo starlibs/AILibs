@@ -314,6 +314,12 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			boolean instanceReadMode = false;
 			while ((line = br.readLine()) != null) {
 				lineCounter++;
+
+				// skip comments in arff
+				if (line.trim().startsWith("%")) {
+					continue;
+				}
+
 				if (!instanceReadMode) {
 					if (line.toLowerCase().startsWith(EArffItem.RELATION.getValue())) {
 						// parse relation meta data

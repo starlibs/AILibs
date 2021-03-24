@@ -86,7 +86,7 @@ public class SimplifiedTimeSeriesLoader {
 			cm = new ClassMapper((List<String>) tsTargetClassNames[2]);
 		}
 
-		return new Pair<>(new TimeSeriesDataset2(matrices, new ArrayList<double[][]>(), (int[]) tsTargetClassNames[1]), cm);
+		return new Pair<>(new TimeSeriesDataset2(matrices, new ArrayList<>(), (int[]) tsTargetClassNames[1]), cm);
 	}
 
 	/**

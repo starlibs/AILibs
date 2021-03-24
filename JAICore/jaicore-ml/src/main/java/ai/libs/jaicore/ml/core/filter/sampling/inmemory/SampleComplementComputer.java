@@ -33,21 +33,21 @@ public class SampleComplementComputer {
 		Map<Object, Integer> frequenciesInComplement = new HashMap<>();
 
 		for (Object instance : originalData) {
-			frequenciesInInput.put(instance, frequenciesInInput.computeIfAbsent(instance, k -> 0) + 1);
-			frequenciesInComplement.put(instance, 0);
-			frequenciesInSubSample.put(instance, 0);
+			frequenciesInInput.put(instance.hashCode(), frequenciesInInput.computeIfAbsent(instance.hashCode(), k -> 0) + 1);
+			frequenciesInComplement.put(instance.hashCode(), 0);
+			frequenciesInSubSample.put(instance.hashCode(), 0);
 		}
 		for (Object instance : sample) {
-			frequenciesInSubSample.put(instance, frequenciesInSubSample.computeIfAbsent(instance, k -> 0) + 1); // inserts 0 if, for some reason, the value has not been defined before
+			frequenciesInSubSample.put(instance.hashCode(), frequenciesInSubSample.computeIfAbsent(instance.hashCode(), k -> 0) + 1); // inserts 0 if, for some reason, the value has not been defined before
 		}
 
 		/* now compute complement */
 		D complement = (D) originalData.createEmptyCopy();
 		for (I instance : originalData) {
-			int frequencyInComplement = frequenciesInComplement.get(instance);
-			if (frequenciesInSubSample.get(instance) + frequencyInComplement < frequenciesInInput.get(instance)) {
+			Integer frequencyInComplement = frequenciesInComplement.get(instance.hashCode());
+			if (frequenciesInSubSample.get(instance.hashCode()) + frequencyInComplement < frequenciesInInput.get(instance.hashCode())) {
 				complement.add(instance);
-				frequenciesInComplement.put(instance, frequencyInComplement + 1);
+				frequenciesInComplement.put(instance.hashCode(), frequencyInComplement + 1);
 			}
 		}
 

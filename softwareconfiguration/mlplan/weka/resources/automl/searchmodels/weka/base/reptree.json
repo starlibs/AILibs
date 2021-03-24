@@ -7,11 +7,13 @@
 			"requiredInterface": [],
 			"providedInterface": [
 				"AbstractClassifier",
-				"WekaBaseClassifier",
-				"WeightedInstancesHandler",
+				"Classifier",
 				"BaseClassifier",
+				"WeightedInstancesHandler",
 				"RandomizableBaseClassifier",
-				"PipelineClassifier"
+				"AbstractRegressor",
+				"Regressor",
+				"BaseRegressor"
 			],
 			"parameters": [
 				{

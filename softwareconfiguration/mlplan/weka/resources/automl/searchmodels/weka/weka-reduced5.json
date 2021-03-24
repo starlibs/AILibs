@@ -1,7 +1,7 @@
 {
 	"repository": "WEKA - Auto-WEKA Searchspace",
 	"include": [
-		"./ext/twosteppipeline.json",
+		"./ext/twostep-classification-pipeline.json",
 		"./preprocessing/index.json",
     	"./base/naivebayes.json",
     	"./base/smo_kernel/index.json",

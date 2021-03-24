@@ -7,30 +7,50 @@
 			"requiredInterface": [],
 			"providedInterface": [
 				"AbstractClassifier",
-				"WekaBaseClassifier",
-				"WeightedInstancesHandler",
+				"Classifier",
 				"BaseClassifier",
+				"WeightedInstancesHandler",
 				"RandomizableBaseClassifier",
-				"PipelineClassifier"
+				"AbstractRegressor",
+				"Regressor",
+				"BaseRegressor"
 			],
 			"parameters": [
 				{
 					"name": "L",
 					"type": "double",
 					"default": 0.3,
-					"min": 0.1,
+					"min": 0.01,
 					"max": 1.0,
 					"refineSplits": 8,
-					"minInterval": 0.1
+					"minInterval": 0.05
 				},
 				{
 					"name": "M",
 					"type": "double",
 					"default": 0.2,
-					"min": 0.1,
+					"min": 0.01,
 					"max": 1.0,
 					"refineSplits": 8,
-					"minInterval": 0.1
+					"minInterval": 0.05
+				},
+				{
+					"name": "V",
+					"type": "int",
+					"default": 0.0,
+					"min": 0.0,
+					"max": 100.0,
+					"refineSplits": 8,
+					"minInterval": 1
+				},
+				{
+					"name": "E",
+					"type": "int",
+					"default": 20.0,
+					"min": 1.0,
+					"max": 100.0,
+					"refineSplits": 8,
+					"minInterval": 1.0
 				},
 				{
 					"name": "B",
@@ -54,6 +74,11 @@
 					"default": "false"
 				},
 				{
+					"name": "I",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
 					"name": "R",
 					"type": "boolean",
 					"default": "false"
@@ -62,14 +87,6 @@
 					"name": "D",
 					"type": "boolean",
 					"default": "false"
-				},
-				{
-					"name": "S",
-					"type": "cat",
-					"default": "1",
-					"values": [
-						"1"
-					]
 				}
 			],
 			"dependencies": []

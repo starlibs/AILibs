@@ -1,0 +1,42 @@
+{
+	"repository": "weka.classifiers.trees.M5P",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.trees.M5P",
+			"requiredInterface": [],
+			"providedInterface": [
+				"AbstractRegressor",
+				"Regressor",
+				"BaseRegressor"
+			],
+			"parameters": [
+				{
+					"name": "N",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "M",
+					"type": "int",
+					"default": 4.0,
+					"min": 1.0,
+					"max": 64.0,
+					"refineSplits": 8,
+					"minInterval": 1
+				},
+				{
+					"name": "U",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "R",
+					"type": "boolean",
+					"default": "false"
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

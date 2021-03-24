@@ -34,7 +34,7 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEv
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
-import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multiclass.IMLPlanClassifierConfig;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuard;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
 
@@ -137,7 +137,7 @@ abstract class MLPlanUtil {
 		return new Pair<>(classifierEvaluatorForSearch, classifierEvaluatorForSelection);
 	}
 
-	public static HASCOViaFDAndBestFirstWithRandomCompletionsBuilder getHASCOBuilder(final MLPlanClassifierConfig algorithmConfig, final ILabeledDataset<?> dataset, final File searchSpaceFile, final String requestedHASCOInterface,
+	public static HASCOViaFDAndBestFirstWithRandomCompletionsBuilder getHASCOBuilder(final IMLPlanClassifierConfig algorithmConfig, final ILabeledDataset<?> dataset, final File searchSpaceFile, final String requestedHASCOInterface,
 			final Predicate<TFDNode> priorizingPredicate, final List<IPathEvaluator<TFDNode, String, Double>> preferredNodeEvaluators, final PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator, final String nameOfMethod1, final String nameOfMethod2) {
 
 		/* compile software composition problem and create the builder */

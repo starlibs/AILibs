@@ -12,10 +12,9 @@
 			],
 			"providedInterface": [
 				"AbstractClassifier",
-				"WekaBaseClassifier",
+				"Classifier",
 				"BaseClassifier",
-				"WeightedInstancesHandler",
-				"PipelineClassifier"
+				"WeightedInstancesHandler"
 			],
 			"parameters": [
 				{
@@ -92,16 +91,15 @@
 					"default": "-1",
 					"values": [
 						"-1",
-						"1",
 						"2",
 						"3",
 						"4",
-						"10",
 						"5",
 						"6",
 						"7",
 						"8",
-						"9"
+						"9",
+						"10"
 					]
 				}
 			],

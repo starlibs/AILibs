@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstance;
 
 public class ComponentInstanceSerializer {
@@ -17,7 +18,7 @@ public class ComponentInstanceSerializer {
 		this.initializeObjectMapper();
 	}
 
-	public String serializeComponentInstance(final ComponentInstance componentInstance) throws JsonProcessingException {
+	public String serializeComponentInstance(final IComponentInstance componentInstance) throws JsonProcessingException {
 		return this.objectMapper.writeValueAsString(componentInstance);
 	}
 

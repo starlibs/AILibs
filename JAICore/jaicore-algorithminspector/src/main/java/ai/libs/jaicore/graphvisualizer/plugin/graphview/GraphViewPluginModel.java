@@ -70,7 +70,6 @@ public class GraphViewPluginModel extends ASimpleMVCPluginModel<GraphViewPluginV
 
 	private void initializeGraph(final File searchGraphCSSPath) {
 		this.graph = new SingleGraph("Search Graph");
-
 		try {
 			this.graph.setAttribute("ui.stylesheet", FileUtil.readFileAsString(searchGraphCSSPath.getPath()));
 		} catch (IOException e) {

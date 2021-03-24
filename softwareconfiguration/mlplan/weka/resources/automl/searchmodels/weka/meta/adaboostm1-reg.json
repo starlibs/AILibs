@@ -1,0 +1,73 @@
+{
+	"repository": "weka.classifiers.meta.AdaBoostM1",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.meta.AdaBoostM1",
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BoostableBaseRegressor"
+				}
+			],
+			"providedInterface": [
+				"AbstractRegressor",
+				"Regressor",
+				"MetaRegressor",
+				"WeightedInstancesHandler"
+			],
+			"parameters": [
+				{
+					"name": "pActivator",
+					"type": "cat",
+					"default": "0",
+					"values": [
+						"0",
+						"1"
+					]
+				},
+				{
+					"name": "P",
+					"type": "int",
+					"default": 100.0,
+					"min": 10.0,
+					"max": 100.0,
+					"refineSplits": 8,
+					"minInterval": 5
+				},
+				{
+					"name": "I",
+					"type": "int",
+					"default": 10.0,
+					"min": 2.0,
+					"max": 128.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "Q",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "S",
+					"type": "cat",
+					"default": "1",
+					"values": [
+						"1"
+					]
+				}
+			],
+			"dependencies": [
+				{
+					"pre": "pActivator in {0}",
+					"post": "P in {100}"
+				},
+				{
+					"pre": "pActivator in {1}",
+					"post": "P in [50.0,100.0]"
+				}
+			]
+		}
+	]
+}

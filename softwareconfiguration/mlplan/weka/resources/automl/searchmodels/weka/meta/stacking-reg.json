@@ -1,0 +1,43 @@
+{
+	"repository": "weka.classifiers.meta.Stacking",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.meta.Stacking",
+			"requiredInterface": [
+				{
+					"id": "B",
+					"name": "BaseRegressor"
+				},
+				{
+					"id": "M",
+					"name": "BaseRegressor"
+				}
+			],
+			"providedInterface": [
+				"AbstractRegressor",
+				"Regressor",
+				"MetaRegressor"
+			],
+			"parameters": [
+				{
+					"name": "X",
+					"type": "cat",
+					"default": "10",
+					"values": [
+						"10"
+					]
+				},
+				{
+					"name": "S",
+					"type": "cat",
+					"default": "1",
+					"values": [
+						"1"
+					]
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

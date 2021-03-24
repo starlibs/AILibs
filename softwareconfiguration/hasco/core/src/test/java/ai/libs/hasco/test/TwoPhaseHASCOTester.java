@@ -31,7 +31,7 @@ import ai.libs.hasco.twophase.TwoPhaseHASCO;
 import ai.libs.hasco.twophase.TwoPhaseHASCOConfig;
 import ai.libs.hasco.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.model.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -120,7 +120,7 @@ public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 		TwoPhaseHASCO<TFDNode, String> twoPhaseHASCO = this.getAlgorithmForSoftwareConfigurationProblem(timeSimulatingProblem);
 		twoPhaseHASCO.setTimeout(new Timeout(30, TimeUnit.SECONDS));
 		twoPhaseHASCO.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
-		Map<ComponentInstance, Integer> trueTimes = new HashMap<>();
+		Map<IComponentInstance, Integer> trueTimes = new HashMap<>();
 		twoPhaseHASCO.registerListener(new Object() {
 			@Subscribe
 			public void receiveSolution(final HASCOSolutionEvent<Double> e) {

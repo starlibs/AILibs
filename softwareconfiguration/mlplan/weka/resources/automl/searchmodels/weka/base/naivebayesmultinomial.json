@@ -1,11 +1,17 @@
 {
-  "repository" : "weka.classifiers.bayes.NaiveBayesMultinomial",
-  "include" : [ ],
-  "components" : [ {
-    "name" : "weka.classifiers.bayes.NaiveBayesMultinomial",
-    "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "PipelineClassifier" ],
-    "parameters" : [ ],
-    "dependencies" : [ ]
-  } ]
+	"repository": "weka.classifiers.bayes.NaiveBayesMultinomial",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.bayes.NaiveBayesMultinomial",
+			"requiredInterface": [],
+			"providedInterface": [
+				"AbstractClassifier",
+				"Classifier",
+				"BaseClassifier"
+			],
+			"parameters": [],
+			"dependencies": []
+		}
+	]
 }

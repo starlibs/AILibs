@@ -15,6 +15,7 @@ dependencies {
 	// linear algebra; used for time series modeling and dyad ranking
   	compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"
     compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta3"
+    compile ("com.github.mwever:epochx:0.0.2")
     
     //optimization algorithms; used for optimization in dyad ranking
     compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '3.9.2'

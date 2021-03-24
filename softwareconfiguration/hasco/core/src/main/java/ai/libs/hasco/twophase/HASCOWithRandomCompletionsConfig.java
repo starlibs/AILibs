@@ -1,5 +1,9 @@
 package ai.libs.hasco.twophase;
 
+import java.util.concurrent.TimeUnit;
+
+import org.api4.java.algorithm.Timeout;
+
 import ai.libs.hasco.core.HASCOConfig;
 import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 
@@ -23,10 +27,24 @@ public interface HASCOWithRandomCompletionsConfig extends HASCOConfig, IOwnerBas
 	public int timeoutForNodeEvaluation();
 
 	/**
+	 * @return A timeout object representing the timeout for the evaluation of a single node.
+	 */
+	default Timeout getTimeoutForNodeEvaluation() {
+		return new Timeout(this.timeoutForNodeEvaluation(), TimeUnit.MILLISECONDS);
+	}
+
+	/**
 	 * @return Timeout in ms for a single evaluation of a solution candidate
 	 */
 	@Key(K_RANDOM_COMPLETIONS_TIMEOUT_PATH)
 	@DefaultValue("15000")
 	public int timeoutForCandidateEvaluation();
+
+	/**
+	 * @return A timeout object representing the timeout for the evaluation of a single candidate / random completion.
+	 */
+	default Timeout getTimeoutForCandidateEvaluation() {
+		return new Timeout(this.timeoutForCandidateEvaluation(), TimeUnit.MILLISECONDS);
+	}
 
 }

@@ -53,7 +53,7 @@ class SQLAdapter implements IDatabaseAdapter {
 	private final String database;
 	private final boolean ssl;
 	private final Properties connectionProperties;
-	private final ISQLQueryBuilder queryBuilder = new MySQLQueryBuilder();
+	private final transient ISQLQueryBuilder queryBuilder = new MySQLQueryBuilder();
 
 	/* Connection object */
 	private transient Connection connect;
@@ -163,7 +163,7 @@ class SQLAdapter implements IDatabaseAdapter {
 			try {
 				Properties connectionProps = new Properties(this.connectionProperties);
 				connectionProps.put("user", this.user);
-				connectionProps.put("password", this.password);
+				connectionProps.put("password", this.password != null ? this.password : "");
 				String connectionString = "jdbc:" + this.driver + "://" + this.host + "/" + this.database + ((this.ssl) ? "?verifyServerCertificate=false&requireSSL=true&useSSL=true" : "?useSSL=false");
 				this.logger.info("Connecting to {}", connectionString);
 				this.connect = DriverManager.getConnection(connectionString, connectionProps);

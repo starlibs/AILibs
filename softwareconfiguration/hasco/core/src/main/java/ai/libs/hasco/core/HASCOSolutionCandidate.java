@@ -1,7 +1,7 @@
 package ai.libs.hasco.core;
 
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.api.IEvaluatedSoftwareConfigurationSolution;
-import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedGraphSearchBasedPlan;
 
 /**
@@ -14,12 +14,12 @@ import ai.libs.jaicore.planning.core.interfaces.IEvaluatedGraphSearchBasedPlan;
  */
 public class HASCOSolutionCandidate<V extends Comparable<V>> implements IEvaluatedSoftwareConfigurationSolution<V> {
 
-	private final ComponentInstance componentInstance;
+	private final IComponentInstance componentInstance;
 	private final IEvaluatedGraphSearchBasedPlan<?, ?, V> planningSolution;
 	private final int timeToEvaluateCandidate;
 	private final long timeOfCreation = System.currentTimeMillis();
 
-	public HASCOSolutionCandidate(final ComponentInstance componentInstance, final IEvaluatedGraphSearchBasedPlan<?, ?, V> planningSolution, final int timeToEvaluateCandidate) {
+	public HASCOSolutionCandidate(final IComponentInstance componentInstance, final IEvaluatedGraphSearchBasedPlan<?, ?, V> planningSolution, final int timeToEvaluateCandidate) {
 		super();
 		this.componentInstance = componentInstance;
 		this.planningSolution = planningSolution;
@@ -33,7 +33,7 @@ public class HASCOSolutionCandidate<V extends Comparable<V>> implements IEvaluat
 	}
 
 	@Override
-	public ComponentInstance getComponentInstance() {
+	public IComponentInstance getComponentInstance() {
 		return this.componentInstance;
 	}
 

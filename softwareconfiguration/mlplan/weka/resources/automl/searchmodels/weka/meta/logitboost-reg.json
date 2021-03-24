@@ -1,0 +1,93 @@
+{
+	"repository": "weka.classifiers.meta.LogitBoost",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.meta.LogitBoost",
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BaseRegressor"
+				}
+			],
+			"providedInterface": [
+				"AbstractRegressor",
+				"MetaRegressor",
+				"Regressor",
+				"WeightedInstancesHandler"
+			],
+			"parameters": [
+				{
+					"name": "Q",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "H",
+					"type": "cat",
+					"default": "1.0",
+					"values": [
+						"0.1",
+						"0.5",
+						"0.9",
+						"1.0"
+					]
+				},
+				{
+					"name": "P",
+					"type": "cat",
+					"default": "100",
+					"values": [
+						"100",
+						"90",
+						"80",
+						"70",
+						"60",
+						"95"
+					]
+				},
+				{
+					"name": "I",
+					"type": "cat",
+					"default": "10",
+					"values": [
+						"5",
+						"10",
+						"20",
+						"50",
+						"100"
+					]
+				},
+				{
+					"name": "L",
+					"type": "cat",
+					"default": "-1.7976931348623157E308",
+					"values": [
+						"0.0",
+						"0.1",
+						"0.01",
+						"-1.7976931348623157E308"
+					]
+				},
+				{
+					"name": "Z",
+					"type": "cat",
+					"default": "3",
+					"values": [
+						"1",
+						"2",
+						"3",
+						"5",
+						"10"
+					]
+				}
+			],
+			"dependencies": [
+				{
+					"pre": "Q in {true}",
+					"post": "P in {100}"
+				}
+			]
+		}
+	]
+}

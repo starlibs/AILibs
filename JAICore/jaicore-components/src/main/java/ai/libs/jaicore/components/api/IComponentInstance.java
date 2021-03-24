@@ -5,7 +5,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface IComponentInstance extends Serializable {
+import ai.libs.jaicore.basic.IAnnotatable;
+
+public interface IComponentInstance extends Serializable, IAnnotatable {
 
 	public IComponent getComponent();
 
@@ -44,4 +46,5 @@ public interface IComponentInstance extends Serializable {
 	public Map<String, List<IComponentInstance>> getSatisfactionOfRequiredInterfaces();
 
 	public List<IComponentInstance> getSatisfactionOfRequiredInterface(String idOfRequiredInterface);
+
 }
