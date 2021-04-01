@@ -197,7 +197,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			attType = EArffAttributeType.NOMINAL;
 		} else if (type.toLowerCase().startsWith(EArffAttributeType.MULTIDIMENSIONAL.getName())) {
 			attType = EArffAttributeType.MULTIDIMENSIONAL;
-			values = type.toLowerCase().substring(EArffAttributeType.MULTIDIMENSIONAL.getName().length() + 1, type.length() - 1).split(SEPARATOR_DENSE_INSTANCE_VALUES); // TODO test ob das hier funktioniert
+			values = type.toLowerCase().substring(EArffAttributeType.MULTIDIMENSIONAL.getName().length() + 1, type.length() - 1).split(SEPARATOR_DENSE_INSTANCE_VALUES);
 		} else {
 			try {
 				attType = EArffAttributeType.valueOf(type.toUpperCase());
@@ -220,7 +220,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				return new IntBasedCategoricalAttribute(name,
 						Arrays.stream(values).map(String::trim).map(x -> (((x.startsWith("'") && x.endsWith("'")) || x.startsWith("\"") && x.endsWith("\"")) ? x.substring(1, x.length() - 1) : x)).collect(Collectors.toList()));
 			} else {
-				throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
+				throw new IllegalStateException("Identified a" + EArffAttributeType.NOMINAL.getName() + "attribute but it seems to have no values.");
 			}
 		case MULTIDIMENSIONAL:
 			if (values != null) {
