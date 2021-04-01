@@ -49,10 +49,7 @@ public class TwoDimensionalAttribute extends MultidimensionalAttribute<double[][
 			return false;
 		}
 		TwoDimensionalAttribute other = (TwoDimensionalAttribute) obj;
-		if (this.xsize != other.xsize) {
-			return false;
-		}
-		if (this.ysize != other.ysize) {
+		if (this.xsize != other.xsize || this.ysize != other.ysize) {
 			return false;
 		}
 		return true;
