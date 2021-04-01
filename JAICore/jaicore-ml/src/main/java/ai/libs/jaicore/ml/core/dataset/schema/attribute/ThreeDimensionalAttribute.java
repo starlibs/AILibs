@@ -10,7 +10,7 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
  */
 public class ThreeDimensionalAttribute extends MultidimensionalAttribute<double[][][]> {
 
-	private static final long serialVersionUID = 6878673196924994437L;
+	private static final long serialVersionUID = 3932496459363695399L;
 	private int xsize;
 	private int ysize;
 	private int zsize;
@@ -45,6 +45,40 @@ public class ThreeDimensionalAttribute extends MultidimensionalAttribute<double[
 	@Override
 	public String getStringDescriptionOfDomain() {
 		return "[3d] " + this.getName();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + this.xsize;
+		result = prime * result + this.ysize;
+		result = prime * result + this.zsize;
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		ThreeDimensionalAttribute other = (ThreeDimensionalAttribute) obj;
+		if (this.xsize != other.xsize) {
+			return false;
+		}
+		if (this.ysize != other.ysize) {
+			return false;
+		}
+		if (this.zsize != other.zsize) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override

@@ -42,7 +42,7 @@ public class MultidimensionalAttributeValue<O> implements IAttributeValue {
 		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
-		MultidimensionalAttributeValue<O> other = (MultidimensionalAttributeValue<O>) obj; // FIXME what does that warning mean?
+		MultidimensionalAttributeValue<O> other = (MultidimensionalAttributeValue<O>) obj;
 		if (this.attribute == null) {
 			if (other.attribute != null) {
 				return false;
