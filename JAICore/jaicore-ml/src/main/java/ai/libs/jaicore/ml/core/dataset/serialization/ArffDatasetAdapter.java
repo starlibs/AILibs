@@ -230,6 +230,8 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 					return new ThreeDimensionalAttribute(name, Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2]));
 				}
 				throw new IllegalStateException("Identified a" + EArffAttributeType.MULTIDIMENSIONAL.getName() + "attribute but the values don't fit the given syntax");
+			} else {
+				throw new IllegalStateException("Identified a" + EArffAttributeType.MULTIDIMENSIONAL.getName() + "attribute but it seems to have no values");
 			}
 		default:
 			throw new UnsupportedAttributeTypeException("Can not deal with attribute type " + type);
