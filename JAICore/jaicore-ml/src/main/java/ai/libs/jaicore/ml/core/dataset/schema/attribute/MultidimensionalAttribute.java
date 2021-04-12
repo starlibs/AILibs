@@ -16,12 +16,12 @@ public abstract class MultidimensionalAttribute<O> extends AGenericObjectAttribu
 
 	private static final long serialVersionUID = -1416829149499898655L;
 
-	protected final String SINGLE_SPACE = " ";
-	protected final String ARRAY_STRING_SPLITTER = ",";
-	protected final String EMPTY_STRING = "";
-	protected final String OPEN_OR_CLOSED_BRACES_REGEX = "\\[|\\]";
-	protected final String INNTER_ARRAY_SPLITTER = "\\],\\[";
-	protected final String WHITESPACE_REGEX = "\\s+";
+	protected static final String SINGLE_SPACE = " ";
+	protected static final String ARRAY_STRING_SPLITTER = ",";
+	protected static final String EMPTY_STRING = "";
+	protected static final String OPEN_OR_CLOSED_BRACES_REGEX = "\\[|\\]";
+	protected static final String INNTER_ARRAY_SPLITTER = "\\],\\[";
+	protected static final String WHITESPACE_REGEX = "\\s+";
 
 	protected MultidimensionalAttribute(final String name) {
 		super(name);

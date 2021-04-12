@@ -95,7 +95,7 @@ public class ArffDatasetAdapterTest {
 
 		assertTrue("Returned attribute is not of type MultidimensionalAttribute2d", attribute2d instanceof TwoDimensionalAttribute);
 
-		assertTrue("Name of attrtibute could not be extracted correctly", attribute2d.getName().equals(ATTRIBUTE_NAME));
+		assertEquals("Name of attrtibute could not be extracted correctly", attribute2d.getName(), (ATTRIBUTE_NAME));
 	}
 
 	@Test
@@ -104,7 +104,7 @@ public class ArffDatasetAdapterTest {
 
 		assertTrue("Returned attribute is not of type MultidimensionalAttribute3d", attribute3d instanceof ThreeDimensionalAttribute);
 
-		assertTrue("Name of attrtibute could not be extracted correctly", attribute3d.getName().equals(attribute3d.getName()));
+		assertEquals("Name of attrtibute could not be extracted correctly", attribute3d.getName(), (attribute3d.getName()));
 
 	}
 
