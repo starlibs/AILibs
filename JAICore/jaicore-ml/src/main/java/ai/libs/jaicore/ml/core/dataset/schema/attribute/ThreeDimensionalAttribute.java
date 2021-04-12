@@ -69,10 +69,7 @@ public class ThreeDimensionalAttribute extends MultidimensionalAttribute<double[
 			return false;
 		}
 		ThreeDimensionalAttribute other = (ThreeDimensionalAttribute) obj;
-		if (this.xsize != other.xsize || this.ysize != other.ysize || this.zsize != other.zsize) {
-			return false;
-		}
-		return true;
+		return this.xsize == other.xsize && this.ysize == other.ysize && this.zsize == other.zsize;
 	}
 
 	@Override
