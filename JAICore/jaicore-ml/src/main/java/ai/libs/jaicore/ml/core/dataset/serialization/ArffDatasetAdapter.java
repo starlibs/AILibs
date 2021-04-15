@@ -220,7 +220,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				return new IntBasedCategoricalAttribute(name,
 						Arrays.stream(values).map(String::trim).map(x -> (((x.startsWith("'") && x.endsWith("'")) || x.startsWith("\"") && x.endsWith("\"")) ? x.substring(1, x.length() - 1) : x)).collect(Collectors.toList()));
 			} else {
-				throw new IllegalStateException("Identified a" + EArffAttributeType.NOMINAL.getName() + "attribute but it seems to have no values.");
+				throw new IllegalStateException("Identified a " + EArffAttributeType.NOMINAL.getName() + " attribute but it seems to have no values.");
 			}
 		case MULTIDIMENSIONAL:
 			if (values != null) {
@@ -229,10 +229,9 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				} else if (values.length == 3) {
 					return new ThreeDimensionalAttribute(name, Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2]));
 				}
-				throw new IllegalStateException("Identified a" + EArffAttributeType.MULTIDIMENSIONAL.getName() + "attribute but the values don't fit the given syntax");
-			} else {
-				throw new IllegalStateException("Identified a" + EArffAttributeType.MULTIDIMENSIONAL.getName() + "attribute but it seems to have no values");
 			}
+			throw new IllegalStateException("Identified a " + EArffAttributeType.MULTIDIMENSIONAL.getName() + " attribute but the syntax seems to be wrong.");
+
 		default:
 			throw new UnsupportedAttributeTypeException("Can not deal with attribute type " + type);
 		}
