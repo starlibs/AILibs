@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.core.dataset.schema.attribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 
 /**
- * A {@link MultidimensionalAttribute} that holds Threedimensional DoubleArrays
+ * A {@link MultidimensionalAttribute} that holds three dimensional double arrays.
  *
  * @author Lukas
  *
@@ -23,7 +23,7 @@ public class ThreeDimensionalAttribute extends MultidimensionalAttribute<double[
 	}
 
 	/**
-	 * {@inheritDoc} takes object type double[][][] or {@link MultidimensionalAttributeValue} and returns a {@link MultidimensionalAttributeValue} that holds the same values
+	 * {@inheritDoc} This method takes object type double[][][] or {@link MultidimensionalAttributeValue} and returns a {@link MultidimensionalAttributeValue} that holds the same values.
 	 */
 	@Override
 	public IAttributeValue getAsAttributeValue(final Object object) {
@@ -73,7 +73,7 @@ public class ThreeDimensionalAttribute extends MultidimensionalAttribute<double[
 	}
 
 	@Override
-	public double[][][] formGenereicMultidimensionalArray(final String[] stringvalues) {
+	public double[][][] formGenericMultidimensionalArray(final String[] stringvalues) {
 		double[][][] doublevalues = new double[this.xsize][this.ysize][this.zsize];
 
 		int position = 0;
@@ -82,7 +82,11 @@ public class ThreeDimensionalAttribute extends MultidimensionalAttribute<double[
 			for (int y = 0; y < this.ysize; y++) {
 				double[] nextsingle = new double[this.zsize];
 				for (int z = 0; z < this.zsize; z++) {
-					nextsingle[z] = Double.parseDouble(stringvalues[position]);
+					try {
+						nextsingle[z] = Double.parseDouble(stringvalues[position]);
+					} catch (NumberFormatException e) {
+						throw new IllegalArgumentException("No valid value of this attribute");
+					}
 					position++;
 				}
 				nextdouble[y] = nextsingle;

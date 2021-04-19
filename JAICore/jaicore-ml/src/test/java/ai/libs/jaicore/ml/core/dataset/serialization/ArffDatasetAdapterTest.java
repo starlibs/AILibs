@@ -93,7 +93,7 @@ public class ArffDatasetAdapterTest {
 	public void testTwoDimensionalAttribute() throws UnsupportedAttributeTypeException {
 		IAttribute attribute2d = ArffDatasetAdapter.parseAttribute(MULTI_DIMENSIONAL_ATTRIBUTE2D_STRING);
 
-		assertTrue("Returned attribute is not of type MultidimensionalAttribute2d", attribute2d instanceof TwoDimensionalAttribute);
+		assertTrue("Returned attribute is not of type {@link TwoDimensionalAttribute} ", attribute2d instanceof TwoDimensionalAttribute);
 
 		assertEquals("Name of attrtibute could not be extracted correctly", attribute2d.getName(), (ATTRIBUTE_NAME));
 	}
@@ -102,7 +102,7 @@ public class ArffDatasetAdapterTest {
 	public void testThreDimensionalAttribute() throws UnsupportedAttributeTypeException {
 		IAttribute attribute3d = ArffDatasetAdapter.parseAttribute(MULTI_DIMENSIONAL_ATTRIBUTE3D_STRING);
 
-		assertTrue("Returned attribute is not of type MultidimensionalAttribute3d", attribute3d instanceof ThreeDimensionalAttribute);
+		assertTrue("Returned attribute is not of type {@link ThreeDimensionalAttribute}", attribute3d instanceof ThreeDimensionalAttribute);
 
 		assertEquals("Name of attrtibute could not be extracted correctly", attribute3d.getName(), (attribute3d.getName()));
 
