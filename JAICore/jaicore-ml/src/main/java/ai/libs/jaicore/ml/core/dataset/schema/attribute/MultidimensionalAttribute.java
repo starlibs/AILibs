@@ -6,11 +6,11 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IObjectAttribute;
 
 /**
- * An Abstract {@link IAttribute} class that holds Multidimensional Double Arrays.
+ * This is an {@link IAttribute} class that holds Multidimensional Double Arrays.
  *
  * @author Lukas Fehring
  *
- * @param <O>
+ * @param <O> O is the type of the {@link MultidimensionalAttributeValue} that is parsed using this {@link IAttribute}. This should be a double array of dimension 2 or 3.
  */
 public abstract class MultidimensionalAttribute<O> extends AGenericObjectAttribute<O> implements IObjectAttribute<NumericAttribute> {
 
@@ -33,7 +33,7 @@ public abstract class MultidimensionalAttribute<O> extends AGenericObjectAttribu
 	}
 
 	/**
-	 * {@inheritDoc} This method takes and parameter of type {@link ThreeDimensionalAttributeValue} or doulbe[][][] and parses it to a serilised value of form[[a b] [c d] [e f]]
+	 * {@inheritDoc} This method takes and parameter of type {@link MultidimensionalAttributeValue} or O and serializes it. The resulting form should look like [[a b] [c d] ... [e f]].
 	 */
 	@Override
 	public String serializeAttributeValue(final Object value) {
@@ -42,14 +42,14 @@ public abstract class MultidimensionalAttribute<O> extends AGenericObjectAttribu
 		return serialisedString.replace(MultidimensionalAttribute.ARRAY_STRING_SPLITTER, MultidimensionalAttribute.SINGLE_SPACE).replaceAll(MultidimensionalAttribute.WHITESPACE_REGEX, MultidimensionalAttribute.SINGLE_SPACE);
 	}
 
-	protected abstract O formGenereicMultidimensionalArray(String[] values);
+	protected abstract O formGenericMultidimensionalArray(String[] values);
 
 	@Override
 	public O deserializeAttributeValue(final String string) {
 		String formatstring = string.replaceAll(MultidimensionalAttribute.OPEN_OR_CLOSED_BRACES_REGEX, MultidimensionalAttribute.EMPTY_STRING);
 		String[] stringvalues = formatstring.split(MultidimensionalAttribute.SINGLE_SPACE);
 
-		return this.formGenereicMultidimensionalArray(stringvalues);
+		return this.formGenericMultidimensionalArray(stringvalues);
 
 	}
 
