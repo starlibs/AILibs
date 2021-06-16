@@ -11,6 +11,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.junit.Rule;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
@@ -59,7 +60,7 @@ public abstract class MCTSLearningSuccessTester<N, A> extends ATest {
 	}
 
 	@Test
-	//	@Disabled // currently disabled, because we cannot guarantee convergence!
+	@Disabled // currently disabled, because we cannot guarantee convergence!
 	@MediumTest
 	public void testLearningSuccess() throws AlgorithmTimeoutedException, ObjectEvaluationFailedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ActionPredictionFailedException {
 		final int max = 10;
