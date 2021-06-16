@@ -21,7 +21,7 @@ public class EnsembleMCTSFactory<N, A> extends MCTSFactory<N, A, EnsembleMCTSFac
 
 	@Override
 	public EnsembleMCTS<N, A> getAlgorithm(final IMDP<N, A, Double> input) {
-		return new EnsembleMCTS<>(input, this.treePolicies, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.getRandom(), this.isTabooExhaustedNodes());
+		return new EnsembleMCTS<>(input, this.getDefaultPolicy(true), this.treePolicies, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.getRandom(), this.isTabooExhaustedNodes());
 	}
 
 }

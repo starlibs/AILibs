@@ -11,7 +11,6 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.junit.Rule;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
@@ -20,6 +19,7 @@ import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.ActionPredictionFailedException;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.EBehaviorForNotFullyExploredStates;
+import ai.libs.jaicore.search.algorithms.mdp.mcts.UniformRandomPolicy;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.uct.UCBPolicy;
 import ai.libs.jaicore.search.algorithms.mdp.mcts.uct.UCT;
 import ai.libs.jaicore.search.probleminputs.IMDP;
@@ -59,7 +59,7 @@ public abstract class MCTSLearningSuccessTester<N, A> extends ATest {
 	}
 
 	@Test
-	@Disabled // currently disabled, because we cannot guarantee convergence!
+	//	@Disabled // currently disabled, because we cannot guarantee convergence!
 	@MediumTest
 	public void testLearningSuccess() throws AlgorithmTimeoutedException, ObjectEvaluationFailedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ActionPredictionFailedException {
 		final int max = 10;
@@ -75,7 +75,7 @@ public abstract class MCTSLearningSuccessTester<N, A> extends ATest {
 		Objects.requireNonNull(mdp);
 		MDPUtils utils = new MDPUtils();
 
-		UCT<N, A> mcts = new UCT<>(mdp, this.getAllowedTrainingIterations(), this.getGamma(), this.getEpsilon(), new Random(0), false);
+		UCT<N, A> mcts = new UCT<>(mdp, new UniformRandomPolicy<>(), this.getAllowedTrainingIterations(), this.getGamma(), this.getEpsilon(), new Random(0), false);
 		mcts.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		UCBPolicy<N, A> policy = mcts.getTreePolicy();
 		this.logger.info("Training policy via MCTS");
