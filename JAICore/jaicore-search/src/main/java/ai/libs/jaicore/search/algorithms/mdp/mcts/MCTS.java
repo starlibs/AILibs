@@ -363,12 +363,6 @@ public class MCTS<N, A> extends AAlgorithm<IMDP<N, A, Double>, IPolicy<N, A>> {
 						}
 
 						boolean hasNullScore = scores.contains(null);
-						// if (hasNullScore) {
-						// this.logger.warn("Found playout with null-score. Ignoring this run.");
-						// this.summarizeIteration(System.currentTimeMillis() - timeStart, timeSpentInActionApplicabilityComputationThisIteration, timeSpentInSuccessorGenerationThisIteration, invocationsOfTreePolicyInThisIteration,
-						// invocationsOfDefaultPolicyInThisIteration, timeSpentInTreePolicyQueriesThisIteration, timeSpentInTreePolicyUpdatesThisIteration, timeSpentInDefaultPolicyThisIteration);
-						// return this.nextWithException();
-						// }
 
 						/* create and publish roll-out event */
 						boolean isGoalPath;
