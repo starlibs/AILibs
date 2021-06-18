@@ -50,7 +50,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 	protected static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn", "pandas" };
 	protected static final String[] PYTHON_OPTIONAL_MODULES = {};
 
-	private static final String SCIKIT_LEARN_TEMPLATE = "sklearn/sklearn_template.twig.py";
+	private static final String SCIKIT_LEARN_TEMPLATE = "sklearn/sklearn_template_windows.twig.py";
 
 	private static final String COULD_NOT_RUN_SCIKIT_LEARN_MODEL = "Could not run scikit-learn model.";
 
@@ -366,6 +366,8 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 				String call = Arrays.toString(commandLineParameters).replace(",", "");
 				this.logger.info("Starting process {}", call.substring(1, call.length() - 1));
 			}
+
+			System.out.println(Arrays.toString(commandLineParameters));
 			ProcessBuilder processBuilder = new ProcessBuilder(commandLineParameters).directory(this.scikitLearnWrapperConfig.getTempFolder());
 			Process process = processBuilder.start();
 			this.logger.debug("Started process with PID: {}. Listener is {}", ProcessUtil.getPID(process), listener);

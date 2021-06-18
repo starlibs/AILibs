@@ -1,7 +1,12 @@
 package ai.libs.jaicore.timing;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import org.api4.java.algorithm.Timeout;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -58,14 +63,13 @@ public abstract class TimedComputation {
 		int delay = runtime - (int) timeout.milliseconds();
 		boolean isInterrupted = Thread.currentThread().isInterrupted();
 		if (caughtException != null) {
-			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed exception: {}. Thread interrupt flag is {}.", runtime, delay, caughtException.getClass().getName(),
-					isInterrupted);
+			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed exception: {}. Thread interrupt flag is {}.", runtime, delay, caughtException.getClass().getName(), isInterrupted);
 			if ((caughtException instanceof InterruptedException) && isInterrupted && interrupter.getAllUnresolvedInterruptsOfThread(Thread.currentThread()).size() == 1) { // only the reason belonging to our task is on the stack
-				logger.warn("Timed computation has thrown an InterruptedException AND the thread is interrupted AND there are no other open interrupts on the thread! This should never happen! Here is the stack trace: \n\t{}", LoggerUtil.getExceptionInfo(caughtException));
+				logger.warn("Timed computation has thrown an InterruptedException AND the thread is interrupted AND there are no other open interrupts on the thread! This should never happen! Here is the stack trace: \n\t{}",
+						LoggerUtil.getExceptionInfo(caughtException));
 			}
 		} else {
-			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed regular output return value: {}. Thread interrupt flag is {}.", runtime, delay, output,
-					isInterrupted);
+			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed regular output return value: {}. Thread interrupt flag is {}.", runtime, delay, output, isInterrupted);
 		}
 
 		/* now make sure that
@@ -109,5 +113,67 @@ public abstract class TimedComputation {
 		/* if no exception has been thrown, return the received output. Maybe the thread is interrupted, but this is then not due to our timeout */
 		logger.debug("Finished timed computation of {} after {}ms where {}ms were allowed. Interrupt-flag is {}", callable, runtime, timeout, Thread.currentThread().isInterrupted());
 		return output;
+	}
+
+	public static void computeWithTimeout(final Timeout timeout, final Runnable runnable) throws InterruptedException {
+		Semaphore sync = new Semaphore(0);
+		Thread t = new Thread(() -> {
+			try {
+				runnable.run();
+			} catch (Exception e) {
+				logger.info("Caught exception in timed computation thread", e);
+			} finally {
+				sync.release();
+			}
+		});
+		t.start();
+
+		try {
+			if (timeout.milliseconds() > 0) {
+				logger.info("Wait for a timeout of {}ms.", timeout.milliseconds());
+				if (!sync.tryAcquire(timeout.milliseconds(), TimeUnit.MILLISECONDS)) {
+					t.interrupt();
+				}
+			} else {
+				logger.info("No timeout set, thus wait until the process is finished.");
+				sync.acquire();
+			}
+		} catch (InterruptedException e) {
+			logger.info("TimedComputation got interrupted or timeout has fired, thus interrupt nested thread.");
+			t.interrupt();
+			throw e;
+		}
+	}
+
+	public static void computeWithTimeoutInParallel(final int numCPUs, final Timeout timeout, final List<Runnable> taskList) throws InterruptedException {
+		ExecutorService pool = Executors.newFixedThreadPool(numCPUs);
+		Semaphore sync = new Semaphore(0);
+		taskList.stream().map(x -> new Runnable() {
+			@Override
+			public void run() {
+				try {
+					x.run();
+				} finally {
+					sync.release();
+				}
+			}
+		}).forEach(pool::submit);
+		pool.shutdown();
+
+		try {
+			logger.info("Wait for a timeout of {}ms.", timeout.milliseconds());
+			if (timeout.milliseconds() > 0) {
+				if (!sync.tryAcquire(taskList.size(), timeout.milliseconds(), TimeUnit.MILLISECONDS)) {
+					logger.info("Timeout fired, shutdown pool right now.");
+					pool.shutdownNow();
+				}
+			} else {
+				sync.acquire(taskList.size());
+			}
+		} catch (InterruptedException e) {
+			logger.info("TimedComputation got interrupted or timeout has fired, thus interrupt nested thread.");
+			pool.shutdownNow();
+			throw e;
+		}
 	}
 }

@@ -26,7 +26,7 @@ public interface IScikitLearnWrapperConfig extends IPythonConfig {
 	public String getResultFileExtension();
 
 	@Key("sklearn.wrapper.temp.delete_on_exit")
-	@DefaultValue("true")
+	@DefaultValue("false")
 	public boolean getDeleteFileOnExit();
 
 	@Key(K_TEMP_FOLDER)

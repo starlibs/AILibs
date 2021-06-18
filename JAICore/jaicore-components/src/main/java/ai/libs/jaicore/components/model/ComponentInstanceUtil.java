@@ -303,4 +303,19 @@ public class ComponentInstanceUtil {
 		/* if no incompatibility was found, return true */
 		return true;
 	}
+
+	public static String toRecursiveConstructorString(final IComponentInstance ci) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(ci.getComponent().getName()).append("(");
+		sb.append(ci.getParameterValues().entrySet().stream().map(x -> x.getKey() + "=" + x.getValue()).collect(Collectors.joining(", ")));
+
+		if (!ci.getParameterValues().isEmpty() && !ci.getSatisfactionOfRequiredInterfaces().isEmpty()) {
+			sb.append(", ");
+		}
+
+		sb.append(ci.getSatisfactionOfRequiredInterfaces().entrySet().stream()
+				.map(reqIEntry -> reqIEntry.getKey() + "= [" + reqIEntry.getValue().stream().map(ComponentInstanceUtil::toRecursiveConstructorString).collect(Collectors.joining(", ")) + "]").collect(Collectors.joining(", ")));
+		sb.append(")");
+		return sb.toString();
+	}
 }

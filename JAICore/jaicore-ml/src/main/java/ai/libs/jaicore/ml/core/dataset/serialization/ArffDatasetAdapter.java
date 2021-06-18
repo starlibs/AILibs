@@ -379,6 +379,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			bw.write("\n\n");
 			// write actual data (payload)
 			serializeData(bw, data);
+			bw.flush();
 		}
 	}
 

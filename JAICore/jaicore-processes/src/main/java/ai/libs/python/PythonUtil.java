@@ -78,7 +78,7 @@ public class PythonUtil {
 
 		if (executePythonInteractive) {
 			processParameters.add(CMD_PYTHON_COMMANDPARAM);
-			processParameters.add("'" + command + "'");
+			processParameters.add(command);
 		} else {
 			processParameters.add(command);
 		}
