@@ -34,7 +34,7 @@ public class FixedCommitmentMCTSFactory<N, A> extends MCTSFactory<N, A, FixedCom
 		if (this.metric == null) {
 			throw new IllegalStateException("Cannot create FixedCommitment MCTS since metric not set!");
 		}
-		return new FixedCommitmentMCTS<>(input, this.k, this.metric, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.getRandom(), this.isTabooExhaustedNodes());
+		return new FixedCommitmentMCTS<>(input, this.getDefaultPolicy(true), this.k, this.metric, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.getRandom(), this.isTabooExhaustedNodes());
 	}
 
 }

@@ -6,6 +6,7 @@ navigation:
     - { id: "overview", link: "overview", title: "Overview" }
     - { id: "installation", link: "installation", title: "Installation" }
     - { id: "usage", link: "usage", title: "Usage" }
+    - { id: "mcts", link: "monte-carlo-tree-search-mcts", title: "MCTS" }
     - { id: "javadoc", link: "javadoc", title: "JavaDoc" }
     - { id: "contribute", link: "contribute", title: "Contribute" }
 navigation_active: overview
@@ -54,7 +55,7 @@ To apply a search algorithm to a graph, three steps are necessary:
 
 A minimal code example in jaicore-search for the 8-queens problems looks like this:
 ```java
-GraphSearchInput<QueenNode, String> input = new GraphSearchInput<>(new NQueensGraphGenerator(8));
+GraphSearchInput<QueenNode, String> input = new NQueensToGraphSearchReducer().encodeProblem(new NQueensProblem(8));
 RandomSearch<QueenNode, String> rs = new RandomSearch<>(input);
 SearchGraphPath<QueenNode, String> solution = rs.call();
 System.out.println(solution);
@@ -71,15 +72,15 @@ jaicore-search already comes with a number of `GraphGenerator` classes for stand
 
 For example, to create a search problem for the 8-queens problem, you can do the following:
 ```java
-GraphSearchInput<QueenNode, String> input1 = new GraphSearchInput<>(new NQueensGraphGenerator(8));
+GraphSearchInput<QueenNode, String> input1 = new NQueensToGraphSearchReducer().encodeProblem(new NQueensProblem(8));
 ```
 
 Some algorithms can already work with this kind of problem, e.g. `RandomSearch`.
 Some algorithms, however, need additional input.
 For example, BestFirstSearch requires a function that can evaluate arbitrary paths starting from the root (typically called *f*).
-To this end, a more specific input object can be created:
+To this end, a more specific input object can be created for which we can re-use the above search problem definition object:
 ```java
-GraphSearchWithSubpathEvaluationsInput<QueenNode, String, Double> input2 = new GraphSearchWithSubpathEvaluationsInput<>(new NQueensGraphGenerator(4), p -> 0.0);
+GraphSearchWithSubpathEvaluationsInput<QueenNode, String, Double> input2 = new GraphSearchWithSubpathEvaluationsInput<>(input1, p -> 0.0);
 ```
 Here, the evaluator simply assigns a constant 0.0 to each path.
 You may also observe that this input problem has an additional generic parameter (`Double`), which is the class for the node evaluations.
@@ -89,11 +90,11 @@ Often, these are `Double`, but you can also you more complex evaluations like ve
 Every search algorithm can be instantiated with a problem instance that corresponds to its input type.
 ```java
 RandomSearch<QueenNode, String> rs = new RandomSearch<>(input1);
-StandardBestFirst<QueenNode, String> bf = new StandardBestFirst<>(input2);
+StandardBestFirst<QueenNode, String, Double> bf = new StandardBestFirst<>(input2);
 ```
 Since every search algorithm implements the `IAlgorithm` interface, a timeout, and conditions on CPU usage, and maximum threads can be defined.
 ```java
-rs.setTimeout(new TimeOut(10, TimeUnit.SECONDS));
+rs.setTimeout(new Timeout(10, TimeUnit.SECONDS));
 rs.setNumCPUs(4);
 rs.setMaxNumThreads(8);
 ```
@@ -120,7 +121,7 @@ Note that this throws a `NoSuchElementException` if no more solutions exist.
 
 For iterating over *all events*, use:
 ```java
-for (AlgorithmEvent e : bf) {
+for (IAlgorithmEvent e : bf) {
   if (e instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
     EvaluatedSearchGraphPath<QueenNode, String, Double> solution = ((EvaluatedSearchSolutionCandidateFoundEvent<QueenNode, String, Double>)e).getSolutionCandidate();
     double score = solution.getScore();
@@ -152,6 +153,46 @@ Our general approach is to try to hide as much of the generics as possible in in
 | AwaStarSearch | GraphSearchWithSubpathEvaluationsInput | EvaluatedSearchGraphPath |
 | BestFirstLimitedDiscrepancySearch |  GraphSearchWithNodeRecommenderInput | EvaluatedSearchGraphPath |
 
+## Monte-Carlo Tree Search (MCTS)
+MCTS is a tree search algorithm that was originally designed for reinforcement learning.
+In AILibs it can be used for both learning a *policy* in an MDP or for finding a best path in a tree.
+The two associated classes are `MCTS` and `MCTSPathSearch`.
+The latter class reduces the given graph search poblem to a canonical MDP and then uses ordinary MCTS, so the two are fully compatible.
+
+It is recommended to create MCTS algorithms with a respective factory.
+AILibs comes with quite a collection of tree policies, each for which has a factory that allows to create an instance of MCTS with it.
+Check out for:
+* BRUEFactory (for MCTS with the BRUE tree policy)
+* DNGFactory (for MCTS with the Dirichlet Normal Gamma (DNG) tree policy)
+* PlackettLuceMCTSFactory (for MCTS with the Plackett-Luce tree policy)
+* SPUCTFactory (for MCTS with the single player MCTS tree policy)
+* TAGMCTSFactory (for MCTS with the Threshold Ascent for Graphs (TAG) tree policy)
+* UCTFactory (for MCTS with the UCB1 tree policy)
+* UUCTFactory (for MCTS with the UUCB tree policy)
+
+All factories allow to optionally configure the default policy, which is by default the uniform random tree policy.
+
+Here is a code example to solve the n-queens problem with UCT:
+```java
+/* create search problem */
+GraphSearchInput<QueenNode, String> input1 = new NQueensToGraphSearchReducer().encodeProblem(new NQueensProblem(8));
+GraphSearchWithPathEvaluationsInput<QueenNode, String, Double> input2 = new GraphSearchWithPathEvaluationsInput<>(input1, p -> 0.0);
+
+/* set inner factory (for the MCTS algorithm itself) */
+UCTFactory<QueenNode, String> innerFactory = new UCTFactory<>();
+innerFactory.withMaxIterations(100);
+
+/* configure outer factory (for the path search version of MCTS) */
+MCTSPathSearchFactory<QueenNode, String> outerFactory = new MCTSPathSearchFactory<>();
+outerFactory.withMCTSFactory(innerFactory);
+outerFactory.withProblem(input2);
+
+/* create and run algorithm */
+MCTSPathSearch<?, QueenNode, String> mcts = outerFactory.getAlgorithm();
+IEvaluatedPath<QueenNode, String, Double> solution = mcts.call();
+System.out.println(solution.getHead());
+System.out.println(solution.getScore());
+```
 
 ## JavaDoc
 JavaDoc is available [here](https://javadoc.io/doc/ai.libs/jaicore-search/).
