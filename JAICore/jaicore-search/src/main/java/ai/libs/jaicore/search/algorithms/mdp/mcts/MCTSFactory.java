@@ -13,6 +13,7 @@ public abstract class MCTSFactory<N, A, B extends MCTSFactory<N, A, B>> extends 
 	private Random random = new Random(0);
 	private boolean tabooExhaustedNodes = false;
 	private boolean maximize = false;
+	private IPolicy<N, A> defaultPolicy;
 
 	public int getMaxIterations() {
 		return this.maxIterations;
@@ -73,7 +74,23 @@ public abstract class MCTSFactory<N, A, B extends MCTSFactory<N, A, B>> extends 
 		return this.getSelf();
 	}
 
+	public B withDefaultPolicy(final IPolicy<N, A> defaultPolicy) {
+		this.defaultPolicy = defaultPolicy;
+		return this.getSelf();
+	}
 
+	public IPolicy<N, A> getDefaultPolicy() {
+		return this.getDefaultPolicy(false);
+	}
+
+	public IPolicy<N, A> getDefaultPolicy(final boolean instantiateUniformIfNotSet) {
+		if (this.defaultPolicy != null || !instantiateUniformIfNotSet) {
+			return this.defaultPolicy;
+		}
+		else {
+			return new UniformRandomPolicy<>(this.random);
+		}
+	}
 
 	@Override
 	public MCTS<N, A> getAlgorithm() {
@@ -82,6 +99,6 @@ public abstract class MCTSFactory<N, A, B extends MCTSFactory<N, A, B>> extends 
 
 	@SuppressWarnings("unchecked")
 	public B getSelf() {
-		return (B)this;
+		return (B) this;
 	}
 }
