@@ -26,9 +26,7 @@ import pandas
 import numpy as np
 
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.pipeline import make_pipeline, make_union
-
-from sklearn.ensemble import RandomForestClassifier
+{{import}}
 
 
 class ProblemType:
@@ -74,7 +72,7 @@ class ArgsHandler:
 
     @staticmethod
     def get_pipeline():
-        pipeline = RandomForestClassifier()
+        pipeline = {{pipeline}}
         print("* Pipeline: ", pipeline)
         return pipeline
 
@@ -159,7 +157,6 @@ class SingleTargetLearningModel:
         except:
             print("Cannot predict probabilities, thus, predict labels")
             predictions = pipeline.predict(test_data)
-        print("\tPredictions:" + str(predictions))
         serialize_prediction(predictions, ArgsHandler.get_predict_output_file_path())
 
 
@@ -218,7 +215,9 @@ class ArffData:
         with open(data_path, 'r') as file:
             try:
                 if dense_mode:
-                    df_arff = pandas.DataFrame(scipy_arff.loadarff(file)[0])
+                    data, meta = scipy_arff.loadarff(file)
+                    print(meta)
+                    df_arff = pandas.DataFrame(data)
                 else:
                     arff_parsed = arff.load(file, return_type=arff.LOD, encode_nominal=True)
                     list_attributes = arff_parsed["attributes"]

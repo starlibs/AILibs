@@ -52,9 +52,7 @@ public class MLPlanScikitLearnClassificationResultDeliveryTester extends AutoMLA
 			throws TrainingException, InterruptedException, DatasetDeserializationFailedException, SplitFailedException, PredictionException, IOException, ComponentInstantiationFailedException {
 		long start = System.currentTimeMillis();
 		List<ILabeledDataset> ds = SplitterUtil.getLabelStratifiedTrainTestSplit(data, 0, .7);
-		System.err.println("predict with majority classifier");
 		new SimpleScikitLearnClassifier("DummyClassifier(strategy='stratified')", "from sklearn.dummy import DummyClassifier").fitAndPredict(ds.get(0), ds.get(1));
-		System.err.println("Done");
 		return (int) (System.currentTimeMillis() - start);
 	}
 

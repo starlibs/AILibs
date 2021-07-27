@@ -27,7 +27,6 @@ public abstract class AProcessListener implements IProcessListener, ILoggingCust
 	private int processIDObtainedFromListening = -1;
 
 	public AProcessListener() {
-
 	}
 
 	public AProcessListener(final boolean listenForPIDFromProcess) {
@@ -37,8 +36,7 @@ public abstract class AProcessListener implements IProcessListener, ILoggingCust
 	@Override
 	public void listenTo(final Process process) throws IOException, InterruptedException {
 		this.logger.info("Starting to listen to process {}", process);
-		try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-				BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+		try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
 			// While process is alive the output- and error stream is output.
 			while (process.isAlive()) {
 				if (Thread.interrupted()) { // reset flag since we will throw an exception now

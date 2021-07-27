@@ -38,12 +38,14 @@ public abstract class MLPlanResultWithMinimumQualityTest {
 	@MethodSource("getBenchmark")
 	public void testMinimumQualityAfter5Min(final String benchmarkName, final int openmlid, final double minQuality)
 			throws SplitFailedException, InterruptedException, AlgorithmTimeoutedException, LearnerExecutionFailedException, AlgorithmException, AlgorithmExecutionCanceledException, IOException, DatasetDeserializationFailedException {
+		LOGGER.info("Execute minimum quality test run for {}", benchmarkName);
 		List<ILabeledDataset<? extends ILabeledInstance>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(OpenMLDatasetReader.deserializeDataset(openmlid), 0, 0.7);
 		AMLPlanBuilder builder = this.getBuilder();
 		builder.withDataset(split.get(0));
 		builder.withTimeOut(new Timeout(300, TimeUnit.SECONDS));
 		LOGGER.info("Evaluate ML-PLan for dataset {} with a timeout of {}s, whether it can achieve at least a loss of {}", benchmarkName, 300, minQuality);
 		double lossAchieved = builder.getMetricForSearchPhase().loss(new SupervisedLearnerExecutor().execute(builder.build().call(), split.get(1)).getPredictionDiffList());
+		LOGGER.info("Loss achieved for {} is {} (min quality required: {})", benchmarkName, lossAchieved, minQuality);
 		assertTrue(lossAchieved <= minQuality, "Could not achieve the required maximum loss within 300s.");
 	}
 

@@ -6,20 +6,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.io.FileUtils;
-import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
-import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassificationPredictionBatch;
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassifier;
-import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
+import org.api4.java.ai.ml.regression.evaluation.IRegressionPrediction;
+import org.api4.java.ai.ml.regression.evaluation.IRegressionResultBatch;
 import org.api4.java.algorithm.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +24,12 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 
 import ai.libs.jaicore.basic.ResourceUtil;
-import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
-import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
-import ai.libs.jaicore.ml.classification.singlelabel.learner.ASingleLabelClassifier;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
+import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
+import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
+import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
 import ai.libs.jaicore.ml.scikitwrapper.DefaultProcessListener;
 import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapper;
 import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapperConfig;
@@ -41,19 +37,19 @@ import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapperExecutionFailedExcepti
 import ai.libs.jaicore.processes.ProcessUtil;
 import ai.libs.python.IPythonConfig;
 
-public class SimpleScikitLearnClassifier extends ASingleLabelClassifier implements ISingleLabelClassifier, IScikitLearnWrapper {
-	private Logger logger = LoggerFactory.getLogger(SimpleScikitLearnClassifier.class);
+public class SimpleScikitLearnRegressor extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, IRegressionPrediction, IRegressionResultBatch> implements IScikitLearnWrapper {
+	private Logger logger = LoggerFactory.getLogger(SimpleScikitLearnRegressor.class);
 	private static File tempDir = null;
 
 	private static final IPythonConfig pythonC = ConfigFactory.create(IPythonConfig.class);
-	private static final IScikitLearnWrapperConfig sklearnClassifierConfig = ConfigFactory.create(IScikitLearnWrapperConfig.class);
+	private static final IScikitLearnWrapperConfig sklearnRegressorConfig = ConfigFactory.create(IScikitLearnWrapperConfig.class);
 
 	private static final String PATH_EXECUTABLE_TEMPLATE = "sklearn/sklearn_template_windows.twig.py";
 	private ILabeledDataset<? extends ILabeledInstance> trainingData;
 	private final String constructorCall;
 	private final String imports;
 
-	public SimpleScikitLearnClassifier(final String constructorCall, final String imports) {
+	public SimpleScikitLearnRegressor(final String constructorCall, final String imports) {
 		this.constructorCall = constructorCall;
 		this.imports = imports;
 	}
@@ -72,12 +68,12 @@ public class SimpleScikitLearnClassifier extends ASingleLabelClassifier implemen
 	}
 
 	@Override
-	public ISingleLabelClassification predict(final ILabeledInstance xTest) throws PredictionException, InterruptedException {
+	public IRegressionPrediction predict(final ILabeledInstance xTest) throws PredictionException, InterruptedException {
 		try {
 			@SuppressWarnings("unchecked")
 			ILabeledDataset<ILabeledInstance> dTest = (ILabeledDataset<ILabeledInstance>) this.trainingData.createEmptyCopy();
 			dTest.add(xTest);
-			return this.predict(dTest).get(0);
+			return (IRegressionPrediction) this.predict(dTest).get(0);
 		} catch (InterruptedException e) {
 			throw e;
 		} catch (DatasetCreationException e) {
@@ -86,8 +82,8 @@ public class SimpleScikitLearnClassifier extends ASingleLabelClassifier implemen
 	}
 
 	@Override
-	public ISingleLabelClassificationPredictionBatch predict(final ILabeledDataset<? extends ILabeledInstance> dTest) throws PredictionException, InterruptedException {
-		ISingleLabelClassificationPredictionBatch batch = null;
+	public IRegressionResultBatch predict(final ILabeledDataset<? extends ILabeledInstance> dTest) throws PredictionException, InterruptedException {
+		IRegressionResultBatch batch = null;
 		Process p = null;
 
 		try {
@@ -114,7 +110,7 @@ public class SimpleScikitLearnClassifier extends ASingleLabelClassifier implemen
 			command.add("--predict");
 			command.add(predictFile.getCanonicalPath());
 			command.add("--problem");
-			command.add("classification");
+			command.add("regression");
 			command.add("--predictOutput");
 			command.add(predictOutputFile.getCanonicalPath());
 
@@ -123,32 +119,18 @@ public class SimpleScikitLearnClassifier extends ASingleLabelClassifier implemen
 			new DefaultProcessListener().listenTo(p);
 			int exitValue = p.waitFor();
 
-			List<String> labels = ((ICategoricalAttribute) dTest.getLabelAttribute()).getLabels();
 			if (exitValue == 0) {
 				JsonNode n = new ObjectMapper().readTree(FileUtils.readFileToString(predictOutputFile));
 				if (!(n instanceof ArrayNode)) {
 					throw new PredictionException("Json file for predictions does not contain an array as root element");
 				}
 
-				List<String> ascendSortingLabels = new ArrayList<>(labels);
-				Collections.sort(ascendSortingLabels);
-
-				List<ISingleLabelClassification> predictions = new ArrayList<>();
+				List<IRegressionPrediction> predictions = new ArrayList<>();
 				ArrayNode preds = (ArrayNode) n;
 				for (JsonNode pred : preds) {
-					double[] labelProbabilities = new double[labels.size()];
-					if (pred instanceof ArrayNode) {
-						int i = 0;
-						for (JsonNode prob : pred) {
-							labelProbabilities[labels.indexOf(ascendSortingLabels.get(i++))] = prob.asDouble();
-						}
-					} else if (pred instanceof TextNode) {
-						int index = (int) dTest.getLabelAttribute().deserializeAttributeValue(pred.asText());
-						labelProbabilities[index] = 1.0;
-					}
-					predictions.add(new SingleLabelClassification(labelProbabilities));
+					predictions.add(new SingleTargetRegressionPrediction(pred.asDouble()));
 				}
-				batch = new SingleLabelClassificationPredictionBatch(predictions);
+				batch = new SingleTargetRegressionPredictionBatch(predictions);
 			} else {
 				throw new PredictionException("Could not execute python classifier. Exited with exit code " + exitValue);
 			}
@@ -173,7 +155,7 @@ public class SimpleScikitLearnClassifier extends ASingleLabelClassifier implemen
 		this.logger.debug("Serializing {}x{} dataset to {}", dataset.size(), dataset.getNumAttributes(), dataFileName);
 
 		File dataFile = this.getDatasetFile(dataFileName);
-		if (sklearnClassifierConfig.getDeleteFileOnExit()) {
+		if (sklearnRegressorConfig.getDeleteFileOnExit()) {
 			dataFile.deleteOnExit();
 		}
 
@@ -226,18 +208,6 @@ public class SimpleScikitLearnClassifier extends ASingleLabelClassifier implemen
 	}
 
 	@Override
-	public void setSeed(final long seed) {
-	}
-
-	@Override
-	public void setTimeout(final Timeout timeout) {
-	}
-
-	@Override
-	public void fit(final String trainingDataName) throws TrainingException, InterruptedException {
-	}
-
-	@Override
 	public File getOutputFile(final String dataName) {
 		return null;
 	}
@@ -268,5 +238,36 @@ public class SimpleScikitLearnClassifier extends ASingleLabelClassifier implemen
 	@Override
 	public String toString() {
 		return this.constructorCall;
+	}
+
+	@Override
+	public IRegressionResultBatch predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
+		try {
+			ILabeledDataset<ILabeledInstance> testData = (ILabeledDataset<ILabeledInstance>) this.trainingData.createEmptyCopy();
+			for (ILabeledInstance iTest : dTest) {
+				testData.add(iTest);
+			}
+			return this.predict(testData);
+		} catch (DatasetCreationException e) {
+			throw new PredictionException("Could not create dataset for test data.", e);
+		}
+	}
+
+	@Override
+	public void setSeed(final long seed) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setTimeout(final Timeout timeout) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void fit(final String trainingDataName) throws TrainingException, InterruptedException {
+		// TODO Auto-generated method stub
+
 	}
 }

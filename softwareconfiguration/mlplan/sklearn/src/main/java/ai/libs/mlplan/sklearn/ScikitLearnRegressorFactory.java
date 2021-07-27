@@ -2,11 +2,8 @@ package ai.libs.mlplan.sklearn;
 
 import java.io.IOException;
 
-import org.api4.java.ai.ml.core.evaluation.IPrediction;
-import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
-
-import ai.libs.jaicore.ml.scikitwrapper.AScikitLearnWrapper;
-import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnRegressionWrapper;
+import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapper;
+import ai.libs.jaicore.ml.scikitwrapper.simple.SimpleScikitLearnRegressor;
 
 public class ScikitLearnRegressorFactory extends ATwoStepPipelineScikitLearnFactory {
 
@@ -15,8 +12,8 @@ public class ScikitLearnRegressorFactory extends ATwoStepPipelineScikitLearnFact
 	}
 
 	@Override
-	public AScikitLearnWrapper<IPrediction, IPredictionBatch> getScikitLearnWrapper(final String constructionString, final String imports) throws IOException {
-		return new ScikitLearnRegressionWrapper<>(constructionString, imports);
+	public IScikitLearnWrapper getScikitLearnWrapper(final String constructionString, final String imports) throws IOException {
+		return new SimpleScikitLearnRegressor(constructionString, imports);
 	}
 
 }

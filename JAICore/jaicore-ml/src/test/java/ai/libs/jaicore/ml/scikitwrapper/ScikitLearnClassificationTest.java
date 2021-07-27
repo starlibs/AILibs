@@ -25,7 +25,7 @@ public class ScikitLearnClassificationTest {
 
 	@BeforeAll
 	public static void setup() throws DatasetDeserializationFailedException {
-		datasetIris = OpenMLDatasetReader.deserializeDataset(61);
+		datasetIris = OpenMLDatasetReader.deserializeDataset(40975);
 	}
 
 	@Test
@@ -33,6 +33,7 @@ public class ScikitLearnClassificationTest {
 		SimpleScikitLearnClassifier slw = new SimpleScikitLearnClassifier("RandomForestClassifier()", "from sklearn.ensemble import RandomForestClassifier");
 		List<ILabeledDataset<?>> split = SplitterUtil.getSimpleTrainTestSplit(datasetIris, 42, .7);
 		ILearnerRunReport report = new SupervisedLearnerExecutor().execute(slw, split.get(0), split.get(1));
+
 		System.out.println(EClassificationPerformanceMeasure.ERRORRATE.loss(report.getPredictionDiffList().getCastedView(Integer.class, ISingleLabelClassification.class)));
 	}
 
