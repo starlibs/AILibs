@@ -7,10 +7,13 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.aeonbits.owner.ConfigCache;
 
 import ai.libs.jaicore.basic.SystemRequirementsNotMetException;
+import ai.libs.jaicore.processes.EOperatingSystem;
+import ai.libs.jaicore.processes.ProcessUtil;
 
 public class PythonUtil {
 	private static final String CMD_PYTHON_COMMANDPARAM = "-c";
@@ -18,6 +21,8 @@ public class PythonUtil {
 
 	private final File pathToPythonExecutable;
 	private final String pythonCommand;
+	private String pathToAnacondaExecutable;
+	private String anacondaEnvironment;
 
 	public PythonUtil() {
 		this(ConfigCache.getOrCreate(IPythonConfig.class));
@@ -25,8 +30,17 @@ public class PythonUtil {
 
 	public PythonUtil(final IPythonConfig config) {
 		this.pythonCommand = config.getPythonCommand();
+		if (config.getAnacondaEnvironment() != null) {
+			if (config.getPathToAnacondaExecutable() != null) {
+				String path = config.getPathToAnacondaExecutable();
+				this.pathToAnacondaExecutable = (path != null) ? path : null;
+			}
+			this.anacondaEnvironment = config.getAnacondaEnvironment();
+		}
+
 		String path = config.getPathToPythonExecutable();
-		this.pathToPythonExecutable = (path != null) ? new File(config.getPathToPythonExecutable()) : null;
+		this.pathToPythonExecutable = (path != null) ? new File(path) : null;
+
 		if (this.pathToPythonExecutable != null) {
 			if (!this.pathToPythonExecutable.exists()) {
 				throw new IllegalArgumentException("The path to python executable " + this.pathToPythonExecutable.getAbsolutePath() + " does not exist.");
@@ -41,11 +55,50 @@ public class PythonUtil {
 		return new ProcessBuilder();
 	}
 
+	public String[] getExecutableCommandArray(final String command, final boolean executePythonInteractive) {
+		List<String> processParameters = new ArrayList<>();
+		EOperatingSystem os = ProcessUtil.getOS();
+		if (this.anacondaEnvironment != null) {
+			if (os == EOperatingSystem.MAC) {
+				processParameters.add("source");
+				processParameters.add(this.pathToAnacondaExecutable);
+				processParameters.add("&&");
+			}
+			processParameters.add("conda");
+			processParameters.add("activate");
+			processParameters.add(this.anacondaEnvironment);
+			processParameters.add("&&");
+		}
+
+		if (this.pathToPythonExecutable != null) {
+			processParameters.add(this.pathToPythonExecutable + File.separator + this.pythonCommand);
+		} else {
+			processParameters.add(this.pythonCommand);
+		}
+
+		if (executePythonInteractive) {
+			processParameters.add(CMD_PYTHON_COMMANDPARAM);
+			processParameters.add("'" + command + "'");
+		} else {
+			processParameters.add(command);
+		}
+
+		if (os == EOperatingSystem.MAC) {
+			StringJoiner stringJoiner = new StringJoiner(" ");
+			for (String parameter : processParameters) {
+				stringJoiner.add(parameter);
+			}
+			return new String[] { "sh", "-c", stringJoiner.toString() };
+		} else {
+			return processParameters.toArray(new String[] {});
+		}
+	}
+
 	public String executeScript(final String script) throws IOException {
+		String[] command = this.getExecutableCommandArray(script, true);
 		ProcessBuilder processBuilder = this.getProcessBuilder();
 		processBuilder.redirectErrorStream(true);
-		String command = (this.pathToPythonExecutable != null ? this.pathToPythonExecutable.getAbsolutePath() + File.separator : "") + this.pythonCommand;
-		Process p = processBuilder.command(command, CMD_PYTHON_COMMANDPARAM, script).start();
+		Process p = processBuilder.command(command).start();
 		StringBuilder sb = new StringBuilder();
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
 			String line;
@@ -57,7 +110,7 @@ public class PythonUtil {
 	}
 
 	public String getInstalledVersion() throws IOException {
-		return this.executeScript(PY_IMPORT + "platform\nprint(platform.python_version())");
+		return this.executeScript(PY_IMPORT + "platform; print(platform.python_version())");
 	}
 
 	public boolean isInstalledVersionCompatible(final int reqRel, final int reqMaj, final int reqMin) throws IOException {

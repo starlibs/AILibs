@@ -1,5 +1,9 @@
 package ai.libs.jaicore.ml.core.dataset.serialization.arff;
 
+/**
+ * enum of possible arff declarations
+ *
+ */
 public enum EArffItem {
 
 	RELATION("@relation"), ATTRIBUTE("@attribute"), DATA("@data");

@@ -42,10 +42,15 @@ import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.IntBasedCategoricalAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.StringAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.ThreeDimensionalAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.TwoDimensionalAttribute;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffAttributeType;
 import ai.libs.jaicore.ml.core.dataset.serialization.arff.EArffItem;
 import ai.libs.jaicore.ml.pdm.dataset.SensorTimeSeriesAttribute;
 
+/**
+ * Handles dataset files in the arff format {@link https://waikato.github.io/weka-wiki/formats_and_processing/arff/}
+ */
 public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<ILabeledInstance>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ArffDatasetAdapter.class);
@@ -166,6 +171,13 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		return metaData;
 	}
 
+	/**
+	 * parses an attribute definition of an ARff file. General format: {@literal @}Attribute {@literal <}attribute_name {@literal >} {@literal <}attribute_type{@literal >}
+	 *
+	 * @param line to be analyzed
+	 * @return Object of class IAttribute
+	 * @throws UnsupportedAttributeTypeException when the parsed Attribute not implemented
+	 */
 	protected static IAttribute parseAttribute(final String line) throws UnsupportedAttributeTypeException {
 		String attributeDefinitionSplit = line.replace("\\t", " ").substring(EArffItem.ATTRIBUTE.getValue().length() + 1).trim();
 		Matcher m = REG_EXP_ATTRIBUTE_DESCRIPTION.matcher(attributeDefinitionSplit);
@@ -185,6 +197,9 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		if (type.startsWith("{") && type.endsWith("}")) {
 			values = type.substring(1, type.length() - 1).split(SEPARATOR_DENSE_INSTANCE_VALUES);
 			attType = EArffAttributeType.NOMINAL;
+		} else if (type.toLowerCase().startsWith(EArffAttributeType.MULTIDIMENSIONAL.getName())) {
+			attType = EArffAttributeType.MULTIDIMENSIONAL;
+			values = type.toLowerCase().substring(EArffAttributeType.MULTIDIMENSIONAL.getName().length() + 1, type.length() - 1).split(SEPARATOR_DENSE_INSTANCE_VALUES);
 		} else {
 			try {
 				attType = EArffAttributeType.valueOf(type.toUpperCase());
@@ -207,8 +222,17 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				return new IntBasedCategoricalAttribute(name,
 						Arrays.stream(values).map(String::trim).map(x -> (((x.startsWith("'") && x.endsWith("'")) || x.startsWith("\"") && x.endsWith("\"")) ? x.substring(1, x.length() - 1) : x)).collect(Collectors.toList()));
 			} else {
-				throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
+				throw new IllegalStateException("Identified a " + EArffAttributeType.NOMINAL.getName() + " attribute but it seems to have no values.");
 			}
+		case MULTIDIMENSIONAL:
+			if (values != null) {
+				if (values.length == 2) {
+					return new TwoDimensionalAttribute(name, Integer.parseInt(values[0]), Integer.parseInt(values[1]));
+				} else if (values.length == 3) {
+					return new ThreeDimensionalAttribute(name, Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2]));
+				}
+			}
+			throw new IllegalStateException("Identified a " + EArffAttributeType.MULTIDIMENSIONAL.getName() + " attribute but the syntax seems to be wrong.");
 
 		default:
 			throw new UnsupportedAttributeTypeException("Can not deal with attribute type " + type);
@@ -237,6 +261,16 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		return lineSplit.toArray(new String[] {});
 	}
 
+
+	/**
+	 * Parses a single instance of an ARff file containing values for each attribute given (attributes parameter). Syntax <attribute1_value>, <attribute2_value>, ...
+	 *
+	 * @param sparseData if true there are ? in the data - if it false there are not
+	 * @param attributes List of given IAttribute Objects.
+	 * @param targetIndex
+	 * @param line line of data
+	 * @return list of IAttribute values
+	 */
 	protected static List<Object> parseInstance(final boolean sparseData, final List<IAttribute> attributes, final int targetIndex, final String line) {
 		if (line.trim().startsWith("%")) {
 			throw new IllegalArgumentException("Cannot create object for commented line!");
@@ -318,6 +352,14 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		return readDataset(sparseMode, datasetFile, -1);
 	}
 
+	/**
+	 * Parses the ARff dataset from the given file into a {@link ILabeledDataset}
+	 *
+	 * @param sparseMode
+	 * @param datasetFile file to be parsed
+	 * @param columnWithClassIndex
+	 * @throws DatasetDeserializationFailedException
+	 */
 	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile, final int columnWithClassIndex) throws DatasetDeserializationFailedException {
 		String line = null;
 		long lineCounter = 0;

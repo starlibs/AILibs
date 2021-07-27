@@ -18,10 +18,10 @@ plugins {
 }
 
 allprojects {
-	//Shadow for fat-jars
+	// Shadow for fat-jars
 	apply plugin: "com.github.johnrengelman.shadow"
 
-	//IDE
+	// IDE
 	apply plugin: "java"
 	apply plugin: "eclipse"
 	apply plugin: "idea"
