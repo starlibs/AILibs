@@ -20,6 +20,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import ai.libs.jaicore.ml.core.dataset.serialization.CSVDatasetAdapter;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
@@ -70,7 +71,7 @@ public class WekaInstancesTest {
 			/* check for each value that the contained information is correct */
 			for (int j = 0; j <= numAttributes; j++) {
 				if (j < numAttributes) {
-					Double value = (Double) inst.getAttributeValue(j);
+					Double value = Double.valueOf("" + inst.getAttributeValue(j));
 					if (data.attribute(j).isNumeric()) {
 						assertEquals(data.get(i).value(j), value, 0.0, "Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + value + " but should have " + data.get(i).value(j));
 					} else if (data.attribute(j).isNominal()) {
@@ -136,6 +137,20 @@ public class WekaInstancesTest {
 		/* check that the copy is not the same anymore if one element is removed */
 		copy.remove(0);
 		assertNotEquals(wrapped, copy);
+	}
+
+	@MethodSource("getDataset")
+	@ParameterizedTest
+	public void testWrite(final File dataset) throws Exception {
+		Instances data = new Instances(new FileReader(dataset));
+		data.setClassIndex(data.numAttributes() - 1);
+		IWekaInstances wrapped = new WekaInstances(data);
+		File outFile = new File("testrsc/WekaInstancesTestFile.csv");
+
+		/* write and read data */
+		CSVDatasetAdapter.writeDataset(outFile, wrapped);
+		assertTrue(outFile.exists());
+		outFile.delete();
 	}
 
 	@MethodSource("getDataset")
