@@ -98,9 +98,9 @@ jobs:
         - git fetch --no-tags https://github.com/fmohr/AILibs.git +dev:refs/heads/dev
         - ./gradlew sonarqube -x test
         
-    - stage: light_test # this stage figures out the projects in which changes were made (compared to dev) and tests only those projects
-      script:
-        - echo "This stage does currently not test anything" # here we should put the logic to do light testing
+    #- stage: light_test # this stage figures out the projects in which changes were made (compared to dev) and tests only those projects
+    #  script:
+    #    - echo "This stage does currently not test anything" # here we should put the logic to do light testing
 
 # configures the *order* of the stages. See https://docs.travis-ci.com/user/build-stages/
 stages:
@@ -108,7 +108,8 @@ stages:
     if: (commit_message=~ /--documentation--/) OR ((type=push) AND (branch IN (master, dev))) # do never build master and dev in push mode; this is double work, because the branches are protected and always built upon PR. This dummy is here in order to trigger a feedback to github, which does not happen if the build job is just skipped.
   - name: check_build
     if: NOT ((commit_message=~ /--documentation--/) OR ((type=push) AND (branch IN (master, dev)))) # do standard building (but no testing) if this is a non-documentation commit
-  - name: light_test
-    if: NOT (commit_message=~ /--documentation--/) AND (type=push) AND NOT (branch IN (master, dev)) # do light testing if this is a standard PR that is not on dev or master (those are dummy runs)
+# light is currently disabled. Once we have meaningful tests here, activate this line
+#  - name: light_test
+#    if: NOT (commit_message=~ /--documentation--/) AND (type=push) AND NOT (branch IN (master, dev)) # do light testing if this is a standard PR that is not on dev or master (those are dummy runs)
   - name: test # this is the IMPLICITLY defined stage (see above in the comments of the jobs section)
     if: NOT (commit_message=~ /--documentation--/) AND NOT (type=push) AND (branch IN (master, dev)))) # do a full testing if this is a non-documentary PR commit on dev or master
