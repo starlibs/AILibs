@@ -9,15 +9,17 @@ if [[ ${TRAVIS_BRANCH} == "master" ||  ${TRAVIS_BRANCH} == "dev" ]]; then
 		echo "This is a push event on master or dev. This is always allowed."
 		exit 0
 	fi
-fi
 
-if ! git diff --name-only $TRAVIS_COMMIT_RANGE | grep -qvE '(.md$)'
-then
-  echo "Only docs were updated, not running the CI."
-  exit 0
+
+	if ! git diff --name-only $TRAVIS_COMMIT_RANGE | grep -qvE '(.md$)'
+	then
+	  echo "Only docs were updated, not running the CI."
+	  exit 0
+	else
+	  echo "The commit range has changes in non-markdown files, which is forbidden for dummy builds, because this could be used to circumvent the CI when true code changes were made. Please make sure to not include the --documentation-- tag into your commit message. Here are the changed non-markdown files (one per line):"
+	  git diff --name-only $TRAVIS_COMMIT_RANGE | grep -vE '(.md$)' | sed 's/.*/ - &/'
+	  exit 1
+	fi
 else
-  echo "The commit range has changes in non-markdown files, which is forbidden for dummy builds, because this could be used to circumvent the CI when true code changes were made. Please make sure to not include the --documentation-- tag into your commit message. Here are the changed non-markdown files (one per line):"
-  git diff --name-only $TRAVIS_COMMIT_RANGE | grep -vE '(.md$)' | sed 's/.*/ - &/'
-  exit 1
+  echo "This is a commit to a branch other than dev or master, so no CI is run. This can change in the future."
 fi
-
