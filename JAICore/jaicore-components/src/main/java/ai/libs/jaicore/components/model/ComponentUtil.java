@@ -320,7 +320,7 @@ public class ComponentUtil {
 				}
 				params.add(items);
 			} else if (domain instanceof CategoricalParameterDomain) {
-				params.add(Arrays.asList(((CategoricalParameterDomain) domain).getValues()));
+				params.add(Arrays.asList((Object[]) ((CategoricalParameterDomain) domain).getValues()));
 			}
 		}
 

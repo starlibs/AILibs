@@ -139,8 +139,7 @@ public class OpenMLDatasetAdapterTest {
 				41064, // convex
 				41167, // dionis
 				41142, // christine
-				42732, // sf-police-incidents
-				1461, 1486, 4534, 4135, 4541, 40670, 40701, 40978, 40981, 41162, 41143, 41147, 40975, 31, 41138, // APSFailure
+				1461, 1486, 4534, 4135, 4541, 40670, 40701, 40978, 40981, 41162, 41143, 40975, 31, 41138, // APSFailure
 				41145, // philippine
 				41158, // gina
 				41169, // helena
@@ -165,6 +164,7 @@ public class OpenMLDatasetAdapterTest {
 				41165, // robert
 				41166, // volkert
 				41159, // guilermo
+				41147, // albert
 				42732 // sf-police-incidents
 		));
 	}

@@ -36,6 +36,9 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 					dataset.removeColumn(columnNameToIgnore);
 				}
 			}
+			if(dsd.getRow_id_attribute() != null) {
+				dataset.removeColumn(dsd.getRow_id_attribute());
+			}
 			return dataset;
 		} catch (Exception e) {
 			e.printStackTrace();

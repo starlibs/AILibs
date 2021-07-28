@@ -1,6 +1,9 @@
 package ai.libs.jaicore.ml.core.dataset.schema.attribute;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttributeValue;
@@ -13,11 +16,14 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 	private static final long serialVersionUID = 3727153881173459843L;
 
 	private final List<String> domain;
+	private final Map<String, Integer> encodingMap;
 	private final int numCategories;
 
 	public IntBasedCategoricalAttribute(final String name, final List<String> domain) {
 		super(name);
 		this.domain = domain;
+		this.encodingMap = new HashMap<>();
+		IntStream.range(0, this.domain.size()).forEach(x -> this.encodingMap.put(this.domain.get(x), x));
 		this.numCategories = domain.size();
 	}
 
@@ -91,7 +97,7 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 			int cObject;
 			if (object instanceof Integer) {
 				cObject = (int) object;
-			} else if (this.domain.contains(object)) {
+			} else if (this.encodingMap.containsKey(object)) {
 				cObject = this.domain.indexOf(object);
 			} else if (object instanceof ICategoricalAttributeValue) {
 				cObject = ((ICategoricalAttributeValue) object).getValue();
@@ -148,7 +154,7 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		if ((string.startsWith("'") && string.endsWith("'")) || (string.startsWith("\"") && string.endsWith("\""))) {
 			trimmedString = trimmedString.substring(1, trimmedString.length() - 1);
 		}
-		int indexOf = this.domain.indexOf(trimmedString);
+		int indexOf = this.encodingMap.get(trimmedString);
 		return (indexOf < 0) ? null : indexOf;
 	}
 
