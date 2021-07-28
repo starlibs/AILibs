@@ -28,7 +28,7 @@ public class PlackettLuceMCTSFactory<N, A> extends MCTSFactory<N, A, PlackettLuc
 		if (this.preferenceKernel == null) {
 			throw new IllegalStateException("Cannot build PL-MCTS since no preference kernel has been set.");
 		}
-		return new PlackettLuceMCTS<>(input, this.preferenceKernel, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), new Random(this.getRandom().nextLong()), new Random(this.getRandom().nextLong()), this.isTabooExhaustedNodes());
+		return new PlackettLuceMCTS<>(input, this.getDefaultPolicy(true), this.preferenceKernel, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), new Random(this.getRandom().nextLong()), new Random(this.getRandom().nextLong()), this.isTabooExhaustedNodes());
 	}
 
 }

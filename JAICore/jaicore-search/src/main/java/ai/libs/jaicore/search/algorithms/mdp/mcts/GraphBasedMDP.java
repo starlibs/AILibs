@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
@@ -47,7 +46,7 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 		this.root = ((ISingleRootGenerator<N>) this.graph.getGraphGenerator().getRootGenerator()).getRoot();
 		this.succGen = graph.getGraphGenerator().getSuccessorGenerator();
 		this.goalTester = graph.getGoalTester();
-		this.lazySuccGen = this.succGen instanceof ILazySuccessorGenerator ? (ILazySuccessorGenerator<N, A>)this.succGen : null;
+		this.lazySuccGen = this.succGen instanceof ILazySuccessorGenerator ? (ILazySuccessorGenerator<N, A>) this.succGen : null;
 		this.lazy = this.lazySuccGen != null;
 	}
 
@@ -102,7 +101,8 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 							break;
 						}
 					}
-					throw new IllegalStateException("Reaching state " + succ.getTo() + " on a second way, which must not be the case in trees!\n\t1st way: " + backpointer.getX() + "; " + backpointer.getY() + "\n\t2nd way: " + state + "; " + action + "\n\ttoString of existing node: " + otherNode + "\n\tSame parent: " + sameParent + "\n\tSame Action: " + sameAction);
+					throw new IllegalStateException("Reaching state " + succ.getTo() + " on a second way, which must not be the case in trees!\n\t1st way: " + backpointer.getX() + "; " + backpointer.getY() + "\n\t2nd way: " + state + "; "
+							+ action + "\n\ttoString of existing node: " + otherNode + "\n\tSame parent: " + sameParent + "\n\tSame Action: " + sameAction);
 				}
 			}
 			this.logger.debug("Setting backpointer from {} to {}", succ.getTo(), state);
@@ -124,8 +124,7 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 		N successor = null;
 		if (this.successorCache.containsKey(state) && this.successorCache.get(state).containsKey(action)) {
 			successor = this.successorCache.get(state).get(action);
-		}
-		else {
+		} else {
 			Optional<INewNodeDescription<N, A>> succOpt = this.succGen.generateSuccessors(state).stream().filter(nd -> nd.getArcLabel().equals(action)).findAny();
 			if (!succOpt.isPresent()) {
 				this.logger.error("THERE IS NO SUCCESSOR REACHABLE WITH ACTION {} IN THE MDP!", action);
@@ -156,7 +155,9 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 		nodes.add(cur);
 		while (cur != this.root) {
 			Pair<N, A> parentEdge = this.backPointers.get(cur);
-			Objects.requireNonNull(parentEdge, "No back pointer defined for non-root node " + cur);
+			if (parentEdge == null) {
+				throw new NullPointerException("No back pointer defined for non-root node " + cur); // this is INTENTIONALLY not done with Object.requireNonNull, because the string shall not be evaluated otherwise!
+			}
 			cur = parentEdge.getX();
 			nodes.add(0, cur);
 			arcs.add(0, parentEdge.getY());
@@ -185,8 +186,7 @@ public class GraphBasedMDP<N, A> implements IMDP<N, A, Double>, ILoggingCustomiz
 		if (this.lazy) {
 			this.logger.debug("Determining terminal state condition for lazy graph generator.");
 			return !this.lazySuccGen.getIterativeGenerator(state).hasNext();
-		}
-		else {
+		} else {
 			return this.succGen.generateSuccessors(state).isEmpty();
 		}
 	}

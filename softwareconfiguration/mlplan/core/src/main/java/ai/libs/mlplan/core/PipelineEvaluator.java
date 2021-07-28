@@ -19,7 +19,6 @@ import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.exceptions.ComponentInstantiationFailedException;
 import ai.libs.jaicore.components.model.ComponentInstance;
 import ai.libs.jaicore.components.model.ComponentInstanceUtil;
-import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedObjectEvaluator;
 import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
 import ai.libs.mlplan.core.events.TimeTrackingLearnerEvaluationEvent;
@@ -52,13 +51,14 @@ public class PipelineEvaluator extends TimedObjectEvaluator<IComponentInstance, 
 		this(learnerFactory, benchmark, timeoutForEvaluation, new AlwaysEvaluateSafeGuard());
 	}
 
+	@SuppressWarnings("unchecked")
 	public PipelineEvaluator(final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> learnerFactory,
 			final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> benchmark, final Timeout timeoutForEvaluation, final IEvaluationSafeGuard safeGuard) {
 		super();
 		this.learnerFactory = learnerFactory;
 		this.benchmark = benchmark;
 		if (benchmark instanceof IEventEmitter) {
-			((IEventEmitter) benchmark).registerListener(this);
+			((IEventEmitter<PipelineEvaluator>) benchmark).registerListener(this);
 		}
 		this.timeoutForEvaluation = timeoutForEvaluation;
 		this.safeGuard = safeGuard;
@@ -104,18 +104,18 @@ public class PipelineEvaluator extends TimedObjectEvaluator<IComponentInstance, 
 
 			ITimeTrackingLearner trackableLearner = new TimeTrackingLearnerWrapper(c, learner);
 			if (c instanceof ComponentInstance) {
-				trackableLearner.setPredictedInductionTime(((ComponentInstance)c).getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME));
-				trackableLearner.setPredictedInferenceTime(((ComponentInstance)c).getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME));
+				trackableLearner.setPredictedInductionTime(((ComponentInstance) c).getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INDUCTION_TIME));
+				trackableLearner.setPredictedInferenceTime(((ComponentInstance) c).getAnnotation(IEvaluationSafeGuard.ANNOTATION_PREDICTED_INFERENCE_TIME));
 			}
 
 			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, (learner instanceof ScikitLearnWrapper) ? learner.toString() : learner.getClass().getName());
+				this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, learner);
 			}
 
 			Double score = this.benchmark.evaluate(trackableLearner);
 			trackableLearner.setScore(score);
 			if (this.logger.isInfoEnabled()) {
-				this.logger.info("Obtained score {} for classifier {}", score, (learner instanceof ScikitLearnWrapper) ? learner.toString() : learner.getClass().getName());
+				this.logger.info("Obtained score {} for classifier {}", score, learner);
 			}
 
 			this.eventBus.post(new TimeTrackingLearnerEvaluationEvent(trackableLearner));

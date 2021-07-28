@@ -34,9 +34,12 @@ import ai.libs.jaicore.search.probleminputs.IMDP;
  *
  * @author Felix Mohr
  *
- * @param <I> Problem type
- * @param <N> Type of states (nodes)
- * @param <A> Type of actions
+ * @param <I>
+ *            Problem type
+ * @param <N>
+ *            Type of states (nodes)
+ * @param <A>
+ *            Type of actions
  */
 public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends AOptimalPathInORGraphSearch<I, N, A, Double> {
 
@@ -53,7 +56,7 @@ public class MCTSPathSearch<I extends IPathSearchWithPathEvaluationsInput<N, A, 
 
 			@Subscribe
 			public void receiveMCTSEvent(final IAlgorithmEvent e) {
-				if (!(e instanceof AlgorithmInitializedEvent) && !(e instanceof AlgorithmFinishedEvent)){
+				if (!(e instanceof AlgorithmInitializedEvent) && !(e instanceof AlgorithmFinishedEvent)) {
 					MCTSPathSearch.this.post(e); // forward everything
 				}
 			}
