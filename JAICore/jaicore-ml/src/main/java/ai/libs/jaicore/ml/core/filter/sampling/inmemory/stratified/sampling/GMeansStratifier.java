@@ -30,6 +30,8 @@ import ai.libs.jaicore.ml.clustering.learner.GMeans;
  */
 public class GMeansStratifier extends ClusterStratiAssigner implements IStratifier {
 
+	private int maxInnerIterations = 100;
+
 	/**
 	 * Constructor for GMeansStratiAmountSelectorAndAssigner with Manhattan
 	 * distanceMeasure as a default.
@@ -62,7 +64,7 @@ public class GMeansStratifier extends ClusterStratiAssigner implements IStratifi
 		// Perform g-means to get a fitting k and the corresponding clusters.
 		this.setDataset(dataset);
 		List<Clusterable> cDataset = new ListView<>(dataset);
-		GMeans<Clusterable> clusterer = new GMeans<>(cDataset, this.distanceMeasure, this.randomSeed);
+		GMeans<Clusterable> clusterer = new GMeans<>(cDataset, this.distanceMeasure, this.maxInnerIterations, this.randomSeed);
 		this.setClusters(clusterer.cluster());
 		return this.getClusters().size();
 	}

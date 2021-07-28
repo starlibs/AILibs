@@ -1,12 +1,14 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
+import org.apache.commons.math3.ml.distance.ManhattanDistance;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.slf4j.Logger;
 
 import ai.libs.jaicore.ml.clustering.learner.GMeans;
 import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
@@ -24,23 +26,32 @@ import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
  */
 public class GmeansSampling<I extends IClusterableInstance, D extends ILabeledDataset<I>> extends ClusterSampling<I, D> {
 
-	public GmeansSampling(final long seed, final DistanceMeasure dist, final D input) {
+	private final int maxIterationsInInnerLoop;
+
+	public GmeansSampling(final int maxIterationsInInnerLoop, final long seed, final DistanceMeasure dist, final D input) {
 		super(seed, dist, input);
 		if (input.size() > 1000) {
 			throw new IllegalArgumentException("GMeans does not support datasets with more than 1000 points, because it has quadratic (non-interruptible) runtime.");
 		}
+		this.maxIterationsInInnerLoop = maxIterationsInInnerLoop;
+	}
+
+	public GmeansSampling(final long seed, final DistanceMeasure dist, final D input) {
+		this(-1, seed, dist, input);
+	}
+
+	public GmeansSampling(final int maxIterationsInInnerLoop, final long seed, final D input) {
+		this(maxIterationsInInnerLoop, seed, new ManhattanDistance(), input);
 	}
 
 	public GmeansSampling(final long seed, final D input) {
-		super(seed, input);
-		if (input.size() > 1000) {
-			throw new IllegalArgumentException("GMeans does not support datasets with more than 1000 points, because it has quadratic (non-interruptible) runtime.");
-		}
+		this(-1, seed, input);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
+		Logger logger = this.getLogger();
 		switch (this.getState()) {
 		case CREATED:
 			// Initialize variables
@@ -52,7 +63,8 @@ public class GmeansSampling<I extends IClusterableInstance, D extends ILabeledDa
 
 			if (this.clusterResults == null) {
 				// create cluster
-				GMeans<I> gMeansCluster = new GMeans<>(this.getInput(), this.distanceMeassure, this.seed);
+				logger.debug("Create clustering.");
+				GMeans<I> gMeansCluster = new GMeans<>(this.getInput(), this.distanceMeassure, this.maxIterationsInInnerLoop, this.seed);
 				this.clusterResults = gMeansCluster.cluster(); // this is not interruptible!!
 			}
 			return this.activate();

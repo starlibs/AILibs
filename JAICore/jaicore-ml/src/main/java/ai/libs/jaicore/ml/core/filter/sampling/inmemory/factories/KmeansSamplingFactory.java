@@ -17,6 +17,7 @@ public class KmeansSamplingFactory<I extends ILabeledInstance & Clusterable, D e
 	private int k = -1;
 	private long clusterSeed = System.currentTimeMillis();
 	private DistanceMeasure distanceMeassure = new ManhattanDistance();
+	private int maxIterations = -1;
 
 	@Override
 	public void setPreviousRun(final KmeansSampling<I, D> previousRun) {
@@ -53,13 +54,17 @@ public class KmeansSamplingFactory<I extends ILabeledInstance & Clusterable, D e
 		this.distanceMeassure = distanceMeassure;
 	}
 
+	public void setMaxIterations(final int maxIterations) {
+		this.maxIterations = maxIterations;
+	}
+
 	@Override
 	public KmeansSampling<I, D> getAlgorithm(final int sampleSize, final D inputDataset, final Random random) {
 		int kValue = sampleSize;
 		if (this.k > 0) {
 			kValue = this.k;
 		}
-		KmeansSampling<I, D> kmeansSampling = new KmeansSampling<>(this.clusterSeed, kValue, inputDataset);
+		KmeansSampling<I, D> kmeansSampling = new KmeansSampling<>(this.clusterSeed, kValue, this.maxIterations, inputDataset);
 		kmeansSampling.setSampleSize(sampleSize);
 		kmeansSampling.setDistanceMeassure(this.distanceMeassure);
 		if (this.previousRun != null && this.previousRun.getClusterResults() != null) {
