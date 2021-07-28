@@ -59,7 +59,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	public static final String K_RELATION_NAME = "relationName";
 	public static final String K_CLASS_INDEX = "classIndex";
 
-	public static final Pattern REG_EXP_DATA_LINE = Pattern.compile("(?<=,|^)('([^']*)'|\"([^\"]*)\"|([^,]*))(?=,|$)");// Pattern.compile("'([^']*)'|\"([^\"]*)\"|(?<=,|^)([^,]*)(?=,|$)");
+	public static final Pattern REG_EXP_DATA_LINE = Pattern.compile("(?<=,|^)( *'([^']*)'| *\"([^\"]*)\"|([^,]*))(?=,|$)");
 
 	private static final String F_CLASS_INDEX = "C";
 
@@ -195,7 +195,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		EArffAttributeType attType;
 		String[] values = null;
 		if (type.startsWith("{") && type.endsWith("}")) {
-			values = type.substring(1, type.length() - 1).split(SEPARATOR_DENSE_INSTANCE_VALUES);
+			values = splitDenseInstanceLine(type.substring(1, type.length() - 1));
 			attType = EArffAttributeType.NOMINAL;
 		} else if (type.toLowerCase().startsWith(EArffAttributeType.MULTIDIMENSIONAL.getName())) {
 			attType = EArffAttributeType.MULTIDIMENSIONAL;
@@ -253,14 +253,10 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		Matcher matcher = REG_EXP_DATA_LINE.matcher(line);
 		while (matcher.find()) {
 			String entry = matcher.group();
-			// if ((entry.startsWith("'") && entry.endsWith("'")) || (entry.startsWith("\"") && entry.endsWith("\""))) {
-			// entry = entry.substring(1, entry.length() - 1);
-			// }
 			lineSplit.add(entry);
 		}
 		return lineSplit.toArray(new String[] {});
 	}
-
 
 	/**
 	 * Parses a single instance of an ARff file containing values for each attribute given (attributes parameter). Syntax <attribute1_value>, <attribute2_value>, ...
@@ -296,6 +292,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				throw new IllegalArgumentException("Cannot parse instance as this is not a sparse instance but has less columns than there are attributes defined. Expected values: " + attributes.size() + ". Actual number of values: "
 						+ lineSplit.length + ". Values: " + Arrays.toString(lineSplit));
 			}
+
 			Object[] parsedDenseInstance = new Object[lineSplit.length - 1];
 			Object target = null;
 			int cI = 0;

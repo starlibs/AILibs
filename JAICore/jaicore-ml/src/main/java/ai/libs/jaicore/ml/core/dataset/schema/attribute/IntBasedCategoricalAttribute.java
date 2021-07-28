@@ -140,7 +140,7 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 			if (!this.domain.contains(value)) {
 				throw new IllegalArgumentException("The given value \"" + value + "\" is not part of the domain and cannot be serialized. The domain is: " + this.domain);
 			}
-			return (String)value; // here we know that this must be a String; otherwise it could not be in the domain!
+			return (String) value; // here we know that this must be a String; otherwise it could not be in the domain!
 		}
 		if (((Integer) value) < 0) {
 			return null;
@@ -154,8 +154,12 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		if ((string.startsWith("'") && string.endsWith("'")) || (string.startsWith("\"") && string.endsWith("\""))) {
 			trimmedString = trimmedString.substring(1, trimmedString.length() - 1);
 		}
-		int indexOf = this.encodingMap.get(trimmedString);
-		return (indexOf < 0) ? null : indexOf;
+		try {
+			int indexOf = this.encodingMap.get(trimmedString);
+			return (indexOf < 0) ? null : indexOf;
+		} catch (NullPointerException e) {
+			return null;
+		}
 	}
 
 	@Override

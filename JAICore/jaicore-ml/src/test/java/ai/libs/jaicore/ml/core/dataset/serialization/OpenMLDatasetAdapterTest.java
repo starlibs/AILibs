@@ -116,6 +116,7 @@ public class OpenMLDatasetAdapterTest {
 
 	public static Stream<Arguments> getMediumDatasets() throws IOException, Exception {
 		return readDatasets(Arrays.asList(// 149, // CovPokElec
+				42734, // okcupid-steam
 				// 155, // pokerhand
 				// 180, // covertype
 				// 273, // IMDB Drama
@@ -146,7 +147,6 @@ public class OpenMLDatasetAdapterTest {
 				// /**/ 42123 // articleinfluence => string attribute
 				41164, // fabert
 				41168, // jannis
-				42734, // okcupid-steam
 				23517, // numerai28.6
 				41150 // MiniBooNE
 		));

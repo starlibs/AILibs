@@ -22,7 +22,7 @@ public class NDCGLoss extends ARankingPredictionPerformanceMeasure implements IR
 	 * The position up to which to compute the cumulative gain (zero-indexed, exclusive).
 	 */
 	private int l;
-	
+
 	private static final boolean BINARY_RELEVANCE = true;
 
 	/**
@@ -55,13 +55,12 @@ public class NDCGLoss extends ARankingPredictionPerformanceMeasure implements IR
 
 		Map<Object, Integer> relevance = new HashMap<>();
 		for (int i = 0; i < this.l; i++) {
-			if(BINARY_RELEVANCE) {
+			if (BINARY_RELEVANCE) {
 				relevance.put(expected.get(i), 1);
 			} else {
 				relevance.put(expected.get(i), -(i + 1));
 			}
 		}
-		System.out.println(relevance);
 
 		double dcg = this.computeDCG(actual, relevance);
 		double idcg = this.computeDCG(expected, relevance);

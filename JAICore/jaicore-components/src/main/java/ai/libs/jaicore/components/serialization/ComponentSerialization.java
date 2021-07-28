@@ -58,6 +58,7 @@ public class ComponentSerialization implements ILoggingCustomizable {
 	public static final String FIELD_COMPONENTS = "components";
 	public static final String FIELD_CONSTRAINTS = "constraints";
 	public static final String FIELD_PARAMETERS = "parameters";
+	public static final String FIELD_VALUES = "values";
 
 	public static final String DTYPE_DOUBLE = "double";
 	public static final String DTYPE_INT = "int";
@@ -86,7 +87,7 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		for (IComponent c : components) {
 			componentArray.add(this.serialize(c));
 		}
-		on.set("components", componentArray);
+		on.set(FIELD_COMPONENTS, componentArray);
 		return on;
 	}
 
@@ -130,10 +131,9 @@ public class ComponentSerialization implements ILoggingCustomizable {
 			for (String val : ((CategoricalParameterDomain) domain).getValues()) {
 				vals.add(val);
 			}
-			on.set("values", vals);
-		}
-		else {
-			NumericParameterDomain nDomain = (NumericParameterDomain)domain;
+			on.set(FIELD_VALUES, vals);
+		} else {
+			NumericParameterDomain nDomain = (NumericParameterDomain) domain;
 			on.put("type", nDomain.isInteger() ? DTYPE_INT : DTYPE_DOUBLE);
 			on.put("min", nDomain.getMin());
 			on.put("max", nDomain.getMax());
@@ -286,12 +286,12 @@ public class ComponentSerialization implements ILoggingCustomizable {
 			if (!parameter.has("min")) {
 				throw new IllegalArgumentException("No min value defined for parameter " + name);
 			}
-		if (!parameter.has("max")) {
-			throw new IllegalArgumentException("No max value defined for parameter " + name);
-		}
-		double min = parameter.get("min").asDouble();
-		double max = parameter.get("max").asDouble();
-		return new Parameter(name, new NumericParameterDomain(type.equals("int") || type.equals("int-log"), min, max), defValNode.asDouble());
+			if (!parameter.has("max")) {
+				throw new IllegalArgumentException("No max value defined for parameter " + name);
+			}
+			double min = parameter.get("min").asDouble();
+			double max = parameter.get("max").asDouble();
+			return new Parameter(name, new NumericParameterDomain(type.equals("int") || type.equals("int-log"), min, max), defValNode.asDouble());
 
 		case "bool":
 		case "boolean":
@@ -300,10 +300,10 @@ public class ComponentSerialization implements ILoggingCustomizable {
 		case "cat":
 		case "categoric":
 		case "categorical":
-			if (!parameter.has("values")) {
+			if (!parameter.has(FIELD_VALUES)) {
 				throw new IllegalArgumentException("Categorical parameter \"" + name + "\" has no field \"values\" for the possible values defined!");
 			}
-			JsonNode valuesNode = parameter.get("values");
+			JsonNode valuesNode = parameter.get(FIELD_VALUES);
 			List<String> values = new LinkedList<>();
 			if (valuesNode.isTextual()) {
 				values.addAll(Arrays.stream(valuesNode.asText().split(",")).collect(Collectors.toList()));

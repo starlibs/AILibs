@@ -1,9 +1,9 @@
 package ai.libs.jaicore.ml.core.dataset.serialization;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,83 +78,81 @@ public class ArffDatasetAdapterTest {
 	@Test
 	public void testParseRelation() {
 		KVStore store = ArffDatasetAdapter.parseRelation(RELATION_STRING);
-		assertEquals("The class index could not be read correctly", CLASS_INDEX, (int) store.getAsInt(ArffDatasetAdapter.K_CLASS_INDEX));
-		assertEquals("The relation name could not be extracted correctly", RELATION_NAME, store.getAsString(ArffDatasetAdapter.K_RELATION_NAME));
+		assertEquals(CLASS_INDEX, (int) store.getAsInt(ArffDatasetAdapter.K_CLASS_INDEX), "The class index could not be read correctly");
+		assertEquals(RELATION_NAME, store.getAsString(ArffDatasetAdapter.K_RELATION_NAME), "The relation name could not be extracted correctly");
 	}
 
 	@Test
 	public void testParseNumericAttribute() throws UnsupportedAttributeTypeException {
 		IAttribute attribute = ArffDatasetAdapter.parseAttribute(NUMERIC_ATTRIBUTE_STRING);
-		assertTrue("Returned attribute is not of type INumericAttribtue", attribute instanceof INumericAttribute);
-		assertEquals("Name of attribute could not be extracted correctly", ATTRIBUTE_NAME, attribute.getName());
+		assertTrue(attribute instanceof INumericAttribute, "Returned attribute is not of type INumericAttribtue");
+		assertEquals(ATTRIBUTE_NAME, attribute.getName(), "Name of attribute could not be extracted correctly");
 	}
 
 	@Test
 	public void testTwoDimensionalAttribute() throws UnsupportedAttributeTypeException {
 		IAttribute attribute2d = ArffDatasetAdapter.parseAttribute(MULTI_DIMENSIONAL_ATTRIBUTE2D_STRING);
-
-		assertTrue("Returned attribute is not of type {@link TwoDimensionalAttribute} ", attribute2d instanceof TwoDimensionalAttribute);
-
-		assertEquals("Name of attrtibute could not be extracted correctly", attribute2d.getName(), (ATTRIBUTE_NAME));
+		assertTrue(attribute2d instanceof TwoDimensionalAttribute, "Returned attribute is not of type {@link TwoDimensionalAttribute} ");
+		assertEquals(attribute2d.getName(), (ATTRIBUTE_NAME), "Name of attrtibute could not be extracted correctly");
 	}
 
 	@Test
 	public void testThreDimensionalAttribute() throws UnsupportedAttributeTypeException {
 		IAttribute attribute3d = ArffDatasetAdapter.parseAttribute(MULTI_DIMENSIONAL_ATTRIBUTE3D_STRING);
 
-		assertTrue("Returned attribute is not of type {@link ThreeDimensionalAttribute}", attribute3d instanceof ThreeDimensionalAttribute);
+		assertTrue(attribute3d instanceof ThreeDimensionalAttribute, "Returned attribute is not of type {@link ThreeDimensionalAttribute}");
 
-		assertEquals("Name of attrtibute could not be extracted correctly", attribute3d.getName(), (attribute3d.getName()));
+		assertEquals(attribute3d.getName(), (attribute3d.getName()), "Name of attrtibute could not be extracted correctly");
 
 	}
 
 	@Test
 	public void testParseCategoricalAttribute() throws UnsupportedAttributeTypeException {
 		IAttribute attribute = ArffDatasetAdapter.parseAttribute(NOMINAL_ATTRIBUTE_STRING);
-		assertTrue("Returned attribute is not of type INumericAttribtue", attribute instanceof ICategoricalAttribute);
-		assertEquals("Name of attribute could not be extracted correctly", ATTRIBUTE_NAME, attribute.getName());
+		assertTrue(attribute instanceof ICategoricalAttribute, "Returned attribute is not of type INumericAttribtue");
+		assertEquals(ATTRIBUTE_NAME, attribute.getName(), "Name of attribute could not be extracted correctly");
 		ICategoricalAttribute catAtt = (ICategoricalAttribute) attribute;
-		assertEquals("Number of categories extracted does not match the real number of categories", CATEGORICAL_VALUES.size(), catAtt.getLabels().size());
-		assertTrue("Extracted list of categories does not contain all ground truth values", CATEGORICAL_VALUES.containsAll(catAtt.getLabels()));
+		assertEquals(CATEGORICAL_VALUES.size(), catAtt.getLabels().size(), "Number of categories extracted does not match the real number of categories");
+		assertTrue(CATEGORICAL_VALUES.containsAll(catAtt.getLabels()), "Extracted list of categories does not contain all ground truth values");
 	}
 
 	@Test
 	public void testParseSensorTimeSeriesAttribute() throws UnsupportedAttributeTypeException {
 		IAttribute attribute = ArffDatasetAdapter.parseAttribute(SENSOR_TIME_SERIES_ATTRIBUTE_STRING);
-		assertTrue("Returned attribute is not of type IObjectAttribute", attribute instanceof IObjectAttribute);
-		assertEquals("Name of attribute could not be extracted correctly", ATTRIBUTE_NAME, attribute.getName());
+		assertTrue(attribute instanceof IObjectAttribute, "Returned attribute is not of type IObjectAttribute");
+		assertEquals(ATTRIBUTE_NAME, attribute.getName(), "Name of attribute could not be extracted correctly");
 	}
 
 	@Test
 	public void testParseDenseInstance() {
 		String testInstanceLine = generateDenseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE);
 		Object parsedInstance = ArffDatasetAdapter.parseInstance(false, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
-		assertTrue("The returned instance is not in the expected dense instance format", parsedInstance instanceof List<?>);
+		assertTrue(parsedInstance instanceof List<?>, "The returned instance is not in the expected dense instance format");
 		Object[] parsedDenseInstance = (Object[]) ((List<?>) parsedInstance).get(0);
 		Object label = ((List<?>) parsedInstance).get(1);
-		assertEquals("The size of the array is varying.", TEST_INSTANCE.length, parsedDenseInstance.length + 1);
+		assertEquals(TEST_INSTANCE.length, parsedDenseInstance.length + 1, "The size of the array is varying.");
 		for (int i = 0; i < TEST_INSTANCE.length; i++) {
 			if (i == CLASS_INDEX) {
-				assertEquals("Attribute value at position " + i + " " + label + " is not equal to the expected value " + TEST_INSTANCE[i], TEST_INSTANCE[i], label);
+				assertEquals(TEST_INSTANCE[i], label, "Attribute value at position " + i + " " + label + " is not equal to the expected value " + TEST_INSTANCE[i]);
 			} else {
 				if (parsedDenseInstance[i] instanceof double[][]) {
-					assertTrue("Attribute value at position " + i + " " + parsedDenseInstance[i] + " is not equal to the expected value ", Arrays.deepEquals((double[][]) parsedDenseInstance[i], (double[][]) TEST_INSTANCE[i]));
+					assertTrue(Arrays.deepEquals((double[][]) parsedDenseInstance[i], (double[][]) TEST_INSTANCE[i]), "Attribute value at position " + i + " " + parsedDenseInstance[i] + " is not equal to the expected value ");
 				} else if (parsedDenseInstance[i] instanceof double[][][]) {
-					assertTrue("Attribute value at position " + i + " " + parsedDenseInstance[i] + " is not equal to the expected value ", Arrays.deepEquals((double[][][]) parsedDenseInstance[i], (double[][][]) TEST_INSTANCE[i]));
+					assertTrue(Arrays.deepEquals((double[][][]) parsedDenseInstance[i], (double[][][]) TEST_INSTANCE[i]), "Attribute value at position " + i + " " + parsedDenseInstance[i] + " is not equal to the expected value ");
 				} else {
-					assertEquals("Attribute value at position " + i + " " + parsedDenseInstance[i] + " is not equal to the expected value " + TEST_INSTANCE[i], TEST_INSTANCE[i], parsedDenseInstance[i]);
+					assertEquals(TEST_INSTANCE[i], parsedDenseInstance[i], "Attribute value at position " + i + " " + parsedDenseInstance[i] + " is not equal to the expected value " + TEST_INSTANCE[i]);
 				}
 			}
 		}
-		assertTrue("Numeric attribute is not a Number object but of type " + parsedDenseInstance[0].getClass().getName(), parsedDenseInstance[0] instanceof Number);
-		assertNotNull("No instance label for dense instance " + parsedInstance, ((List<?>) parsedInstance).get(1));
+		assertTrue(parsedDenseInstance[0] instanceof Number, "Numeric attribute is not a Number object but of type " + parsedDenseInstance[0].getClass().getName());
+		assertNotNull(((List<?>) parsedInstance).get(1), "No instance label for dense instance " + parsedInstance);
 	}
 
 	@Test
 	public void testParseSparseInstance() {
 		String testInstanceLine = generateSparseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE);
 		List<Object> parsedInstance = ArffDatasetAdapter.parseInstance(true, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
-		assertTrue("The returned instance is not in the expected sparse instance format", parsedInstance.get(0) instanceof Map);
+		assertTrue(parsedInstance.get(0) instanceof Map, "The returned instance is not in the expected sparse instance format");
 		@SuppressWarnings("unchecked")
 		Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance.get(0);
 		for (int i = 0; i < TEST_INSTANCE.length; i++) {
@@ -162,24 +160,24 @@ public class ArffDatasetAdapterTest {
 				continue;
 			}
 			if (parsedSparseInstance.get(i) instanceof double[][]) {
-				assertTrue("Attribute value at position " + i + " " + parsedSparseInstance.get(i) + " is not equal to the expected value ", Arrays.deepEquals((double[][]) parsedSparseInstance.get(i), (double[][]) TEST_INSTANCE[i]));
+				assertTrue(Arrays.deepEquals((double[][]) parsedSparseInstance.get(i), (double[][]) TEST_INSTANCE[i]), "Attribute value at position " + i + " " + parsedSparseInstance.get(i) + " is not equal to the expected value ");
 			} else if (parsedSparseInstance.get(i) instanceof double[][][]) {
-				assertTrue("Attribute value at position " + i + " " + parsedSparseInstance.get(i) + " is not equal to the expected value ", Arrays.deepEquals((double[][][]) parsedSparseInstance.get(i), (double[][][]) TEST_INSTANCE[i]));
+				assertTrue(Arrays.deepEquals((double[][][]) parsedSparseInstance.get(i), (double[][][]) TEST_INSTANCE[i]), "Attribute value at position " + i + " " + parsedSparseInstance.get(i) + " is not equal to the expected value ");
 			} else {
-				assertEquals("Attribute value at position " + i + " " + parsedSparseInstance.get(i) + " is not equal to the expected value " + TEST_INSTANCE[i], TEST_INSTANCE[i], parsedSparseInstance.get(i));
+				assertEquals(TEST_INSTANCE[i], parsedSparseInstance.get(i), "Attribute value at position " + i + " " + parsedSparseInstance.get(i) + " is not equal to the expected value " + TEST_INSTANCE[i]);
 			}
 		}
-		assertEquals("Target has not been parsed correctly.", TEST_INSTANCE[CLASS_INDEX], parsedInstance.get(1));
+		assertEquals(TEST_INSTANCE[CLASS_INDEX], parsedInstance.get(1), "Target has not been parsed correctly.");
 
-		assertTrue("Numeric attribute is not a Number object but of type " + parsedSparseInstance.get(0).getClass().getName(), parsedSparseInstance.get(0) instanceof Number);
-		assertNotNull("No instance label for sparse instance " + parsedSparseInstance, parsedInstance.get(1));
+		assertTrue(parsedSparseInstance.get(0) instanceof Number, "Numeric attribute is not a Number object but of type " + parsedSparseInstance.get(0).getClass().getName());
+		assertNotNull(parsedInstance.get(1), "No instance label for sparse instance " + parsedSparseInstance);
 	}
 
 	@Test
 	public void testThatMissingNumericValuesAreNullInDenseInstances() {
 		String testInstanceLine = generateDenseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE_WITH_MISSING_NUMERIC_VAL);
 		Object parsedInstance = ArffDatasetAdapter.parseInstance(false, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
-		assertTrue("The returned instance is not in the expected dense instance format", parsedInstance instanceof List<?>);
+		assertTrue(parsedInstance instanceof List<?>, "The returned instance is not in the expected dense instance format");
 		Object[] parsedDenseInstance = (Object[]) ((List<?>) parsedInstance).get(0);
 		Object label = ((List<?>) parsedInstance).get(1);
 		assertNull(parsedDenseInstance[0]);
@@ -190,7 +188,7 @@ public class ArffDatasetAdapterTest {
 	public void testThatMissingCategoricalValuesAreNullInDenseInstances() {
 		String testInstanceLine = generateDenseInstanceString(TEST_ATTRIBUTES, TEST_INSTANCE_WITH_MISSING_CATEGORICAL_VAL);
 		Object parsedInstance = ArffDatasetAdapter.parseInstance(false, TEST_ATTRIBUTES, CLASS_INDEX, testInstanceLine);
-		assertTrue("The returned instance is not in the expected dense instance format", parsedInstance instanceof List<?>);
+		assertTrue(parsedInstance instanceof List<?>, "The returned instance is not in the expected dense instance format");
 		Object[] parsedDenseInstance = (Object[]) ((List<?>) parsedInstance).get(0);
 		Object label = ((List<?>) parsedInstance).get(1);
 		assertNull(label);
@@ -240,8 +238,8 @@ public class ArffDatasetAdapterTest {
 	@Test
 	public void testSplitDentInstanceLine() {
 		String testLine = "a,\"a\",\"a,a\",'a,b',a,a'a,a\"a,'a'";
-		System.out.println(testLine);
-		System.out.println(Arrays.toString(ArffDatasetAdapter.splitDenseInstanceLine(testLine)));
+		String[] values = ArffDatasetAdapter.splitDenseInstanceLine(testLine);
+		assertEquals(8, values.length, "The number of expected entries does not match.");
 	}
 
 	@Test

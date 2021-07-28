@@ -331,7 +331,6 @@ public class ComponentUtil {
 
 		/* build cartesian product */
 		Collection<List<Object>> combos = SetUtil.cartesianProduct(params);
-		System.out.println(combos.size() + " combos.");
 		List<IComponentInstance> instances = new ArrayList<>();
 		combos.forEach(c -> {
 			Map<String, String> paramMap = new HashMap<>();
@@ -346,7 +345,7 @@ public class ComponentUtil {
 	public static ComponentInstance getRandomParametrization(final IComponentInstance componentInstance, final Random rand) {
 		ComponentInstance randomParametrization = getRandomParameterizationOfComponent(componentInstance.getComponent(), rand);
 		componentInstance.getSatisfactionOfRequiredInterfaces().entrySet()
-		.forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), Arrays.asList(getRandomParametrization(x.getValue().iterator().next(), rand))));
+				.forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), Arrays.asList(getRandomParametrization(x.getValue().iterator().next(), rand))));
 		return randomParametrization;
 	}
 
