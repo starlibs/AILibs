@@ -15,12 +15,16 @@ import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.openml.apiconnector.xml.Task;
 import org.openml.apiconnector.xml.Task.Input;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
 import ai.libs.jaicore.ml.core.dataset.Dataset;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 
 public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset<ILabeledInstance>> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(OpenMLDatasetReader.class);
 
 	private static final OpenmlConnector connector = new OpenmlConnector();
 
@@ -33,8 +37,10 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 			ILabeledDataset<ILabeledInstance> dataset = deserializeDataset(openMLId, dsd.getDefault_target_attribute());
 			if (dsd.getIgnore_attribute() != null) {
 				for (String columnNameToIgnore : dsd.getIgnore_attribute()) {
-					if (dataset.getInstanceSchema().getAttributeList().stream().filter(x -> x.getName().equals(columnNameToIgnore)).findAny().isPresent()) {
+					if (dataset.getListOfAttributes().stream().anyMatch(a -> a.getName().equals(columnNameToIgnore))) {
 						dataset.removeColumn(columnNameToIgnore);
+					} else {
+						LOGGER.warn("Ignored attribute \"{}\" is not a column of the dataset. Ignoring to ignore it!", columnNameToIgnore);
 					}
 				}
 			}
@@ -45,7 +51,6 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 			}
 			return dataset;
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new DatasetDeserializationFailedException("Could not deserialize OpenML dataset with id " + openMLId, e);
 		}
 	}
@@ -113,5 +118,4 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 		}
 		return SplitterUtil.getRealizationOfSplitSpecification(dataset, Arrays.asList(fitFold, predictFold));
 	}
-
 }

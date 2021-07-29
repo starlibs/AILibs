@@ -13,6 +13,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.IRe
 public class GmeansSamplingFactory<I extends IClusterableInstance, D extends ILabeledDataset<I>> extends ASampleAlgorithmFactory<D, GmeansSampling<I, D>> implements IRerunnableSamplingAlgorithmFactory<D, GmeansSampling<I, D>> {
 
 	private GmeansSampling<I, D> previousRun;
+	private int maxIterationsInnerLoop = 100;
 	private long clusterSeed = System.currentTimeMillis();
 	private DistanceMeasure distanceMeassure = new ManhattanDistance();
 
@@ -22,8 +23,7 @@ public class GmeansSamplingFactory<I extends IClusterableInstance, D extends ILa
 	}
 
 	/**
-	 * Set the seed the clustering will use for initialization. Default is without a
-	 * fix seed and the system time instead.
+	 * Set the seed the clustering will use for initialization. Default is without a fix seed and the system time instead.
 	 *
 	 * @param clusterSeed
 	 */
@@ -32,8 +32,7 @@ public class GmeansSamplingFactory<I extends IClusterableInstance, D extends ILa
 	}
 
 	/**
-	 * Set the distance measure for the clustering. Default is the Manhattan
-	 * distance.
+	 * Set the distance measure for the clustering. Default is the Manhattan distance.
 	 *
 	 * @param distanceMeassure
 	 */
@@ -41,9 +40,17 @@ public class GmeansSamplingFactory<I extends IClusterableInstance, D extends ILa
 		this.distanceMeassure = distanceMeassure;
 	}
 
+	public int getMaxIterationsInnerLoop() {
+		return this.maxIterationsInnerLoop;
+	}
+
+	public void setMaxIterationsInnerLoop(final int maxIterationsInnerLoop) {
+		this.maxIterationsInnerLoop = maxIterationsInnerLoop;
+	}
+
 	@Override
 	public GmeansSampling<I, D> getAlgorithm(final int sampleSize, final D inputDataset, final Random random) {
-		GmeansSampling<I, D> gmeansSampling = new GmeansSampling<>(this.clusterSeed, inputDataset);
+		GmeansSampling<I, D> gmeansSampling = new GmeansSampling<>(this.maxIterationsInnerLoop, this.clusterSeed, inputDataset);
 		gmeansSampling.setSampleSize(sampleSize);
 		gmeansSampling.setDistanceMeassure(this.distanceMeassure);
 		if (this.previousRun != null && this.previousRun.getClusterResults() != null) {

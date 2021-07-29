@@ -16,6 +16,9 @@ import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.api4.java.common.control.ILoggingCustomizable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of Gmeans based on Helen Beierlings implementation of GMeans(https://github.com/helebeen/AILibs/blob/master/JAICore/jaicore-modifiedISAC/src/main/java/jaicore/modifiedISAC/ModifiedISACgMeans.java).<br>
@@ -25,11 +28,14 @@ import org.apache.commons.math3.random.RandomGenerator;
  *
  * @author Helen Beierling
  * @author jnowack
+ * @author Felix Mohr
  *
  * @param <C>
  *            Points to cluster.
  */
-public class GMeans<C extends Clusterable> {
+public class GMeans<C extends Clusterable> implements ILoggingCustomizable {
+
+	private Logger logger = LoggerFactory.getLogger(GMeans.class);
 
 	private List<double[]> center = new ArrayList<>();
 
@@ -45,6 +51,8 @@ public class GMeans<C extends Clusterable> {
 
 	private RandomGenerator randomGenerator;
 
+	private final int maxIterationsInInnerLoop;
+
 	/**
 	 * Initializes a basic cluster for the given Point using Mannhatten distance and seed=1
 	 *
@@ -52,7 +60,7 @@ public class GMeans<C extends Clusterable> {
 	 *            Points which should be clustered
 	 */
 	public GMeans(final Collection<C> toClusterPoints) {
-		this(toClusterPoints, new ManhattanDistance(), 1);
+		this(toClusterPoints, new ManhattanDistance(), -1, 1);
 	}
 
 	/**
@@ -63,11 +71,12 @@ public class GMeans<C extends Clusterable> {
 	 * @param distanceMeasure
 	 * @param seed
 	 */
-	public GMeans(final Collection<C> toClusterPoints, final DistanceMeasure distanceMeasure, final long seed) {
+	public GMeans(final Collection<C> toClusterPoints, final DistanceMeasure distanceMeasure, final int maxIterationsInInnerLoop, final long seed) {
 		this.points = new ArrayList<>(toClusterPoints);
 		this.distanceMeasure = distanceMeasure;
 		this.gmeansCluster = new ArrayList<>();
 		this.randomGenerator = new JDKRandomGenerator();
+		this.maxIterationsInInnerLoop = maxIterationsInInnerLoop;
 		this.randomGenerator.setSeed(seed);
 	}
 
@@ -104,11 +113,9 @@ public class GMeans<C extends Clusterable> {
 			List<C> loopPoints = this.currentPoints.get(positionOfCenter.get(i));
 
 			// makes a new instance with of kmeans with S_i as base
-			KMeansPlusPlusClusterer<C> loopCluster = new KMeansPlusPlusClusterer<>(2, -1, this.distanceMeasure, this.randomGenerator);
+			KMeansPlusPlusClusterer<C> loopCluster = new KMeansPlusPlusClusterer<>(2, this.maxIterationsInInnerLoop, this.distanceMeasure, this.randomGenerator);
 
-			// clusters S_I into to cluster intermediate points is a HashMap of center with
-			// an ArrayList of thier
-			// corresponding points
+			/* clusters S_I into to cluster intermediate points is a HashMap of center with an ArrayList of their corresponding points */
 			List<double[]> intermediateCenter = new ArrayList<>(2);
 			if (loopPoints.size() < 2) {
 				break;
@@ -124,43 +131,40 @@ public class GMeans<C extends Clusterable> {
 			// the difference between the two new Center
 			double[] v = this.difference(intermediateCenter.get(0), intermediateCenter.get(1));
 
+			/* w is calculated as the summed squares of the entries of the difference between the center if the entry is NaN it is ignored in the sum */
 			double w = 0;
-			// w is calculated as the summed squares of the entries of the difference
-			// between the center
-			// if the entry is NaN it is ignored in the sum
+			boolean allNan = true;
 			for (int l = 0; l < v.length; l++) {
 				if (!Double.isNaN(v[l])) {
 					w += Math.pow(v[l], 2);
+					allNan = false;
 				}
 			}
-
-			if (w == 0) {
+			if (allNan) {
 				throw new IllegalStateException("All entries in v are NaN, cannot compute w!");
 			}
 
+			/*	All points are projected onto a points by multiplying every entry of point with the corresponding entry of v and divide by the w.
+				For every point the all entrys modified that way are than summed.
+				if the entry of v is Nan or the entry of the point the entry is ignored
+			 */
 			double[] y = new double[loopPoints.size()];
-			// All points are projected onto a points by multiplying every entry of point
-			// with the corresponding
-			// entry of v and divide by the w.
-			// For every point the all entrys modified that way are than summed.
-			// if the entry of v is Nan or the entry of the point the entry is ignored
 			for (int r = 0; r < loopPoints.size(); r++) {
 				for (int p = 0; p < loopPoints.get(r).getPoint().length; p++) {
-					if (!Double.isNaN(loopPoints.get(r).getPoint()[p]) && !Double.isNaN(v[p])) {
+					if (Double.isNaN(loopPoints.get(r).getPoint()[p])) {
+						this.logger.warn("Found NaN clustering reference point entry!");
+					} else if (Double.isNaN(v[p])) {
+						this.logger.warn("Found NaN cluster distance entry!");
+					} else {
 						y[r] += (v[p] * loopPoints.get(r).getPoint()[p]) / w;
-						// TODO soll ich wenn v an der stelle NaN ist einfach so tuen als wäre es
-						// 1 oder nichts machen
 					}
 				}
 			}
-			// if the Anderson Darling test is failed the the center C_i is replaced by C`_1
-			// and S_i is replaced by the
-			// points of C`_1.
-			// k is raised by 1.
-			// C_k is replaced by C`_2 and the points of C_k S_k are replaced by the one
-			// from C`_2 S`_2
-			// if the test is passed i is raised.
 
+			/*
+			 * if the Anderson Darling test is failed the the center C_i is replaced by C`_1  and S_i is replaced by the points of C`_1.
+			 * k is raised by 1. C_k is replaced by C`_2 and the points of C_k S_k are replaced by the one from C`_2 S`_2 if the test is passed i is raised.
+			 */
 			if (!this.andersonDarlingTest(y)) {
 				this.currentPoints.remove(positionOfCenter.get(i));
 				this.currentPoints.put(intermediateCenter.get(0), this.intermediatePoints.get(intermediateCenter.get(0)));
@@ -321,5 +325,15 @@ public class GMeans<C extends Clusterable> {
 
 	public List<C> getPoints() {
 		return this.points;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }
