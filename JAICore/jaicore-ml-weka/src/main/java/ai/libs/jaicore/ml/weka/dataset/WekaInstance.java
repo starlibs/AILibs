@@ -45,8 +45,8 @@ public class WekaInstance extends ElementDecorator<Instance> implements IWekaIns
 		double val = inst.value(pos);
 		if (inst.attribute(pos).isNumeric()) {
 			return val;
-		}else {
-			return (int)val; // map categorical values to ints instead of doubles
+		} else {
+			return (int) val; // map categorical values to ints instead of doubles
 		}
 	}
 
