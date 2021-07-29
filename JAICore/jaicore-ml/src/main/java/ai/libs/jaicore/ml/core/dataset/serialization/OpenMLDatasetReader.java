@@ -33,11 +33,15 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 			ILabeledDataset<ILabeledInstance> dataset = deserializeDataset(openMLId, dsd.getDefault_target_attribute());
 			if (dsd.getIgnore_attribute() != null) {
 				for (String columnNameToIgnore : dsd.getIgnore_attribute()) {
-					dataset.removeColumn(columnNameToIgnore);
+					if (dataset.getInstanceSchema().getAttributeList().stream().filter(x -> x.getName().equals(columnNameToIgnore)).findAny().isPresent()) {
+						dataset.removeColumn(columnNameToIgnore);
+					}
 				}
 			}
 			if (dsd.getRow_id_attribute() != null) {
-				dataset.removeColumn(dsd.getRow_id_attribute());
+				if (dataset.getInstanceSchema().getAttributeList().stream().filter(x -> x.getName().equals(dsd.getRow_id_attribute())).findAny().isPresent()) {
+					dataset.removeColumn(dsd.getRow_id_attribute());
+				}
 			}
 			return dataset;
 		} catch (Exception e) {
