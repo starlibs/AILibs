@@ -37,12 +37,14 @@ public class MLPlanScikitLearnClassificationResultDeliveryTester extends AutoMLA
 			throw new AlgorithmCreationException(e);
 		}
 		assertTrue(baseTime < 60, "The majority classifier already needs too much time: " + baseTime);
-		Timeout totalTimeout = new Timeout(Math.min(160, 10 + (data.size() + data.getNumAttributes()) / 1000 + 15 * baseTime), TimeUnit.SECONDS);
+		Timeout totalTimeout = new Timeout(Math.min(240, 10 + (data.size() + data.getNumAttributes()) / 1000 + 15 * baseTime), TimeUnit.SECONDS);
 		this.logger.debug("Majority classifier evaluation took {}s. Total timeout will be set to {}", baseTime, totalTimeout);
 		builder.withTimeOut(totalTimeout); // time out at most 100 seconds
 		builder.withCandidateEvaluationTimeOut(new Timeout(totalTimeout.seconds() / 2, TimeUnit.SECONDS));
 		builder.withNodeEvaluationTimeOut(new Timeout(totalTimeout.seconds(), TimeUnit.SECONDS));
-
+		builder.withMCCVBasedCandidateEvaluationInSearchPhase(3, .7);
+		builder.withMCCVBasedCandidateEvaluationInSelectionPhase(3, .7);
+		
 		MLPlan mlplan = builder.withDataset(data).build();
 		this.logger.info("Built of ML-Plan complete");
 		return mlplan;

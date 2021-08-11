@@ -3,6 +3,7 @@ package ai.libs.jaicore.ml.scikitwrapper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.concurrent.Semaphore;
 
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
@@ -36,33 +37,63 @@ public abstract class AProcessListener implements IProcessListener, ILoggingCust
 	@Override
 	public void listenTo(final Process process) throws IOException, InterruptedException {
 		this.logger.info("Starting to listen to process {}", process);
-		try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-			// While process is alive the output- and error stream is output.
-			while (process.isAlive()) {
-				if (Thread.interrupted()) { // reset flag since we will throw an exception now
-					this.logger.info("Detected interrupt on process execution.");
-					if (this.listenForPIDFromProcess && this.processIDObtainedFromListening > 0) {
-						ProcessUtil.killProcess(this.processIDObtainedFromListening);
-					} else {
-						ProcessUtil.killProcess(process);
+
+		Semaphore sem = new Semaphore(0);
+
+		Runnable run = new Runnable() {
+			public void run() {
+				try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream())); BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+					// While process is alive the output- and error stream is output.
+					while (process.isAlive()) {
+						if (Thread.interrupted()) { // reset flag since we will throw an exception now
+							throw new InterruptedException("Process execution was interrupted.");
+						}
+						String line;
+						while (checkReady(inputReader) && (line = inputReader.readLine()) != null) {
+							if (Thread.interrupted()) {
+								throw new InterruptedException();
+							}
+							handleProcessIDLine(line);
+							if (line.contains("import imp") || line.contains("imp module")) {
+								continue;
+							}
+							handleInput(line);
+						}
+						while (checkReady(errorReader) && (line = errorReader.readLine()) != null) {
+							if (Thread.interrupted()) {
+								throw new InterruptedException();
+							}
+							if (line.contains("import imp") || line.contains("imp module")) {
+								continue;
+							}
+							handleError(line);
+						}
 					}
-					throw new InterruptedException("Process execution was interrupted.");
-				}
-				String line;
-				while (this.checkReady(inputReader) && (line = inputReader.readLine()) != null) {
-					this.handleProcessIDLine(line);
-					if (line.contains("import imp") || line.contains("imp module")) {
-						continue;
-					}
-					this.handleInput(line);
-				}
-				while (this.checkReady(errorReader) && (line = errorReader.readLine()) != null) {
-					if (line.contains("import imp") || line.contains("imp module")) {
-						continue;
-					}
-					this.handleError(line);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} finally {
+					sem.release();
 				}
 			}
+		};
+		Thread t = new Thread(run);
+		t.start();
+
+		try {
+			sem.acquire();
+		} catch (InterruptedException e) {
+			logger.info("Detected interrupt on process execution.");
+			if (listenForPIDFromProcess && processIDObtainedFromListening > 0) {
+				ProcessUtil.killProcess(processIDObtainedFromListening);
+			} else {
+				ProcessUtil.killProcess(process);
+			}
+			t.interrupt();
+			logger.info("Killed process, now wait until listener thread returns.");
+			t.join();
+			throw e;
 		}
 	}
 
