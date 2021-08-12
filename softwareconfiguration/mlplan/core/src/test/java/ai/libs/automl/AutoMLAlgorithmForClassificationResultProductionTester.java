@@ -50,7 +50,7 @@ public abstract class AutoMLAlgorithmForClassificationResultProductionTester ext
 			problemSets.add(new OpenMLProblemSet(60)); // waveform-5000
 			problemSets.add(new OpenMLProblemSet(61)); // iris
 			// problemSets.add(new OpenMLProblemSet(149)); // CovP okElec
-			// problemSets.add(new OpenMLProblemSet(155)); // pokerhand
+			problemSets.add(new OpenMLProblemSet(155)); // pokerhand
 			problemSets.add(new OpenMLProblemSet(182)); // satimage
 			problemSets.add(new OpenMLProblemSet(273)); // IMDB drama
 			problemSets.add(new OpenMLProblemSet(554)); // mnist
@@ -64,6 +64,7 @@ public abstract class AutoMLAlgorithmForClassificationResultProductionTester ext
 			problemSets.add(new OpenMLProblemSet(1457)); // amazon
 			problemSets.add(new OpenMLProblemSet(1501)); // semeion
 			// problemSets.add(new OpenMLProblemSet(1590)); // adult # THIS ARFF CANNOT BE PARSED BY THE PYTHON ARFF LOADERS
+			problemSets.add(new OpenMLProblemSet(1590)); // adult # THIS ARFF CANNOT BE PARSED BY THE PYTHON ARFF LOADERS
 			problemSets.add(new OpenMLProblemSet(4136)); // dexter
 			problemSets.add(new OpenMLProblemSet(4137)); // dorothea
 			problemSets.add(new OpenMLProblemSet(40668)); // connect-4
@@ -73,7 +74,6 @@ public abstract class AutoMLAlgorithmForClassificationResultProductionTester ext
 			// problemSets.add(new OpenMLProblemSet(41065)); // mnist-rotate
 			problemSets.add(new OpenMLProblemSet(41066)); // secom
 			problemSets.add(new OpenMLProblemSet(41705)); // ASP-POTASSCO-classification # THIS ARFF CANNOT BE PARSED BY THE PYTHON ARFF LOADERS
-
 			return problemSets.stream().map(Arguments::of);
 		} catch (Exception e) {
 			throw new DatasetDeserializationFailedException(e);

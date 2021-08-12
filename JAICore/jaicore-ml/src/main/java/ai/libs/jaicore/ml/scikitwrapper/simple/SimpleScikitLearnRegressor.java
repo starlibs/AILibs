@@ -135,9 +135,12 @@ public class SimpleScikitLearnRegressor extends ASupervisedLearner<ILabeledInsta
 				throw new PredictionException("Could not execute python classifier. Exited with exit code " + exitValue);
 			}
 		} catch (InterruptedException e) {
+			this.logger.info("SimpleScikitLearnRegressor for pipeline {} got interrupted.", this.constructorCall);
 			if (p != null) {
 				try {
+					this.logger.info("Attempt to kill the spawned process for executing the pipeline.");
 					ProcessUtil.killProcess(p);
+					this.logger.info("Process killed via ProcessUtil.");
 				} catch (IOException e1) {
 					throw new PredictionException("Could not kill process spawned for executing the python classifier", e1);
 				}
