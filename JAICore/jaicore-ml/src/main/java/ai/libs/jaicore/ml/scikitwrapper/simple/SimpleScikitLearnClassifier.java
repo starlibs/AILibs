@@ -58,7 +58,7 @@ public class SimpleScikitLearnClassifier extends ASingleLabelClassifier implemen
 		this.imports = imports;
 	}
 
-	private synchronized static File getTempDir() throws IOException {
+	private static synchronized File getTempDir() throws IOException {
 		if (tempDir == null) {
 			tempDir = Files.createTempDirectory("ailibs-dumps").toFile();
 			tempDir.deleteOnExit();

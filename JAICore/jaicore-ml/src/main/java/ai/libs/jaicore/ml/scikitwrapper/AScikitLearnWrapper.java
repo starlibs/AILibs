@@ -367,7 +367,6 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 				this.logger.info("Starting process {}", call.substring(1, call.length() - 1));
 			}
 
-			System.out.println(Arrays.toString(commandLineParameters));
 			ProcessBuilder processBuilder = new ProcessBuilder(commandLineParameters).directory(this.scikitLearnWrapperConfig.getTempFolder());
 			Process process = processBuilder.start();
 			this.logger.debug("Started process with PID: {}. Listener is {}", ProcessUtil.getPID(process), listener);
