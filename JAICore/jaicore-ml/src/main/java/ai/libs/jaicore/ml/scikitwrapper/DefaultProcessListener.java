@@ -50,6 +50,7 @@ public class DefaultProcessListener extends AProcessListener implements ILogging
 	@Override
 	public void handleInput(final String input) throws IOException, InterruptedException {
 		this.defaultSB.append(input + "\n");
+		System.out.println("SKL-Wrapper: " + System.currentTimeMillis() + " " + input);
 		this.logger.info(">>> {}", input);
 	}
 

@@ -22,7 +22,6 @@ public abstract class DBTest extends ATest {
 	public static final String VAR_DB_PASS = "AILIBS_JAICORE_DB_DEFAULT_PASS";
 	public static final String VAR_DB_DATABASE = "AILIBS_JAICORE_DB_DEFAULT_DATABASE";
 
-
 	public static final String VAR_DB_REST_HOST = "AILIBS_JAICORE_DB_REST_DB_HOST";
 	public static final String VAR_DB_REST_TOKEN = "AILIBS_JAICORE_DB_REST_DB_TOKEN"; // this is for rest-based access
 
@@ -31,16 +30,14 @@ public abstract class DBTest extends ATest {
 
 	protected IDatabaseAdapter reportConfigAndGetAdapter(final Object config) {
 		if (config instanceof IDatabaseConfig) {
-			IDatabaseConfig c = (IDatabaseConfig )config;
+			IDatabaseConfig c = (IDatabaseConfig) config;
 			this.logger.info("Carry out tests with direct MySQL connection to {} on database {} with user {}.", c.getDBHost(), c.getDBDatabaseName(), c.getDBUsername());
 			return DatabaseAdapterFactory.get(c);
-		}
-		else if (config instanceof IRestDatabaseConfig) {
-			IRestDatabaseConfig c = (IRestDatabaseConfig)config;
+		} else if (config instanceof IRestDatabaseConfig) {
+			IRestDatabaseConfig c = (IRestDatabaseConfig) config;
 			this.logger.info("Carry out tests with REST connection to {} using token {}.", c.getHost(), c.getToken());
 			return DatabaseAdapterFactory.get(c);
-		}
-		else {
+		} else {
 			throw new IllegalArgumentException("Cannot work with configs of type " + config.getClass());
 		}
 	}

@@ -216,7 +216,6 @@ class ArffData:
             try:
                 if dense_mode:
                     data, meta = scipy_arff.loadarff(file)
-                    print(meta)
                     df_arff = pandas.DataFrame(data)
                 else:
                     arff_parsed = arff.load(file, return_type=arff.LOD, encode_nominal=True)

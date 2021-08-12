@@ -26,8 +26,8 @@ public class MLPlan4ScikitLearnResultWithMinimumQualityTest extends MLPlanResult
 	}
 
 	public static Stream<Arguments> getBenchmark() {
-		return Stream.of(Arguments.of("car", 40975, 0.05), //
+		return Stream.of(Arguments.of("car", 40975, 0.12), //
 				Arguments.of("tic-tac-toe", 50, 0.05), //
-				Arguments.of("credit-g", 31, 0.3));
+				Arguments.of("credit-g", 31, 0.35));
 	}
 }
