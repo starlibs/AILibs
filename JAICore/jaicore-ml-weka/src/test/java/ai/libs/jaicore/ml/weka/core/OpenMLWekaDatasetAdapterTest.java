@@ -27,7 +27,7 @@ public class OpenMLWekaDatasetAdapterTest extends ATest {
 	@MethodSource("getDatasets")
 	public void testCastabilityToWekaInstances(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException {
 		System.gc();
-		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(problemSet.getId());
+		ILabeledDataset<?> ds = new OpenMLDatasetReader().deserializeDataset(problemSet.getId());
 		WekaInstances inst = new WekaInstances(ds);
 		assertEquals(ds.size(), inst.size());
 		assertEquals(ds.getNumAttributes(), inst.getNumAttributes());

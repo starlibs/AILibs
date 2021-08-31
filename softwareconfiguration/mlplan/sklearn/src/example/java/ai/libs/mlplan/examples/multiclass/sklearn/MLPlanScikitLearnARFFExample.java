@@ -31,7 +31,7 @@ public class MLPlanScikitLearnARFFExample {
 		/* load data for segment dataset and create a train-test-split */
 		long start = System.currentTimeMillis();
 		File file = new File("testrsc/waveform.arff");
-		ILabeledDataset<ILabeledInstance> dataset = ArffDatasetAdapter.readDataset(file);
+		ILabeledDataset<ILabeledInstance> dataset = new ArffDatasetAdapter().readDataset(file);
 
 		LOGGER.info("Data read. Time to create dataset object was {}ms", System.currentTimeMillis() - start);
 		List<ILabeledDataset<ILabeledInstance>> split = RandomHoldoutSplitter.createSplit(dataset, 42, .7);

@@ -35,7 +35,7 @@ public class MLPlanGraphVisualizationExample {
 	public static void main(final String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
-		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(40709);
+		ILabeledDataset<?> ds = new OpenMLDatasetReader().deserializeDataset(40709);
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(1), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */

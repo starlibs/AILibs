@@ -72,7 +72,7 @@ public class StatisticsReportTest {
 
 	private void testReportOutput(final File expectedOutput, final int datasetID, final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner)
 			throws IOException, SplitFailedException, InterruptedException, DatasetDeserializationFailedException, LearnerExecutionFailedException {
-		List<ILabeledDataset<?>> split = SplitterUtil.getSimpleTrainTestSplit(OpenMLDatasetReader.deserializeDataset(datasetID), 0, .7);
+		List<ILabeledDataset<?>> split = SplitterUtil.getSimpleTrainTestSplit(new OpenMLDatasetReader().deserializeDataset(datasetID), 0, .7);
 		ILearnerRunReport runReport = new SupervisedLearnerExecutor().execute(learner, split.get(0), split.get(1));
 		StatisticsReport analysisReport = new StatisticsReport(new StatisticsListener(), ci, runReport);
 		ObjectNode expected = (ObjectNode) mapper.readTree(expectedOutput);

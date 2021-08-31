@@ -43,7 +43,7 @@ public class MLPlanEvaluationListenerExample {
 
 	public static void main(final String[] args) throws Exception {
 
-		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(60);
+		ILabeledDataset<?> ds = new OpenMLDatasetReader().deserializeDataset(60);
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan */

@@ -35,7 +35,7 @@ public class MLPlanScikitLearnOpenMLExample {
 
 	public static void main(final String[] args) throws Exception {
 
-		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(3);
+		ILabeledDataset<?> ds = new OpenMLDatasetReader().deserializeDataset(3);
 		LOGGER.info("Loaded dataset {}. Now creating a 70/30% train/test split.", ds.getRelationName());
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 

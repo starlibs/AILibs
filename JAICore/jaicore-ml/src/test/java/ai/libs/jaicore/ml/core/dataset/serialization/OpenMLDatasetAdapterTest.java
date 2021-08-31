@@ -32,6 +32,7 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.dataset.DatasetTestUtil;
@@ -39,9 +40,11 @@ import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 import ai.libs.jaicore.test.MediumTest;
 
-public class OpenMLDatasetAdapterTest {
+public class OpenMLDatasetAdapterTest extends ATest {
 
 	public static final File TMP_FOLDER = new File("testrsc/tmp/openmlreader");
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER + "." + OpenMLDatasetAdapterTest.class);
 
 	protected Logger logger = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER);
 
@@ -51,11 +54,20 @@ public class OpenMLDatasetAdapterTest {
 	private static Map<Integer, Integer> numFeatures = new HashMap<>();
 	private static Map<Integer, Integer> numClasses = new HashMap<>();
 
+	private OpenMLDatasetReader reader = new OpenMLDatasetReader();
+
+	public OpenMLDatasetAdapterTest() {
+		this.reader.setLoggerName(this.getLoggerName() + ".openmlreader");
+	}
+
 	private static OpenMLProblemSet register(final int id) throws Exception {
 
 		/* compute the features (modulo the ignored ones) */
+		LOGGER.debug("Retrieving meta-data for dataset {}", id);
 		DataSetDescription dsd = con.dataGet(id);
+		LOGGER.debug("Done. Retrieving feature names for dataset {}", id);
 		List<String> featureNames = Arrays.stream(con.dataFeatures(id).getFeatures()).map(Feature::getName).collect(Collectors.toList());
+		LOGGER.debug("Done. Found {} features.", featureNames.size());
 		String[] namesOfIgnoredAttributes = dsd.getIgnore_attribute();
 		if (namesOfIgnoredAttributes != null) {
 			for (String f : namesOfIgnoredAttributes) {
@@ -204,7 +216,7 @@ public class OpenMLDatasetAdapterTest {
 		File file = new File(TMP_FOLDER + File.separator + "openmlid-" + id);
 		if (!file.exists()) {
 			this.logger.info("Reading in dataset with id {}", id);
-			ILabeledDataset<ILabeledInstance> data = OpenMLDatasetReader.deserializeDataset(id);
+			ILabeledDataset<ILabeledInstance> data = this.reader.deserializeDataset(id);
 			if (checkProperties) {
 				this.logger.info("Dataset read, now checking general properties.");
 				assertEquals("Incorrect number of instances.", expectedInstances, data.size());
@@ -291,9 +303,10 @@ public class OpenMLDatasetAdapterTest {
 		this.logger.debug("Reading in dataset.", outFile);
 		ILabeledDataset<?> ds = dataset;
 		this.logger.debug("Serializing dataset.");
-		ArffDatasetAdapter.serializeDataset(outFile, ds);
+		ArffDatasetAdapter adapter = new ArffDatasetAdapter();
+		adapter.serializeDataset(outFile, ds);
 		this.logger.debug("Re-reading dataset from tmp file {}", outFile);
-		ILabeledDataset<?> reread = ArffDatasetAdapter.readDataset(outFile);
+		ILabeledDataset<?> reread = adapter.readDataset(outFile);
 		assertNotNull("Could not read in dataset again after writing", reread);
 		assertEquals("Datasets have different sizes!", ds.size(), reread.size());
 		int n = reread.size();
@@ -307,6 +320,7 @@ public class OpenMLDatasetAdapterTest {
 
 	private void testReconstructibility(final OpenMLProblemSet problemSet) throws DatasetDeserializationFailedException, InterruptedException, ReconstructionException, ClassNotFoundException, IOException {
 		this.assureThatCorrectDatasetIsLoaded(problemSet, true);
+		long timeStart = System.currentTimeMillis();
 		Objects.requireNonNull(dataset);
 		if (!(dataset instanceof IReconstructible)) {
 			fail("Dataset not reconstructible");
@@ -317,9 +331,13 @@ public class OpenMLDatasetAdapterTest {
 		this.logger.info("Creating reconstruction plan.");
 		IReconstructionPlan plan = rDataset.getConstructionPlan();
 		this.logger.info("Recovering object from reconstruction plan.");
+
 		ILabeledDataset<?> reproducedDataset = (ILabeledDataset<?>) plan.reconstructObject();
 		this.logger.info("Testing equalness of the reproduced object");
+		long timeEnd = System.currentTimeMillis();
+		long reproductionTime = timeEnd - timeStart;
 		this.testReproduction(dataset, reproducedDataset);
+		this.logger.info("Reproduction took {}ms", reproductionTime);
 	}
 
 	private void testReproduction(final ILabeledDataset<?> expected, final ILabeledDataset<?> actual) {

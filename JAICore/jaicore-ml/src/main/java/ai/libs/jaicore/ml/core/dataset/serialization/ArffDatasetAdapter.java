@@ -30,6 +30,7 @@ import org.api4.java.ai.ml.core.dataset.serialization.IDatasetDeserializer;
 import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,9 +52,9 @@ import ai.libs.jaicore.ml.pdm.dataset.SensorTimeSeriesAttribute;
 /**
  * Handles dataset files in the arff format {@link https://waikato.github.io/weka-wiki/formats_and_processing/arff/}
  */
-public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<ILabeledInstance>> {
+public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<ILabeledInstance>>, ILoggingCustomizable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ArffDatasetAdapter.class);
+	private Logger logger = LoggerFactory.getLogger(ArffDatasetAdapter.class);
 
 	public static final String V_MISSING_VALUE = "?";
 	public static final String K_RELATION_NAME = "relationName";
@@ -88,7 +89,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			String line;
 			while ((line = br.readLine()) != null) {
 				if (line.toLowerCase().startsWith(EArffItem.ATTRIBUTE.getValue().toLowerCase())) {
-					IAttribute att = parseAttribute(line);
+					IAttribute att = this.parseAttribute(line);
 					if (att.getName().equals(nameOfAttribute)) {
 						return att;
 					}
@@ -108,7 +109,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			String line;
 			while ((line = br.readLine()) != null) {
 				if (line.toLowerCase().startsWith(EArffItem.ATTRIBUTE.getValue().toLowerCase())) {
-					IAttribute att = parseAttribute(line);
+					IAttribute att = this.parseAttribute(line);
 					if (att.getName().equals(nameOfClassAttribute)) {
 						break;
 					}
@@ -119,13 +120,13 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			throw new DatasetDeserializationFailedException(e);
 		}
 
-		LOGGER.info("Successfully identified class attribute index {} for attribute with name {}", numAttributes, nameOfClassAttribute);
+		this.logger.info("Successfully identified class attribute index {} for attribute with name {}. Now reading in the dataset based on this info.", numAttributes, nameOfClassAttribute);
 		return this.deserializeDataset(datasetFile, numAttributes);
 	}
 
 	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IFileDatasetDescriptor datasetDescriptor, final int columnWithClassIndex) throws DatasetDeserializationFailedException {
 		Objects.requireNonNull(datasetDescriptor, "No dataset has been configured.");
-		return readDataset(this.sparseMode, datasetDescriptor.getDatasetDescription(), columnWithClassIndex);
+		return this.readDataset(this.sparseMode, datasetDescriptor.getDatasetDescription(), columnWithClassIndex);
 	}
 
 	@Override
@@ -146,7 +147,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	 * @param line The line which is to be parsed to extract the necessary information from the relation name.
 	 * @return A KVStore containing the parsed meta data.
 	 */
-	protected static KVStore parseRelation(final String line) {
+	protected KVStore parseRelation(final String line) {
 		KVStore metaData = new KVStore();
 
 		// cut off relation tag
@@ -161,7 +162,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 					int classIndex = Integer.parseInt(optParser.get(F_CLASS_INDEX).toString());
 					metaData.put(K_CLASS_INDEX, classIndex);
 				} catch (Exception e) {
-					LOGGER.warn("Could not read in class index from relation name: {}, class index: {}", line, optParser.get(F_CLASS_INDEX).toString());
+					this.logger.warn("Could not read in class index from relation name: {}, class index: {}", line, optParser.get(F_CLASS_INDEX).toString());
 				}
 			}
 		} else {
@@ -178,7 +179,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	 * @return Object of class IAttribute
 	 * @throws UnsupportedAttributeTypeException when the parsed Attribute not implemented
 	 */
-	protected static IAttribute parseAttribute(final String line) throws UnsupportedAttributeTypeException {
+	protected IAttribute parseAttribute(final String line) throws UnsupportedAttributeTypeException {
 		String attributeDefinitionSplit = line.replace("\\t", " ").substring(EArffItem.ATTRIBUTE.getValue().length() + 1).trim();
 		Matcher m = REG_EXP_ATTRIBUTE_DESCRIPTION.matcher(attributeDefinitionSplit);
 		if (!m.find()) {
@@ -195,7 +196,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		EArffAttributeType attType;
 		String[] values = null;
 		if (type.startsWith("{") && type.endsWith("}")) {
-			values = splitDenseInstanceLine(type.substring(1, type.length() - 1));
+			values = this.splitDenseInstanceLine(type.substring(1, type.length() - 1));
 			attType = EArffAttributeType.NOMINAL;
 		} else if (type.toLowerCase().startsWith(EArffAttributeType.MULTIDIMENSIONAL.getName())) {
 			attType = EArffAttributeType.MULTIDIMENSIONAL;
@@ -239,7 +240,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 	}
 
-	private static boolean tryParseInt(final String string) {
+	private boolean tryParseInt(final String string) {
 		try {
 			Integer.parseInt(string);
 			return true;
@@ -248,7 +249,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 	}
 
-	public static String[] splitDenseInstanceLine(final String line) {
+	public String[] splitDenseInstanceLine(final String line) {
 		List<String> lineSplit = new ArrayList<>();
 		Matcher matcher = REG_EXP_DATA_LINE.matcher(line);
 		while (matcher.find()) {
@@ -267,10 +268,11 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	 * @param line line of data
 	 * @return list of IAttribute values
 	 */
-	protected static List<Object> parseInstance(final boolean sparseData, final List<IAttribute> attributes, final int targetIndex, final String line) {
+	protected List<Object> parseInstance(final boolean sparseData, final List<IAttribute> attributes, final int targetIndex, final String line) {
 		if (line.trim().startsWith("%")) {
 			throw new IllegalArgumentException("Cannot create object for commented line!");
 		}
+		this.logger.trace("Parsing line with target col {}: {}", targetIndex, line);
 
 		boolean sparseMode = sparseData;
 		String curLine = line;
@@ -282,12 +284,12 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 
 		String[] lineSplit = curLine.split(",");
-		if (!(lineSplit[0].startsWith("'") && lineSplit[0].endsWith("'") || lineSplit[0].startsWith("\"") && lineSplit[0].endsWith("\"")) && lineSplit[0].contains(" ") && tryParseInt(lineSplit[0].split(" ")[0])) {
+		if (!(lineSplit[0].startsWith("'") && lineSplit[0].endsWith("'") || lineSplit[0].startsWith("\"") && lineSplit[0].endsWith("\"")) && lineSplit[0].contains(" ") && this.tryParseInt(lineSplit[0].split(" ")[0])) {
 			sparseMode = true;
 		}
 
 		if (!sparseMode) {
-			lineSplit = splitDenseInstanceLine(curLine);
+			lineSplit = this.splitDenseInstanceLine(curLine);
 			if (lineSplit.length != attributes.size()) {
 				throw new IllegalArgumentException("Cannot parse instance as this is not a sparse instance but has less columns than there are attributes defined. Expected values: " + attributes.size() + ". Actual number of values: "
 						+ lineSplit.length + ". Values: " + Arrays.toString(lineSplit));
@@ -301,9 +303,14 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				if (lineSplit[i].trim().equals(V_MISSING_VALUE)) {
 					value = null;
 				} else {
-					value = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
+					try {
+						value = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
+					}
+					catch (RuntimeException e) {
+						IAttribute att = attributes.get(i);
+						throw new IllegalArgumentException("Could not unserizalize value " + lineSplit[i] + " on attribute " + att.getName() + " with domain " + att.getStringDescriptionOfDomain(), e);
+					}
 				}
-
 				if (i == targetIndex) {
 					target = value;
 				} else {
@@ -331,7 +338,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 	}
 
-	protected static ILabeledDataset<ILabeledInstance> createDataset(final KVStore relationMetaData, final List<IAttribute> attributes) {
+	protected ILabeledDataset<ILabeledInstance> createDataset(final KVStore relationMetaData, final List<IAttribute> attributes) {
 		if (!relationMetaData.containsKey(K_CLASS_INDEX) || relationMetaData.getAsInt(K_CLASS_INDEX) < 0) {
 			throw new IllegalArgumentException("No (valid) class index given!");
 		}
@@ -341,12 +348,12 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		return new Dataset(schema);
 	}
 
-	public static ILabeledDataset<ILabeledInstance> readDataset(final File datasetFile) throws DatasetDeserializationFailedException {
-		return readDataset(false, datasetFile);
+	public ILabeledDataset<ILabeledInstance> readDataset(final File datasetFile) throws DatasetDeserializationFailedException {
+		return this.readDataset(false, datasetFile);
 	}
 
-	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile) throws DatasetDeserializationFailedException {
-		return readDataset(sparseMode, datasetFile, -1);
+	public ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile) throws DatasetDeserializationFailedException {
+		return this.readDataset(sparseMode, datasetFile, -1);
 	}
 
 	/**
@@ -357,7 +364,9 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	 * @param columnWithClassIndex
 	 * @throws DatasetDeserializationFailedException
 	 */
-	public static ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile, final int columnWithClassIndex) throws DatasetDeserializationFailedException {
+	public ILabeledDataset<ILabeledInstance> readDataset(final boolean sparseMode, final File datasetFile, final int columnWithClassIndex) throws DatasetDeserializationFailedException {
+		long timeStart = System.currentTimeMillis();
+		this.logger.info("Reading in dataset {} considering class index {}. Sparse Mode: {}", datasetFile, columnWithClassIndex, sparseMode);
 		String line = null;
 		long lineCounter = 0;
 
@@ -369,6 +378,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			boolean instanceReadMode = false;
 			while ((line = br.readLine()) != null) {
 				lineCounter++;
+				this.logger.trace("Reading in line {}", lineCounter);
 
 				// skip comments in arff
 				if (line.trim().startsWith("%")) {
@@ -378,13 +388,13 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				if (!instanceReadMode) {
 					if (line.toLowerCase().startsWith(EArffItem.RELATION.getValue())) {
 						// parse relation meta data
-						relationMetaData = parseRelation(line);
+						relationMetaData = this.parseRelation(line);
 						if (columnWithClassIndex >= 0) {
 							relationMetaData.put(K_CLASS_INDEX, columnWithClassIndex);
 						}
 					} else if (line.toLowerCase().startsWith(EArffItem.ATTRIBUTE.getValue())) {
 						// parse attribute meta data
-						attributes.add(parseAttribute(line));
+						attributes.add(this.parseAttribute(line));
 					} else if (line.toLowerCase().startsWith(EArffItem.DATA.getValue())) {
 						// switch to instance read mode
 						if (!line.toLowerCase().trim().equals(EArffItem.DATA.getValue())) {
@@ -393,17 +403,18 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						}
 						instanceReadMode = true;
 						if (relationMetaData.containsKey(K_CLASS_INDEX) && relationMetaData.getAsInt(K_CLASS_INDEX) >= 0) {
-							dataset = createDataset(relationMetaData, attributes);
+							dataset = this.createDataset(relationMetaData, attributes);
 						} else {
-							LOGGER.warn("Invalid class index in the dataset's meta data ({}): Assuming last column to be the target attribute!", relationMetaData.get(K_CLASS_INDEX));
+							this.logger.warn("Invalid class index in the dataset's meta data ({}): Assuming last column to be the target attribute!", relationMetaData.get(K_CLASS_INDEX));
 							relationMetaData.put(K_CLASS_INDEX, attributes.size() - 1);
-							dataset = createDataset(relationMetaData, attributes);
+							dataset = this.createDataset(relationMetaData, attributes);
 						}
+						this.logger.debug("Switched to instance read mode in line {}. Class index is {}", lineCounter, relationMetaData.getAsInt(K_CLASS_INDEX));
 					}
 				} else {
 					line = line.trim();
-					if (!line.isEmpty() && !line.startsWith("%")) { // ignore empty and comment lines
-						List<Object> parsedInstance = parseInstance(sparseMode, attributes, relationMetaData.getAsInt(K_CLASS_INDEX), line);
+					if (!line.isEmpty() && !line.startsWith("%")) { // ignore empty and comment lines);
+						List<Object> parsedInstance = this.parseInstance(sparseMode, attributes, relationMetaData.getAsInt(K_CLASS_INDEX), line);
 						ILabeledInstance newI;
 						if ((parsedInstance.get(0) instanceof Object[])) {
 							newI = new DenseInstance((Object[]) ((List<?>) parsedInstance).get(0), ((List<?>) parsedInstance).get(1));
@@ -420,24 +431,30 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						dataset.add(newI);
 					}
 				}
+				if (dataset != null && !dataset.isEmpty() && dataset.size() % 10000 == 0) {
+					this.logger.debug("Read in another 1000 instances. Current dataset size is {}", dataset.size());
+				}
 			}
+			Objects.requireNonNull(dataset, "Dataset is null, which must not happen!");
+			long timeEnd = System.currentTimeMillis();
+			this.logger.info("Dataset of size {}x{} read completely. Runtime was {}ms", dataset.size(), dataset.getNumAttributes(), timeEnd - timeStart);
 			return dataset;
 		} catch (Exception e) {
 			throw new DatasetDeserializationFailedException("Could not deserialize dataset from ARFF file. Error occurred on line " + lineCounter + ": " + line, e);
 		}
 	}
 
-	public static void serializeDataset(final File arffOutputFile, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
+	public void serializeDataset(final File arffOutputFile, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(arffOutputFile))) {
 			// write metadata
-			serializeMetaData(bw, data);
+			this.serializeMetaData(bw, data);
 			bw.write("\n\n");
 			// write actual data (payload)
-			serializeData(bw, data);
+			this.serializeData(bw, data);
 		}
 	}
 
-	private static void serializeData(final BufferedWriter bw, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
+	private void serializeData(final BufferedWriter bw, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
 		bw.write(EArffItem.DATA.getValue() + "\n");
 
 		for (ILabeledInstance instance : data) {
@@ -448,26 +465,26 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				Collections.sort(keys);
 
 				sb.append("{");
-				sb.append(keys.stream().map(x -> x + " " + serializeAttributeValue(data.getInstanceSchema().getAttribute(x), attributeValues.get(x))).collect(Collectors.joining(", ")));
+				sb.append(keys.stream().map(x -> x + " " + this.serializeAttributeValue(data.getInstanceSchema().getAttribute(x), attributeValues.get(x))).collect(Collectors.joining(", ")));
 				if (!attributeValues.isEmpty() && instance.isLabelPresent()) {
 					sb.append(",");
 				}
 				sb.append(data.getNumAttributes());
 				sb.append(" ");
-				sb.append(serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
+				sb.append(this.serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
 				sb.append("}\n");
 				bw.write(sb.toString());
 			} else {
 				Object[] atts = instance.getAttributes();
-				bw.write(IntStream.range(0, atts.length).mapToObj(x -> serializeAttributeValue(data.getInstanceSchema().getAttribute(x), atts[x])).collect(Collectors.joining(",")));
+				bw.write(IntStream.range(0, atts.length).mapToObj(x -> this.serializeAttributeValue(data.getInstanceSchema().getAttribute(x), atts[x])).collect(Collectors.joining(",")));
 				bw.write(",");
-				bw.write(serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
+				bw.write(this.serializeAttributeValue(data.getInstanceSchema().getLabelAttribute(), instance.getLabel()));
 				bw.write("\n");
 			}
 		}
 	}
 
-	private static String serializeAttributeValue(final IAttribute att, final Object value) {
+	private String serializeAttributeValue(final IAttribute att, final Object value) {
 		if (value == null) {
 			return V_MISSING_VALUE;
 		}
@@ -478,20 +495,20 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		return returnValue;
 	}
 
-	private static void serializeMetaData(final BufferedWriter bw, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
+	private void serializeMetaData(final BufferedWriter bw, final ILabeledDataset<? extends ILabeledInstance> data) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(EArffItem.RELATION.getValue() + " '" + data.getRelationName() + "'");
 		sb.append("\n");
 		sb.append("\n");
 		for (IAttribute att : data.getInstanceSchema().getAttributeList()) {
-			sb.append(serializeAttribute(att));
+			sb.append(this.serializeAttribute(att));
 			sb.append("\n");
 		}
-		sb.append(serializeAttribute(data.getInstanceSchema().getLabelAttribute()));
+		sb.append(this.serializeAttribute(data.getInstanceSchema().getLabelAttribute()));
 		bw.write(sb.toString());
 	}
 
-	private static String serializeAttribute(final IAttribute att) {
+	private String serializeAttribute(final IAttribute att) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(EArffItem.ATTRIBUTE.getValue() + " '" + att.getName() + "' ");
 		if (att instanceof ICategoricalAttribute) {
@@ -502,6 +519,16 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			sb.append(EArffAttributeType.TIMESERIES.getName());
 		}
 		return sb.toString();
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 
 }

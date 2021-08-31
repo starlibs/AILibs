@@ -55,7 +55,7 @@ public class ScikitLearnWrapperTest {
 	@MethodSource("arguments")
 	public void testFitPredict(final EScikitLearnProblemType problemType, final String datasetName, final IScikitLearnWrapper model)
 			throws IOException, InterruptedException, TrainingException, PredictionException, DatasetDeserializationFailedException, SplitFailedException {
-		ILabeledDataset<ILabeledInstance> data = ArffDatasetAdapter.readDataset(new File(BASE_TESTRSC_PATH + datasetName));
+		ILabeledDataset<ILabeledInstance> data = new ArffDatasetAdapter().readDataset(new File(BASE_TESTRSC_PATH + datasetName));
 		List<ILabeledDataset<ILabeledInstance>> split = RandomHoldoutSplitter.createSplit(data, 42, .7);
 
 		model.fit(split.get(0));
@@ -73,7 +73,7 @@ public class ScikitLearnWrapperTest {
 	@MethodSource("arguments")
 	public void testFitAndPredict(final EScikitLearnProblemType problemType, final String datasetName, final IScikitLearnWrapper model)
 			throws IOException, InterruptedException, TrainingException, PredictionException, DatasetDeserializationFailedException, SplitFailedException {
-		ILabeledDataset<ILabeledInstance> data = ArffDatasetAdapter.readDataset(new File(BASE_TESTRSC_PATH + datasetName));
+		ILabeledDataset<ILabeledInstance> data = new ArffDatasetAdapter().readDataset(new File(BASE_TESTRSC_PATH + datasetName));
 		List<ILabeledDataset<ILabeledInstance>> split = RandomHoldoutSplitter.createSplit(data, 42, .7);
 
 		model.fitAndPredict(split.get(0), split.get(1));
@@ -98,7 +98,7 @@ public class ScikitLearnWrapperTest {
 								"make_pipeline(UniToMultivariateNumpyBasedFeatureGenerator(univariate_ts_feature_generator=UltraFastShapeletsFeatureExtractor(keep_candidates_percentage=0.1212768581941968)))",
 								"from python_connection.feature_generation.ultra_fast_shapelets_feature_generator import UltraFastShapeletsFeatureExtractor\n"
 										+ "from python_connection.feature_generation.uni_to_multi_numpy_feature_generator import UniToMultivariateNumpyBasedFeatureGenerator\n" + "from sklearn.pipeline import make_pipeline\n")) //
-		);
+				);
 	}
 
 }

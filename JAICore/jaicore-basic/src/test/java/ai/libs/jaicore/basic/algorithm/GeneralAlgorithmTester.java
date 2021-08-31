@@ -70,14 +70,21 @@ public abstract class GeneralAlgorithmTester extends ATest {
 			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException, AlgorithmTestProblemSetCreationException {
 		this.checkPreconditionForTest(problemSet);
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(problemSet.getSimpleProblemInputForGeneralTestPurposes());
+		this.logger.debug("Algorithm created. Setting its logger and registering listeners.");
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
+			this.logger.info("Setting logger name of the algorithm to {}", LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 			((ILoggingCustomizable) algorithm).setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
+		}
+		else {
+			this.logger.info("Tested algorithm is not logging configurable, not setting a logger name.");
 		}
 		CheckingEventListener listener = new CheckingEventListener();
 		algorithm.registerListener(listener);
 		try {
+			this.logger.info("Starting algorithm of type {}.", algorithm.getClass());
 			algorithm.call();
+			this.logger.info("Algorithm finished. Checking state and test conditions.");
 		} catch (AlgorithmTimeoutedException e) { // it may happen, that no solution has been found within the specified timeout. Then algorithm must, however, have emitted an event
 		}
 		listener.checkState();

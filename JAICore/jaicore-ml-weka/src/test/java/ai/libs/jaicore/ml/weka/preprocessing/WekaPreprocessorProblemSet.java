@@ -32,7 +32,7 @@ public class WekaPreprocessorProblemSet implements IAlgorithmTestProblemSet<Pair
 	@Override
 	public Pair<String, ILabeledDataset<ILabeledInstance>> getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		try {
-			return new Pair<>(this.getName(), OpenMLDatasetReader.deserializeDataset(30)); // page-blocks
+			return new Pair<>(this.getName(), new OpenMLDatasetReader().deserializeDataset(30)); // page-blocks
 		} catch (DatasetDeserializationFailedException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
@@ -41,7 +41,7 @@ public class WekaPreprocessorProblemSet implements IAlgorithmTestProblemSet<Pair
 	@Override
 	public Pair<String, ILabeledDataset<ILabeledInstance>> getDifficultProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		try {
-			ILabeledDataset<ILabeledInstance> ds = OpenMLDatasetReader.deserializeDataset(1457); // amazon
+			ILabeledDataset<ILabeledInstance> ds = new OpenMLDatasetReader().deserializeDataset(1457); // amazon
 			ILabeledInstanceSchema s = ds.getInstanceSchema().getCopy();
 			int blowup = 10000;
 			for (int i = 0; i < blowup; i++) {

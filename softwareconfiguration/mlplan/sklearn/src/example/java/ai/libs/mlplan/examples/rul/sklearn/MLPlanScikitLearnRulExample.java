@@ -7,8 +7,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.evaluation.IPrediction;
-import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.regression.evaluation.IRegressionPrediction;
 import org.api4.java.algorithm.Timeout;
@@ -35,7 +33,7 @@ public class MLPlanScikitLearnRulExample {
 
 		/* load data for segment dataset and create a train-test-split */
 		File file = new File("testrsc/rul_smallExample.arff");
-		ILabeledDataset<ILabeledInstance> dataset = ArffDatasetAdapter.readDataset(file);
+		ILabeledDataset<ILabeledInstance> dataset = new ArffDatasetAdapter().readDataset(file);
 		LOGGER.info("Data read. Time to create dataset object was {}ms", System.currentTimeMillis() - start);
 
 		List<ILabeledDataset<ILabeledInstance>> splits = RandomHoldoutSplitter.createSplit(dataset, 42, .7);

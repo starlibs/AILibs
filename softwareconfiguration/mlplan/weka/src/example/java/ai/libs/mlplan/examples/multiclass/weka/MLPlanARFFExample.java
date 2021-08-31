@@ -32,7 +32,7 @@ public class MLPlanARFFExample {
 
 		/* load data for segment dataset and create a train-test-split */
 		long start = System.currentTimeMillis();
-		ILabeledDataset<?> ds = ArffDatasetAdapter.readDataset(new File(DATASET_PATH));
+		ILabeledDataset<?> ds = new ArffDatasetAdapter().readDataset(new File(DATASET_PATH));
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(42), .7);
 		LOGGER.info("Data read. Time to create dataset object was {}ms", System.currentTimeMillis() - start);
 

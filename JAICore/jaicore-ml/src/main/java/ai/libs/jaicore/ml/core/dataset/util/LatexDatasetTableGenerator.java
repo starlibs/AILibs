@@ -111,7 +111,7 @@ public class LatexDatasetTableGenerator {
 				String numAttributes = "?";
 				String numClasses = "?";
 				try {
-					ILabeledDataset<ILabeledInstance> inst = ArffDatasetAdapter.readDataset(source);
+					ILabeledDataset<ILabeledInstance> inst = new ArffDatasetAdapter().readDataset(source);
 					datasetName = inst.getRelationName().replaceAll("(&|_)", "");
 					numInstances = String.valueOf(inst.size());
 					numAttributes = String.valueOf(inst.getNumAttributes() - 1);

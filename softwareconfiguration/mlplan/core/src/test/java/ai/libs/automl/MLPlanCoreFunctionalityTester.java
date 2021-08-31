@@ -32,7 +32,7 @@ public class MLPlanCoreFunctionalityTester extends AutoMLAlgorithmCoreFunctional
 
 	@Test
 	public void testThatPhaseSwitchEventIsSent() throws DatasetDeserializationFailedException, AlgorithmTimeoutedException, AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, IOException {
-		MLPlan<IClassifier> mlplan = new MLPlanSimpleBuilder().withDataset(OpenMLDatasetReader.deserializeDataset(3)).build();
+		MLPlan<IClassifier> mlplan = new MLPlanSimpleBuilder().withDataset(new OpenMLDatasetReader().deserializeDataset(3)).build();
 		mlplan.setLoggerName("testedalgorithm");
 		mlplan.setTimeout(new Timeout(20, TimeUnit.SECONDS));
 		AtomicBoolean eventSeen = new AtomicBoolean(false);

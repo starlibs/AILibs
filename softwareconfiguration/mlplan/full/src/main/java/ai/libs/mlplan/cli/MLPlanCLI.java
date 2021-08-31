@@ -332,7 +332,7 @@ public class MLPlanCLI {
 			predictDataset = split.get(1);
 		} else {
 			if (cl.getOptionValue(O_MODULE, getDefault(O_MODULE)).equals(MLPlan4ScikitLearnRegressionCLIModule.M_RUL)) {
-				fitDataset = ArffDatasetAdapter.readDataset(new File(cl.getOptionValue(O_FIT_DATASET)));
+				fitDataset = new ArffDatasetAdapter().readDataset(new File(cl.getOptionValue(O_FIT_DATASET)));
 			} else {
 				Instances wekaData = new Instances(new FileReader(new File(cl.getOptionValue(O_FIT_DATASET))));
 				wekaData.setClassIndex(wekaData.numAttributes() - 1);
@@ -398,7 +398,7 @@ public class MLPlanCLI {
 			if (cl.hasOption(O_PREDICT_DATASET)) {
 				File predictDatasetFile = new File(cl.getOptionValue(O_PREDICT_DATASET));
 				logger.info("Load test data file: {}", predictDatasetFile.getAbsolutePath());
-				predictDataset = ArffDatasetAdapter.readDataset(predictDatasetFile);
+				predictDataset = new ArffDatasetAdapter().readDataset(predictDatasetFile);
 			}
 
 			ILearnerRunReport runReport = new SupervisedLearnerExecutor().execute(optimizedLearner, predictDataset);

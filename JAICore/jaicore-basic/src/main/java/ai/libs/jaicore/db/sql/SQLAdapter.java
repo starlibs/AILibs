@@ -159,6 +159,7 @@ class SQLAdapter implements IDatabaseAdapter {
 
 	private void connect() throws SQLException {
 		int tries = 0;
+		this.logger.info("Connecting to database.");
 		do {
 			try {
 				Properties connectionProps = new Properties(this.connectionProperties);

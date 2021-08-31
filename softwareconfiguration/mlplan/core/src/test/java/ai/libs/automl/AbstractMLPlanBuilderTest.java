@@ -43,7 +43,7 @@ public abstract class AbstractMLPlanBuilderTest {
 	}
 
 	protected MLPlan<?> getMLPlanForBuilder(final AMLPlanBuilder<?, ?> builder) throws DatasetDeserializationFailedException, Exception {
-		return builder.withDataset(OpenMLDatasetReader.deserializeDataset(3)).build(); // test builds with the kr-vs-kp dataset
+		return builder.withDataset(new OpenMLDatasetReader().deserializeDataset(3)).build(); // test builds with the kr-vs-kp dataset
 	}
 
 	protected BestFirst<?, TFDNode, String, Double> getSearch(final MLPlan<?> mlplan) {
