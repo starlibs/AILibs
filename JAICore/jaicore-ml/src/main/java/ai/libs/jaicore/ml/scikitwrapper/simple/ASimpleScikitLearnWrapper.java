@@ -143,22 +143,25 @@ public abstract class ASimpleScikitLearnWrapper<P extends IPrediction, B extends
 
 	@Override
 	public void setModelPath(final String modelPath) throws IOException {
-		throw new UnsupportedOperationException("The simple scikit-learn classifier wrapper does not support model serialization.");
+
+		this.logger.warn("The simple scikit-learn classifier wrapper does not support model serialization.");
 	}
 
 	@Override
 	public File getModelPath() {
-		throw new UnsupportedOperationException("The simple scikit-learn classifier wrapper does not support model serialization.");
+		this.logger.warn("The simple scikit-learn classifier wrapper does not support model serialization.");
+		return null;
 	}
 
 	@Override
 	public File getModelFile() {
-		throw new UnsupportedOperationException("The simple scikit-learn classifier wrapper does not support model serialization.");
+		this.logger.warn("The simple scikit-learn classifier wrapper does not support model serialization.");
+		return null;
 	}
 
 	@Override
 	public void setTargetIndices(final int... targetIndices) {
-		throw new UnsupportedOperationException("The simple scikit-learn classifier wrapper does not support multiple targets.");
+		this.logger.warn("The simple scikit-learn classifier wrapper does not support multiple targets.");
 	}
 
 	@Override
@@ -168,22 +171,23 @@ public abstract class ASimpleScikitLearnWrapper<P extends IPrediction, B extends
 
 	@Override
 	public void setSeed(final long seed) {
-		throw new UnsupportedOperationException("The simple scikit-learn classifier wrapper does not support setting a seed.");
+		this.logger.warn("The simple scikit-learn classifier wrapper does not support setting a seed.");
 	}
 
 	@Override
 	public void setTimeout(final Timeout timeout) {
-		throw new UnsupportedOperationException("The simple scikit-learn classifier wrapper does not support setting a timeout.");
+		this.logger.warn("The simple scikit-learn classifier wrapper does not support setting a timeout.");
 	}
 
 	@Override
 	public void fit(final String trainingDataName) throws TrainingException, InterruptedException {
-		throw new UnsupportedOperationException("The simple scikit-learn classifier wrapper does not support fitting providing a path only.");
+		this.logger.warn("The simple scikit-learn classifier wrapper does not support fitting providing a path only.");
 	}
 
 	@Override
 	public File getOutputFile(final String dataName) {
-		throw new UnsupportedOperationException("The simple scikit-learn classifier wrapper does not support retrieving the output file.");
+		this.logger.warn("The simple scikit-learn classifier wrapper does not support retrieving the output file.");
+		return null;
 	}
 
 	@Override
