@@ -153,6 +153,9 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		if ((string.startsWith("'") && string.endsWith("'")) || (string.startsWith("\"") && string.endsWith("\""))) {
 			trimmedString = trimmedString.substring(1, trimmedString.length() - 1);
 		}
+		if (!this.valuePosCache.containsKey(trimmedString)) {
+			return null; // return null for missing values
+		}
 		int indexOf = this.valuePosCache.get(trimmedString); // storing this as an int here is important in order to obtain an exception on null
 		return indexOf;
 	}
