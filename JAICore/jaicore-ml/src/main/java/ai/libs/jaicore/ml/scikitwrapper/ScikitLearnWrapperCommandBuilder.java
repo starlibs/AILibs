@@ -222,7 +222,7 @@ public class ScikitLearnWrapperCommandBuilder {
 		for (String parameter : processParameters) {
 			stringJoiner.add(parameter);
 		}
-		return new PythonUtil(this.pythonConfiguration).getExecutableCommandArray(stringJoiner.toString(), false);
+		return new PythonUtil(this.pythonConfiguration).getExecutableCommandArray(false, stringJoiner.toString());
 	}
 
 }

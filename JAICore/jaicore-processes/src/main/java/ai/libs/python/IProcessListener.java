@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.scikitwrapper;
+package ai.libs.python;
 
 import java.io.IOException;
 

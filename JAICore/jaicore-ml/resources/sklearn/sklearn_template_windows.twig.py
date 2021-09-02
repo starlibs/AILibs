@@ -32,8 +32,6 @@ from sklearn.preprocessing import OneHotEncoder
 class ProblemType:
     CLASSIFICATION = 'classification'
     REGRESSION = 'regression'
-    TIME_SERIES_REGRESSION = 'ts-reg'
-    TIME_SERIES_FEATURE_ENGINEERING = 'ts-fe'
 
     @staticmethod
     def get(identifier):
@@ -41,10 +39,6 @@ class ProblemType:
             return ProblemType.CLASSIFICATION
         if identifier == ProblemType.REGRESSION:
             return ProblemType.REGRESSION
-        elif identifier == ProblemType.TIME_SERIES_REGRESSION:
-            return ProblemType.TIME_SERIES_REGRESSION
-        elif identifier == ProblemType.TIME_SERIES_FEATURE_ENGINEERING:
-            return ProblemType.TIME_SERIES_FEATURE_ENGINEERING
         else:
             raise RuntimeError("Unsupported problem type: " + identifier)
 
@@ -57,7 +51,7 @@ class ArgsHandler:
         accessable as a list.
         """
         parser = argparse.ArgumentParser()
-        parser.add_argument('--problem', choices=[ProblemType.CLASSIFICATION, ProblemType.REGRESSION, ProblemType.TIME_SERIES_REGRESSION, ProblemType.TIME_SERIES_FEATURE_ENGINEERING], required=True, help="If set, converts the data for use by tsfresh.")
+        parser.add_argument('--problem', choices=[ProblemType.CLASSIFICATION, ProblemType.REGRESSION], required=True, help="Determines the type of learning problem.")
         parser.add_argument('--fit', help="Path or data to use for training.")
         parser.add_argument('--predict', help="Path or data to use for testing when running with predict mode or fitAndPredict mode.")
         parser.add_argument('--predictOutput', help="In train mode set the file where the model shall be dumped; in test mode set the file where the prediction results shall be serialized to.")
