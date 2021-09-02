@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -87,7 +86,7 @@ public class PythonUtil {
 
 	public int executeScriptFile(final List<String> fileAndParams) throws IOException, InterruptedException {
 		String[] commandArray = this.getExecutableCommandArray(false, fileAndParams.toArray(new String[] {}));
-		Process process = new ProcessBuilder(commandArray).redirectError(Redirect.INHERIT).start();
+		Process process = new ProcessBuilder(commandArray).start();
 		DefaultProcessListener dpl = new DefaultProcessListener();
 		dpl.listenTo(process);
 

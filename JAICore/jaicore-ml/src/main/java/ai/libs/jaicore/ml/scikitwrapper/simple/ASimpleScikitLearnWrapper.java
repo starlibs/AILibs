@@ -44,6 +44,9 @@ public abstract class ASimpleScikitLearnWrapper<P extends IPrediction, B extends
 	protected final String imports;
 	private PythonUtil putil;
 
+	private File executable = null;
+	private File outputFile = null;
+
 	protected ILabeledDataset<? extends ILabeledInstance> trainingData;
 
 	public ASimpleScikitLearnWrapper(final String constructorCall, final String imports, final String problem) {
@@ -107,23 +110,23 @@ public abstract class ASimpleScikitLearnWrapper<P extends IPrediction, B extends
 	}
 
 	protected File executePipeline(final ILabeledDataset<? extends ILabeledInstance> dTest) throws IOException, InterruptedException, ScikitLearnWrapperExecutionFailedException {
-		File executable = Files.createTempFile("sklearn-classifier-", ".py").toFile();
-		executable.deleteOnExit();
+		this.executable = Files.createTempFile("sklearn-classifier-", ".py").toFile();
+		this.executable.deleteOnExit();
 
 		String template = ResourceUtil.readResourceFileToString(this.pathExecutableTemplate);
 		template = template.replace("{{pipeline}}", this.constructorCall);
 		template = template.replace("{{import}}", this.imports);
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(executable))) {
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.executable))) {
 			bw.write(template);
 		}
-		File predictOutputFile = Files.createTempFile("sklearn-predictions", ".json").toFile();
-		predictOutputFile.deleteOnExit();
+		this.outputFile = Files.createTempFile("sklearn-predictions", ".json").toFile();
+		this.outputFile.deleteOnExit();
 
 		File fitFile = this.getOrWriteDataFile(this.trainingData, this.getDataName(this.trainingData));
 		File predictFile = this.getOrWriteDataFile(dTest, this.getDataName(dTest));
 
 		List<String> command = new ArrayList<>();
-		command.add(executable.getCanonicalPath());
+		command.add(this.executable.getCanonicalPath());
 		command.add("--fit");
 		command.add(fitFile.getCanonicalPath());
 		command.add("--predict");
@@ -131,19 +134,18 @@ public abstract class ASimpleScikitLearnWrapper<P extends IPrediction, B extends
 		command.add("--problem");
 		command.add(this.problem);
 		command.add("--predictOutput");
-		command.add(predictOutputFile.getCanonicalPath());
+		command.add(this.outputFile.getCanonicalPath());
 
 		int exitCode = this.putil.executeScriptFile(command);
 
 		if (exitCode != 0) {
 			throw new ScikitLearnWrapperExecutionFailedException("Spawned python process has not terminated cleanly.");
 		}
-		return predictOutputFile;
+		return this.outputFile;
 	}
 
 	@Override
 	public void setModelPath(final String modelPath) throws IOException {
-
 		this.logger.debug("The simple scikit-learn classifier wrapper does not support model serialization.");
 	}
 
@@ -187,7 +189,7 @@ public abstract class ASimpleScikitLearnWrapper<P extends IPrediction, B extends
 	@Override
 	public File getOutputFile(final String dataName) {
 		this.logger.debug("The simple scikit-learn classifier wrapper does not support retrieving the output file.");
-		return null;
+		return this.outputFile;
 	}
 
 	@Override
@@ -208,7 +210,7 @@ public abstract class ASimpleScikitLearnWrapper<P extends IPrediction, B extends
 
 	@Override
 	public File getSKLearnScriptFile() {
-		return new File(this.pathExecutableTemplate);
+		return this.executable;
 	}
 
 	@Override
