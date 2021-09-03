@@ -19,12 +19,12 @@ import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictio
 
 public class ScikitLearnMultiTargetRegressionWrapper<P extends IPrediction, B extends IPredictionBatch> extends AScikitLearnWrapper<P, B> {
 
-	public ScikitLearnMultiTargetRegressionWrapper(final String pipeline, final String imports, final int[] targetIndices) throws IOException {
+	public ScikitLearnMultiTargetRegressionWrapper(final String pipeline, final String imports, final int[] targetIndices) throws IOException, InterruptedException {
 		super(EScikitLearnProblemType.REGRESSION, pipeline, imports);
 		this.targetIndices = targetIndices;
 	}
 
-	protected ScikitLearnMultiTargetRegressionWrapper(final EScikitLearnProblemType problemType, final String pipeline, final String imports) throws IOException {
+	protected ScikitLearnMultiTargetRegressionWrapper(final EScikitLearnProblemType problemType, final String pipeline, final String imports) throws IOException, InterruptedException {
 		super(problemType, pipeline, imports);
 	}
 

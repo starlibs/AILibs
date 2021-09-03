@@ -9,7 +9,7 @@ import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 
 public class ScikitLearnTimeSeriesRegressionWrapper<P extends IPrediction, B extends IPredictionBatch> extends ScikitLearnRegressionWrapper<P, B> {
 
-	public ScikitLearnTimeSeriesRegressionWrapper(final String pipeline, final String imports) throws IOException {
+	public ScikitLearnTimeSeriesRegressionWrapper(final String pipeline, final String imports) throws IOException, InterruptedException {
 		super(EScikitLearnProblemType.TIME_SERIES_REGRESSION, pipeline, imports);
 	}
 

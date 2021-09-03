@@ -19,11 +19,11 @@ import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictio
 
 public class ScikitLearnRegressionWrapper<P extends IPrediction, B extends IPredictionBatch> extends AScikitLearnWrapper<P, B> {
 
-	public ScikitLearnRegressionWrapper(final String pipeline, final String imports) throws IOException {
+	public ScikitLearnRegressionWrapper(final String pipeline, final String imports) throws IOException, InterruptedException {
 		super(EScikitLearnProblemType.REGRESSION, pipeline, imports);
 	}
 
-	protected ScikitLearnRegressionWrapper(final EScikitLearnProblemType problemType, final String pipeline, final String imports) throws IOException {
+	protected ScikitLearnRegressionWrapper(final EScikitLearnProblemType problemType, final String pipeline, final String imports) throws IOException, InterruptedException {
 		super(problemType, pipeline, imports);
 	}
 
@@ -37,8 +37,7 @@ public class ScikitLearnRegressionWrapper<P extends IPrediction, B extends IPred
 	protected B handleOutput(final File outputFile) throws PredictionException, TrainingException {
 		List<List<Double>> rawLastPredictionResults = this.getRawPredictionResults(outputFile);
 		if (!rawLastPredictionResults.isEmpty()) {
-			return (B) new SingleTargetRegressionPredictionBatch(
-					rawLastPredictionResults.stream().flatMap(List::stream).map(x -> new SingleTargetRegressionPrediction((double) x)).collect(Collectors.toList()));
+			return (B) new SingleTargetRegressionPredictionBatch(rawLastPredictionResults.stream().flatMap(List::stream).map(x -> new SingleTargetRegressionPrediction((double) x)).collect(Collectors.toList()));
 		}
 		throw new PredictionException("Reading the output file lead to empty predictions.");
 	}

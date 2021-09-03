@@ -16,7 +16,7 @@ public interface IPythonConfig extends IOwnerBasedConfig {
 	public String getPathToPythonExecutable();
 
 	@Key(KEY_PYTHON)
-	@DefaultValue("python3")
+	@DefaultValue("python")
 	public String getPythonCommand();
 
 	@Key(KEY_ANACONDA)

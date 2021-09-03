@@ -207,7 +207,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
 			this.optimizingFactory.registerListener(new Object() {
 				@Subscribe
-				public void receiveEventFromFactory(final IEvent event) {
+				public void receiveEventFromFactory(final IEvent event) throws InterruptedException {
 					if (event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent) {
 						return;
 					}

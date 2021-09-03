@@ -16,7 +16,7 @@ import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 
 public class ScikitLearnTimeSeriesFeatureEngineeringWrapper<P extends IPrediction, B extends IPredictionBatch> extends AScikitLearnWrapper<P, B> {
 
-	public ScikitLearnTimeSeriesFeatureEngineeringWrapper(final String pipeline, final String imports) throws IOException {
+	public ScikitLearnTimeSeriesFeatureEngineeringWrapper(final String pipeline, final String imports) throws IOException, InterruptedException {
 		super(EScikitLearnProblemType.TIME_SERIES_FEATURE_ENGINEERING, pipeline, imports);
 	}
 

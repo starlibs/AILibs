@@ -38,7 +38,7 @@ public interface IScikitLearnWrapper extends ISupervisedLearner<ILabeledInstance
 
 	public File getOutputFile(final String dataName);
 
-	public void setPythonConfig(final IPythonConfig pythonConfig);
+	public void setPythonConfig(final IPythonConfig pythonConfig) throws IOException, InterruptedException;
 
 	public void setScikitLearnWrapperConfig(final IScikitLearnWrapperConfig scikitLearnWrapperConfig);
 

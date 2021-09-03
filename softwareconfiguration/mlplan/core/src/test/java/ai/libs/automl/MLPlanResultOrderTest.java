@@ -48,7 +48,7 @@ public abstract class MLPlanResultOrderTest<L extends ISupervisedLearner<ILabele
 
 	private MLPlan<L> mlplan;
 
-	private MLPlan<L> prepare(final AMLPlanBuilder<L, ?> builder) throws DatasetDeserializationFailedException, IOException {
+	private MLPlan<L> prepare(final AMLPlanBuilder<L, ?> builder) throws DatasetDeserializationFailedException, IOException, InterruptedException {
 		builder.withDataset(new OpenMLDatasetReader().deserializeDataset(39));
 		List<String> preferredComponents = builder.getPreferredComponents().stream().limit(10).collect(Collectors.toList());
 		final AtomicInteger observedIndex = new AtomicInteger(-1);

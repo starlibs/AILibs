@@ -92,6 +92,16 @@
     <level value="warn" />
   </logger>
   
+  <logger name="ai.libs.jaicore.ml.scikitwrapper">
+    <level value="info" />
+  </logger>
+  
+  <logger name="ai.libs.python.DefaultProcessListener">
+    <level value="debug" />
+  </logger>
+  
+  
+  
   <logger name="testedalgorithm">
     <level value="warn" />
     

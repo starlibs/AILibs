@@ -12,7 +12,7 @@ import ai.libs.mlplan.core.MLPlanSimpleBuilder;
 public class MLPlanResultProductionTester extends AutoMLAlgorithmForClassificationResultProductionTester {
 
 	@Override
-	public IAlgorithm<ILabeledDataset<?>, IClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws IOException {
+	public IAlgorithm<ILabeledDataset<?>, IClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws IOException, InterruptedException {
 		this.logger.info("Creating ML-Plan instance.");
 		MLPlan<IClassifier> mlplan = new MLPlanSimpleBuilder().withDataset(data).build();
 		this.logger.info("done");

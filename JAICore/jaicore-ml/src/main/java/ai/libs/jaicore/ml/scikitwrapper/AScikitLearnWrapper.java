@@ -39,6 +39,7 @@ import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 import ai.libs.jaicore.processes.EOperatingSystem;
 import ai.libs.jaicore.processes.ProcessIDNotRetrievableException;
 import ai.libs.jaicore.processes.ProcessUtil;
+import ai.libs.python.DefaultProcessListener;
 import ai.libs.python.IPythonConfig;
 import ai.libs.python.PythonRequirementDefinition;
 
@@ -71,7 +72,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 	protected Timeout timeout;
 	private boolean listenToPidFromProcess; // If true, the PID is obtained from the python process being started by listening to according output.
 
-	protected AScikitLearnWrapper(final EScikitLearnProblemType problemType, final String pipeline, final String imports) throws IOException {
+	protected AScikitLearnWrapper(final EScikitLearnProblemType problemType, final String pipeline, final String imports) throws IOException, InterruptedException {
 		this.problemType = problemType;
 		this.pipeline = pipeline;
 		this.imports = imports;
@@ -366,6 +367,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 				String call = Arrays.toString(commandLineParameters).replace(",", "");
 				this.logger.info("Starting process {}", call.substring(1, call.length() - 1));
 			}
+
 			ProcessBuilder processBuilder = new ProcessBuilder(commandLineParameters).directory(this.scikitLearnWrapperConfig.getTempFolder());
 			Process process = processBuilder.start();
 			this.logger.debug("Started process with PID: {}. Listener is {}", ProcessUtil.getPID(process), listener);
