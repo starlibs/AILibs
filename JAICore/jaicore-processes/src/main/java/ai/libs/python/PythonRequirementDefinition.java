@@ -59,11 +59,11 @@ public class PythonRequirementDefinition {
 		return this.optionalModules;
 	}
 
-	public void check() {
+	public void check() throws InterruptedException {
 		this.check(null);
 	}
 
-	public void check(final IPythonConfig pythonConfig) {
+	public void check(final IPythonConfig pythonConfig) throws InterruptedException {
 		try {
 			/* Check whether we have all required python modules available*/
 			PythonUtil pu = pythonConfig != null ? new PythonUtil(pythonConfig) : new PythonUtil();

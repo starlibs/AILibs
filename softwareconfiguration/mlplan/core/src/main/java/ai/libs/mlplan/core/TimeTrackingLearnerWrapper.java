@@ -66,6 +66,16 @@ public class TimeTrackingLearnerWrapper extends ASupervisedLearner<ILabeledInsta
 	}
 
 	@Override
+	public IPredictionBatch predict(final ILabeledDataset<? extends ILabeledInstance> dTest) throws PredictionException, InterruptedException {
+		TimeTracker tracker = new TimeTracker();
+		IPredictionBatch prediction = this.wrappedSLClassifier.predict(dTest);
+		long time = tracker.stop();
+		this.batchPredictTimes.add(time);
+		this.perInstancePredictionTimes.add(Math.round((double) time / dTest.size()));
+		return prediction;
+	}
+
+	@Override
 	public List<Long> getFitTimes() {
 		return this.fitTimes;
 	}

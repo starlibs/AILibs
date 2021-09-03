@@ -103,7 +103,7 @@ public class MLPlanScikitLearnBuilder extends AMLPlanBuilder<IScikitLearnWrapper
 	}
 
 	@Override
-	public MLPlan<IScikitLearnWrapper> build() {
+	public MLPlan<IScikitLearnWrapper> build() throws InterruptedException {
 		if (!this.skipSetupCheck) {
 			new PythonRequirementDefinition(AScikitLearnWrapper.PYTHON_MINIMUM_REQUIRED_VERSION_REL, AScikitLearnWrapper.PYTHON_MINIMUM_REQUIRED_VERSION_MAJ, AScikitLearnWrapper.PYTHON_MINIMUM_REQUIRED_VERSION_MIN).check(this.pythonConfig);
 		}

@@ -26,7 +26,7 @@ import ai.libs.mlplan.core.events.MLPlanPhaseSwitchedEvent;
 public class MLPlanCoreFunctionalityTester extends AutoMLAlgorithmCoreFunctionalityTester {
 
 	@Override
-	public IAlgorithm getAutoMLAlgorithm(final ILabeledDataset data) throws IOException {
+	public IAlgorithm getAutoMLAlgorithm(final ILabeledDataset data) throws IOException, InterruptedException {
 		return new MLPlanSimpleBuilder().withDataset(data).build();
 	}
 

@@ -73,6 +73,10 @@
 	</logger>
 	
 	<logger
+		name="ai.libs.automl.MLPlanResultWithMinimumQualityTest">
+		<level value="info" />
+	</logger>
+	<logger
 		name="ai.libs.jaicore.interrupt">
 		<level value="warn" />
 	</logger>

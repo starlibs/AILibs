@@ -52,7 +52,8 @@ import ai.libs.jaicore.test.LongTest;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public abstract class AutoMLAlgorithmResultProductionTester extends ATest {
 
-	public abstract IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(ILabeledDataset<?> data) throws AlgorithmCreationException, IOException;
+	public abstract IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(ILabeledDataset<?> data)
+			throws AlgorithmCreationException, IOException, InterruptedException;
 
 	public abstract List<ILabeledDataset<?>> getTrainTestSplit(ILabeledDataset<?> dataset) throws SplitFailedException, InterruptedException;
 
@@ -63,7 +64,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends ATest {
 	}
 
 	@LongTest
-	@ParameterizedTest(name="Test that ML-Plan delivers a model on {0}")
+	@ParameterizedTest(name = "Test that ML-Plan delivers a model on {0}")
 	@MethodSource("getDatasets")
 	public void testThatModelIsTrained(final OpenMLProblemSet problemSet)
 			throws DatasetDeserializationFailedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ObjectEvaluationFailedException, SplitFailedException, AlgorithmCreationException, IOException {

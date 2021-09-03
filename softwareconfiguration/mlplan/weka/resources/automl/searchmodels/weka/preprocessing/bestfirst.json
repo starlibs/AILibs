@@ -42,11 +42,6 @@
 						"2",
 						"3"
 					]
-				},
-				{
-					"name": "M",
-					"type": "boolean",
-					"default": "false"
 				}
 			],
 			"dependencies": []

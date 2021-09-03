@@ -24,6 +24,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import ai.libs.jaicore.ml.core.dataset.splitter.RandomHoldoutSplitter;
+import ai.libs.jaicore.ml.scikitwrapper.simple.SimpleScikitLearnClassifier;
+import ai.libs.jaicore.ml.scikitwrapper.simple.SimpleScikitLearnRegressor;
 import ai.libs.jaicore.test.MediumParameterizedTest;
 
 public class ScikitLearnWrapperTest {
@@ -35,6 +37,7 @@ public class ScikitLearnWrapperTest {
 	@BeforeEach
 	@AfterEach
 	public void onSetUp() throws IOException {
+		new File(FOLDER_TMP).mkdirs();
 		for (File file : new File(FOLDER_TMP).listFiles()) {
 			if (!file.isDirectory() && !file.getName().endsWith(".py")) {
 				if (!file.delete()) {
@@ -59,13 +62,12 @@ public class ScikitLearnWrapperTest {
 		List<ILabeledDataset<ILabeledInstance>> split = RandomHoldoutSplitter.createSplit(data, 42, .7);
 
 		model.fit(split.get(0));
-		assertTrue(model.getSKLearnScriptFile().exists());
-		assertTrue(model.getModelFile().exists());
 		if (problemType == EScikitLearnProblemType.TIME_SERIES_FEATURE_ENGINEERING) {
 			assertTrue(model.getOutputFile(model.getDataName(split.get(0))).exists());
 		}
 
 		model.predict(split.get(1));
+		assertTrue(model.getSKLearnScriptFile().exists());
 		assertTrue(model.getOutputFile(model.getDataName(split.get(1))).exists());
 	}
 
@@ -84,20 +86,21 @@ public class ScikitLearnWrapperTest {
 		assertTrue(model.getOutputFile(model.getDataName(split.get(1))).exists());
 	}
 
-	public static Stream<Arguments> arguments() throws IOException {
+	public static Stream<Arguments> arguments() throws IOException, InterruptedException {
 		return Stream.of( //
-				Arguments.of(EScikitLearnProblemType.CLASSIFICATION, "dataset_31_credit-g.arff", new ScikitLearnClassificationWrapper<>("RandomForestClassifier(n_estimators=100)", "from sklearn.ensemble import RandomForestClassifier\n")), //
-				Arguments.of(EScikitLearnProblemType.REGRESSION, "0532052678.arff", new ScikitLearnRegressionWrapper<>("LinearRegression()", "from sklearn.linear_model import LinearRegression\n")), //
-				Arguments.of(EScikitLearnProblemType.TIME_SERIES_REGRESSION, "CMAPSS_FD001_train.arff", new ScikitLearnTimeSeriesRegressionWrapper<>(
-						"make_pipeline(UniToMultivariateNumpyBasedFeatureGenerator(univariate_ts_feature_generator=UltraFastShapeletsFeatureExtractor(keep_candidates_percentage=0.1212768581941968)), SVR(C=0.27332631373580385,coef0=1.3310979035891473,degree=3,gamma=1.2,kernel=\"poly\",max_iter=5236,shrinking=True,tol=0.27707849007413665))",
-						"from python_connection.feature_generation.ultra_fast_shapelets_feature_generator import UltraFastShapeletsFeatureExtractor\n"
-								+ "from python_connection.feature_generation.uni_to_multi_numpy_feature_generator import UniToMultivariateNumpyBasedFeatureGenerator\n" + "from sklearn.pipeline import make_pipeline\n"
-								+ "from sklearn.svm import SVR\n")), //
-				Arguments.of(EScikitLearnProblemType.TIME_SERIES_FEATURE_ENGINEERING, "CMAPSS_FD001_train.arff",
-						new ScikitLearnTimeSeriesFeatureEngineeringWrapper<>(
-								"make_pipeline(UniToMultivariateNumpyBasedFeatureGenerator(univariate_ts_feature_generator=UltraFastShapeletsFeatureExtractor(keep_candidates_percentage=0.1212768581941968)))",
-								"from python_connection.feature_generation.ultra_fast_shapelets_feature_generator import UltraFastShapeletsFeatureExtractor\n"
-										+ "from python_connection.feature_generation.uni_to_multi_numpy_feature_generator import UniToMultivariateNumpyBasedFeatureGenerator\n" + "from sklearn.pipeline import make_pipeline\n")) //
+				Arguments.of(EScikitLearnProblemType.CLASSIFICATION, "dataset_31_credit-g.arff", new SimpleScikitLearnClassifier("RandomForestClassifier(n_estimators=100)", "from sklearn.ensemble import RandomForestClassifier\n")), //
+				Arguments.of(EScikitLearnProblemType.REGRESSION, "0532052678.arff", new SimpleScikitLearnRegressor("LinearRegression()", "from sklearn.linear_model import LinearRegression\n"))// , //
+		// Arguments.of(EScikitLearnProblemType.TIME_SERIES_REGRESSION, "CMAPSS_FD001_train.arff", new ScikitLearnTimeSeriesRegressionWrapper<>(
+		// "make_pipeline(UniToMultivariateNumpyBasedFeatureGenerator(univariate_ts_feature_generator=UltraFastShapeletsFeatureExtractor(keep_candidates_percentage=0.1212768581941968)),
+		// SVR(C=0.27332631373580385,coef0=1.3310979035891473,degree=3,gamma=1.2,kernel=\"poly\",max_iter=5236,shrinking=True,tol=0.27707849007413665))",
+		// "from python_connection.feature_generation.ultra_fast_shapelets_feature_generator import UltraFastShapeletsFeatureExtractor\n"
+		// + "from python_connection.feature_generation.uni_to_multi_numpy_feature_generator import UniToMultivariateNumpyBasedFeatureGenerator\n" + "from sklearn.pipeline import make_pipeline\n"
+		// + "from sklearn.svm import SVR\n")), //
+		// Arguments.of(EScikitLearnProblemType.TIME_SERIES_FEATURE_ENGINEERING, "CMAPSS_FD001_train.arff",
+		// new ScikitLearnTimeSeriesFeatureEngineeringWrapper<>(
+		// "make_pipeline(UniToMultivariateNumpyBasedFeatureGenerator(univariate_ts_feature_generator=UltraFastShapeletsFeatureExtractor(keep_candidates_percentage=0.1212768581941968)))",
+		// "from python_connection.feature_generation.ultra_fast_shapelets_feature_generator import UltraFastShapeletsFeatureExtractor\n"
+		// + "from python_connection.feature_generation.uni_to_multi_numpy_feature_generator import UniToMultivariateNumpyBasedFeatureGenerator\n" + "from sklearn.pipeline import make_pipeline\n")) //
 		);
 	}
 

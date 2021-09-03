@@ -59,7 +59,7 @@ public class ScikitLearnTimeSeriesRegressionFactory extends AScikitLearnLearnerF
 	}
 
 	@Override
-	public AScikitLearnWrapper<IPrediction, IPredictionBatch> getScikitLearnWrapper(final String constructionString, final String imports) throws IOException {
+	public AScikitLearnWrapper<IPrediction, IPredictionBatch> getScikitLearnWrapper(final String constructionString, final String imports) throws IOException, InterruptedException {
 		return new ScikitLearnTimeSeriesRegressionWrapper<>(constructionString, imports);
 	}
 }

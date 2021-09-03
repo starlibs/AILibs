@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.classification.singlelabel;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -77,5 +78,10 @@ public class SingleLabelClassification extends Prediction implements ISingleLabe
 		} else {
 			return highestProbEntry.getKey();
 		}
+	}
+
+	@Override
+	public String toString() {
+		return new StringBuilder().append(this.getPrediction()).append(" ").append(Arrays.toString(this.labelProbabilities)).toString();
 	}
 }
