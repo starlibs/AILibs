@@ -45,10 +45,10 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<ISci
 		super();
 	}
 
-	public abstract IScikitLearnWrapper getScikitLearnWrapper(String constructionString, String imports) throws IOException;
+	public abstract IScikitLearnWrapper getScikitLearnWrapper(String constructionString, String imports) throws IOException, InterruptedException;
 
 	@Override
-	public IScikitLearnWrapper getComponentInstantiation(final IComponentInstance groundComponent) throws ComponentInstantiationFailedException {
+	public IScikitLearnWrapper getComponentInstantiation(final IComponentInstance groundComponent) throws ComponentInstantiationFailedException, InterruptedException {
 		this.logger.debug("Parse ground component instance {} to ScikitLearnWrapper object.", groundComponent);
 
 		StringBuilder constructInstruction = new StringBuilder();

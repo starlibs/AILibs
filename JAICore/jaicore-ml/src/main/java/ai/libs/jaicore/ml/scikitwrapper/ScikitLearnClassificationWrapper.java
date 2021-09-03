@@ -19,7 +19,7 @@ import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 
 public class ScikitLearnClassificationWrapper extends AScikitLearnWrapper<ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> {
 
-	public ScikitLearnClassificationWrapper(final String pipeline, final String imports) throws IOException {
+	public ScikitLearnClassificationWrapper(final String pipeline, final String imports) throws IOException, InterruptedException {
 		super(EScikitLearnProblemType.CLASSIFICATION, pipeline, imports);
 	}
 

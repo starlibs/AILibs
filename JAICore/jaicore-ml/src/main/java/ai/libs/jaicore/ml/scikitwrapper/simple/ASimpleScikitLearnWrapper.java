@@ -28,32 +28,58 @@ import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapper;
 import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapperConfig;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapperExecutionFailedException;
 import ai.libs.python.IPythonConfig;
+import ai.libs.python.PythonRequirementDefinition;
 import ai.libs.python.PythonUtil;
 
 public abstract class ASimpleScikitLearnWrapper<P extends IPrediction, B extends IPredictionBatch> extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, P, B> implements IScikitLearnWrapper {
+	// logging
 	private Logger logger = LoggerFactory.getLogger(ASimpleScikitLearnWrapper.class);
 
+	// python requirements
+	public static final int PYTHON_MINIMUM_REQUIRED_VERSION_REL = 3;
+	public static final int PYTHON_MINIMUM_REQUIRED_VERSION_MAJ = 5;
+	public static final int PYTHON_MINIMUM_REQUIRED_VERSION_MIN = 0;
+	protected static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn", "pandas" };
+	protected static final String[] PYTHON_OPTIONAL_MODULES = {};
+
+	private static Boolean pythonRequirementsFulfilled = null;
+
+	// configurables
 	private static File tempDir = null;
 
 	private String pathExecutableTemplate = "sklearn/sklearn_template_windows.twig.py";
 	protected IScikitLearnWrapperConfig sklearnClassifierConfig = ConfigFactory.create(IScikitLearnWrapperConfig.class);
-	protected IPythonConfig pythonC = ConfigFactory.create(IPythonConfig.class);
+	protected IPythonConfig pythonC;
+	private PythonUtil putil;
 
+	// variables of the object
 	protected final String problem;
 	protected final String constructorCall;
 	protected final String imports;
-	private PythonUtil putil;
 
+	// temporary files
 	private File executable = null;
 	private File outputFile = null;
 
+	// temporary data
 	protected ILabeledDataset<? extends ILabeledInstance> trainingData;
 
-	public ASimpleScikitLearnWrapper(final String constructorCall, final String imports, final String problem) {
+	public ASimpleScikitLearnWrapper(final String constructorCall, final String imports, final String problem) throws IOException, InterruptedException {
+		this(constructorCall, imports, problem, ConfigFactory.create(IPythonConfig.class));
+	}
+
+	public ASimpleScikitLearnWrapper(final String constructorCall, final String imports, final String problem, final IPythonConfig pythonConfig) throws IOException, InterruptedException {
 		this.constructorCall = constructorCall;
 		this.imports = imports;
 		this.problem = problem;
-		this.putil = new PythonUtil(this.pythonC);
+		this.setPythonConfig(pythonConfig);
+	}
+
+	private synchronized void ensurePythonRequirementsAreSatisfied() throws IOException, InterruptedException {
+		if (pythonRequirementsFulfilled == null) {
+			new PythonRequirementDefinition(PYTHON_MINIMUM_REQUIRED_VERSION_REL, PYTHON_MINIMUM_REQUIRED_VERSION_MAJ, PYTHON_MINIMUM_REQUIRED_VERSION_MIN, PYTHON_REQUIRED_MODULES, PYTHON_OPTIONAL_MODULES).check(this.pythonC);
+		}
+		pythonRequirementsFulfilled = true;
 	}
 
 	@Override
@@ -198,9 +224,10 @@ public abstract class ASimpleScikitLearnWrapper<P extends IPrediction, B extends
 	}
 
 	@Override
-	public void setPythonConfig(final IPythonConfig pythonConfig) {
+	public void setPythonConfig(final IPythonConfig pythonConfig) throws IOException, InterruptedException {
 		this.pythonC = pythonConfig;
 		this.putil = new PythonUtil(pythonConfig);
+		this.ensurePythonRequirementsAreSatisfied();
 	}
 
 	@Override

@@ -26,7 +26,7 @@ import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapperExecutionFailedExcepti
 
 public class SimpleScikitLearnClassifier extends ASimpleScikitLearnWrapper<ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> implements ISingleLabelClassifier {
 
-	public SimpleScikitLearnClassifier(final String constructorCall, final String imports) {
+	public SimpleScikitLearnClassifier(final String constructorCall, final String imports) throws IOException, InterruptedException {
 		super(constructorCall, imports, "classification");
 	}
 

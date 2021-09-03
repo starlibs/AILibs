@@ -72,7 +72,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 	protected Timeout timeout;
 	private boolean listenToPidFromProcess; // If true, the PID is obtained from the python process being started by listening to according output.
 
-	protected AScikitLearnWrapper(final EScikitLearnProblemType problemType, final String pipeline, final String imports) throws IOException {
+	protected AScikitLearnWrapper(final EScikitLearnProblemType problemType, final String pipeline, final String imports) throws IOException, InterruptedException {
 		this.problemType = problemType;
 		this.pipeline = pipeline;
 		this.imports = imports;

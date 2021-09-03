@@ -26,7 +26,8 @@ import ai.libs.mlplan.sklearn.builder.MLPlanScikitLearnBuilder;
 public class MLPlanScikitLearnRegressionResultDeliveryTester extends AutoMLAlgorithmForRegressionResultProductionTest {
 
 	@Override
-	public IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws AlgorithmCreationException, IOException {
+	public IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(final ILabeledDataset<?> data)
+			throws AlgorithmCreationException, IOException, InterruptedException {
 		this.logger.info("Creating ML-Plan instance.");
 		MLPlanScikitLearnBuilder builder = MLPlanScikitLearnBuilder.forRegression();
 		int baseTime;

@@ -12,7 +12,7 @@ public class ScikitLearnRegressorFactory extends ATwoStepPipelineScikitLearnFact
 	}
 
 	@Override
-	public IScikitLearnWrapper getScikitLearnWrapper(final String constructionString, final String imports) throws IOException {
+	public IScikitLearnWrapper getScikitLearnWrapper(final String constructionString, final String imports) throws IOException, InterruptedException {
 		return new SimpleScikitLearnRegressor(constructionString, imports);
 	}
 

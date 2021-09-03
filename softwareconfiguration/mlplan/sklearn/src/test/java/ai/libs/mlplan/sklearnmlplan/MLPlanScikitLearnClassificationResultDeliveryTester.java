@@ -27,7 +27,8 @@ import ai.libs.mlplan.sklearn.builder.MLPlanScikitLearnBuilder;
 public class MLPlanScikitLearnClassificationResultDeliveryTester extends AutoMLAlgorithmForClassificationResultProductionTester {
 
 	@Override
-	public IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws AlgorithmCreationException, IOException {
+	public IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(final ILabeledDataset<?> data)
+			throws AlgorithmCreationException, IOException, InterruptedException {
 		this.logger.info("Creating ML-Plan instance.");
 		MLPlanScikitLearnBuilder builder = MLPlanScikitLearnBuilder.forClassification();
 		int baseTime;
@@ -44,7 +45,7 @@ public class MLPlanScikitLearnClassificationResultDeliveryTester extends AutoMLA
 		builder.withNodeEvaluationTimeOut(new Timeout(totalTimeout.seconds(), TimeUnit.SECONDS));
 		builder.withMCCVBasedCandidateEvaluationInSearchPhase(3, .7);
 		builder.withMCCVBasedCandidateEvaluationInSelectionPhase(3, .7);
-		
+
 		MLPlan mlplan = builder.withDataset(data).build();
 		this.logger.info("Built of ML-Plan complete");
 		return mlplan;

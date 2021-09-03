@@ -25,7 +25,7 @@ import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapperExecutionFailedExcepti
 public class SimpleScikitLearnRegressor extends ASimpleScikitLearnWrapper<IRegressionPrediction, IRegressionResultBatch> {
 	private Logger logger = LoggerFactory.getLogger(SimpleScikitLearnRegressor.class);
 
-	public SimpleScikitLearnRegressor(final String constructorCall, final String imports) {
+	public SimpleScikitLearnRegressor(final String constructorCall, final String imports) throws IOException, InterruptedException {
 		super(constructorCall, imports, "regression");
 	}
 

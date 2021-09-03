@@ -1,9 +1,7 @@
 package ai.libs.python;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -115,27 +113,31 @@ public class PythonUtil {
 		}
 	}
 
-	public String executeScript(final String script) throws IOException {
+	public String executeScript(final String script) throws IOException, InterruptedException {
+		// ensure that script is wrapped into quotation marks when being run on MacOS
+		String scriptToExecute;
+		if (ProcessUtil.getOS() == EOperatingSystem.MAC) {
+			scriptToExecute = "'" + script + "'";
+		} else {
+			scriptToExecute = script;
+		}
+
+		// build command array
 		String[] command = this.getExecutableCommandArray(true, script);
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.redirectErrorStream(true);
 		Process p = processBuilder.command(command).start();
-		StringBuilder sb = new StringBuilder();
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-			String line;
-			while ((line = br.readLine()) != null) {
-				sb.append(line);
-			}
-		}
-		return sb.toString();
+		DefaultProcessListener dpl = new DefaultProcessListener();
+		dpl.listenTo(p);
+		return dpl.getDefaultOutput();
 	}
 
-	public String getInstalledVersion() throws IOException {
+	public String getInstalledVersion() throws IOException, InterruptedException {
 		return this.executeScript(PY_IMPORT + "platform; print(platform.python_version())");
 	}
 
-	public boolean isInstalledVersionCompatible(final int reqRel, final int reqMaj, final int reqMin) throws IOException {
-		String[] versionSplit = this.getInstalledVersion().split("\\.");
+	public boolean isInstalledVersionCompatible(final int reqRel, final int reqMaj, final int reqMin) throws IOException, InterruptedException {
+		String[] versionSplit = this.getInstalledVersion().trim().split("\\.");
 		if (versionSplit.length != 3) {
 			throw new SystemRequirementsNotMetException("Could not parse python version to be of the shape X.X.X");
 		}
@@ -149,7 +151,7 @@ public class PythonUtil {
 		return ((actRel > reqRel) || (actRel == reqRel && actMaj > reqMaj) || (actRel == reqRel && actMaj == reqMaj && actMin >= reqMin));
 	}
 
-	public boolean areAllGivenModuleInstalled(final List<String> modules) throws IOException {
+	public boolean areAllGivenModuleInstalled(final List<String> modules) throws IOException, InterruptedException {
 		StringBuilder imports = new StringBuilder();
 		for (String module : modules) {
 			if (!imports.toString().isEmpty()) {
@@ -160,15 +162,15 @@ public class PythonUtil {
 		return !this.executeScript(imports.toString()).contains("ModuleNotFoundError");
 	}
 
-	public boolean isSingleModuleInstalled(final String moduleName) throws IOException {
+	public boolean isSingleModuleInstalled(final String moduleName) throws IOException, InterruptedException {
 		return !this.executeScript(PY_IMPORT + moduleName).contains("ModuleNotFoundError");
 	}
 
-	public List<String> getMissingModules(final String... modules) throws IOException {
+	public List<String> getMissingModules(final String... modules) throws IOException, InterruptedException {
 		return this.getMissingModules(Arrays.asList(modules));
 	}
 
-	public List<String> getMissingModules(final List<String> modules) throws IOException {
+	public List<String> getMissingModules(final List<String> modules) throws IOException, InterruptedException {
 		if (this.areAllGivenModuleInstalled(modules)) { // first try with a single invocation whether everything required is there.
 			return Arrays.asList();
 		}
@@ -181,7 +183,7 @@ public class PythonUtil {
 		return missingModules;
 	}
 
-	public boolean isModuleInstalled(final String... modules) throws IOException {
+	public boolean isModuleInstalled(final String... modules) throws IOException, InterruptedException {
 		return this.getMissingModules(modules).isEmpty();
 	}
 }

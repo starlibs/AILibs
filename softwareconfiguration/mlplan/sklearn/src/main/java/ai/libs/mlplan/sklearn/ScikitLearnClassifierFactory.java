@@ -12,7 +12,7 @@ public class ScikitLearnClassifierFactory extends ATwoStepPipelineScikitLearnFac
 	}
 
 	@Override
-	public IScikitLearnWrapper getScikitLearnWrapper(final String constructionString, final String imports) throws IOException {
+	public IScikitLearnWrapper getScikitLearnWrapper(final String constructionString, final String imports) throws IOException, InterruptedException {
 		return new SimpleScikitLearnClassifier(constructionString, imports);
 	}
 

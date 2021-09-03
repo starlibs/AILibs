@@ -29,26 +29,26 @@ public class PythonUtilTest {
 	}
 
 	@Test
-	public void testGetInstalledVersion() throws IOException {
+	public void testGetInstalledVersion() throws IOException, InterruptedException {
 		String installedVersion = util.getInstalledVersion();
 		assertTrue(installedVersion.matches("[0-9]+\\.[0-9]+\\.[0-9]+"), "Installed Python version could not be retrieved or has incorrect format: " + installedVersion);
 	}
 
 	@Test
-	public void testIsSingleModuleInstalled() throws IOException {
+	public void testIsSingleModuleInstalled() throws IOException, InterruptedException {
 		assertTrue(util.isModuleInstalled("os"), "Cannot check whether the os module is installed which should always be available.");
 		assertFalse(util.isModuleInstalled(randomStringForNegativeCheck), "Apparently there seems to be a module installed named like the randomly generated string: " + randomStringForNegativeCheck);
 	}
 
 	@Test
-	public void testGetMissingModules() throws IOException {
+	public void testGetMissingModules() throws IOException, InterruptedException {
 		List<String> moduleList = Arrays.asList("os", randomStringForNegativeCheck);
 		List<String> missingModules = util.getMissingModules(moduleList);
 		assertEquals(Arrays.asList(randomStringForNegativeCheck), missingModules, "List of missing modules is not as expected.");
 	}
 
 	@Test
-	public void testExecuteScript() throws IOException {
+	public void testExecuteScript() throws IOException, InterruptedException {
 		String scriptToExec = "print('Hello World')";
 		assertEquals(util.executeScript(scriptToExec), "Hello World", "Script has not been executed correctly or generated non-expected outputs.");
 	}
