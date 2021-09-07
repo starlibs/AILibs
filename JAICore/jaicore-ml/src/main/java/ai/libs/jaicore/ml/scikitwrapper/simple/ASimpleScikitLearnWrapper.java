@@ -111,7 +111,7 @@ public abstract class ASimpleScikitLearnWrapper<P extends IPrediction, B extends
 		}
 
 		try {
-			ArffDatasetAdapter.serializeDataset(dataFile, dataset);
+			new ArffDatasetAdapter().serializeDataset(dataFile, dataset);
 		} catch (IOException e1) {
 			throw new ScikitLearnWrapperExecutionFailedException("Could not dump data file for prediction", e1);
 		}
