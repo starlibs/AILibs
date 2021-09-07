@@ -9,10 +9,16 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.IClassifierEvaluator;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -39,8 +45,10 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.logging.LoggerUtil;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.PreTrainedPredictionBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
+import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
 import ai.libs.jaicore.test.LongTest;
 
 /**
@@ -114,10 +122,37 @@ public abstract class AutoMLAlgorithmResultProductionTester extends ATest {
 			/* free memory */
 			trainTestSplit = null;
 
+			/* Sanity check for minimum quality */
+			double maximumLoss = Double.MAX_VALUE;
+			if (train.getLabelAttribute() instanceof ICategoricalAttribute) {
+				ICategoricalAttribute att = (ICategoricalAttribute) train.getLabelAttribute();
+				Map<Integer, Integer> counterMap = new HashMap<>();
+				train.stream().map(x -> (int) x.getLabel()).forEach(x -> counterMap.put(x, counterMap.computeIfAbsent(x, t -> 0) + 1));
+
+				Integer majorityClass = null;
+				for (Entry<Integer, Integer> entry : counterMap.entrySet()) {
+					if (majorityClass == null || entry.getValue() > counterMap.get(majorityClass)) {
+						majorityClass = entry.getKey();
+					}
+				}
+				final int selectedMajorityClass = majorityClass;
+				List predictions = IntStream.range(0, test.size()).mapToObj(x -> new SingleLabelClassification(att.getLabels().size(), selectedMajorityClass)).collect(Collectors.toList());
+				List expected = test.stream().map(x -> (int) x.getLabel()).collect(Collectors.toList());
+				maximumLoss = this.getTestMeasure().loss(expected, predictions);
+			} else if (train.getLabelAttribute() instanceof INumericAttribute) {
+				double mean = train.stream().mapToDouble(x -> (double) x.getLabel()).average().getAsDouble();
+				List predictions = IntStream.range(0, test.size()).mapToObj(x -> new SingleTargetRegressionPrediction(mean)).collect(Collectors.toList());
+				List expected = test.stream().map(x -> (double) x.getLabel()).collect(Collectors.toList());
+				maximumLoss = this.getTestMeasure().loss(expected, predictions);
+			} else {
+				this.logger.warn("Test does not support {} whether the result achieves at maximum a loss of a statistic baseline.", train.getLabelAttribute().getClass().getName());
+			}
+
 			/* compute error rate */
 			assertTrue(test.size() >= 10, "At least 10 instances must be classified!");
 			IClassifierEvaluator evaluator = new PreTrainedPredictionBasedClassifierEvaluator(test, this.getTestMeasure());
 			double score = evaluator.evaluate(c);
+			assertTrue(score <= maximumLoss, "The test score of the final solution (" + score + ") did not meet the minimum requirements of a maximum loss of " + maximumLoss);
 			Awaitility.await().atLeast(Duration.ofSeconds(algorithm.getTimeout().seconds() / 20));
 			assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty(), "There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks());
 			this.logger.info("Error rate of solution {} ({}) on {} is: {}", c.getClass().getName(), c, datasetname, score);
