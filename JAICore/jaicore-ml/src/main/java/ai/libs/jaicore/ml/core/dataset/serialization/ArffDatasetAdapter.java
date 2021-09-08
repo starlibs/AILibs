@@ -25,6 +25,7 @@ import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.IStringAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.serialization.IDatasetDeserializer;
 import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
@@ -305,8 +306,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 				} else {
 					try {
 						value = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
-					}
-					catch (RuntimeException e) {
+					} catch (RuntimeException e) {
 						IAttribute att = attributes.get(i);
 						throw new IllegalArgumentException("Could not unserizalize value " + lineSplit[i] + " on attribute " + att.getName() + " with domain " + att.getStringDescriptionOfDomain(), e);
 					}
@@ -490,7 +490,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			return V_MISSING_VALUE;
 		}
 		String returnValue = att.serializeAttributeValue(value);
-		if (att instanceof ICategoricalAttribute) {
+		if (att instanceof ICategoricalAttribute || att instanceof IStringAttribute) {
 			returnValue = "'" + returnValue + "'";
 		}
 		return returnValue;
@@ -516,6 +516,8 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			sb.append("{'" + ((ICategoricalAttribute) att).getLabels().stream().collect(Collectors.joining("','")) + "'}");
 		} else if (att instanceof INumericAttribute) {
 			sb.append(EArffAttributeType.NUMERIC.getName());
+		} else if (att instanceof IStringAttribute) {
+			sb.append(EArffAttributeType.STRING.getName());
 		} else if (att instanceof SensorTimeSeriesAttribute) {
 			sb.append(EArffAttributeType.TIMESERIES.getName());
 		}

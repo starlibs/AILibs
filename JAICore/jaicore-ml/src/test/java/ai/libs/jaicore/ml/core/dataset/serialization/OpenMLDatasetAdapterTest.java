@@ -101,8 +101,7 @@ public class OpenMLDatasetAdapterTest extends ATest {
 	}
 
 	public static Stream<Arguments> getSmallDatasets() throws IOException, Exception {
-		return readDatasets(Arrays.asList(
-				3, // kr-vs-kp
+		return readDatasets(Arrays.asList(3, // kr-vs-kp
 				6, // letter
 				9, // autos
 				12, // mfeat-factors
@@ -139,10 +138,8 @@ public class OpenMLDatasetAdapterTest extends ATest {
 				1590, // adult
 				40691, // wine-quality-red
 				41066, // secom
-				1475, 1468, 1489, 4538, 41027, 40981, 40982, 40983,
-				40984 // segment
-				,40685, 40900, 40498, 41144, 41146, 41156, 41157, 54, 188, 1494, 1464, 1487, 1067, 1049
-				));
+				1475, 1468, 1489, 4538, 41027, 40981, 40982, 40983, 40984 // segment
+				, 40685, 40900, 40498, 41144, 41146, 41156, 41157, 54, 188, 1494, 1464, 1487, 1067, 1049));
 	}
 
 	public static Stream<Arguments> getMediumDatasets() throws IOException, Exception {
@@ -179,7 +176,7 @@ public class OpenMLDatasetAdapterTest extends ATest {
 				41168, // jannis
 				23517, // numerai28.6
 				41150 // MiniBooNE
-				));
+		));
 	}
 
 	public static Stream<Arguments> getBigDatasets() throws IOException, Exception {
@@ -197,7 +194,7 @@ public class OpenMLDatasetAdapterTest extends ATest {
 				41159, // guilermo
 				41147, // albert
 				42732 // sf-police-incidents
-				));
+		));
 	}
 
 	private static int lastCachedId; // this is to detect whether the current dataset hold in dataset fits the current problem set

@@ -27,7 +27,7 @@ public class MekaPipelineFactoryTest extends AbstractComponentInstanceFactoryTes
 	}
 
 	public static Stream<Arguments> getComponentNames() {
-		return getComponentNames("MLClassifier", repository);
+		return getComponentNames("BasicMLClassifier", repository);
 	}
 
 	@Override
