@@ -60,6 +60,8 @@ import ai.libs.jaicore.test.LongTest;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public abstract class AutoMLAlgorithmResultProductionTester extends ATest {
 
+	public static final double TOLERANCE = 0.015; // this is a tolerance we admit here w.r.t. dispersion in the evaluation scores
+
 	public abstract IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> getAutoMLAlgorithm(ILabeledDataset<?> data)
 			throws AlgorithmCreationException, IOException, InterruptedException;
 
@@ -72,7 +74,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends ATest {
 	}
 
 	@LongTest
-	@ParameterizedTest(name = "Test that ML-Plan delivers a model on {0}")
+	@ParameterizedTest(name = "Test that ML-Plan delivers a model on {0} with performance not worse than " + TOLERANCE + " compared to a trivial model (e.g. majority).")
 	@MethodSource("getDatasets")
 	public void testThatModelIsTrained(final OpenMLProblemSet problemSet)
 			throws DatasetDeserializationFailedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, ObjectEvaluationFailedException, SplitFailedException, AlgorithmCreationException, IOException {
@@ -152,7 +154,7 @@ public abstract class AutoMLAlgorithmResultProductionTester extends ATest {
 			assertTrue(test.size() >= 10, "At least 10 instances must be classified!");
 			IClassifierEvaluator evaluator = new PreTrainedPredictionBasedClassifierEvaluator(test, this.getTestMeasure());
 			double score = evaluator.evaluate(c);
-			assertTrue(score <= maximumLoss, "The test score of the final solution (" + score + ") did not meet the minimum requirements of a maximum loss of " + maximumLoss);
+			assertTrue(score <= maximumLoss + TOLERANCE, "The test score of the final solution (" + score + ") did not meet the minimum requirements of a maximum loss of " + maximumLoss);
 			Awaitility.await().atLeast(Duration.ofSeconds(algorithm.getTimeout().seconds() / 20));
 			assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty(), "There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks());
 			this.logger.info("Error rate of solution {} ({}) on {} is: {}", c.getClass().getName(), c, datasetname, score);

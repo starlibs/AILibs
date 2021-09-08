@@ -1,0 +1,14 @@
+weka.classifiers.functions.SimpleLinearRegression
+weka.classifiers.trees.RandomTree
+weka.classifiers.trees.J48
+weka.classifiers.lazy.IBk
+weka.classifiers.trees.RandomForest
+weka.classifiers.functions.SMOreg
+weka.classifiers.functions.MultilayerPerceptron
+weka.classifiers.trees.REPTree
+weka.classifiers.trees.DecisionStump
+weka.classifiers.functions.SGD
+weka.classifiers.meta.AdaBoostM1
+weka.classifiers.meta.Bagging
+weka.classifiers.meta.LogitBoost
+weka.classifiers.meta.RandomCommittee

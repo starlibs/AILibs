@@ -9,7 +9,8 @@
 				"AbstractClassifier",
 				"Classifier",
 				"BaseClassifier",
-				"WeightedInstancesHandler"
+				"WeightedInstancesHandler",
+				"AbstractRegressor"
 			],
 			"parameters": [
 				{

@@ -21,7 +21,7 @@ import ai.libs.mlplan.weka.weka.WekaRegressorFactory;
 
 public enum EMLPlanWekaProblemType implements IProblemType<IWekaClassifier> {
 
-	CLASSIFICATION_MULTICLASS("automl/searchmodels/weka/weka-full.json", "conf/mlplan-weka.json", "mlplan/weka-preferenceList-autoweka.txt", "conf/preferenceList.txt", "AbstractClassifier", new WekaPipelineFactory(),
+	CLASSIFICATION_MULTICLASS("automl/searchmodels/weka/weka-full.json", "conf/mlplan-weka.json", "mlplan/weka-preferenceList-classification.txt", "conf/preferenceList.txt", "AbstractClassifier", new WekaPipelineFactory(),
 			EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //
 
 	CLASSIFICATION_MULTICLASS_REDUCED("automl/searchmodels/weka/weka-reduced.json", EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
@@ -34,7 +34,7 @@ public enum EMLPlanWekaProblemType implements IProblemType<IWekaClassifier> {
 			new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //
 
 	REGRESSION("automl/searchmodels/weka/weka-full-regression.json", EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
-			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), "AbstractRegressor",
+			"mlplan/weka-preferenceList-regression.txt", EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), "AbstractRegressor",
 			new WekaRegressorFactory(), new RootMeanSquaredError(), new RootMeanSquaredError(), new RandomHoldoutSplitter<>(new Random(0), .7)), //
 
 	CLASSIFICATION_MULTICLASS_TINY("automl/searchmodels/weka/weka-small.json", EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(), "mlplan/weka-preferenceList-tiny.txt",
