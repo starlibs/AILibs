@@ -28,7 +28,7 @@ public class MLPlanProprietaryPropertyTester {
 
 	@Test
 	public void testThatSelectionPhaseUsesSupersetOfSearchData() throws Exception {
-		final ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(30);
+		final ILabeledDataset<?> ds = new OpenMLDatasetReader().deserializeDataset(30);
 		MLPlanSimpleBuilder builder = new MLPlanSimpleBuilder().withPortionOfDataReservedForSelection(.3).withTimeOut(new Timeout(30, TimeUnit.SECONDS)).withDataset(ds);
 		final MLPlan<?> mlplan = builder.build();
 		final int dataSizeSearchPhase = (int) Math.round(ds.size() * .7);

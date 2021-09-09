@@ -33,13 +33,13 @@ public class WekaDyadRankingExample {
 
 	public static void main(final String[] args) throws Exception {
 		long starttime = System.currentTimeMillis();
-		WekaInstances data = new WekaInstances(OpenMLDatasetReader.deserializeDataset(40983));
+		WekaInstances data = new WekaInstances(new OpenMLDatasetReader().deserializeDataset(40983));
 		List<WekaInstances> split = SplitterUtil.getLabelStratifiedTrainTestSplit(data, 0, 0.7);
 
 		WEKADyadRankedNodeQueueConfig openConfig = new WEKADyadRankedNodeQueueConfig();
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 		builder.withSearchSpaceConfigFile(new File("resources/automl/searchmodels/weka/weka-reduced5.json")).withAlgorithmConfigFile(new File("conf/mlplan.properties"))
-				.withSearchFactory(new DyadRankedBestFirstFactory<>(openConfig), new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness<>()).withPreferredNodeEvaluator(n -> 1.0);
+		.withSearchFactory(new DyadRankedBestFirstFactory<>(openConfig), new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness<>()).withPreferredNodeEvaluator(n -> 1.0);
 
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
 		openConfig.setComponents(mlplan.getComponents());

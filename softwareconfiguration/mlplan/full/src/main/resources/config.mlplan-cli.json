@@ -1,5 +1,5 @@
 {
-	"version": "0.1-alpha",
+	"version": "0.1",
 	"options": [
 		{
 			"shortOpt": "h",
@@ -120,6 +120,12 @@
 			"shortOpt": "os",
 			"longOpt": "outputStatistics",
 			"description": "Generate statistics as output and write it into the given path.",
+			"hasArg": "true"
+		},
+		{
+			"shortOpt": "om",
+			"longOpt": "outputModel",
+			"description": "Serializes the model of the eventually built learner it into the given path.",
 			"hasArg": "true"
 		}
 	

@@ -14,16 +14,18 @@ import ai.libs.jaicore.test.MediumTest;
 
 public class DatasetTester {
 
+	private OpenMLDatasetReader reader = new OpenMLDatasetReader();
+
 	@Test
 	@MediumTest
 	public void testColumnRemovalForDenseInstances() throws DatasetDeserializationFailedException {
-		this.testColumnRemoval((Dataset) OpenMLDatasetReader.deserializeDataset(60));
+		this.testColumnRemoval((Dataset) this.reader.deserializeDataset(60));
 	}
 
 	@Test
 	@LongTest
 	public void testColumnRemovalForSparseInstances() throws DatasetDeserializationFailedException {
-		this.testColumnRemoval((Dataset) OpenMLDatasetReader.deserializeDataset(4137));
+		this.testColumnRemoval((Dataset) this.reader.deserializeDataset(4137));
 	}
 
 	public void testColumnRemoval(final Dataset ds) {

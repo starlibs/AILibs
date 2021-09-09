@@ -73,7 +73,7 @@ public abstract class AutoMLAlgorithmForClassificationResultProductionTester ext
 			// problemSets.add(new OpenMLProblemSet(41026)); // gisette
 			// problemSets.add(new OpenMLProblemSet(41065)); // mnist-rotate
 			problemSets.add(new OpenMLProblemSet(41066)); // secom
-			problemSets.add(new OpenMLProblemSet(41705)); // ASP-POTASSCO-classification # THIS ARFF CANNOT BE PARSED BY THE PYTHON ARFF LOADERS
+			// problemSets.add(new OpenMLProblemSet(41705)); // ASP-POTASSCO-classification # THIS ARFF CANNOT BE PARSED BY THE PYTHON ARFF LOADERS
 			return problemSets.stream().map(Arguments::of);
 		} catch (Exception e) {
 			throw new DatasetDeserializationFailedException(e);

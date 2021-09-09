@@ -1,6 +1,10 @@
 package ai.libs.jaicore.ml.core.dataset.schema.attribute;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttributeValue;
@@ -12,12 +16,14 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 	 */
 	private static final long serialVersionUID = 3727153881173459843L;
 
+	private final Map<String, Integer> valuePosCache = new HashMap<>();
 	private final List<String> domain;
 	private final int numCategories;
 
 	public IntBasedCategoricalAttribute(final String name, final List<String> domain) {
 		super(name);
 		this.domain = domain;
+		IntStream.range(0, domain.size()).forEach(i -> this.valuePosCache.put(domain.get(i), i));
 		this.numCategories = domain.size();
 	}
 
@@ -28,7 +34,7 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 
 	@Override
 	public List<String> getLabels() {
-		return this.domain;
+		return Collections.unmodifiableList(this.domain);
 	}
 
 	@Override
@@ -49,7 +55,7 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		} else if (attributeValue instanceof Double) {
 			value = (int) (double) attributeValue;
 		} else if (this.domain.contains(attributeValue)) {
-			value = this.domain.indexOf(attributeValue);
+			value = this.valuePosCache.get(attributeValue);
 		}
 
 		if (value == null) {
@@ -64,7 +70,7 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		if (!this.isValidValue(attributeValue)) {
 			throw new IllegalArgumentException("No valid attribute value.");
 		}
-		return this.domain.indexOf(this.getLabelOfAttributeValue(attributeValue));
+		return this.valuePosCache.get(this.getLabelOfAttributeValue(attributeValue));
 	}
 
 	@Override
@@ -91,12 +97,15 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 			int cObject;
 			if (object instanceof Integer) {
 				cObject = (int) object;
-			} else if (this.domain.contains(object)) {
-				cObject = this.domain.indexOf(object);
-			} else if (object instanceof ICategoricalAttributeValue) {
+			}
+			else if (object instanceof ICategoricalAttributeValue) {
 				cObject = ((ICategoricalAttributeValue) object).getValue();
-			} else {
-				throw new IllegalStateException("Object should be parseable after the test.");
+			}
+			else {
+				cObject = this.valuePosCache.get(object);
+				if (cObject < 0) {
+					throw new IllegalStateException("Object should be parseable after the test.");
+				}
 			}
 			return new IntBasedCategoricalAttributeValue(this, cObject);
 		} else {
@@ -113,16 +122,12 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		return this.domain.get(categoryId);
 	}
 
-	public int getIdOfLabel(final String label) {
-		return this.domain.indexOf(label);
-	}
-
 	@Override
 	public double toDouble(final Object value) {
 		if (!(value instanceof Integer)) {
 			throw new IllegalArgumentException();
 		}
-		return this.domain.indexOf(value);
+		return (double)value;
 	}
 
 	@Override
@@ -134,7 +139,7 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 			if (!this.domain.contains(value)) {
 				throw new IllegalArgumentException("The given value \"" + value + "\" is not part of the domain and cannot be serialized. The domain is: " + this.domain);
 			}
-			return (String)value; // here we know that this must be a String; otherwise it could not be in the domain!
+			return (String) value; // here we know that this must be a String; otherwise it could not be in the domain!
 		}
 		if (((Integer) value) < 0) {
 			return null;
@@ -148,8 +153,11 @@ public class IntBasedCategoricalAttribute extends AAttribute implements ICategor
 		if ((string.startsWith("'") && string.endsWith("'")) || (string.startsWith("\"") && string.endsWith("\""))) {
 			trimmedString = trimmedString.substring(1, trimmedString.length() - 1);
 		}
-		int indexOf = this.domain.indexOf(trimmedString);
-		return (indexOf < 0) ? null : indexOf;
+		if (!this.valuePosCache.containsKey(trimmedString)) {
+			return null; // return null for missing values
+		}
+		int indexOf = this.valuePosCache.get(trimmedString); // storing this as an int here is important in order to obtain an exception on null
+		return indexOf;
 	}
 
 	@Override

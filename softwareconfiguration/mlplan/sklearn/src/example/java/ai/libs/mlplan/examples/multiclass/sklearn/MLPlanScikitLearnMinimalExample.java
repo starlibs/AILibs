@@ -15,6 +15,6 @@ public class MLPlanScikitLearnMinimalExample {
 
 	public static void main(final String[] args)
 			throws AlgorithmTimeoutedException, AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, IOException, DatasetDeserializationFailedException {
-		IScikitLearnWrapper c = MLPlanScikitLearnBuilder.forClassification().withDataset(OpenMLDatasetReader.deserializeDataset(3)).build().call();
+		IScikitLearnWrapper c = MLPlanScikitLearnBuilder.forClassification().withDataset(new OpenMLDatasetReader().deserializeDataset(3)).build().call();
 	}
 }

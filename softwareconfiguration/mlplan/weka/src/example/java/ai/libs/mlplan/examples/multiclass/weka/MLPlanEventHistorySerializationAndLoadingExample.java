@@ -44,7 +44,7 @@ public class MLPlanEventHistorySerializationAndLoadingExample {
 		File datasetFile = new File("testrsc/car.arff");
 		System.out.println(datasetFile.getAbsolutePath());
 
-		ILabeledDataset<?> ds = ArffDatasetAdapter.readDataset(datasetFile);
+		ILabeledDataset<?> ds = new ArffDatasetAdapter().readDataset(datasetFile);
 
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(1), .7);
 

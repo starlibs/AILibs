@@ -49,9 +49,9 @@ public class RandomComponentValidityTest extends ATest {
 
 	@BeforeAll
 	public static void setup() throws DatasetDeserializationFailedException, IOException {
-		classificationDataset = OpenMLDatasetReader.deserializeDataset(50);
+		classificationDataset = new OpenMLDatasetReader().deserializeDataset(50);
 		repoClassification = new ComponentSerialization().deserializeRepository(new ResourceFile("automl/searchmodels/weka/weka-full.json"));
-		regressionDataset = OpenMLDatasetReader.deserializeDataset(232);
+		regressionDataset = new OpenMLDatasetReader().deserializeDataset(232);
 		repoRegression = new ComponentSerialization().deserializeRepository(new ResourceFile("automl/searchmodels/weka/weka-full-regression.json"));
 		factory = new WekaPipelineFactory();
 	}

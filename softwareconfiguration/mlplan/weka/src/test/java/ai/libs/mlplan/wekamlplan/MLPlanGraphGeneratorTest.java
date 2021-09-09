@@ -24,7 +24,7 @@ public class MLPlanGraphGeneratorTest extends GraphGeneratorTester<TFDNode, Stri
 	public static Stream<Arguments> getGraphGenerators() throws IOException, DatasetDeserializationFailedException {
 
 		/* extract graph generator from mlplan */
-		WekaInstances data = new WekaInstances(ArffDatasetAdapter.readDataset(new File("testrsc/car.arff")));
+		WekaInstances data = new WekaInstances(new ArffDatasetAdapter().readDataset(new File("testrsc/car.arff")));
 		MLPlan<IWekaClassifier> mlplan = new MLPlanWekaBuilder().withDataset(data).build();
 		mlplan.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		IGraphGenerator<TFDNode, String> graphGenerator = mlplan.getSearchProblemInputGenerator().getGraphGenerator();

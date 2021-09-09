@@ -13,6 +13,7 @@ import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.evaluation.execution.LearnerExecutionFailedException;
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
@@ -22,30 +23,36 @@ import ai.libs.jaicore.ml.weka.regression.learner.WekaRegressor;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.RandomForest;
 
-public class OpenMLAutoMLBenchmarkReportTest {
+public class OpenMLAutoMLBenchmarkReportTest extends ATest {
 
 	private static final File BASE_DIR = new File("testrsc/report/openml-automlbenchmark");
 	private static final File EXP_BINARY = new File(BASE_DIR, "binary.txt");
 	private static final File EXP_MULTINOMIAL = new File(BASE_DIR, "multinomial.txt");
 	private static final File EXP_REGRESSION = new File(BASE_DIR, "regression.txt");
 
+	private final OpenMLDatasetReader reader = new OpenMLDatasetReader();
+
+	public OpenMLAutoMLBenchmarkReportTest() {
+		this.reader.setLoggerName(this.getLoggerName() + ".openmlreader");
+	}
+
 	@Test
 	public void testBinaryClassification() throws LearnerExecutionFailedException, SplitFailedException, InterruptedException, DatasetDeserializationFailedException, IOException {
-		List<ILabeledDataset> split = SplitterUtil.getLabelStratifiedTrainTestSplit(OpenMLDatasetReader.deserializeDataset(31), 0, .7);
+		List<ILabeledDataset> split = SplitterUtil.getLabelStratifiedTrainTestSplit(this.reader.deserializeDataset(31), 0, .7);
 		ILearnerRunReport runReport = new SupervisedLearnerExecutor().execute(new WekaClassifier(new J48()), split.get(0), split.get(1));
 		this.testReportOutput(EXP_BINARY, runReport);
 	}
 
 	@Test
 	public void testMultinomialClassification() throws LearnerExecutionFailedException, SplitFailedException, InterruptedException, DatasetDeserializationFailedException, IOException {
-		List<ILabeledDataset> split = SplitterUtil.getLabelStratifiedTrainTestSplit(OpenMLDatasetReader.deserializeDataset(307), 0, .7);
+		List<ILabeledDataset> split = SplitterUtil.getLabelStratifiedTrainTestSplit(this.reader.deserializeDataset(307), 0, .7);
 		ILearnerRunReport runReport = new SupervisedLearnerExecutor().execute(new WekaClassifier(new J48()), split.get(0), split.get(1));
 		this.testReportOutput(EXP_MULTINOMIAL, runReport);
 	}
 
 	@Test
 	public void testRegression() throws LearnerExecutionFailedException, SplitFailedException, InterruptedException, DatasetDeserializationFailedException, IOException {
-		List<ILabeledDataset<?>> split = SplitterUtil.getSimpleTrainTestSplit(OpenMLDatasetReader.deserializeDataset(42364), 0, .7);
+		List<ILabeledDataset<?>> split = SplitterUtil.getSimpleTrainTestSplit(this.reader.deserializeDataset(42364), 0, .7);
 		ILearnerRunReport runReport = new SupervisedLearnerExecutor().execute(new WekaRegressor(new RandomForest()), split.get(0), split.get(1));
 		System.out.println(new OpenMLAutoMLBenchmarkReport(runReport));
 		this.testReportOutput(EXP_REGRESSION, runReport);

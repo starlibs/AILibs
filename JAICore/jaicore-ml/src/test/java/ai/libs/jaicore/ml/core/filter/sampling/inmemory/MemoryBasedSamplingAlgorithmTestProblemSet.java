@@ -53,7 +53,7 @@ public class MemoryBasedSamplingAlgorithmTestProblemSet extends AAlgorithmTestPr
 	}
 
 	private ILabeledDataset<ILabeledInstance> loadDatasetFromOpenML(final int id) throws DatasetDeserializationFailedException, InterruptedException {
-		return OpenMLDatasetReader.deserializeDataset(id);
+		return new OpenMLDatasetReader().deserializeDataset(id);
 	}
 
 }

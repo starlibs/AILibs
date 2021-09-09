@@ -25,7 +25,7 @@ public class ScikitLearnClassificationTest {
 
 	@BeforeAll
 	public static void setup() throws DatasetDeserializationFailedException {
-		datasetIris = OpenMLDatasetReader.deserializeDataset(40975);
+		datasetIris = new OpenMLDatasetReader().deserializeDataset(40975);
 	}
 
 	@Test

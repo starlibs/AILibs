@@ -27,6 +27,7 @@ fi
 
 echo "Test task is: ${TEST_TASK}"
 ./gradlew $TEST_PROJECT:$TEST_TASK
+RETURNCODE=$? # conserve the return code of gradle, because that will be used as the return code of this script.
 echo "Test finished. This is the report folder:"
 find ./ -maxdepth 10 -path "*/build/reports/tests/${TEST_TASK}" -exec echo {} \; -exec ls -lh {} \;
-exit $?
+exit $RETURNCODE

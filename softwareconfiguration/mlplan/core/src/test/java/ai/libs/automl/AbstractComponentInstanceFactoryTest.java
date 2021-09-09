@@ -43,6 +43,7 @@ public abstract class AbstractComponentInstanceFactoryTest extends ATest {
 			try {
 				this.getFactory().getComponentInstantiation(list.get(i));
 			} catch (ComponentInstantiationFailedException e) {
+				this.logger.warn("Could not instantiate {}.", list.get(i), e);
 				succeeded = false;
 			}
 		}

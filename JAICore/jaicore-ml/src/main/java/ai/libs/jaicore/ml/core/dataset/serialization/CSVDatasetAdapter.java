@@ -53,8 +53,13 @@ public class CSVDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<I
 		}
 
 		String value = att.serializeAttributeValue(attValue);
-		if (att instanceof ICategoricalAttribute && !(value.startsWith("'") && value.endsWith("'"))) {
-			value = "'" + value + "'";
+		if (att instanceof ICategoricalAttribute) {
+			if (value.startsWith("'") && value.endsWith("'")) {
+				value = value.substring(1, value.length() - 2);
+			}
+			if (!value.startsWith("\"")) {
+				value = "\"" + value + "\"";
+			}
 		}
 		return value;
 	}

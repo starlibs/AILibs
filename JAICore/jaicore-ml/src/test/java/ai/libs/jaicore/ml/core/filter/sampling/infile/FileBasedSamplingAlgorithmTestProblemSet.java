@@ -42,7 +42,7 @@ public class FileBasedSamplingAlgorithmTestProblemSet extends AAlgorithmTestProb
 	}
 
 	private File loadDatasetFromOpenML(final int id) throws Exception {
-		return OpenMLDatasetReader.getArffFileOfOpenMLID(id);
+		return new OpenMLDatasetReader().getArffFileOfOpenMLID(id);
 	}
 
 }

@@ -26,7 +26,7 @@ public class MDPUtils implements ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(MDPUtils.class);
 
-	public <N, A> Collection<N> getStates(final IMDP<N, A, ?> mdp) throws InterruptedException {
+	public static <N, A> Collection<N> getStates(final IMDP<N, A, ?> mdp) throws InterruptedException {
 		Collection<N> states = new HashSet<>();
 		Deque<N> open = new ArrayDeque<>();
 		open.add(mdp.getInitState());

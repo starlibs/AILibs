@@ -35,7 +35,7 @@ public class WekaClassifierProblemSet implements IAlgorithmTestProblemSet<Pair<S
 	public Pair<String, ILabeledDataset<ILabeledInstance>> getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		try {
 			if (simpleDataset == null) {
-				simpleDataset = OpenMLDatasetReader.deserializeDataset(30);
+				simpleDataset = new OpenMLDatasetReader().deserializeDataset(30);
 			}
 			return new Pair<>(this.classifierClass, simpleDataset); // page-blocks
 		} catch (DatasetDeserializationFailedException e) {

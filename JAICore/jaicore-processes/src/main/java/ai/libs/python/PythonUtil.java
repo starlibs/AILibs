@@ -7,13 +7,16 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.aeonbits.owner.ConfigCache;
+import org.api4.java.common.control.ILoggingCustomizable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.SystemRequirementsNotMetException;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.processes.EOperatingSystem;
 import ai.libs.jaicore.processes.ProcessUtil;
 
-public class PythonUtil {
+public class PythonUtil implements ILoggingCustomizable {
 	private static final String CMD_PYTHON_COMMANDPARAM = "-c";
 	private static final String PY_IMPORT = "import ";
 
@@ -21,6 +24,8 @@ public class PythonUtil {
 	private final String pythonCommand;
 	private String pathToAnacondaExecutable;
 	private String anacondaEnvironment;
+
+	private Logger logger = LoggerFactory.getLogger(PythonUtil.class);
 
 	public PythonUtil() {
 		this(ConfigCache.getOrCreate(IPythonConfig.class));
@@ -102,6 +107,9 @@ public class PythonUtil {
 
 	public String executeScriptFileAndGetOutput(final List<String> fileAndParams) throws IOException, InterruptedException {
 		String[] commandArray = this.getExecutableCommandArray(false, fileAndParams.toArray(new String[] {}));
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("Invoking {}", Arrays.toString(commandArray));
+		}
 		Process process = new ProcessBuilder(commandArray).start();
 		DefaultProcessListener dpl = new DefaultProcessListener();
 		dpl.listenTo(process);
@@ -133,7 +141,7 @@ public class PythonUtil {
 	}
 
 	public String getInstalledVersion() throws IOException, InterruptedException {
-		return this.executeScript(PY_IMPORT + "platform; print(platform.python_version())");
+		return this.executeScript(PY_IMPORT + "platform; print(platform.python_version())").trim();
 	}
 
 	public boolean isInstalledVersionCompatible(final int reqRel, final int reqMaj, final int reqMin) throws IOException, InterruptedException {
@@ -185,5 +193,15 @@ public class PythonUtil {
 
 	public boolean isModuleInstalled(final String... modules) throws IOException, InterruptedException {
 		return this.getMissingModules(modules).isEmpty();
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }

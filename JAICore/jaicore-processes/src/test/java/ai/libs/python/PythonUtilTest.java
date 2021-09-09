@@ -12,9 +12,10 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.basic.StringUtil;
 
-public class PythonUtilTest {
+public class PythonUtilTest extends ATest {
 
 	private static final File SIMPLE_SCRIPT_FILE = new File("testrsc/simple_python_script.py");
 	private static final File SIMPLE_PARAM_SCRIPT_FILE = new File("testrsc/simple_parameterized_python_script.py");
@@ -25,6 +26,7 @@ public class PythonUtilTest {
 	@BeforeAll
 	public static void setup() {
 		util = new PythonUtil();
+		util.setLoggerName(ATest.LOGGER.getName() + "." + PythonUtil.class);
 		randomStringForNegativeCheck = StringUtil.getRandomString(10, new char[] { 'a', 'b', 'c', 'd', 'e' }, 0);
 	}
 
@@ -50,7 +52,7 @@ public class PythonUtilTest {
 	@Test
 	public void testExecuteScript() throws IOException, InterruptedException {
 		String scriptToExec = "print('Hello World')";
-		assertEquals(util.executeScript(scriptToExec), "Hello World", "Script has not been executed correctly or generated non-expected outputs.");
+		assertEquals(util.executeScript(scriptToExec).trim(), "Hello World", "Script has not been executed correctly or generated non-expected outputs.");
 	}
 
 	@Test

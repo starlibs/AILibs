@@ -67,7 +67,7 @@ Then open Eclipse and go to the import menu, e.g., in the package manager. Choos
 
 ### Maven dependency resolvement problems
 
-In some cases, Maven is not able to import referenced dependencies on repositories different from the central Maven repositories, resulting in a build failure. 
+In some cases, maven is not able to import referenced dependencies on repositories different from the central Maven repositories, resulting in a build failure. 
 To solve this problem, one might add the following repositories to the ```pom.xml``` to be able to properly execute ```maven compile``` or similar:
 
 ```

@@ -28,7 +28,7 @@ public class MetaMinerExample {
 	public static void main(final String[] args) throws Exception {
 		// Load data for a data set and create a train-test-split
 		logger.info("Load data.");
-		WekaInstances data = new WekaInstances(OpenMLDatasetReader.deserializeDataset(40984));
+		WekaInstances data = new WekaInstances(new OpenMLDatasetReader().deserializeDataset(40984));
 		List<IWekaInstances> split = WekaUtil.getStratifiedSplit(data, 0, .7f);
 
 		// Initialize meta mlplan and let it run for 2 minutes

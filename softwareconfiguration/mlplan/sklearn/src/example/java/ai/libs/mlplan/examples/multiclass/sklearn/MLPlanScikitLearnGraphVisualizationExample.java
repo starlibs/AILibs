@@ -33,7 +33,7 @@ public class MLPlanScikitLearnGraphVisualizationExample {
 
 	public static void main(final String[] args) throws Exception {
 
-		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(346);
+		ILabeledDataset<?> ds = new OpenMLDatasetReader().deserializeDataset(346);
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */

@@ -226,14 +226,17 @@ public class ComponentInstance implements IComponentInstance, Serializable {
 		return sb.toString();
 	}
 
+	@Override
 	public void putAnnotation(final String key, final String annotation) {
 		this.annotations.put(key, annotation);
 	}
 
+	@Override
 	public String getAnnotation(final String key) {
 		return this.annotations.get(key);
 	}
 
+	@Override
 	public void appendAnnotation(final String key, final String annotation) {
 		if (this.annotations.containsKey(key)) {
 			this.annotations.put(key, this.annotations.get(key) + annotation);

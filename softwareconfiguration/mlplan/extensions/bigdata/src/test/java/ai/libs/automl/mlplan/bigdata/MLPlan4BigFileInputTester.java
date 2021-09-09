@@ -30,7 +30,7 @@ public class MLPlan4BigFileInputTester extends ATest {
 	public void test() throws Exception {
 
 		this.logger.info("Reading in data.");
-		ILabeledDataset<?> data = new WekaInstances(OpenMLDatasetReader.deserializeDataset(1240));
+		ILabeledDataset<?> data = new WekaInstances(new OpenMLDatasetReader().deserializeDataset(1240));
 		this.logger.info("Splitting data.");
 		List<ILabeledDataset<?>> split = SplitterUtil.getSimpleTrainTestSplit(data, new Random(0), .7f);
 		this.logger.info("Ready. Now saving separate files.");

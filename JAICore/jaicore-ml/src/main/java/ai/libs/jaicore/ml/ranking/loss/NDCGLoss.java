@@ -23,6 +23,8 @@ public class NDCGLoss extends ARankingPredictionPerformanceMeasure implements IR
 	 */
 	private int l;
 
+	private static final boolean BINARY_RELEVANCE = true;
+
 	/**
 	 *
 	 * @param l The position up to which to compute the cumulative gain (zero-indexed, exclusive).
@@ -53,7 +55,11 @@ public class NDCGLoss extends ARankingPredictionPerformanceMeasure implements IR
 
 		Map<Object, Integer> relevance = new HashMap<>();
 		for (int i = 0; i < this.l; i++) {
-			relevance.put(expected.get(i), -(i + 1));
+			if (BINARY_RELEVANCE) {
+				relevance.put(expected.get(i), 1);
+			} else {
+				relevance.put(expected.get(i), -(i + 1));
+			}
 		}
 
 		double dcg = this.computeDCG(actual, relevance);
@@ -69,7 +75,7 @@ public class NDCGLoss extends ARankingPredictionPerformanceMeasure implements IR
 		int length = ranking.size();
 		double dcg = 0;
 		for (int i = 0; i < length; i++) {
-			dcg += (Math.pow(2, relevance.get(ranking.get(i))) - 1) / this.log2(i + 2.0);
+			dcg += Math.pow(2, relevance.computeIfAbsent(ranking.get(i), t -> 0)) / this.log2(i + 2.0);
 		}
 		return dcg;
 	}

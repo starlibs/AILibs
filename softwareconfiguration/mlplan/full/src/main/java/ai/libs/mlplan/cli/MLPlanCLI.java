@@ -42,6 +42,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
+import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
@@ -104,8 +105,10 @@ public class MLPlanCLI {
 	public static final String O_POS_CLASS_NAME = "pcn";
 	public static final String O_OPENML_TASK = "openMLTask"; // id of an openML taks as an alternative to fit and predict datasets
 
+
 	public static final String O_OUT_OPENML_BENCHMARK = "ooab";
 	public static final String O_OUT_STATS = "os";
+	public static final String O_OUT_MODEL = "om";
 
 	public static final String O_TMP = "tmp";
 	public static final String O_PYTHON_CMD = "pythonCmd";
@@ -116,6 +119,7 @@ public class MLPlanCLI {
 			new MLPlan4ScikitLearnRegressionCLIModule());
 	private static Map<String, IMLPlanCLIModule> moduleRegistry = null;
 	private static Map<String, String> defaults = new HashMap<>();
+	private static String version;
 
 	private static Double testPerformance;
 	private static IComponentInstance incumbent;
@@ -167,6 +171,7 @@ public class MLPlanCLI {
 				defaults.put(option.get(K_SHORT_OPT).asText(), option.get(K_DEFAULT).asText());
 			}
 		}
+		version = root.get("version").asText();
 		return options;
 	}
 
@@ -213,7 +218,7 @@ public class MLPlanCLI {
 
 	private static void printHelp(final Options options) {
 		final HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp(600, CLI_SYNTAX, "ML-Plan CLI v0.0.1-alpha\n================================\n", options, "===============================\nVisit us at: https://mlplan.org");
+		formatter.printHelp(600, CLI_SYNTAX, "ML-Plan CLI " + version + "\n================================\n", options, "===============================\nVisit us at: https://mlplan.org");
 	}
 
 	public static String getDefault(final String key) {
@@ -237,6 +242,8 @@ public class MLPlanCLI {
 			ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class).setProperty(IPythonConfig.KEY_PYTHON, cl.getOptionValue(O_PYTHON_CMD));
 			ConfigCache.getOrCreate(IPythonConfig.class).setProperty(IPythonConfig.KEY_PYTHON, cl.getOptionValue(O_PYTHON_CMD));
 		}
+
+
 
 		// Load CLI modules and identify module responsible for the requested ml-plan configuration
 		Map<String, IMLPlanCLIModule> moduleRegistry = getModuleRegistry();
@@ -324,8 +331,8 @@ public class MLPlanCLI {
 			fitDataset = split.get(0);
 			predictDataset = split.get(1);
 		} else {
-			if (cl.getOptionValue(O_MODULE).equals(MLPlan4ScikitLearnRegressionCLIModule.M_RUL)) {
-				fitDataset = ArffDatasetAdapter.readDataset(new File(cl.getOptionValue(O_FIT_DATASET)));
+			if (cl.getOptionValue(O_MODULE, getDefault(O_MODULE)).equals(MLPlan4ScikitLearnRegressionCLIModule.M_RUL)) {
+				fitDataset = new ArffDatasetAdapter().readDataset(new File(cl.getOptionValue(O_FIT_DATASET)));
 			} else {
 				Instances wekaData = new Instances(new FileReader(new File(cl.getOptionValue(O_FIT_DATASET))));
 				wekaData.setClassIndex(wekaData.numAttributes() - 1);
@@ -382,15 +389,16 @@ public class MLPlanCLI {
 		}
 
 		// call ml-plan to obtain the optimal supervised learner
-		logger.info("Build mlplan classifier");
+		logger.info("Running ML-Plan ...");
 		ISupervisedLearner optimizedLearner = mlplan.call();
 		incumbent = mlplan.getComponentInstanceOfSelectedClassifier();
+		logger.info("ML-Plan finished. JSON description of selected solution: {}", incumbent);
 
 		if (predictDataset != null || cl.hasOption(O_PREDICT_DATASET)) {
 			if (cl.hasOption(O_PREDICT_DATASET)) {
 				File predictDatasetFile = new File(cl.getOptionValue(O_PREDICT_DATASET));
 				logger.info("Load test data file: {}", predictDatasetFile.getAbsolutePath());
-				predictDataset = ArffDatasetAdapter.readDataset(predictDatasetFile);
+				predictDataset = new ArffDatasetAdapter().readDataset(predictDatasetFile);
 			}
 
 			ILearnerRunReport runReport = new SupervisedLearnerExecutor().execute(optimizedLearner, predictDataset);
@@ -408,6 +416,13 @@ public class MLPlanCLI {
 				logger.info("Generating statistics report in json and writing it to file {}.", outputFile);
 				writeFile(outputFile, new StatisticsReport(statsListener, mlplan.getComponentInstanceOfSelectedClassifier(), runReport).toString());
 			}
+		}
+
+		if (cl.hasOption(O_OUT_MODEL)) {
+			String outputFile = cl.getOptionValue(O_OUT_MODEL, getDefault(O_OUT_MODEL));
+			logger.info("Serializing trained model of selected classifier {} to output file {}.", optimizedLearner, outputFile);
+			FileUtil.serializeObject(optimizedLearner, outputFile);
+			logger.info("Serialization completed.");
 		}
 	}
 
@@ -434,6 +449,8 @@ public class MLPlanCLI {
 
 	public static void main(final String[] args) throws Exception {
 		System.out.println("Called ML-Plan CLI with the following params: >" + Arrays.toString(args) + "<");
+		System.out.println("Logger name is " + MLPlanCLI.class.getName() + ". If logger works properlym the next line should contain an INFO-level message.");
+		logger.info("Logger works properly. Log-level is {}.", logger.isTraceEnabled() ? "TRACE" : (logger.isDebugEnabled() ? "DEBUG" : logger.isInfoEnabled() ? "INFO" : logger.isWarnEnabled() ? "WARN" : logger.isErrorEnabled() ? "ERROR" : "UNKNOWN"));
 
 		final Options options = generateOptions();
 		if (args.length == 0) {

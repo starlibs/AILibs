@@ -65,7 +65,7 @@
 					"pre": "A in {weka.core.neighboursearch.CoverTree}",
 					"post": "X in {false}"
 				}
-			
+
 			]
 		}
 	]

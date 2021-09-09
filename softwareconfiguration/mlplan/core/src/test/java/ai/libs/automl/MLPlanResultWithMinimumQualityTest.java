@@ -40,7 +40,7 @@ public abstract class MLPlanResultWithMinimumQualityTest {
 	public void testMinimumQualityAfter5Min(final String benchmarkName, final int openmlid, final double minQuality)
 			throws SplitFailedException, InterruptedException, AlgorithmTimeoutedException, LearnerExecutionFailedException, AlgorithmException, AlgorithmExecutionCanceledException, IOException, DatasetDeserializationFailedException {
 		LOGGER.info("Execute minimum quality test run for {}", benchmarkName);
-		List<ILabeledDataset<? extends ILabeledInstance>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(OpenMLDatasetReader.deserializeDataset(openmlid), 0, 0.7);
+		List<ILabeledDataset<? extends ILabeledInstance>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(new OpenMLDatasetReader().deserializeDataset(openmlid), 0, 0.7);
 		AMLPlanBuilder builder = this.getBuilder();
 		builder.withDataset(split.get(0));
 		builder.withTimeOut(new Timeout(300, TimeUnit.SECONDS));

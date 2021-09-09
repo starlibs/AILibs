@@ -50,7 +50,7 @@ public class MLPlanScikitLearnSearchSpaceConfigurationTest extends AbstractSearc
 	public void prepare(final IProblemType<?> problemTypeOrig) throws DatasetDeserializationFailedException, IOException, SplitFailedException, InterruptedException {
 		EMLPlanScikitLearnProblemType problemType = (EMLPlanScikitLearnProblemType) problemTypeOrig;
 		String dataPath = (problemType == EMLPlanScikitLearnProblemType.RUL) ? DATASET_RUL : DATASET_DEFAULT;
-		ILabeledDataset<ILabeledInstance> data = ArffDatasetAdapter.readDataset(new File(dataPath));
+		ILabeledDataset<ILabeledInstance> data = new ArffDatasetAdapter().readDataset(new File(dataPath));
 
 		if (data.size() > 20) {// ensure that the dataset has at maximum 20 instances (for speedup)
 			data = (ILabeledDataset<ILabeledInstance>) SplitterUtil.getSimpleTrainTestSplit(data, 0, 20.0 / data.size()).get(0);

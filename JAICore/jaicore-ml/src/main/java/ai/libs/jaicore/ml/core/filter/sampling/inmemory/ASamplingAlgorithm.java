@@ -160,4 +160,8 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 	public String getLoggerName() {
 		return this.logger.getName();
 	}
+
+	protected Logger getLogger() {
+		return this.logger;
+	}
 }
