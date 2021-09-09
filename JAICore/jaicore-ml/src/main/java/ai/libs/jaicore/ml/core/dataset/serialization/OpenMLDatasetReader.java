@@ -9,7 +9,6 @@ import org.api4.java.ai.ml.core.dataset.descriptor.IDatasetDescriptor;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.serialization.IDatasetDeserializer;
-import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -21,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.reconstruction.ReconstructionInstruction;
-import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.core.dataset.Dataset;
 import ai.libs.jaicore.ml.core.filter.SplitterUtil;
 
@@ -53,10 +51,8 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 					}
 				}
 			}
-			if (dsd.getRow_id_attribute() != null) {
-				if (dataset.getInstanceSchema().getAttributeList().stream().filter(x -> x.getName().equals(dsd.getRow_id_attribute())).findAny().isPresent()) {
-					dataset.removeColumn(dsd.getRow_id_attribute());
-				}
+			if (dsd.getRow_id_attribute() != null && dataset.getInstanceSchema().getAttributeList().stream().anyMatch(x -> x.getName().equals(dsd.getRow_id_attribute()))) {
+				dataset.removeColumn(dsd.getRow_id_attribute());
 			}
 			return dataset;
 		} catch (Exception e) {
@@ -137,14 +133,5 @@ public class OpenMLDatasetReader implements IDatasetDeserializer<ILabeledDataset
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
 		this.adapter.setLoggerName(this.getLoggerName() + ".arffadapter");
-	}
-
-	public static void main(final String[] args) throws DatasetDeserializationFailedException, SplitFailedException, InterruptedException {
-		OpenMLDatasetReader reader = new OpenMLDatasetReader();
-		reader.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
-		ILabeledDataset<ILabeledInstance> ds = reader.deserializeDataset(41147);
-		System.out.println("Dataset read. Now splitting");
-		SplitterUtil.getLabelStratifiedTrainTestSplit(ds, 0, .9);
-		System.out.println("Split completed.");
 	}
 }

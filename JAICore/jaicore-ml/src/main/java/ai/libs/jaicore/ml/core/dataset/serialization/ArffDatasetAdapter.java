@@ -163,7 +163,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 					int classIndex = Integer.parseInt(optParser.get(F_CLASS_INDEX).toString());
 					metaData.put(K_CLASS_INDEX, classIndex);
 				} catch (Exception e) {
-					this.logger.warn("Could not read in class index from relation name: {}, class index: {}", line, optParser.get(F_CLASS_INDEX).toString());
+					this.logger.warn("Could not read in class index from relation name: {}, class index: {}", line, optParser.get(F_CLASS_INDEX));
 				}
 			}
 		} else {
@@ -412,8 +412,11 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						this.logger.debug("Switched to instance read mode in line {}. Class index is {}", lineCounter, relationMetaData.getAsInt(K_CLASS_INDEX));
 					}
 				} else {
+					if (dataset == null) {
+						throw new NullPointerException("The dataset point is empty even though we have skipped to instance read mode already.");
+					}
 					line = line.trim();
-					if (!line.isEmpty() && !line.startsWith("%")) { // ignore empty and comment lines);
+					if (!line.isEmpty() && !line.startsWith("%")) { // ignore empty and comment lines
 						List<Object> parsedInstance = this.parseInstance(sparseMode, attributes, relationMetaData.getAsInt(K_CLASS_INDEX), line);
 						ILabeledInstance newI;
 						if ((parsedInstance.get(0) instanceof Object[])) {

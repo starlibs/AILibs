@@ -163,7 +163,11 @@ public class LakeMDP extends AMDP<TimedLakeState, ELakeActions, Double> {
 				try {
 					ELakeActions action = policy.getAction(state, this.getApplicableActions(state));
 					sb.append(action != null ? action.toString().substring(0, 1) : "/");
-				} catch (ActionPredictionFailedException | InterruptedException e) {
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt(); // re-interrupt
+					break;
+				}
+				catch (ActionPredictionFailedException e) {
 					sb.append("EXCEPTION");
 				}
 			}
