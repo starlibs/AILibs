@@ -119,13 +119,13 @@ public abstract class AutoMLAlgorithmResultProductionTester extends ATest {
 					}
 				}
 				final int selectedMajorityClass = majorityClass;
-				List predictions = IntStream.range(0, test.size()).mapToObj(x -> new SingleLabelClassification(att.getLabels().size(), selectedMajorityClass)).collect(Collectors.toList());
-				List expected = test.stream().map(x -> (int) x.getLabel()).collect(Collectors.toList());
+				List predictions = IntStream.range(0, train.size()).mapToObj(x -> new SingleLabelClassification(att.getLabels().size(), selectedMajorityClass)).collect(Collectors.toList());
+				List expected = train.stream().map(x -> (int) x.getLabel()).collect(Collectors.toList());
 				maximumLoss = this.getTestMeasure().loss(expected, predictions);
 			} else if (train.getLabelAttribute() instanceof INumericAttribute) {
 				double mean = train.stream().filter(x -> x.getLabel() != null).mapToDouble(x -> (double) x.getLabel()).average().getAsDouble();
-				List predictions = test.stream().filter(x -> x.getLabel() != null).map(x -> new SingleTargetRegressionPrediction(mean)).collect(Collectors.toList());
-				List expected = test.stream().filter(x -> x.getLabel() != null).map(x -> (double) x.getLabel()).collect(Collectors.toList());
+				List predictions = train.stream().filter(x -> x.getLabel() != null).map(x -> new SingleTargetRegressionPrediction(mean)).collect(Collectors.toList());
+				List expected = train.stream().filter(x -> x.getLabel() != null).map(x -> (double) x.getLabel()).collect(Collectors.toList());
 				maximumLoss = this.getTestMeasure().loss(expected, predictions);
 			} else {
 				this.logger.warn("Test does not support {} whether the result achieves at maximum a loss of a statistic baseline.", train.getLabelAttribute().getClass().getName());
@@ -164,12 +164,14 @@ public abstract class AutoMLAlgorithmResultProductionTester extends ATest {
 
 			/* compute error rate */
 			assertTrue(test.size() >= 10, "At least 10 instances must be classified!");
-			IClassifierEvaluator evaluator = new PreTrainedPredictionBasedClassifierEvaluator(test, this.getTestMeasure());
-			double score = evaluator.evaluate(c);
-			assertTrue(score <= maximumLoss + TOLERANCE, "The test score of the final solution (" + score + ") did not meet the minimum requirements of a maximum loss of " + maximumLoss);
+			IClassifierEvaluator evaluatorTrainData = new PreTrainedPredictionBasedClassifierEvaluator(train, this.getTestMeasure());
+			IClassifierEvaluator evaluatorTestData = new PreTrainedPredictionBasedClassifierEvaluator(test, this.getTestMeasure());
+			double scoreTrain = evaluatorTrainData.evaluate(c);
+			double scoreTest = evaluatorTestData.evaluate(c);
+			assertTrue(scoreTrain <= maximumLoss + TOLERANCE, "The train score of the final solution (" + scoreTrain + ") did not meet the minimum requirements of a maximum loss of " + maximumLoss);
 			Awaitility.await().atLeast(Duration.ofSeconds(algorithm.getTimeout().seconds() / 20));
 			assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty(), "There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks());
-			this.logger.info("Error rate of solution {} ({}) on {} is: {}", c.getClass().getName(), c, datasetname, score);
+			this.logger.info("Error rate of solution {} ({}) on {} is: {} (train error) and {} (test error)", c.getClass().getName(), c, datasetname, scoreTrain, scoreTest);
 		} catch (AlgorithmTimeoutedException e) {
 			fail("No solution was found in the given timeout. Stack trace: " + Arrays.stream(e.getStackTrace()).map(se -> "\n\t" + se.toString()).collect(Collectors.joining()));
 		} finally {

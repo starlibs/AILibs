@@ -44,7 +44,7 @@ public abstract class AutoMLAlgorithmForRegressionResultProductionTest extends A
 			List<OpenMLProblemSet> problemSets = new ArrayList<>();
 			Study study = con.studyGet(130); // openml regression 30
 			List<Integer> datasetIDs = Arrays.asList(// list of openml ids
-					495, // baseball-pitcher
+					//					495, // baseball-pitcher
 					41021, // moneyball
 					574, // house_16H
 					564, // fried
@@ -73,7 +73,7 @@ public abstract class AutoMLAlgorithmForRegressionResultProductionTest extends A
 					196, // autoMpg
 					189, // kin8nm
 					183 // abalone
-			);
+					);
 
 			datasetIDs.stream().map(x -> {
 				try {
