@@ -24,7 +24,7 @@ import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 
 @Disabled("This project is currently not maintained")
-public class MLPlan4BigFileInputTester extends ATest {
+public class MLPlan4BigFileInputTest extends ATest {
 
 	@Test
 	public void test() throws Exception {
