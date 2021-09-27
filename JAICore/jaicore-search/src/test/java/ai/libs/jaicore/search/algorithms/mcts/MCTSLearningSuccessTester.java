@@ -76,7 +76,7 @@ public abstract class MCTSLearningSuccessTester<N, A> extends ATest {
 		Objects.requireNonNull(mdp);
 		MDPUtils utils = new MDPUtils();
 
-		UCT<N, A> mcts = new UCT<>(mdp, new UniformRandomPolicy<>(), this.getAllowedTrainingIterations(), this.getGamma(), this.getEpsilon(), new Random(0), false);
+		UCT<N, A> mcts = new UCT<>(mdp, new UniformRandomPolicy<>(), this.getAllowedTrainingIterations(), this.getGamma(), this.getEpsilon(), false);
 		mcts.setLoggerName(LoggerUtil.LOGGER_NAME_TESTEDALGORITHM);
 		UCBPolicy<N, A> policy = mcts.getTreePolicy();
 		this.logger.info("Training policy via MCTS");
