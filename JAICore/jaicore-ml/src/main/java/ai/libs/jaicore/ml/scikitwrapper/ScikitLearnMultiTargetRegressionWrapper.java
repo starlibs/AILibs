@@ -39,8 +39,8 @@ public class ScikitLearnMultiTargetRegressionWrapper<P extends IPrediction, B ex
 	}
 
 	@Override
-	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForFitMode(final File modelFile, final File trainingDataFile, final File outputFile) {
-		ScikitLearnWrapperCommandBuilder commandLineBuilder = super.constructCommandLineParametersForFitMode(modelFile, trainingDataFile, outputFile);
+	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForFitMode(final File modelFile, final File trainingDataFile) {
+		ScikitLearnWrapperCommandBuilder commandLineBuilder = super.constructCommandLineParametersForFitMode(modelFile, trainingDataFile);
 		commandLineBuilder.withTargetIndices(this.targetIndices);
 		return commandLineBuilder;
 	}
@@ -53,8 +53,8 @@ public class ScikitLearnMultiTargetRegressionWrapper<P extends IPrediction, B ex
 	}
 
 	@Override
-	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForFitAndPredictMode(final File trainingDataFile, final File trainingOutputFile, final File testingDataFile, final File testingOutputFile) {
-		ScikitLearnWrapperCommandBuilder commandLineBuilder = super.constructCommandLineParametersForFitAndPredictMode(trainingDataFile, trainingOutputFile, testingDataFile, testingOutputFile);
+	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForFitAndPredictMode(final File trainingDataFile, final File testingDataFile, final File testingOutputFile) {
+		ScikitLearnWrapperCommandBuilder commandLineBuilder = super.constructCommandLineParametersForFitAndPredictMode(trainingDataFile, testingDataFile, testingOutputFile);
 		commandLineBuilder.withTargetIndices(this.targetIndices);
 		return commandLineBuilder;
 	}

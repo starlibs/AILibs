@@ -41,25 +41,12 @@ public class ScikitLearnTimeSeriesFeatureEngineeringWrapper<P extends IPredictio
 		return super.getCommandBuilder(commandBuilder);
 	}
 
-	@Override
 	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForFitMode(final File modelFile, final File trainingDataFile, final File outputFile) {
-		ScikitLearnWrapperCommandBuilder commandBuilder = this.getCommandBuilder();
-		commandBuilder.withFitMode();
-		commandBuilder.withModelFile(modelFile);
-		commandBuilder.withFitDataFile(trainingDataFile);
-		commandBuilder.withFitOutputFile(outputFile);
-		return commandBuilder;
+		return super.constructCommandLineParametersForFitMode(modelFile, trainingDataFile).withFitOutputFile(outputFile);
 	}
 
-	@Override
 	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForFitAndPredictMode(final File trainingDataFile, final File trainingOutputFile, final File testingDataFile, final File testingOutputFile) {
-		ScikitLearnWrapperCommandBuilder commandBuilder = this.getCommandBuilder();
-		commandBuilder.withFitAndPredictMode();
-		commandBuilder.withFitDataFile(trainingDataFile);
-		commandBuilder.withFitOutputFile(trainingOutputFile);
-		commandBuilder.withPredictDataFile(testingDataFile);
-		commandBuilder.withPredictOutputFile(testingOutputFile);
-		return commandBuilder;
+		return super.constructCommandLineParametersForFitAndPredictMode(trainingDataFile, testingDataFile, testingOutputFile).withFitOutputFile(trainingOutputFile);
 	}
 
 	@Override
@@ -71,7 +58,6 @@ public class ScikitLearnTimeSeriesFeatureEngineeringWrapper<P extends IPredictio
 		return null;
 	}
 
-	@Override
 	protected B handleOutput(final File fitOutputFile, final File predictOutputFile) throws PredictionException, TrainingException {
 		this.handleOutput(fitOutputFile);
 		this.handleOutput(predictOutputFile);

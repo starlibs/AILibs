@@ -171,7 +171,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 			File outputFile = this.getOutputFile(trainingDataName);
 			if (!outputFile.exists()) {
 				this.modelFile = new File(this.scikitLearnWrapperConfig.getModelDumpsDirectory(), this.getModelFileName(trainingDataName));
-				String[] trainCommand = this.constructCommandLineParametersForFitMode(this.modelFile, trainingDataFile, outputFile).toCommandArray();
+				String[] trainCommand = this.constructCommandLineParametersForFitMode(this.modelFile, trainingDataFile).toCommandArray();
 				if (this.logger.isDebugEnabled()) {
 					this.logger.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
 				}
@@ -261,14 +261,14 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 			File trainingOutputFile = this.getOutputFile(trainingDataName);
 			File testingOutputFile = this.getOutputFile(testingDataName);
 			if (!trainingOutputFile.exists() && !testingOutputFile.exists()) {
-				String[] fitAndPredictCommand = this.constructCommandLineParametersForFitAndPredictMode(trainingDataFile, trainingOutputFile, testingDataFile, testingOutputFile).toCommandArray();
+				String[] fitAndPredictCommand = this.constructCommandLineParametersForFitAndPredictMode(trainingDataFile, testingDataFile, testingOutputFile).toCommandArray();
 				if (this.logger.isDebugEnabled()) {
 					this.logger.debug("{} run fitAndPredict mode {}", Thread.currentThread().getName(), Arrays.toString(fitAndPredictCommand));
 				}
 				this.runProcess(fitAndPredictCommand);
 			}
 
-			return this.handleOutput(trainingOutputFile, testingOutputFile);
+			return this.handleOutput(testingOutputFile);
 		} catch (ScikitLearnWrapperExecutionFailedException e) {
 			throw new TrainingException(COULD_NOT_RUN_SCIKIT_LEARN_MODEL, e);
 		}
@@ -328,7 +328,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 		return commandBuilder;
 	}
 
-	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForFitMode(final File modelFile, final File trainingDataFile, final File outputFile) {
+	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForFitMode(final File modelFile, final File trainingDataFile) {
 		ScikitLearnWrapperCommandBuilder commandBuilder = this.getCommandBuilder();
 		commandBuilder.withFitMode();
 		commandBuilder.withModelFile(modelFile);
@@ -347,7 +347,7 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 		return commandBuilder;
 	}
 
-	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForFitAndPredictMode(final File trainingDataFile, final File trainingOutputFile, final File testingDataFile, final File testingOutputFile) {
+	protected ScikitLearnWrapperCommandBuilder constructCommandLineParametersForFitAndPredictMode(final File trainingDataFile, final File testingDataFile, final File testingOutputFile) {
 		ScikitLearnWrapperCommandBuilder commandBuilder = this.getCommandBuilder();
 		commandBuilder.withFitAndPredictMode();
 		commandBuilder.withFitDataFile(trainingDataFile);
@@ -398,10 +398,6 @@ public abstract class AScikitLearnWrapper<P extends IPrediction, B extends IPred
 	}
 
 	protected abstract B handleOutput(final File outputFile) throws PredictionException, TrainingException;
-
-	protected B handleOutput(final File fitOutputFile, final File predictOutputFile) throws PredictionException, TrainingException {
-		return this.handleOutput(predictOutputFile);
-	}
 
 	@SuppressWarnings("unchecked")
 	protected List<List<Double>> getRawPredictionResults(final File outputFile) throws PredictionException {
