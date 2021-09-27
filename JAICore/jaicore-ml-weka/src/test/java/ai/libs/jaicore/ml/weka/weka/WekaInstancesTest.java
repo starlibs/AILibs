@@ -30,7 +30,7 @@ import ai.libs.jaicore.test.LongParameterizedTest;
 import ai.libs.jaicore.test.LongTest;
 import weka.core.Instances;
 
-public class WekaInstancesTester {
+public class WekaInstancesTest {
 
 	public static Stream<Arguments> getDatasets() throws IOException, Exception {
 		List<File> datasets = new ArrayList<>();
@@ -212,7 +212,7 @@ public class WekaInstancesTester {
 		WekaInstances wrapped = new WekaInstances(data);
 
 		for (IWekaInstance i : wrapped) {
-			assertTrue(i.equals(i));
+			assertEquals(i, i);
 		}
 		assertEquals(wrapped, wrapped);
 	}
@@ -229,7 +229,7 @@ public class WekaInstancesTester {
 		int n = dataAsArray.length;
 		assertEquals(wrapped.size(), n);
 		for (int i = 0; i < n; i++) {
-			assertTrue(wrapped.get(i).equals(dataAsArray[i]));
+			assertEquals(wrapped.get(i), dataAsArray[i]);
 		}
 
 		/* check Instance array */
@@ -237,7 +237,7 @@ public class WekaInstancesTester {
 		n = dataAsSpecificArray.length;
 		assertEquals(wrapped.size(), n);
 		for (int i = 0; i < n; i++) {
-			assertTrue(wrapped.get(i).equals(dataAsSpecificArray[i]));
+			assertEquals(wrapped.get(i), dataAsSpecificArray[i]);
 		}
 	}
 
