@@ -275,7 +275,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 		this.logger.trace("Parsing line with target col {}: {}", targetIndex, line);
 
-		boolean sparseMode = sparseData;
+		boolean instanceSparseMode = sparseData;
 		String curLine = line;
 		if (curLine.trim().startsWith("{") && curLine.trim().endsWith("}")) {
 			curLine = curLine.substring(1, curLine.length() - 1);
@@ -286,10 +286,10 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 		String[] lineSplit = curLine.split(",");
 		if (!(lineSplit[0].startsWith("'") && lineSplit[0].endsWith("'") || lineSplit[0].startsWith("\"") && lineSplit[0].endsWith("\"")) && lineSplit[0].contains(" ") && this.tryParseInt(lineSplit[0].split(" ")[0])) {
-			sparseMode = true;
+			instanceSparseMode = true;
 		}
 
-		if (!sparseMode) {
+		if (!instanceSparseMode) {
 			lineSplit = this.splitDenseInstanceLine(curLine);
 			if (lineSplit.length != attributes.size()) {
 				throw new IllegalArgumentException("Cannot parse instance as this is not a sparse instance but has less columns than there are attributes defined. Expected values: " + attributes.size() + ". Actual number of values: "
