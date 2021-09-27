@@ -52,7 +52,7 @@ public class PythonUtilTest extends ATest {
 	@Test
 	public void testExecuteScript() throws IOException, InterruptedException {
 		String scriptToExec = "print('Hello World')";
-		assertEquals(util.executeScript(scriptToExec).trim(), "Hello World", "Script has not been executed correctly or generated non-expected outputs.");
+		assertEquals("Hello World", util.executeScript(scriptToExec).trim(), "Script has not been executed correctly or generated non-expected outputs.");
 	}
 
 	@Test
