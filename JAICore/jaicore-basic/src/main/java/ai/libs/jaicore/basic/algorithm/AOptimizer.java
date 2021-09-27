@@ -40,7 +40,7 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	 *
 	 * @param input The input of the algorithm.
 	 */
-	public AOptimizer(final I input) {
+	protected AOptimizer(final I input) {
 		super(input);
 	}
 
