@@ -10,10 +10,10 @@ import ai.libs.jaicore.search.probleminputs.IMDP;
 public class DNGMCTS<N, A> extends MCTS<N, A> {
 
 	public DNGMCTS(final IMDP<N, A, Double> input, final double varianceFactor, final double initLambda, final int maxIterations, final double gamma, final double epsilon, final Random random, final boolean tabooExhaustedNodes, final boolean maximize) {
-		this(input, new UniformRandomPolicy<>(random), varianceFactor, initLambda, maxIterations, gamma, epsilon, random, tabooExhaustedNodes, maximize);
+		this(input, new UniformRandomPolicy<>(random), varianceFactor, initLambda, maxIterations, gamma, epsilon, tabooExhaustedNodes, maximize);
 	}
 
-	public DNGMCTS(final IMDP<N, A, Double> input, final IPolicy<N, A> defaultPolicy, final double varianceFactor, final double initLambda, final int maxIterations, final double gamma, final double epsilon, final Random random, final boolean tabooExhaustedNodes, final boolean maximize) {
+	public DNGMCTS(final IMDP<N, A, Double> input, final IPolicy<N, A> defaultPolicy, final double varianceFactor, final double initLambda, final int maxIterations, final double gamma, final double epsilon, final boolean tabooExhaustedNodes, final boolean maximize) {
 		super(input, new DNGPolicy<>(gamma, t -> {
 			try {
 				return input.isTerminalState(t);
