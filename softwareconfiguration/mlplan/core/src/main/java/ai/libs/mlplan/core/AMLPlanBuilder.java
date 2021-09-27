@@ -534,7 +534,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	 * @return The ML-Plan object configured with this builder.
 	 * @throws InterruptedException
 	 */
-	public MLPlan<L> build(final ILabeledDataset<?> dataset) throws InterruptedException {
+	public MLPlan<L> build(final ILabeledDataset<?> dataset) {
 		return this.withDataset(dataset).build();
 	}
 
@@ -558,9 +558,8 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	 * Builds an ML-Plan object with the dataset provided earlier to this builder.
 	 *
 	 * @return The ML-Plan object configured with this builder.
-	 * @throws InterruptedException
 	 */
-	public MLPlan<L> build() throws InterruptedException {
+	public MLPlan<L> build() {
 		this.checkPreconditionsForInitialization();
 		return new MLPlan<>(this, this.dataset);
 	}
