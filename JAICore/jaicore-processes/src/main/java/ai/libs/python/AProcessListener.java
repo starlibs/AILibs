@@ -27,10 +27,10 @@ public abstract class AProcessListener implements IProcessListener, ILoggingCust
 	private boolean listenForPIDFromProcess = false;
 	private int processIDObtainedFromListening = -1;
 
-	public AProcessListener() {
+	protected AProcessListener() {
 	}
 
-	public AProcessListener(final boolean listenForPIDFromProcess) {
+	protected AProcessListener(final boolean listenForPIDFromProcess) {
 		this.listenForPIDFromProcess = listenForPIDFromProcess;
 	}
 
