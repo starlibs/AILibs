@@ -4,13 +4,16 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.PriorityQueue;
+import java.util.stream.Stream;
 
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import ai.libs.jaicore.basic.metric.EuclideanDistance;
 import ai.libs.jaicore.basic.sets.Pair;
@@ -70,6 +73,16 @@ public class NearestNeighborTest {
 		this.nearestNeighbors.add(new Pair<Integer, Double>(3, 1.6));
 	}
 
+	@ParameterizedTest
+	@MethodSource("getKNearestNeighborTestCase")
+	public void testPredictionWithK(final double[] instance, final int k, final int expectedPrediction) throws TrainingException, PredictionException, InterruptedException {
+		NearestNeighborClassifier classifier = new NearestNeighborClassifier(k, new EuclideanDistance());
+		classifier.train(this.dataset);
+		// Predict.
+		int prediction = classifier.predict(instance);
+		assertEquals(expectedPrediction, prediction);
+	}
+
 	/**
 	 * Create prediction for the test instance <code>t = { 0.5, 0.5 }</code> on the
 	 * dataset with <code>k=1</code> and euclidean distance. Since the nearest
@@ -80,71 +93,8 @@ public class NearestNeighborTest {
 	 * @throws PredictionException
 	 * @throws InterruptedException
 	 */
-	@Disabled
-	@Test
-	public void testPredictionWithK1() throws TrainingException, PredictionException, InterruptedException {
-		int k = 1;
-		NearestNeighborClassifier classifier = new NearestNeighborClassifier(k, new EuclideanDistance());
-		classifier.train(this.dataset);
-		// Predict.
-		double[] instance = { 0.5, 0.5 };
-		int prediction = classifier.predict(instance);
-		int expectation = 1;
-		assertEquals(expectation, prediction);
-	}
-
-	/**
-	 * Create prediction for the test instance <code>t = { 0.5, 0.5 }</code> on the
-	 * dataset with <code>k=3</code>, euclidean distance and majority vote. Since
-	 * the three nearest neighbors of <code>t</code> are <code>
-	 * s = {0.4, 0.5},
-	 * t = {0.4, 0.4},
-	 * u = {0.4, 0.6}
-	 * </code> the predicition should be the majority class of the classes of
-	 * <code>s, t, u</code>, that is the majority of <code>1, 2, 2</code>, that is
-	 * <code>2</code>.
-	 *
-	 * @throws TrainingException
-	 * @throws PredictionException
-	 * @throws InterruptedException
-	 */
-	@Disabled
-	@Test
-	public void testPredictionWithK3() throws TrainingException, PredictionException, InterruptedException {
-		int k = 3;
-		NearestNeighborClassifier classifier = new NearestNeighborClassifier(k, new EuclideanDistance());
-		classifier.train(this.dataset);
-		// Predict.
-		double[] instance = { 0.5, 0.5 };
-		int prediction = classifier.predict(instance);
-		int expectation = 2;
-		assertEquals(expectation, prediction);
-
-	}
-
-	/**
-	 * Create prediction for the test instance <code>t = { 0.5, 0.5 }</code> on the
-	 * dataset with <code>k=5</code>, euclidean distance and majority vote. Since
-	 * the five nearest neighbors of <code>t</code> are all the instances in the
-	 * dataset, the predicition should be the majority class of the classes of the
-	 * dataset instances, that is the majority of <code>1, 2, 2, 1, 1</code>, that
-	 * is <code>1</code>.
-	 *
-	 * @throws TrainingException
-	 * @throws PredictionException
-	 * @throws InterruptedException
-	 */
-	@Disabled
-	@Test
-	public void testPredictionWithK5() throws TrainingException, PredictionException, InterruptedException {
-		int k = 5;
-		NearestNeighborClassifier classifier = new NearestNeighborClassifier(k, new EuclideanDistance());
-		classifier.train(this.dataset);
-		// Predict.
-		double[] instance = { 0.5, 0.5 };
-		int prediction = classifier.predict(instance);
-		int expectation = 1;
-		assertEquals(expectation, prediction);
+	public static Stream<Arguments> getKNearestNeighborTestCase() {
+		return Stream.of(Arguments.of(new double[] { 0.5, 0.5 }, 1, 1), Arguments.of(new double[] { 0.5, 0.5 }, 3, 2), Arguments.of(new double[] { 0.5, 0.5 }, 5, 1));
 	}
 
 	/**
@@ -152,17 +102,16 @@ public class NearestNeighborTest {
 	 * priority queue using the comparator and then polling the elements out and
 	 * check the sequence of polled elements.
 	 */
-	@Disabled
 	@Test
-	public void testNeirestNeighborComparator() {
+	public void testNearestNeighborComparator() {
 		// Create priority queue and fill (in not sorted order).
 		PriorityQueue<Pair<Integer, Double>> queue = new PriorityQueue<>(NearestNeighborClassifier.nearestNeighborComparator);
-		this.nearestNeighbors.add(new Pair<Integer, Double>(3, 1.6));
-		this.nearestNeighbors.add(new Pair<Integer, Double>(3, 0.3));
-		this.nearestNeighbors.add(new Pair<Integer, Double>(1, 0.1));
-		this.nearestNeighbors.add(new Pair<Integer, Double>(3, 0.8));
-		this.nearestNeighbors.add(new Pair<Integer, Double>(2, 0.2));
-		this.nearestNeighbors.add(new Pair<Integer, Double>(2, 0.4));
+		queue.add(new Pair<Integer, Double>(3, 1.6));
+		queue.add(new Pair<Integer, Double>(3, 0.3));
+		queue.add(new Pair<Integer, Double>(1, 0.1));
+		queue.add(new Pair<Integer, Double>(3, 0.8));
+		queue.add(new Pair<Integer, Double>(2, 0.2));
+		queue.add(new Pair<Integer, Double>(2, 0.4));
 
 		// Poll every element and assure correct sequence of polled elements.
 		Pair<Integer, Double> pair;
@@ -241,7 +190,7 @@ public class NearestNeighborTest {
 	 */
 	@Test
 	public void testPredictionOnSingleInstanceWithNullInstanceThrowsIllegalArgumentException() throws TrainingException, PredictionException {
-		Assertions.assertThrows(TrainingException.class, () -> {
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			// For single instance prediciton.
 			NearestNeighborClassifier classifier = new NearestNeighborClassifier(6, new EuclideanDistance());
 			classifier.train(this.dataset);
@@ -254,14 +203,13 @@ public class NearestNeighborTest {
 	 * <code>null</code> objects.
 	 */
 	@Test
-	public void testPredictionOnDatasetWithNullInstanceThrowsIllegalArgumentException() throws TrainingException, PredictionException {
-		Assertions.assertThrows(TrainingException.class, () -> {
+	public void testPredictionOnDatasetWithNullInstanceThrowsIllegalArgumentException() {
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
 			// For prediction on dataset
 			NearestNeighborClassifier classifier = new NearestNeighborClassifier(6, new EuclideanDistance());
 			classifier.train(this.dataset);
 			classifier.predict((TimeSeriesDataset2) null);
 		});
-
 	}
 
 }
