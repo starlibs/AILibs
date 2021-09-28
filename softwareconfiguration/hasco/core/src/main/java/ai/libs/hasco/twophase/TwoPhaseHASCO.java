@@ -44,7 +44,7 @@ import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithm;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.concurrent.GlobalTimer;
-import ai.libs.jaicore.concurrent.NamedTimerTask;
+import ai.libs.jaicore.concurrent.ANamedTimerTask;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
@@ -57,7 +57,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 
 	/* HASCO configuration */
 	private HASCO<N, A, Double> hasco;
-	private NamedTimerTask phase1CancellationTask;
+	private ANamedTimerTask phase1CancellationTask;
 
 	/** The solution selected during selection phase. */
 	private final Queue<HASCOSolutionCandidate<Double>> phase1ResultQueue = new LinkedBlockingQueue<>();
@@ -164,7 +164,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 			/* phase 1: gather solutions */
 			if (this.hasco.getTimeout().milliseconds() >= 0) {
 				GlobalTimer timer = GlobalTimer.getInstance();
-				this.phase1CancellationTask = new NamedTimerTask() {
+				this.phase1CancellationTask = new ANamedTimerTask() {
 
 					@Override
 					public void exec() {

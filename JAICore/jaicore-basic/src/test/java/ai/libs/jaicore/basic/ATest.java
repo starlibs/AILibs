@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.concurrent.CancellationTimerTask;
 import ai.libs.jaicore.concurrent.GlobalTimer;
-import ai.libs.jaicore.concurrent.NamedTimerTask;
+import ai.libs.jaicore.concurrent.ANamedTimerTask;
 import ai.libs.jaicore.concurrent.TrackableTimerTask;
 import ai.libs.jaicore.interrupt.InterruptionTimerTask;
 import ai.libs.jaicore.logging.LoggerUtil;
@@ -70,9 +70,9 @@ public abstract class ATest implements ILoggingCustomizable {
 				StringBuilder sb = new StringBuilder();
 				sb.append(t.getClass().getName());
 				sb.append(" (" + (t.hasBeenExecuted() ? "" : "not ") + "executed, " + (t.isFinished() ? "" : "not ") + "finished)");
-				if (t instanceof NamedTimerTask) {
+				if (t instanceof ANamedTimerTask) {
 					sb.append(": ");
-					sb.append(((NamedTimerTask) t).getDescriptor());
+					sb.append(((ANamedTimerTask) t).getDescriptor());
 					if (t instanceof CancellationTimerTask) {
 						sb.append(" - to cancel " + ((CancellationTimerTask) t).getCancelable());
 					}

@@ -10,16 +10,16 @@ import ai.libs.jaicore.basic.transform.vector.IVectorTransform;
 public abstract class ADerivateFilter implements IVectorTransform {
 
 	/**
-	 * Flag that states wheter the filter should add a padding to the derivate
+	 * Flag that states whether the filter should add a padding to the derivate
 	 * assure that is has the same length as the origin time series or not.
 	 */
 	protected boolean withBoundaries;
 
-	public ADerivateFilter(final boolean withBoundaries) {
+	protected ADerivateFilter(final boolean withBoundaries) {
 		this.withBoundaries = withBoundaries;
 	}
 
-	public ADerivateFilter() {
+	protected ADerivateFilter() {
 		this.withBoundaries = false;
 	}
 

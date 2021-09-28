@@ -1,9 +1,10 @@
 package ai.libs.jaicore.experiments;
+
 public abstract class AExperimentDecoder<I, A> implements IExperimentDecoder<I, A> {
 	private final IExperimentSetConfig config;
 	private final ExperimentSetAnalyzer analyzer;
 
-	public AExperimentDecoder(final IExperimentSetConfig config) {
+	protected AExperimentDecoder(final IExperimentSetConfig config) {
 		super();
 		this.config = config;
 		this.analyzer = new ExperimentSetAnalyzer(config);

@@ -6,7 +6,7 @@ import ai.libs.jaicore.experiments.configurations.IAlgorithmNameConfig;
 
 public abstract class AAlgorithmExperimentBuilder<B extends AAlgorithmExperimentBuilder<B>> extends AExperimentBuilder<B> {
 
-	public AAlgorithmExperimentBuilder(final IExperimentSetConfig config) {
+	protected AAlgorithmExperimentBuilder(final IExperimentSetConfig config) {
 		super(config);
 	}
 

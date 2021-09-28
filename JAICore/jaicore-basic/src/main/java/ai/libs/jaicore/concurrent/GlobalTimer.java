@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 public class GlobalTimer extends TrackableTimer {
 	private static final Logger logger = LoggerFactory.getLogger(GlobalTimer.class);
-	public static final NamedTimerTask INIT_TASK = new NamedTimerTask("Init task") {
+	public static final ANamedTimerTask INIT_TASK = new ANamedTimerTask("Init task") {
 
 		@Override
 		public void exec() {

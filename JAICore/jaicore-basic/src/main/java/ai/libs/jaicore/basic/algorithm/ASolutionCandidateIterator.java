@@ -25,11 +25,11 @@ import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
  */
 public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> implements ISolutionCandidateIterator<I, O> {
 
-	public ASolutionCandidateIterator(final I input) {
+	protected ASolutionCandidateIterator(final I input) {
 		super(input);
 	}
 
-	protected ASolutionCandidateIterator(final IOwnerBasedAlgorithmConfig config,final I input) {
+	protected ASolutionCandidateIterator(final IOwnerBasedAlgorithmConfig config, final I input) {
 		super(config, input);
 	}
 

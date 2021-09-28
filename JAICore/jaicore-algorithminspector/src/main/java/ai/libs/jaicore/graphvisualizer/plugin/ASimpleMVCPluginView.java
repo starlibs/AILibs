@@ -19,7 +19,7 @@ public abstract class ASimpleMVCPluginView<M extends IGUIPluginModel, C extends 
 
 	protected Logger logger = LoggerFactory.getLogger("gui.view." + this.getClass().getName());
 
-	public ASimpleMVCPluginView(final M model, final N node) {
+	protected ASimpleMVCPluginView(final M model, final N node) {
 		this.model = model;
 		this.node = node;
 	}

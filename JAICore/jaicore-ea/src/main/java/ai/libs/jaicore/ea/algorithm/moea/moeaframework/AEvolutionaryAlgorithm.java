@@ -39,7 +39,7 @@ import org.moeaframework.core.Solution;
 * The majority of evolutionary algorithms should only need to override the
 * {@link #iterate()} method.
 */
-public abstract class AbstractEvolutionaryAlgorithm extends AbstractAlgorithm implements EvolutionaryAlgorithm {
+public abstract class AEvolutionaryAlgorithm extends AbstractAlgorithm implements EvolutionaryAlgorithm {
 
 	/**
 	 * The current population.
@@ -58,13 +58,13 @@ public abstract class AbstractEvolutionaryAlgorithm extends AbstractAlgorithm im
 
 	/**
 	 * Constructs an abstract evolutionary algorithm.
-	 * 
+	 *
 	 * @param problem the problem being solved
 	 * @param population the population
 	 * @param archive the archive storing the non-dominated solutions
 	 * @param initialization the initialization operator
 	 */
-	public AbstractEvolutionaryAlgorithm(final Problem problem, final Population population, final NondominatedPopulation archive, final Initialization initialization) {
+	protected AEvolutionaryAlgorithm(final Problem problem, final Population population, final NondominatedPopulation archive, final Initialization initialization) {
 		super(problem);
 		this.population = population;
 		this.archive = archive;
@@ -73,14 +73,14 @@ public abstract class AbstractEvolutionaryAlgorithm extends AbstractAlgorithm im
 
 	@Override
 	public NondominatedPopulation getResult() {
-		Population population = this.getPopulation();
-		NondominatedPopulation archive = this.getArchive();
+		Population resultPopulation = this.getPopulation();
+		NondominatedPopulation resultArchive = this.getArchive();
 		NondominatedPopulation result = new NondominatedPopulation();
 
-		result.addAll(population);
+		result.addAll(resultPopulation);
 
-		if (archive != null) {
-			result.addAll(archive);
+		if (resultArchive != null) {
+			result.addAll(resultArchive);
 		}
 
 		return result;
@@ -90,15 +90,15 @@ public abstract class AbstractEvolutionaryAlgorithm extends AbstractAlgorithm im
 	protected void initialize() {
 		super.initialize();
 
-		Population population = this.getPopulation();
-		NondominatedPopulation archive = this.getArchive();
+		Population initPopulation = this.getPopulation();
+		NondominatedPopulation initArchive = this.getArchive();
 		Solution[] initialSolutions = this.initialization.initialize();
 
 		this.evaluateAll(initialSolutions);
-		population.addAll(initialSolutions);
+		initPopulation.addAll(initialSolutions);
 
-		if (archive != null) {
-			archive.addAll(population);
+		if (initArchive != null) {
+			initArchive.addAll(initPopulation);
 		}
 	}
 
@@ -118,8 +118,8 @@ public abstract class AbstractEvolutionaryAlgorithm extends AbstractAlgorithm im
 			throw new AlgorithmInitializationException(this, "algorithm not initialized");
 		}
 
-		List<Solution> populationList = new ArrayList<Solution>();
-		List<Solution> archiveList = new ArrayList<Solution>();
+		List<Solution> populationList = new ArrayList<>();
+		List<Solution> archiveList = new ArrayList<>();
 
 		for (Solution solution : this.population) {
 			populationList.add(solution);
@@ -173,9 +173,9 @@ public abstract class AbstractEvolutionaryAlgorithm extends AbstractAlgorithm im
 		private final List<Solution> archive;
 
 		/**
-		 * Constructs a proxy to serialize and deserialize the state of an 
+		 * Constructs a proxy to serialize and deserialize the state of an
 		 * {@code AbstractEvolutionaryAlgorithm}.
-		 * 
+		 *
 		 * @param numberOfEvaluations the number of objective function
 		 *        evaluations
 		 * @param population the population stored in a serializable list
@@ -190,7 +190,7 @@ public abstract class AbstractEvolutionaryAlgorithm extends AbstractAlgorithm im
 
 		/**
 		 * Returns the number of objective function evaluations.
-		 * 
+		 *
 		 * @return the number of objective function evaluations
 		 */
 		public int getNumberOfEvaluations() {
@@ -199,7 +199,7 @@ public abstract class AbstractEvolutionaryAlgorithm extends AbstractAlgorithm im
 
 		/**
 		 * Returns the population stored in a serializable list.
-		 * 
+		 *
 		 * @return the population stored in a serializable list
 		 */
 		public List<Solution> getPopulation() {
@@ -208,7 +208,7 @@ public abstract class AbstractEvolutionaryAlgorithm extends AbstractAlgorithm im
 
 		/**
 		 * Returns the archive stored in a serializable list.
-		 * 
+		 *
 		 * @return the archive stored in a serializable list
 		 */
 		public List<Solution> getArchive() {

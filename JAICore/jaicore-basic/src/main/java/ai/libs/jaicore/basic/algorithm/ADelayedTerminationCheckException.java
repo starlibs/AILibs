@@ -15,11 +15,11 @@ package ai.libs.jaicore.basic.algorithm;
  *
  */
 @SuppressWarnings("serial")
-public abstract class DelayedTerminationCheckException extends Exception {
+public abstract class ADelayedTerminationCheckException extends Exception {
 
 	private final long delay;
 
-	public DelayedTerminationCheckException(final String message, final long delay) {
+	protected ADelayedTerminationCheckException(final String message, final long delay) {
 		super(message);
 		this.delay = delay;
 	}

@@ -53,12 +53,7 @@ public class KVStoreCollectionOneLayerPartition implements Iterable<Entry<String
 	 * @param store
 	 */
 	public void add(final IKVStore store) {
-		/* First ensure that nested maps contain the required keys and KVStoreCollection respectively. */
-		String keyForPartition = store.getAsString(this.partitionKey);
-		if (!this.data.containsKey(keyForPartition)) {
-			this.data.put(keyForPartition, new KVStoreCollection());
-		}
-		this.data.get(keyForPartition).add(store);
+		this.data.computeIfAbsent(store.getAsString(this.partitionKey), t -> new KVStoreCollection()).add(store);
 	}
 
 	/**
