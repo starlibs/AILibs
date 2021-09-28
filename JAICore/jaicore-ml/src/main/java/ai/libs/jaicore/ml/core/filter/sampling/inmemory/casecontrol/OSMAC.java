@@ -13,7 +13,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 
-public class OSMAC<D extends ILabeledDataset<? extends ILabeledInstance>> extends PilotEstimateSampling<D> {
+public class OSMAC<D extends ILabeledDataset<? extends ILabeledInstance>> extends APilotEstimateSampling<D> {
 
 	public OSMAC(final Random rand, final D input, final IClassifier pilot) {
 		super(input, pilot);

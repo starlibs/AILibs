@@ -41,13 +41,41 @@ public abstract class AutoMLAlgorithmForRegressionResultProductionTest extends A
 	// creates the test data
 	public static Stream<OpenMLProblemSet> getDatasets() throws DatasetDeserializationFailedException {
 		try {
-			List<Integer> ignoreDatasets = Arrays.asList(565);
 			List<OpenMLProblemSet> problemSets = new ArrayList<>();
 			Study study = con.studyGet(130); // openml regression 30
-			Arrays.stream(study.getDataset()).map(x -> {
-				if (ignoreDatasets.contains(x)) {
-					return null;
-				}
+			List<Integer> datasetIDs = Arrays.asList(// list of openml ids
+					//					495, // baseball-pitcher
+					41021, // moneyball
+					574, // house_16H
+					564, // fried
+					558, // bank32nh
+					550, // quake
+					549, // strikes
+					547, // no2
+					546, // sensory
+					541, // socmob
+					537, // houses
+					531, // boston
+					528, // humandevel
+					512, // balloon
+					507, // space_ga
+					505, // tecator
+					503, // wind
+					497, // veteran
+					405, // mtp
+					344, // mv
+					308, // puma32H
+					287, // wine_quality
+					227, // cpu_small
+					223, // stock
+					216, // elevators
+					215, // 2dplanes
+					196, // autoMpg
+					189, // kin8nm
+					183 // abalone
+					);
+
+			datasetIDs.stream().map(x -> {
 				try {
 					return new OpenMLProblemSet(x);
 				} catch (Exception e) {

@@ -29,7 +29,7 @@ public class MLPlanAlgorithmEventHistorySerializationTest {
 	public void testSerializationAndDeserializationOfAlgorithmEventHistoryOfMLPlan() throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
-		ILabeledDataset<?> ds = OpenMLDatasetReader.deserializeDataset(30);
+		ILabeledDataset<?> ds = new OpenMLDatasetReader().deserializeDataset(30);
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(0), .7);
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */

@@ -98,8 +98,7 @@ public class FileUtil {
 		try (BufferedReader r = Files.newBufferedReader(Paths.get(filename), StandardCharsets.UTF_8)) {
 			String line;
 			while ((line = r.readLine()) != null) {
-				sb.append(line);
-				sb.append("\n");
+				sb.append(line).append("\n");
 			}
 		}
 		return sb.toString();
@@ -136,7 +135,9 @@ public class FileUtil {
 	 */
 	public static Properties readPropertiesFile(final File propertiesFile) throws IOException {
 		Properties props = new Properties();
-		props.load(new FileInputStream(propertiesFile));
+		try (FileInputStream fis = new FileInputStream(propertiesFile)) {
+			props.load(fis);
+		}
 		return props;
 	}
 

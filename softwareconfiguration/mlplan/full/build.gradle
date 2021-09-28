@@ -16,6 +16,13 @@ dependencies {
 	compile project(':mlplan-sklearn')
 	
 	compile("$cli")
+	
+	/* dependencies to the test sources of other projects */
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-components', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-ml', configuration: 'testArtifacts')
+	testCompile project(path: ':mlplan-core', configuration: 'testArtifacts')
 }
 
 configurations.all {
@@ -75,4 +82,9 @@ uploadArchives {
   	}
 }
 
+task runMLPlanExperimenter(type: JavaExec) {
+  classpath sourceSets.main.runtimeClasspath
+  main = "ai.libs.mlplan.experimenter.MLPlanExperimenter"
+  args = ["-c"]
+}
 

@@ -35,7 +35,7 @@ public class MLPlanSubsamplingExample {
 		samplingAlgorithm.call();
 
 		/* create a train-test-split */
-		ILabeledDataset<?> data = ArffDatasetAdapter.readDataset(sampleFile);
+		ILabeledDataset<?> data = new ArffDatasetAdapter().readDataset(sampleFile);
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(data, 0, .7);
 
 		/* build and run ml-plan */

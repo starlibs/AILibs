@@ -8,6 +8,10 @@ public class JasminLakeMDP extends LakeMDP {
 		{true, false, false, false}
 	};
 
+	public JasminLakeMDP() {
+		this(0);
+	}
+
 	public JasminLakeMDP(final int timeout) {
 		super(new LakeLayout(4, 4, pits), 0, 0, 3, 3, timeout);
 	}

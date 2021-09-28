@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -1100,11 +1099,7 @@ public class SetUtil {
 	public static <T, U> Map<U, Collection<T>> groupCollectionByAttribute(final Collection<T> collection, final IGetter<T, U> getter) throws InterruptedException, GetPropertyFailedException {
 		Map<U, Collection<T>> groupedCollection = new HashMap<>();
 		for (T i : collection) {
-			U val = getter.getPropertyOf(i);
-			if (!groupedCollection.containsKey(val)) {
-				groupedCollection.put(val, new ArrayList<>());
-			}
-			groupedCollection.get(val).add(i);
+			groupedCollection.computeIfAbsent(getter.getPropertyOf(i), t -> new ArrayList<>()).add(i);
 		}
 		return groupedCollection;
 	}
@@ -1127,12 +1122,7 @@ public class SetUtil {
 	 * @return The list representing the split string.
 	 */
 	public static List<String> explode(final String stringList, final String separator) {
-		List<String> values = new LinkedList<>();
-		String[] split = stringList.split(separator);
-		for (String splitElement : split) {
-			values.add(splitElement);
-		}
-		return values;
+		return Arrays.stream(stringList.split(separator)).collect(Collectors.toList());
 	}
 
 	/**
@@ -1244,7 +1234,7 @@ public class SetUtil {
 		if (totalSize < numSamples) {
 			throw new IllegalArgumentException("Cannot generate a sample of size " + numSamples + " for a hypercube with only " + totalSize + " entries.");
 		}
-		int stepSize = (int)Math.floor(totalSize * 1.0 / numSamples);
+		int stepSize = (int) Math.floor(totalSize * 1.0 / numSamples);
 
 		/* compute full hypercube */
 		int i = 0;

@@ -20,7 +20,7 @@ public abstract class ABayesianInferenceAlgorithm extends AAlgorithm<BayesianInf
 	protected final Collection<String> hiddenVariables = SetUtil.difference(this.allModelVariables, SetUtil.union(this.queryVariables, this.evidence.keySet()));
 	private DiscreteProbabilityDistribution distribution = new DiscreteProbabilityDistribution();
 
-	public ABayesianInferenceAlgorithm(final BayesianInferenceProblem input) {
+	protected ABayesianInferenceAlgorithm(final BayesianInferenceProblem input) {
 		super(input);
 	}
 

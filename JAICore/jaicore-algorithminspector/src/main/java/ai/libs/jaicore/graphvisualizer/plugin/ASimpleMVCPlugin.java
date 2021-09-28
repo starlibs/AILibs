@@ -19,12 +19,12 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 	private final V view;
 	private final C controller;
 
-	public ASimpleMVCPlugin() {
+	protected ASimpleMVCPlugin() {
 		this(null);
 	}
 
 	@SuppressWarnings("unchecked")
-	public ASimpleMVCPlugin(final String title) {
+	protected ASimpleMVCPlugin(final String title) {
 		super();
 		if (title == null) {
 			this.title = this.getClass().getSimpleName();

@@ -40,8 +40,14 @@ public class WekaInstance extends ElementDecorator<Instance> implements IWekaIns
 	}
 
 	@Override
-	public Double getAttributeValue(final int pos) {
-		return this.getElement().value(pos);
+	public Object getAttributeValue(final int pos) {
+		Instance inst = this.getElement();
+		double val = inst.value(pos);
+		if (inst.attribute(pos).isNumeric()) {
+			return val;
+		} else {
+			return (int) val; // map categorical values to ints instead of doubles
+		}
 	}
 
 	@Override

@@ -79,11 +79,6 @@ public class ArrayUtil {
 		return transposed;
 	}
 
-	/**
-	 * Transposes a matrix A and returns A^T.
-	 * @param matrix The given matrix A.
-	 * @return The transposed matrix A^T originating from A.
-	 */
 	public static int[][] transposeIntegerMatrix(final int[][] matrix) {
 		int[][] transposed = new int[matrix[0].length][matrix.length];
 		for (int i = 0; i < matrix.length; i++) {

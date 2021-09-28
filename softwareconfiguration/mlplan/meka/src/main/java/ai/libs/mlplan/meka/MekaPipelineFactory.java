@@ -18,6 +18,8 @@ import meka.classifiers.multilabel.MultiLabelClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.MultipleClassifiersCombiner;
 import weka.classifiers.SingleClassifierEnhancer;
+import weka.classifiers.functions.SMO;
+import weka.classifiers.functions.SMOreg;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.core.OptionHandler;
 
@@ -45,37 +47,30 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 	}
 
 	private Classifier getClassifier(final IComponentInstance ci) throws Exception {
-		Classifier c = (Classifier) Class.forName(ci.getComponent().getName()).newInstance();
+		Classifier c = (Classifier) Class.forName(ci.getComponent().getName()).getDeclaredConstructor().newInstance();
 		List<String> optionsList = getOptionsForParameterValues(ci);
-
-		for (Entry<String, List<IComponentInstance>> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
-			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
-				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
-			}
-
-			IComponentInstance subCI = reqI.getValue().iterator().next();
-			if (!reqI.getKey().equals("B") && !(c instanceof SingleClassifierEnhancer) && !(reqI.getKey().equals("K") && ci.getComponent().getName().endsWith("SMO"))) {
-				logger.warn("Classifier {} is not a single classifier enhancer and still has an unexpected required interface: {}. Try to set this configuration in the form of options.", ci.getComponent().getName(), reqI);
-				optionsList.add("-" + reqI.getKey());
-				optionsList.add(subCI.getComponent().getName());
-				if (!subCI.getParameterValues().isEmpty() || !subCI.getSatisfactionOfRequiredInterfaces().isEmpty()) {
-					optionsList.add("--");
-					optionsList.addAll(this.getOptionsRecursively(subCI));
-				}
-			}
-		}
 		if (c instanceof OptionHandler) {
 			((OptionHandler) c).setOptions(optionsList.toArray(new String[0]));
 		}
+
 		for (Entry<String, List<IComponentInstance>> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
 				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}
+
 			IComponentInstance subCI = reqI.getValue().iterator().next();
-			if (reqI.getKey().equals("K") && ci.getComponent().getName().endsWith("SMO")) {
-				logger.debug("Set kernel for SMO to be {}", subCI.getComponent().getName());
-				Kernel k = (Kernel) Class.forName(subCI.getComponent().getName()).newInstance();
+			if (reqI.getKey().equals("K") && (ci.getComponent().getName().endsWith("SMO") || ci.getComponent().getName().endsWith("SMOreg"))) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Set kernel for SMO to be {}", subCI.getComponent().getName());
+				}
+
+				Kernel k = (Kernel) Class.forName(subCI.getComponent().getName()).getDeclaredConstructor().newInstance();
 				k.setOptions(getOptionsForParameterValues(subCI).toArray(new String[0]));
+				if (c instanceof SMO) {
+					((SMO) c).setKernel(k);
+				} else if (c instanceof SMOreg) {
+					((SMOreg) c).setKernel(k);
+				}
 			} else if (reqI.getKey().equals("B") && (c instanceof MultipleClassifiersCombiner)) {
 				Classifier[] classifiers = this.getListOfBaseLearners(subCI).toArray(new Classifier[0]);
 				((MultipleClassifiersCombiner) c).setClassifiers(classifiers);
@@ -83,6 +78,7 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Set {} as a base classifier for {}", subCI.getComponent().getName(), ci.getComponent().getName());
 				}
+
 				((SingleClassifierEnhancer) c).setClassifier(this.getClassifier(subCI));
 			}
 		}

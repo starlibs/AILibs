@@ -85,15 +85,15 @@ public class SFA implements IFilter {
 					} else if (elem == lookup[this.alphabet.length - 2]) {
 						sfaWords[instance][entry] = this.alphabet[this.alphabet.length - 1];
 					}
-					// get alphabet letter for every non extrem coefficient
+					// get alphabet letter for every non extreme coefficient
 					else {
 						for (int i = 1; i < lookup.length; i++) {
-							if (elem < lookup[i]) {
-								sfaWords[instance][entry] = this.alphabet[i];
-								break;
-							}
-							if (elem == lookup[i]) {
-								sfaWords[instance][entry] = this.alphabet[i + 1];
+							if (elem <= lookup[i]) {
+								if (elem < lookup[i]) {
+									sfaWords[instance][entry] = this.alphabet[i];
+								} else if (elem == lookup[i]) {
+									sfaWords[instance][entry] = this.alphabet[i + 1];
+								}
 								break;
 							}
 						}

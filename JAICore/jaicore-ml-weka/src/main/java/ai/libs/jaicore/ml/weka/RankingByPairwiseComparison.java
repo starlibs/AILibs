@@ -21,7 +21,7 @@ import weka.filters.unsupervised.attribute.Remove;
 
 public class RankingByPairwiseComparison {
 
-	private RPCConfig config;
+	private RankingByPairwiseComparisonConfig config;
 
 	private List<Integer> labelIndices;
 	private Set<String> labelSet = new HashSet<>();
@@ -34,7 +34,7 @@ public class RankingByPairwiseComparison {
 
 	private List<PairWiseClassifier> pwClassifiers = new LinkedList<>();
 
-	public RankingByPairwiseComparison(final RPCConfig config) {
+	public RankingByPairwiseComparison(final RankingByPairwiseComparisonConfig config) {
 		this.config = config;
 	}
 
@@ -119,7 +119,7 @@ public class RankingByPairwiseComparison {
 				double[] dist = pwc.c.distributionForInstance(datasetCopy.get(0));
 
 				switch (this.config.getVotingStrategy()) {
-				case RPCConfig.V_VOTING_STRATEGY_CLASSIFY:
+				case RankingByPairwiseComparisonConfig.V_VOTING_STRATEGY_CLASSIFY:
 					if (dist[0] > dist[1]) {
 						Maps.increaseCounterInDoubleMap(vote, pwc.a);
 					} else {
@@ -127,7 +127,7 @@ public class RankingByPairwiseComparison {
 					}
 					break;
 				default:
-				case RPCConfig.V_VOTING_STRATEGY_PROBABILITY:
+				case RankingByPairwiseComparisonConfig.V_VOTING_STRATEGY_PROBABILITY:
 					Maps.increaseCounterInDoubleMap(vote, pwc.a, dist[0]);
 					Maps.increaseCounterInDoubleMap(vote, pwc.b, dist[1]);
 					break;

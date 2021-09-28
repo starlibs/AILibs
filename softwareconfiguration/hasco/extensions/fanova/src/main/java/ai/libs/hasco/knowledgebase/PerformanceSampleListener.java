@@ -4,7 +4,7 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.core.events.HASCOSolutionEvent;
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.jaicore.components.api.IComponentInstance;
 
 /**
  *
@@ -25,7 +25,7 @@ public class PerformanceSampleListener {
 	public void handleEvent(final HASCOSolutionEvent<Double> event) {
 		if (event.getSolutionCandidate() instanceof HASCOSolutionCandidate) {
 			HASCOSolutionCandidate<?> solutionCandidate = event.getSolutionCandidate();
-			ComponentInstance ci = solutionCandidate.getComponentInstance();
+			IComponentInstance ci = solutionCandidate.getComponentInstance();
 			double score = (Double) solutionCandidate.getScore();
 			this.performanceKnowledgeBase.addPerformanceSample(this.benchmarkName, ci, score, false);
 		}

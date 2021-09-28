@@ -29,7 +29,7 @@ import ai.libs.jaicore.logging.ToJSONStringUtil;
  *
  */
 @JsonPropertyOrder(alphabetic = true)
-public class ComponentInstance  implements IComponentInstance, Serializable {
+public class ComponentInstance implements IComponentInstance, Serializable {
 
 	/* Auto-generated serial version UID. */
 	private static final long serialVersionUID = 714378153827839502L;
@@ -56,7 +56,7 @@ public class ComponentInstance  implements IComponentInstance, Serializable {
 		this.parameterValues = new HashMap<>(other.parameterValues);
 		this.satisfactionOfRequiredInterfaces = new HashMap<>();
 		other.satisfactionOfRequiredInterfaces.entrySet().forEach(x -> this.satisfactionOfRequiredInterfaces.put(x.getKey(), new ArrayList<>()));
-		other.satisfactionOfRequiredInterfaces.entrySet().forEach(x -> x.getValue().forEach(ci -> this.satisfactionOfRequiredInterfaces.get(x.getKey()).add(new ComponentInstance((ComponentInstance)ci))));
+		other.satisfactionOfRequiredInterfaces.entrySet().forEach(x -> x.getValue().forEach(ci -> this.satisfactionOfRequiredInterfaces.get(x.getKey()).add(new ComponentInstance((ComponentInstance) ci))));
 		other.annotations.entrySet().forEach(x -> this.annotations.put(x.getKey(), x.getValue()));
 	}
 
@@ -191,7 +191,8 @@ public class ComponentInstance  implements IComponentInstance, Serializable {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getComponent().getName());
 		if (!this.satisfactionOfRequiredInterfaces.isEmpty()) {
-			sb.append(this.satisfactionOfRequiredInterfaces.entrySet().stream().map(x -> x.getValue().stream().map(ci -> ((ComponentInstance)ci).toComponentNameString()).collect(Collectors.joining())).collect(Collectors.toList()).toString());
+			sb.append(this.satisfactionOfRequiredInterfaces.entrySet().stream().map(x -> x.getValue().stream().map(ci -> ((ComponentInstance) ci).toComponentNameString()).collect(Collectors.joining())).collect(Collectors.toList())
+					.toString());
 		}
 		return sb.toString();
 	}
@@ -221,28 +222,21 @@ public class ComponentInstance  implements IComponentInstance, Serializable {
 	public String getNestedComponentDescription() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getComponent().getName());
-		this.satisfactionOfRequiredInterfaces.values().stream().map(x -> " - " + x.stream().map(ci -> ((ComponentInstance)ci).getNestedComponentDescription()).collect(Collectors.joining())).forEach(sb::append);
+		this.satisfactionOfRequiredInterfaces.values().stream().map(x -> " - " + x.stream().map(ci -> ((ComponentInstance) ci).getNestedComponentDescription()).collect(Collectors.joining())).forEach(sb::append);
 		return sb.toString();
 	}
 
-	/**
-	 * Add an annotation to this component instance.
-	 * @param key The key of how to address this annotation.
-	 * @param annotation The annotation value.
-	 */
+	@Override
 	public void putAnnotation(final String key, final String annotation) {
 		this.annotations.put(key, annotation);
 	}
 
-	/**
-	 * Retrieve an annotation by its key.
-	 * @param key The key for which to retrieve the annotation.
-	 * @return The annotation value.
-	 */
+	@Override
 	public String getAnnotation(final String key) {
 		return this.annotations.get(key);
 	}
 
+	@Override
 	public void appendAnnotation(final String key, final String annotation) {
 		if (this.annotations.containsKey(key)) {
 			this.annotations.put(key, this.annotations.get(key) + annotation);
@@ -254,7 +248,8 @@ public class ComponentInstance  implements IComponentInstance, Serializable {
 	@Override
 	public List<IComponentInstance> getSatisfactionOfRequiredInterface(final String idOfRequiredInterface) {
 		if (!this.component.hasRequiredInterfaceWithId(idOfRequiredInterface)) {
-			throw new IllegalArgumentException("\"" + idOfRequiredInterface + "\" is not a valid required interface id of component " + this.component.getName()+ ". Valid ids are: " + this.component.getRequiredInterfaces().stream().map(ri -> "\n\t- " + ri.getId()).collect(Collectors.joining()));
+			throw new IllegalArgumentException("\"" + idOfRequiredInterface + "\" is not a valid required interface id of component " + this.component.getName() + ". Valid ids are: "
+					+ this.component.getRequiredInterfaces().stream().map(ri -> "\n\t- " + ri.getId()).collect(Collectors.joining()));
 		}
 		return this.satisfactionOfRequiredInterfaces.get(idOfRequiredInterface);
 	}

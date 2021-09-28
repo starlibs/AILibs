@@ -26,7 +26,7 @@ public class NodeInfoGUIPluginController extends ASimpleMVCPluginController<Node
 
 	@Override
 	public void handleGUIEvent(final GUIEvent guiEvent) {
-		if (NodeClickedEvent.class.isInstance(guiEvent)) {
+		if (guiEvent instanceof NodeClickedEvent) {
 			NodeClickedEvent nodeClickedEvent = (NodeClickedEvent) guiEvent;
 			String searchGraphNodeCorrespondingToClickedViewGraphNode = nodeClickedEvent.getSearchGraphNode();
 			this.getModel().setCurrentlySelectedNode(searchGraphNodeCorrespondingToClickedViewGraphNode);

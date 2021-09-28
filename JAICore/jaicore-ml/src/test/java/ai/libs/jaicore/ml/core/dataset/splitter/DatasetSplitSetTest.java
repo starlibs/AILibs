@@ -32,7 +32,7 @@ public class DatasetSplitSetTest {
 
 	@BeforeAll
 	public static void setup() throws DatasetDeserializationFailedException, InterruptedException {
-		d = OpenMLDatasetReader.deserializeDataset(3);
+		d = new OpenMLDatasetReader().deserializeDataset(3);
 	}
 
 	@BeforeEach

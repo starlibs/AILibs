@@ -13,9 +13,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import ai.libs.jaicore.basic.kvstore.KVStore;
+import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.api.IComponentRepository;
 import ai.libs.jaicore.components.api.IParameter;
+import ai.libs.jaicore.components.api.IParameterDomain;
 import ai.libs.jaicore.components.api.IRequiredInterfaceDefinition;
 import ai.libs.jaicore.components.exceptions.ComponentNotFoundException;
 
@@ -192,18 +195,18 @@ public class ComponentUtil {
 	 *            The collection fo components that is used for resolving required interfaces recursively.
 	 * @return A collection of component instances of the given root component with all possible algorithm choices.
 	 */
-	public static Collection<ComponentInstance> getAllAlgorithmSelectionInstances(final IComponent rootComponent, final Collection<? extends IComponent> components) {
-		Collection<ComponentInstance> instanceList = new LinkedList<>();
+	public static Collection<IComponentInstance> getAllAlgorithmSelectionInstances(final IComponent rootComponent, final Collection<? extends IComponent> components) {
+		Collection<IComponentInstance> instanceList = new LinkedList<>();
 		instanceList.add(ComponentUtil.getDefaultParameterizationOfComponent(rootComponent));
 
 		for (IRequiredInterfaceDefinition requiredInterface : rootComponent.getRequiredInterfaces()) {
-			List<ComponentInstance> tempList = new LinkedList<>();
+			List<IComponentInstance> tempList = new LinkedList<>();
 
 			Collection<IComponent> possiblePlugins = ComponentUtil.getComponentsProvidingInterface(components, requiredInterface.getName());
-			for (ComponentInstance ci : instanceList) {
+			for (IComponentInstance ci : instanceList) {
 				for (IComponent possiblePlugin : possiblePlugins) {
-					for (ComponentInstance reqICI : getAllAlgorithmSelectionInstances(possiblePlugin, components)) {
-						ComponentInstance copyOfCI = new ComponentInstance(ci.getComponent(), new HashMap<>(ci.getParameterValues()), new HashMap<>(ci.getSatisfactionOfRequiredInterfaces()));
+					for (IComponentInstance reqICI : getAllAlgorithmSelectionInstances(possiblePlugin, components)) {
+						IComponentInstance copyOfCI = new ComponentInstance(ci.getComponent(), new HashMap<>(ci.getParameterValues()), new HashMap<>(ci.getSatisfactionOfRequiredInterfaces()));
 						copyOfCI.getSatisfactionOfRequiredInterfaces().put(requiredInterface.getId(), Arrays.asList(reqICI));
 						tempList.add(copyOfCI);
 					}
@@ -226,8 +229,8 @@ public class ComponentUtil {
 	 *            The collection fo components that is used for resolving required interfaces recursively.
 	 * @return A collection of component instances of the given root component with all possible algorithm choices.
 	 */
-	public static Collection<ComponentInstance> getAllAlgorithmSelectionInstances(final String requiredInterface, final Collection<? extends IComponent> components) {
-		Collection<ComponentInstance> instanceList = new ArrayList<>();
+	public static Collection<IComponentInstance> getAllAlgorithmSelectionInstances(final String requiredInterface, final Collection<? extends IComponent> components) {
+		Collection<IComponentInstance> instanceList = new ArrayList<>();
 		components.stream().filter(x -> x.getProvidedInterfaces().contains(requiredInterface)).map(x -> getAllAlgorithmSelectionInstances(x, components)).forEach(instanceList::addAll);
 		return instanceList;
 	}
@@ -249,7 +252,7 @@ public class ComponentUtil {
 					int numberOfSolutionPerSlotForThisInterface = getNumberOfUnparametrizedCompositions(components, reqIFace);
 					int subSolutionsForThisInterface = 0;
 					if (reqIFaceDef.isOptional() || reqIFaceDef.getMin() == 0) {
-						subSolutionsForThisInterface ++;
+						subSolutionsForThisInterface++;
 					}
 
 					/* now consider all numbers i of positive realizations of this required interface */
@@ -259,7 +262,7 @@ public class ComponentUtil {
 						for (int j = 0; j < i; j++) {
 							numberOfPossibleRealizationsForThisFixedNumberOfSlots *= numCandidatesForNextSlot;
 							if (reqIFaceDef.isUniqueComponents()) {
-								numCandidatesForNextSlot --;
+								numCandidatesForNextSlot--;
 							}
 						}
 						subSolutionsForThisInterface += numberOfPossibleRealizationsForThisFixedNumberOfSlots;
@@ -277,10 +280,72 @@ public class ComponentUtil {
 		return numCandidates;
 	}
 
+	public static int getNumberOfParametrizations(final IComponent component) {
+		int combos = 1;
+		for (IParameter p : component.getParameters()) {
+			IParameterDomain domain = p.getDefaultDomain();
+			if (domain instanceof NumericParameterDomain) {
+				NumericParameterDomain nDomain = (NumericParameterDomain) domain;
+				if (!nDomain.isInteger()) {
+					return Integer.MAX_VALUE;
+				}
+				combos *= nDomain.getMax() - nDomain.getMin() + 1;
+			} else if (domain instanceof CategoricalParameterDomain) {
+				combos *= ((CategoricalParameterDomain) domain).getValues().length;
+			}
+		}
+		return combos;
+	}
+
+	public static Collection<IComponentInstance> getAllInstantiations(final IComponent component) {
+		if (!component.getRequiredInterfaces().isEmpty()) {
+			throw new IllegalArgumentException("Full grounding only enabled for atomic components (without required interfaces).");
+		}
+		int numInstances = getNumberOfParametrizations(component);
+		if (numInstances > 100000) {
+			throw new IllegalArgumentException("Component " + component.getName() + " has " + numInstances + " possible instantiations. Only up to 100000 are supported.");
+		}
+
+		/* collect param domains as lists */
+		List<String> paramNames = new ArrayList<>();
+		List<Collection<Object>> params = new ArrayList<>();
+		for (IParameter p : component.getParameters()) {
+			paramNames.add(p.getName());
+			IParameterDomain domain = p.getDefaultDomain();
+			if (domain instanceof NumericParameterDomain) {
+				NumericParameterDomain nDomain = (NumericParameterDomain) domain;
+				List<Object> items = new ArrayList<>();
+				for (int i = (int) nDomain.getMin(); i <= nDomain.getMax(); i++) {
+					items.add(i);
+				}
+				params.add(items);
+			} else if (domain instanceof CategoricalParameterDomain) {
+				params.add(Arrays.asList((Object[]) ((CategoricalParameterDomain) domain).getValues()));
+			}
+		}
+
+		/* if this one is not parametrizable */
+		if (params.isEmpty()) {
+			return Arrays.asList(ComponentUtil.getDefaultParameterizationOfComponent(component));
+		}
+
+		/* build cartesian product */
+		Collection<List<Object>> combos = SetUtil.cartesianProduct(params);
+		List<IComponentInstance> instances = new ArrayList<>();
+		combos.forEach(c -> {
+			Map<String, String> paramMap = new HashMap<>();
+			for (int i = 0; i < paramNames.size(); i++) {
+				paramMap.put(paramNames.get(i), c.get(i).toString());
+			}
+			instances.add(new ComponentInstance(component, paramMap, new HashMap<>()));
+		});
+		return instances;
+	}
+
 	public static ComponentInstance getRandomParametrization(final IComponentInstance componentInstance, final Random rand) {
 		ComponentInstance randomParametrization = getRandomParameterizationOfComponent(componentInstance.getComponent(), rand);
 		componentInstance.getSatisfactionOfRequiredInterfaces().entrySet()
-		.forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), Arrays.asList(getRandomParametrization(x.getValue().iterator().next(), rand))));
+				.forEach(x -> randomParametrization.getSatisfactionOfRequiredInterfaces().put(x.getKey(), Arrays.asList(getRandomParametrization(x.getValue().iterator().next(), rand))));
 		return randomParametrization;
 	}
 
@@ -379,5 +444,61 @@ public class ComponentUtil {
 		}
 
 		throw new ComponentNotFoundException("No Component with this name loaded: " + componentName);
+	}
+
+	/**
+	 * Creates a randomly samples instantiation of the component. Required interfaces are configured at random too.
+	 *
+	 * @param component
+	 *            The root component to be instantiated.
+	 * @param componentRepository
+	 *            The repository of available components for satisfying required interfaces.
+	 * @param random
+	 *            The pseudo-randomness object.
+	 * @return A component instance of the provided component that is fully configured including the satisfaction of required interfaces.
+	 */
+	public static IComponentInstance getRandomInstantiationOfComponent(final String componentName, final IComponentRepository componentRepository, final Random random) {
+		return getRandomInstantiationOfComponent(componentRepository.getComponent(componentName), componentRepository, random);
+	}
+
+	/**
+	 * Creates a randomly samples instantiation of the component. Required interfaces are configured at random too.
+	 *
+	 * @param component
+	 *            The root component to be instantiated.
+	 * @param componentRepository
+	 *            The repository of available components for satisfying required interfaces.
+	 * @param random
+	 *            The pseudo-randomness object.
+	 * @return A component instance of the provided component that is fully configured including the satisfaction of required interfaces.
+	 */
+	public static IComponentInstance getRandomInstantiationOfComponent(final IComponent component, final IComponentRepository componentRepository, final Random random) {
+		IComponentInstance ci = getRandomParameterizationOfComponent(component, random);
+		for (IRequiredInterfaceDefinition reqI : component.getRequiredInterfaces()) {
+			List<IComponent> pluginComponents = new ArrayList<>(ComponentUtil.getComponentsProvidingInterface(componentRepository, reqI.getName()));
+
+			int numSatisfactions = 0;
+			if (reqI.getMin() == reqI.getMax()) {
+				numSatisfactions = reqI.getMin();
+			} else {
+				numSatisfactions = Math.min(pluginComponents.size(), (reqI.getMin() + random.nextInt(reqI.getMax() - reqI.getMin())));
+			}
+
+			List<IComponentInstance> satCIList = new ArrayList<>();
+			while (satCIList.size() < numSatisfactions) {
+				IComponent randomComponent = pluginComponents.get(random.nextInt(pluginComponents.size()));
+				IComponentInstance randomCI = getRandomInstantiationOfComponent(randomComponent, componentRepository, random);
+				if (reqI.isUniqueComponents()) {
+					pluginComponents.remove(randomComponent);
+				}
+				satCIList.add(randomCI);
+			}
+			ci.getSatisfactionOfRequiredInterfaces().put(reqI.getId(), satCIList);
+		}
+		return ci;
+	}
+
+	public static boolean areSame(final IComponentInstance c1, final IComponentInstance c2) {
+		return c1.getComponent().getName().equals(c2.getComponent().getName());
 	}
 }

@@ -2,9 +2,11 @@ package ai.libs.mlplan.cli;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -26,6 +29,12 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.Timeout;
+import org.openml.apiconnector.io.OpenmlConnector;
+import org.openml.apiconnector.xml.DataFeature;
+import org.openml.apiconnector.xml.DataFeature.Feature;
+import org.openml.apiconnector.xml.DataSetDescription;
+import org.openml.apiconnector.xml.Task;
+import org.openml.apiconnector.xml.Task.Input;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,13 +42,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
+import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceUtil;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
-import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
+import ai.libs.jaicore.ml.core.filter.SplitterUtil;
+import ai.libs.jaicore.ml.scikitwrapper.IScikitLearnWrapperConfig;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import ai.libs.jaicore.search.gui.plugins.rolloutboxplots.SearchRolloutBoxplotPlugin;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
@@ -50,8 +63,15 @@ import ai.libs.mlplan.cli.module.regression.MLPlan4WEKARegressionCLIModule;
 import ai.libs.mlplan.cli.module.slc.MLPlan4ScikitLearnClassificationCLIModule;
 import ai.libs.mlplan.cli.module.slc.MLPlan4WekaClassificationCLIModule;
 import ai.libs.mlplan.cli.report.OpenMLAutoMLBenchmarkReport;
+import ai.libs.mlplan.cli.report.StatisticsListener;
+import ai.libs.mlplan.cli.report.StatisticsReport;
 import ai.libs.mlplan.core.AMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
+import ai.libs.python.IPythonConfig;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 
 public class MLPlanCLI {
 
@@ -69,11 +89,11 @@ public class MLPlanCLI {
 	private static final TimeUnit DEF_TIME_UNIT = TimeUnit.valueOf(CONFIG.getDefaultTimeUnit());
 	private static final int DEF_NUM_RANDOM_COMPLETIONS = 3;
 
-	public static final String O_HELP = "h";
-	public static final String O_MODULE = "m";
-	public static final String O_FIT_DATASET = "f";
-	public static final String O_PREDICT_DATASET = "p";
-	public static final String O_LOSS = "l";
+	public static final String O_HELP = "h"; // print help
+	public static final String O_MODULE = "m"; // select module
+	public static final String O_FIT_DATASET = "f"; // provide fit dataset
+	public static final String O_PREDICT_DATASET = "p"; // provide predict dataset
+	public static final String O_LOSS = "l"; // specify loss function to use
 	public static final String O_SEED = "s";
 	public static final String O_SSC = "ssc";
 	public static final String O_NUM_CPUS = "ncpus";
@@ -83,9 +103,14 @@ public class MLPlanCLI {
 	public static final String O_NODE_EVAL_TIMEOUT = "tn";
 	public static final String O_POS_CLASS_INDEX = "pci";
 	public static final String O_POS_CLASS_NAME = "pcn";
-	public static final String O_OPENML_TASK = "openMLTask";
+	public static final String O_OPENML_TASK = "openMLTask"; // id of an openML taks as an alternative to fit and predict datasets
 
 	public static final String O_OUT_OPENML_BENCHMARK = "ooab";
+	public static final String O_OUT_STATS = "os";
+	public static final String O_OUT_MODEL = "om";
+
+	public static final String O_TMP = "tmp";
+	public static final String O_PYTHON_CMD = "pythonCmd";
 
 	/** OPTIONAL PARAMETERS' DEFAULT VALUES */
 	// Communication options standard values
@@ -93,6 +118,10 @@ public class MLPlanCLI {
 			new MLPlan4ScikitLearnRegressionCLIModule());
 	private static Map<String, IMLPlanCLIModule> moduleRegistry = null;
 	private static Map<String, String> defaults = new HashMap<>();
+	private static String version;
+
+	private static Double testPerformance;
+	private static IComponentInstance incumbent;
 
 	private static Map<String, IMLPlanCLIModule> getModuleRegistry() {
 		if (moduleRegistry != null) {
@@ -141,6 +170,7 @@ public class MLPlanCLI {
 				defaults.put(option.get(K_SHORT_OPT).asText(), option.get(K_DEFAULT).asText());
 			}
 		}
+		version = root.get("version").asText();
 		return options;
 	}
 
@@ -187,11 +217,81 @@ public class MLPlanCLI {
 
 	private static void printHelp(final Options options) {
 		final HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp(600, CLI_SYNTAX, "ML-Plan CLI v0.0.1-alpha\n================================\n", options, "===============================\nVisit us at: https://mlplan.org");
+		formatter.printHelp(600, CLI_SYNTAX, "ML-Plan CLI " + version + "\n================================\n", options, "===============================\nVisit us at: https://mlplan.org");
 	}
 
 	public static String getDefault(final String key) {
 		return defaults.get(key);
+	}
+
+	private static List<ILabeledDataset<ILabeledInstance>> loadOpenMLTaskAsTrainTestSplit(final int taskID, final int fold) throws Exception {
+
+		logger.info("Load train test split of task {} and fold {}", taskID, fold);
+		OpenmlConnector con = new OpenmlConnector();
+		Task omlTask = con.taskGet(taskID);
+		File foldAssignmentFile = con.taskSplitsGet(omlTask);
+
+		Instances splitDescription = new Instances(new FileReader(foldAssignmentFile));
+		splitDescription.setClassIndex(splitDescription.numAttributes() - 1);
+		List<Integer> fitFold = new ArrayList<>();
+		List<Integer> predictFold = new ArrayList<>();
+
+		for (Instance i : splitDescription) {
+			if (((int) i.classValue()) == fold) {
+				int instanceIndex = (int) i.value(1);
+				switch (splitDescription.attribute(0).value((int) i.value(0))) {
+				case "TRAIN":
+					fitFold.add(instanceIndex);
+					break;
+				case "TEST":
+					predictFold.add(instanceIndex);
+					break;
+				default:
+					/* ignore this case */
+					break;
+				}
+			}
+		}
+
+		ILabeledDataset<?> dataset = null;
+		for (Input input : omlTask.getInputs()) {
+			if (input.getName().equals("source_data")) {
+				DataSetDescription dsd = input.getData_set().getDataSetDescription(con);
+				DataFeature feature = con.dataFeatures(dsd.getId());
+
+				List<String> removeAttributes = new ArrayList<>();
+				for (Entry<String, Feature> featureEntry : feature.getFeaturesAsMap().entrySet()) {
+					if (featureEntry.getValue().getIs_row_identifier() || featureEntry.getValue().getIs_ignore()) {
+						removeAttributes.add(featureEntry.getKey());
+					}
+				}
+
+				Instances wekaData = new Instances(new FileReader(con.datasetGet(con.dataGet(input.getData_set().getData_set_id()))));
+				String rangeList = removeAttributes.stream().map(x -> (wekaData.attribute(x).index() + 1) + "").collect(Collectors.joining(","));
+				Remove remove = new Remove();
+				remove.setAttributeIndices(rangeList);
+				remove.setInputFormat(wekaData);
+				Instances cleanWekaData = Filter.useFilter(wekaData, remove);
+
+				Integer classIndex = null;
+				String targetName = input.getData_set().getTarget_feature();
+				for (int i = 0; i < cleanWekaData.numAttributes(); i++) {
+					if (cleanWekaData.attribute(i).name().equals(targetName)) {
+						classIndex = i;
+					}
+				}
+
+				if (classIndex == null) {
+					logger.error("Could not find target attribute with name {}. Assuming last column to be the target instead.", targetName);
+					classIndex = cleanWekaData.numAttributes() - 1;
+				}
+				cleanWekaData.setClassIndex(classIndex);
+
+				dataset = new WekaInstances(cleanWekaData);
+			}
+		}
+
+		return SplitterUtil.getRealizationOfSplitSpecification(dataset, Arrays.asList(fitFold, predictFold));
 	}
 
 	private static void runMLPlan(final CommandLine cl) throws Exception {
@@ -201,6 +301,15 @@ public class MLPlanCLI {
 			System.exit(1);
 		} else if (cl.hasOption(O_FIT_DATASET) && cl.hasOption(O_OPENML_TASK)) {
 			System.err.println("Cannot use both: local dataset and openml task. Only one option either " + O_FIT_DATASET + " or " + O_OPENML_TASK + " may be given.");
+		}
+
+		if (cl.hasOption(O_TMP)) {
+			ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class).setProperty(IScikitLearnWrapperConfig.K_TEMP_FOLDER, cl.getOptionValue(O_TMP));
+		}
+
+		if (cl.hasOption(O_PYTHON_CMD)) {
+			ConfigCache.getOrCreate(IScikitLearnWrapperConfig.class).setProperty(IPythonConfig.KEY_PYTHON, cl.getOptionValue(O_PYTHON_CMD));
+			ConfigCache.getOrCreate(IPythonConfig.class).setProperty(IPythonConfig.KEY_PYTHON, cl.getOptionValue(O_PYTHON_CMD));
 		}
 
 		// Load CLI modules and identify module responsible for the requested ml-plan configuration
@@ -217,11 +326,20 @@ public class MLPlanCLI {
 		ILabeledDataset predictDataset = null;
 		if (cl.hasOption(O_OPENML_TASK)) {
 			String[] taskSpec = cl.getOptionValues(O_OPENML_TASK);
-			List<ILabeledDataset<ILabeledInstance>> split = OpenMLDatasetReader.loadTaskFold(Integer.parseInt(taskSpec[0]), Integer.parseInt(taskSpec[1]));
+			int taskID = Integer.parseInt(taskSpec[0]);
+			int fold = Integer.parseInt(taskSpec[1]);
+
+			List<ILabeledDataset<ILabeledInstance>> split = loadOpenMLTaskAsTrainTestSplit(taskID, fold);
 			fitDataset = split.get(0);
 			predictDataset = split.get(1);
 		} else {
-			fitDataset = ArffDatasetAdapter.readDataset(new File(cl.getOptionValue(O_FIT_DATASET)));
+			if (cl.getOptionValue(O_MODULE, getDefault(O_MODULE)).equals(MLPlan4ScikitLearnRegressionCLIModule.M_RUL)) {
+				fitDataset = new ArffDatasetAdapter().readDataset(new File(cl.getOptionValue(O_FIT_DATASET)));
+			} else {
+				Instances wekaData = new Instances(new FileReader(new File(cl.getOptionValue(O_FIT_DATASET))));
+				wekaData.setClassIndex(wekaData.numAttributes() - 1);
+				fitDataset = new WekaInstances(wekaData);
+			}
 		}
 
 		// retrieve builder from module
@@ -237,9 +355,9 @@ public class MLPlanCLI {
 			builder.withCandidateEvaluationTimeOut(new Timeout(Integer.parseInt(cl.getOptionValue(O_CANDIDATE_TIMEOUT)), DEF_TIME_UNIT));
 		} else {
 			Timeout candidateTimeout;
-			if (builder.getTimeOut().seconds() < 60 * 5) {
+			if (builder.getTimeOut().seconds() <= 60 * 15) {
 				candidateTimeout = new Timeout(30, DEF_TIME_UNIT);
-			} else if (builder.getTimeOut().seconds() < 60 * 60) {
+			} else if (builder.getTimeOut().seconds() <= 2 * 60 * 60) {
 				candidateTimeout = new Timeout(300, DEF_TIME_UNIT);
 			} else if (builder.getTimeOut().seconds() < 60 * 60 * 12) {
 				candidateTimeout = new Timeout(600, DEF_TIME_UNIT);
@@ -262,6 +380,9 @@ public class MLPlanCLI {
 		MLPlan mlplan = builder.build();
 		mlplan.setLoggerName("mlplan");
 
+		StatisticsListener statsListener = new StatisticsListener();
+		mlplan.registerListener(statsListener);
+
 		if (cl.hasOption(O_VISUALIZATION)) {
 			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan);
 			window.withMainPlugin(new GraphViewPlugin());
@@ -270,29 +391,58 @@ public class MLPlanCLI {
 		}
 
 		// call ml-plan to obtain the optimal supervised learner
-		logger.info("Build mlplan classifier");
+		logger.info("Running ML-Plan ...");
 		ISupervisedLearner optimizedLearner = mlplan.call();
+		incumbent = mlplan.getComponentInstanceOfSelectedClassifier();
+		logger.info("ML-Plan finished. JSON description of selected solution: {}", incumbent);
 
 		if (predictDataset != null || cl.hasOption(O_PREDICT_DATASET)) {
 			if (cl.hasOption(O_PREDICT_DATASET)) {
 				File predictDatasetFile = new File(cl.getOptionValue(O_PREDICT_DATASET));
 				logger.info("Load test data file: {}", predictDatasetFile.getAbsolutePath());
-				predictDataset = ArffDatasetAdapter.readDataset(predictDatasetFile);
+				predictDataset = new ArffDatasetAdapter().readDataset(predictDatasetFile);
 			}
 
 			ILearnerRunReport runReport = new SupervisedLearnerExecutor().execute(optimizedLearner, predictDataset);
 			logger.info("Run report of the module: {}", module.getRunReportAsString(mlplan.getSelectedClassifier(), runReport));
+			testPerformance = builder.getMetricForSearchPhase().loss(runReport.getPredictionDiffList());
 
 			if (cl.hasOption(O_OUT_OPENML_BENCHMARK)) {
 				String outputFile = cl.getOptionValue(O_OUT_OPENML_BENCHMARK, getDefault(O_OUT_OPENML_BENCHMARK));
 				logger.info("Generating report conforming the OpenML AutoML Benchmark format which is then written to {}.", outputFile);
 				writeFile(outputFile, new OpenMLAutoMLBenchmarkReport(runReport).toString());
 			}
+
+			if (cl.hasOption(O_OUT_STATS)) {
+				String outputFile = cl.getOptionValue(O_OUT_STATS, getDefault(O_OUT_STATS));
+				logger.info("Generating statistics report in json and writing it to file {}.", outputFile);
+				writeFile(outputFile, new StatisticsReport(statsListener, mlplan.getComponentInstanceOfSelectedClassifier(), runReport).toString());
+			}
+		}
+
+		if (cl.hasOption(O_OUT_MODEL)) {
+			String outputFile = cl.getOptionValue(O_OUT_MODEL, getDefault(O_OUT_MODEL));
+			logger.info("Serializing trained model of selected classifier {} to output file {}.", optimizedLearner, outputFile);
+			FileUtil.serializeObject(optimizedLearner, outputFile);
+			logger.info("Serialization completed.");
 		}
 	}
 
+	public static IComponentInstance incumbent() {
+		return incumbent;
+	}
+
+	public static Double testPerformance() {
+		return testPerformance;
+	}
+
 	private static void writeFile(final String fileName, final String value) {
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File(fileName)))) {
+		File file = new File(fileName);
+		if (file.getParentFile() != null) {
+			file.getParentFile().mkdirs();
+		}
+
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
 			bw.write(value);
 		} catch (IOException e) {
 			logger.error("Could not write value to file {}: {}", fileName, value);
@@ -300,7 +450,21 @@ public class MLPlanCLI {
 	}
 
 	public static void main(final String[] args) throws Exception {
-		System.out.println("Called ML-Plan CLI with the following params: >" + Arrays.toString(args) + "<");
+		String logLevel;
+		if (logger.isTraceEnabled()) {
+			logLevel = "TRACE";
+		} else if (logger.isDebugEnabled()) {
+			logLevel = "DEBUG";
+		} else if (logger.isInfoEnabled()) {
+			logLevel = "INFO";
+		} else if (logger.isWarnEnabled()) {
+			logLevel = "WARN";
+		} else if (logger.isErrorEnabled()) {
+			logLevel = "ERROR";
+		} else {
+			logLevel = "UNKNOWN";
+		}
+		logger.info("Logger works properly. Log-level is {}.", logLevel);
 
 		final Options options = generateOptions();
 		if (args.length == 0) {

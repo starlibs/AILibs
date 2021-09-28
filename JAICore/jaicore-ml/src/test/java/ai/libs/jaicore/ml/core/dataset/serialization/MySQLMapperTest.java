@@ -35,7 +35,7 @@ public class MySQLMapperTest extends DBTest {
 	private static final String TARGET_ATTRIBUTE_NAME = "target";
 
 	public ILabeledDataset<?> getDataset() throws DatasetDeserializationFailedException {
-		return ArffDatasetAdapter.readDataset(new File("testrsc/dataset/arff/tiny.arff"));
+		return new ArffDatasetAdapter().readDataset(new File("testrsc/dataset/arff/tiny.arff"));
 	}
 
 	@ParameterizedTest

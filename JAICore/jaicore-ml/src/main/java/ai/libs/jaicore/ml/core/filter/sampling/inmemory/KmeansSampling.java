@@ -11,6 +11,7 @@ import org.api4.java.algorithm.events.IAlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.slf4j.Logger;
 
 /**
  * Implementation of a sampling method using kmeans-clustering. This algorithm
@@ -24,8 +25,10 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
  *
  */
 public class KmeansSampling<I extends ILabeledInstance & Clusterable, D extends ILabeledDataset<I>> extends ClusterSampling<I, D> {
+
 	/* number of clusters, if -1 use sample size */
-	private int k;
+	private final int k;
+	private final int maxIterations;
 
 	/**
 	 * Implementation of a sampling method using kmeans-clustering.
@@ -35,9 +38,10 @@ public class KmeansSampling<I extends ILabeledInstance & Clusterable, D extends 
 	 * @param k
 	 *            number of clusters
 	 */
-	public KmeansSampling(final long seed, final int k, final D input) {
+	public KmeansSampling(final long seed, final int k, final int maxIterations, final D input) {
 		super(seed, input);
 		this.k = k;
+		this.maxIterations = maxIterations;
 		if (input.size() > 1000) {
 			throw new IllegalArgumentException("KMeansSampling does not support datasets with more than 1000 points, because it has quadratic (non-interruptible) runtime.");
 		}
@@ -52,8 +56,9 @@ public class KmeansSampling<I extends ILabeledInstance & Clusterable, D extends 
 	 * @param dist
 	 *            {@link DistanceMeasure} to be used
 	 */
-	public KmeansSampling(final long seed, final DistanceMeasure dist, final D input) {
+	public KmeansSampling(final int maxIterations, final long seed, final DistanceMeasure dist, final D input) {
 		super(seed, dist, input);
+		this.maxIterations = maxIterations;
 		this.k = -1;
 		if (input.size() > 1000) {
 			throw new IllegalArgumentException("KMeansSampling does not support datasets with more than 1000 points, because it has quadratic (non-interruptible) runtime.");
@@ -70,8 +75,9 @@ public class KmeansSampling<I extends ILabeledInstance & Clusterable, D extends 
 	 * @param dist
 	 *            {@link DistanceMeasure} to be used
 	 */
-	public KmeansSampling(final long seed, final int k, final DistanceMeasure dist, final D input) {
+	public KmeansSampling(final int maxIterations, final long seed, final int k, final DistanceMeasure dist, final D input) {
 		super(seed, dist, input);
+		this.maxIterations = maxIterations;
 		this.k = k;
 
 	}
@@ -79,8 +85,10 @@ public class KmeansSampling<I extends ILabeledInstance & Clusterable, D extends 
 	@SuppressWarnings("unchecked")
 	@Override
 	public IAlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
+		Logger logger = this.getLogger();
 		switch (this.getState()) {
 		case CREATED:
+			logger.info("Initializing KMeansSampling.");
 			// Initialize variables
 			try {
 				this.sample = (D) this.getInput().createEmptyCopy();
@@ -92,13 +100,15 @@ public class KmeansSampling<I extends ILabeledInstance & Clusterable, D extends 
 			JDKRandomGenerator r = new JDKRandomGenerator();
 			r.setSeed(this.seed);
 			// update k if k=-1
-			if (this.k == -1) {
-				this.k = this.sampleSize;
-			}
+			int numClusters = this.k > 0 ? this.k : this.sampleSize;
+
 			if (this.clusterResults == null) {
-				KMeansPlusPlusClusterer<I> kMeansCluster = new KMeansPlusPlusClusterer<>(this.k, -1, this.distanceMeassure, r);
+				KMeansPlusPlusClusterer<I> kMeansCluster = new KMeansPlusPlusClusterer<>(numClusters, this.maxIterations, this.distanceMeassure, r);
+				logger.debug("Starting to cluster the dataset with k={} on {}x{} dataset.", numClusters, this.getInput().size(), this.getInput().getNumAttributes());
 				this.clusterResults = kMeansCluster.cluster(this.getInput()); // this is not interruptible!!
+				logger.debug("Clustering ready.");
 			}
+			logger.info("KMeansSampling activated.");
 			return this.activate();
 		case ACTIVE:
 			return this.doAlgorithmStep();

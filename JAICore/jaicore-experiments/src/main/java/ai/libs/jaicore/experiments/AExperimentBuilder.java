@@ -23,7 +23,7 @@ public abstract class AExperimentBuilder<B extends AExperimentBuilder<B>> implem
 	private final Class<?> configClass;
 	private final ExperimentSetAnalyzer analyzer;
 
-	public AExperimentBuilder(final IExperimentSetConfig config) {
+	protected AExperimentBuilder(final IExperimentSetConfig config) {
 		super();
 		this.config = config;
 

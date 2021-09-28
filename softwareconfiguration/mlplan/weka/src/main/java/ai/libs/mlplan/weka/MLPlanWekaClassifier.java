@@ -28,7 +28,7 @@ import ai.libs.jaicore.components.api.IComponent;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multiclass.IMLPlanClassifierConfig;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -47,7 +47,7 @@ import weka.core.OptionHandler;
  *
  */
 @SuppressWarnings("serial")
-public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, OptionHandler, ILoggingCustomizable, IWekaClassifier, IEventEmitter {
+public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, OptionHandler, ILoggingCustomizable, IWekaClassifier, IEventEmitter<Object> {
 
 	/* Logger for controlled output. */
 	private transient Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
@@ -75,11 +75,11 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 		this.fit(new WekaInstances(data));
 	}
 
-	public double[] classifyInstances(final Instances instances) throws Exception {
+	public double[] classifyInstances(final Instances instances) throws PredictionException, InterruptedException {
 		double[] predictionsAsDoubles = new double[instances.size()];
 		List<? extends IPrediction> predictions = this.classifierFoundByMLPlan.predict(new WekaInstances(instances)).getPredictions();
 		for (int i = 0; i < instances.size(); i++) {
-			predictionsAsDoubles[i] = (double)predictions.get(i).getPrediction();
+			predictionsAsDoubles[i] = (double) predictions.get(i).getPrediction();
 		}
 		return predictionsAsDoubles;
 	}
@@ -145,7 +145,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 		this.timeout = timeout;
 	}
 
-	public MLPlanClassifierConfig getMLPlanConfig() {
+	public IMLPlanClassifierConfig getMLPlanConfig() {
 		return this.builder.getAlgorithmConfig();
 	}
 

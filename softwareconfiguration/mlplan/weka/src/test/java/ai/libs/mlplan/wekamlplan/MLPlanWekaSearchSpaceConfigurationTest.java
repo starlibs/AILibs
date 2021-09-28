@@ -46,7 +46,7 @@ public class MLPlanWekaSearchSpaceConfigurationTest extends AbstractSearchSpaceC
 	@Override
 	public void prepare(final IProblemType<?> problemTypeOrig) throws DatasetDeserializationFailedException, IOException, SplitFailedException, InterruptedException {
 		EMLPlanWekaProblemType problemType = (EMLPlanWekaProblemType) problemTypeOrig;
-		ILabeledDataset<ILabeledInstance> data = ArffDatasetAdapter.readDataset(new File(dataPath));
+		ILabeledDataset<ILabeledInstance> data = new ArffDatasetAdapter().readDataset(new File(dataPath));
 		data = (ILabeledDataset<ILabeledInstance>) SplitterUtil.getSimpleTrainTestSplit(data, 0, 20.0 / data.size()).get(0); // work with only 20 instances for speedup
 
 		this.factory = problemType.getLearnerFactory();

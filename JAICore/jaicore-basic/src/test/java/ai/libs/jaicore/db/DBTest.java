@@ -4,12 +4,13 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.aeonbits.owner.ConfigFactory;
-import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.rules.Timeout;
 
 import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.db.sql.DatabaseAdapterFactory;
@@ -22,25 +23,25 @@ public abstract class DBTest extends ATest {
 	public static final String VAR_DB_PASS = "AILIBS_JAICORE_DB_DEFAULT_PASS";
 	public static final String VAR_DB_DATABASE = "AILIBS_JAICORE_DB_DEFAULT_DATABASE";
 
-
 	public static final String VAR_DB_REST_HOST = "AILIBS_JAICORE_DB_REST_DB_HOST";
 	public static final String VAR_DB_REST_TOKEN = "AILIBS_JAICORE_DB_REST_DB_TOKEN"; // this is for rest-based access
 
-	@Rule
-	public Timeout globalTimeout = Timeout.seconds(30); // database tests should not take longer than 10 seconds
+	@BeforeEach
+	@Timeout(value = 30, unit = TimeUnit.SECONDS) // database tests should not take longer than 10 seconds
+	void setUp() {
+
+	}
 
 	protected IDatabaseAdapter reportConfigAndGetAdapter(final Object config) {
 		if (config instanceof IDatabaseConfig) {
-			IDatabaseConfig c = (IDatabaseConfig )config;
+			IDatabaseConfig c = (IDatabaseConfig) config;
 			this.logger.info("Carry out tests with direct MySQL connection to {} on database {} with user {}.", c.getDBHost(), c.getDBDatabaseName(), c.getDBUsername());
 			return DatabaseAdapterFactory.get(c);
-		}
-		else if (config instanceof IRestDatabaseConfig) {
-			IRestDatabaseConfig c = (IRestDatabaseConfig)config;
+		} else if (config instanceof IRestDatabaseConfig) {
+			IRestDatabaseConfig c = (IRestDatabaseConfig) config;
 			this.logger.info("Carry out tests with REST connection to {} using token {}.", c.getHost(), c.getToken());
 			return DatabaseAdapterFactory.get(c);
-		}
-		else {
+		} else {
 			throw new IllegalArgumentException("Cannot work with configs of type " + config.getClass());
 		}
 	}

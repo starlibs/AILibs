@@ -1,38 +1,76 @@
 {
-  "repository" : "weka.classifiers.rules.PART",
-  "include" : [ ],
-  "components" : [ {
-    "name" : "weka.classifiers.rules.PART",
-    "requiredInterface" : [ ],
-    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "WeightedInstancesHandler", "BaseClassifier", "PipelineClassifier" ],
-    "parameters" : [ {
-      "name" : "N",
-      "type" : "int",
-      "default" : 3.0,
-      "min" : 2.0,
-      "max" : 5.0,
-      "refineSplits" : 8,
-      "minInterval" : 1.0
-    }, {
-      "name" : "M",
-      "type" : "int",
-      "default" : 2.0,
-      "min" : 1.0,
-      "max" : 64.0,
-      "refineSplits" : 8,
-      "minInterval" : 1
-    }, {
-      "name" : "R",
-      "type" : "boolean",
-      "default" : "false"
-    }, {
-      "name" : "B",
-      "type" : "boolean",
-      "default" : "false"
-    } ],
-    "dependencies" : [ {
-      "pre" : "R in {false}",
-      "post" : "N in [3.0,3.0]"
-    } ]
-  } ]
+	"repository": "weka.classifiers.rules.PART",
+	"comment": "Original Parameters: pruning confidence (C), Minimum number of objects (M), reduced error pruning (R), number of folds (N), binary splits only (B), unpruned decision list (U), no MDL correction (J), random data shuffling seed (Q)",
+	"include": [],
+	"components": [
+		{
+			"name": "weka.classifiers.rules.PART",
+			"requiredInterface": [],
+			"providedInterface": [
+				"AbstractClassifier",
+				"Classifier",
+				"BaseClassifier",
+				"WeightedInstancesHandler"
+			],
+			"parameters": [
+				{
+					"name": "C",
+					"type": "double",
+					"default": 0.25,
+					"min": 0.0,
+					"max": 1.0,
+					"refineSplits": 8,
+					"minInterval": 0.05
+				},
+				{
+					"name": "N",
+					"type": "int",
+					"default": 3.0,
+					"min": 2.0,
+					"max": 5.0,
+					"refineSplits": 8,
+					"minInterval": 1.0
+				},
+				{
+					"name": "M",
+					"type": "int",
+					"default": 2.0,
+					"min": 1.0,
+					"max": 64.0,
+					"refineSplits": 8,
+					"minInterval": 1
+				},
+				{
+					"name": "R",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "B",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "U",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "J",
+					"type": "boolean",
+					"default": "false"
+				}
+			],
+			"dependencies": [
+				{
+					"pre": "R in {false}",
+					"post": "N in [3.0,3.0]"
+				},
+				{
+					"pre": "R in {true}",
+					"post": "C in [0.25,0.25]"
+				}
+			]
+		}
+	]
 }

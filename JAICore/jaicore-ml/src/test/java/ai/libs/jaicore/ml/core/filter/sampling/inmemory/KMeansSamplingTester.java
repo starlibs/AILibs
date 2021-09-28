@@ -15,7 +15,8 @@ public class KMeansSamplingTester extends GeneralSamplingTester<Number> {
 
 	private static final long SEED = 1;
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
-	private static final int K = 100;
+	private static final int K = -1;
+	private static final int MAX_ITERATIONS = 100;
 
 	@Override
 	public void testSampleSizeSimpleProblem(final MemoryBasedSamplingAlgorithmTestProblemSet set) {
@@ -48,6 +49,7 @@ public class KMeansSamplingTester extends GeneralSamplingTester<Number> {
 			factory.setClusterSeed(SEED);
 			factory.setK(K);
 			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * dataset.size());
+			factory.setMaxIterations(MAX_ITERATIONS);
 			return factory.getAlgorithm(sampleSize, (ILabeledDataset<IClusterableInstance>)dataset, new Random(SEED));
 		}
 		return null;

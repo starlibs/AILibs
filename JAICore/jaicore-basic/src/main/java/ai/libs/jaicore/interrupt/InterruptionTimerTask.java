@@ -3,9 +3,9 @@ package ai.libs.jaicore.interrupt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.concurrent.NamedTimerTask;
+import ai.libs.jaicore.concurrent.ANamedTimerTask;
 
-public class InterruptionTimerTask extends NamedTimerTask {
+public class InterruptionTimerTask extends ANamedTimerTask {
 	private static final Logger logger = LoggerFactory.getLogger(InterruptionTimerTask.class);
 	private final Thread threadToBeInterrupted;
 	private final Object reason;

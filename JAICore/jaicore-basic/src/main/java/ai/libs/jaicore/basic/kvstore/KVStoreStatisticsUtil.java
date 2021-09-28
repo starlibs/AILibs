@@ -362,7 +362,7 @@ public class KVStoreStatisticsUtil {
 		Set<String> consideredKeys = new HashSet<>();
 		collection.forEach(t -> {
 			String keyValue = t.getAsString(setting);
-			if (!consideredKeys.contains(keyValue) && t.getAsBoolean(output)) {
+			if (!consideredKeys.contains(keyValue) && Boolean.TRUE.equals(t.getAsBoolean(output))) {
 				consideredKeys.add(keyValue);
 				distinctTasks.add(t);
 			}
@@ -445,7 +445,7 @@ public class KVStoreStatisticsUtil {
 		}
 		return averageRanks;
 	}
-  
+
 	public static void bestWilcoxonSignedRankTest(final KVStoreCollection collection, final String setting, final String sampleID, final String pairingIndices, final String sampledValues, final String output) {
 		String bestField = output + "_best";
 		KVStoreCollectionOneLayerPartition bestPart = new KVStoreCollectionOneLayerPartition(setting, collection);

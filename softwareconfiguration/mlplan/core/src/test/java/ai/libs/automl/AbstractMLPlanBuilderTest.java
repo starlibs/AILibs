@@ -32,7 +32,7 @@ import ai.libs.mlplan.core.IProblemType;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
 import ai.libs.mlplan.core.PreferenceBasedNodeEvaluator;
-import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multiclass.IMLPlanClassifierConfig;
 
 public abstract class AbstractMLPlanBuilderTest {
 
@@ -43,7 +43,7 @@ public abstract class AbstractMLPlanBuilderTest {
 	}
 
 	protected MLPlan<?> getMLPlanForBuilder(final AMLPlanBuilder<?, ?> builder) throws DatasetDeserializationFailedException, Exception {
-		return builder.withDataset(OpenMLDatasetReader.deserializeDataset(3)).build(); // test builds with the kr-vs-kp dataset
+		return builder.withDataset(new OpenMLDatasetReader().deserializeDataset(3)).build(); // test builds with the kr-vs-kp dataset
 	}
 
 	protected BestFirst<?, TFDNode, String, Double> getSearch(final MLPlan<?> mlplan) {
@@ -165,7 +165,7 @@ public abstract class AbstractMLPlanBuilderTest {
 	public void testSettingPortionOfDataReservedForSelection(final IProblemType<?> problemType) throws Exception {
 		double portionOfDataReservedForSelection = 0.456;
 		AMLPlanBuilder<?, ?> builder = this.getBuilder(problemType).withPortionOfDataReservedForSelection(portionOfDataReservedForSelection);
-		assertEquals(portionOfDataReservedForSelection, Double.parseDouble(builder.getAlgorithmConfig().getProperty(MLPlanClassifierConfig.SELECTION_PORTION)), 0.00001);
+		assertEquals(portionOfDataReservedForSelection, Double.parseDouble(builder.getAlgorithmConfig().getProperty(IMLPlanClassifierConfig.SELECTION_PORTION)), 0.00001);
 	}
 
 	@ParameterizedTest

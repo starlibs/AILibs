@@ -39,7 +39,7 @@ import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multiclass.IMLPlanClassifierConfig;
 import ai.libs.mlplan.safeguard.IEvaluationSafeGuardFactory;
 
 /**
@@ -70,7 +70,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	private ILabeledDataset<?> dataset;
 
 	/* other general properties of ML-Plan */
-	private MLPlanClassifierConfig algorithmConfig;
+	private IMLPlanClassifierConfig algorithmConfig;
 
 	/* node evaluation and search guidance */
 	private Predicate<TFDNode> priorizingPredicate = new DefaultPathPriorizingPredicate<>(); // by default, we prefer paths that lead to default parametrizations
@@ -81,8 +81,8 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	private IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter;
 	private IDeterministicPredictionPerformanceMeasure<?, ?> metricForSearchPhase;
 	private IDeterministicPredictionPerformanceMeasure<?, ?> metricForSelectionPhase;
-	private ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factoryForPipelineEvaluationInSearchPhase = this.getMCCVFactory(3, .7);
-	private ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factoryForPipelineEvaluationInSelectionPhase = this.getMCCVFactory(3, .7);
+	private ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factoryForPipelineEvaluationInSearchPhase = this.getMCCVFactory(5, .7);
+	private ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> factoryForPipelineEvaluationInSelectionPhase = this.getMCCVFactory(5, .7);
 	private IEvaluationSafeGuardFactory safeGuard = null;
 
 	protected AMLPlanBuilder() {
@@ -164,7 +164,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	 *             Thrown if a problem occurs while trying to read the file containing the priority list.
 	 */
 	public B withPreferredComponentsFile(final File preferredComponentsFile) throws IOException {
-		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
+		this.getAlgorithmConfig().setProperty(IMLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
 		List<String> namesOfPreferredComponents = null; // the order is important!
 		if (preferredComponentsFile instanceof ResourceFile) {
 			namesOfPreferredComponents = ResourceUtil.readResourceFileToStringList((ResourceFile) preferredComponentsFile);
@@ -180,7 +180,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	}
 
 	public B withPreferredComponents(final List<String> preferredComponents) {
-		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, "" + SetUtil.implode(preferredComponents, ", "));
+		this.getAlgorithmConfig().setProperty(IMLPlanClassifierConfig.PREFERRED_COMPONENTS, "" + SetUtil.implode(preferredComponents, ", "));
 		return this.getSelf();
 	}
 
@@ -227,7 +227,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	 *             An IOException is thrown if there are issues reading the config file.
 	 */
 	public B withAlgorithmConfigFile(final File algorithmConfigFile) {
-		return this.withAlgorithmConfig((MLPlanClassifierConfig) ConfigFactory.create(MLPlanClassifierConfig.class).loadPropertiesFromFile(algorithmConfigFile));
+		return this.withAlgorithmConfig((IMLPlanClassifierConfig) ConfigFactory.create(IMLPlanClassifierConfig.class).loadPropertiesFromFile(algorithmConfigFile));
 	}
 
 	/**
@@ -239,7 +239,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	 * @throws IOException
 	 *             An IOException is thrown if there are issues reading the config file.
 	 */
-	public B withAlgorithmConfig(final MLPlanClassifierConfig config) {
+	public B withAlgorithmConfig(final IMLPlanClassifierConfig config) {
 		this.algorithmConfig = config;
 		return this.getSelf();
 	}
@@ -331,7 +331,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	}
 
 	public B withTimeoutPrecautionOffsetInSeconds(final int seconds) {
-		this.algorithmConfig.setProperty(MLPlanClassifierConfig.PRECAUTION_OFFSET, "" + seconds);
+		this.algorithmConfig.setProperty(IMLPlanClassifierConfig.PRECAUTION_OFFSET, "" + seconds);
 		return this.getSelf();
 	}
 
@@ -493,7 +493,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	}
 
 	@Override
-	public MLPlanClassifierConfig getAlgorithmConfig() {
+	public IMLPlanClassifierConfig getAlgorithmConfig() {
 		return this.algorithmConfig;
 	}
 
@@ -507,7 +507,7 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	}
 
 	public B withPortionOfDataReservedForSelection(final double value) {
-		this.algorithmConfig.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, value + "");
+		this.algorithmConfig.setProperty(IMLPlanClassifierConfig.SELECTION_PORTION, value + "");
 		return this.getSelf();
 	}
 
@@ -532,13 +532,13 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	 * @param dataset
 	 *            The dataset for which an ML-Plan object is to be built.
 	 * @return The ML-Plan object configured with this builder.
+	 * @throws InterruptedException
 	 */
-	public MLPlan<L> build(final ILabeledDataset<?> dataset) {
+	public MLPlan<L> build(final ILabeledDataset<?> dataset) throws InterruptedException {
 		return this.withDataset(dataset).build();
 	}
 
 	public void checkPreconditionsForInitialization() {
-
 		/* check proper problem definition */
 		Objects.requireNonNull(this.searchSpaceFile, "No search space file defined.");
 		Objects.requireNonNull(this.requestedHASCOInterface, "No requested HASCO interface defined!");
@@ -557,8 +557,9 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	 * Builds an ML-Plan object with the dataset provided earlier to this builder.
 	 *
 	 * @return The ML-Plan object configured with this builder.
+	 * @throws InterruptedException
 	 */
-	public MLPlan<L> build() {
+	public MLPlan<L> build() throws InterruptedException {
 		this.checkPreconditionsForInitialization();
 		return new MLPlan<>(this, this.dataset);
 	}

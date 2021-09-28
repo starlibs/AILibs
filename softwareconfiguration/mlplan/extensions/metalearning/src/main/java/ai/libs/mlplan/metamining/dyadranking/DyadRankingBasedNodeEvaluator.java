@@ -375,8 +375,9 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 	 * @param cI
 	 *            the pipeline to characterize
 	 * @return the meta features of the pipeline with appended landmarking features
+	 * @throws InterruptedException
 	 */
-	private IVector evaluateLandmarkersForAlgorithm(final ComponentInstance cI) {
+	private IVector evaluateLandmarkersForAlgorithm(final ComponentInstance cI) throws InterruptedException {
 		double[] y = this.characterizer.characterize(cI);
 
 		int sizeOfYPrime = this.characterizer.getLengthOfCharacterization() + this.landmarkers.length;
@@ -389,6 +390,8 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 				FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(new WekaInstances(train), new WekaInstances(this.evaluationDataset), EClassificationPerformanceMeasure.ERRORRATE);
 				try {
 					score += evaluator.evaluate(this.classifierFactory.getComponentInstantiation(cI));
+				} catch (InterruptedException e) {
+					throw e;
 				} catch (Exception e) {
 					logger.error("Couldn't get classifier for {}", cI);
 				}
@@ -446,6 +449,9 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 					return new Pair<>(node, score);
 				} catch (Exception e) {
 					logger.error("Couldn't evaluate {}", node);
+					if (e instanceof InterruptedException) {
+						Thread.currentThread().interrupt();
+					}
 					return null;
 				}
 			});
@@ -469,6 +475,8 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 					evaluatedPipe.cancel(true);
 				}
 
+			} catch (InterruptedException e) {
+				throw e;
 			} catch (Exception e) {
 				logger.info("Got exception while evaluating {}", e.getMessage());
 			}

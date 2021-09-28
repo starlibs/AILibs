@@ -14,6 +14,6 @@ import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 public class MLPlanMinimalExample {
 
 	public static void main(final String[] args) throws AlgorithmTimeoutedException, AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, IOException, DatasetDeserializationFailedException {
-		IClassifier c = new MLPlanWekaBuilder().withDataset(OpenMLDatasetReader.deserializeDataset(3)).build().call();
+		IClassifier c = new MLPlanWekaBuilder().withDataset(new OpenMLDatasetReader().deserializeDataset(3)).build().call();
 	}
 }

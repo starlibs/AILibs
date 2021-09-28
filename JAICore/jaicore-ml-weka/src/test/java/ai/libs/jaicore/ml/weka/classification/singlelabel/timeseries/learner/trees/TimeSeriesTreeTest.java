@@ -269,9 +269,10 @@ public class TimeSeriesTreeTest {
 	/**
 	 * See
 	 * {@link TimeSeriesTreeLearningAlgorithm#tree(double[][], int[], double, TreeNode, int)}.
+	 * @throws InterruptedException
 	 */
 	@Test
-	public void treeTest() throws TrainingException {
+	public void treeTest() throws TrainingException, InterruptedException {
 		TimeSeriesTreeClassifier tst = new TimeSeriesTreeClassifier(this.config);
 
 		double[][] data = new double[][] { { 0, 1, 2, 3, 4, 5 }, { 0, 2, 4, 6, 8, 10 } };

@@ -3,14 +3,13 @@ package ai.libs.mlplan.sklearn;
 import java.util.Set;
 
 import ai.libs.jaicore.components.api.IComponentInstance;
-import ai.libs.jaicore.ml.core.EScikitLearnProblemType;
 
 public abstract class ATwoStepPipelineScikitLearnFactory extends AScikitLearnLearnerFactory {
 
 	private final String learnerFieldName;
 
-	protected ATwoStepPipelineScikitLearnFactory(final EScikitLearnProblemType problemType, final String learnerFieldName) {
-		super(problemType);
+	protected ATwoStepPipelineScikitLearnFactory(final String learnerFieldName) {
+		super();
 		this.learnerFieldName = learnerFieldName;
 	}
 

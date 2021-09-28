@@ -12,9 +12,9 @@
 			],
 			"providedInterface": [
 				"AbstractClassifier",
+				"Classifier",
 				"MetaClassifier",
-				"WeightedInstancesHandler",
-				"PipelineClassifier"
+				"WeightedInstancesHandler"
 			],
 			"parameters": [
 				{
@@ -34,14 +34,6 @@
 					"max": 1.0,
 					"refineSplits": 8,
 					"minInterval": 0.05
-				},
-				{
-					"name": "S",
-					"type": "cat",
-					"default": "1",
-					"values": [
-						"1"
-					]
 				}
 			],
 			"dependencies": []

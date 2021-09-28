@@ -2,6 +2,11 @@ package ai.libs.jaicore.basic;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
@@ -51,6 +56,48 @@ class StatisticsUtilTest {
 	void testTTest() {
 		assertFalse("TTest identifies different distributions which is not the case", StatisticsUtil.twoSampleTTestSignificance(posSampleA, posSampleB));
 		assertTrue("TTest did not detect different distributions although they are.", StatisticsUtil.twoSampleTTestSignificance(negSampleA, negSampleB));
+	}
+
+	private static final List<Integer> EMPTY_LIST = Arrays.asList();
+	private static final List<Integer> LIST_A = Arrays.asList(5, 3, 9, 13);
+	private static final List<Integer> LIST_B = Arrays.asList(7, 4, 10, 11, 18);
+	private static final List<Integer> LIST_C = Arrays.asList(3);
+	private static final List<List<Integer>> ALL_LISTS = Arrays.asList(EMPTY_LIST, LIST_A, LIST_B, LIST_C);
+
+	void testDoubleEquals(final List<Double> expected, final List<Double> actual) {
+		for (int i = 0; i < expected.size(); i++) {
+			assertEquals(expected.get(i).doubleValue(), actual.get(i).doubleValue());
+		}
+	}
+
+	@Test
+	void testMedian() {
+		List<Double> expected = Arrays.asList(Double.NaN, 7.0, 10.0, 3.0);
+		this.testDoubleEquals(expected, ALL_LISTS.stream().map(StatisticsUtil::median).collect(Collectors.toList()));
+	}
+
+	@Test
+	void testMean() {
+		List<Double> expected = Arrays.asList(Double.NaN, 7.5, 10.0, 3.0);
+		this.testDoubleEquals(expected, ALL_LISTS.stream().map(StatisticsUtil::mean).collect(Collectors.toList()));
+	}
+
+	@Test
+	void testSum() {
+		List<Double> expected = Arrays.asList(0.0, 30.0, 50.0, 3.0);
+		this.testDoubleEquals(expected, ALL_LISTS.stream().map(StatisticsUtil::sum).collect(Collectors.toList()));
+	}
+
+	@Test
+	void testMin() {
+		List<Double> expected = Arrays.asList(Double.NaN, 3.0, 4.0, 3.0);
+		this.testDoubleEquals(expected, ALL_LISTS.stream().map(StatisticsUtil::min).collect(Collectors.toList()));
+	}
+
+	@Test
+	void testMax() {
+		List<Double> expected = Arrays.asList(Double.NaN, 13.0, 18.0, 3.0);
+		this.testDoubleEquals(expected, ALL_LISTS.stream().map(StatisticsUtil::max).collect(Collectors.toList()));
 	}
 
 	/**

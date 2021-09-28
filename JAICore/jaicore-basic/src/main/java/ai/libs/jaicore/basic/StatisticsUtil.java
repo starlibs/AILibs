@@ -29,6 +29,10 @@ public class StatisticsUtil {
 	 * @return The maximum value of the provided collection.
 	 */
 	public static double max(final Collection<? extends Number> values) {
+		if (values.isEmpty()) {
+			return Double.NaN;
+		}
+
 		return values.stream().mapToDouble(Number::doubleValue).max().getAsDouble();
 	}
 
@@ -39,6 +43,10 @@ public class StatisticsUtil {
 	 * @return The minimum value of the provided collection.
 	 */
 	public static double min(final Collection<? extends Number> values) {
+		if (values.isEmpty()) {
+			return Double.NaN;
+		}
+
 		return values.stream().mapToDouble(Number::doubleValue).min().getAsDouble();
 	}
 
@@ -49,6 +57,10 @@ public class StatisticsUtil {
 	 * @return The mean of the provided values.
 	 */
 	public static double mean(final Collection<? extends Number> values) {
+		if (values.isEmpty()) {
+			return Double.NaN;
+		}
+
 		return values.stream().mapToDouble(Number::doubleValue).average().getAsDouble();
 	}
 
@@ -59,12 +71,19 @@ public class StatisticsUtil {
 	 * @return The mean of the provided values.
 	 */
 	public static double median(final Collection<? extends Number> values) {
+		if (values.isEmpty()) {
+			return Double.NaN;
+		}
+
 		List<? extends Number> list = new ArrayList<>(values);
 		list.sort((o1, o2) -> Double.compare(o1.doubleValue(), o2.doubleValue()));
-		int upperIndex = (int) Math.ceil(((double) values.size() + 1) / 2);
-		int lowerIndex = (int) Math.floor(((double) values.size() + 1) / 2);
-
-		return (list.get(lowerIndex).doubleValue() + list.get(upperIndex).doubleValue()) / 2;
+		if (list.size() > 1) {
+			int upperIndex = (int) Math.ceil(((double) values.size() + 1) / 2) - 1;
+			int lowerIndex = (int) Math.floor(((double) values.size() + 1) / 2) - 1;
+			return (list.get(lowerIndex).doubleValue() + list.get(upperIndex).doubleValue()) / 2;
+		} else {
+			return list.get(0).doubleValue();
+		}
 	}
 
 	/**
@@ -84,6 +103,10 @@ public class StatisticsUtil {
 	 * @return The variance of the provided values.
 	 */
 	public static double variance(final Collection<? extends Number> values) {
+		if (values.isEmpty()) {
+			return 0.0;
+		}
+
 		final double mean = mean(values);
 		return values.stream().mapToDouble(Number::doubleValue).map(x -> Math.pow(x - mean, 2) / values.size()).sum();
 	}
@@ -95,6 +118,10 @@ public class StatisticsUtil {
 	 * @return The standard deviation of the provided values.
 	 */
 	public static double standardDeviation(final Collection<? extends Number> values) {
+		if (values.isEmpty()) {
+			return 0.0;
+		}
+
 		return Math.sqrt(variance(values));
 	}
 

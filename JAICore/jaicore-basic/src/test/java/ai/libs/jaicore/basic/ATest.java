@@ -5,20 +5,20 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.awaitility.Awaitility;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.concurrent.CancellationTimerTask;
 import ai.libs.jaicore.concurrent.GlobalTimer;
-import ai.libs.jaicore.concurrent.NamedTimerTask;
+import ai.libs.jaicore.concurrent.ANamedTimerTask;
 import ai.libs.jaicore.concurrent.TrackableTimerTask;
 import ai.libs.jaicore.interrupt.InterruptionTimerTask;
 import ai.libs.jaicore.logging.LoggerUtil;
@@ -29,8 +29,11 @@ public abstract class ATest implements ILoggingCustomizable {
 
 	protected Logger logger = LoggerFactory.getLogger(LoggerUtil.LOGGER_NAME_TESTER + "." + this.getClass().getSimpleName().toLowerCase());
 
-	@Rule
-	public Timeout globalTimeout = Timeout.seconds(120); // no test should run longer than two minutes
+	@BeforeEach
+	@Timeout(value = 120, unit = TimeUnit.SECONDS) // no test should run longer than two minutes
+	void setup() {
+
+	}
 
 	@Override
 	public String getLoggerName() {
@@ -66,16 +69,16 @@ public abstract class ATest implements ILoggingCustomizable {
 			String msg = "Global Timer has " + unresolvedTasks.size() + " active jobs " + situation + " test: " + unresolvedTasks.stream().map(t -> {
 				StringBuilder sb = new StringBuilder();
 				sb.append(t.getClass().getName());
-				sb.append(" (" + (t.hasBeenExecuted() ? "" : "not ")  + "executed, " + (t.isFinished() ? "" : "not ") + "finished)");
-				if (t instanceof NamedTimerTask) {
+				sb.append(" (" + (t.hasBeenExecuted() ? "" : "not ") + "executed, " + (t.isFinished() ? "" : "not ") + "finished)");
+				if (t instanceof ANamedTimerTask) {
 					sb.append(": ");
-					sb.append(((NamedTimerTask) t).getDescriptor());
+					sb.append(((ANamedTimerTask) t).getDescriptor());
 					if (t instanceof CancellationTimerTask) {
-						sb.append(" - to cancel " + ((CancellationTimerTask)t).getCancelable());
+						sb.append(" - to cancel " + ((CancellationTimerTask) t).getCancelable());
 					}
 					if (t instanceof InterruptionTimerTask) {
-						InterruptionTimerTask it = (InterruptionTimerTask)t;
-						sb.append(" - to interrupt " + it.getThreadToBeInterrupted() + " with reason " + it.getReason() + " (" + (it.isTriggered() ? "" : "not ")  +"triggered)");
+						InterruptionTimerTask it = (InterruptionTimerTask) t;
+						sb.append(" - to interrupt " + it.getThreadToBeInterrupted() + " with reason " + it.getReason() + " (" + (it.isTriggered() ? "" : "not ") + "triggered)");
 					}
 				}
 				return "\n\t- " + sb.toString();

@@ -1,5 +1,5 @@
 {
-	"version": "0.1-alpha",
+	"version": "0.1",
 	"options": [
 		{
 			"shortOpt": "h",
@@ -19,6 +19,18 @@
 			"description": "The randomness seed used for the pseudo random number generator.",
 			"hasArg": "true",
 			"default": "42"
+		},
+		{
+			"shortOpt": "tmp",
+			"longOpt": "tempFolder",
+			"description": "Configure the temporary files directory for storing files for python scripts.",
+			"hasArg": "true"
+		},
+		{
+			"shortOpt": "pythonCmd",
+			"longOpt": "pythonCmd",
+			"description": "Configure the python binary to be used to run python scripts.",
+			"hasArg": "true"
 		},
 		{
 			"shortOpt": "ncpus",
@@ -102,6 +114,18 @@
 			"shortOpt": "ooab",
 			"longOpt": "outputOpenmlAutomlBenchmarkResult",
 			"description": "Output the result of the AutoML process according to the OpenML AutoML Benchmark suite. Enabling this option requires a dataset for predicting to be provided.",
+			"hasArg": "true"
+		},
+		{
+			"shortOpt": "os",
+			"longOpt": "outputStatistics",
+			"description": "Generate statistics as output and write it into the given path.",
+			"hasArg": "true"
+		},
+		{
+			"shortOpt": "om",
+			"longOpt": "outputModel",
+			"description": "Serializes the model of the eventually built learner it into the given path.",
 			"hasArg": "true"
 		}
 	

@@ -53,6 +53,8 @@ public class Util {
 			List<Collection<String>> classSplit;
 			try {
 				classSplit = new ArrayList<>(splitter.split(data));
+			} catch (InterruptedException e) {
+				throw e;
 			} catch (Exception e) {
 				throw new RuntimeException("Could not create RPND split.", e);
 			}

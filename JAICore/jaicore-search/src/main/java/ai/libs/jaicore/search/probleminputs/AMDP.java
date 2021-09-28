@@ -10,7 +10,7 @@ public abstract class AMDP<N, A, V extends Comparable<V>> implements IMDP<N, A, 
 
 	private final N initState;
 
-	public AMDP(final N initState) {
+	protected AMDP(final N initState) {
 		super();
 		this.initState = initState;
 	}
@@ -22,9 +22,18 @@ public abstract class AMDP<N, A, V extends Comparable<V>> implements IMDP<N, A, 
 
 	@Override
 	public double getProb(final N state, final A action, final N successor) throws InterruptedException {
+		return this.getProb(state, action, successor, false);
+	}
+
+	public double getProb(final N state, final A action, final N successor, final boolean setProbabilityOfUndefinedToZero) throws InterruptedException {
 		Map<N, Double> dist = this.getProb(state, action);
 		if (!dist.containsKey(successor)) {
-			throw new IllegalArgumentException("No probability defined for the following triplet:\n\tFrom state: " + state + "\n\tUsed action: " + action  + "\n\tTo state: " + successor + ".\nDistribution is: " + dist.entrySet().stream().map(e -> "\n\t" + e.toString()).collect(Collectors.joining()));
+			if (setProbabilityOfUndefinedToZero) {
+				return 0.0;
+			}
+			else {
+				throw new IllegalArgumentException("No probability defined for the following triplet:\n\tFrom state: " + state + "\n\tUsed action: " + action  + "\n\tTo state: " + successor + ".\nDistribution is: " + dist.entrySet().stream().map(e -> "\n\t" + e.toString()).collect(Collectors.joining()));
+			}
 		}
 		return dist.get(successor);
 	}

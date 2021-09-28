@@ -14,7 +14,7 @@ public class CSVDatasetAdapterTest {
 
 	@Test
 	public void testWriteDataset() throws DatasetDeserializationFailedException, IOException {
-		ILabeledDataset<ILabeledInstance> dataset = OpenMLDatasetReader.deserializeDataset(31);
+		ILabeledDataset<ILabeledInstance> dataset = new OpenMLDatasetReader().deserializeDataset(31);
 		File f = new File("test.csv");
 		CSVDatasetAdapter.writeDataset(f, dataset);
 		assertTrue(f.exists());

@@ -68,7 +68,7 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 *
 	 * @param problem the problem being solved
 	 */
-	public AbstractAlgorithm(final Problem problem) {
+	protected AbstractAlgorithm(final Problem problem) {
 		super();
 		this.problem = problem;
 	}

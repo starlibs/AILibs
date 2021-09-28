@@ -4,10 +4,18 @@
 	"components": [
 		{
 			"name": "weka.classifiers.meta.Vote",
-			"requiredInterface": [],
+			"requiredInterface": [
+				{
+					"id": "B",
+					"name": "BaseClassifier",
+					"min": 2,
+					"max": 10
+				}
+			],
 			"providedInterface": [
 				"AbstractClassifier",
 				"MetaClassifier",
+				"MetaRegressor",
 				"PipelineClassifier"
 			],
 			"parameters": [
@@ -21,14 +29,6 @@
 						"MAJ",
 						"MIN",
 						"MAX"
-					]
-				},
-				{
-					"name": "S",
-					"type": "cat",
-					"default": "1",
-					"values": [
-						"1"
 					]
 				}
 			],

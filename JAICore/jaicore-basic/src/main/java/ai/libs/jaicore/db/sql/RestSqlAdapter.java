@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -31,7 +30,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import ai.libs.jaicore.basic.kvstore.KVStoreUtil;
-import ai.libs.jaicore.db.IDatabaseAdapter;
 
 /**
  * This is a simple util class for easy database access and query execution in sql. You need to make sure that the respective JDBC connector is in the class path. By default, the adapter uses the mysql driver, but any jdbc driver can be
@@ -41,11 +39,7 @@ import ai.libs.jaicore.db.IDatabaseAdapter;
  *
  */
 @SuppressWarnings("serial")
-class RestSqlAdapter implements IDatabaseAdapter {
-
-	private static final String KEY_EQUALS_VALUE_TO_BE_SET = " = (?)";
-	private static final String STR_SPACE_AND = " AND ";
-	private static final String STR_SPACE_WHERE = " WHERE ";
+class RestSqlAdapter extends ASqlBasedAdapter {
 
 	private final transient ISQLQueryBuilder queryBuilder = new MySQLQueryBuilder();
 	private transient Logger logger = LoggerFactory.getLogger(RestSqlAdapter.class);
@@ -238,23 +232,6 @@ class RestSqlAdapter implements IDatabaseAdapter {
 	@Override
 	public void close() {
 		/* nothing to do */
-	}
-
-	@Override
-	public int delete(final String table, final Map<String, ? extends Object> conditions) throws SQLException {
-		StringBuilder conditionSB = new StringBuilder();
-		for (Entry<String, ? extends Object> entry : conditions.entrySet()) {
-			if (conditionSB.length() > 0) {
-				conditionSB.append(STR_SPACE_AND);
-			}
-			if (entry.getValue() != null) {
-				conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
-			} else {
-				conditionSB.append(entry.getKey());
-				conditionSB.append(" IS NULL");
-			}
-		}
-		return this.update("DELETE FROM `" + table + "`" + STR_SPACE_WHERE + " " + conditionSB);
 	}
 
 	@Override

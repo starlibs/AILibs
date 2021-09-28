@@ -64,12 +64,20 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
+  <logger name="tester.openmldatasetadaptertest.openmlreader.arffadapter">
+    <level value="info" />
+  </logger>
+  
   <logger name="ai.libs.jaicore.graphvisualizer">
     <level value="warn" />
   </logger>
   
   <logger name="ai.libs.jaicore.ml">
     <level value="warn" />
+  </logger>
+  
+  <logger name="ai.libs.jaicore.ml.hpo">
+    <level value="trace" />
   </logger>
   
   <logger name="ai.libs.jaicore.ml.core.filter.sampling.inmemory.GeneralSamplingTester">
@@ -83,6 +91,16 @@
   <logger name="ai.libs.jaicore.timing">
     <level value="warn" />
   </logger>
+  
+  <logger name="ai.libs.jaicore.ml.scikitwrapper">
+    <level value="info" />
+  </logger>
+  
+  <logger name="ai.libs.python.DefaultProcessListener">
+    <level value="debug" />
+  </logger>
+  
+  
   
   <logger name="testedalgorithm">
     <level value="warn" />

@@ -1,0 +1,24 @@
+{
+	"repository": "Two Step Pipeline",
+	"include": [],
+	"components": [
+		{
+			"name": "pipeline",
+			"providedInterface": [
+				"MLPipeline",
+				"AbstractRegressor"
+			],
+			"requiredInterface": [
+				{
+					"id": "preprocessor",
+					"name": "AbstractPreprocessor"
+				},
+				{
+					"id": "classifier",
+					"name": "Regressor"
+				}
+			],
+			"parameters": []
+		}
+	]
+}

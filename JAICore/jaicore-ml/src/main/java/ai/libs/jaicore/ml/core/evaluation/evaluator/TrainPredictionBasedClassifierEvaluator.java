@@ -66,7 +66,8 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 					ILabeledDataset<?> train = folds.get(0);
 					ILabeledDataset<?> test = folds.get(1);
 					ILearnerRunReport failReport = new LearnerRunReport(train, test, e.getTrainTimeStart(), e.getTrainTimeEnd(), e.getTestTimeStart(), e.getTestTimeEnd(), e);
-					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent<>(learner, failReport));
+					reports.add(failReport);
+					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent<>(learner, reports));
 					throw e;
 				} catch (LearnerExecutionFailedException e) { // cannot be merged with the above clause, because then the only common supertype is "Exception", which does not have these methods
 					this.logger.info("Catching {} in iteration #{} after a total evaluation time of {}ms. Sending an event over the bus and forwarding the exception.", e.getClass().getName(), i + 1,
@@ -74,7 +75,8 @@ public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvalu
 					ILabeledDataset<?> train = folds.get(0);
 					ILabeledDataset<?> test = folds.get(1);
 					ILearnerRunReport failReport = new LearnerRunReport(train, test, e.getTrainTimeStart(), e.getTrainTimeEnd(), e.getTestTimeStart(), e.getTestTimeEnd(), e);
-					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent<>(learner, failReport));
+					reports.add(failReport);
+					this.eventBus.post(new TrainTestSplitEvaluationFailedEvent<>(learner, reports));
 					throw e;
 				}
 

@@ -148,6 +148,9 @@ public class ReductionOptimizer implements Classifier {
 				return (int) Math.round((stats.getMean() * 100));
 
 			} catch (Exception e) {
+				if (e instanceof InterruptedException) {
+					Thread.currentThread().interrupt();
+				}
 				this.logger.error(LoggerUtil.getExceptionInfo(e));
 				return Integer.MAX_VALUE;
 			}

@@ -36,7 +36,7 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 	private IExperimentSetConfig config;
 	private IExperimentDatabaseHandle databaseHandle;
 	private IExperimentSetEvaluator evaluator;
-	private ExperimentDomain<?, ?, ?> domain;
+	private AExperimentDomain<?, ?, ?> domain;
 	private IExperimentRunController<?> controller;
 	private String loggerNameForAlgorithm;
 	private ExperimentRunner runner;
@@ -118,7 +118,7 @@ public class ExperimenterFrontend implements ILoggingCustomizable {
 		return this.executorInfo;
 	}
 
-	public <B extends IExperimentBuilder, I, A extends IAlgorithm<? extends I, ?>> ExperimenterFrontend withDomain(final ExperimentDomain<B, I, A> domain) {
+	public <B extends IExperimentBuilder, I, A extends IAlgorithm<? extends I, ?>> ExperimenterFrontend withDomain(final AExperimentDomain<B, I, A> domain) {
 		this.evaluator = null;
 		this.withExperimentsConfig(domain.getConfig());
 		this.domain = domain;

@@ -40,7 +40,7 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	 *
 	 * @param input The input of the algorithm.
 	 */
-	public AOptimizer(final I input) {
+	protected AOptimizer(final I input) {
 		super(input);
 	}
 
@@ -60,7 +60,7 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	 * @param candidate A candidate for a new best seen solution. It is only updated iff the candidate performs better than the bestSeenSolution observed so far.
 	 * @return Returns true iff the candidate is the best seen solution.
 	 */
-	protected boolean updateBestSeenSolution(final O candidate) {
+	protected synchronized boolean updateBestSeenSolution(final O candidate) {
 		assert (candidate != null) : "Cannot update best solution with null.";
 		this.tellAboutBestScoreKnownToExist(candidate.getScore());
 		if (this.bestSeenSolution == null || (candidate.getScore() != null && candidate.getScore().compareTo(this.bestSeenSolution.getScore()) < 0)) {
@@ -107,8 +107,6 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 		}
 		throw new NoSuchElementException();
 	}
-
-
 
 	public V getBestScoreKnownToExist() {
 		return this.bestScoreKnownToExist;

@@ -2,9 +2,14 @@ package ai.libs.jaicore.ml.scikitwrapper;
 
 import java.io.File;
 
+import org.aeonbits.owner.Config.Sources;
+
 import ai.libs.python.IPythonConfig;
 
+@Sources({ "file:conf/scikitlearn_wrapper.properties" })
 public interface IScikitLearnWrapperConfig extends IPythonConfig {
+
+	public static final String K_TEMP_FOLDER = "sklearn.wrapper.temp.folder";
 
 	public static final String DEF_TEMP_FOLDER = "tmp";
 
@@ -24,12 +29,16 @@ public interface IScikitLearnWrapperConfig extends IPythonConfig {
 	@DefaultValue("false")
 	public boolean getDeleteFileOnExit();
 
-	@Key("sklearn.wrapper.temp.folder")
+	@Key(K_TEMP_FOLDER)
 	@DefaultValue(DEF_TEMP_FOLDER)
 	public File getTempFolder();
 
-	@Key("sklearn.wrapper.temp.dump_folder")
-	@DefaultValue(DEF_TEMP_FOLDER + "/model_dumps")
-	public File getModelDumpsDirectory();
+	@Key("sklearn.wrapper.temp.dump_folder_name")
+	@DefaultValue("model_dumps")
+	public String getModelDumpsDirectoryName();
+
+	default File getModelDumpsDirectory() {
+		return new File(this.getTempFolder(), this.getModelDumpsDirectoryName());
+	}
 
 }

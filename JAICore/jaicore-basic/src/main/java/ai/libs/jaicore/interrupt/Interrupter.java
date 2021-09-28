@@ -72,10 +72,7 @@ public class Interrupter {
 	}
 
 	public void avoidInterrupt(final Thread t, final Object reason) {
-		if (!this.blackListedInterruptReasons.containsKey(t)) {
-			this.blackListedInterruptReasons.put(t, new HashSet<>());
-		}
-		this.blackListedInterruptReasons.get(t).add(reason);
+		this.blackListedInterruptReasons.computeIfAbsent(t, x -> new HashSet<>()).add(reason);
 	}
 
 	public boolean hasThreadBeenInterruptedWithReason(final Thread thread, final Object reason) {

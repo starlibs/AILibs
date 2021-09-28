@@ -99,7 +99,9 @@ public class MCTreeNode extends AMCTreeNode<Integer> implements ITreeClassifier,
 		if (data.isEmpty()) {
 			throw new IllegalArgumentException("Cannot train MCTree with empty set of instances.");
 		}
-		assert !this.children.isEmpty() : "Cannot train MCTree without children";
+		if (this.children.isEmpty()) {
+			throw new IllegalStateException("Cannot train MCTree without children");
+		}
 
 		// sort class split into clusters
 		List<Set<String>> instancesCluster = new ArrayList<>();
@@ -135,7 +137,7 @@ public class MCTreeNode extends AMCTreeNode<Integer> implements ITreeClassifier,
 			try {
 				child.buildClassifier(data);
 			} catch (Exception e) {
-				this.logger.error("Encountered problem when training MCTreeNode: {}", e);
+				this.logger.error("Encountered problem when training MCTreeNode.", e);
 			}
 		});
 		this.trained = true;
@@ -157,11 +159,13 @@ public class MCTreeNode extends AMCTreeNode<Integer> implements ITreeClassifier,
 
 	@Override
 	public double[] distributionForInstance(final Instance instance) throws Exception {
-		assert this.trained : "Cannot get distribution from untrained classifier " + this.toStringWithOffset();
+		if (!this.trained) {
+			throw new IllegalStateException("Cannot get distribution from untrained classifier " + this.toStringWithOffset());
+		}
 
-	double[] classDistribution = new double[this.getContainedClasses().size()];
-	this.distributionForInstance(instance, classDistribution);
-	return classDistribution;
+		double[] classDistribution = new double[this.getContainedClasses().size()];
+		this.distributionForInstance(instance, classDistribution);
+		return classDistribution;
 	}
 
 	@Override
@@ -171,7 +175,7 @@ public class MCTreeNode extends AMCTreeNode<Integer> implements ITreeClassifier,
 
 	@Override
 	public int getHeight() {
-		return 1 + this.children.stream().map(MCTreeNode::getHeight).mapToInt(x -> (int) x).max().getAsInt();
+		return 1 + this.children.stream().map(MCTreeNode::getHeight).mapToInt(int.class::cast).max().getAsInt();
 	}
 
 	@Override
@@ -197,7 +201,6 @@ public class MCTreeNode extends AMCTreeNode<Integer> implements ITreeClassifier,
 	}
 
 	public void setBaseClassifier(final Classifier classifier) {
-
 		if (classifier == null) {
 			throw new IllegalArgumentException("Cannot set null classifier!");
 		}
@@ -215,7 +218,7 @@ public class MCTreeNode extends AMCTreeNode<Integer> implements ITreeClassifier,
 			try {
 				allPairsMCC.setOptions(new String[] { "-M", "" + 3 });
 			} catch (Exception e) {
-				this.logger.error("Observed problem when setting options for classifier: {}", e);
+				this.logger.error("Observed problem when setting options for classifier.", e);
 			}
 			allPairsMCC.setClassifier(classifier);
 			this.classifier = allPairsMCC;
@@ -235,44 +238,17 @@ public class MCTreeNode extends AMCTreeNode<Integer> implements ITreeClassifier,
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("(");
-		sb.append(this.classifierID);
-		sb.append(":");
-		sb.append(this.nodeType);
-		sb.append(")");
-
-		sb.append("{");
-
-		boolean first = true;
-		for (MCTreeNode child : this.children) {
-			if (first) {
-				first = false;
-			} else {
-				sb.append(",");
-			}
-			sb.append(child);
-		}
-		sb.append("}");
-		return sb.toString();
+		return this.toStringWithOffset("", null);
 	}
 
 	public String toStringWithOffset() {
-		return this.toStringWithOffset("");
+		return this.toStringWithOffset("", "  ");
 	}
 
-	public String toStringWithOffset(final String offset) {
+	public String toStringWithOffset(final String offset, final String indent) {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append(offset);
-		sb.append("(");
-		sb.append(this.getContainedClasses());
-		sb.append(":");
-		sb.append(this.classifierID);
-		sb.append(":");
-		sb.append(this.nodeType);
-		sb.append(") {");
+		sb.append(offset).append("(").append(this.getContainedClasses()).append(":").append(this.classifierID).append(":").append(this.nodeType).append(") {");
 		boolean first = true;
 		for (MCTreeNode child : this.children) {
 			if (first) {
@@ -280,11 +256,16 @@ public class MCTreeNode extends AMCTreeNode<Integer> implements ITreeClassifier,
 			} else {
 				sb.append(",");
 			}
-			sb.append("\n");
-			sb.append(child.toStringWithOffset(offset + "  "));
+			if (indent != null) {
+				sb.append("\n");
+			}
+			sb.append(child.toStringWithOffset(offset + (indent != null ? indent : ""), indent));
 		}
-		sb.append("\n");
-		sb.append(offset);
+
+		if (indent != null) {
+			sb.append("\n").append(offset);
+		}
+
 		sb.append("}");
 		return sb.toString();
 	}
