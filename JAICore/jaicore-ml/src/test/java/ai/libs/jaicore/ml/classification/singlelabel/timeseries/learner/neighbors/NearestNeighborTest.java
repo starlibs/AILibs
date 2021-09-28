@@ -187,13 +187,14 @@ public class NearestNeighborTest {
 	 * <code>null</code> objects.
 	 * @throws TrainingException
 	 * @throws PredictionException
+	 * @throws InterruptedException
 	 */
 	@Test
-	public void testPredictionOnSingleInstanceWithNullInstanceThrowsIllegalArgumentException() throws TrainingException, PredictionException {
+	public void testPredictionOnSingleInstanceWithNullInstanceThrowsIllegalArgumentException() throws TrainingException, PredictionException, InterruptedException {
+		// For single instance prediciton.
+		NearestNeighborClassifier classifier = new NearestNeighborClassifier(6, new EuclideanDistance());
+		classifier.train(this.dataset);
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			// For single instance prediciton.
-			NearestNeighborClassifier classifier = new NearestNeighborClassifier(6, new EuclideanDistance());
-			classifier.train(this.dataset);
 			classifier.predict((double[]) null);
 		});
 	}
@@ -201,13 +202,15 @@ public class NearestNeighborTest {
 	/**
 	 * Tests if IllegalArgumetnExceptions are thrown when making calls with
 	 * <code>null</code> objects.
+	 * @throws InterruptedException
+	 * @throws TrainingException
 	 */
 	@Test
-	public void testPredictionOnDatasetWithNullInstanceThrowsIllegalArgumentException() {
+	public void testPredictionOnDatasetWithNullInstanceThrowsIllegalArgumentException() throws TrainingException, InterruptedException {
+		// For prediction on dataset
+		NearestNeighborClassifier classifier = new NearestNeighborClassifier(6, new EuclideanDistance());
+		classifier.train(this.dataset);
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			// For prediction on dataset
-			NearestNeighborClassifier classifier = new NearestNeighborClassifier(6, new EuclideanDistance());
-			classifier.train(this.dataset);
 			classifier.predict((TimeSeriesDataset2) null);
 		});
 	}

@@ -195,7 +195,7 @@ public class DFT extends AFilter {
 	}
 
 	// It is required that the input is inform of the already sliced windows.
-	// cf. p. 1516 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schï¿½fer
+	// cf. p. 1516 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
 	// Best explanation of the algorithm can be found here : "https://www.dsprelated.com/showarticle/776.php"
 
 	public double[][] rekursivDFT(final double[][] input) {
