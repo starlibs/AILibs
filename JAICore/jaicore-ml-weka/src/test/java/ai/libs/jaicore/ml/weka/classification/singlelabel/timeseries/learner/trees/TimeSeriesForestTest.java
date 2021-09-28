@@ -34,9 +34,10 @@ public class TimeSeriesForestTest {
 	 *
 	 * @throws TrainingException
 	 *             thrown if the training could not be performed.
+	 * @throws InterruptedException
 	 */
 	@Test
-	public void voidTrainingTest() throws TrainingException {
+	public void voidTrainingTest() throws TrainingException, InterruptedException {
 		int numTrees = 10;
 		int maxDepth = 10;
 		int seed = 42;

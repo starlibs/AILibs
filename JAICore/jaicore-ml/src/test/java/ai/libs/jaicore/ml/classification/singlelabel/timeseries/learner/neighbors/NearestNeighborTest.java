@@ -78,10 +78,11 @@ public class NearestNeighborTest {
 	 *
 	 * @throws TrainingException
 	 * @throws PredictionException
+	 * @throws InterruptedException
 	 */
 	@Disabled
 	@Test
-	public void testPredictionWithK1() throws TrainingException, PredictionException {
+	public void testPredictionWithK1() throws TrainingException, PredictionException, InterruptedException {
 		int k = 1;
 		NearestNeighborClassifier classifier = new NearestNeighborClassifier(k, new EuclideanDistance());
 		classifier.train(this.dataset);
@@ -105,10 +106,11 @@ public class NearestNeighborTest {
 	 *
 	 * @throws TrainingException
 	 * @throws PredictionException
+	 * @throws InterruptedException
 	 */
 	@Disabled
 	@Test
-	public void testPredictionWithK3() throws TrainingException, PredictionException {
+	public void testPredictionWithK3() throws TrainingException, PredictionException, InterruptedException {
 		int k = 3;
 		NearestNeighborClassifier classifier = new NearestNeighborClassifier(k, new EuclideanDistance());
 		classifier.train(this.dataset);
@@ -130,10 +132,11 @@ public class NearestNeighborTest {
 	 *
 	 * @throws TrainingException
 	 * @throws PredictionException
+	 * @throws InterruptedException
 	 */
 	@Disabled
 	@Test
-	public void testPredictionWithK5() throws TrainingException, PredictionException {
+	public void testPredictionWithK5() throws TrainingException, PredictionException, InterruptedException {
 		int k = 5;
 		NearestNeighborClassifier classifier = new NearestNeighborClassifier(k, new EuclideanDistance());
 		classifier.train(this.dataset);

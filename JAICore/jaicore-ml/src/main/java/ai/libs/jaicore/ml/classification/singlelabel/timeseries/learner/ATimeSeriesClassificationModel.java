@@ -43,7 +43,7 @@ public abstract class ATimeSeriesClassificationModel<L, D extends TimeSeriesData
 	 * {@inheritDoc ABatchLearner#train(jaicore.ml.core.dataset.IDataset)}
 	 */
 	@Override
-	public void fit(final D dataset) throws TrainingException {
+	public void fit(final D dataset) throws InterruptedException, TrainingException {
 		// Set model which is trained
 		this.algorithm.setModel(this);
 
@@ -52,6 +52,8 @@ public abstract class ATimeSeriesClassificationModel<L, D extends TimeSeriesData
 		try {
 			// Train
 			this.algorithm.call();
+		} catch (InterruptedException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new TrainingException("Could not train model " + this.getClass().getSimpleName(), e);
 		}

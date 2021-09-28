@@ -77,7 +77,7 @@ public abstract class ASimplifiedTSClassifier<T> {
 	 *            training.
 	 * @throws TrainingException If something fails during the training process.
 	 */
-	public final void train(final TimeSeriesDataset2 dataset) throws TrainingException {
+	public final void train(final TimeSeriesDataset2 dataset) throws InterruptedException, TrainingException {
 
 		// Set model which is trained
 		ASimplifiedTSCLearningAlgorithm<T, ? extends ASimplifiedTSClassifier<T>> algorithm = this.getLearningAlgorithm(dataset);
@@ -87,6 +87,8 @@ public abstract class ASimplifiedTSClassifier<T> {
 			// Train
 			algorithm.call();
 			this.trained = true;
+		} catch (InterruptedException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new TrainingException("Could not train model " + this.getClass().getSimpleName(), e);
 		}

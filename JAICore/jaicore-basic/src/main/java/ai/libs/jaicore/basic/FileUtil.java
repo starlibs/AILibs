@@ -135,7 +135,9 @@ public class FileUtil {
 	 */
 	public static Properties readPropertiesFile(final File propertiesFile) throws IOException {
 		Properties props = new Properties();
-		props.load(new FileInputStream(propertiesFile));
+		try (FileInputStream fis = new FileInputStream(propertiesFile)) {
+			props.load(fis);
+		}
 		return props;
 	}
 
