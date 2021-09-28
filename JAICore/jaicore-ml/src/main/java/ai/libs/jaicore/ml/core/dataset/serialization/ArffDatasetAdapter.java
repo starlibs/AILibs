@@ -412,9 +412,9 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						this.logger.debug("Switched to instance read mode in line {}. Class index is {}", lineCounter, relationMetaData.getAsInt(K_CLASS_INDEX));
 					}
 				} else {
-					if (dataset == null) {
-						throw new NullPointerException("The dataset point is empty even though we have skipped to instance read mode already.");
-					}
+					// require dataset to be not null.
+					Objects.requireNonNull(dataset, "The dataset point is empty even though we have skipped to instance read mode already.");
+
 					line = line.trim();
 					if (!line.isEmpty() && !line.startsWith("%")) { // ignore empty and comment lines
 						List<Object> parsedInstance = this.parseInstance(sparseMode, attributes, relationMetaData.getAsInt(K_CLASS_INDEX), line);
@@ -433,9 +433,6 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						}
 						dataset.add(newI);
 					}
-				}
-				if (dataset != null && !dataset.isEmpty() && dataset.size() % 10000 == 0) {
-					this.logger.debug("Read in another 1000 instances. Current dataset size is {}", dataset.size());
 				}
 			}
 			Objects.requireNonNull(dataset, "Dataset is null, which must not happen!");
