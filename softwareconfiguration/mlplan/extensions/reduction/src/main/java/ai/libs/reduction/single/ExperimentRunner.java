@@ -65,6 +65,8 @@ public class ExperimentRunner<T extends ISplitter> {
 			List<Collection<String>> classSplit;
 			try {
 				classSplit = new ArrayList<>(splitter.split(outerSplit.get(0).getInstances()));
+			} catch (InterruptedException e) {
+				throw e;
 			} catch (Exception e) {
 				throw new ExperimentEvaluationFailedException("Could not create a split.", e);
 			}

@@ -38,9 +38,8 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements ISuperv
 	private double[] configurations;
 	private int fullDatasetSize = -1;
 
-	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<ILabeledDataset<?>, ASamplingAlgorithm<ILabeledDataset<?>>> samplingAlgorithmFactory,
-			final ILabeledDataset<?> dataset, final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier, final double[] configurations) {
+	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<ILabeledDataset<?>, ASamplingAlgorithm<ILabeledDataset<?>>> samplingAlgorithmFactory, final ILabeledDataset<?> dataset,
+			final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier, final double[] configurations) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
@@ -74,6 +73,8 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements ISuperv
 			}
 
 			return learningCurve.getCurveValue(evaluationPoint) * 100.0d;
+		} catch (InterruptedException e) {
+			throw e;
 		} catch (Exception e) {
 			this.logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.", e.getClass().getName(), e.getMessage());
 			return null;

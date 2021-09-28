@@ -37,7 +37,7 @@ public class StripsForwardPlanningGraphGenerator implements IGraphGenerator<Stri
 		};
 	}
 
-	private List<StripsAction> getApplicableActionsInNode(final StripsForwardPlanningNode node) {
+	private List<StripsAction> getApplicableActionsInNode(final StripsForwardPlanningNode node) throws InterruptedException {
 		logger.info("Computing successors for node {}", node);
 		long start = System.currentTimeMillis();
 		Monom state = node.getStateRelativeToInitState(this.initState);
@@ -68,7 +68,8 @@ public class StripsForwardPlanningGraphGenerator implements IGraphGenerator<Stri
 					StripsForwardPlanningNode newNode = new StripsForwardPlanningNode(add, del, action);
 					successors.add(new NodeExpansionDescription<>(newNode, "edge label"));
 					if (logger.isTraceEnabled()) {
-						logger.trace("Created the node expansion description within {}ms. New state size is {}.", System.currentTimeMillis() - t, newNode.getStateRelativeToInitState(StripsForwardPlanningGraphGenerator.this.initState).size());
+						logger.trace("Created the node expansion description within {}ms. New state size is {}.", System.currentTimeMillis() - t,
+								newNode.getStateRelativeToInitState(StripsForwardPlanningGraphGenerator.this.initState).size());
 					}
 				}
 				logger.info("Generated {} successors in {}ms.", successors.size(), System.currentTimeMillis() - start);

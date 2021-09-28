@@ -17,19 +17,19 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 
-public abstract class PilotEstimateSampling<D extends ILabeledDataset<? extends ILabeledInstance>> extends CaseControlLikeSampling<D> {
+public abstract class APilotEstimateSampling<D extends ILabeledDataset<? extends ILabeledInstance>> extends CaseControlLikeSampling<D> {
 
-	private Logger logger = LoggerFactory.getLogger(PilotEstimateSampling.class);
+	private Logger logger = LoggerFactory.getLogger(APilotEstimateSampling.class);
 
 	private final ISamplingAlgorithm<D> subSampler;
 	protected int preSampleSize;
 	private final IClassifier pilotEstimator;
 
-	protected PilotEstimateSampling(final D input, final IClassifier pilotClassifier) {
+	protected APilotEstimateSampling(final D input, final IClassifier pilotClassifier) {
 		this(input, null, 1, pilotClassifier);
 	}
 
-	protected PilotEstimateSampling(final D input, final ISamplingAlgorithmFactory<D, ?> subSamplingFactory, final int preSampleSize, final IClassifier pilotClassifier) {
+	protected APilotEstimateSampling(final D input, final ISamplingAlgorithmFactory<D, ?> subSamplingFactory, final int preSampleSize, final IClassifier pilotClassifier) {
 		super(input);
 		Objects.requireNonNull(pilotClassifier);
 		this.pilotEstimator = pilotClassifier;

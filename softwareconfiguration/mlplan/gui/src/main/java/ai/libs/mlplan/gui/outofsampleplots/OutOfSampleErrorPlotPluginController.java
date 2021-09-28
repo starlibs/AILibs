@@ -79,6 +79,9 @@ public class OutOfSampleErrorPlotPluginController extends ASimpleMVCPluginContro
 					return;
 				} catch (Exception e) {
 					this.logger.error("Could not train classifier! \n" + ExceptionUtils.getMessage(e));
+					if (e instanceof InterruptedException) {
+						currentThread().interrupt();
+					}
 				}
 			}
 		}

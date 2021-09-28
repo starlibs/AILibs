@@ -12,7 +12,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 import ai.libs.jaicore.basic.sets.Pair;
 
-public class LocalCaseControlSampling extends PilotEstimateSampling<ILabeledDataset<?>> {
+public class LocalCaseControlSampling extends APilotEstimateSampling<ILabeledDataset<?>> {
 
 	public LocalCaseControlSampling(final Random rand, final int preSampleSize, final ILabeledDataset<?> input, final IClassifier pilot) {
 		super(input, pilot);
@@ -21,29 +21,34 @@ public class LocalCaseControlSampling extends PilotEstimateSampling<ILabeledData
 	}
 
 	@Override
-	public List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(final ILabeledDataset<?> instances, final IClassifier pilotEstimator) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(final ILabeledDataset<?> instances, final IClassifier pilotEstimator)
+			throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		double boundaryOfCurrentInstance = 0.0;
 		ArrayList<Pair<ILabeledInstance, Double>> instanceProbabilityBoundaries = new ArrayList<>();
 		double sumOfDistributionLosses = 0;
 		double loss;
 		int i = 0;
 		for (ILabeledInstance instance : instances) {
-			if (i ++ % 100 == 0) {
+			if (i++ % 100 == 0) {
 				this.checkAndConductTermination();
 			}
 			try {
 				loss = 1 - pilotEstimator.predict(instance).getProbabilityOfLabel(instance.getLabel());
+			} catch (InterruptedException e) {
+				throw e;
 			} catch (Exception e) {
 				loss = 1;
 			}
 			sumOfDistributionLosses += loss;
 		}
 		for (ILabeledInstance instance : instances) {
-			if (i ++ % 100 == 0) {
+			if (i++ % 100 == 0) {
 				this.checkAndConductTermination();
 			}
 			try {
 				loss = 1 - pilotEstimator.predict(instance).getProbabilityOfLabel(instance.getLabel());
+			} catch (InterruptedException e) {
+				throw e;
 			} catch (Exception e) {
 				loss = 1;
 			}

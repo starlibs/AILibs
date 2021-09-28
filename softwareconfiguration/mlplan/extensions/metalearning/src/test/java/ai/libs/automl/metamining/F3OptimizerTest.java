@@ -1,6 +1,6 @@
 package ai.libs.automl.metamining;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ public class F3OptimizerTest {
 		/* learn the U matrix */
 		IHeterogenousSimilarityMeasureComputer learner = new F3Optimizer(1);
 		learner.build(x, w, r);
-		assertNotNull(learner.computeSimilarity(x, w));
+		assertNotEquals(Double.NaN, learner.computeSimilarity(x, w));
 	}
 
 }
