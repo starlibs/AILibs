@@ -82,11 +82,11 @@ public class ReductionGraphGenerator implements IGraphGenerator<RestProblem, Dec
 
 					/* now go for splits (here we always apply direct) */
 					List<ISplitter> splitters = new ArrayList<>();
-					Map<ISplitter,Classifier> classifiers = new HashMap<>();
+					Map<ISplitter, Classifier> classifiers = new HashMap<>();
 					for (int i = 0; i < 1; i++) {
 						Classifier c = AbstractClassifier.forName(classifier, null);
 						ISplitter splitter = new RPNDSplitter(this.rand, c);
-						classifiers.put(splitter,c);
+						classifiers.put(splitter, c);
 						splitters.add(splitter);
 					}
 					for (ISplitter splitter : splitters) {
@@ -108,6 +108,8 @@ public class ReductionGraphGenerator implements IGraphGenerator<RestProblem, Dec
 						restProblems.add(new NodeExpansionDescription<>(rp, rp.getEdgeToParent()));
 					}
 				}
+			} catch (InterruptedException e) {
+				throw e;
 			} catch (Exception e) {
 				this.logger.error("Encountered error: {}", e);
 			}
