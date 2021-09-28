@@ -534,12 +534,11 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	 * @return The ML-Plan object configured with this builder.
 	 * @throws InterruptedException
 	 */
-	public MLPlan<L> build(final ILabeledDataset<?> dataset) {
+	public MLPlan<L> build(final ILabeledDataset<?> dataset) throws InterruptedException {
 		return this.withDataset(dataset).build();
 	}
 
-	public void checkPreconditionsForInitialization() {
-
+	public void checkPreconditionsForInitialization() throws InterruptedException {
 		/* check proper problem definition */
 		Objects.requireNonNull(this.searchSpaceFile, "No search space file defined.");
 		Objects.requireNonNull(this.requestedHASCOInterface, "No requested HASCO interface defined!");
@@ -558,8 +557,9 @@ public abstract class AMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstan
 	 * Builds an ML-Plan object with the dataset provided earlier to this builder.
 	 *
 	 * @return The ML-Plan object configured with this builder.
+	 * @throws InterruptedException
 	 */
-	public MLPlan<L> build() {
+	public MLPlan<L> build() throws InterruptedException {
 		this.checkPreconditionsForInitialization();
 		return new MLPlan<>(this, this.dataset);
 	}
