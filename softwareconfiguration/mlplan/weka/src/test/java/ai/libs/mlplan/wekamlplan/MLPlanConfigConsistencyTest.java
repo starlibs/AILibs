@@ -33,7 +33,7 @@ import weka.core.Instances;
  * @author fmohr
  *
  */
-public class MLPlanConfigConsistencyTester {
+public class MLPlanConfigConsistencyTest {
 
 	private final Timeout timeoutForNodeEvaluation = new Timeout(180, TimeUnit.SECONDS);
 	private final Timeout timeoutForSingleSolutionEvaluation = new Timeout(60, TimeUnit.SECONDS);
