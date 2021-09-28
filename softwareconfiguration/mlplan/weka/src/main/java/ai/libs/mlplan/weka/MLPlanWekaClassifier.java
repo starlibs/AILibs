@@ -75,7 +75,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 		this.fit(new WekaInstances(data));
 	}
 
-	public double[] classifyInstances(final Instances instances) throws Exception {
+	public double[] classifyInstances(final Instances instances) throws PredictionException, InterruptedException {
 		double[] predictionsAsDoubles = new double[instances.size()];
 		List<? extends IPrediction> predictions = this.classifierFoundByMLPlan.predict(new WekaInstances(instances)).getPredictions();
 		for (int i = 0; i < instances.size(); i++) {
