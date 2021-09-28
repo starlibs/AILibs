@@ -450,10 +450,21 @@ public class MLPlanCLI {
 	}
 
 	public static void main(final String[] args) throws Exception {
-		System.out.println("Called ML-Plan CLI with the following params: >" + Arrays.toString(args) + "<");
-		System.out.println("Logger name is " + MLPlanCLI.class.getName() + ". If logger works properlym the next line should contain an INFO-level message.");
-		logger.info("Logger works properly. Log-level is {}.",
-				logger.isTraceEnabled() ? "TRACE" : (logger.isDebugEnabled() ? "DEBUG" : logger.isInfoEnabled() ? "INFO" : logger.isWarnEnabled() ? "WARN" : logger.isErrorEnabled() ? "ERROR" : "UNKNOWN"));
+		String logLevel;
+		if (logger.isTraceEnabled()) {
+			logLevel = "TRACE";
+		} else if (logger.isDebugEnabled()) {
+			logLevel = "DEBUG";
+		} else if (logger.isInfoEnabled()) {
+			logLevel = "INFO";
+		} else if (logger.isWarnEnabled()) {
+			logLevel = "WARN";
+		} else if (logger.isErrorEnabled()) {
+			logLevel = "ERROR";
+		} else {
+			logLevel = "UNKNOWN";
+		}
+		logger.info("Logger works properly. Log-level is {}.", logLevel);
 
 		final Options options = generateOptions();
 		if (args.length == 0) {

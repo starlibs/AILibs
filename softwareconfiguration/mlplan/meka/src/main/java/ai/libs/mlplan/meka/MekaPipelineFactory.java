@@ -47,7 +47,7 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 	}
 
 	private Classifier getClassifier(final IComponentInstance ci) throws Exception {
-		Classifier c = (Classifier) Class.forName(ci.getComponent().getName()).newInstance();
+		Classifier c = (Classifier) Class.forName(ci.getComponent().getName()).getDeclaredConstructor().newInstance();
 		List<String> optionsList = getOptionsForParameterValues(ci);
 		if (c instanceof OptionHandler) {
 			((OptionHandler) c).setOptions(optionsList.toArray(new String[0]));
@@ -64,7 +64,7 @@ public class MekaPipelineFactory implements IMekaPipelineFactory {
 					logger.debug("Set kernel for SMO to be {}", subCI.getComponent().getName());
 				}
 
-				Kernel k = (Kernel) Class.forName(subCI.getComponent().getName()).newInstance();
+				Kernel k = (Kernel) Class.forName(subCI.getComponent().getName()).getDeclaredConstructor().newInstance();
 				k.setOptions(getOptionsForParameterValues(subCI).toArray(new String[0]));
 				if (c instanceof SMO) {
 					((SMO) c).setKernel(k);
