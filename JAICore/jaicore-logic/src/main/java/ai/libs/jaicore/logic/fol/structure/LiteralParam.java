@@ -17,7 +17,7 @@ public abstract class LiteralParam implements Serializable {
 	 * @param name
 	 *            The name of this parameter;
 	 */
-	public LiteralParam(final String name) {
+	protected LiteralParam(final String name) {
 		this.name = name;
 	}
 
@@ -25,7 +25,7 @@ public abstract class LiteralParam implements Serializable {
 	 * @param name
 	 *            The name of this parameter;
 	 */
-	public LiteralParam(final String name, final Type type) {
+	protected LiteralParam(final String name, final Type type) {
 		this(name);
 		this.setType(type);
 	}

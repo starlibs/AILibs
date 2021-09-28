@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.db.IDatabaseAdapter;
 import ai.libs.jaicore.db.IDatabaseConfig;
 
 /**
@@ -35,15 +34,11 @@ import ai.libs.jaicore.db.IDatabaseConfig;
  *
  */
 @SuppressWarnings("serial")
-class SQLAdapter implements IDatabaseAdapter {
+class SQLAdapter extends ASqlBasedAdapter {
 
 	private transient Logger logger = LoggerFactory.getLogger(SQLAdapter.class);
 
 	private static final String DB_DRIVER = "mysql";
-	private static final String KEY_EQUALS_VALUE_TO_BE_SET = " = (?)";
-
-	private static final String STR_SPACE_AND = " AND ";
-	private static final String STR_SPACE_WHERE = " WHERE ";
 
 	/* Credentials and properties for the connection establishment. */
 	private final String driver;
@@ -623,23 +618,6 @@ class SQLAdapter implements IDatabaseAdapter {
 			this.logger.info("Executing query: {}", sqlMainTable);
 			stmt.execute(sqlMainTable.toString());
 		}
-	}
-
-	@Override
-	public int delete(final String table, final Map<String, ? extends Object> conditions) throws SQLException {
-		StringBuilder conditionSB = new StringBuilder();
-		for (Entry<String, ? extends Object> entry : conditions.entrySet()) {
-			if (conditionSB.length() > 0) {
-				conditionSB.append(STR_SPACE_AND);
-			}
-			if (entry.getValue() != null) {
-				conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
-			} else {
-				conditionSB.append(entry.getKey());
-				conditionSB.append(" IS NULL");
-			}
-		}
-		return this.update("DELETE FROM `" + table + "` " + STR_SPACE_WHERE + " " + conditionSB);
 	}
 
 	@Override

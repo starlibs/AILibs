@@ -1,6 +1,6 @@
 package ai.libs.automl.metamining;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ public class F1OptimizerTest {
 		uLearner.build(vX, null, vR);
 
 		INDArray vW = Nd4j.create(new float[] { 1, 2, 3, 4, 5, 6, 7, 8 }, new int[] { 4, 2 });
-		assertNotNull(uLearner.computeSimilarity(vX, vW));
+		assertNotEquals(Double.NaN, uLearner.computeSimilarity(vX, vW));
 	}
 
 }

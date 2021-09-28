@@ -61,7 +61,7 @@ public class NodeInfoAlgorithmEventPropertyComputer implements AlgorithmEventPro
 			NodePropertyChangedEvent<?> propertyChangedEvent = (NodePropertyChangedEvent<?>) algorithmEvent;
 			Object mainNode = propertyChangedEvent.getNode();
 			String mainNodeId = this.getIdOfNode(mainNode);
-			Map<String, Object> properties= propertyChangedEvent.getChangedProperties();
+			Map<String, Object> properties = propertyChangedEvent.getChangedProperties();
 			return new NodeInfo(mainNodeId, null, null, null, properties);
 		}
 		return null;
@@ -73,11 +73,7 @@ public class NodeInfoAlgorithmEventPropertyComputer implements AlgorithmEventPro
 	}
 
 	private String getIdOfNode(final Object node) {
-		if (!this.nodeToIdMap.containsKey(node)) {
-			int nodeId = this.idCounter.getAndIncrement();
-			this.nodeToIdMap.put(node, nodeId);
-		}
-		return String.valueOf(this.nodeToIdMap.get(node));
+		return String.valueOf(this.nodeToIdMap.computeIfAbsent(node, t -> this.idCounter.getAndIncrement()));
 	}
 
 	public String getIdOfNodeIfExistent(final Object node) {

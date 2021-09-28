@@ -32,6 +32,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(ExperimentRunner.class);
 	private static final double MAX_MEM_DEVIATION = .15;
+	private static final String MSG_STARTEXPS = "Starting to run up to {} experiments.";
 
 	private boolean checkMemory = true;
 
@@ -95,7 +96,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	 */
 	public void randomlyConductExperiments(final int maxNumberOfExperiments) throws ExperimentDBInteractionFailedException, InterruptedException {
 		if (this.logger.isInfoEnabled()) {
-			this.logger.info("Starting to run up to {} experiments.", maxNumberOfExperiments);
+			this.logger.info(MSG_STARTEXPS, maxNumberOfExperiments);
 		}
 
 		int numberOfConductedExperiments = 0;
@@ -153,7 +154,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	 * @throws InterruptedException
 	 */
 	public void randomlyConductExperimentsInParallel(final int maxNumberOfExperiments, final int numThreads) throws InterruptedException, ExperimentDBInteractionFailedException {
-		this.logger.info("Starting to run up to {} experiments.", maxNumberOfExperiments);
+		this.logger.info(MSG_STARTEXPS, maxNumberOfExperiments);
 
 		// Calculate how many experiments need to be conducted per thread and how many threads are actually needed.
 		final int experimentsPerThread;
@@ -192,13 +193,10 @@ public class ExperimentRunner implements ILoggingCustomizable {
 				} finally {
 					sem.release();
 				}
-			}
-		}).forEach(pool::submit);
+			}}).forEach(pool::submit);
 
 		try {
 			sem.acquire(actualNumThreads);
-		} catch (InterruptedException e) {
-			throw e;
 		} finally {
 			if (!pool.isShutdown()) {
 				pool.shutdownNow();
@@ -216,7 +214,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	}
 
 	public void sequentiallyConductExperiments(final int maxNumberOfExperiments) throws ExperimentDBInteractionFailedException, InterruptedException {
-		this.logger.info("Starting to run up to {} experiments.", maxNumberOfExperiments);
+		this.logger.info(MSG_STARTEXPS, maxNumberOfExperiments);
 
 		int numberOfConductedExperiments = 0;
 		while ((maxNumberOfExperiments <= 0 || numberOfConductedExperiments < maxNumberOfExperiments)) {

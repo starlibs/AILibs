@@ -34,11 +34,11 @@ public class StripsUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(StripsUtil.class);
 
-	public static List<StripsAction> getApplicableActionsInState(final Monom state, final StripsPlanningDomain domain) {
+	public static List<StripsAction> getApplicableActionsInState(final Monom state, final StripsPlanningDomain domain) throws InterruptedException {
 		return getApplicableActionsInState(state, domain, false, -1);
 	}
 
-	public static List<StripsAction> getApplicableActionsInState(final Monom state, final StripsPlanningDomain domain, final boolean randomized, final int pLimit)  {
+	public static List<StripsAction> getApplicableActionsInState(final Monom state, final StripsPlanningDomain domain, final boolean randomized, final int pLimit) throws InterruptedException {
 		long start = System.currentTimeMillis();
 		int limit = pLimit;
 		logger.debug("Computing applicable actions for state with {} items (activate TRACE for exact state)", state.size());
@@ -51,7 +51,7 @@ public class StripsUtil {
 			if (!(operations instanceof List)) {
 				operations = new ArrayList<>(operations);
 			}
-			Collections.shuffle((List<Operation>)operations);
+			Collections.shuffle((List<Operation>) operations);
 		}
 
 		/* now walk over the operations and collect actions until the limit is reached */
@@ -68,7 +68,7 @@ public class StripsUtil {
 		return applicableDerivedActions;
 	}
 
-	public static Collection<StripsAction> getPossibleOperationGroundingsForState(final Monom state, final StripsOperation operation, final int limit)  {
+	public static Collection<StripsAction> getPossibleOperationGroundingsForState(final Monom state, final StripsOperation operation, final int limit) throws InterruptedException {
 		Collection<StripsAction> applicableDerivedActions = new ArrayList<>();
 
 		/* decompose premise in positive and negative literals */
@@ -88,13 +88,15 @@ public class StripsUtil {
 				/* refactor grounding to constants only and add the respective action */
 				Map<VariableParam, ConstantParam> rGrounding = new HashMap<>();
 				for (Entry<VariableParam, LiteralParam> groundingEntry : grounding.entrySet()) {
-					ConstantParam cp = (ConstantParam)groundingEntry.getValue();
+					ConstantParam cp = (ConstantParam) groundingEntry.getValue();
 					rGrounding.put(groundingEntry.getKey(), cp);
 				}
 				StripsAction a = new StripsAction(operation, rGrounding);
 				applicableDerivedActions.add(a);
 				logger.debug("Found action {} to be applicable after {}ms.", a.getEncoding(), System.currentTimeMillis() - start);
 			}
+		} catch (InterruptedException e) {
+			throw e;
 		} catch (Exception e) {
 			logger.error("Error in grounding computation: {}", e);
 		}

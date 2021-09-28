@@ -5,22 +5,24 @@ import java.util.List;
 
 import it.unimi.dsi.fastutil.shorts.ShortList;
 
-public abstract class EnhancedTTSPBinaryTelescopeNode {
-	protected final EnhancedTTSPBinaryTelescopeNode parent;
+public abstract class AEnhancedTTSPBinaryTelescopeNode {
+	protected final AEnhancedTTSPBinaryTelescopeNode parent;
 
-	public EnhancedTTSPBinaryTelescopeNode(final EnhancedTTSPBinaryTelescopeNode parent) {
+	protected AEnhancedTTSPBinaryTelescopeNode(final AEnhancedTTSPBinaryTelescopeNode parent) {
 		super();
 		this.parent = parent;
 	}
 
 	public abstract EnhancedTTSPState getState();
+
 	public abstract short getCurLocation();
+
 	public abstract ShortList getCurTour();
 
-	public static class EnhancedTTSPBinaryTelescopeDeterminedDestinationNode extends EnhancedTTSPBinaryTelescopeNode {
+	public static class EnhancedTTSPBinaryTelescopeDeterminedDestinationNode extends AEnhancedTTSPBinaryTelescopeNode {
 		private final EnhancedTTSPState state;
 
-		public EnhancedTTSPBinaryTelescopeDeterminedDestinationNode(final EnhancedTTSPBinaryTelescopeNode parent, final EnhancedTTSPState state) {
+		public EnhancedTTSPBinaryTelescopeDeterminedDestinationNode(final AEnhancedTTSPBinaryTelescopeNode parent, final EnhancedTTSPState state) {
 			super(parent);
 			this.state = state;
 		}
@@ -76,8 +78,8 @@ public abstract class EnhancedTTSPBinaryTelescopeNode {
 		}
 	}
 
-	public static class EnhancedTTSPBinaryTelescopeDestinationDecisionNode extends EnhancedTTSPBinaryTelescopeNode {
-		public EnhancedTTSPBinaryTelescopeDestinationDecisionNode(final EnhancedTTSPBinaryTelescopeNode parent, final boolean bitChoice) {
+	public static class EnhancedTTSPBinaryTelescopeDestinationDecisionNode extends AEnhancedTTSPBinaryTelescopeNode {
+		public EnhancedTTSPBinaryTelescopeDestinationDecisionNode(final AEnhancedTTSPBinaryTelescopeNode parent, final boolean bitChoice) {
 			super(parent);
 			this.bitChoice = bitChoice;
 		}
@@ -104,7 +106,7 @@ public abstract class EnhancedTTSPBinaryTelescopeNode {
 				l.add(this.bitChoice);
 				return l;
 			}
-			List<Boolean> l = ((EnhancedTTSPBinaryTelescopeDestinationDecisionNode)this.parent).getField();
+			List<Boolean> l = ((EnhancedTTSPBinaryTelescopeDestinationDecisionNode) this.parent).getField();
 			l.add(this.bitChoice);
 			return l;
 		}

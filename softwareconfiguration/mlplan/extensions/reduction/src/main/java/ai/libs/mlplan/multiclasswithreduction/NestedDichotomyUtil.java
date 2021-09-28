@@ -48,7 +48,8 @@ public class NestedDichotomyUtil {
 		}
 	}
 
-	public static ClassSplit<String> createGeneralRPNDBasedSplit(final Collection<String> classes, final Collection<String> s1, final Collection<String> s2, final Random rand, final String classifierName, final Instances data) {
+	public static ClassSplit<String> createGeneralRPNDBasedSplit(final Collection<String> classes, final Collection<String> s1, final Collection<String> s2, final Random rand, final String classifierName, final Instances data)
+			throws InterruptedException {
 		try {
 			RPNDSplitter splitter = new RPNDSplitter(rand, AbstractClassifier.forName(classifierName, new String[] {}));
 			Collection<Collection<String>> splitAsCollection = null;
@@ -56,6 +57,8 @@ public class NestedDichotomyUtil {
 			splitAsCollection = splitter.split(classes, s1, s2, data);
 			Iterator<Collection<String>> it = splitAsCollection.iterator();
 			return new ClassSplit<>(classes, it.next(), it.next());
+		} catch (InterruptedException e) {
+			throw e;
 		} catch (Exception e) {
 			logger.error("Unexpected exception occurred while creating an RPND split", e);
 		}

@@ -22,7 +22,7 @@ public abstract class ASimpleMVCPluginController<M extends ASimpleMVCPluginModel
 	private final V view;
 	private final M model;
 
-	public ASimpleMVCPluginController(final M model, final V view) {
+	protected ASimpleMVCPluginController(final M model, final V view) {
 		super();
 		this.setName(this.getClass().getName());
 		this.model = model;

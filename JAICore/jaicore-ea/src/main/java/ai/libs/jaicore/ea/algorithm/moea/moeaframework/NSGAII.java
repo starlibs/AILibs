@@ -38,20 +38,20 @@ import org.moeaframework.core.comparator.ParetoDominanceComparator;
 import org.moeaframework.core.operator.TournamentSelection;
 
 /**
-* Implementation of NSGA-II, with the ability to attach an optional 
+* Implementation of NSGA-II, with the ability to attach an optional
 * &epsilon;-dominance archive.
 * <p>
 * References:
 * <ol>
 *   <li>Deb, K. et al.  "A Fast Elitist Multi-Objective Genetic Algorithm:
-*       NSGA-II."  IEEE Transactions on Evolutionary Computation, 6:182-197, 
+*       NSGA-II."  IEEE Transactions on Evolutionary Computation, 6:182-197,
 *       2000.
-*   <li>Kollat, J. B., and Reed, P. M.  "Comparison of Multi-Objective 
+*   <li>Kollat, J. B., and Reed, P. M.  "Comparison of Multi-Objective
 *       Evolutionary Algorithms for Long-Term Monitoring Design."  Advances in
 *       Water Resources, 29(6):792-807, 2006.
 * </ol>
 */
-public class NSGAII extends AbstractEvolutionaryAlgorithm implements EpsilonBoxEvolutionaryAlgorithm {
+public class NSGAII extends AEvolutionaryAlgorithm implements EpsilonBoxEvolutionaryAlgorithm {
 
 	/**
 	 * The selection operator.  If {@code null}, this algorithm uses binary
@@ -67,7 +67,7 @@ public class NSGAII extends AbstractEvolutionaryAlgorithm implements EpsilonBoxE
 
 	/**
 	 * Constructs the NSGA-II algorithm with the specified components.
-	 * 
+	 *
 	 * @param problem the problem being solved
 	 * @param population the population used to store solutions
 	 * @param archive the archive used to store the result; can be {@code null}
@@ -92,14 +92,14 @@ public class NSGAII extends AbstractEvolutionaryAlgorithm implements EpsilonBoxE
 			// recreate the original NSGA-II implementation using binary
 			// tournament selection without replacement; this version works by
 			// maintaining a pool of candidate parents.
-			LinkedList<Solution> pool = new LinkedList<Solution>();
+			LinkedList<Solution> pool = new LinkedList<>();
 
 			DominanceComparator comparator = new ChainedComparator(new ParetoDominanceComparator(), new CrowdingComparator());
 
 			while (offspring.size() < populationSize) {
 				// ensure the pool has enough solutions
 				while (pool.size() < 2 * this.variation.getArity()) {
-					List<Solution> poolAdditions = new ArrayList<Solution>();
+					List<Solution> poolAdditions = new ArrayList<>();
 
 					for (Solution solution : population) {
 						poolAdditions.add(solution);

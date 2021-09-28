@@ -1,7 +1,6 @@
 package ai.libs.jaicore.experiments.configurations;
 
 import org.aeonbits.owner.Reloadable;
-import org.aeonbits.owner.Config.Key;
 
 import ai.libs.jaicore.basic.IOwnerBasedConfig;
 

@@ -1,14 +1,14 @@
 package ai.libs.jaicore.concurrent;
 
-public abstract class NamedTimerTask extends TrackableTimerTask {
+public abstract class ANamedTimerTask extends TrackableTimerTask {
 
 	private String descriptor;
 
-	public NamedTimerTask() {
+	protected ANamedTimerTask() {
 		this("<unnamed task>");
 	}
 
-	public NamedTimerTask(final String descriptor) {
+	protected ANamedTimerTask(final String descriptor) {
 		super();
 		this.descriptor = descriptor;
 	}

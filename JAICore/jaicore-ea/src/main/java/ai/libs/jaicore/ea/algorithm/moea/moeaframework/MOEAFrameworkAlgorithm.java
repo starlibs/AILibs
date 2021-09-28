@@ -176,7 +176,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm<Population> {
 		try {
 			getPopulationMethod = this.getAlgorithm().getClass().getMethod("getPopulation", (Class<?>[]) null);
 		} catch (NoSuchMethodException | SecurityException e) {
-			this.logger.error("Encountered exception: {}", e);
+			this.logger.error("Encountered exception.", e);
 		}
 
 		if (getPopulationMethod == null) {

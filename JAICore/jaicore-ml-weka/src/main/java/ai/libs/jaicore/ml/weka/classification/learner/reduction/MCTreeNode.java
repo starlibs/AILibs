@@ -175,7 +175,7 @@ public class MCTreeNode extends AMCTreeNode<Integer> implements ITreeClassifier,
 
 	@Override
 	public int getHeight() {
-		return 1 + this.children.stream().map(MCTreeNode::getHeight).mapToInt(x -> (int) x).max().getAsInt();
+		return 1 + this.children.stream().map(MCTreeNode::getHeight).mapToInt(int.class::cast).max().getAsInt();
 	}
 
 	@Override

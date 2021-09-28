@@ -105,7 +105,6 @@ public class MLPlanCLI {
 	public static final String O_POS_CLASS_NAME = "pcn";
 	public static final String O_OPENML_TASK = "openMLTask"; // id of an openML taks as an alternative to fit and predict datasets
 
-
 	public static final String O_OUT_OPENML_BENCHMARK = "ooab";
 	public static final String O_OUT_STATS = "os";
 	public static final String O_OUT_MODEL = "om";
@@ -225,6 +224,76 @@ public class MLPlanCLI {
 		return defaults.get(key);
 	}
 
+	private static List<ILabeledDataset<ILabeledInstance>> loadOpenMLTaskAsTrainTestSplit(final int taskID, final int fold) throws Exception {
+
+		logger.info("Load train test split of task {} and fold {}", taskID, fold);
+		OpenmlConnector con = new OpenmlConnector();
+		Task omlTask = con.taskGet(taskID);
+		File foldAssignmentFile = con.taskSplitsGet(omlTask);
+
+		Instances splitDescription = new Instances(new FileReader(foldAssignmentFile));
+		splitDescription.setClassIndex(splitDescription.numAttributes() - 1);
+		List<Integer> fitFold = new ArrayList<>();
+		List<Integer> predictFold = new ArrayList<>();
+
+		for (Instance i : splitDescription) {
+			if (((int) i.classValue()) == fold) {
+				int instanceIndex = (int) i.value(1);
+				switch (splitDescription.attribute(0).value((int) i.value(0))) {
+				case "TRAIN":
+					fitFold.add(instanceIndex);
+					break;
+				case "TEST":
+					predictFold.add(instanceIndex);
+					break;
+				default:
+					/* ignore this case */
+					break;
+				}
+			}
+		}
+
+		ILabeledDataset<?> dataset = null;
+		for (Input input : omlTask.getInputs()) {
+			if (input.getName().equals("source_data")) {
+				DataSetDescription dsd = input.getData_set().getDataSetDescription(con);
+				DataFeature feature = con.dataFeatures(dsd.getId());
+
+				List<String> removeAttributes = new ArrayList<>();
+				for (Entry<String, Feature> featureEntry : feature.getFeaturesAsMap().entrySet()) {
+					if (featureEntry.getValue().getIs_row_identifier() || featureEntry.getValue().getIs_ignore()) {
+						removeAttributes.add(featureEntry.getKey());
+					}
+				}
+
+				Instances wekaData = new Instances(new FileReader(con.datasetGet(con.dataGet(input.getData_set().getData_set_id()))));
+				String rangeList = removeAttributes.stream().map(x -> (wekaData.attribute(x).index() + 1) + "").collect(Collectors.joining(","));
+				Remove remove = new Remove();
+				remove.setAttributeIndices(rangeList);
+				remove.setInputFormat(wekaData);
+				Instances cleanWekaData = Filter.useFilter(wekaData, remove);
+
+				Integer classIndex = null;
+				String targetName = input.getData_set().getTarget_feature();
+				for (int i = 0; i < cleanWekaData.numAttributes(); i++) {
+					if (cleanWekaData.attribute(i).name().equals(targetName)) {
+						classIndex = i;
+					}
+				}
+
+				if (classIndex == null) {
+					logger.error("Could not find target attribute with name {}. Assuming last column to be the target instead.", targetName);
+					classIndex = cleanWekaData.numAttributes() - 1;
+				}
+				cleanWekaData.setClassIndex(classIndex);
+
+				dataset = new WekaInstances(cleanWekaData);
+			}
+		}
+
+		return SplitterUtil.getRealizationOfSplitSpecification(dataset, Arrays.asList(fitFold, predictFold));
+	}
+
 	private static void runMLPlan(final CommandLine cl) throws Exception {
 		// check whether a dataset is provided for fitting.
 		if (!cl.hasOption(O_FIT_DATASET) && !cl.hasOption(O_OPENML_TASK)) {
@@ -243,8 +312,6 @@ public class MLPlanCLI {
 			ConfigCache.getOrCreate(IPythonConfig.class).setProperty(IPythonConfig.KEY_PYTHON, cl.getOptionValue(O_PYTHON_CMD));
 		}
 
-
-
 		// Load CLI modules and identify module responsible for the requested ml-plan configuration
 		Map<String, IMLPlanCLIModule> moduleRegistry = getModuleRegistry();
 		String moduleName = cl.getOptionValue(O_MODULE, getDefault(O_MODULE));
@@ -262,72 +329,7 @@ public class MLPlanCLI {
 			int taskID = Integer.parseInt(taskSpec[0]);
 			int fold = Integer.parseInt(taskSpec[1]);
 
-			logger.info("Load train test split of task {} and fold {}", taskID, fold);
-			OpenmlConnector con = new OpenmlConnector();
-			Task omlTask = con.taskGet(taskID);
-			File foldAssignmentFile = con.taskSplitsGet(omlTask);
-
-			Instances splitDescription = new Instances(new FileReader(foldAssignmentFile));
-			splitDescription.setClassIndex(splitDescription.numAttributes() - 1);
-			List<Integer> fitFold = new ArrayList<>();
-			List<Integer> predictFold = new ArrayList<>();
-
-			for (Instance i : splitDescription) {
-				if (((int) i.classValue()) == fold) {
-					int instanceIndex = (int) i.value(1);
-					switch (splitDescription.attribute(0).value((int) i.value(0))) {
-					case "TRAIN":
-						fitFold.add(instanceIndex);
-						break;
-					case "TEST":
-						predictFold.add(instanceIndex);
-						break;
-					default:
-						/* ignore this case */
-						break;
-					}
-				}
-			}
-
-			ILabeledDataset<?> dataset = null;
-			for (Input input : omlTask.getInputs()) {
-				if (input.getName().equals("source_data")) {
-					DataSetDescription dsd = input.getData_set().getDataSetDescription(con);
-					DataFeature feature = con.dataFeatures(dsd.getId());
-
-					List<String> removeAttributes = new ArrayList<>();
-					for (Entry<String, Feature> featureEntry : feature.getFeaturesAsMap().entrySet()) {
-						if (featureEntry.getValue().getIs_row_identifier() || featureEntry.getValue().getIs_ignore()) {
-							removeAttributes.add(featureEntry.getKey());
-						}
-					}
-
-					Instances wekaData = new Instances(new FileReader(con.datasetGet(con.dataGet(input.getData_set().getData_set_id()))));
-					String rangeList = removeAttributes.stream().map(x -> (wekaData.attribute(x).index() + 1) + "").collect(Collectors.joining(","));
-					Remove remove = new Remove();
-					remove.setAttributeIndices(rangeList);
-					remove.setInputFormat(wekaData);
-					Instances cleanWekaData = Filter.useFilter(wekaData, remove);
-
-					Integer classIndex = null;
-					String targetName = input.getData_set().getTarget_feature();
-					for (int i = 0; i < cleanWekaData.numAttributes(); i++) {
-						if (cleanWekaData.attribute(i).name().equals(targetName)) {
-							classIndex = i;
-						}
-					}
-
-					if (classIndex == null) {
-						logger.error("Could not find target attribute with name {}. Assuming last column to be the target instead.", targetName);
-						classIndex = cleanWekaData.numAttributes() - 1;
-					}
-					cleanWekaData.setClassIndex(classIndex);
-
-					dataset = new WekaInstances(cleanWekaData);
-				}
-			}
-
-			List<ILabeledDataset<ILabeledInstance>> split = SplitterUtil.getRealizationOfSplitSpecification(dataset, Arrays.asList(fitFold, predictFold));
+			List<ILabeledDataset<ILabeledInstance>> split = loadOpenMLTaskAsTrainTestSplit(taskID, fold);
 			fitDataset = split.get(0);
 			predictDataset = split.get(1);
 		} else {
@@ -448,9 +450,21 @@ public class MLPlanCLI {
 	}
 
 	public static void main(final String[] args) throws Exception {
-		System.out.println("Called ML-Plan CLI with the following params: >" + Arrays.toString(args) + "<");
-		System.out.println("Logger name is " + MLPlanCLI.class.getName() + ". If logger works properlym the next line should contain an INFO-level message.");
-		logger.info("Logger works properly. Log-level is {}.", logger.isTraceEnabled() ? "TRACE" : (logger.isDebugEnabled() ? "DEBUG" : logger.isInfoEnabled() ? "INFO" : logger.isWarnEnabled() ? "WARN" : logger.isErrorEnabled() ? "ERROR" : "UNKNOWN"));
+		String logLevel;
+		if (logger.isTraceEnabled()) {
+			logLevel = "TRACE";
+		} else if (logger.isDebugEnabled()) {
+			logLevel = "DEBUG";
+		} else if (logger.isInfoEnabled()) {
+			logLevel = "INFO";
+		} else if (logger.isWarnEnabled()) {
+			logLevel = "WARN";
+		} else if (logger.isErrorEnabled()) {
+			logLevel = "ERROR";
+		} else {
+			logLevel = "UNKNOWN";
+		}
+		logger.info("Logger works properly. Log-level is {}.", logLevel);
 
 		final Options options = generateOptions();
 		if (args.length == 0) {

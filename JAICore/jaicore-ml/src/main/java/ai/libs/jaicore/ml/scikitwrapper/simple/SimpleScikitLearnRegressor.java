@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.PredictionException;
@@ -18,6 +17,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
+import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPrediction;
 import ai.libs.jaicore.ml.regression.singlelabel.SingleTargetRegressionPredictionBatch;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapperExecutionFailedException;
@@ -34,7 +34,7 @@ public class SimpleScikitLearnRegressor extends ASimpleScikitLearnWrapper<IRegre
 		IRegressionResultBatch batch = null;
 		try {
 			File predictOutputFile = this.executePipeline(dTest);
-			JsonNode n = new ObjectMapper().readTree(FileUtils.readFileToString(predictOutputFile));
+			JsonNode n = new ObjectMapper().readTree(FileUtil.readFileAsString(predictOutputFile));
 			if (!(n instanceof ArrayNode)) {
 				throw new PredictionException("Json file for predictions does not contain an array as root element");
 			}

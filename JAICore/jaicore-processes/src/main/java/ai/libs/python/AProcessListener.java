@@ -27,10 +27,10 @@ public abstract class AProcessListener implements IProcessListener, ILoggingCust
 	private boolean listenForPIDFromProcess = false;
 	private int processIDObtainedFromListening = -1;
 
-	public AProcessListener() {
+	protected AProcessListener() {
 	}
 
-	public AProcessListener(final boolean listenForPIDFromProcess) {
+	protected AProcessListener(final boolean listenForPIDFromProcess) {
 		this.listenForPIDFromProcess = listenForPIDFromProcess;
 	}
 
@@ -72,6 +72,7 @@ public abstract class AProcessListener implements IProcessListener, ILoggingCust
 				e1.printStackTrace();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				Thread.currentThread().interrupt();
 			} finally {
 				sem.release();
 			}

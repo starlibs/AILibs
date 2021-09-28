@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class EntitySelector<T> {
+public abstract class AEntitySelector<T> {
 	protected final Set<T> init;
 	protected final Set<T> current;
 
-	public EntitySelector(final Collection<T> items) {
+	protected AEntitySelector(final Collection<T> items) {
 		this.init = new HashSet<>(items);
 		this.current = new HashSet<>(items);
 	}
@@ -27,7 +27,7 @@ public abstract class EntitySelector<T> {
 		return inverted;
 	}
 
-	public EntitySelector<T> invert() {
+	public AEntitySelector<T> invert() {
 		Set<T> tmp = new HashSet<>(this.current);
 		this.current.clear();
 		this.init.forEach(i -> {

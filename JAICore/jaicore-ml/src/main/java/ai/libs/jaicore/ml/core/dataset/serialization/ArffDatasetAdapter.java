@@ -275,7 +275,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		}
 		this.logger.trace("Parsing line with target col {}: {}", targetIndex, line);
 
-		boolean sparseMode = sparseData;
+		boolean instanceSparseMode = sparseData;
 		String curLine = line;
 		if (curLine.trim().startsWith("{") && curLine.trim().endsWith("}")) {
 			curLine = curLine.substring(1, curLine.length() - 1);
@@ -286,10 +286,10 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 		String[] lineSplit = curLine.split(",");
 		if (!(lineSplit[0].startsWith("'") && lineSplit[0].endsWith("'") || lineSplit[0].startsWith("\"") && lineSplit[0].endsWith("\"")) && lineSplit[0].contains(" ") && this.tryParseInt(lineSplit[0].split(" ")[0])) {
-			sparseMode = true;
+			instanceSparseMode = true;
 		}
 
-		if (!sparseMode) {
+		if (!instanceSparseMode) {
 			lineSplit = this.splitDenseInstanceLine(curLine);
 			if (lineSplit.length != attributes.size()) {
 				throw new IllegalArgumentException("Cannot parse instance as this is not a sparse instance but has less columns than there are attributes defined. Expected values: " + attributes.size() + ". Actual number of values: "
@@ -412,9 +412,9 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						this.logger.debug("Switched to instance read mode in line {}. Class index is {}", lineCounter, relationMetaData.getAsInt(K_CLASS_INDEX));
 					}
 				} else {
-					if (dataset == null) {
-						throw new NullPointerException("The dataset point is empty even though we have skipped to instance read mode already.");
-					}
+					// require dataset to be not null.
+					Objects.requireNonNull(dataset, "The dataset point is empty even though we have skipped to instance read mode already.");
+
 					line = line.trim();
 					if (!line.isEmpty() && !line.startsWith("%")) { // ignore empty and comment lines
 						List<Object> parsedInstance = this.parseInstance(sparseMode, attributes, relationMetaData.getAsInt(K_CLASS_INDEX), line);
@@ -433,9 +433,6 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						}
 						dataset.add(newI);
 					}
-				}
-				if (dataset != null && !dataset.isEmpty() && dataset.size() % 10000 == 0) {
-					this.logger.debug("Read in another 1000 instances. Current dataset size is {}", dataset.size());
 				}
 			}
 			Objects.requireNonNull(dataset, "Dataset is null, which must not happen!");

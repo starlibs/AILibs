@@ -294,8 +294,8 @@ public abstract class Solver {
 		 * now make variables in this new resolve unique by adding an underscore to each of the variables
 		 */
 		Map<VariableParam, LiteralParam> substitution = new HashMap<>();
-		for (VariableParam var : basicResolvent.getVariableParams()) {
-			substitution.put(var, new VariableParam("_" + var.getName()));
+		for (VariableParam variable : basicResolvent.getVariableParams()) {
+			substitution.put(variable, new VariableParam("_" + variable.getName()));
 		}
 		Clause resolvent = new Clause(basicResolvent, substitution);
 
@@ -335,9 +335,9 @@ public abstract class Solver {
 
 			else if (v2 instanceof VariableParam && v1 instanceof ConstantParam) {
 				unifier.put((VariableParam) v2, v1);
-				for (VariableParam key : unifier.keySet()) {
-					if (unifier.get(key).equals(v2)) {
-						unifier.put(key, v1);
+				for (Entry<VariableParam, LiteralParam> entry : unifier.entrySet()) {
+					if (entry.getValue().equals(v2)) {
+						unifier.put(entry.getKey(), v1);
 					}
 				}
 			}
@@ -346,9 +346,9 @@ public abstract class Solver {
 				if (!v1.equals(v2)) {
 					unifier.put((VariableParam) v2, v1);
 				}
-				for (VariableParam key : unifier.keySet()) {
-					if (unifier.get(key).equals(v2)) {
-						unifier.put(key, v1);
+				for (Entry<VariableParam, LiteralParam> entry : unifier.entrySet()) {
+					if (entry.getValue().equals(v2)) {
+						unifier.put(entry.getKey(), v1);
 					}
 				}
 			}

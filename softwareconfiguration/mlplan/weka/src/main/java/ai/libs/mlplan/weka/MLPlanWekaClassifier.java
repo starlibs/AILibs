@@ -47,7 +47,7 @@ import weka.core.OptionHandler;
  *
  */
 @SuppressWarnings("serial")
-public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, OptionHandler, ILoggingCustomizable, IWekaClassifier, IEventEmitter {
+public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, OptionHandler, ILoggingCustomizable, IWekaClassifier, IEventEmitter<Object> {
 
 	/* Logger for controlled output. */
 	private transient Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
@@ -75,11 +75,11 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 		this.fit(new WekaInstances(data));
 	}
 
-	public double[] classifyInstances(final Instances instances) throws Exception {
+	public double[] classifyInstances(final Instances instances) throws PredictionException, InterruptedException {
 		double[] predictionsAsDoubles = new double[instances.size()];
 		List<? extends IPrediction> predictions = this.classifierFoundByMLPlan.predict(new WekaInstances(instances)).getPredictions();
 		for (int i = 0; i < instances.size(); i++) {
-			predictionsAsDoubles[i] = (double)predictions.get(i).getPrediction();
+			predictionsAsDoubles[i] = (double) predictions.get(i).getPrediction();
 		}
 		return predictionsAsDoubles;
 	}

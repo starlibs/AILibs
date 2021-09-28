@@ -4,12 +4,13 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.aeonbits.owner.ConfigFactory;
-import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.rules.Timeout;
 
 import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.db.sql.DatabaseAdapterFactory;
@@ -25,8 +26,11 @@ public abstract class DBTest extends ATest {
 	public static final String VAR_DB_REST_HOST = "AILIBS_JAICORE_DB_REST_DB_HOST";
 	public static final String VAR_DB_REST_TOKEN = "AILIBS_JAICORE_DB_REST_DB_TOKEN"; // this is for rest-based access
 
-	@Rule
-	public Timeout globalTimeout = Timeout.seconds(30); // database tests should not take longer than 10 seconds
+	@BeforeEach
+	@Timeout(value = 30, unit = TimeUnit.SECONDS) // database tests should not take longer than 10 seconds
+	void setUp() {
+
+	}
 
 	protected IDatabaseAdapter reportConfigAndGetAdapter(final Object config) {
 		if (config instanceof IDatabaseConfig) {

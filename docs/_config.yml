@@ -6,4 +6,4 @@ defaults:
       path: "" # an empty string here means all files in the project
     values:
       layout: project
-      version: "0.2.4"
+      version: "0.2.5"

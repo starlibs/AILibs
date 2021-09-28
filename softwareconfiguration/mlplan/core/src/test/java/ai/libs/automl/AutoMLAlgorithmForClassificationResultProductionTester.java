@@ -3,6 +3,7 @@ package ai.libs.automl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
@@ -10,9 +11,9 @@ import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFail
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.evaluation.supervised.loss.IDeterministicPredictionPerformanceMeasure;
-import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.rules.Timeout;
 
 import ai.libs.jaicore.ml.classification.loss.dataset.EClassificationPerformanceMeasure;
 import ai.libs.jaicore.ml.core.dataset.DatasetUtil;
@@ -21,8 +22,11 @@ import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 
 public abstract class AutoMLAlgorithmForClassificationResultProductionTester extends AutoMLAlgorithmResultProductionTester {
 
-	@Rule
-	public Timeout globalTimeout = Timeout.seconds(180); // AutoML tests may run up to 3m
+	@BeforeEach
+	@Timeout(value = 180, unit = TimeUnit.SECONDS)
+	void setUp() {
+		// nothing to do here
+	}
 
 	@Override
 	public IDeterministicPredictionPerformanceMeasure<?, ?> getTestMeasure() {

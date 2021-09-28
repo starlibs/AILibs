@@ -23,7 +23,7 @@ import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanSimpleBuilder;
 import ai.libs.mlplan.core.events.MLPlanPhaseSwitchedEvent;
 
-public class MLPlanCoreFunctionalityTester extends AutoMLAlgorithmCoreFunctionalityTester {
+public class MLPlanCoreFunctionalityTest extends AutoMLAlgorithmCoreFunctionalityTester {
 
 	@Override
 	public IAlgorithm getAutoMLAlgorithm(final ILabeledDataset data) throws IOException, InterruptedException {

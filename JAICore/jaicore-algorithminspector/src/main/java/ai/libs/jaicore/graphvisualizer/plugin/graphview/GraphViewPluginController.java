@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 import org.api4.java.algorithm.events.serializable.IPropertyProcessedAlgorithmEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
@@ -21,8 +19,6 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPro
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
 public class GraphViewPluginController extends ASimpleMVCPluginController<GraphViewPluginModel, GraphViewPluginView> {
-
-	private Logger logger = LoggerFactory.getLogger(GraphViewPluginController.class);
 
 	public GraphViewPluginController(final GraphViewPluginModel model, final GraphViewPluginView view) {
 		super(model, view);
@@ -74,7 +70,7 @@ public class GraphViewPluginController extends ASimpleMVCPluginController<GraphV
 
 	private void handleNodeAddedEvent(final IPropertyProcessedAlgorithmEvent nodeReachedEvent) throws ViewGraphManipulationException {
 		NodeInfo nodeInfo = nodeReachedEvent.getProperty(NodeInfoAlgorithmEventPropertyComputer.NODE_INFO_PROPERTY_NAME, NodeInfo.class);
-		this.getModel().addNode(nodeInfo.getMainNodeId(), nodeInfo.getParentNodeIds().stream().map(s -> (Object) s).collect(Collectors.toList()), nodeInfo.getNodeType());
+		this.getModel().addNode(nodeInfo.getMainNodeId(), nodeInfo.getParentNodeIds().stream().map(Object.class::cast).collect(Collectors.toList()), nodeInfo.getNodeType());
 	}
 
 	private void handleNodeTypeSwitchEvent(final IPropertyProcessedAlgorithmEvent nodeTypeSwitchEvent) throws ViewGraphManipulationException {
@@ -97,16 +93,6 @@ public class GraphViewPluginController extends ASimpleMVCPluginController<GraphV
 		if (guiEvent instanceof ResetEvent || guiEvent instanceof GoToTimeStepEvent) {
 			this.getModel().clear();
 		}
-	}
-
-	@Override
-	public String getLoggerName() {
-		return this.logger.getName();
-	}
-
-	@Override
-	public void setLoggerName(final String name) {
-		this.logger = LoggerFactory.getLogger(name);
 	}
 
 }
