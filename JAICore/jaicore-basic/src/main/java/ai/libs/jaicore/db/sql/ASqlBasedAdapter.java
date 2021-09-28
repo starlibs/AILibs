@@ -13,9 +13,9 @@ public abstract class ASqlBasedAdapter implements IDatabaseAdapter {
 	 */
 	private static final long serialVersionUID = 153647641292144496L;
 
-	static final String KEY_EQUALS_VALUE_TO_BE_SET = " = (?)";
-	static final String STR_SPACE_AND = " AND ";
-	static final String STR_SPACE_WHERE = " WHERE ";
+	protected static final String KEY_EQUALS_VALUE_TO_BE_SET = " = (?)";
+	protected static final String STR_SPACE_AND = " AND ";
+	protected static final String STR_SPACE_WHERE = " WHERE ";
 
 	protected ASqlBasedAdapter() {
 	}

@@ -74,7 +74,7 @@ public class GraphViewPluginController extends ASimpleMVCPluginController<GraphV
 
 	private void handleNodeAddedEvent(final IPropertyProcessedAlgorithmEvent nodeReachedEvent) throws ViewGraphManipulationException {
 		NodeInfo nodeInfo = nodeReachedEvent.getProperty(NodeInfoAlgorithmEventPropertyComputer.NODE_INFO_PROPERTY_NAME, NodeInfo.class);
-		this.getModel().addNode(nodeInfo.getMainNodeId(), nodeInfo.getParentNodeIds().stream().map(s -> (Object) s).collect(Collectors.toList()), nodeInfo.getNodeType());
+		this.getModel().addNode(nodeInfo.getMainNodeId(), nodeInfo.getParentNodeIds().stream().map(Object.class::cast).collect(Collectors.toList()), nodeInfo.getNodeType());
 	}
 
 	private void handleNodeTypeSwitchEvent(final IPropertyProcessedAlgorithmEvent nodeTypeSwitchEvent) throws ViewGraphManipulationException {

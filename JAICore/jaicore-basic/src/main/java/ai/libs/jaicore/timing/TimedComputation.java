@@ -148,15 +148,13 @@ public abstract class TimedComputation {
 	public static void computeWithTimeoutInParallel(final int numCPUs, final Timeout timeout, final List<Runnable> taskList) throws InterruptedException {
 		ExecutorService pool = Executors.newFixedThreadPool(numCPUs);
 		Semaphore sync = new Semaphore(0);
-		taskList.stream().forEach(x -> {
-			pool.submit(() -> {
-				try {
-					x.run();
-				} finally {
-					sync.release();
-				}
-			});
-		});
+		taskList.stream().forEach(x -> pool.submit(() -> {
+			try {
+				x.run();
+			} finally {
+				sync.release();
+			}
+		}));
 		pool.shutdown();
 
 		try

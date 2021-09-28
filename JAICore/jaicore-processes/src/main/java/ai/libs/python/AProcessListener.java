@@ -72,6 +72,7 @@ public abstract class AProcessListener implements IProcessListener, ILoggingCust
 				e1.printStackTrace();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				Thread.currentThread().interrupt();
 			} finally {
 				sem.release();
 			}

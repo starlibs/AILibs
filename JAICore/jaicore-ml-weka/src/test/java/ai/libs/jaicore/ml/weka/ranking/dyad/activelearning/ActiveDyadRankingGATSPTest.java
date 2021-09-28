@@ -61,7 +61,7 @@ public class ActiveDyadRankingGATSPTest {
 	}
 
 	@ParameterizedTest
-	@Disabled
+	@Disabled("Dyad Ranking is currently not supported.")
 	@MethodSource("supplyDyadRankers")
 	public void test(final PLNetDyadRanker ranker) throws Exception {
 		int seed = 0;
