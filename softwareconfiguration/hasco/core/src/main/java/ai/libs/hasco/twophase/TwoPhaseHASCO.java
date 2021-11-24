@@ -152,8 +152,8 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 			AlgorithmInitializedEvent event = this.activate();
 			this.logger.info(
 					"Starting 2-Phase HASCO with the following setup:\n\tCPUs:{},\n\tTimeout: {}s\n\tTimeout per node evaluation: {}ms\n\tTimeout per candidate: {}ms\n\tNumber of Random Completions: {}\n\tExpected blow-ups are {} (selection) and {} (post-processing).\nThe search factory is: {}",
-					this.getNumCPUs(), this.getTimeout().seconds(), this.getConfig().timeoutForNodeEvaluation(), this.getConfig().timeoutForCandidateEvaluation(), this.getConfig().numberOfRandomCompletions(),
-					this.blowupInSelection, this.blowupInPostProcessing, this.hasco.getSearchFactory());
+					this.getNumCPUs(), this.getTimeout().seconds(), this.getConfig().timeoutForNodeEvaluation(), this.getConfig().timeoutForCandidateEvaluation(), this.getConfig().numberOfRandomCompletions(), this.blowupInSelection,
+					this.blowupInPostProcessing, this.hasco.getSearchFactory());
 			this.setHASCOLoggerNameIfPossible();
 			this.logger.info("Initialized HASCO with start time {}.", this.timeOfStart);
 			return event;
@@ -226,10 +226,8 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 			if (selectionBenchmark != null) {
 				if (this.logger.isInfoEnabled()) {
 					this.logger.info("Entering phase 2.");
-					this.logger.debug("Solutions seen so far had the following (internal) errors and evaluation times (one per line): {}",
-							this.phase1ResultQueue.stream()
-							.map(e -> "\n\t" + MathExt.round(e.getScore(), 4) + " in " + e.getTimeToEvaluateCandidate() + "ms (" + this.serializer.serialize(e.getComponentInstance()) + ")")
-							.collect(Collectors.joining()));
+					this.logger.debug("Solutions seen so far had the following (internal) errors and evaluation times (one per line): {}", this.phase1ResultQueue.stream()
+							.map(e -> "\n\t" + MathExt.round(e.getScore(), 4) + " in " + e.getTimeToEvaluateCandidate() + "ms (" + this.serializer.serialize(e.getComponentInstance()) + ")").collect(Collectors.joining()));
 				}
 				this.post(new TwoPhaseHASCOPhaseSwitchEvent(this));
 
@@ -269,8 +267,9 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		Collection<HASCOSolutionCandidate<Double>> currentSelection = this.getSelectionForPhase2();
 		int estimateForRemainingRuntime = this.getExpectedTotalRemainingRuntimeForAGivenPool(currentSelection, true);
 		boolean terminatePhase1 = estimateForRemainingRuntime + 5000 > timeRemaining;
-		int currentMemoryConsumption = (int)((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024);
-		this.logger.info("{}ms of the available time remaining in total, and we estimate a remaining runtime of {}ms. Terminate phase 1: {}. Current memory consumption: {}MB", timeRemaining, estimateForRemainingRuntime, terminatePhase1, currentMemoryConsumption);
+		int currentMemoryConsumption = (int) ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024);
+		this.logger.info("{}ms of the available time remaining in total, and we estimate a remaining runtime of {}ms. Terminate phase 1: {}. Current memory consumption: {}MB", timeRemaining, estimateForRemainingRuntime, terminatePhase1,
+				currentMemoryConsumption);
 		return terminatePhase1;
 	}
 
@@ -376,7 +375,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 
 	public List<HASCOSolutionCandidate<Double>> getEnsembleToSelectFromInPhase2() {
 		if (this.getTimeout().seconds() <= 0) {
-			return this.getSelectionForPhase2().stream().sorted((c1,c2) -> Double.compare(c1.getScore(), c2.getScore())).collect(Collectors.toList());
+			return this.getSelectionForPhase2().stream().sorted((c1, c2) -> Double.compare(c1.getScore(), c2.getScore())).collect(Collectors.toList());
 		}
 		int remainingTime = (int) (this.getTimeout().milliseconds() - (System.currentTimeMillis() - this.timeOfStart));
 
@@ -401,11 +400,10 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		if (this.logger.isInfoEnabled()) {
 			this.logger.info(
 					"We expect phase 2 to consume {}ms for {} candidates, and post-processing is assumed to take at most {}ms, which is a total remaining runtime of {}ms. {}ms are permitted by timeout. The following candidates are considered (one per line with the internal error of phase 1): {}",
-					expectedTimeForPhase2, ensembleToSelectFrom.size(), expectedPostprocessingTime, expectedMaximumRemainingRuntime, remainingTime,
-					ensembleToSelectFrom.stream().map(e -> "\n\t" + MathExt.round(e.getScore(), 4) + " in " + e.getTimeToEvaluateCandidate() + "ms (" + this.serializer.serialize(e.getComponentInstance()) + ")")
-					.collect(Collectors.joining()));
+					expectedTimeForPhase2, ensembleToSelectFrom.size(), expectedPostprocessingTime, expectedMaximumRemainingRuntime, remainingTime, ensembleToSelectFrom.stream()
+					.map(e -> "\n\t" + MathExt.round(e.getScore(), 4) + " in " + e.getTimeToEvaluateCandidate() + "ms (" + this.serializer.serialize(e.getComponentInstance()) + ")").collect(Collectors.joining()));
 		}
-		return ensembleToSelectFrom.stream().sorted((c1,c2) -> Double.compare(c1.getScore(), c2.getScore())).collect(Collectors.toList());
+		return ensembleToSelectFrom.stream().sorted((c1, c2) -> Double.compare(c1.getScore(), c2.getScore())).collect(Collectors.toList());
 	}
 
 	protected HASCOSolutionCandidate<Double> selectModel() throws InterruptedException {
@@ -417,8 +415,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		if (ensembleToSelectFrom.isEmpty()) {
 			this.logger.warn("No solution contained in ensemble.");
 			return null;
-		}
-		else if (ensembleToSelectFrom.size() == 1) {
+		} else if (ensembleToSelectFrom.size() == 1) {
 			this.logger.info("No selection to make since there is only one candidate to select from.");
 			return ensembleToSelectFrom.get(0);
 		}
@@ -442,7 +439,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		for (HASCOSolutionCandidate<Double> c : ensembleToSelectFrom) {
 			TwoPhaseCandidateEvaluator run = new TwoPhaseCandidateEvaluator(c, timestampOfDeadline, timeoutTolerance, this.blowupInSelection, this.blowupInPostProcessing, evaluator, sem);
 			run.setLoggerName(loggerNameForWorkers);
-			this.selectionRuns.put(c,  run);
+			this.selectionRuns.put(c, run);
 			pool.submit(run);
 		}
 
@@ -473,7 +470,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 	}
 
 	private synchronized Optional<TwoPhaseCandidateEvaluator> getCandidateThatWouldCurrentlyBeSelectedWithinPhase2(final Map<HASCOSolutionCandidate<Double>, TwoPhaseCandidateEvaluator> stats) {
-		return stats.entrySet().stream().map(Entry::getValue).min((e1,e2) -> Double.compare(e1.getSelectionScore(), e2.getSelectionScore()));
+		return stats.entrySet().stream().map(Entry::getValue).min((e1, e2) -> Double.compare(e1.getSelectionScore(), e2.getSelectionScore()));
 	}
 
 	public HASCO<N, A, Double> getHasco() {

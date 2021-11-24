@@ -13,12 +13,14 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.jaicore.components.api.IComponentInstance;
+import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.timing.TimedComputation;
 
 public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(TwoPhaseCandidateEvaluator.class);
+	private final ComponentSerialization serializer = new ComponentSerialization();
 
 	/* input variables */
 	private final IObjectEvaluator<IComponentInstance, Double> evaluator;
@@ -32,7 +34,8 @@ public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizabl
 	private final int timeoutForEvaluation;
 
 	/* result variables */
-	private double selectionScore;
+	private boolean completedSuccessfully = false;
+	private double selectionScore = Double.NaN;
 	private long trueEvaluationTime;
 
 	/* shared variables */
@@ -64,7 +67,7 @@ public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizabl
 			/* We assume linear growth of the evaluation time here to estimate (A) time for
 			 * selection phase, (B) time for post-processing the solution in case it gets selected. */
 			this.logger.info("Estimating {}ms re-evaluation time and {}ms build time for candidate {} in case of selection (evaluation time during search was {}ms).", this.estimatedInSelectionSingleIterationEvaluationTime,
-					this.estimatedPostProcessingTime, this.c.getComponentInstance(), this.c.getTimeToEvaluateCandidate());
+					this.estimatedPostProcessingTime, this.serializer.serialize(this.c.getComponentInstance()), this.c.getTimeToEvaluateCandidate());
 
 			/* If we have a global timeout, check whether considering this model is feasible. */
 			if (this.selectionPhaseDeadline > 0) {
@@ -83,12 +86,14 @@ public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizabl
 			TimedComputation.compute(() -> {
 				this.selectionScore = this.evaluator.evaluate(this.c.getComponentInstance());
 				this.trueEvaluationTime = (System.currentTimeMillis() - timestampStart);
-				this.logger.info("Obtained evaluation score of {} after {}ms for candidate {} (score assigned by HASCO was {}).", this.selectionScore, this.trueEvaluationTime, this.c.getComponentInstance(), this.c.getScore());
+				this.completedSuccessfully = true;
+				this.logger.info("Obtained evaluation score of {} after {}ms for candidate {} (score assigned by HASCO was {}).", this.selectionScore, this.trueEvaluationTime, this.serializer.serialize(this.c.getComponentInstance()),
+						this.c.getScore());
 				return true;
-			}, new Timeout(this.timeoutForEvaluation, TimeUnit.MILLISECONDS), "Timeout for evaluation of ensemble candidate " + this.c.getComponentInstance());
+			}, new Timeout(this.timeoutForEvaluation, TimeUnit.MILLISECONDS), "Timeout for evaluation of ensemble candidate " + this.serializer.serialize(this.c.getComponentInstance()));
 		} catch (InterruptedException e) {
 			assert !Thread.currentThread().isInterrupted() : "The interrupted-flag should not be true when an InterruptedException is thrown!";
-			this.logger.info("Selection eval of {} got interrupted after {}ms. Defined timeout was: {}ms", this.c.getComponentInstance(), (System.currentTimeMillis() - timestampStart), this.timeoutForEvaluation);
+			this.logger.info("Selection eval of {} got interrupted after {}ms. Defined timeout was: {}ms", this.serializer.serialize(this.c.getComponentInstance()), (System.currentTimeMillis() - timestampStart), this.timeoutForEvaluation);
 			Thread.currentThread().interrupt(); // no controlled interrupt needed here, because this is only a re-interrupt, and the execution will cease after this anyway
 		} catch (ExecutionException e) {
 			this.logger.error("Observed an exeption when trying to evaluate a candidate in the selection phase.\n{}", LoggerUtil.getExceptionInfo(e.getCause()));
@@ -101,7 +106,14 @@ public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizabl
 	}
 
 	public double getSelectionScore() {
+		if (!this.completedSuccessfully) {
+			throw new IllegalStateException("The run was not completed succesfully. This exception is to avoid strange behavior, please check whether the run was successful before and only call this method then.");
+		}
 		return this.selectionScore;
+	}
+
+	public boolean isCompletedSuccessfully() {
+		return this.completedSuccessfully;
 	}
 
 	public HASCOSolutionCandidate<Double> getSolution() {
