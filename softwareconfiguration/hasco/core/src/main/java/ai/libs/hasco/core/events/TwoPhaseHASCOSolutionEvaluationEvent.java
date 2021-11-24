@@ -1,28 +1,23 @@
 package ai.libs.hasco.core.events;
 
-import ai.libs.jaicore.components.model.ComponentInstance;
+import ai.libs.hasco.twophase.TwoPhaseHASCO;
+import ai.libs.jaicore.basic.algorithm.AAlgorithmEvent;
+import ai.libs.jaicore.components.api.IComponentInstance;
 
-public class TwoPhaseHASCOSolutionEvaluationEvent<T, V extends Comparable<V>> {
-	private final ComponentInstance componentInstance;
-	private final T solution;
-	private final V score;
+public class TwoPhaseHASCOSolutionEvaluationEvent extends AAlgorithmEvent {
+	private final IComponentInstance componentInstance;
+	private final double score;
 
-	public TwoPhaseHASCOSolutionEvaluationEvent(final ComponentInstance componentInstance, final T solution, final V score) {
-		super();
+	public TwoPhaseHASCOSolutionEvaluationEvent(final TwoPhaseHASCO<?, ?> algorithm, final IComponentInstance componentInstance, final double score) {
+		super(algorithm);
 		this.componentInstance = componentInstance;
-		this.solution = solution;
 		this.score = score;
 	}
 
-	public ComponentInstance getComponentInstance() {
+	public IComponentInstance getComponentInstance() {
 		return this.componentInstance;
 	}
-
-	public T getSolution() {
-		return this.solution;
-	}
-
-	public V getScore() {
+	public double getScore() {
 		return this.score;
 	}
 }

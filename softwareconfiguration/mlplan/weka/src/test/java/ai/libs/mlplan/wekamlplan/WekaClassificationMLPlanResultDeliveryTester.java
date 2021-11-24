@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
@@ -16,8 +18,12 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.Timeout;
 
+import com.google.common.eventbus.Subscribe;
+
 import ai.libs.automl.AutoMLAlgorithmForClassificationResultProductionTester;
+import ai.libs.hasco.core.events.TwoPhaseHASCOSolutionEvaluationEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
+import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier;
 import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
@@ -27,6 +33,8 @@ import ai.libs.mlplan.weka.MLPlanWekaBuilder;
 import ai.libs.mlplan.weka.weka.WekaPipelineValidityCheckingNodeEvaluator;
 
 public class WekaClassificationMLPlanResultDeliveryTester extends AutoMLAlgorithmForClassificationResultProductionTester {
+
+	private List<TwoPhaseHASCOSolutionEvaluationEvent> selectionPhaseEvents = new ArrayList<>();
 
 	@Override
 	public IAlgorithm<ILabeledDataset<?>, IWekaClassifier> getAutoMLAlgorithm(final ILabeledDataset<?> data) throws AlgorithmCreationException {
@@ -65,6 +73,23 @@ public class WekaClassificationMLPlanResultDeliveryTester extends AutoMLAlgorith
 		}
 		assertTrue(ape.getPrimaryNodeEvaluator() instanceof WekaPipelineValidityCheckingNodeEvaluator,
 				"The ML-Plan searcher uses a node evaluator that does not use " + WekaPipelineValidityCheckingNodeEvaluator.class.getName() + " as its eventual primary node evaluator. The evaluator is: " + ape);
+
+		/* reset received events for solutions */
+		this.selectionPhaseEvents.clear();
+		mlplan.getOptimizingFactory().registerListener(new Object() {
+
+			@Subscribe
+			public void receiveSolutionEvent(final TwoPhaseHASCOSolutionEvaluationEvent e) {
+				WekaClassificationMLPlanResultDeliveryTester.this.selectionPhaseEvents.add(e);
+			}
+		});
+	}
+
+	@Override
+	public void afterCompletionHook(final IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> algorithm) {
+		MLPlan<IWekaClassifier> mlplan = (MLPlan<IWekaClassifier>) algorithm;
+		IComponentInstance selectedSolution = mlplan.getComponentInstanceOfSelectedClassifier();
+		assertTrue(this.selectionPhaseEvents.stream().anyMatch(e -> e.getComponentInstance().equals(selectedSolution)), "ML-Plan selected a pipeline that was not executed successfully in the selection phase!");
 	}
 
 	public int getTrainTimeOfMajorityClassifier(final ILabeledDataset<?> data) throws TrainingException, InterruptedException, DatasetDeserializationFailedException {

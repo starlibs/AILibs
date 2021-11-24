@@ -42,6 +42,7 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.basic.ATest;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
+import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.interrupt.Interrupter;
@@ -71,6 +72,10 @@ public abstract class AutoMLAlgorithmResultProductionTester extends ATest {
 	public abstract IDeterministicPredictionPerformanceMeasure<?, ?> getTestMeasure();
 
 	public void afterInitHook(final IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> algorithm) {
+
+	}
+
+	public void afterCompletionHook(final IAlgorithm<ILabeledDataset<?>, ? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>> algorithm) {
 
 	}
 
@@ -150,6 +155,11 @@ public abstract class AutoMLAlgorithmResultProductionTester extends ATest {
 				@Subscribe
 				public void receiveInitEvent(final AlgorithmInitializedEvent e) {
 					AutoMLAlgorithmResultProductionTester.this.afterInitHook(algorithm);
+				}
+
+				@Subscribe
+				public void receiveTerminationEvent(final AlgorithmFinishedEvent e) {
+					AutoMLAlgorithmResultProductionTester.this.afterCompletionHook(algorithm);
 				}
 			});
 			ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> c = algorithm.call();

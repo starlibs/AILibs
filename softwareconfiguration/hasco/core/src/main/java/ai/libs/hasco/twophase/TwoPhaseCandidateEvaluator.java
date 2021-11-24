@@ -11,7 +11,10 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
+
 import ai.libs.hasco.core.HASCOSolutionCandidate;
+import ai.libs.hasco.core.events.TwoPhaseHASCOSolutionEvaluationEvent;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
 import ai.libs.jaicore.logging.LoggerUtil;
@@ -19,6 +22,7 @@ import ai.libs.jaicore.timing.TimedComputation;
 
 public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizable {
 
+	private final EventBus eventBus;
 	private Logger logger = LoggerFactory.getLogger(TwoPhaseCandidateEvaluator.class);
 	private final ComponentSerialization serializer = new ComponentSerialization();
 
@@ -42,7 +46,7 @@ public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizabl
 	private final Semaphore sem;
 
 	public TwoPhaseCandidateEvaluator(final HASCOSolutionCandidate<Double> c, final long selectionPhaseDeadline, final double timeoutTolerance, final double blowupInSelection, final double blowupInPostProcessing,
-			final IObjectEvaluator<IComponentInstance, Double> evaluator, final Semaphore sem) {
+			final IObjectEvaluator<IComponentInstance, Double> evaluator, final Semaphore sem, final EventBus eventBus) {
 		super();
 		this.c = c;
 		this.selectionPhaseDeadline = selectionPhaseDeadline;
@@ -56,6 +60,7 @@ public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizabl
 
 		this.evaluator = evaluator;
 		this.sem = sem;
+		this.eventBus = eventBus;
 	}
 
 	@Override
@@ -89,6 +94,7 @@ public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizabl
 				this.completedSuccessfully = true;
 				this.logger.info("Obtained evaluation score of {} after {}ms for candidate {} (score assigned by HASCO was {}).", this.selectionScore, this.trueEvaluationTime, this.serializer.serialize(this.c.getComponentInstance()),
 						this.c.getScore());
+				this.eventBus.post(new TwoPhaseHASCOSolutionEvaluationEvent(null, this.c.getComponentInstance(), this.selectionScore));
 				return true;
 			}, new Timeout(this.timeoutForEvaluation, TimeUnit.MILLISECONDS), "Timeout for evaluation of ensemble candidate " + this.serializer.serialize(this.c.getComponentInstance()));
 		} catch (InterruptedException e) {

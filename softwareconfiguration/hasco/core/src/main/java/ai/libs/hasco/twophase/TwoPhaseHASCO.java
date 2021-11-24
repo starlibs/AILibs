@@ -30,12 +30,14 @@ import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.core.events.HASCOSolutionEvent;
 import ai.libs.hasco.core.events.TwoPhaseHASCOPhaseSwitchEvent;
+import ai.libs.hasco.core.events.TwoPhaseHASCOSolutionEvaluationEvent;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.AlgorithmInitializedEvent;
@@ -43,8 +45,8 @@ import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.components.api.IComponentInstance;
 import ai.libs.jaicore.components.optimizingfactory.SoftwareConfigurationAlgorithm;
 import ai.libs.jaicore.components.serialization.ComponentSerialization;
-import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.concurrent.ANamedTimerTask;
+import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
@@ -436,8 +438,16 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		final IObjectEvaluator<IComponentInstance, Double> evaluator = this.getInput().getSelectionBenchmark();
 		final double timeoutTolerance = TwoPhaseHASCO.this.getConfig().selectionPhaseTimeoutTolerance();
 		final String loggerNameForWorkers = this.getLoggerName() + ".worker";
+		final EventBus selectionEventBus = new EventBus();
+		selectionEventBus.register(new Object() {
+
+			@Subscribe
+			public void receiveSolution(final TwoPhaseHASCOSolutionEvaluationEvent e) {
+				TwoPhaseHASCO.this.post(e);
+			}
+		});
 		for (HASCOSolutionCandidate<Double> c : ensembleToSelectFrom) {
-			TwoPhaseCandidateEvaluator run = new TwoPhaseCandidateEvaluator(c, timestampOfDeadline, timeoutTolerance, this.blowupInSelection, this.blowupInPostProcessing, evaluator, sem);
+			TwoPhaseCandidateEvaluator run = new TwoPhaseCandidateEvaluator(c, timestampOfDeadline, timeoutTolerance, this.blowupInSelection, this.blowupInPostProcessing, evaluator, sem, selectionEventBus);
 			run.setLoggerName(loggerNameForWorkers);
 			this.selectionRuns.put(c, run);
 			pool.submit(run);
@@ -470,7 +480,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 	}
 
 	private synchronized Optional<TwoPhaseCandidateEvaluator> getCandidateThatWouldCurrentlyBeSelectedWithinPhase2(final Map<HASCOSolutionCandidate<Double>, TwoPhaseCandidateEvaluator> stats) {
-		return stats.entrySet().stream().map(Entry::getValue).min((e1, e2) -> Double.compare(e1.getSelectionScore(), e2.getSelectionScore()));
+		return stats.entrySet().stream().map(Entry::getValue).filter(TwoPhaseCandidateEvaluator::isCompletedSuccessfully).min((e1, e2) -> Double.compare(e1.getSelectionScore(), e2.getSelectionScore()));
 	}
 
 	public HASCO<N, A, Double> getHasco() {
