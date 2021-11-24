@@ -13,7 +13,7 @@ public abstract class AWeightedTrigometricDistance implements IDistanceMetric {
 	private double a;
 	private double b;
 
-	public AWeightedTrigometricDistance(final double alpha) {
+	protected AWeightedTrigometricDistance(final double alpha) {
 		super();
 		// Parameter checks.
 		if (alpha > Math.PI / 2 || alpha < 0) {

@@ -61,9 +61,6 @@ public class MLPlanWekaBuilder extends AMLPlanBuilder<IWekaClassifier, MLPlanWek
 
 	@Override
 	public MLPlanWekaBuilder withDataset(final ILabeledDataset<?> dataset) {
-		// if (!(dataset.getLabelAttribute() instanceof ICategoricalAttribute)) {
-		// throw new IllegalArgumentException("MLPlanWeka currently only support categorically labeled data!");
-		// }
 		WekaInstances instances = dataset instanceof WekaInstances ? (WekaInstances) dataset : new WekaInstances(dataset);
 		super.withDataset(instances);
 		this.logger.info("Setting dataset as WekaInstances object.");

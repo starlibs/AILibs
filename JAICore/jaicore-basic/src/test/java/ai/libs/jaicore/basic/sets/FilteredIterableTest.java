@@ -1,6 +1,6 @@
 package ai.libs.jaicore.basic.sets;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -21,7 +21,7 @@ public class FilteredIterableTest {
 	private static final List<String> ORIGINAL_LIST = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h");
 	private static final int NUM_RESHUFFLES = 10;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() {
 
 	}
@@ -54,7 +54,7 @@ public class FilteredIterableTest {
 					expected.append(ORIGINAL_LIST.get(correctNextIndex) + " ");
 				}
 
-				assertEquals("The elements returned by the FilteredIterable are not correct.", expected.toString(), actual.toString());
+				assertEquals(expected.toString(), actual.toString(), "The elements returned by the FilteredIterable are not correct.");
 			}
 		}
 	}

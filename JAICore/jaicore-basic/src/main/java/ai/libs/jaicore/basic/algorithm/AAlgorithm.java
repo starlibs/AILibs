@@ -102,6 +102,9 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			return this.nextWithException();
 		} catch (Exception e) {
 			this.unregisterThreadAndShutdown();
+			if (e instanceof InterruptedException) {
+				Thread.currentThread().interrupt();
+			}
 			throw new ExceptionInAlgorithmIterationException(e);
 		}
 	}

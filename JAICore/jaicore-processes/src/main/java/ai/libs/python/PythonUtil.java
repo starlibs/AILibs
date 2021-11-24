@@ -97,9 +97,7 @@ public class PythonUtil implements ILoggingCustomizable {
 		try {
 			exitValue = process.waitFor();
 		} catch (InterruptedException e) {
-			if (process != null) {
-				ProcessUtil.killProcess(process);
-			}
+			ProcessUtil.killProcess(process);
 			throw e;
 		}
 		return exitValue;
@@ -131,7 +129,7 @@ public class PythonUtil implements ILoggingCustomizable {
 		}
 
 		// build command array
-		String[] command = this.getExecutableCommandArray(true, script);
+		String[] command = this.getExecutableCommandArray(true, scriptToExecute);
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.redirectErrorStream(true);
 		Process p = processBuilder.command(command).start();

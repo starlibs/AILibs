@@ -75,7 +75,7 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 					case "K":
 						if (c instanceof SMO || c instanceof SMOreg) {
 							IComponentInstance kernel = reqI.getValue().iterator().next();
-							Kernel k = (Kernel) Class.forName(kernel.getComponent().getName()).newInstance();
+							Kernel k = (Kernel) Class.forName(kernel.getComponent().getName()).getDeclaredConstructor().newInstance();
 							k.setOptions(this.getParameterList(kernel).toArray(new String[0]));
 							if (c instanceof SMO) {
 								((SMO) c).setKernel(k);

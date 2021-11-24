@@ -68,7 +68,7 @@ public abstract class HASCOBuilder<N, A, V extends Comparable<V>, B extends HASC
 		return withForwardDecomposition(Double.class);
 	}
 
-	public HASCOBuilder(final Class<V> scoreClass) {
+	protected HASCOBuilder(final Class<V> scoreClass) {
 		this.scoreClass = scoreClass;
 		this.withDefaultAlgorithmConfig();
 	}
@@ -99,7 +99,7 @@ public abstract class HASCOBuilder<N, A, V extends Comparable<V>, B extends HASC
 
 	}
 
-	public HASCOBuilder(final HASCOBuilder<N, A, V, ?> builder) {
+	protected HASCOBuilder(final HASCOBuilder<N, A, V, ?> builder) {
 		this(builder.scoreClass);
 		this.problem = builder.problem;
 		this.planningGraphGeneratorDeriver = builder.planningGraphGeneratorDeriver;

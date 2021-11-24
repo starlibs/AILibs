@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassificationPredictionBatch;
 import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassifier;
@@ -20,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
+import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapperExecutionFailedException;
@@ -36,7 +36,7 @@ public class SimpleScikitLearnClassifier extends ASimpleScikitLearnWrapper<ISing
 		try {
 			File predictOutputFile = this.executePipeline(dTest);
 			List<String> labels = ((ICategoricalAttribute) dTest.getLabelAttribute()).getLabels();
-			JsonNode n = new ObjectMapper().readTree(FileUtils.readFileToString(predictOutputFile));
+			JsonNode n = new ObjectMapper().readTree(FileUtil.readFileAsString(predictOutputFile));
 			if (!(n instanceof ArrayNode)) {
 				throw new PredictionException("Json file for predictions does not contain an array as root element");
 			}

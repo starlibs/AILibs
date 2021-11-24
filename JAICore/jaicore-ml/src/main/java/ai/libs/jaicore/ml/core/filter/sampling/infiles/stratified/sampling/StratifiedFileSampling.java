@@ -166,7 +166,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 		int numOfSamplesThatWillBeCreated = 0;
 		List<Integer> fillupStrati = new ArrayList<>(); // strati to fill up rounding instances
 		for (Entry<String, Integer> entry : strati.entrySet()) {
-			sampleSizeForStrati[i] = (int)Math.floor((float) (this.sampleSize * ((double) strati.get(entry.getKey()) / (double) this.datapointAmount)));
+			sampleSizeForStrati[i] = (int) Math.floor((float) (this.sampleSize * ((double) strati.get(entry.getKey()) / (double) this.datapointAmount)));
 			numOfSamplesThatWillBeCreated += sampleSizeForStrati[i];
 			fillupStrati.add(i);
 			i++;
@@ -174,8 +174,8 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 		while (numOfSamplesThatWillBeCreated < this.sampleSize) {
 			Collections.shuffle(fillupStrati, this.random);
 			int indexForNextFillUp = fillupStrati.remove(0);
-			sampleSizeForStrati[indexForNextFillUp] ++;
-			numOfSamplesThatWillBeCreated ++;
+			sampleSizeForStrati[indexForNextFillUp]++;
+			numOfSamplesThatWillBeCreated++;
 		}
 		if (numOfSamplesThatWillBeCreated != this.sampleSize) {
 			throw new IllegalStateException("The strati sum up to a size of " + numOfSamplesThatWillBeCreated + " instead of " + this.sampleSize + ".");
@@ -204,6 +204,9 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 					}
 				} catch (Exception e) {
 					this.logger.error("Unexpected exception during reservoir sampling!", e);
+					if (e instanceof InterruptedException) {
+						Thread.currentThread().interrupt();
+					}
 				}
 			});
 			i++;

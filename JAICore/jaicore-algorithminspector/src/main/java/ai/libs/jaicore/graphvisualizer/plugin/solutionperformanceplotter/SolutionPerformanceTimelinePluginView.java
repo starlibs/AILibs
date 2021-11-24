@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.util.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import javafx.application.Platform;
@@ -20,8 +18,6 @@ import javafx.scene.chart.XYChart.Series;
  *
  */
 public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<SolutionPerformanceTimelinePluginModel, SolutionPerformanceTimelinePluginController, LineChart<Number, Number>> {
-
-	private Logger logger = LoggerFactory.getLogger(SolutionPerformanceTimelinePluginView.class);
 
 	private Series<Number, Number> performanceSeries;
 	private int nextIndexToDisplay = 0;

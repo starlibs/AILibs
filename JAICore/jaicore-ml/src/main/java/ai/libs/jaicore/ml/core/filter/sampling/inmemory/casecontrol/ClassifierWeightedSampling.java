@@ -32,7 +32,7 @@ import ai.libs.jaicore.basic.sets.Pair;
  * @param <I>
  */
 
-public class ClassifierWeightedSampling<D extends ILabeledDataset<? extends ILabeledInstance>> extends PilotEstimateSampling<D> {
+public class ClassifierWeightedSampling<D extends ILabeledDataset<? extends ILabeledInstance>> extends APilotEstimateSampling<D> {
 
 	private Logger logger = LoggerFactory.getLogger(ClassifierWeightedSampling.class);
 
@@ -41,11 +41,13 @@ public class ClassifierWeightedSampling<D extends ILabeledDataset<? extends ILab
 		this.rand = rand;
 	}
 
-	private double getMean(final ILabeledDataset<?> instances) {
+	private double getMean(final ILabeledDataset<?> instances) throws InterruptedException {
 		double sum = 0.0;
 		for (ILabeledInstance instance : instances) {
 			try {
 				sum += this.getPilotEstimator().predict(instance).getProbabilityOfLabel(instance.getLabel());
+			} catch (InterruptedException e) {
+				throw e;
 			} catch (Exception e) {
 				this.logger.error("Unexpected error in pilot estimator", e);
 			}
@@ -54,7 +56,7 @@ public class ClassifierWeightedSampling<D extends ILabeledDataset<? extends ILab
 	}
 
 	@Override
-	public List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(final D dataset, final IClassifier pilot) {
+	public List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(final D dataset, final IClassifier pilot) throws InterruptedException {
 
 		/* compute mean value and base values the instances must have */
 		double mid = this.getMean(dataset);

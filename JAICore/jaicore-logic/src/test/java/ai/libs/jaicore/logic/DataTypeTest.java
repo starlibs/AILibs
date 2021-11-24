@@ -3,6 +3,7 @@ package ai.libs.jaicore.logic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,14 +50,14 @@ public class DataTypeTest {
 
 	@Test
 	public void getParentTypesTest() {
-		assertTrue(this.nonRootType.getDirectSuperTypes().indexOf(this.rootType) != -1);
-		assertTrue(this.rootType.getDirectSuperTypes().indexOf(this.nonRootType) == -1);
+		assertNotEquals(-1, this.nonRootType.getDirectSuperTypes().indexOf(this.rootType));
+		assertEquals(-1, this.rootType.getDirectSuperTypes().indexOf(this.nonRootType));
 	}
 
 	@Test
 	public void removeParentTypeTest() {
 		this.nonRootType.removeSuperType(this.rootType);
-		assertTrue(this.nonRootType.getDirectSuperTypes().indexOf(this.rootType) == -1);
+		assertEquals(-1, this.nonRootType.getDirectSuperTypes().indexOf(this.rootType));
 		assertTrue(this.rootType.getDirectSubTypes().isEmpty());
 	}
 
@@ -94,6 +95,8 @@ public class DataTypeTest {
 
 		betweenType = this.typeMod.getType("IntermediateType2");
 		betweenType.addSuperType(this.nonRootType);
+
+		assertEquals(null, Type.getGreatestSubType(this.parallelNonRootType, this.nonRootType));
 
 	}
 

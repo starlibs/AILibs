@@ -10,7 +10,7 @@ public abstract class AMDP<N, A, V extends Comparable<V>> implements IMDP<N, A, 
 
 	private final N initState;
 
-	public AMDP(final N initState) {
+	protected AMDP(final N initState) {
 		super();
 		this.initState = initState;
 	}

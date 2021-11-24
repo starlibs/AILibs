@@ -18,7 +18,7 @@ public class UUCTFactory<N, A> extends MCTSFactory<N, A, UUCTFactory<N, A>> {
 
 	@Override
 	public MCTS<N, A> getAlgorithm(final IMDP<N, A, Double> input) {
-		return new UUCT<>(input, this.getDefaultPolicy(true), this.utility, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.getRandom(), this.isTabooExhaustedNodes());
+		return new UUCT<>(input, this.getDefaultPolicy(true), this.utility, this.getMaxIterations(), this.getGamma(), this.getEpsilon(), this.isTabooExhaustedNodes());
 	}
 
 }

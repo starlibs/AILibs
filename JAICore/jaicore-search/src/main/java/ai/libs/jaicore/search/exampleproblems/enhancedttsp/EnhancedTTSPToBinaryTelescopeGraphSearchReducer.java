@@ -6,13 +6,13 @@ import org.api4.java.datastructure.graph.ILabeledPath;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
-import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPBinaryTelescopeNode;
+import ai.libs.jaicore.problems.enhancedttsp.AEnhancedTTSPBinaryTelescopeNode;
 import ai.libs.jaicore.search.exampleproblems.enhancedttsp.binarytelescope.EnhancedTTSPBinaryTelescopeSolutionPredicate;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 
 public class EnhancedTTSPToBinaryTelescopeGraphSearchReducer
-implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPBinaryTelescopeNode, String, Double>, ILabeledPath<EnhancedTTSPBinaryTelescopeNode, String>> {
+implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithSubpathEvaluationsInput<AEnhancedTTSPBinaryTelescopeNode, String, Double>, ILabeledPath<AEnhancedTTSPBinaryTelescopeNode, String>> {
 
 	private final ToDoubleFunction<Number> linkFunction;
 
@@ -25,7 +25,7 @@ implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithS
 	}
 
 	@Override
-	public GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPBinaryTelescopeNode, String, Double> encodeProblem(final EnhancedTTSP problem) {
+	public GraphSearchWithSubpathEvaluationsInput<AEnhancedTTSPBinaryTelescopeNode, String, Double> encodeProblem(final EnhancedTTSP problem) {
 		return new GraphSearchWithSubpathEvaluationsInput<>(new EnhancedTTSPTelescopeGraphGenerator(problem), new EnhancedTTSPBinaryTelescopeSolutionPredicate(problem), path -> {
 			ShortList tour = this.decodeSolution(path);
 			double score = problem.getSolutionEvaluator().evaluate(tour);
@@ -35,7 +35,7 @@ implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithS
 	}
 
 	@Override
-	public ShortList decodeSolution(final ILabeledPath<EnhancedTTSPBinaryTelescopeNode, String> solution) {
+	public ShortList decodeSolution(final ILabeledPath<AEnhancedTTSPBinaryTelescopeNode, String> solution) {
 		return solution.getHead().getCurTour();
 	}
 }

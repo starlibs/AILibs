@@ -269,6 +269,9 @@ public class TimeSeriesDataset2 {
 	 *         <code>index</code>.
 	 */
 	public double[][] getTimestampsOrNull(final int index) {
+		if (this.timestampMatrices == null) {
+			return null;
+		}
 		return this.timestampMatrices.size() > index ? this.timestampMatrices.get(index) : null;
 	}
 

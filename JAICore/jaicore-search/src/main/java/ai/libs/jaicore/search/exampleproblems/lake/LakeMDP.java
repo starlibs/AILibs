@@ -103,7 +103,11 @@ public class LakeMDP extends AMDP<TimedLakeState, ELakeActions, Double> {
 		if (this.timed) {
 			return successor.isInPit() ? (1 - state.getTime() * 1.0 / this.timeout) : 1.0 / this.timeout; // every move gets more expensive than the previous one
 		} else {
-			return this.isGoalState(successor) ? this.rewardGoal : (successor.isInPit() ? this.rewardPit : this.rewardOrdinary);
+			if (this.isGoalState(successor)) {
+				return this.rewardGoal;
+			} else {
+				return successor.isInPit() ? this.rewardPit : this.rewardOrdinary;
+			}
 		}
 	}
 
@@ -166,8 +170,7 @@ public class LakeMDP extends AMDP<TimedLakeState, ELakeActions, Double> {
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt(); // re-interrupt
 					break;
-				}
-				catch (ActionPredictionFailedException e) {
+				} catch (ActionPredictionFailedException e) {
 					sb.append("EXCEPTION");
 				}
 			}

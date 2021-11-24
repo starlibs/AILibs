@@ -37,7 +37,7 @@ public class BOSSAlgorithmTest {
 
 	@Disabled
 	@Test
-	public void testFit() throws TrainingException {
+	public void testFit() throws TrainingException, InterruptedException {
 		IBossAlgorithmConfig config = ConfigCache.getOrCreate(IBossAlgorithmConfig.class);
 		config.setProperty(IBossAlgorithmConfig.K_WINDOW_SIZE, "" + 3);
 		config.setProperty(IBossAlgorithmConfig.K_WORDLENGTH, "" + 3);

@@ -4,7 +4,7 @@ import org.api4.java.common.control.ICancelable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CancellationTimerTask extends NamedTimerTask {
+public class CancellationTimerTask extends ANamedTimerTask {
 	private static final Logger logger = LoggerFactory.getLogger(CancellationTimerTask.class);
 	private final ICancelable thingToBeCanceled;
 	private final Runnable hookToExecutePriorToCancel;

@@ -37,7 +37,7 @@ import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedExcep
 import ai.libs.jaicore.experiments.exceptions.ExperimentUpdateFailedException;
 import ai.libs.jaicore.logging.LoggerUtil;
 
-public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggingCustomizable {
+public abstract class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(AExperimenterSQLHandle.class);
 
@@ -70,7 +70,6 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	}
 
 	protected final IDatabaseAdapter adapter;
-
 	protected final String tablename;
 
 	private IExperimentSetConfig config;
@@ -79,13 +78,13 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	private String[] keyFields;
 	private String[] resultFields;
 
-	public AExperimenterSQLHandle(final IDatabaseAdapter adapter, final String tablename) {
+	protected AExperimenterSQLHandle(final IDatabaseAdapter adapter, final String tablename) {
 		super();
 		this.adapter = adapter;
 		this.tablename = tablename;
 	}
 
-	public AExperimenterSQLHandle(final IDatabaseConfig config) {
+	protected AExperimenterSQLHandle(final IDatabaseConfig config) {
 		if (config.getDBDriver() == null) {
 			throw new IllegalArgumentException("DB driver must not be null in experiment config.");
 		}

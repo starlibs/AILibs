@@ -35,6 +35,8 @@ public abstract class ASimpleScikitLearnWrapper<P extends IPrediction, B extends
 	// logging
 	private Logger logger = LoggerFactory.getLogger(ASimpleScikitLearnWrapper.class);
 
+	private static final String LOG_SERIALIZATION_NOT_IMPLEMENTED = "The simple scikit-learn classifier wrapper does not support model serialization.";
+
 	// python requirements
 	public static final int PYTHON_MINIMUM_REQUIRED_VERSION_REL = 3;
 	public static final int PYTHON_MINIMUM_REQUIRED_VERSION_MAJ = 5;
@@ -64,18 +66,18 @@ public abstract class ASimpleScikitLearnWrapper<P extends IPrediction, B extends
 	// temporary data
 	protected ILabeledDataset<? extends ILabeledInstance> trainingData;
 
-	public ASimpleScikitLearnWrapper(final String constructorCall, final String imports, final String problem) throws IOException, InterruptedException {
+	protected ASimpleScikitLearnWrapper(final String constructorCall, final String imports, final String problem) throws IOException, InterruptedException {
 		this(constructorCall, imports, problem, ConfigFactory.create(IPythonConfig.class));
 	}
 
-	public ASimpleScikitLearnWrapper(final String constructorCall, final String imports, final String problem, final IPythonConfig pythonConfig) throws IOException, InterruptedException {
+	protected ASimpleScikitLearnWrapper(final String constructorCall, final String imports, final String problem, final IPythonConfig pythonConfig) throws IOException, InterruptedException {
 		this.constructorCall = constructorCall;
 		this.imports = imports;
 		this.problem = problem;
 		this.setPythonConfig(pythonConfig);
 	}
 
-	private synchronized void ensurePythonRequirementsAreSatisfied() throws IOException, InterruptedException {
+	private synchronized void ensurePythonRequirementsAreSatisfied() throws InterruptedException {
 		if (pythonRequirementsFulfilled == null) {
 			new PythonRequirementDefinition(PYTHON_MINIMUM_REQUIRED_VERSION_REL, PYTHON_MINIMUM_REQUIRED_VERSION_MAJ, PYTHON_MINIMUM_REQUIRED_VERSION_MIN, PYTHON_REQUIRED_MODULES, PYTHON_OPTIONAL_MODULES).check(this.pythonC);
 		}
@@ -98,24 +100,22 @@ public abstract class ASimpleScikitLearnWrapper<P extends IPrediction, B extends
 	}
 
 	private synchronized File getOrWriteDataFile(final ILabeledDataset<? extends ILabeledInstance> dataset, final String dataFileName) throws ScikitLearnWrapperExecutionFailedException, IOException {
-		this.logger.debug("Serializing {}x{} dataset to {}", dataset.size(), dataset.getNumAttributes(), dataFileName);
-
 		File dataFile = this.getDatasetFile(dataFileName);
-		if (this.sklearnClassifierConfig.getDeleteFileOnExit()) {
-			dataFile.deleteOnExit();
-		}
-
 		if (dataFile.exists()) {
 			this.logger.debug("Reusing dataset: {}", dataFileName);
 			return dataFile;
 		}
 
 		try {
+			if (this.sklearnClassifierConfig.getDeleteFileOnExit()) {
+				dataFile.deleteOnExit();
+			}
+			this.logger.debug("Serializing {}x{} dataset to {}", dataset.size(), dataset.getNumAttributes(), dataFileName);
 			new ArffDatasetAdapter().serializeDataset(dataFile, dataset);
 		} catch (IOException e1) {
 			throw new ScikitLearnWrapperExecutionFailedException("Could not dump data file for prediction", e1);
 		}
-		this.logger.debug("Serializating completed.");
+		this.logger.debug("Serialization completed.");
 		return dataFile;
 	}
 
@@ -172,18 +172,18 @@ public abstract class ASimpleScikitLearnWrapper<P extends IPrediction, B extends
 
 	@Override
 	public void setModelPath(final String modelPath) throws IOException {
-		this.logger.debug("The simple scikit-learn classifier wrapper does not support model serialization.");
+		this.logger.debug(LOG_SERIALIZATION_NOT_IMPLEMENTED);
 	}
 
 	@Override
 	public File getModelPath() {
-		this.logger.debug("The simple scikit-learn classifier wrapper does not support model serialization.");
+		this.logger.debug(LOG_SERIALIZATION_NOT_IMPLEMENTED);
 		return null;
 	}
 
 	@Override
 	public File getModelFile() {
-		this.logger.debug("The simple scikit-learn classifier wrapper does not support model serialization.");
+		this.logger.debug(LOG_SERIALIZATION_NOT_IMPLEMENTED);
 		return null;
 	}
 
