@@ -26,20 +26,20 @@ public interface TwoPhaseHASCOConfig extends HASCOWithRandomCompletionsConfig {
 	 * @return Expected multiplication in time for each solution candidate that will be required for evaluation
 	 */
 	@Key(K_BLOWUP_SELECTION)
-	@DefaultValue("1.0")
+	@DefaultValue("NaN")
 	public double expectedBlowupInSelection();
 
 	/**
 	 * @return Expected multiplication in time for each solution candidate that will be required for a postprocessing that should be considered when computing the timeout
 	 */
 	@Key(K_BLOWUP_POSTPROCESS)
-	@DefaultValue("1.0")
+	@DefaultValue("NaN")
 	public double expectedBlowupInPostprocessing();
 
 	/**
 	 * @return The factor by which the evaluation in the selection phase may exceed the time expected on the basis of the estimate given by the blow-up
 	 */
 	@Key(K_SELECTION_EVALUATION_TIMEOUT_TOLERANCE)
-	@DefaultValue("0.1")
+	@DefaultValue("0.2")
 	public double selectionPhaseTimeoutTolerance();
 }

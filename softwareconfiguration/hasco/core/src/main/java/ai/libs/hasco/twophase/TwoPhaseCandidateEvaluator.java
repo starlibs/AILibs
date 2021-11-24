@@ -56,7 +56,7 @@ public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizabl
 		this.estimatedInSelectionSingleIterationEvaluationTime = (int) Math.round(inSearchSolutionEvaluationTime * blowupInSelection);
 		this.estimatedPostProcessingTime = (int) Math.round(this.estimatedInSelectionSingleIterationEvaluationTime * blowupInPostProcessing);
 		this.estimatedTotalEffortInCaseOfSelection = this.estimatedInSelectionSingleIterationEvaluationTime;
-		this.timeoutForEvaluation = (int) Math.max(1000, this.estimatedInSelectionSingleIterationEvaluationTime * (1 + timeoutTolerance));
+		this.timeoutForEvaluation = (int) Math.max(2000, this.estimatedInSelectionSingleIterationEvaluationTime * (1 + timeoutTolerance));
 
 		this.evaluator = evaluator;
 		this.sem = sem;
@@ -75,19 +75,21 @@ public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizabl
 					this.estimatedPostProcessingTime, this.serializer.serialize(this.c.getComponentInstance()), this.c.getTimeToEvaluateCandidate());
 
 			/* If we have a global timeout, check whether considering this model is feasible. */
+			int remainingTime = Integer.MAX_VALUE;
 			if (this.selectionPhaseDeadline > 0) {
-				int remainingTime = (int) (this.selectionPhaseDeadline - System.currentTimeMillis());
-				if (this.estimatedTotalEffortInCaseOfSelection >= remainingTime) {
-					this.logger.info(
-							"Not evaluating solution {} anymore, because its insearch evaluation time was {}, expected evaluation time for selection is {}, and expected post-processing time is {}. This adds up to {}, which exceeds the remaining time of {}!",
-							this.c.getComponentInstance(), this.c.getTimeToEvaluateCandidate(), this.estimatedInSelectionSingleIterationEvaluationTime, this.estimatedPostProcessingTime, this.estimatedTotalEffortInCaseOfSelection,
-							remainingTime);
-					return;
-				}
+				remainingTime = (int) (this.selectionPhaseDeadline - System.currentTimeMillis());
+				this.logger.info("Identified remaining time in selection phase of {}ms", remainingTime);
 			}
 
-			/* Schedule a timeout for this evaluation, which is 10% over the estimated time. Grant at least 1s */
-			this.logger.info("Starting selection performance computation with timeout {}ms", this.timeoutForEvaluation);
+			/* compute the timeout for this evaluation */
+			int effectiveTimeoutForEvaluation = Math.min(remainingTime - this.estimatedPostProcessingTime, this.timeoutForEvaluation);
+			if (effectiveTimeoutForEvaluation <= 0) {
+				this.logger.info("Not evaluating solution {} anymore, because its effective timeout, taking into account an anticipated post-processing time of {}ms, would be non-positive ({}).", this.c.getComponentInstance(),
+						this.estimatedPostProcessingTime, effectiveTimeoutForEvaluation);
+				return;
+			}
+
+			this.logger.info("Starting selection performance computation with effective timeout {}ms", effectiveTimeoutForEvaluation);
 			TimedComputation.compute(() -> {
 				this.selectionScore = this.evaluator.evaluate(this.c.getComponentInstance());
 				this.trueEvaluationTime = (System.currentTimeMillis() - timestampStart);
@@ -96,7 +98,7 @@ public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizabl
 						this.c.getScore());
 				this.eventBus.post(new TwoPhaseHASCOSolutionEvaluationEvent(null, this.c.getComponentInstance(), this.selectionScore));
 				return true;
-			}, new Timeout(this.timeoutForEvaluation, TimeUnit.MILLISECONDS), "Timeout for evaluation of ensemble candidate " + this.serializer.serialize(this.c.getComponentInstance()));
+			}, new Timeout(effectiveTimeoutForEvaluation, TimeUnit.MILLISECONDS), "Timeout for evaluation of ensemble candidate " + this.serializer.serialize(this.c.getComponentInstance()));
 		} catch (InterruptedException e) {
 			assert !Thread.currentThread().isInterrupted() : "The interrupted-flag should not be true when an InterruptedException is thrown!";
 			this.logger.info("Selection eval of {} got interrupted after {}ms. Defined timeout was: {}ms", this.serializer.serialize(this.c.getComponentInstance()), (System.currentTimeMillis() - timestampStart), this.timeoutForEvaluation);
@@ -104,7 +106,7 @@ public class TwoPhaseCandidateEvaluator implements Runnable, ILoggingCustomizabl
 		} catch (ExecutionException e) {
 			this.logger.error("Observed an exeption when trying to evaluate a candidate in the selection phase.\n{}", LoggerUtil.getExceptionInfo(e.getCause()));
 		} catch (AlgorithmTimeoutedException e) {
-			this.logger.info("Evaluation of candidate has timed out: {}", this.c);
+			this.logger.info("Evaluation of candidate has timed out: {}", this.serializer.serialize(this.c.getComponentInstance()));
 		} finally {
 			this.sem.release();
 			this.logger.debug("Released. Sem state: {}", this.sem.availablePermits());

@@ -37,6 +37,7 @@ import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.core.events.HASCOSolutionEvent;
 import ai.libs.hasco.core.events.TwoPhaseHASCOPhaseSwitchEvent;
+import ai.libs.hasco.core.events.TwoPhaseHASCOSelectionPhaseSkippedEvent;
 import ai.libs.hasco.core.events.TwoPhaseHASCOSolutionEvaluationEvent;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AlgorithmFinishedEvent;
@@ -227,7 +228,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 			IObjectEvaluator<?, Double> selectionBenchmark = this.getInput().getSelectionBenchmark();
 			if (selectionBenchmark != null) {
 				if (this.logger.isInfoEnabled()) {
-					this.logger.info("Entering phase 2.");
+					this.logger.info("Entering phase 2. Remaining time: {}ms", this.getRemainingTimeToDeadline().milliseconds());
 					this.logger.debug("Solutions seen so far had the following (internal) errors and evaluation times (one per line): {}", this.phase1ResultQueue.stream()
 							.map(e -> "\n\t" + MathExt.round(e.getScore(), 4) + " in " + e.getTimeToEvaluateCandidate() + "ms (" + this.serializer.serialize(e.getComponentInstance()) + ")").collect(Collectors.joining()));
 				}
@@ -297,15 +298,18 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 
 		/* compute k pipeline candidates (the k/2 best, and k/2 random ones that do not deviate too much from the best one) */
 		double optimalInternalScore = internallyOptimalSolution.getScore();
-		int bestK = (int) Math.ceil((double) this.getNumberOfConsideredSolutions() / 2);
-		int randomK = this.getNumberOfConsideredSolutions() - bestK;
-		Collection<HASCOSolutionCandidate<Double>> potentialCandidates = new ArrayList<>(this.phase1ResultQueue).stream().filter(solution -> solution.getScore() <= optimalInternalScore + MAX_MARGIN_FROM_BEST).collect(Collectors.toList());
+		Collection<HASCOSolutionCandidate<Double>> potentialCandidates = new ArrayList<>(this.phase1ResultQueue).stream().filter(solution -> solution.getScore() <= optimalInternalScore + MAX_MARGIN_FROM_BEST).sorted((s1,s2) -> Double.compare(s1.getScore(), s2.getScore())).collect(Collectors.toList());
+		int numberOfRelevantSolution = Math.min(this.getNumberOfConsideredSolutions(), potentialCandidates.size());
+		int bestK = (int) Math.min(numberOfRelevantSolution, Math.ceil((double) this.getNumberOfConsideredSolutions() / 2));
+		int randomK = numberOfRelevantSolution - bestK;
 		this.logger.debug("Computing {} best and {} random solutions for a max runtime of {}. Number of candidates that are at most {} worse than optimum {} is: {}/{}", bestK, randomK, remainingTime, MAX_MARGIN_FROM_BEST,
 				optimalInternalScore, potentialCandidates.size(), this.phase1ResultQueue.size());
 		List<HASCOSolutionCandidate<Double>> selectionCandidates = potentialCandidates.stream().limit(bestK).collect(Collectors.toList());
-		List<HASCOSolutionCandidate<Double>> remainingCandidates = new ArrayList<>(SetUtil.difference(potentialCandidates, selectionCandidates));
-		Collections.shuffle(remainingCandidates, new Random(this.getConfig().randomSeed()));
-		selectionCandidates.addAll(remainingCandidates.stream().limit(randomK).collect(Collectors.toList()));
+		if (randomK > 0) {
+			List<HASCOSolutionCandidate<Double>> remainingCandidates = new ArrayList<>(SetUtil.difference(potentialCandidates, selectionCandidates));
+			Collections.shuffle(remainingCandidates, new Random(this.getConfig().randomSeed()));
+			selectionCandidates.addAll(remainingCandidates.stream().limit(randomK).collect(Collectors.toList()));
+		}
 		if (this.logger.isTraceEnabled()) {
 			this.logger.trace("Determined the following candidates for selection phase (in this order): {}", selectionCandidates.stream().map(c -> "\n\t" + c.getScore() + ": " + c.getComponentInstance()).collect(Collectors.joining()));
 		}
@@ -416,9 +420,11 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		List<HASCOSolutionCandidate<Double>> ensembleToSelectFrom = this.getEnsembleToSelectFromInPhase2();
 		if (ensembleToSelectFrom.isEmpty()) {
 			this.logger.warn("No solution contained in ensemble.");
+			this.post(new TwoPhaseHASCOSelectionPhaseSkippedEvent(this));
 			return null;
 		} else if (ensembleToSelectFrom.size() == 1) {
 			this.logger.info("No selection to make since there is only one candidate to select from.");
+			this.post(new TwoPhaseHASCOSelectionPhaseSkippedEvent(this));
 			return ensembleToSelectFrom.get(0);
 		}
 
@@ -458,7 +464,7 @@ public class TwoPhaseHASCO<N, A> extends SoftwareConfigurationAlgorithm<TwoPhase
 		this.logger.info("Waiting for termination of {} computations running on {} threads.", n, this.getConfig().cpus());
 		sem.acquire(n);
 		long endOfPhase2 = System.currentTimeMillis();
-		this.logger.info("Finished phase 2 within {}ms net. Total runtime was {}ms. Evaluated solutions {}/{}", endOfPhase2 - startOfPhase2, endOfPhase2 - this.timeOfStart, this.selectionRuns.size(), n);
+		this.logger.info("Finished phase 2 within {}ms net. Total runtime was {}ms. Evaluated solutions {}/{}", endOfPhase2 - startOfPhase2, endOfPhase2 - this.timeOfStart, this.selectionRuns.values().stream().filter(TwoPhaseCandidateEvaluator::isCompletedSuccessfully).collect(Collectors.toList()).size(), n);
 		this.logger.debug("Shutting down thread pool");
 		pool.shutdownNow();
 		pool.awaitTermination(5, TimeUnit.SECONDS);
