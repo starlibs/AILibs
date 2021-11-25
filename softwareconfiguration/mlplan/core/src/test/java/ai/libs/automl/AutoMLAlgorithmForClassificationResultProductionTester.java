@@ -70,7 +70,7 @@ public abstract class AutoMLAlgorithmForClassificationResultProductionTester ext
 			// problemSets.add(new OpenMLProblemSet(1590)); // adult # THIS ARFF CANNOT BE PARSED BY THE PYTHON ARFF LOADERS
 			problemSets.add(new OpenMLProblemSet(1590)); // adult # THIS ARFF CANNOT BE PARSED BY THE PYTHON ARFF LOADERS
 			problemSets.add(new OpenMLProblemSet(4136)); // dexter
-			problemSets.add(new OpenMLProblemSet(4137)); // dorothea
+			//			problemSets.add(new OpenMLProblemSet(4137)); // dorothea // TEMPORARILY DISABLED since problems with data loading procedure
 			problemSets.add(new OpenMLProblemSet(40668)); // connect-4
 			problemSets.add(new OpenMLProblemSet(40691)); // winequality
 			// problemSets.add(new OpenMLProblemSet(40927)); // cifar-10
