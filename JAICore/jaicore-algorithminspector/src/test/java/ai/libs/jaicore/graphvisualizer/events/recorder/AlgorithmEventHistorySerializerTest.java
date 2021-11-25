@@ -28,6 +28,7 @@ import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeDisplayInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
+import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
 
 class AlgorithmEventHistorySerializerTest {
@@ -36,7 +37,20 @@ class AlgorithmEventHistorySerializerTest {
 	void testAlgorithmEventSerializationAndDeserializationWithEasyEvents() throws IOException, InterruptedException {
 
 		NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer = new NodeInfoAlgorithmEventPropertyComputer();
-		List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers = Arrays.asList(nodeInfoAlgorithmEventPropertyComputer, new NodeDisplayInfoAlgorithmEventPropertyComputer<>(n -> n.toString()),
+		NodeInfoGenerator gen = new NodeInfoGenerator() {
+
+			@Override
+			public String getName() {
+				return "test";
+			}
+
+			@Override
+			public String generateInfoForNode(final Object node) {
+				return node.toString();
+			}
+
+		};
+		List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers = Arrays.asList(nodeInfoAlgorithmEventPropertyComputer, new NodeDisplayInfoAlgorithmEventPropertyComputer<>(gen),
 				new ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer());
 
 		AlgorithmEventHistoryRecorder recorder = new AlgorithmEventHistoryRecorder(algorithmEventPropertyComputers);

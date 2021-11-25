@@ -71,4 +71,9 @@ public class TFDNodeAsCIViewInfoGenerator implements NodeInfoGenerator<BackPoint
 		return sb.toString();
 	}
 
+	@Override
+	public String getName() {
+		return TFDNodeAsCIViewInfoGenerator.class.getName();
+	}
+
 }

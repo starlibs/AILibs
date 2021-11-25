@@ -53,4 +53,9 @@ public class TFDNodeInfoGenerator implements NodeInfoGenerator<List<TFDNode>> {
 		return sb.toString();
 	}
 
+	@Override
+	public String getName() {
+		return TFDNodeInfoGenerator.class.getName();
+	}
+
 }

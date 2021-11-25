@@ -9,13 +9,15 @@ import ai.libs.jaicore.graphvisualizer.plugin.graphview.NodeClickedEvent;
 
 public class NodeInfoGUIPluginController extends ASimpleMVCPluginController<NodeInfoGUIPluginModel, NodeInfoGUIPluginView> {
 
+	private NodeInfoGenerator<?> infoGenerator;
+
 	public NodeInfoGUIPluginController(final NodeInfoGUIPluginModel model, final NodeInfoGUIPluginView view) {
 		super(model, view);
 	}
 
 	@Override
 	public void handleAlgorithmEventInternally(final IPropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
-		Object rawNodeDisplayInfoProperty = algorithmEvent.getProperty(NodeDisplayInfoAlgorithmEventPropertyComputer.NODE_DISPLAY_INFO_PROPERTY_NAME);
+		Object rawNodeDisplayInfoProperty = algorithmEvent.getProperty(NodeDisplayInfoAlgorithmEventPropertyComputer.NODE_DISPLAY_INFO_PROPERTY_NAME + "_" + this.infoGenerator.getName());
 		Object rawNodeInfoProperty = algorithmEvent.getProperty(NodeInfoAlgorithmEventPropertyComputer.NODE_INFO_PROPERTY_NAME);
 		if (rawNodeDisplayInfoProperty != null && rawNodeInfoProperty != null) {
 			NodeInfo nodeInfo = (NodeInfo) rawNodeInfoProperty;
@@ -31,5 +33,13 @@ public class NodeInfoGUIPluginController extends ASimpleMVCPluginController<Node
 			String searchGraphNodeCorrespondingToClickedViewGraphNode = nodeClickedEvent.getSearchGraphNode();
 			this.getModel().setCurrentlySelectedNode(searchGraphNodeCorrespondingToClickedViewGraphNode);
 		}
+	}
+
+	public NodeInfoGenerator<?> getInfoGenerator() {
+		return this.infoGenerator;
+	}
+
+	public void setInfoGenerator(final NodeInfoGenerator<?> infoGenerator) {
+		this.infoGenerator = infoGenerator;
 	}
 }
