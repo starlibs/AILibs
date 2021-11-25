@@ -49,7 +49,7 @@ public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
 	}
 
 	public boolean hasPropertyComputerInstalled(final AlgorithmEventPropertyComputer propertyComputer) {
-		return this.eventPropertyComputers.stream().anyMatch(pc -> pc.getClass().equals(propertyComputer.getClass()));
+		return this.eventPropertyComputers.stream().anyMatch(pc -> pc.getPropertyName().equals(propertyComputer.getPropertyName()));
 	}
 
 	public AlgorithmEventPropertyComputer getInstalledCopyOfPropertyComputer(final AlgorithmEventPropertyComputer propertyComputer) {
@@ -105,7 +105,6 @@ public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
 				LOGGER.error("Could not compute property \"{}\".", algorithmEventPropertyComputer.getPropertyName(), e);
 			}
 		}
-
 		return new DefaultPropertyProcessedAlgorithmEvent(algorithmEvent.getClass().getSimpleName(), properties, algorithmEvent, algorithmEvent.getTimestamp());
 	}
 

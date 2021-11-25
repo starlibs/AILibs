@@ -19,8 +19,7 @@ public class NodeDisplayInfoAlgorithmEventPropertyComputer<N> implements Algorit
 	private String propertyName;
 
 	public NodeDisplayInfoAlgorithmEventPropertyComputer(final NodeInfoGenerator<N> nodeInfoGenerator) {
-		this.nodeInfoGenerator = nodeInfoGenerator;
-		this.propertyName = NODE_DISPLAY_INFO_PROPERTY_NAME;
+		this(NODE_DISPLAY_INFO_PROPERTY_NAME + "_" + nodeInfoGenerator.getName(), nodeInfoGenerator);
 	}
 
 	public NodeDisplayInfoAlgorithmEventPropertyComputer(final String propertyName, final NodeInfoGenerator<N> nodeInfoGenerator) {

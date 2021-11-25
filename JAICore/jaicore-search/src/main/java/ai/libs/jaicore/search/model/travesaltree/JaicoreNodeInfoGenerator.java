@@ -62,4 +62,9 @@ public class JaicoreNodeInfoGenerator<N, V extends Comparable<V>> implements Nod
 		return sb.toString();
 	}
 
+	@Override
+	public String getName() {
+		return JaicoreNodeInfoGenerator.class.getName();
+	}
+
 }

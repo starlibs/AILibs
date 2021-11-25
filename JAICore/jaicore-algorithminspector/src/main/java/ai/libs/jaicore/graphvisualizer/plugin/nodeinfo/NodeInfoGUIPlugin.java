@@ -17,6 +17,7 @@ public class NodeInfoGUIPlugin extends ASimpleMVCPlugin<NodeInfoGUIPluginModel, 
 	public NodeInfoGUIPlugin(final String title, final NodeInfoGenerator<?> infoGenerator) {
 		super(title);
 		this.infoGenerator = infoGenerator;
+		this.getController().setInfoGenerator(infoGenerator);
 	}
 
 	@Override
