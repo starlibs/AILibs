@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.Subscribe;
 
-import ai.libs.hasco.core.events.HASCOSolutionEvaluationEvent;
+import ai.libs.hasco.core.events.HASCOSolutionEvent;
 import ai.libs.jaicore.db.IDatabaseAdapter;
 
 /**
@@ -44,10 +44,10 @@ public class IntermediateResultHandler {
 	}
 
 	@Subscribe
-	public void receiveSolutionEvaluationEvent(final HASCOSolutionEvaluationEvent<?, ?> solution) throws JsonProcessingException, SQLException {
+	public void receiveSolutionEvaluationEvent(final HASCOSolutionEvent<?> solution) throws JsonProcessingException, SQLException {
 		Map<String, String> map = new HashMap<>();
 		ObjectMapper mapper = new ObjectMapper();
-		String composition = mapper.writeValueAsString(solution.getComponentInstance());
+		String composition = mapper.writeValueAsString(solution.getSolutionCandidate().getComponentInstance());
 		map.put("composition", composition);
 		//// outer split
 		map.put("test_evaluation_technique", this.testEvalTechnique);

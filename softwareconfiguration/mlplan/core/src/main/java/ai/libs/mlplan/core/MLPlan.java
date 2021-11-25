@@ -123,7 +123,8 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 			}
 
 			/* set up exact splits */
-			Pair<ILabeledDataset<?>, ILabeledDataset<?>> split = MLPlanUtil.getDataForSearchAndSelection(this.getInput(), this.getConfig().dataPortionForSelection(), new Random(this.getConfig().seed()),
+			double portionForSelection = this.getConfig().dataPortionForSelection();
+			Pair<ILabeledDataset<?>, ILabeledDataset<?>> split = MLPlanUtil.getDataForSearchAndSelection(this.getInput(), portionForSelection, new Random(this.getConfig().seed()),
 					this.builder.getSearchSelectionDatasetSplitter(), this.logger);
 			ILabeledDataset<?> dataShownToSearch = split.getX();
 			ILabeledDataset<?> dataShownToSelection = split.getY();
@@ -140,7 +141,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 
 			/* dynamically compute blow-ups */
 			if (Double.isNaN(this.getConfig().expectedBlowupInSelection())) {
-				double blowUpInSelectionPhase = 1;
+				double blowUpInSelectionPhase = (1 + portionForSelection) * 1.5; // assume super-linear runime increase
 				this.getConfig().setProperty(TwoPhaseHASCOConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
 				this.logger.info("No expected blow-up for selection phase has been defined. Automatically configuring {}", blowUpInSelectionPhase);
 			}
@@ -148,7 +149,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 				this.getConfig().setProperty(TwoPhaseHASCOConfig.K_BLOWUP_POSTPROCESS, String.valueOf(0));
 				this.logger.info("Selected classifier won't be built, so now blow-up is calculated.");
 			} else if (Double.isNaN(this.getConfig().expectedBlowupInPostprocessing())) {
-				double blowUpInPostprocessing = 1;
+				double blowUpInPostprocessing = ((1.0 +  portionForSelection) / 0.8)  * 1.5; // the 1.5 are for a supposed super-linear runtime increase
 				this.getConfig().setProperty(TwoPhaseHASCOConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
 				this.logger.info("No expected blow-up for postprocessing phase has been defined. Automatically configuring {}", blowUpInPostprocessing);
 			}
@@ -180,7 +181,7 @@ public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDatas
 						this.getInput().getRelationName(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getRemainingTimeToDeadline().seconds(), this.getConfig().precautionOffset(),
 						this.getConfig().timeoutForCandidateEvaluation() / 1000, this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(),
 						MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), dataShownToSearch.size(), dataShownToSelection != null ? dataShownToSelection.size() : 0, this.classifierEvaluatorForSearch.getBenchmark(),
-						this.classifierEvaluatorForSelection != null ? this.classifierEvaluatorForSelection.getBenchmark() : null, this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
+								this.classifierEvaluatorForSelection != null ? this.classifierEvaluatorForSelection.getBenchmark() : null, this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
 			}
 
 			/* create 2-phase software configuration problem */
