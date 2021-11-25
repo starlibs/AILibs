@@ -34,7 +34,7 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 
 	private Logger logger = LoggerFactory.getLogger(WekaPipelineFactory.class);
 
-	private static final String L_CLASSIFIER = "classifier";
+	private static final String L_CLASSIFIER = "learner";
 
 	@Override
 	public IWekaClassifier getComponentInstantiation(final IComponentInstance groundComponent) throws ComponentInstantiationFailedException {

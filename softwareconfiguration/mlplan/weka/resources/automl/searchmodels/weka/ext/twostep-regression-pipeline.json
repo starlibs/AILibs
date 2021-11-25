@@ -14,7 +14,7 @@
 					"name": "AbstractPreprocessor"
 				},
 				{
-					"id": "classifier",
+					"id": "learner",
 					"name": "Regressor"
 				}
 			],

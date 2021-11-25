@@ -9,6 +9,8 @@ package ai.libs.jaicore.graphvisualizer.plugin.nodeinfo;
  */
 public interface NodeInfoGenerator<N> {
 
+	public String getName();
+
 	public String generateInfoForNode(N node);
 
 }

@@ -21,6 +21,11 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 
 	private Logger logger = LoggerFactory.getLogger(WekaPipelineValidityCheckingNodeEvaluator.class);
 
+	public static final String COMPNAME_PREPROCESSOR = "preprocessor";
+	public static final String COMPNAME_SEARCH = "search";
+	public static final String COMPNAME_EVAL = "eval";
+	public static final String COMPNAME_LEARNER= "learner";
+
 	public WekaPipelineValidityCheckingNodeEvaluator() {
 		super();
 	}
@@ -40,11 +45,11 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 		if (instance != null) {
 
 			/* check invalid preprocessor combinations */
-			if (instance.getSatisfactionOfRequiredInterfaces().containsKey("preprocessor")) {
-				IComponentInstance pp = instance.getSatisfactionOfRequiredInterface("preprocessor").iterator().next();
-				if (pp != null && pp.getComponent().getName().contains("AttributeSelection")) {
-					IComponentInstance search = pp.getSatisfactionOfRequiredInterface("search").iterator().next();
-					IComponentInstance eval = pp.getSatisfactionOfRequiredInterface("eval").iterator().next();
+			if (instance.getSatisfactionOfRequiredInterfaces().containsKey(COMPNAME_PREPROCESSOR) && !instance.getSatisfactionOfRequiredInterface(COMPNAME_PREPROCESSOR).isEmpty()) {
+				IComponentInstance pp = instance.getSatisfactionOfRequiredInterface(COMPNAME_PREPROCESSOR).iterator().next();
+				if (pp != null && pp.getComponent().getName().contains("AttributeSelection") && !pp.getSatisfactionOfRequiredInterface(COMPNAME_SEARCH).isEmpty() && !pp.getSatisfactionOfRequiredInterface(COMPNAME_EVAL).isEmpty()) {
+					IComponentInstance search = pp.getSatisfactionOfRequiredInterface(COMPNAME_SEARCH).iterator().next();
+					IComponentInstance eval = pp.getSatisfactionOfRequiredInterface(COMPNAME_EVAL).iterator().next();
 					if (search != null && eval != null && !WekaUtil.isValidPreprocessorCombination(search.getComponent().getName(), eval.getComponent().getName())) {
 						throw new ControlledNodeEvaluationException("The given combination of searcher and evaluator cannot be benchmarked since they are incompatible.");
 					}
@@ -54,7 +59,12 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 			/* check invalid classifiers for this kind of dataset */
 			IComponentInstance classifier;
 			if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
-				classifier = instance.getSatisfactionOfRequiredInterface("classifier").iterator().next();
+				if (instance.getSatisfactionOfRequiredInterfaces().containsKey(COMPNAME_LEARNER) && !instance.getSatisfactionOfRequiredInterface(COMPNAME_LEARNER).isEmpty()) {
+					classifier = instance.getSatisfactionOfRequiredInterface(COMPNAME_LEARNER).iterator().next();
+				}
+				else {
+					classifier = null;
+				}
 			} else {
 				classifier = instance;
 			}

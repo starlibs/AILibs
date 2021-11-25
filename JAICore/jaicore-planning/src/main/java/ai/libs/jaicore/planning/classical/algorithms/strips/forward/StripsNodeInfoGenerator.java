@@ -8,7 +8,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
 public class StripsNodeInfoGenerator<V extends Comparable<V>> implements NodeInfoGenerator<StripsForwardPlanningNode> {
 
 	@Override
-	public String generateInfoForNode(StripsForwardPlanningNode node) {
+	public String generateInfoForNode(final StripsForwardPlanningNode node) {
 		StringBuilder sb = new StringBuilder();
 		if (node.getActionToReachState() != null) {
 			sb.append("<h2>Applied Action</h2>");
@@ -33,6 +33,11 @@ public class StripsNodeInfoGenerator<V extends Comparable<V>> implements NodeInf
 		}
 		sb.append("</ul>");
 		return sb.toString();
+	}
+
+	@Override
+	public String getName() {
+		return StripsNodeInfoGenerator.class.getName();
 	}
 
 }

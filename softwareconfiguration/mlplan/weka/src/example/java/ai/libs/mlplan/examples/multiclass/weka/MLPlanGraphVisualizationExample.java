@@ -35,12 +35,13 @@ public class MLPlanGraphVisualizationExample {
 	public static void main(final String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
-		ILabeledDataset<?> ds = new OpenMLDatasetReader().deserializeDataset(40709);
+		ILabeledDataset<?> ds = new OpenMLDatasetReader().deserializeDataset(41021);
 		List<ILabeledDataset<?>> split = SplitterUtil.getLabelStratifiedTrainTestSplit(ds, new Random(1), .7);
 
 		/* initialize mlplan, and let it run for 1 hour */
-		MLPlanWekaBuilder mlplanBuilder = MLPlanWekaBuilder.forClassification().withNumCpus(2).withTimeOut(new Timeout(600, TimeUnit.SECONDS)).withCandidateEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS))
+		MLPlanWekaBuilder mlplanBuilder = MLPlanWekaBuilder.forRegression().withNumCpus(2).withTimeOut(new Timeout(600, TimeUnit.SECONDS)).withCandidateEvaluationTimeOut(new Timeout(30, TimeUnit.SECONDS))
 				.withNodeEvaluationTimeOut(new Timeout(150, TimeUnit.SECONDS)).withDataset(split.get(0));
+		mlplanBuilder.withNumCpus(8);
 		MLPlan<IWekaClassifier> mlplan = mlplanBuilder.build();
 		mlplan.setLoggerName("example");
 
