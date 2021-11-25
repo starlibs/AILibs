@@ -61,28 +61,26 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 				return EXPAND_NODE_SCORE;
 			}
 
-			/* now check whether this is a pipeline */
+			/* now check whether the classifier has already been chosen. If the classifier has NOT been chosen, continue with BFS */
 			String nameOfLastAppliedMethod = appliedMethods.get(appliedMethods.size() - 1);
 			String compactStringOfCI = new ComponentSerialization().serialize(instance).toString();
 			this.logger.debug("The associated component instance is {}. Constitutes a pipeline? {}. Name of last applied method: {}", compactStringOfCI, isPipeline ? "yes" : "no", nameOfLastAppliedMethod);
 			Double score = EXPAND_NODE_SCORE;
-			boolean lastMethodBeforeSteppingToRandomCompletions = false;
-			if (instance.getComponent().getName().toLowerCase().contains("pipeline")) {
-				lastMethodBeforeSteppingToRandomCompletions = nameOfLastAppliedMethod.startsWith(this.nameOfMethodToResolveLearnerInPipeline);
-
+			if (isPipeline) {
 				if (instance.getSatisfactionOfRequiredInterfaces().containsKey(COMPNAME_LEARNER) && !instance.getSatisfactionOfRequiredInterface(COMPNAME_LEARNER).isEmpty()) {
 					classifierName = instance.getSatisfactionOfRequiredInterface(COMPNAME_LEARNER).iterator().next().getComponent().getName();
 				}
 				else {
-					this.logger.debug("Exact decision about pipeline fillup not recognizable in state yet. Returning {}.", EXPAND_NODE_SCORE);
+					this.logger.debug("Exact decision about learner used in the pipeline is recognizable in state yet. Returning {}.", EXPAND_NODE_SCORE);
 					return EXPAND_NODE_SCORE;
 				}
 			} else {
 				classifierName = instance.getComponent().getName();
-				lastMethodBeforeSteppingToRandomCompletions = nameOfLastAppliedMethod.startsWith(this.nameOfMethodToResolveBaseLearner);
 			}
 			this.logger.debug("Identified classifier {}.", classifierName);
 
+			/* check whether this is the last step before stepping to random completions  */
+			boolean lastMethodBeforeSteppingToRandomCompletions = nameOfLastAppliedMethod.startsWith(this.nameOfMethodToResolveLearnerInPipeline) || nameOfLastAppliedMethod.startsWith(this.nameOfMethodToResolveBaseLearner);;
 			if (lastMethodBeforeSteppingToRandomCompletions) {
 				if (isPipeline) {
 					score /= Math.pow(10.0, this.orderingOfComponents.size() + 1.0);

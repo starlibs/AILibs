@@ -22,25 +22,28 @@ import ai.libs.mlplan.weka.weka.WekaRegressorFactory;
 public enum EMLPlanWekaProblemType implements IProblemType<IWekaClassifier> {
 
 	CLASSIFICATION_MULTICLASS("automl/searchmodels/weka/weka-full.json", "conf/mlplan-weka.json", "mlplan/weka-preferenceList-classification.txt", "conf/preferenceList.txt", "AbstractClassifier", new WekaPipelineFactory(),
-			EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //
+			EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE, new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>()), "Classifier"), //
 
 	CLASSIFICATION_MULTICLASS_REDUCED("automl/searchmodels/weka/weka-reduced.json", EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
 			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromResource(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(),
 			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getRequestedInterface(), new WekaPipelineFactory(), EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE,
-			new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //
+			new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>()), "Classifier"), //
 
 	CLASSIFICATION_MULTICLASS_BASE("automl/searchmodels/weka/base/index.json", "conf/mlplan-weka.json", "mlplan/weka-preferenceList-classification.txt", "conf/preferenceList.txt",
 			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getRequestedInterface(), new WekaPipelineFactory(), EClassificationPerformanceMeasure.ERRORRATE, EClassificationPerformanceMeasure.ERRORRATE,
-			new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>())), //
+			new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>()), "Classifier"), //
 
 	REGRESSION("automl/searchmodels/weka/weka-full-regression.json", EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(),
 			"mlplan/weka-preferenceList-regression.txt", EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), "AbstractRegressor",
-			new WekaRegressorFactory(), new RootMeanSquaredError(), new RootMeanSquaredError(), new RandomHoldoutSplitter<>(new Random(0), .7)), //
+			new WekaRegressorFactory(), new RootMeanSquaredError(), new RootMeanSquaredError(), new RandomHoldoutSplitter<>(new Random(0), .7), "Regressor"), //
 
 	CLASSIFICATION_MULTICLASS_TINY("automl/searchmodels/weka/weka-small.json", EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSpaceConfigFromFileSystem(), "mlplan/weka-preferenceList-tiny.txt",
 			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPreferredComponentListFromFileSystem(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getRequestedInterface(),
 			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getLearnerFactory(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPerformanceMetricForSearchPhase(),
-			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPerformanceMetricForSelectionPhase(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter());
+			EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getPerformanceMetricForSelectionPhase(), EMLPlanWekaProblemType.CLASSIFICATION_MULTICLASS.getSearchSelectionDatasetSplitter(), "Classifier");
+
+
+	private final String preferredComponentName;
 
 	private final String searchSpaceConfigFileFromResource;
 	private final String systemSearchSpaceConfigFromFileSystem;
@@ -58,7 +61,7 @@ public enum EMLPlanWekaProblemType implements IProblemType<IWekaClassifier> {
 
 	private EMLPlanWekaProblemType(final String searchSpaceConfigFileFromResource, final String systemSearchSpaceConfigFromFileSystem, final String preferedComponentsListFromResource, final String preferedComponentsListFromFileSystem,
 			final String requestedHascoInterface, final ILearnerFactory<IWekaClassifier> learnerFactory, final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSearchPhase,
-			final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase, final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter) {
+			final IDeterministicPredictionPerformanceMeasure<?, ?> performanceMetricForSelectionPhase, final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter, final String preferredComponentName) {
 
 		this.searchSpaceConfigFileFromResource = searchSpaceConfigFileFromResource;
 		this.systemSearchSpaceConfigFromFileSystem = systemSearchSpaceConfigFromFileSystem;
@@ -73,6 +76,8 @@ public enum EMLPlanWekaProblemType implements IProblemType<IWekaClassifier> {
 		this.performanceMetricForSearchPhase = performanceMetricForSearchPhase;
 		this.performanceMetricForSelectionPhase = performanceMetricForSelectionPhase;
 		this.searchSelectionDatasetSplitter = searchSelectionDatasetSplitter;
+
+		this.preferredComponentName = preferredComponentName;
 	}
 
 	@Override
@@ -107,7 +112,7 @@ public enum EMLPlanWekaProblemType implements IProblemType<IWekaClassifier> {
 
 	@Override
 	public String getLastHASCOMethodPriorToParameterRefinementOfPipeline() {
-		return this.getPreferredComponentName("PipelineClassifier");
+		return this.getPreferredComponentName(this.preferredComponentName);
 	}
 
 	private String getPreferredComponentName(final String requestedInterface) {
