@@ -203,6 +203,10 @@ allprojects {
 		sign configurations.archives
 	}
 	
+	shadowJar {
+		zip64 true
+	}
+
 
 	eclipse {
 	    project.natures "org.eclipse.buildship.core.gradleprojectnature"
