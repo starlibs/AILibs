@@ -47,7 +47,7 @@ public class CSVDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<I
 	@Override
 	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IDatasetDescriptor datasetDescriptor) throws DatasetDeserializationFailedException, InterruptedException {
 		if (!(datasetDescriptor instanceof CSVFileDatasetDescriptor)) {
-			throw new IllegalArgumentException(String.format("Only {}s supported", getClass().getSimpleName()));
+			throw new IllegalArgumentException(String.format("Only {}s supported", CSVFileDatasetDescriptor.class.getSimpleName()));
 		}
 
 		CSVFileDatasetDescriptor descriptor = (CSVFileDatasetDescriptor) datasetDescriptor;
@@ -75,6 +75,7 @@ public class CSVDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<I
 
 		int labelColumnIndex = computeLabelColumnIndex(columnNames, descriptor.getLabelColumn());
 		if (columnTypes.get(labelColumnIndex) != ColumnType.Numeric) {
+			// TODO is this too strict?
 			String msg = String.format("File {}: Column {} contains non-numeric values and can thus not serve as label column", 
 					csvFile.getAbsolutePath(), descriptor.getLabelColumn());
 			throw new DatasetDeserializationFailedException(msg);
