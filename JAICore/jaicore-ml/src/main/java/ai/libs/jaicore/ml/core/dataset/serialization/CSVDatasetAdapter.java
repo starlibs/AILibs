@@ -72,14 +72,7 @@ public class CSVDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<I
 		}
 
 		List<ColumnType> columnTypes = computeColumnTypes(columnNames, descriptor.getCategoricalColumns(), data);
-
 		int labelColumnIndex = computeLabelColumnIndex(columnNames, descriptor.getLabelColumn());
-		if (columnTypes.get(labelColumnIndex) != ColumnType.Numeric) {
-			// TODO is this too strict?
-			String msg = String.format("File {}: Column {} contains non-numeric values and can thus not serve as label column", 
-					csvFile.getAbsolutePath(), descriptor.getLabelColumn());
-			throw new DatasetDeserializationFailedException(msg);
-		}
 
 		List<IAttribute> allAttributes = computeAttributes(columnNames, columnTypes, data);
 
@@ -264,29 +257,29 @@ public class CSVDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<I
 			if (col != labelColumnIndex) {
 				IAttribute attribute = allAttributes.get(col);
 				String stringValue = stringValues.get(col);
-				if (stringValue.trim().isEmpty()) {
-					if (attribute instanceof StringAttribute) {
-						values.add("");
-					} else {
-						values.add(null);
-					}
-				} else {
-					Object value = attribute.deserializeAttributeValue(stringValue);
-					values.add(value);
-				}
+				values.add(computeValue(attribute, stringValue));
 			}
 		}
 
+		IAttribute attribute = allAttributes.get(labelColumnIndex);
 		String stringValue = stringValues.get(labelColumnIndex);
-		Object labelValue;
-		if (stringValue.trim().isEmpty()) {
-			labelValue = null;
-		} else {
-			IAttribute attribute = allAttributes.get(labelColumnIndex);
-			labelValue = attribute.deserializeAttributeValue(stringValue);
-		}
+		Object labelValue = computeValue(attribute, stringValue);
 
 		return new DenseInstance(values, labelValue);
+	}
+	
+	private Object computeValue(IAttribute attribute, String stringValue) {
+		Object value;
+		if (stringValue.trim().isEmpty()) {
+			if (attribute instanceof StringAttribute) {
+				value = "";
+			} else {
+				value = null;
+			}
+		} else {
+			value = attribute.deserializeAttributeValue(stringValue);
+		}
+		return value;
 	}
 
 	private ReconstructionInstruction createReconstructionInstruction(CSVFileDatasetDescriptor descriptor) throws DatasetDeserializationFailedException {
