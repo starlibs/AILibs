@@ -42,7 +42,7 @@ allprojects {
 
 	//Project properties
 	project.group = 'ai.libs'
-	project.version = '0.2.5'
+	project.version = '0.2.7'
 	
 	ext {
 	    ossrhUsername = project.hasProperty('ossrhUsername') ? ossrhUsername : System.getenv("ossrhUsername")

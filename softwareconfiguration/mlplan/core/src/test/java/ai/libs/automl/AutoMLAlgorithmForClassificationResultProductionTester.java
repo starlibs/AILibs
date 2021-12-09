@@ -46,6 +46,7 @@ public abstract class AutoMLAlgorithmForClassificationResultProductionTester ext
 	public static Stream<Arguments> getDatasets() throws DatasetDeserializationFailedException {
 		try {
 			List<OpenMLProblemSet> problemSets = new ArrayList<>();
+			problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
 			problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
 			problemSets.add(new OpenMLProblemSet(9)); // autos
 			problemSets.add(new OpenMLProblemSet(24)); // mushroom
@@ -59,7 +60,6 @@ public abstract class AutoMLAlgorithmForClassificationResultProductionTester ext
 			problemSets.add(new OpenMLProblemSet(273)); // IMDB drama
 			problemSets.add(new OpenMLProblemSet(554)); // mnist
 			problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic
-			problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
 			problemSets.add(new OpenMLProblemSet(1104)); // leukemia
 			problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
 			problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary

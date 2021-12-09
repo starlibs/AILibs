@@ -8,7 +8,7 @@ import ai.libs.jaicore.ml.scikitwrapper.simple.SimpleScikitLearnRegressor;
 public class ScikitLearnRegressorFactory extends ATwoStepPipelineScikitLearnFactory {
 
 	public ScikitLearnRegressorFactory() {
-		super("regressor");
+		super("learner");
 	}
 
 	@Override

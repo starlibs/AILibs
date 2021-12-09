@@ -8,7 +8,7 @@ import ai.libs.jaicore.ml.scikitwrapper.simple.SimpleScikitLearnClassifier;
 public class ScikitLearnClassifierFactory extends ATwoStepPipelineScikitLearnFactory {
 
 	public ScikitLearnClassifierFactory() {
-		super("classifier");
+		super("learner");
 	}
 
 	@Override

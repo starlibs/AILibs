@@ -2,8 +2,8 @@
 	"repository": "mlplan.util.model.make_forward",
 	"include": [
 		"./make_forward.json",
-		"make_union.json",
-		"twosteppipeline.json"
+		"./make_union.json",
+		"./twosteppipeline.json"
 	],
 	"components": []
 }

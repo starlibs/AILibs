@@ -10,7 +10,7 @@
 			],
 			"requiredInterface": [
 				{
-					"id": "regressor",
+					"id": "learner",
 					"name": "BasicRegressor"
 				},
 				{

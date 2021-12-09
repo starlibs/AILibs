@@ -10,7 +10,7 @@
 			],
 			"requiredInterface": [
 				{
-					"id": "classifier",
+					"id": "learner",
 					"name": "BasicClassifier"
 				},
 				{
