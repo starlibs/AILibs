@@ -139,18 +139,18 @@ class SingleTargetLearningModel:
             train_targets = train_targets[:, 0].astype("str")
         else:
             train_targets = train_targets[:, 0]
-        pipeline.fit(X=train_data, y=train_targets)
+        pipeline.fit(X=train_data.toarray(), y=train_targets)
 
     def predict(self, pipeline, test_data):
         print('\tStart testing ...')
-        test_data, test_targets = test_data.input_matrix, test_data.output_matrix
+        test_features, test_targets = test_data.input_matrix, test_data.output_matrix
         
         try:
             print("Predict probabilities")
-            predictions = pipeline.predict_proba(test_data)
+            predictions = pipeline.predict_proba(test_features.toarray())
         except:
             print("Cannot predict probabilities, thus, predict labels")
-            predictions = pipeline.predict(test_data)
+            predictions = pipeline.predict(test_features.toarray())
         serialize_prediction(predictions, ArgsHandler.get_predict_output_file_path())
 
 

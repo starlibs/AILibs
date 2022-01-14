@@ -9,6 +9,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -83,7 +85,29 @@ public class FileUtil {
 	 * @throws IOException Thrown, if there are issues reading the file.
 	 */
 	public static String readFileAsString(final File file) throws IOException {
-		return readFileAsString(file.getAbsolutePath());
+		if(file instanceof ResourceFile) {
+			return readInputStreamAsString(((ResourceFile) file).getInputStream());
+		} else {
+			return readFileAsString(file.getAbsolutePath());
+		}
+	}
+	
+	/**
+	 * Reads the content of the given input stream into a single string.
+	 * 
+	 * @param stream The input stream to read from.
+	 * @return A string with the contents read from the provided input stream.
+	 * @throws IOException Thrown if there is an issue with reading from the given input stream.
+	 */
+	public static String readInputStreamAsString(final InputStream stream) throws IOException {
+		StringBuilder sb = new StringBuilder();
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(stream))) {
+			String line;
+			while((line = br.readLine()) != null) {
+				sb.append(line).append("\n");
+			}
+		}
+		return sb.toString();
 	}
 
 	/**

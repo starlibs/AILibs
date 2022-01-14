@@ -97,7 +97,7 @@ public abstract class AScikitLearnLearnerFactory implements ILearnerFactory<ISci
 			importSet.add("from " + fromSB.toString() + " import " + className + "\n");
 		}
 		if (groundComponent.getComponent().getName().startsWith("sklearn.feature_selection.f_classif")) {
-			sb.append("f_classif(features, targets)");
+			sb.append("f_classif");
 			return sb.toString();
 		}
 

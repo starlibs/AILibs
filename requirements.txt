@@ -1,7 +1,7 @@
 setuptools
 
 liac-arff>=2.4.0<2.5
-sklearn>=0.22.0,<0.23
+scikit-learn>=0.22.0,<0.23
 xgboost>=1.1.0,<1.2
 
 tpot>=0.11.0<0.12
