@@ -58,7 +58,7 @@ public class ArffDatasetAdapterTest extends ATest {
 
 	private static final double TEST_NUMERIC_VAL = 231.0;
 	private static final int TEST_CATEGORICAL_VAL = (int) TEST_CAT_ATT.deserializeAttributeValue(CATEGORICAL_VALUES.get(1));
-	private static final SensorTimeSeries TEST_STS_VAL = (SensorTimeSeries) TEST_STS_ATT.deserializeAttributeValue("1#0.5 2#0.34 5#93.4");
+	private static final SensorTimeSeries TEST_STS_VAL = (SensorTimeSeries) TEST_STS_ATT.deserializeAttributeValue("1:0.5;2:0.34;5:93.4");
 	private static final double[][] TEST_MUL2D_VAL = { { 1.0, 2.0 }, { 3.0, 4.0 }, { 5.0, 6.0 } };
 	private static final double[][][] TEST_MUL3D_VAL = { { { 1.0, 2.0 }, { 3.0, 4.0 }, { 5.0, 6.0 } }, { { 1.1, 2.1 }, { 3.1, 4.1 }, { 5.1, 6.1 } }, { { 1.2, 2.2 }, { 3.2, 4.2 }, { 5.2, 6.2 } },
 			{ { 1.3, 2.3 }, { 3.3, 4.3 }, { 5.3, 6.3 } } };

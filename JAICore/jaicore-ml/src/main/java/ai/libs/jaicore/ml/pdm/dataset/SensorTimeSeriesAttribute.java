@@ -12,11 +12,11 @@ public class SensorTimeSeriesAttribute extends AGenericObjectAttribute<SensorTim
 
 	private static final long serialVersionUID = 7375915385236514621L;
 
-	private static final String SENSOR_TIME_SERIES_BORDER_FLAG = "\"";
+	private static final String TIMESERIES_START = "(";
+	private static final String TIMESERIES_END = ")";
 	private static final String EMPTY_STRING = "";
-	private static final String DATA_POINT_SEPARATOR = " ";
-	private static final String SPLIT_MULTIPLE_WHITESPACES = "\\s+";
-	private static final String TIMESTEP_VALUE_SEPARATOR = "#";
+	private static final String DATAPOINT_SEPARATOR = ";";
+	private static final String TIMESTEP_VALUE_SEPARATOR = ":";
 
 	public SensorTimeSeriesAttribute(final String name) {
 		super(name);
@@ -52,14 +52,14 @@ public class SensorTimeSeriesAttribute extends AGenericObjectAttribute<SensorTim
 	 */
 	@Override
 	public String serializeAttributeValue(final Object value) {
-		StringJoiner sj = new StringJoiner(DATA_POINT_SEPARATOR);
+		StringJoiner sj = new StringJoiner(DATAPOINT_SEPARATOR);
 		SensorTimeSeries sensorTimeSeries = (SensorTimeSeries) value;
 		for (int t = 0; t <= sensorTimeSeries.getLength(); t++) {
 			if (sensorTimeSeries.getValueOrNull(t) != null) {
 				sj.add(t + TIMESTEP_VALUE_SEPARATOR + sensorTimeSeries.getValueOrNull(t));
 			}
 		}
-		return SENSOR_TIME_SERIES_BORDER_FLAG + sj.toString() + SENSOR_TIME_SERIES_BORDER_FLAG;
+		return TIMESERIES_START + sj.toString() + TIMESERIES_END;
 	}
 
 	/**
@@ -67,8 +67,8 @@ public class SensorTimeSeriesAttribute extends AGenericObjectAttribute<SensorTim
 	 */
 	@Override
 	public SensorTimeSeries deserializeAttributeValue(String string) {
-		string = string.replace(SENSOR_TIME_SERIES_BORDER_FLAG, EMPTY_STRING);
-		String[] splittedString = string.split(SPLIT_MULTIPLE_WHITESPACES);
+		string = string.replace(TIMESERIES_START, EMPTY_STRING).replace(TIMESERIES_END, EMPTY_STRING);
+		String[] splittedString = string.split(DATAPOINT_SEPARATOR);
 		SensorTimeSeries sensorTimeSeries = new SensorTimeSeries();
 		for (int i = 0; i < splittedString.length; i++) {
 			String[] dataPoint = splittedString[i].split(TIMESTEP_VALUE_SEPARATOR);
